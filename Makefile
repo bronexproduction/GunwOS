@@ -2,9 +2,9 @@ SRC_DIR=src
 BUILD_DIR=build
 
 export ASM=nasm
-export C=tools/gunwxcc_9.2.0/bin/i386-elf-gcc
-export CXX=tools/gunwxcc_9.2.0/bin/i386-elf-g++
-export L=tools/gunwxcc_9.2.0/i386-elf/ld
+export C=$(PWD)/tools/gunwxcc_9.2.0/bin/i386-elf-gcc
+export CXX=$(PWD)/tools/gunwxcc_9.2.0/bin/i386-elf-g++
+export L=ld
 export MAKE=make
 
 export CFLAGS_GLOBAL=-fdebug-prefix-map=$(PWD)/$(BUILD_DIR)=.
