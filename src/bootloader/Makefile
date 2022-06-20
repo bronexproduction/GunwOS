@@ -6,7 +6,7 @@ all: mkbin $(MODULES)
 .PHONY: $(MODULES)
 
 $(MODULES):
-	make -C $@ --trace
+	make -C $@
 	cat $@/$@.bin >> bootloader.bin
 	
 mkbin:

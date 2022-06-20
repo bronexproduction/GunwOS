@@ -1,4 +1,4 @@
-LFLAGS=-melf_i386 --trace
+LFLAGS=-melf_i386
 LFLAGS_DRY=$(LFLAGS)
 LFLAGS_FINAL=$(LFLAGS) -i
 
@@ -12,7 +12,7 @@ all: $(MODULES) link
 .PHONY: $(MODULES)
 
 $(MODULES):
-	make -C $@ --trace
+	make -C $@
 	mv $@/$@.o $@.o
 
 # WORKAROUND: Checks if there are any unresolved symbols in the library

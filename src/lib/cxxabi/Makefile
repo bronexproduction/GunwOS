@@ -1,5 +1,5 @@
 CXXFLAGS=-std=c11 -c -ffreestanding -Wall -Wextra -ggdb $(CXXFLAGS_GLOBAL)
-LFLAGS=-melf_i386 --trace -i
+LFLAGS=-melf_i386 -i
 
 O_DIR_LISTING=find . -name '*.o' -type f
 EXEC_TERMINATOR=\;

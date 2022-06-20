@@ -74,7 +74,16 @@
     {
         "label": "Install dependencies",
         "type": "shell",
-        "command": "sudo apt-get update && sudo apt-get install -y build-essential nasm qemu-system-x86",
+        "windows": {
+            "command": "sudo apt-get update && sudo apt-get install -y build-essential nasm qemu-system-x86",
+        },
+        "linux": {
+            "command": "sudo apt-get update && sudo apt-get install -y build-essential nasm qemu-system-x86",
+        },
+        "osx": {
+            // not working - support for 64-bit to be added
+            "command": "brew install nasm qemu",
+        },
         "group": {
             "kind": "none",
             "isDefault": false
