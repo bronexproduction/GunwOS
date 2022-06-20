@@ -8,6 +8,10 @@ GuwnOS is an hobbyist attempt to create an operating system for x86 architecture
 
 - [System call](syscall.md)
 
+## Tools
+
+Cross-compiler and the tools required for building are available ([here](https://drive.google.com/file/d/1lFFKgdm-P1xWkPZV1mojCOeyCxg9KSrK/view?usp=sharing))
+
 ## Contributors
 
 * Artur Danielewski ([bronexproduction](https://github.com/bronexproduction)) <[artur.danielewski@gmail.com](mailto:artur.danielewski@gmail.com)>
