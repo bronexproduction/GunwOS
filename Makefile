@@ -27,7 +27,6 @@ $(BUILD_DIR)/system.img: $(BUILD_DIR)/system.bin
 	cat $(BUILD_DIR)/bootloader/bootloader.bin > $@
 	cat $(BUILD_DIR)/system.bin >> $@
 
-
 $(BUILD_DIR)/system.bin: system_build
 	$(L) $(LFLAGS_SYSTEM) -o $(BUILD_DIR)/system_raw.bin $(BUILD_DIR)/system/kernel._o $(BUILD_DIR)/system/system.o $(BUILD_DIR)/lib/lib.o 
 	# Align system binary to 512 bytes

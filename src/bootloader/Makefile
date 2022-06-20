@@ -8,6 +8,7 @@ all: mkbin $(MODULES)
 $(MODULES):
 	make -C $@
 	cat $@/$@.bin >> bootloader.bin
+	rm $@/$@.bin
 	
 mkbin:
 	touch bootloader.bin
