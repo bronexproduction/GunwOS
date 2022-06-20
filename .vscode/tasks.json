@@ -1,0 +1,84 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+"tasks": [
+    {
+        "label": "Build",
+        "type": "shell",
+        "command": "make rebuild",
+        "group": {
+            "kind": "build",
+            "isDefault": false
+        },
+        "problemMatcher": []
+    },
+    {
+        "label": "Build and run (QEMU)",
+        "type": "shell",
+        "command": "bash scripts/qemu_run.sh",
+        "windows": {
+            "command": "export DISPLAY=:0 && scripts/qemu_run.sh"
+        },
+        "group": {
+            "kind": "build",
+            "isDefault": true
+        },
+        "dependsOn": [
+            "Build"
+        ],
+        "problemMatcher": []
+    },
+    {
+        "label": "Build and run (VirtualBox)",
+        "type": "shell",
+        "command": "bash scripts/virtualbox_run.sh",
+        "group": {
+            "kind": "build",
+            "isDefault": true
+        },
+        "dependsOn": [
+            "Build"
+        ],
+        "problemMatcher": []
+    },
+    {
+        "label": "Build and write floppy (rawwritewin)",
+        "type": "shell",
+        "command": "/mnt/d/Software/rawwritewin-0.7/rawwritewin.exe build/system.img",
+        "group": {
+            "kind": "build",
+            "isDefault": true
+        },
+        "dependsOn": [
+            "Build"
+        ],
+        "problemMatcher": []
+    },
+    {
+        "label": "Build and debug (QEMU)",
+        "type": "shell",
+        "command": "bash scripts/qemu_run_debug.sh",
+        "windows": {
+            "command": "export DISPLAY=:0 && scripts/qemu_run_debug.sh"
+        },
+        "group": {
+            "kind": "build",
+            "isDefault": false
+        },
+        "dependsOn": [
+            "Build"
+        ],
+        "problemMatcher": []
+    },
+    {
+        "label": "Install dependencies",
+        "type": "shell",
+        "command": "sudo apt-get update && sudo apt-get install -y build-essential nasm qemu-system-x86",
+        "group": {
+            "kind": "none",
+            "isDefault": false
+        }
+    }
+]
+}
