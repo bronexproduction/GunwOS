@@ -20,6 +20,7 @@ rebuild: clean all
 
 clean:
 	rm -rf $(BUILD_DIR)
+	find $(SRC_DIR)/ -type f -name '*.o' -delete
 
 all: $(BUILD_DIR)/system.img
 
