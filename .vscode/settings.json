@@ -1,0 +1,16 @@
+{
+    "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    ".gitignore": true,
+  },
+  "terminal.integrated.shell.windows": "C:\\Windows\\System32\\bash.exe",
+  "files.associations": {
+    "*.h": "c",
+    "*.c": "c",
+    "memory": "c",
+    "random": "c",
+    "optional": "c",
+    "__nullptr": "c"
+  }
+}
