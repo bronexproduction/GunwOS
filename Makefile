@@ -40,18 +40,18 @@ $(BUILD_DIR)/system.bin: system_build
 	echo "System terminated binary size: $$(stat -L -c %s $@)"
 	rm $(BUILD_DIR)/system_raw.bin $(BUILD_DIR)/system_aligned.bin
 
-system_build: $(SRC_DIR)/bootloader/bootloader.bin $(SRC_DIR)/lib/lib.o
+system_build: $(BUILD_DIR)/bootloader/bootloader.bin $(BUILD_DIR)/lib/lib.o
 	mkdir -p $(BUILD_DIR)/system
 	make -C $(SRC_DIR)/system
 	mv $(SRC_DIR)/system/system.o $(BUILD_DIR)/system/
 	mv $(SRC_DIR)/system/kernel._o $(BUILD_DIR)/system/
 
-$(SRC_DIR)/bootloader/bootloader.bin:
+$(BUILD_DIR)/bootloader/bootloader.bin:
 	mkdir -p $(BUILD_DIR)/bootloader
 	make -C $(SRC_DIR)/bootloader
-	mv $@ $(BUILD_DIR)/bootloader/
+	mv $(SRC_DIR)/bootloader/bootloader.bin $@
 
-$(SRC_DIR)/lib/lib.o:
+$(BUILD_DIR)/lib/lib.o:
 	mkdir -p $(BUILD_DIR)/lib
 	make -C $(SRC_DIR)/lib
-	mv $@ $(BUILD_DIR)/lib/
+	mv $(SRC_DIR)/lib/lib.o $@
