@@ -10,7 +10,19 @@ ORG 0x7c00
 
 BITS 16
 
+RMODE_STACK                 equ 0x700
+PRELOADER_MEM_OFFSET        equ 0x1000
+ELF_HEADER                  equ 0x464c457f
+%include "../shared/data.s"
+
 jmp boot_init
+
+    ; ---------------------------------------
+    ; IMPORTANT NOTE
+    ; 
+    ; DL register contains boot drive number
+    ; try not to overwrite it
+    ; ---------------------------------------
 
     ; ---------------------------------------
     ; FAT reserved sectors
@@ -25,8 +37,6 @@ oem_name:   db "GunwOS  "
     ; BIOS parameter block
     ; ---------------------------------------
 %include "bpb.s"
-
-%include "../shared/data.s"
 
 BITS 16
 
@@ -47,8 +57,6 @@ boot_init:
     mov bp, RMODE_STACK
     mov sp, bp
 
-    mov [preloader_data_bootDrive], dl
-
     mov bx, BOOT_LOAD_MSG
     call print_str_16
 
@@ -67,7 +75,6 @@ boot_load:
     ; ---------------------------------------
     mov bx, PRELOADER_MEM_OFFSET
     mov dh, BOOT_LOAD_SECTOR_COUNT
-    mov dl, [preloader_data_bootDrive]
     call io_read_disk
 
 boot_check_entry:
@@ -102,11 +109,13 @@ boot_preloader:
     mov bx, BOOT_PRELOADER_MSG
     call print_str_16
 
-    mov cx, preloader_data     ; preloader_start will receive preloader_data pointer as parameter (fastcall)
     jmp PRELOADER_MEM_OFFSET
     jmp $
 
-%include "preloader_data.s"
+    ; ---------------------------------------
+    ; Additional routines and utilities
+    ; ---------------------------------------
+
 %include "print.s"
 %include "io.s"
 

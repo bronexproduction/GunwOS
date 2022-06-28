@@ -5,7 +5,7 @@
 //  Created by Artur Danielewski on 16.01.2018.
 //
 
-#include "../../../bootloader/preloader/kernel_data.h"
+#include "../../../bootloader/preloader/kernel/kernel_data.h""
 
 extern void k_tmr_init();
 extern void k_hal_init(const char codeSegOffset);

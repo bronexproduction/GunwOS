@@ -17,19 +17,19 @@ a20_16:
     cmp al, 1
     je a20_16_end
 
-%include "a20_16_interrupt.s"
+%include "a20/a20_16_interrupt.s"
 
     call a20_16_check
     cmp al, 1
     je a20_16_end
 
-%include "a20_16_keyboard.s"
+%include "a20/a20_16_keyboard.s"
 
     call a20_16_check
     cmp al, 1
     je a20_16_end
 
-%include "a20_16_fast.s"
+%include "a20/a20_16_fast.s"
 
     call a20_16_check
     cmp al, 1

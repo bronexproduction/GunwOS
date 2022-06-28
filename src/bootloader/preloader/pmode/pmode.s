@@ -8,7 +8,7 @@
 
 BITS 16
 
-%include "gdt.s"
+%include "pmode/gdt.s"
 
 pmode_switch:
     cli
