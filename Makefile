@@ -6,7 +6,6 @@ export ASM=nasm
 export C=$(TOOLS_DIR)/gunwxcc_9.2.0/bin/i386-elf-gcc
 export CXX=$(TOOLS_DIR)/gunwxcc_9.2.0/bin/i386-elf-g++
 export L=ld
-export MAKE=make
 
 export CFLAGS_GLOBAL=-fdebug-prefix-map=$(BUILD_DIR)=.
 export CXXFLAGS_GLOBAL=-fdebug-prefix-map=$(BUILD_DIR)=.
