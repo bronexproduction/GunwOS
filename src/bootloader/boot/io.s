@@ -13,13 +13,23 @@ io_read_disk:
     pusha
     push dx
     
+    ; --------------------------------------- 
+    ; FDC reset procedure
+    ; --------------------------------------- 
+    mov ah, 0x00
+    
+    int 0x13
+    jc .io_read_disk_error
+
+    ; --------------------------------------- 
+    ; BIOS read function
+    ; --------------------------------------- 
     mov ah, 0x02    ; BIOS read sector function
     mov al, dh      ; number of sectors to read
     mov ch, 0x00    ; cylinder
     mov dh, 0x00    ; head
     
     int 0x13
-    
     jc .io_read_disk_error
     
     pop dx
