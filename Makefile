@@ -32,15 +32,16 @@ boot.gfb:
 	make -C $(SRC_DIR)/bootloader/preloader
 	mv $(SRC_DIR)/bootloader/preloader/boot.gfb $(BUILD_DIR)/$@
 
-kernel.gfb: lib.o
-	make -C $(SRC_DIR)/system
-	mv $(SRC_DIR)/system/kernel_entry.o $(BUILD_DIR)/
-	mv $(SRC_DIR)/system/kernel.o $(BUILD_DIR)/
-	$(L) $(LFLAGS_SYSTEM) -o $(BUILD_DIR)/$@ $(BUILD_DIR)/kernel_entry.o $(BUILD_DIR)/kernel.o $(BUILD_DIR)/lib.o
+kernel.gfb: lib.o kernel.o
+	$(L) $(LFLAGS_SYSTEM) -o $(BUILD_DIR)/$@ $(BUILD_DIR)/kernel.o $(BUILD_DIR)/lib.o
 
 lib.o:
 	make -C $(SRC_DIR)/lib
-	mv $(SRC_DIR)/lib/lib.o $(BUILD_DIR)/$@
+	mv $(SRC_DIR)/lib/$@ $(BUILD_DIR)/$@
+
+kernel.o:
+	make -C $(SRC_DIR)/system
+	mv $(SRC_DIR)/system/$@ $(BUILD_DIR)/$@
 
 img: $(BUILD_DIR)/gunwos.img
 
