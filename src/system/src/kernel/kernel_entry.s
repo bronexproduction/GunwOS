@@ -1,5 +1,5 @@
 ;
-;  kernel.s
+;  kernel_entry.s
 ;  GunwOS
 ;
 ;  Created by Artur Danielewski on 17.01.2018.
