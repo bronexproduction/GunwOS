@@ -129,11 +129,13 @@ fat12_findDir:
     ; move to previous entry
     sub cx, FAT12_DIR_ENTRY_BYTES
     mov bx, dx
+    add bx, FAT12_FATS_BYTES
     add bx, cx
     
     ; compare filenames
     mov si, ax
     mov di, bx
+
     dec di
 
     push ax
@@ -151,6 +153,7 @@ fat12_findDir:
     lodsb
 
     cmp [di], al
+
     je .fat12_findDir_checkChar
 
 .fat12_findDir_checkChar_end:
@@ -175,6 +178,8 @@ fat12_findDir:
 
     mov bx, BINGO
     call print_str_16
+
+    ; How to return result? TODO
 
     jmp $
 
