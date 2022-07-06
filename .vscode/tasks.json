@@ -45,7 +45,7 @@
     {
         "label": "Build and write floppy (rawwritewin)",
         "type": "shell",
-        "command": "/mnt/d/Software/rawwritewin-0.7/rawwritewin.exe build/system.img",
+        "command": "/mnt/d/Software/rawwritewin-0.7/rawwritewin.exe build/gunwos.img",
         "group": {
             "kind": "build",
             "isDefault": true
