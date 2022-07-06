@@ -8,10 +8,19 @@
 
 BITS 16
 
-; Read DH sectors to ES:BX from drive DL
+    ; ---------------------------------------
+    ; Read sectors from disk
+    ; 
+    ; AL - sector count
+    ; ES:BX - destination address
+    ; CX - starting index (LBA)
+    ; DL - disk number
+    ; ---------------------------------------
+
 io_read_disk:
     pusha
-    push dx
+    xor ah, ah
+    push ax
     
     ; --------------------------------------- 
     ; FDC reset procedure
@@ -23,17 +32,29 @@ io_read_disk:
 
     ; --------------------------------------- 
     ; BIOS read function
+    ; 
+    ; AH - 0x02
+    ; AL - Sectors to read count
+    ; ES:BX - Buffer address
+    ; CH - Cylinder
+    ; CL - Sector
+    ; DH - Head
+    ; DL - Drive
     ; --------------------------------------- 
     mov ah, 0x02    ; BIOS read sector function
-    mov al, dh      ; number of sectors to read
+
+    ; PREPARE STARTING INDEX
+
     mov ch, 0x00    ; cylinder
     mov dh, 0x00    ; head
     
     int 0x13
     jc .io_read_disk_error
-    
-    pop dx
-    cmp dh, al
+
+    xor dx, dx
+    mov dl, al
+    pop ax
+    cmp dl, al
     jne .io_read_disk_error
     
     popa

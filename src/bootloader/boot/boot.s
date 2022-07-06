@@ -10,9 +10,10 @@ ORG 0x7c00
 
 BITS 16
 
-RMODE_STACK                 equ 0x700
-PRELOADER_MEM_OFFSET        equ 0x1000
-ELF_HEADER                  equ 0x464c457f
+RMODE_STACK_ADDR            equ 0x700
+FAT_HEADER_ADDR             equ 0x1000
+SECOND_STAGE_SEG            equ 0x1000
+
 %include "../shared/data.s"
 
 jmp boot_init
@@ -54,62 +55,34 @@ boot_init:
     ; ---------------------------------------
     ; Configure stack
     ; ---------------------------------------
-    mov bp, RMODE_STACK
+    mov bp, RMODE_STACK_ADDR
     mov sp, bp
 
     mov bx, BOOT_LOAD_MSG
     call print_str_16
 
-boot_load_prep:
+boot_load_2nd_stage:
     ; ---------------------------------------
-    ; Start reading from first sector
-    ; after boot loader
+    ; Fetch 2nd stage loader from filesystem 
     ; ---------------------------------------
-    mov cl, BOOT_LOAD_SECTOR_BEGIN
+    mov ax, BOOT_2ND_STAGE_FILENAME
+    mov bx, FAT_HEADER_ADDR
+    mov cx, SECOND_STAGE_SEG
+    mov dx, 0
+    call fat12_loadFile
 
-boot_load:
-    ; ---------------------------------------
-    ; Read BOOT_LOAD_SECTOR_COUNT
-    ; Into PRELOADER_MEM_OFFSET
-    ; Starting from first sector after boot loader
-    ; ---------------------------------------
-    mov bx, PRELOADER_MEM_OFFSET
-    mov dh, BOOT_LOAD_SECTOR_COUNT
-    call io_read_disk
-
-boot_check_entry:
-    ; ---------------------------------------
-    ; Check for ELF header in loaded file
-    ; ---------------------------------------
-    mov eax, PRELOADER_MEM_OFFSET
-    mov ebx, [eax]
-    cmp ebx, ELF_HEADER
-    jne boot_preloader
-
-boot_elf:
-    ; ---------------------------------------
-    ; Print message on ELF header detected
-    ; ---------------------------------------
-    mov bx, BOOT_LOAD_DEBUG_ENTRY
+    mov bx, DEBUG_LOAD_SUCCESS
     call print_str_16
-    
-boot_elf_offset:
-    ; ---------------------------------------
-    ; Offset loading to first sector
-    ; after ELF header
-    ; ---------------------------------------
-    mov cl, BOOT_LOAD_SECTOR_BEGIN
-    add cl, BOOT_LOAD_SECTOR_ELF_OFFSET
-    jmp boot_load
+    jmp $
 
-boot_preloader:
+boot_2nd_stage:
     ; ---------------------------------------
     ; Jump to preloader (2-nd stage)
     ; ---------------------------------------
     mov bx, BOOT_PRELOADER_MSG
     call print_str_16
 
-    jmp PRELOADER_MEM_OFFSET
+    jmp SECOND_STAGE_SEG
     jmp $
 
     ; ---------------------------------------
@@ -118,10 +91,14 @@ boot_preloader:
 
 %include "print.s"
 %include "io.s"
+%include "../shared/fat12.s"
+
+BOOT_2ND_STAGE_FILENAME db "BOOT    GFB"
 
 BOOT_LOAD_MSG db 'GunwOS loading...', 0xa, 0xd, 0
-BOOT_LOAD_DEBUG_ENTRY db 'ELF header found. Offsetting...', 0xa, 0xd, 0
 BOOT_PRELOADER_MSG db 'GunwOS preloader booting...', 0xa, 0xd, 0
+
+DEBUG_LOAD_SUCCESS db 'File loaded successfully - stopped', 0xa, 0xd, 0
 
 boot_fill:
     times 510-($-$$) db 0
