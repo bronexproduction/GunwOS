@@ -8,10 +8,13 @@
 
 BITS 16
 
-print_str_16:
-    pusha
+print_err_16:
     mov ah, 0x0e
+    mov si, ERROR_STRING
+    call .print_str_16_char
     mov si, bx
+    call .print_str_16_char
+    jmp $
 
 .print_str_16_char:
     lodsb
@@ -21,5 +24,4 @@ print_str_16:
     jmp .print_str_16_char
 
 .print_str_16_end:
-    popa
     ret

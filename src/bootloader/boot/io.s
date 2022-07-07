@@ -62,7 +62,4 @@ io_read_disk:
 
 .io_read_disk_error:
     mov bx, IO_DISK_ERROR_MSG
-    call print_str_16
-    jmp $
-
-IO_DISK_ERROR_MSG db "Disk read error!", 0
+    call print_err_16

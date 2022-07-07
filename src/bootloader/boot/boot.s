@@ -22,7 +22,7 @@ jmp boot_init
     ; IMPORTANT NOTE
     ; 
     ; DL register contains boot drive number
-    ; try not to overwrite it
+    ; remember not to overwrite it
     ; ---------------------------------------
 
     ; ---------------------------------------
@@ -57,30 +57,22 @@ boot_init:
     ; ---------------------------------------
     mov bp, RMODE_STACK_ADDR
     mov sp, bp
-
-    mov bx, BOOT_LOAD_MSG
-    call print_str_16
+    xor bp, bp
 
 boot_load_2nd_stage:
     ; ---------------------------------------
     ; Fetch 2nd stage loader from filesystem 
     ; ---------------------------------------
     mov ax, BOOT_2ND_STAGE_FILENAME
-    mov bx, FAT_HEADER_ADDR
-    mov cx, SECOND_STAGE_SEG
     mov dx, 0
+    mov si, FAT_HEADER_ADDR
+    mov di, SECOND_STAGE_SEG
     call fat12_loadFile
-
-    mov bx, DEBUG_LOAD_SUCCESS
-    call print_str_16
-    jmp $
 
 boot_2nd_stage:
     ; ---------------------------------------
     ; Jump to preloader (2-nd stage)
     ; ---------------------------------------
-    mov bx, BOOT_PRELOADER_MSG
-    call print_str_16
 
     jmp SECOND_STAGE_SEG
     jmp $
@@ -92,13 +84,9 @@ boot_2nd_stage:
 %include "print.s"
 %include "io.s"
 %include "../shared/fat12.s"
+%include "msg.s"
 
 BOOT_2ND_STAGE_FILENAME db "BOOT    GFB"
-
-BOOT_LOAD_MSG db 'GunwOS loading...', 0xa, 0xd, 0
-BOOT_PRELOADER_MSG db 'GunwOS preloader booting...', 0xa, 0xd, 0
-
-DEBUG_LOAD_SUCCESS db 'File loaded successfully - stopped', 0xa, 0xd, 0
 
 boot_fill:
     times 510-($-$$) db 0
