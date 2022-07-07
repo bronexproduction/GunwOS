@@ -20,6 +20,7 @@ FAT12_FATS_SECTORS                      equ (BPB_NUMBER_OF_FATS * BPB_LOGICAL_SE
 FAT12_FAT_BYTES                         equ (BPB_LOGICAL_SECTORS_PER_FAT * BPB_BYTES_PER_LOGICAL_SECTOR)
 FAT12_FATS_BYTES                        equ (BPB_NUMBER_OF_FATS * FAT12_FAT_BYTES)
 FAT12_HEADER_SECTORS                    equ (FAT12_FATS_SECTORS + FAT12_ROOT_DIR_SECTORS)
+FAT12_MAX_READABLE_CLUSTER              equ (BPB_TOTAL_LOGICAL_SECTORS / BPB_LOGICAL_SECTORS_PER_CLUSTER - FAT12_ROOT_DIR_SECTORS - FAT12_FATS_SECTORS)
 
     ; ---------------------------------------
     ; Load file from FAT12 disk
@@ -57,10 +58,8 @@ fat12_loadFile:
     add bx, FAT12_DIR_ENTRY_FIRST_CLUSTER_OFFSET
     mov ax, [bx]
 
-    call fat12_checkValidForRead
-
-    ; AX - First cluster
-    ; CX - File size in clusters 
+    ; Read file
+    call fat12_readFile
 
     jmp $
 
@@ -261,6 +260,34 @@ fat12_getSizeClusters:
     call print_err_16
 
     ; ---------------------------------------
+    ; Read file from FAT12 disk
+    ; 
+    ; AX - First cluster
+    ; CX - File size in clusters
+    ; DL - disk number
+    ; SI - address of 16K unused memory
+    ;      block to store FAT12 header
+    ; DI - segment of read buffer (segment)
+    ; ---------------------------------------
+
+fat12_readFile:
+
+    pusha
+
+    ; Validate
+    call fat12_checkValidForRead
+
+    ; TODO
+
+    ; AX - First cluster
+    ; CX - File size in clusters 
+
+    jmp $
+
+    popa
+    ret
+
+    ; ---------------------------------------
     ; Check if sector valid for read
     ; 
     ; AX - sector num
@@ -271,11 +298,17 @@ fat12_checkValidForRead:
     pusha
 
     ; TODO: check if sector is valid for read
+    cmp ax, 1
+    jle .fat12_checkValidForRead_error
+
+    cmp ax, FAT12_MAX_READABLE_CLUSTER
+    jg .fat12_checkValidForRead_error
 
     popa
+    ret
 
 .fat12_checkValidForRead_error:
 
-    mov bx, IO_DISK_ERROR_MSG
+    mov bx, FAT12_INVALID_ERROR_STRING
     call print_err_16
     
