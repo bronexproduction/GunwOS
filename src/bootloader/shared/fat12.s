@@ -58,6 +58,9 @@ fat12_loadFile:
     add bx, FAT12_DIR_ENTRY_FIRST_CLUSTER_OFFSET
     mov ax, [bx]
 
+    ; AX - First cluster
+    ; CX - File size in clusters 
+
     ; Read file
     call fat12_readFile
 
@@ -274,15 +277,35 @@ fat12_readFile:
 
     pusha
 
-    ; Validate
-    call fat12_checkValidForRead
-
-    ; TODO
+    mov es, di
+    mov bx, 0
 
     ; AX - First cluster
     ; CX - File size in clusters 
 
+.fat12_readFile_readCluster:    
+    
+    ; Validate
+    call fat12_checkValidForRead
+
+    ; Get next
+    ; Validate next
+
+    ; Read cluster
+
+    dec cx
+    mov ax, dx ; NEXT CLUSTER
+    add bx, FAT12_CLUSTER_SIZE_BYTES
+
+    cmp cx, 0
+    jne .fat12_readFile_readCluster
+
+    ; Fail if next cluster is not EOF
+
     jmp $
+
+    mov di, 0
+    mov es, di
 
     popa
     ret
