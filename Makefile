@@ -1,6 +1,7 @@
 SRC_DIR=$(PWD)/src
 BUILD_DIR=$(PWD)/build
 TOOLS_DIR=$(PWD)/tools
+UTL_DIR=$(PWD)/utl
 
 export ASM=nasm
 export C=$(TOOLS_DIR)/gunwxcc_9.2.0/bin/i386-elf-gcc
