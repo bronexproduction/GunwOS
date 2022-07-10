@@ -83,7 +83,7 @@ boot_2nd_stage:
 
 %include "print.s"
 %include "io.s"
-%include "../shared/fat12.s"
+%include "../shared/fat12/fat12.s"
 %include "msg.s"
 
 BOOT_2ND_STAGE_FILENAME db "BOOT    GFB"
