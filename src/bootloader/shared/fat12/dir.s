@@ -112,6 +112,7 @@ fat12_getSizeClusters:
     mov cx, FAT12_CLUSTER_SIZE_BYTES
     div cx
 
+    xor dx, dx
     cmp dx, 0
     je .fat12_getSizeClusters_end
 
