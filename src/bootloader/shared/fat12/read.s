@@ -28,7 +28,7 @@ fat12_readFile:
     ; CX - File size in clusters 
 
 .fat12_readFile_readCluster:    
-    
+
     ; Validate current cluster
     call fat12_checkValidForRead
     jc .fat12_readFile_fatInvalid

@@ -57,7 +57,5 @@ fat12_loadFile:
     ; Read file
     call fat12_readFile
 
-    jmp $
-
     popa
     ret

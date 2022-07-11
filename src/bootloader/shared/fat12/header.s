@@ -21,7 +21,7 @@ fat12_loadHeader:
 
     mov al, FAT12_HEADER_SECTORS
     mov bx, si
-    mov cx, 2
+    mov cx, 1
     call io_read_disk
 
     popa
