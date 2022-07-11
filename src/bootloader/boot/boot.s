@@ -64,7 +64,6 @@ boot_load_2nd_stage:
     ; Fetch 2nd stage loader from filesystem 
     ; ---------------------------------------
     mov ax, BOOT_2ND_STAGE_FILENAME
-    mov dx, 0
     mov si, FAT_HEADER_ADDR
     mov di, SECOND_STAGE_SEG
     call fat12_loadFile
@@ -73,7 +72,6 @@ boot_2nd_stage:
     ; ---------------------------------------
     ; Jump to preloader (2-nd stage)
     ; ---------------------------------------
-
     jmp SECOND_STAGE_SEG
 
     ; ---------------------------------------
