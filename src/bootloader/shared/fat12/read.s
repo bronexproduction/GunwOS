@@ -58,7 +58,12 @@ fat12_readFile:
     pop bx
 
     ; Read sector
+    pusha
+    mov cx, ax
+    add cx, FAT12_DATA_CLUSTER_OFFSET
+    mov al, BPB_LOGICAL_SECTORS_PER_CLUSTER
     call io_read_disk
+    popa
 
     ; Prepare next sector
     dec cx
