@@ -65,5 +65,29 @@ fat12_getEntry:
 
     pusha
 
+    mov bx, 3
+    mul bx
+    shr ax, 1 ; index
+
+    mov bx, ax
+    add bx, si
+    mov ax, [bx]
+
+    jnp .fat12_getEntry_even
+
+    shr ax, 4
+    jmp .fat12_getEntry_end
+
+.fat12_getEntry_even:
+    
+    and ax, 0x0FFF
+
+.fat12_getEntry_end:
+
+    ; Replace AX on stack
+    mov di, sp
+    add di, 14
+    mov [di], ax
+
     popa
     ret
