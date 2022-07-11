@@ -75,7 +75,6 @@ boot_2nd_stage:
     ; ---------------------------------------
 
     jmp SECOND_STAGE_SEG
-    jmp $
 
     ; ---------------------------------------
     ; Additional routines and utilities
