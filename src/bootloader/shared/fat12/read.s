@@ -47,13 +47,22 @@ fat12_readFile:
 .fat12_readFile_readValidCluster:
 
     ; Read cluster
-    ; SWAP AX WITH AX ON STACK (next cluster)
-    ; CONFIGURE CORRECT SECTOR (offset)
+
+    ; Swap AX with AX on stack (next cluster should stay on stack)
+    push bx
+    mov bx, ax
+    add sp, 2
+    pop ax
+    push bx
+    sub sp, 2 
+    pop bx
+
+    ; Read sector
     call io_read_disk
 
     ; Prepare next sector
     dec cx
-    pop ax ; NEXT CLUSTER
+    pop ax ; Next cluster
     add bx, FAT12_CLUSTER_SIZE_BYTES
 
     ; Check if all sectors read
@@ -63,8 +72,6 @@ fat12_readFile:
     ; Fail if next cluster is not EOF
     call fat12_checkEOF
     jc .fat12_readFile_fatInvalid
-
-    jmp $
 
     mov di, 0
     mov es, di

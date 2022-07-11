@@ -19,9 +19,8 @@ BITS 16
 
 io_read_disk:
     pusha
-    xor ah, ah
     push ax
-    
+
     ; --------------------------------------- 
     ; FDC reset procedure
     ; --------------------------------------- 
@@ -43,11 +42,44 @@ io_read_disk:
     ; --------------------------------------- 
     mov ah, 0x02    ; BIOS read sector function
 
-    ; PREPARE STARTING INDEX
+    ; Calculate CHS
+    push ax
+    push bx
+    push dx
 
-    mov ch, 0x00    ; cylinder
-    mov dh, 0x00    ; head
+    ; cylinder = LBA / (BPB_NUMBER_OF_HEADS * BPB_PHYSICAL_SECTORS_PER_TRACK)
+	; temp = LBA % (BPB_NUMBER_OF_HEADS * BPB_PHYSICAL_SECTORS_PER_TRACK)
+    mov ax, BPB_NUMBER_OF_HEADS
+    mov bx, BPB_PHYSICAL_SECTORS_PER_TRACK
+    mul bx
+
+    push cx
+    mov cx, ax
+    pop ax
+
+    div cx
+
+    ; Set cylinder (limited to 8 bits)
+    mov cx, ax
+    shl cx, 8
+
+    ; head = temp / BPB_PHYSICAL_SECTORS_PER_TRACK
+	; sector = temp % BPB_PHYSICAL_SECTORS_PER_TRACK + 1
+    mov ax, dx
+    div bx
     
+    ; Set sector
+    mov cl, dl
+    inc cl
+
+    ; Set head
+    pop dx
+    mov dh, al
+
+    pop bx
+    pop ax
+
+    ; Read (interrupt)
     int 0x13
     jc .io_read_disk_error
 

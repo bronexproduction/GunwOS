@@ -65,5 +65,7 @@ fat12_getEntry:
 
     pusha
 
+    ; TODO
+
     popa
     ret
