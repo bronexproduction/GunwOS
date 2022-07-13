@@ -2,6 +2,7 @@ SRC_DIR=$(PWD)/src
 BUILD_DIR=$(PWD)/build
 TOOLS_DIR=$(PWD)/tools
 UTL_DIR=$(PWD)/utl
+SCRIPTS_DIR=$(PWD)/scripts
 
 export ASM=nasm
 export C=$(TOOLS_DIR)/gunwxcc_9.2.0/bin/i386-elf-gcc
@@ -48,7 +49,7 @@ kernel.o:
 img: $(BUILD_DIR)/gunwos.img
 
 $(BUILD_DIR)/gunwos.img:
-	bash scripts/buildImage_fat12.sh $@ $(BUILD_DIR)/boot.bin $(BUILD_DIR)/boot.gfb $(BUILD_DIR)/kernel.gfb 
+	bash $(SCRIPTS_DIR)/build_image_fat12.sh $@ $(BUILD_DIR)/boot.bin $(BUILD_DIR)/boot.gfb $(BUILD_DIR)/kernel.gfb 
 
 clean:
 	rm -rf $(BUILD_DIR)
