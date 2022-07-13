@@ -57,7 +57,6 @@ boot_init:
     ; ---------------------------------------
     mov bp, RMODE_STACK_ADDR
     mov sp, bp
-    xor bp, bp
 
 boot_load_2nd_stage:
     ; ---------------------------------------
