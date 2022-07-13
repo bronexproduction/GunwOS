@@ -72,7 +72,7 @@ boot_2nd_stage:
     ; ---------------------------------------
     ; Jump to preloader (2-nd stage)
     ; ---------------------------------------
-    jmp SECOND_STAGE_SEG
+    jmp SECOND_STAGE_SEG:0
 
     ; ---------------------------------------
     ; Additional routines and utilities
