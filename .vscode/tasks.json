@@ -30,7 +30,7 @@
             "isDefault": true
         },
         "dependsOn": [
-            "Build"
+            "Build and image"
         ],
         "problemMatcher": []
     },
@@ -46,7 +46,7 @@
             "isDefault": true
         },
         "dependsOn": [
-            "Build"
+            "Build and image"
         ],
         "problemMatcher": []
     },
@@ -62,7 +62,7 @@
             "isDefault": false
         },
         "dependsOn": [
-            "Build"
+            "Build and image"
         ],
         "problemMatcher": []
     },
@@ -75,6 +75,19 @@
             "isDefault": true
         },
         "dependsOn": [
+            "Build and image"
+        ],
+        "problemMatcher": []
+    },
+    {
+        "label": "Build and image",
+        "type": "shell",
+        "command": "make img",
+        "group": {
+            "kind": "build",
+            "isDefault": false
+        },
+        "dependsOn": [
             "Build"
         ],
         "problemMatcher": []
@@ -82,7 +95,7 @@
     {
         "label": "Build",
         "type": "shell",
-        "command": "make clean all img",
+        "command": "make clean all",
         "group": {
             "kind": "build",
             "isDefault": false
