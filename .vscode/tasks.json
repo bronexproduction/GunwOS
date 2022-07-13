@@ -14,7 +14,7 @@
         },
         "osx": {
             // not working - support for 64-bit to be added
-            "command": "brew install nasm qemu",
+            "command": "brew install nasm qemu truncate",
         },
         "group": {
             "kind": "none",
