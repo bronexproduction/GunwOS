@@ -3,3 +3,4 @@
 tools
 build
 *.o
+*.lst
