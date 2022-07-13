@@ -17,6 +17,8 @@ export CXX_DIR_LISTING=find . -name '*.cpp' -type f
 LFLAGS=-melf_i386 -T linker.ld
 LFLAGS_SYSTEM=$(LFLAGS)
 
+MEDIA_BYTES=1474560
+
 .PHONY: all pre_build img clean
 
 all: pre_build boot.bin boot.gfb kernel.gfb
@@ -49,6 +51,8 @@ img: $(BUILD_DIR)/gunwos.img
 
 $(BUILD_DIR)/gunwos.img:
 	cat $(BUILD_DIR)/boot.bin > $@
+# check if img size fits the media
+	truncate -s $(MEDIA_BYTES) $@
 
 clean:
 	rm -rf $(BUILD_DIR)
