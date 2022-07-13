@@ -4,13 +4,34 @@
   "version": "2.0.0",
 "tasks": [
     {
-        "label": "Build",
+        "label": "Install dependencies",
         "type": "shell",
-        "command": "make clean all img",
+        "windows": {
+            "command": "sudo apt-get update && sudo apt-get install -y build-essential nasm qemu-system-x86",
+        },
+        "linux": {
+            "command": "sudo apt-get update && sudo apt-get install -y build-essential nasm qemu-system-x86",
+        },
+        "osx": {
+            // not working - support for 64-bit to be added
+            "command": "brew install nasm qemu",
+        },
+        "group": {
+            "kind": "none",
+            "isDefault": false
+        }
+    },
+    {
+        "label": "Build and write floppy (rawwritewin)",
+        "type": "shell",
+        "command": "/mnt/d/Software/rawwritewin-0.7/rawwritewin.exe build/gunwos.img",
         "group": {
             "kind": "build",
-            "isDefault": false
+            "isDefault": true
         },
+        "dependsOn": [
+            "Build"
+        ],
         "problemMatcher": []
     },
     {
@@ -20,32 +41,6 @@
         "windows": {
             "command": "export DISPLAY=:0 && scripts/qemu_run.sh"
         },
-        "group": {
-            "kind": "build",
-            "isDefault": true
-        },
-        "dependsOn": [
-            "Build"
-        ],
-        "problemMatcher": []
-    },
-    {
-        "label": "Build and run (VirtualBox)",
-        "type": "shell",
-        "command": "bash scripts/virtualbox_run.sh",
-        "group": {
-            "kind": "build",
-            "isDefault": true
-        },
-        "dependsOn": [
-            "Build"
-        ],
-        "problemMatcher": []
-    },
-    {
-        "label": "Build and write floppy (rawwritewin)",
-        "type": "shell",
-        "command": "/mnt/d/Software/rawwritewin-0.7/rawwritewin.exe build/gunwos.img",
         "group": {
             "kind": "build",
             "isDefault": true
@@ -72,22 +67,27 @@
         "problemMatcher": []
     },
     {
-        "label": "Install dependencies",
+        "label": "Build and run (VirtualBox)",
         "type": "shell",
-        "windows": {
-            "command": "sudo apt-get update && sudo apt-get install -y build-essential nasm qemu-system-x86",
-        },
-        "linux": {
-            "command": "sudo apt-get update && sudo apt-get install -y build-essential nasm qemu-system-x86",
-        },
-        "osx": {
-            // not working - support for 64-bit to be added
-            "command": "brew install nasm qemu",
-        },
+        "command": "bash scripts/virtualbox_run.sh",
         "group": {
-            "kind": "none",
+            "kind": "build",
+            "isDefault": true
+        },
+        "dependsOn": [
+            "Build"
+        ],
+        "problemMatcher": []
+    },
+    {
+        "label": "Build",
+        "type": "shell",
+        "command": "make clean all img",
+        "group": {
+            "kind": "build",
             "isDefault": false
-        }
+        },
+        "problemMatcher": []
     }
 ]
 }
