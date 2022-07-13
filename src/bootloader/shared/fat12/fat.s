@@ -68,12 +68,14 @@ fat12_getEntry:
     mov bx, 3
     mul bx
     shr ax, 1 ; index
+    pushf
 
     mov bx, ax
     add bx, si
     mov ax, [bx]
 
-    jnp .fat12_getEntry_even
+    popf
+    jnc .fat12_getEntry_even
 
     shr ax, 4
     jmp .fat12_getEntry_end
