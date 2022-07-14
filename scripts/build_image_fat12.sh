@@ -50,6 +50,7 @@ SECTORS_PER_FAT=$(( 16#$(xxd -e -l2 -s $BPB_4_0_SECTORS_PER_FAT_OFFSET "$BOOTLOA
 MAX_DIR_ENTRIES=$(( 16#$(xxd -e -l2 -s $BPB_4_0_MAX_DIR_ENTRIES_OFFSET "$BOOTLOADER_FILE" | awk '{print $2}') ))
 TOTAL_LOGICAL_SECTORS=$(( 16#$(xxd -e -l2 -s $BPB_4_0_TOTAL_LOGICAL_SECTORS_OFFSET "$BOOTLOADER_FILE" | awk '{print $2}') ))
 
+CLUSTER_SIZE_BYTES=$(( SECTORS_PER_CLUSTER * BYTES_PER_SECTOR ))
 FAT_SIZE_BYTES=$(( BYTES_PER_SECTOR * SECTORS_PER_FAT ))
 ROOT_DIR_BYTES=$(( MAX_DIR_ENTRIES * FAT12_BYTES_PER_DIR_ENTRY ))
 HEADER_BYTES=$(( ROOT_DIR_BYTES + $(( NUMBER_OF_FATS * FAT_SIZE_BYTES )) ))
@@ -88,14 +89,15 @@ echo "Header size in clusters: $HEADER_CLUSTERS"
 echo "Max cluster number: $MAX_CLUSTER_NUM"
 
 ROOT_DIR_DATA=()
-FAT_DATA=()
+FAT_DATA=(0x000 0x000)
 FILES_DATA=()
-
-TOTAL_CLUSTERS=0
 
 FLAT_FILENAME_ARRAY=()
 
+NEXT_CLUSTER=2
+
 # Create FAT structure
+echo "Creating FAT structure..."
 for filename in "${@:3}"; do
 
     # Extract basename from path
@@ -131,16 +133,42 @@ for filename in "${@:3}"; do
         exit 1
     fi
     
+    # Prepare root dir entry
+
+    # Check file existence
+    if [ ! -f "$filename" ]; then
+        echo "File $filename not found"
+        exit 1
+    fi
+
     # Get file size
     FILE_SIZE_BYTES=$(wc -c "$filename" | awk '{print $1}')
+    if (( FILE_SIZE_BYTES < 1 )); then
+        echo "File size invalid ($FILE_SIZE_BYTES). File: $filename"
+        exit 1
+    fi
 
-    # Prepare root dir entry
-    # Prepare data section
-        # align to clusters
+    # Calculate file size in clusters
+    FILE_SIZE_CLUSTERS=$(( FILE_SIZE_BYTES / CLUSTER_SIZE_BYTES ))
+    if [ $(expr $FILE_SIZE_BYTES % $CLUSTER_SIZE_BYTES) != "0" ]; then 
+        FILE_SIZE_CLUSTERS=$(( FILE_SIZE_CLUSTERS + 1 ))
+    fi
+
+    echo "File: $BASENAME"
+    echo "File size (bytes): $FILE_SIZE_BYTES"
+    echo "File size (clusters): $FILE_SIZE_CLUSTERS"
+    echo "Starting cluster: $NEXT_CLUSTER"
+    
     # Append FAT entries
 
+    for i in $(seq 1 1 $(( FILE_SIZE_CLUSTERS - 1 ))); do
+        NEXT_CLUSTER=$(( NEXT_CLUSTER + 1))
+        FAT_DATA+=($NEXT_CLUSTER)
+    done
+    NEXT_CLUSTER=$(( NEXT_CLUSTER + 1))
+    FAT_DATA+=(0xFFF)
+
     FLAT_FILENAME_ARRAY+=($DOS_FILENAME)
-    DIR_ENTRY_INDEX=$(( DIR_ENTRY_INDEX + 1 ))
 done
 
 # Check if ROOT_DIR_DATA within limits
@@ -154,6 +182,8 @@ fi
 # Check if TOTAL_CLUSTERS within limits
 
 # Write structure to disk image
+    # Prepare data section
+        # align to clusters
 
 # Check if within limits (max root dir / clusters / FAT entries)
 
