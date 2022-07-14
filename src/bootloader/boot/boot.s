@@ -16,7 +16,8 @@ SECOND_STAGE_SEG            equ 0x1000
 
 %include "../shared/data.s"
 
-jmp boot_init
+    jmp boot_init
+    times 3-($-$$) db 0
 
     ; ---------------------------------------
     ; IMPORTANT NOTE
