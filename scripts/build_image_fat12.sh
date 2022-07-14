@@ -87,16 +87,16 @@ echo "Header size in sectors: $HEADER_SECTORS"
 echo "Header size in clusters: $HEADER_CLUSTERS"
 echo "Max cluster number: $MAX_CLUSTER_NUM"
 
-FAT_ENTRY_INDEX=2
-DIR_ENTRY_INDEX=0
+ROOT_DIR_DATA=()
+FAT_DATA=()
+FILES_DATA=()
+
+TOTAL_CLUSTERS=0
 
 FLAT_FILENAME_ARRAY=()
 
+# Create FAT structure
 for filename in "${@:3}"; do
-    if [ $DIR_ENTRY_INDEX -eq $MAX_DIR_ENTRIES ]; then
-        echo "Max root directory entries count exceeded"
-        exit 1
-    fi
 
     # Extract basename from path
     BASENAME=$(basename -- $filename)
@@ -131,14 +131,31 @@ for filename in "${@:3}"; do
         exit 1
     fi
     
-    # prepare root dir entry
-    # put data in data section
-    # align to sectors
-    # fill FAT table
+    # Get file size
+    FILE_SIZE_BYTES=$(wc -c "$filename" | awk '{print $1}')
+
+    # Prepare root dir entry
+    # Prepare data section
+        # align to clusters
+    # Append FAT entries
 
     FLAT_FILENAME_ARRAY+=($DOS_FILENAME)
     DIR_ENTRY_INDEX=$(( DIR_ENTRY_INDEX + 1 ))
 done
+
+# Check if ROOT_DIR_DATA within limits
+if (( ${#ROOT_DIR_DATA[@]} > $MAX_DIR_ENTRIES )); then
+    echo "Max root directory entries count exceeded"
+    exit 1
+fi
+
+# Check if FAT data within limits
+
+# Check if TOTAL_CLUSTERS within limits
+
+# Write structure to disk image
+
+# Check if within limits (max root dir / clusters / FAT entries)
 
 # check if img size fits the media
 
