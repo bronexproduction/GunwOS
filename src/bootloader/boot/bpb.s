@@ -11,11 +11,6 @@
 
 BITS 16
 
-    ; --------------------------------------- 
-    ; BIOS parameter block start offset
-    ; --------------------------------------- 
-BPB_START_OFFSET                    equ 0xB
-
     ; ---------------------------------------
     ; FAT reserved sectors
     ; BIOS parameter block
