@@ -89,13 +89,57 @@ echo "Max cluster number: $MAX_CLUSTER_NUM"
 
 FAT_ENTRY_INDEX=2
 DIR_ENTRY_INDEX=0
+
+FLAT_FILENAME_ARRAY=()
+
 for filename in "${@:3}"; do
     if [ $DIR_ENTRY_INDEX -eq $MAX_DIR_ENTRIES ]; then
         echo "Max root directory entries count exceeded"
         exit 1
     fi
 
+    # Extract basename from path
+    BASENAME=$(basename -- $filename)
+    NAME=$(echo "$BASENAME" | awk -F. '{print $1}')
+    EXTENSION=$(echo "$BASENAME" | awk -F. '{print $2}')
 
+    # Check if basename contains ASCII characters only
+    if [[ $BASENAME = *[![:ascii:]]* ]]; then
+        echo "Filename can't contain non-ASCII characters ($BASENAME)"
+        exit 1
+    fi
 
-    DIR_ENTRY_INDEX=$((DIR_ENTRY_INDEX+1))
+    # Check if filename is 1-8 characters long
+    if (( ${#NAME} < 1 || ${#NAME} > 8 )); then
+        echo "Filename length not in accepted range (1-8): $NAME ($BASENAME)"
+        exit 1
+    fi
+
+    # Check if extension is 0-3 characters long
+    if (( ${#EXTENSION} > 3 )); then
+        echo "Extension length not in accepted range (0-3): $EXTENSION ($BASENAME)"
+        exit 1
+    fi
+
+    # Create DOS filename with incorrect padding
+    PADDING="........"
+    DOS_FILENAME=$( printf "%s%s%s\n" "$NAME" "${PADDING:${#NAME}}" "$EXTENSION" )
+
+    # Check if DOS_FILENAME already exists - exit if it does
+    if [[ " ${FLAT_FILENAME_ARRAY[*]} " =~ " ${DOS_FILENAME} " ]]; then
+        echo "Duplicated file: $BASENAME"
+        exit 1
+    fi
+    
+    # prepare root dir entry
+    # put data in data section
+    # align to sectors
+    # fill FAT table
+
+    FLAT_FILENAME_ARRAY+=($DOS_FILENAME)
+    DIR_ENTRY_INDEX=$(( DIR_ENTRY_INDEX + 1 ))
 done
+
+# check if img size fits the media
+
+exit 1
