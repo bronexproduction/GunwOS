@@ -4,7 +4,7 @@ set -e
 
 BOOTLOADER_BYTES_EXPECTED=512
 BOOTLOADER_SIGNATURE_EXPECTED=aa55
-MEDIA_BYTES=1474560
+MEDIA_SIZE_BYTES=1474560
 
 BPB_4_0_BYTES_PER_SECTOR_OFFSET=0x00B
 BPB_4_0_SECTORS_PER_CLUSTER_OFFSET=0x00D
@@ -235,9 +235,9 @@ while [ ${#FAT_DATA[@]} -gt 0 ]; do
         ENTRY1=$(( 16#${ENTRY1:2} ))
     fi
 
-    BYTE0="$(( ENTRY0 >> 4 ))"
-    BYTE1="$(( $(( $(( ENTRY0 % $((2 ** 4)) )) << 4 )) + $(( ENTRY1 >> 8 )) ))"
-    BYTE2="$(( ENTRY1 % $((2 ** 8)) ))"
+    BYTE0="$(( ENTRY0 & 0x0FF ))"
+    BYTE1="$(( $(( $(( ENTRY0 & 0xF00 )) >> 8 )) | $(( $(( ENTRY1 & 0x00F )) << 4 )) ))"
+    BYTE2="$(( $(( ENTRY1 & 0xFF0 )) >> 4 ))"
 
     FAT_DATA=("${FAT_DATA[@]:2}")
     FAT_BYTES+=($BYTE0 $BYTE1 $BYTE2)
@@ -290,6 +290,11 @@ for filename in "${@:3}"; do
     fi
 done
 
-# check if img size fits the media
+# Check if image size fits the media
+FILE_SIZE_BYTES=$(wc -c "$DESTINATION_IMAGE_FILE" | awk '{print $1}')
+if (( FILE_SIZE_BYTES > MEDIA_SIZE_BYTES )); then
+    echo "Image size ($FILE_SIZE_BYTES) exceeds media size ($MEDIA_SIZE_BYTES)"
+    exit 1
+fi
 
-exit 1
+echo "Image size: $FILE_SIZE_BYTES bytes"
