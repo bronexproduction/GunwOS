@@ -14,6 +14,11 @@ BPB_4_0_TOTAL_LOGICAL_SECTORS_OFFSET=0x013
 BPB_4_0_SECTORS_PER_FAT_OFFSET=0x016
 
 FAT12_BYTES_PER_DIR_ENTRY=32
+FAT12_FILENAME_LENGTH=8
+FAT12_EXTENSION_LENGTH=3
+FAT12_ATTR_LENGTH=1
+FAT12_FIRST_LOG_CLUSTER_LENGTH=2
+FAT12_FILE_SIZE_BYTES_LENGTH=4
 
 DESTINATION_IMAGE_FILE=$1
 BOOTLOADER_FILE=$2
@@ -96,6 +101,9 @@ FLAT_FILENAME_ARRAY=()
 
 NEXT_CLUSTER=2
 
+DIR_PADDING_LENGTH=$(( FAT12_BYTES_PER_DIR_ENTRY - FAT12_EXTENSION_LENGTH - FAT12_FILENAME_LENGTH - FAT12_ATTR_LENGTH - FAT12_FIRST_LOG_CLUSTER_LENGTH - FAT12_FILE_SIZE_BYTES_LENGTH ))
+DIR_SEQ=($(seq 1 1 $DIR_PADDING_LENGTH))
+DIR_PADDING=("${DIR_SEQ[@]/*/0x00}")
 # Create FAT structure
 echo "Creating FAT structure..."
 for filename in "${@:3}"; do
@@ -112,13 +120,13 @@ for filename in "${@:3}"; do
     fi
 
     # Check if filename is 1-8 characters long
-    if (( ${#NAME} < 1 || ${#NAME} > 8 )); then
+    if (( ${#NAME} < 1 || ${#NAME} > FAT12_FILENAME_LENGTH )); then
         echo "Filename length not in accepted range (1-8): $NAME ($BASENAME)"
         exit 1
     fi
 
     # Check if extension is 0-3 characters long
-    if (( ${#EXTENSION} > 3 )); then
+    if (( ${#EXTENSION} > FAT12_EXTENSION_LENGTH )); then
         echo "Extension length not in accepted range (0-3): $EXTENSION ($BASENAME)"
         exit 1
     fi
@@ -155,16 +163,37 @@ for filename in "${@:3}"; do
     fi
 
     echo "File: $BASENAME"
-    echo "File size (bytes): $FILE_SIZE_BYTES"
-    echo "File size (clusters): $FILE_SIZE_CLUSTERS"
-    echo "Starting cluster: $NEXT_CLUSTER"
+    echo "* File size (bytes): $FILE_SIZE_BYTES"
+    echo "* File size (clusters): $FILE_SIZE_CLUSTERS"
+    echo "* Starting cluster: $NEXT_CLUSTER"
     
-    # Append FAT entries
+    # Create root directory entry
+    DOS_FILENAME_ARR=$(echo "$DOS_FILENAME" | grep -o .)
 
-    for i in $(seq 1 1 $(( FILE_SIZE_CLUSTERS - 1 ))); do
-        NEXT_CLUSTER=$(( NEXT_CLUSTER + 1))
-        FAT_DATA+=($NEXT_CLUSTER)
-    done
+    unset DIR
+    DIR=(${DOS_FILENAME_ARR[@]})
+    DIR+=(0x05) # Attributes: read-only, system
+    DIR+=(${DIR_PADDING[@]})
+    DIR+=(
+        $(printf '0x%.2x\n' $(( NEXT_CLUSTER / $((2 ** 8)) ))) 
+        $(printf '0x%.2x\n' $(( NEXT_CLUSTER % $((2 ** 8)) )))
+    ) # First logical cluster - 2 bytes
+    DIR+=(
+        $(printf '0x%.2x\n' $(( FILE_SIZE_BYTES / $((2 ** 24)) ))) 
+        $(printf '0x%.2x\n' $(( FILE_SIZE_BYTES % $((2 ** 24)) / $((2 ** 16)) ))) 
+        $(printf '0x%.2x\n' $(( FILE_SIZE_BYTES % $((2 ** 16)) / $((2 ** 8)) ))) 
+        $(printf '0x%.2x\n' $(( FILE_SIZE_BYTES % $((2 ** 8)) )))
+    ) # File size bytes - 4 bytes
+
+    ROOT_DIR_DATA+=(${DIR[@]})
+
+    # Append FAT entries
+    if (( FILE_SIZE_CLUSTERS > 1 )); then
+        for i in $(seq 1 1 $(( FILE_SIZE_CLUSTERS - 1 ))); do
+            NEXT_CLUSTER=$(( NEXT_CLUSTER + 1))
+            FAT_DATA+=($NEXT_CLUSTER)
+        done
+    fi
     NEXT_CLUSTER=$(( NEXT_CLUSTER + 1))
     FAT_DATA+=(0xFFF)
 
@@ -178,10 +207,60 @@ if (( ${#ROOT_DIR_DATA[@]} > $MAX_DIR_ENTRIES )); then
 fi
 
 # Check if FAT data within limits
+if [ $(expr ${#FAT_DATA[@]} % 2) != "0" ]; then
+    FAT_DATA+=(0x000)
+fi
+if (( ${#FAT_DATA[@]} > $(( MAX_CLUSTER_NUM + 1 )) )); then
+    echo "FAT cluster limit exceeded: ${#FAT_DATA[@]}"
+    exit 1
+fi
 
-# Check if TOTAL_CLUSTERS within limits
+echo "FAT:"
+echo ${FAT_DATA[@]}
+echo "Root dir: (. to be replaced with spaces)"
+echo ${ROOT_DIR_DATA[@]}
 
-# Write structure to disk image
+FAT_BYTES=()
+
+echo "Converting..."
+# Convert FAT
+while [ ${#FAT_DATA[@]} -gt 0 ]; do
+
+    ENTRY0=${FAT_DATA[0]}
+    if [[ $ENTRY0 == 0x* ]]; then
+        ENTRY0=$(( 16#${ENTRY0:2} ))
+    fi
+    ENTRY1=${FAT_DATA[1]}
+    if [[ $ENTRY1 == 0x* ]]; then
+        ENTRY1=$(( 16#${ENTRY1:2} ))
+    fi
+
+    BYTE0="$(( ENTRY0 >> 4 ))"
+    BYTE1="$(( $(( $(( ENTRY0 % $((2 ** 4)) )) << 4 )) + $(( ENTRY1 >> 8 )) ))"
+    BYTE2="$(( ENTRY1 % $((2 ** 8)) ))"
+
+    FAT_DATA=("${FAT_DATA[@]:2}")
+    FAT_BYTES+=($BYTE0 $BYTE1 $BYTE2)
+done
+
+if (( ${#FAT_BYTES[@]} > FAT_SIZE_BYTES )); then
+    echo "FAT size in bytes exceeded: ${#FAT_BYTES[@]}"
+    exit 1
+fi
+
+echo "FAT bytes:"
+echo ${FAT_BYTES[@]}
+
+# Write FATs
+for i in $(seq 1 $NUMBER_OF_FATS); do
+    for byte in ${FAT_BYTES[@]}; do
+        printf "\x$(printf %x $byte)" >> "$DESTINATION_IMAGE_FILE"
+        # write byte
+    done
+    
+    # Expand file to accomodate empty FAT space
+    truncate -s $(( i * FAT_SIZE_BYTES + BOOTLOADER_BYTES_EXPECTED )) "$DESTINATION_IMAGE_FILE"
+done
     # Prepare data section
         # align to clusters
 
