@@ -175,14 +175,14 @@ for filename in "${@:3}"; do
     DIR+=(0x25) # Attributes: read-only, system, archive
     DIR+=(${DIR_PADDING[@]})
     DIR+=(
-        $(printf '0x%.2x\n' $(( NEXT_CLUSTER / $((2 ** 8)) ))) 
         $(printf '0x%.2x\n' $(( NEXT_CLUSTER % $((2 ** 8)) )))
+        $(printf '0x%.2x\n' $(( NEXT_CLUSTER / $((2 ** 8)) ))) 
     ) # First logical cluster - 2 bytes
     DIR+=(
-        $(printf '0x%.2x\n' $(( FILE_SIZE_BYTES / $((2 ** 24)) ))) 
-        $(printf '0x%.2x\n' $(( FILE_SIZE_BYTES % $((2 ** 24)) / $((2 ** 16)) ))) 
-        $(printf '0x%.2x\n' $(( FILE_SIZE_BYTES % $((2 ** 16)) / $((2 ** 8)) ))) 
         $(printf '0x%.2x\n' $(( FILE_SIZE_BYTES % $((2 ** 8)) )))
+        $(printf '0x%.2x\n' $(( FILE_SIZE_BYTES % $((2 ** 16)) / $((2 ** 8)) ))) 
+        $(printf '0x%.2x\n' $(( FILE_SIZE_BYTES % $((2 ** 24)) / $((2 ** 16)) ))) 
+        $(printf '0x%.2x\n' $(( FILE_SIZE_BYTES / $((2 ** 24)) ))) 
     ) # File size bytes - 4 bytes
 
     ROOT_DIR_DATA+=(${DIR[@]})
