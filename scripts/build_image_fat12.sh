@@ -172,7 +172,7 @@ for filename in "${@:3}"; do
 
     unset DIR
     DIR=(${DOS_FILENAME_ARR[@]})
-    DIR+=(0x05) # Attributes: read-only, system
+    DIR+=(0x25) # Attributes: read-only, system, archive
     DIR+=(${DIR_PADDING[@]})
     DIR+=(
         $(printf '0x%.2x\n' $(( NEXT_CLUSTER / $((2 ** 8)) ))) 
