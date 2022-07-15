@@ -57,8 +57,8 @@ TOTAL_LOGICAL_SECTORS=$(( 16#$(xxd -e -l2 -s $BPB_4_0_TOTAL_LOGICAL_SECTORS_OFFS
 
 CLUSTER_SIZE_BYTES=$(( SECTORS_PER_CLUSTER * BYTES_PER_SECTOR ))
 FAT_SIZE_BYTES=$(( BYTES_PER_SECTOR * SECTORS_PER_FAT ))
-ROOT_DIR_BYTES=$(( MAX_DIR_ENTRIES * FAT12_BYTES_PER_DIR_ENTRY ))
-HEADER_BYTES=$(( ROOT_DIR_BYTES + $(( NUMBER_OF_FATS * FAT_SIZE_BYTES )) ))
+ROOT_DIR_SIZE_BYTES=$(( MAX_DIR_ENTRIES * FAT12_BYTES_PER_DIR_ENTRY ))
+HEADER_BYTES=$(( ROOT_DIR_SIZE_BYTES + $(( NUMBER_OF_FATS * FAT_SIZE_BYTES )) ))
 
 TOTAL_CLUSTERS=$(( TOTAL_LOGICAL_SECTORS / SECTORS_PER_CLUSTER ))
 if [ $(expr $TOTAL_LOGICAL_SECTORS % $SECTORS_PER_CLUSTER) != "0" ]; then 
@@ -87,7 +87,7 @@ echo "Sectors per FAT: $SECTORS_PER_FAT"
 echo "Max dir entries: $MAX_DIR_ENTRIES"
 echo "Total logical sectors: $TOTAL_LOGICAL_SECTORS"
 echo "FAT size in bytes: $FAT_SIZE_BYTES"
-echo "Root dir size in bytes: $ROOT_DIR_BYTES"
+echo "Root dir size in bytes: $ROOT_DIR_SIZE_BYTES"
 echo "Header size in bytes: $HEADER_BYTES"
 echo "Header size in sectors: $HEADER_SECTORS"
 echo "Header size in clusters: $HEADER_CLUSTERS"
@@ -201,8 +201,8 @@ for filename in "${@:3}"; do
 done
 
 # Check if ROOT_DIR_DATA within limits
-if (( ${#ROOT_DIR_DATA[@]} > $MAX_DIR_ENTRIES )); then
-    echo "Max root directory entries count exceeded"
+if (( ${#ROOT_DIR_DATA[@]} > $ROOT_DIR_SIZE_BYTES )); then
+    echo "Max root directory entries count/size in bytes exceeded"
     exit 1
 fi
 
@@ -251,20 +251,44 @@ fi
 echo "FAT bytes:"
 echo ${FAT_BYTES[@]}
 
+echo "Writing FAT tables..."
 # Write FATs
 for i in $(seq 1 $NUMBER_OF_FATS); do
     for byte in ${FAT_BYTES[@]}; do
         printf "\x$(printf %x $byte)" >> "$DESTINATION_IMAGE_FILE"
-        # write byte
     done
     
-    # Expand file to accomodate empty FAT space
+    # Expand destination file to fill remaining FAT bytes
     truncate -s $(( i * FAT_SIZE_BYTES + BOOTLOADER_BYTES_EXPECTED )) "$DESTINATION_IMAGE_FILE"
 done
-    # Prepare data section
-        # align to clusters
 
-# Check if within limits (max root dir / clusters / FAT entries)
+echo "Writing root directory..."
+# Write root dir
+for element in ${ROOT_DIR_DATA[@]}; do
+    if [[ "$element" == "." ]]; then
+        BYTE=$( echo " " | od -An -vtu1 | awk '{print $1}' )
+    elif [[ "$element" == 0x* ]]; then
+        BYTE=$(( 16#${element:2} ))
+    else
+        BYTE=$( printf '%s\n' "$element" | awk '{ print toupper($0) }' | od -An -vtu1 | awk '{print $1}' )
+    fi
+    printf "\x$(printf %x $BYTE)" >> "$DESTINATION_IMAGE_FILE"
+done
+
+# Expand destination file to fill remaining root dir table bytes
+truncate -s $(( NUMBER_OF_FATS * FAT_SIZE_BYTES + ROOT_DIR_SIZE_BYTES + BOOTLOADER_BYTES_EXPECTED )) "$DESTINATION_IMAGE_FILE"
+
+echo "Writing files..."
+# Write files    
+for filename in "${@:3}"; do
+    cat "$filename" >> "$DESTINATION_IMAGE_FILE"
+
+    # Expand destination file to fill remaining root dir table bytes (align to clusters) if needed
+    FILE_SIZE_BYTES=$(wc -c "$DESTINATION_IMAGE_FILE" | awk '{print $1}')
+    if [ $(expr $FILE_SIZE_BYTES % $CLUSTER_SIZE_BYTES) != "0" ]; then
+        truncate -s $(( FILE_SIZE_BYTES / CLUSTER_SIZE_BYTES * CLUSTER_SIZE_BYTES + CLUSTER_SIZE_BYTES )) "$DESTINATION_IMAGE_FILE"
+    fi
+done
 
 # check if img size fits the media
 
