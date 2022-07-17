@@ -298,3 +298,9 @@ if (( FILE_SIZE_BYTES > MEDIA_SIZE_BYTES )); then
 fi
 
 echo "Image size: $FILE_SIZE_BYTES bytes"
+
+# Expand image if needed to help emulators guess the type of media
+if (( FILE_SIZE_BYTES < MEDIA_SIZE_BYTES )); then
+    echo "Expanding image to $MEDIA_SIZE_BYTES bytes"
+    truncate -s $MEDIA_SIZE_BYTES "$DESTINATION_IMAGE_FILE"
+fi
