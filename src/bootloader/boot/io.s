@@ -61,8 +61,7 @@ io_read_disk:
     div cx
 
     ; Set cylinder (limited to 8 bits)
-    mov cx, ax
-    shl cx, 8
+    mov ch, al
 
     ; head = temp / BPB_PHYSICAL_SECTORS_PER_TRACK
 	; sector = temp % BPB_PHYSICAL_SECTORS_PER_TRACK + 1
