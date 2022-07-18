@@ -1,4 +1,4 @@
-CXX_TESTS_FLAGS=-std=c++11 -Wall -Wextra
+CXX_TESTS_FLAGS=-std=c++17 -Wall -Wextra
 CXX_INCLUDE=-I$(TEST_FRAMEWORK_DIR)
 
 O_DIR_LISTING=find . -name '*.o' -type f
