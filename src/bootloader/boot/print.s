@@ -12,12 +12,13 @@ print_err_16:
     mov ah, 0x0e
     mov si, ERROR_STRING
 
-.print_str_16_char:
+.print_err_16_char:
     cmp bx, si
-    jl .print_str_16_end
+    jl .print_err_16_end
     lodsb
     int 0x10
-    jmp .print_str_16_char
+    jmp .print_err_16_char
 
-.print_str_16_end:
-    jmp $
+.print_err_16_end:
+    cli
+    hlt

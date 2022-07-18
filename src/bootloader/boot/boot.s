@@ -46,12 +46,10 @@ boot_init:
     ; ---------------------------------------
     ; Clear accumulator and segment registers
     ; ---------------------------------------
-    mov ax, 0x00
+    xor ax, ax
     mov ds, ax
     mov ss, ax
     mov es, ax
-    mov fs, ax
-    mov gs, ax
 
     ; ---------------------------------------
     ; Configure stack
