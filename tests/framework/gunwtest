@@ -1,0 +1,24 @@
+//
+//  gunwtest.hpp
+//  GunwOS Tests
+//
+//  Created by Artur Danielewski on 18.07.2022.
+//
+
+#ifndef LIBGUNW_TEST
+#define LIBGUNW_TEST
+
+#include <vector>
+
+#include "scenario.hpp"
+
+extern std::vector< const std::unique_ptr<Scenario> > g_scenarios;
+
+#define SCENARIO(NAME) class Scenario_ ## NAME : public Scenario {  \
+    private:                                                        \
+        static const int NAME ## _registration = [](){                  \
+            return 0;                                                 \
+        }();                                                         \
+};
+
+#endif // LIBGUNW_TEST

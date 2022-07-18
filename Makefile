@@ -2,7 +2,8 @@ SRC_DIR=$(PWD)/src
 TOOLS_DIR=$(PWD)/tools
 UTL_DIR=$(PWD)/utl
 SCRIPTS_DIR=$(PWD)/scripts
-TESTS_DIR=$(PWD)/tests
+TESTS_DIR=$(PWD)/tests/modules
+export TEST_FRAMEWORK_DIR=$(PWD)/tests/framework
 export BUILD_DIR=$(PWD)/build
 
 export ASM=nasm
