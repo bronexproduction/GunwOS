@@ -57,8 +57,8 @@ clean:
 	find $(SRC_DIR)/ -type f -name '*.o' -delete
 
 test:
-	make -C $(TESTS_DIR)/bootloader/boot all run
-	make -C $(TESTS_DIR)/bootloader/preloader all run
-	make -C $(TESTS_DIR)/lib all run
-	make -C $(TESTS_DIR)/system all run
+	make -C $(TESTS_DIR)/bootloader/boot clean all run
+	make -C $(TESTS_DIR)/bootloader/preloader clean all run
+	make -C $(TESTS_DIR)/lib clean all run
+	make -C $(TESTS_DIR)/system clean all run
 	
