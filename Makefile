@@ -1,8 +1,8 @@
 SRC_DIR=$(PWD)/src
-BUILD_DIR=$(PWD)/build
 TOOLS_DIR=$(PWD)/tools
 UTL_DIR=$(PWD)/utl
-SCRIPTS_DIR=$(PWD)/scripts
+export SCRIPTS_DIR=$(PWD)/scripts
+export BUILD_DIR=$(PWD)/build
 
 export ASM=nasm
 export C=$(TOOLS_DIR)/gunwxcc_9.2.0/bin/i386-elf-gcc
@@ -18,7 +18,7 @@ export CXX_DIR_LISTING=find . -name '*.cpp' -type f
 LFLAGS=-melf_i386 -T linker.ld
 LFLAGS_SYSTEM=$(LFLAGS)
 
-.PHONY: all pre_build img clean
+.PHONY: all pre_build img clean test
 
 all: pre_build boot.bin boot.gfb kernel.gfb
 
@@ -54,3 +54,10 @@ $(BUILD_DIR)/gunwos.img:
 clean:
 	rm -rf $(BUILD_DIR)
 	find $(SRC_DIR)/ -type f -name '*.o' -delete
+
+test:
+	make -C $(SRC_DIR)/bootloader/boot test
+	make -C $(SRC_DIR)/bootloader/preloader test
+	make -C $(SRC_DIR)/lib test
+	make -C $(SRC_DIR)/system test
+	

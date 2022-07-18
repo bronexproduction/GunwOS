@@ -4,24 +4,6 @@
   "version": "2.0.0",
 "tasks": [
     {
-        "label": "Install dependencies",
-        "type": "shell",
-        "windows": {
-            "command": "sudo apt-get update && sudo apt-get install -y build-essential nasm qemu-system-x86",
-        },
-        "linux": {
-            "command": "sudo apt-get update && sudo apt-get install -y build-essential nasm qemu-system-x86",
-        },
-        "osx": {
-            // not working - support for 64-bit to be added
-            "command": "brew install nasm qemu truncate",
-        },
-        "group": {
-            "kind": "none",
-            "isDefault": false
-        }
-    },
-    {
         "label": "Build and write floppy (rawwritewin)",
         "type": "shell",
         "command": "/mnt/d/Software/rawwritewin-0.7/rawwritewin.exe build/gunwos.img",
@@ -39,7 +21,7 @@
         "type": "shell",
         "command": "bash scripts/qemu_run.sh",
         "windows": {
-            "command": "export DISPLAY=:0 && scripts/qemu_run.sh"
+            "command": "export DISPLAY=:0 && scripts/qemu_run.sh build/gunwos.img"
         },
         "group": {
             "kind": "build",
@@ -55,7 +37,7 @@
         "type": "shell",
         "command": "bash scripts/qemu_run_debug.sh",
         "windows": {
-            "command": "export DISPLAY=:0 && scripts/qemu_run_debug.sh"
+            "command": "export DISPLAY=:0 && scripts/qemu_run_debug.sh build/gunwos.img"
         },
         "group": {
             "kind": "build",
@@ -101,6 +83,34 @@
             "isDefault": false
         },
         "problemMatcher": []
+    },
+    {
+        "label": "Run tests",
+        "type": "shell",
+        "command": "make test",
+        "group": {
+            "kind": "test",
+            "isDefault": false
+        },
+        "problemMatcher": []
+    },
+    {
+        "label": "Install dependencies",
+        "type": "shell",
+        "windows": {
+            "command": "sudo apt-get update && sudo apt-get install -y build-essential nasm qemu-system-x86",
+        },
+        "linux": {
+            "command": "sudo apt-get update && sudo apt-get install -y build-essential nasm qemu-system-x86",
+        },
+        "osx": {
+            // not working - support for 64-bit to be added
+            "command": "brew install nasm qemu truncate",
+        },
+        "group": {
+            "kind": "none",
+            "isDefault": false
+        }
     }
 ]
 }
