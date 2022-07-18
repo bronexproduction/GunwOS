@@ -1,7 +1,8 @@
 SRC_DIR=$(PWD)/src
 TOOLS_DIR=$(PWD)/tools
 UTL_DIR=$(PWD)/utl
-export SCRIPTS_DIR=$(PWD)/scripts
+SCRIPTS_DIR=$(PWD)/scripts
+TESTS_DIR=$(PWD)/tests
 export BUILD_DIR=$(PWD)/build
 
 export ASM=nasm
@@ -56,8 +57,8 @@ clean:
 	find $(SRC_DIR)/ -type f -name '*.o' -delete
 
 test:
-	make -C $(SRC_DIR)/bootloader/boot test
-	make -C $(SRC_DIR)/bootloader/preloader test
-	make -C $(SRC_DIR)/lib test
-	make -C $(SRC_DIR)/system test
+	make -C $(TESTS_DIR)/bootloader/boot all run
+	make -C $(TESTS_DIR)/bootloader/preloader all run
+	make -C $(TESTS_DIR)/lib all run
+	make -C $(TESTS_DIR)/system all run
 	

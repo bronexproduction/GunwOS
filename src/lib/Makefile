@@ -9,7 +9,7 @@ MODULES=	stdgunw \
 
 all: $(MODULES) link
 
-.PHONY: $(MODULES) test
+.PHONY: $(MODULES)
 
 $(MODULES):
 	make -C $@
@@ -22,5 +22,3 @@ link_dry_run:
 
 link: link_dry_run
 	$(L) $(LFLAGS_FINAL) -o lib.o $(shell $(O_DIR_LISTING))
-
-test:
