@@ -12,7 +12,7 @@
 #include "scenario.hpp"
 
 Runner Runner::shared = Runner();
-Runner::Runner(): d(std::unique_ptr<RunnerPrivate>()) {}
+Runner::Runner(): d(std::make_unique<RunnerPrivate>()) {}
 Runner::~Runner() {}
 
 class RunnerPrivate {
@@ -29,7 +29,7 @@ void Runner::Register(void) {
 }
 
 void Runner::Run(void) {
-    
+
     const auto runScenario = [](const std::unique_ptr<Scenario> &scenario){ 
         scenario.get()->run();
     };
