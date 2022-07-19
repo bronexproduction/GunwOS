@@ -1,13 +1,15 @@
 CXX_TESTS_FLAGS=-std=c++17 -Wall -Wextra
 CXX_INCLUDE=-I$(TEST_FRAMEWORK_DIR)
 
+CXX_FRAMEWORK_LISTING=find $(TEST_FRAMEWORK_DIR) -name '*.cpp' -type f
 O_DIR_LISTING=find . -name '*.o' -type f
 
 EXEC_TERMINATOR=\;
 
 .PHONY: all clean run
 
-CXX_INPUT=$(shell $(CXX_DIR_LISTING))
+CXX_INPUT=$(shell $(CXX_FRAMEWORK_LISTING))
+CXX_INPUT+=$(shell $(CXX_DIR_LISTING))
 
 EXECUTABLE=$(BUILD_DIR)/bootloader_tests
 

@@ -13,4 +13,16 @@ class Scenario {
         virtual void run(void) = 0;
 };
 
+#define SCENARIO(NAME, RUN) class Scenario_ ## NAME : public Scenario {     \
+    public:                                                                 \
+        void run(void);                                                     \
+};                                                                          \
+static void NAME ## _registration(void) __attribute__((constructor));       \
+static void NAME ## _registration(void) {                                   \
+    Runner::shared.Register< Scenario_ ## NAME >();                         \
+}                                                                           \
+void Scenario_ ## NAME ::run(void) {                                        \
+    {RUN;}                                                                  \
+}  
+
 #endif // SCENARIO_HPP

@@ -1,5 +1,5 @@
 //
-//  gunwtest.hpp
+//  gunwtest
 //  GunwOS Tests
 //
 //  Created by Artur Danielewski on 18.07.2022.
@@ -8,25 +8,7 @@
 #ifndef LIBGUNW_TEST
 #define LIBGUNW_TEST
 
-#include <vector>
-#include <memory>
-
-#include "scenario.hpp"
-
-extern std::vector< std::unique_ptr<Scenario> > g_scenarioRegistry;
-
-#define SCENARIO(NAME, RUN) class Scenario_ ## NAME : public Scenario {     \
-    public:                                                                 \
-        void run(void);                                                     \
-};                                                                          \
-static void NAME ## _registration(void) __attribute__((constructor));       \
-static void NAME ## _registration(void) {                                   \
-    g_scenarioRegistry.push_back(                                           \
-        std::move(std::make_unique< Scenario_ ## NAME >())                  \
-    );                                                                      \
-}                                                                           \
-void Scenario_ ## NAME ::run(void) {                                        \
-    {RUN;}                                                                  \
-}                                                                           \
+#include "runner.hpp"  
+#include "scenario.hpp"                                                                       \
 
 #endif // LIBGUNW_TEST
