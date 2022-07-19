@@ -22,8 +22,7 @@ class RunnerPrivate {
     friend class Runner;
 };
 
-template <typename S>
-void Runner::Register(void) {
+template <class S> void Runner::Register() {
     
     d.get()->scenarioRegistry.push_back(std::move(std::make_unique<S>()));
 }

@@ -16,8 +16,7 @@ class Runner {
     public:
         static Runner shared;
 
-        template <typename S>
-        void Register(void);
+        template <class S> void Register(void);
         
         void Run(void);
 
