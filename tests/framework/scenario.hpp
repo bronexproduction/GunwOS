@@ -19,6 +19,7 @@ class Scenario {
 };                                                                          \
 static void NAME ## _registration(void) __attribute__((constructor));       \
 static void NAME ## _registration(void) {                                   \
+    return;                                                                 \
     Runner::shared.Register< Scenario_ ## NAME >();                         \
 }                                                                           \
 void Scenario_ ## NAME ::run(void) {                                        \

@@ -11,6 +11,7 @@
 
 #include "scenario.hpp"
 
+Runner Runner::shared = Runner();
 Runner::Runner(): d(std::unique_ptr<RunnerPrivate>()) {}
 Runner::~Runner() {}
 
@@ -21,7 +22,8 @@ class RunnerPrivate {
     friend class Runner;
 };
 
-template <typename S> void Runner::Register(void) {
+template <typename S>
+void Runner::Register(void) {
     
     d.get()->scenarioRegistry.push_back(std::move(std::make_unique<S>()));
 }

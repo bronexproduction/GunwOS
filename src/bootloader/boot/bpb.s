@@ -44,7 +44,7 @@ bpb_hidden_sectors:                 dd 0
 bpb_large_total_logical_sectors:    dd 0
 bpb_physical_drive_number:          db 0
 bpb_flags:                          db 0x0
-bpb_extended_boot_signature:        db 0x29
-bpb_volume_serial_number:           dd 1850637505
-bpb_volume_label:                   db "GUNWOS     "
-bpb_file_system_type:               db "FAT12   "
+; bpb_extended_boot_signature:        db 0x29
+; bpb_volume_serial_number:           dd 1850637505
+; bpb_volume_label:                   db "GUNWOS     "
+; bpb_file_system_type:               db "FAT12   "
