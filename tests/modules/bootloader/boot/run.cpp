@@ -6,17 +6,20 @@
 //
 
 #include <vector>
+#include <memory>
+#include <algorithm>
+
 #include <gunwtest>
 
-std::vector< const std::unique_ptr<Scenario> > g_scenarios;
+std::vector< std::unique_ptr<Scenario> > g_scenarioRegistry;
 
 int main() {
 
     const auto runScenario = [](const std::unique_ptr<Scenario> &scenario){ 
-        printf("asdf\n");
+        scenario.get()->run();
     };
 
-    std::for_each(g_scenarios.begin(), g_scenarios.end(), runScenario);
+    std::for_each(g_scenarioRegistry.begin(), g_scenarioRegistry.end(), runScenario);
 
     return 0;
 }

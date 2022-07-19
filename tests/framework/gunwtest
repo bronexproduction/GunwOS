@@ -9,16 +9,24 @@
 #define LIBGUNW_TEST
 
 #include <vector>
+#include <memory>
 
 #include "scenario.hpp"
 
-extern std::vector< const std::unique_ptr<Scenario> > g_scenarios;
+extern std::vector< std::unique_ptr<Scenario> > g_scenarioRegistry;
 
-#define SCENARIO(NAME) class Scenario_ ## NAME : public Scenario {  \
-    private:                                                        \
-        static const int NAME ## _registration = [](){                  \
-            return 0;                                                 \
-        }();                                                         \
-};
+#define SCENARIO(NAME, RUN) class Scenario_ ## NAME : public Scenario {     \
+    public:                                                                 \
+        void run(void);                                                     \
+};                                                                          \
+static void NAME ## _registration(void) __attribute__((constructor));       \
+static void NAME ## _registration(void) {                                   \
+    g_scenarioRegistry.push_back(                                           \
+        std::move(std::make_unique< Scenario_ ## NAME >())                  \
+    );                                                                      \
+}                                                                           \
+void Scenario_ ## NAME ::run(void) {                                        \
+    {RUN;}                                                                  \
+}                                                                           \
 
 #endif // LIBGUNW_TEST

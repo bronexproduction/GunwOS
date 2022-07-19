@@ -7,4 +7,8 @@
 
 #include <gunwtest>
 
-SCENARIO(scenario1)
+#include <cstdio>
+
+SCENARIO(scenario1, {
+    printf("Jestem testem jednostkowym\n");
+})
