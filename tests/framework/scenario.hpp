@@ -9,6 +9,7 @@
 #define SCENARIO_HPP
 
 class Scenario {
+    
     public:
         virtual void run(void) = 0;
 };

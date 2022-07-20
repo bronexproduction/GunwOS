@@ -7,6 +7,7 @@
 
 #include "runner.hpp"
 
+#include <vector>
 #include <algorithm>
 
 #include "scenario.hpp"
@@ -16,6 +17,7 @@ Runner::Runner(): d(std::make_unique<RunnerPrivate>()) {}
 Runner::~Runner() {}
 
 class RunnerPrivate {
+    
     private:
         std::vector< std::unique_ptr<Scenario> > scenarioRegistry;
 
