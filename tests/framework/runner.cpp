@@ -19,7 +19,7 @@ Runner::~Runner() {}
 class RunnerPrivate {
     
     private:
-        std::vector< std::unique_ptr<Scenario> > scenarioRegistry;
+        std::vector< std::unique_ptr<Scenario> > scenarioRegistry = std::vector< std::unique_ptr<Scenario> >();
 
     friend class Runner;
 };
