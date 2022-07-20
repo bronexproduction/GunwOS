@@ -12,20 +12,18 @@ EXEC_TERMINATOR=\;
 CXX_FRAMEWORK_INPUT=$(shell $(CXX_FRAMEWORK_LISTING))
 CXX_INPUT+=$(shell $(CXX_DIR_LISTING))
 
-FRAMEWORK=gunwtest.a
+FRAMEWORK=$(BUILD_DIR)/gunwtest.a
 EXECUTABLE=$(BUILD_DIR)/bootloader_tests
 
 all: $(FRAMEWORK) $(EXECUTABLE)
 
 $(FRAMEWORK):
-	g++ -o $@.o $(CXX_FRAMEWORK_FLAGS) $(CXX_INCLUDE) $(CXX_FRAMEWORK_INPUT)
-	ar rvs $@ $@.o
+	make -C $(TEST_FRAMEWORK_DIR) clean all
 
 $(EXECUTABLE):
 	g++ -o $@ $(CXX_TESTS_FLAGS) $(CXX_INCLUDE) $(CXX_INPUT) $(FRAMEWORK)
 
 clean:
-	rm -f $(OBJ_INPUT)
 	rm -f $(FRAMEWORK)
 	rm -f $(EXECUTABLE)
 
