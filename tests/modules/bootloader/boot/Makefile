@@ -1,25 +1,32 @@
 CXX_TESTS_FLAGS=-std=c++17 -Wall -Wextra
-CXX_INCLUDE=-I$(TEST_FRAMEWORK_DIR)
+CXX_FRAMEWORK_FLAGS=$(CXX_TESTS_FLAGS) -c
+CXX_INCLUDE=-I$(TEST_FRAMEWORK_DIR)/include
 
-CXX_FRAMEWORK_LISTING=find $(TEST_FRAMEWORK_DIR) -name '*.cpp' -type f
+CXX_FRAMEWORK_LISTING=find $(TEST_FRAMEWORK_DIR)/src -name '*.cpp' -type f
 O_DIR_LISTING=find . -name '*.o' -type f
 
 EXEC_TERMINATOR=\;
 
 .PHONY: all clean run
 
-CXX_INPUT=$(shell $(CXX_FRAMEWORK_LISTING))
+CXX_FRAMEWORK_INPUT=$(shell $(CXX_FRAMEWORK_LISTING))
 CXX_INPUT+=$(shell $(CXX_DIR_LISTING))
 
+FRAMEWORK=gunwtest.a
 EXECUTABLE=$(BUILD_DIR)/bootloader_tests
 
-all: $(EXECUTABLE)
+all: $(FRAMEWORK) $(EXECUTABLE)
+
+$(FRAMEWORK):
+	g++ -o $@.o $(CXX_FRAMEWORK_FLAGS) $(CXX_INCLUDE) $(CXX_FRAMEWORK_INPUT)
+	ar rvs $@ $@.o
 
 $(EXECUTABLE):
-	g++ -o $@ $(CXX_TESTS_FLAGS) $(CXX_INCLUDE) $(CXX_INPUT)
+	g++ -o $@ $(CXX_TESTS_FLAGS) $(CXX_INCLUDE) $(CXX_INPUT) $(FRAMEWORK)
 
 clean:
 	rm -f $(OBJ_INPUT)
+	rm -f $(FRAMEWORK)
 	rm -f $(EXECUTABLE)
 
 run:

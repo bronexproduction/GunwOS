@@ -1,12 +1,31 @@
 //
-//  scenario.hpp
+//  gunwtest
 //  GunwOS Tests
 //
 //  Created by Artur Danielewski on 18.07.2022.
 //
 
-#ifndef SCENARIO_HPP
-#define SCENARIO_HPP
+#ifndef LIBGUNW_TEST
+#define LIBGUNW_TEST
+
+#include <memory>
+
+class RunnerPrivate;
+class Runner {
+    
+    public:
+        static Runner shared;
+
+        template <class S> void Register(void);
+        
+        void Run(void);
+
+    private:
+        Runner();
+        ~Runner();
+
+        std::unique_ptr<RunnerPrivate> d;
+};
 
 class Scenario {
 
@@ -24,4 +43,4 @@ static void NAME ## _registration(void) {                                   \
     Runner::shared.Register< Scenario_ ## NAME >();                         \
 }
 
-#endif // SCENARIO_HPP
+#endif // LIBGUNW_TEST

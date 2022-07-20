@@ -5,12 +5,10 @@
 //  Created by Artur Danielewski on 19.07.2022.
 //
 
-#include "runner.hpp"
+#include <gunwtest>
 
 #include <vector>
 #include <algorithm>
-
-#include "scenario.hpp"
 
 Runner Runner::shared = Runner();
 Runner::Runner(): d(std::make_unique<RunnerPrivate>()) {}
