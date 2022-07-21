@@ -9,6 +9,7 @@
 #define QEMUSCENARIO_HPP
 
 #include <memory>
+#include <string>
 
 #include "scenario.hpp"
 
