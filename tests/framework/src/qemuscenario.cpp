@@ -33,6 +33,7 @@ void QEMUScenario::Prepare(void) {
     if (d->qemuPid < 0) {
         throw std::runtime_error("Unable to launch QEMU");
     }
+    // launch & attach GDB
 }
 
 void QEMUScenario::Cleanup(void) {
