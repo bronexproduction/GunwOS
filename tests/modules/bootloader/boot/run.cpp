@@ -9,7 +9,7 @@
 
 int main() {
 
-    Runner::shared.Run();
+    Runner::Shared().Run();
 
     return 0;
 }

@@ -9,23 +9,7 @@
 #define LIBGUNW_TEST
 
 #include <memory>
-
-class RunnerPrivate;
-class Runner {
-    
-    public:
-        static Runner shared;
-
-        template <class S> void Register(void);
-        
-        void Run(void);
-
-    private:
-        Runner();
-        ~Runner();
-
-        std::unique_ptr<RunnerPrivate> d;
-};
+#include <vector>
 
 class Scenario {
 
@@ -34,13 +18,28 @@ class Scenario {
         virtual ~Scenario() {}
 };
 
+class Runner {
+    
+    public:
+        static Runner& Shared();
+
+        template <class S> void Register(void) {
+            scenarioRegistry.push_back(std::move(std::make_unique<S>()));
+        }
+        
+        void Run(void);
+
+    private:
+        std::vector< std::unique_ptr<Scenario> > scenarioRegistry = std::vector< std::unique_ptr<Scenario> >();
+};
+
 #define SCENARIO(NAME, RUN) class Scenario_ ## NAME : public Scenario {     \
     public:                                                                 \
         void run(void) {RUN;}                                               \
 };                                                                          \
 static void NAME ## _registration(void) __attribute__((constructor));       \
 static void NAME ## _registration(void) {                                   \
-    Runner::shared.Register< Scenario_ ## NAME >();                         \
+    Runner::Shared().Register< Scenario_ ## NAME >();                         \
 }
 
 #endif // LIBGUNW_TEST

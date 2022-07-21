@@ -7,31 +7,24 @@
 
 #include <gunwtest>
 
-#include <vector>
 #include <algorithm>
 
-Runner Runner::shared = Runner();
-Runner::Runner(): d(std::make_unique<RunnerPrivate>()) {}
-Runner::~Runner() {}
+Runner& Runner::Shared() {
+    // TODO: thread safety
+    static std::unique_ptr<Runner> sharedInstance;
 
-class RunnerPrivate {
-    
-    private:
-        std::vector< std::unique_ptr<Scenario> > scenarioRegistry = std::vector< std::unique_ptr<Scenario> >();
+    if (!sharedInstance.get()) {
+        sharedInstance = std::make_unique<Runner>();    
+    }
 
-    friend class Runner;
-};
-
-template <class S> void Runner::Register() {
-    
-    d.get()->scenarioRegistry.push_back(std::move(std::make_unique<S>()));
+    return *(sharedInstance.get());
 }
 
 void Runner::Run(void) {
 
-    const auto runScenario = [](const std::unique_ptr<Scenario> &scenario){ 
+    const auto runScenario = [](const std::unique_ptr<Scenario> &scenario){
         scenario.get()->run();
     };
 
-    std::for_each(d.get()->scenarioRegistry.begin(), d.get()->scenarioRegistry.end(), runScenario);
+    std::for_each(scenarioRegistry.begin(), scenarioRegistry.end(), runScenario);
 }
