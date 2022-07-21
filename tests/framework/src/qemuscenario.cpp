@@ -7,6 +7,10 @@
 
 #include "qemuscenario.hpp"
 
+#include <unistd.h>
+
+#include "spawn.hpp"
+
 class QEMUScenarioPrivate {
     
     private:
@@ -14,6 +18,7 @@ class QEMUScenarioPrivate {
 
     private:
         const std::string binPath;
+        pid_t qemuPid = -1;
 
     friend class QEMUScenario;
 };
@@ -24,7 +29,10 @@ QEMUScenario::~QEMUScenario() {
 } 
 
 void QEMUScenario::Prepare(void) {
-
+    d->qemuPid = spawnShell("qemu-system-i386");
+    if (d->qemuPid < 0) {
+        throw std::runtime_error("Unable to launch QEMU");
+    }
 }
 
 void QEMUScenario::Cleanup(void) {

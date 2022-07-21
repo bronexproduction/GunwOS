@@ -42,6 +42,7 @@
     "typeinfo": "cpp",
     "variant": "cpp",
     "gunwtest": "cpp",
-    "scenarios": "cpp"
+    "scenarios": "cpp",
+    "string": "cpp"
   }
 }
