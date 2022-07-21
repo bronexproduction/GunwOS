@@ -5,9 +5,9 @@
 //  Created by Artur Danielewski on 18.07.2022.
 //
 
-#include <gunwtest>
+#include <scenarios>
 
-SCENARIO(FlatQEMUScenario, LbaToChs, {
+SCENARIO(SystemQEMUScenario, LbaToChs, {
     SetIPAtSymbol(".io_read_disk_calculate_chs");
     SetAX(0);
     SetBX(0);

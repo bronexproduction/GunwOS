@@ -1,23 +1,23 @@
 //
-//  flatqemuscenario.hpp
+//  qemuscenario.hpp
 //  GunwOS Tests
 //
 //  Created by Artur Danielewski on 21.07.2022.
 //
 
-#ifndef FLATQEMUSCENARIO_HPP
-#define FLATQEMUSCENARIO_HPP
+#ifndef QEMUSCENARIO_HPP
+#define QEMUSCENARIO_HPP
 
 #include <memory>
 
 #include "scenario.hpp"
 
-class FlatQEMUScenarioPrivate;
-class FlatQEMUScenario: public Scenario {
+class QEMUScenarioPrivate;
+class QEMUScenario: public Scenario {
     
     public:
-        FlatQEMUScenario();
-        ~FlatQEMUScenario();
+        QEMUScenario(std::string binPath);
+        ~QEMUScenario();
 
     public:
         void Prepare(void);
@@ -41,7 +41,7 @@ class FlatQEMUScenario: public Scenario {
         void CheckDX(uint16_t dx);
 
     private:
-        FlatQEMUScenarioPrivate *d;
+        QEMUScenarioPrivate *d;
 };
 
-#endif // FLATQEMUSCENARIO_HPP
+#endif // QEMUSCENARIO_HPP

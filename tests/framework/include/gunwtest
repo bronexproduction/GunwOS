@@ -9,7 +9,7 @@
 #define LIBGUNW_TEST
 
 #include "../src/scenario.hpp"
-#include "../src/flatqemuscenario.hpp"
+#include "../src/qemuscenario.hpp"
 
 #include "../src/runner.hpp"
 
