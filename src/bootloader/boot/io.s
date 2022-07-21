@@ -42,6 +42,8 @@ io_read_disk:
     ; --------------------------------------- 
     mov ah, 0x02    ; BIOS read sector function
 
+.io_read_disk_calculate_chs:
+
     ; Calculate CHS
     push ax
     push bx
@@ -79,6 +81,8 @@ io_read_disk:
 
     pop bx
     pop ax
+
+.io_read_disk_read_chs:
 
     ; Read (interrupt)
     int 0x13
