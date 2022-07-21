@@ -7,8 +7,6 @@
 
 #include <gunwtest>
 
-#include <cstdio>
-
 SCENARIO(FlatQEMUScenario, LbaToChs, {
     SetIPAtSymbol(".io_read_disk_calculate_chs");
     SetAX(0);
