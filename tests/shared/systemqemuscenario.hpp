@@ -10,15 +10,15 @@
 
 #include <gunwtest>
 
-class SystemQEMUScenarioPrivate;
-class SystemQEMUScenario: public QEMUScenario {
+class SystemQemuScenarioPrivate;
+class SystemQemuScenario: public QemuScenario {
     
     public:
-        SystemQEMUScenario();
-        ~SystemQEMUScenario();
+        SystemQemuScenario();
+        ~SystemQemuScenario();
 
     private:
-        SystemQEMUScenarioPrivate *d;
+        SystemQemuScenarioPrivate *d;
 };
 
 #endif // SYSTEMQEMUSCENARIO_HPP

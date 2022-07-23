@@ -13,12 +13,12 @@
 
 #include "scenario.hpp"
 
-class QEMUScenarioPrivate;
-class QEMUScenario: public Scenario {
+class QemuScenarioPrivate;
+class QemuScenario: public Scenario {
     
     public:
-        QEMUScenario(std::string binPath);
-        ~QEMUScenario();
+        QemuScenario(std::string binPath);
+        ~QemuScenario();
 
     public:
         void Prepare(void);
@@ -42,7 +42,7 @@ class QEMUScenario: public Scenario {
         void CheckDX(uint16_t dx);
 
     private:
-        QEMUScenarioPrivate *d;
+        QemuScenarioPrivate *d;
 };
 
 #endif // QEMUSCENARIO_HPP

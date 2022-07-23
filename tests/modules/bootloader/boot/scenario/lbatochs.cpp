@@ -7,7 +7,7 @@
 
 #include <scenarios>
 
-SCENARIO(SystemQEMUScenario, LbaToChs, {
+SCENARIO(SystemQemuScenario, LbaToChs, {
     SetIPAtSymbol(".io_read_disk_calculate_chs");
     SetAX(0);
     SetBX(0);

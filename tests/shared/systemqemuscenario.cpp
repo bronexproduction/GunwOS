@@ -7,12 +7,12 @@
 
 #include "systemqemuscenario.hpp"
 
-class SystemQEMUScenarioPrivate {
+class SystemQemuScenarioPrivate {
     
-    friend class SystemQEMUScenario;
+    friend class SystemQemuScenario;
 };
 
-SystemQEMUScenario::SystemQEMUScenario(): QEMUScenario("$BUILD_DIR/gunwos.img"), d(new SystemQEMUScenarioPrivate) {};
-SystemQEMUScenario::~SystemQEMUScenario() {
+SystemQemuScenario::SystemQemuScenario(): QemuScenario("$BUILD_DIR/gunwos.img"), d(new SystemQemuScenarioPrivate) {};
+SystemQemuScenario::~SystemQemuScenario() {
     delete d;
 } 
