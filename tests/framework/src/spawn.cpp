@@ -13,5 +13,5 @@ pid_t spawnShell(const std::string cmd) {
     if (size_t pid = fork()) {
         return pid;
     }
-    exit(execlp(cmd.c_str(), NULL));
+    exit(execlp("bash", "sh", "-c", cmd.c_str(), NULL));
 }
