@@ -47,7 +47,7 @@ void QEMUScenario::Prepare(void) {
 }
 
 void QEMUScenario::Cleanup(void) {
-     kill(d->qemuPid, SIGKILL);
+    kill(d->qemuPid, SIGKILL);
 }
 
 void QEMUScenario::SetIPAtSymbol(const std::string symbol) {
