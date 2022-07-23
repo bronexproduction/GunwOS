@@ -8,6 +8,8 @@
 #include "qemuscenario.hpp"
 
 #include <unistd.h>
+#include <sstream>
+#include <signal.h>
 
 #include "spawn.hpp"
 
@@ -15,6 +17,8 @@ class QEMUScenarioPrivate {
     
     private:
         QEMUScenarioPrivate(const std::string binaryPath): binPath(binaryPath) {}
+
+        const std::string BuildQemuCommand();
 
     private:
         const std::string binPath;
@@ -28,8 +32,14 @@ QEMUScenario::~QEMUScenario() {
     delete d;
 } 
 
+const std::string QEMUScenarioPrivate::BuildQemuCommand() {
+    std::stringstream ss;
+    ss << "bash $SCRIPTS_DIR/qemu_run_debug.sh " << binPath;
+    return ss.str();
+}
+
 void QEMUScenario::Prepare(void) {
-    d->qemuPid = spawnShell("qemu-system-i386");
+    d->qemuPid = spawnShell(d->BuildQemuCommand());
     if (d->qemuPid < 0) {
         throw std::runtime_error("Unable to launch QEMU");
     }
@@ -37,7 +47,7 @@ void QEMUScenario::Prepare(void) {
 }
 
 void QEMUScenario::Cleanup(void) {
-    
+     kill(d->qemuPid, SIGKILL);
 }
 
 void QEMUScenario::SetIPAtSymbol(const std::string symbol) {

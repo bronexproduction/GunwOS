@@ -12,7 +12,7 @@ class SystemQEMUScenarioPrivate {
     friend class SystemQEMUScenario;
 };
 
-SystemQEMUScenario::SystemQEMUScenario(): QEMUScenario("gunwos.img"), d(new SystemQEMUScenarioPrivate) {};
+SystemQEMUScenario::SystemQEMUScenario(): QEMUScenario("$BUILD_DIR/gunwos.img"), d(new SystemQEMUScenarioPrivate) {};
 SystemQEMUScenario::~SystemQEMUScenario() {
     delete d;
 } 
