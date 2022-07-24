@@ -7,10 +7,13 @@
 
 #include "exec.hpp"
 
+pid_t execShell(const std::string cmd);
+
 pid_t spawnShell(const std::string cmd, const std::function<void()> childPreExecAction) {
     if (size_t pid = fork()) {
         return pid;
     }
+
     childPreExecAction();
     return execShell(cmd);
 }

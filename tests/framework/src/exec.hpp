@@ -12,7 +12,6 @@
 #include <string>
 #include <functional>
 
-pid_t spawnShell(const std::string cmd, const std::function<void()> childPreExecAction = {});
-pid_t execShell(const std::string cmd);
+pid_t spawnShell(const std::string cmd, const std::function<void()> childPreExecAction = [](){});
 
 #endif // EXEC_HPP
