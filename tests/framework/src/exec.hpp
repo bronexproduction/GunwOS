@@ -14,4 +14,6 @@
 
 pid_t spawnShell(const std::string cmd, const std::function<void()> childPreExecAction = [](){});
 
+bool isPidUp(pid_t pid);
+
 #endif // EXEC_HPP
