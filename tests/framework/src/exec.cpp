@@ -7,11 +7,18 @@
 
 #include "exec.hpp"
 
+#include <chrono>
+#include <thread>
+#include <signal.h>
+
 pid_t execShell(const std::string cmd);
+bool isPidUp(pid_t pid);
 
 pid_t spawnShell(const std::string cmd, const std::function<void()> childPreExecAction) {
     if (size_t pid = fork()) {
-        return pid;
+         // TODO: Avoiding returning valid PID on unknown command
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        return isPidUp(pid) ? pid : -1;
     }
 
     childPreExecAction();
@@ -20,4 +27,8 @@ pid_t spawnShell(const std::string cmd, const std::function<void()> childPreExec
 
 pid_t execShell(const std::string cmd) {
     exit(execlp("bash", "sh", "-c", cmd.c_str(), NULL));
+}
+
+bool isPidUp(pid_t pid) {
+    return !kill(pid, 0);
 }

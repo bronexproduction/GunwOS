@@ -17,6 +17,7 @@ class QemuScenarioPrivate {
     
     private:
         QemuScenarioPrivate(const std::string binaryPath): binPath(binaryPath) {}
+        ~QemuScenarioPrivate();
 
         void Cleanup(void);
 
@@ -44,10 +45,8 @@ void QemuScenario::Prepare(void) {
     if (d->qemuPid < 0) {
         throw std::runtime_error("Unable to launch QEMU");
     }
-    
+
     d->ConfigureGdb();
-    
-    while(1);
 }
 
 void QemuScenario::Cleanup(void) {
@@ -102,6 +101,10 @@ void QemuScenario::CheckDX(uint16_t dx) {
     
 }
 
+QemuScenarioPrivate::~QemuScenarioPrivate() {
+    Cleanup();
+}
+
 void QemuScenarioPrivate::Cleanup(void) {
     if (qemuPid > -1) {
         kill(qemuPid, SIGKILL);
@@ -131,7 +134,7 @@ const std::string QemuScenarioPrivate::BuildQemuCommand() {
 
 const std::string QemuScenarioPrivate::BuildGdbCommand() {
     std::stringstream ss;
-    ss << "gdb -ex 'target remote :1234' -ex 'attach'";
+    ss << "gdb -ex 'target remote :1234'";
     return ss.str();
 }
 
@@ -165,4 +168,6 @@ void QemuScenarioPrivate::ConfigureGdb(void) {
     if (close(gdbOutputPipe[1])) {  throw std::runtime_error("Unable to close output pipe write side"); }
     gdbIn = gdbInputPipe[1];
     gdbOut = gdbOutputPipe[0];
+
+    // TODO: Check if attached correctly
 }
