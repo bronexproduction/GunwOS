@@ -22,6 +22,6 @@ SCENARIO(SystemQemuScenario, LbaToChs, {
     frame.bx = 0x0000;
     frame.cx = 0x0000;
     frame.dx = 0x0000;
-    
+
     CheckRegisters(frame);
 })

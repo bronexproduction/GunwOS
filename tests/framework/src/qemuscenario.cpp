@@ -12,6 +12,7 @@
 #include <signal.h>
 
 #include "exec.hpp"
+#include "fd.hpp"
 
 class QemuScenarioPrivate {
     
@@ -23,12 +24,17 @@ class QemuScenarioPrivate {
 
         const std::string BuildQemuCommand();
         const std::string BuildGdbCommand();
+        void ConfigureQemu(void);
         void ConfigureGdb(void);
+        void LaunchAndConfigure(const std::string binPath, pid_t * const pid, int * const inFd, int * const outFd);
+        void AttachGdb(void);
 
     private:
         const std::string binPath;
         pid_t qemuPid = -1;
         pid_t gdbPid = -1;
+        int qemuIn = -1;
+        int qemuOut = -1;
         int gdbIn = -1;
         int gdbOut = -1;
 
@@ -41,11 +47,7 @@ QemuScenario::~QemuScenario() {
 }
 
 void QemuScenario::Prepare(void) {
-    d->qemuPid = spawnShell(d->BuildQemuCommand());
-    if (d->qemuPid < 0) {
-        throw std::runtime_error("Unable to launch QEMU");
-    }
-
+    d->ConfigureQemu();
     d->ConfigureGdb();
 }
 
@@ -105,6 +107,12 @@ void QemuScenarioPrivate::Cleanup(void) {
         kill(gdbPid, SIGKILL);
     }
     
+    if (qemuIn >= 0) {
+        close(qemuIn);
+    }
+    if (qemuOut >= 0) {
+        close(qemuOut);
+    }
     if (gdbIn >= 0) {
         close(gdbIn);
     }
@@ -114,6 +122,8 @@ void QemuScenarioPrivate::Cleanup(void) {
 
     qemuPid = -1;
     gdbPid = -1;
+    qemuIn = -1;
+    qemuOut = -1;
     gdbIn = -1;
     gdbOut = -1;
 }
@@ -130,36 +140,62 @@ const std::string QemuScenarioPrivate::BuildGdbCommand() {
     return ss.str();
 }
 
-void QemuScenarioPrivate::ConfigureGdb(void) {
-    int gdbInputPipe[2];
-    int gdbOutputPipe[2];
+void QemuScenarioPrivate::ConfigureQemu(void) {
+    LaunchAndConfigure(BuildQemuCommand(), &qemuPid, &qemuIn, &qemuOut);
+}
 
-    if (pipe(gdbInputPipe)) {
-        throw std::runtime_error("Failed to create GDB input pipe");
+void QemuScenarioPrivate::ConfigureGdb(void) {
+    LaunchAndConfigure(BuildGdbCommand(), &gdbPid, &gdbIn, &gdbOut);
+    AttachGdb();
+}
+
+void QemuScenarioPrivate::LaunchAndConfigure(const std::string binPath, pid_t * const pid, int * const inFd, int * const outFd) {
+    if (!(pid && inFd && outFd)) {
+        throw std::runtime_error("NULL pointer passed as argument");
     }
-    if (pipe(gdbOutputPipe)) {
-        throw std::runtime_error("Failed to create GDB output pipe");
+
+    int inputPipe[2];
+    int outputPipe[2];
+
+    if (pipe(inputPipe)) {
+        throw std::runtime_error("Failed to create input pipe");
+    }
+    if (pipe(outputPipe)) {
+        throw std::runtime_error("Failed to create output pipe");
     }
     
-    gdbPid = spawnShell(BuildGdbCommand(), [=](){
-        if (close(STDIN_FILENO)) {                          throw std::runtime_error("GDB process: Unable to close stdin"); }
-        if (dup2(gdbInputPipe[0], STDIN_FILENO) < 0) {      throw std::runtime_error("GDB process: Unable to duplicate input pipe descriptor"); }
-        if (close(gdbInputPipe[0])) {                       throw std::runtime_error("GDB process: Unable to close input pipe read side"); }
-        if (close(gdbInputPipe[1])) {                       throw std::runtime_error("GDB process: Unable to close input pipe write side"); }
-        if (close(STDOUT_FILENO)) {                         throw std::runtime_error("GDB process: Unable to close stdout"); }
-        if (dup2(gdbOutputPipe[1], STDOUT_FILENO) < 0) {    throw std::runtime_error("GDB process: Unable to duplicate output pipe descriptor"); }
-        if (close(gdbOutputPipe[0])) {                      throw std::runtime_error("GDB process: Unable to close output pipe read side"); }
-        if (close(gdbOutputPipe[1])) {                      throw std::runtime_error("GDB process: Unable to close output pipe write side"); }
+    *pid = spawnShell(BuildGdbCommand(), [=](){
+        if (close(STDIN_FILENO)) {                      throw std::runtime_error("Unable to close stdin"); }
+        if (dup2(inputPipe[0], STDIN_FILENO) < 0) {     throw std::runtime_error("Unable to duplicate input pipe descriptor"); }
+        if (close(inputPipe[0])) {                      throw std::runtime_error("Unable to close input pipe read side"); }
+        if (close(inputPipe[1])) {                      throw std::runtime_error("Unable to close input pipe write side"); }
+        if (close(STDOUT_FILENO)) {                     throw std::runtime_error("Unable to close stdout"); }
+        if (dup2(outputPipe[1], STDOUT_FILENO) < 0) {   throw std::runtime_error("Unable to duplicate output pipe descriptor"); }
+        if (close(outputPipe[0])) {                     throw std::runtime_error("Unable to close output pipe read side"); }
+        if (close(outputPipe[1])) {                     throw std::runtime_error("Unable to close output pipe write side"); }
     });
     
-    if (gdbPid < 0) {
-        throw std::runtime_error("Unable to launch GDB");
+    if (*pid < 0) {
+        std::stringstream ss;
+        ss << "Unable to launch: " << binPath;
+        throw std::runtime_error(ss.str());
     }
 
-    if (close(gdbInputPipe[0])) {   throw std::runtime_error("Unable to close input pipe read side"); }
-    if (close(gdbOutputPipe[1])) {  throw std::runtime_error("Unable to close output pipe write side"); }
-    gdbIn = gdbInputPipe[1];
-    gdbOut = gdbOutputPipe[0];
+    if (close(inputPipe[0])) {  throw std::runtime_error("Unable to close input pipe read side"); }
+    if (close(outputPipe[1])) { throw std::runtime_error("Unable to close output pipe write side"); }
 
-    // TODO: Check if attached correctly
+    *outFd = inputPipe[1];
+    *inFd = outputPipe[0];
+}
+
+void QemuScenarioPrivate::AttachGdb() {
+    flushfd(gdbIn);
+    
+    printf("ridink\n");
+    for (int i=0; i<100; ++i) {
+        char b;
+        read(gdbIn, &b, 1);
+        printf("%c", b);
+    }
+    printf("Juz nie riding\n");
 }
