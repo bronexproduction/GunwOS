@@ -23,7 +23,7 @@
     };                          \
 };
 
-struct __attribute__((packed, aligned(4))) i386_regSet {
+struct i386_regSet {
     GP_REG_32(a);
     GP_REG_32(b);
     GP_REG_32(c);
