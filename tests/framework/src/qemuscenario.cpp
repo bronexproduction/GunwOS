@@ -53,6 +53,10 @@ void QemuScenario::Cleanup(void) {
     d->Cleanup();
 }
 
+i386_regSet QemuScenario::ReadRegisters(void) {
+
+}
+
 void QemuScenario::SetIPAtSymbol(const std::string symbol) {
     
 }
@@ -85,20 +89,8 @@ void QemuScenario::ContinueUntil(uint16_t ip) {
     
 }
 
-void QemuScenario::CheckAX(uint16_t ax) {
-    
-}
+void QemuScenario::CheckRegisters(const i386_regSet &ref) {
 
-void QemuScenario::CheckBX(uint16_t bx) {
-    
-}
-
-void QemuScenario::CheckCX(uint16_t cx) {
-    
-}
-
-void QemuScenario::CheckDX(uint16_t dx) {
-    
 }
 
 QemuScenarioPrivate::~QemuScenarioPrivate() {

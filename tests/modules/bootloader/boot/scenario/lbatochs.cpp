@@ -14,9 +14,14 @@ SCENARIO(SystemQemuScenario, LbaToChs, {
     SetCX(0);
     SetDX(0);
 
+    i386_regSet frame = ReadRegisters();
+
     ContinueUntilSymbol(".io_read_disk_read_chs", 1);
-    CheckAX(0);
-    CheckBX(0);
-    CheckCX(0);
-    CheckDX(0);
+    
+    frame.ax = 0x0000;
+    frame.bx = 0x0000;
+    frame.cx = 0x0000;
+    frame.dx = 0x0000;
+    
+    CheckRegisters(frame);
 })

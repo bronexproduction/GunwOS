@@ -8,6 +8,8 @@
 #ifndef LIBGUNW_TEST
 #define LIBGUNW_TEST
 
+#include "../src/regset.hpp"
+
 #include "../src/scenario.hpp"
 #include "../src/qemuscenario.hpp"
 

@@ -12,6 +12,7 @@
 #include <string>
 
 #include "scenario.hpp"
+#include "regset.hpp"
 
 class QemuScenarioPrivate;
 class QemuScenario: public Scenario {
@@ -25,6 +26,8 @@ class QemuScenario: public Scenario {
         void Cleanup(void);
 
     public:
+        i386_regSet ReadRegisters();
+
         void SetIPAtSymbol(const std::string symbol);
         void SetIP(uint16_t ip);
 
@@ -36,10 +39,7 @@ class QemuScenario: public Scenario {
         void ContinueUntilSymbol(const std::string symbol, size_t timeoutSeconds);
         void ContinueUntil(uint16_t ip);
 
-        void CheckAX(uint16_t ax);
-        void CheckBX(uint16_t bx);
-        void CheckCX(uint16_t cx);
-        void CheckDX(uint16_t dx);
+        void CheckRegisters(const i386_regSet &ref);
 
     private:
         QemuScenarioPrivate *d;
