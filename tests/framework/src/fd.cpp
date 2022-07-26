@@ -8,22 +8,50 @@
 #include "fd.hpp"
 
 #include <unistd.h>
-#include <cstdio>
 #include <stdexcept>
+#include <fcntl.h>
+#include <poll.h>
+
+bool isNonBlocking(int fd) {
+    return fcntl(fd, F_GETFL) & O_NONBLOCK;
+}
+
+void setNonBlocking(int fd) {
+    int flags = fcntl(fd, F_GETFL);
+    flags |= O_NONBLOCK;
+    if (fcntl(fd, F_SETFL, flags)) {
+        throw std::runtime_error("Unable to set descriptor flags");
+    }
+}
+
+void waitfd(int fd, unsigned int timeoutMs) {
+    pollfd fdDesc = {fd, POLLIN, 0};
+    poll(&fdDesc, 1, timeoutMs);
+
+    if (!(fdDesc.revents & POLLIN)) {
+        throw std::runtime_error("Timeout waiting for data on descriptor");
+    }
+}
 
 void flushfd(int fd) {
     char c;
-    int status;
-    do {
-        status = read(fd, &c, 1);
-        if (status < 0) {
-            throw std::runtime_error("FD input read failure");
+    size_t totalBytes = 0;
+    errno = 0;
+    while (read(fd, &c, 1) > 0) {
+        ++totalBytes;
+    }
+
+    if (errno) {
+        if (errno != EAGAIN || !isNonBlocking(fd)) {
+            printf("%d\n", errno);  
+            throw std::runtime_error("Error flushing descriptor");
         }
-        if (status == 0) {
-            printf("Status je zero\n");
-        }
-        if (status > 0) {
-            printf("Status wiekszy od zero\n");
-        }
-    } while (status > 0);
+    }
+}
+
+void writefd(int fd, const std::string string) {
+    size_t length = string.length();
+    if (write(fd, string.c_str(), length) != length) {
+        throw std::runtime_error("Error writing string to descriptor");
+    }
 }

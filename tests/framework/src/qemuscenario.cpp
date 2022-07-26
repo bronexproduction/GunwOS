@@ -13,6 +13,7 @@
 
 #include "exec.hpp"
 #include "fd.hpp"
+#include "gdbstrings.hpp"
 
 class QemuScenarioPrivate {
     
@@ -37,6 +38,8 @@ class QemuScenarioPrivate {
         int qemuOut = -1;
         int gdbIn = -1;
         int gdbOut = -1;
+
+        const GdbStrings gdbStrings;
 
     friend class QemuScenario;
 };
@@ -136,16 +139,18 @@ const std::string QemuScenarioPrivate::BuildQemuCommand() {
 
 const std::string QemuScenarioPrivate::BuildGdbCommand() {
     std::stringstream ss;
-    ss << "gdb -ex 'target remote :1234'";
+    ss << "gdb";
     return ss.str();
 }
 
 void QemuScenarioPrivate::ConfigureQemu(void) {
-    LaunchAndConfigure(BuildQemuCommand(), &qemuPid, &qemuIn, &qemuOut);
+    // LaunchAndConfigure(BuildQemuCommand(), &qemuPid, &qemuIn, &qemuOut);
 }
 
 void QemuScenarioPrivate::ConfigureGdb(void) {
     LaunchAndConfigure(BuildGdbCommand(), &gdbPid, &gdbIn, &gdbOut);
+    setNonBlocking(gdbIn);
+    waitfd(gdbIn, 5000);
     AttachGdb();
 }
 
@@ -190,7 +195,10 @@ void QemuScenarioPrivate::LaunchAndConfigure(const std::string binPath, pid_t * 
 
 void QemuScenarioPrivate::AttachGdb() {
     flushfd(gdbIn);
-    
+    writefd(gdbOut, gdbStrings.targetRemoteString);
+
+    waitfd(gdbIn, 30);
+
     printf("ridink\n");
     for (int i=0; i<100; ++i) {
         char b;
