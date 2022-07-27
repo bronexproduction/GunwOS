@@ -12,7 +12,8 @@
 
 bool isNonBlocking(int fd);
 void setNonBlocking(int fd);
-void waitfd(int fd, unsigned int seconds);
+void waitfd(int fd, unsigned int timeoutMs);
+void waitfdstr(int fd, unsigned int timeoutMs, const std::string token);
 void flushfd(int fd);
 void writefd(int fd, const std::string string);
 

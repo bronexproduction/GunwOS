@@ -25,6 +25,10 @@ void setNonBlocking(int fd) {
 }
 
 void waitfd(int fd, unsigned int timeoutMs) {
+    if (!isNonBlocking(fd)) {
+        throw std::runtime_error("Non-blocking descriptor expected");
+    }
+
     pollfd fdDesc = {fd, POLLIN, 0};
     poll(&fdDesc, 1, timeoutMs);
 
@@ -33,7 +37,26 @@ void waitfd(int fd, unsigned int timeoutMs) {
     }
 }
 
+void waitfdstr(int fd, unsigned int timeoutMs, const std::string token) {
+    if (!isNonBlocking(fd)) {
+        throw std::runtime_error("Non-blocking descriptor expected");
+    }
+
+    std::chrono::system_clock::time_point deadline = std::chrono::system_clock::now();
+    deadline += std::chrono::milliseconds(timeoutMs);
+
+    while (std::chrono::system_clock::now() < deadline) {
+        // read (od)bytes
+    }
+
+    throw std::runtime_error("Waiting for token timed out");
+}
+
 void flushfd(int fd) {
+    if (!isNonBlocking(fd)) {
+        throw std::runtime_error("Non-blocking descriptor expected");
+    }
+
     char c;
     size_t totalBytes = 0;
     errno = 0;
@@ -41,11 +64,8 @@ void flushfd(int fd) {
         ++totalBytes;
     }
 
-    if (errno) {
-        if (errno != EAGAIN || !isNonBlocking(fd)) {
-            printf("%d\n", errno);  
-            throw std::runtime_error("Error flushing descriptor");
-        }
+    if (errno != EAGAIN) {
+        throw std::runtime_error("Error flushing descriptor");
     }
 }
 

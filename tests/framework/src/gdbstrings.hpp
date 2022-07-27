@@ -8,5 +8,6 @@
 #include <string>
 
 struct GdbStrings {
+    const std::string prompt = "(gdb)";
     const std::string targetRemoteString = "target remote :1234\n";
 };

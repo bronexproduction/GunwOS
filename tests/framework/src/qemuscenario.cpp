@@ -194,10 +194,11 @@ void QemuScenarioPrivate::LaunchAndConfigure(const std::string binPath, pid_t * 
 }
 
 void QemuScenarioPrivate::AttachGdb() {
+    waitfdstr(gdbIn, 10000, gdbStrings.prompt);
     flushfd(gdbIn);
-    writefd(gdbOut, gdbStrings.targetRemoteString);
 
-    waitfd(gdbIn, 30);
+    writefd(gdbOut, gdbStrings.targetRemoteString);
+    waitfd(gdbIn, 30000);
 
     printf("ridink\n");
     for (int i=0; i<100; ++i) {

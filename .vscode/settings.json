@@ -48,6 +48,21 @@
     "cctype": "cpp",
     "cwchar": "cpp",
     "cwctype": "cpp",
-    "string_view": "cpp"
+    "string_view": "cpp",
+    "__errc": "cpp",
+    "__locale": "cpp",
+    "__mutex_base": "cpp",
+    "bitset": "cpp",
+    "clocale": "cpp",
+    "cstdarg": "cpp",
+    "ios": "cpp",
+    "istream": "cpp",
+    "locale": "cpp",
+    "mutex": "cpp",
+    "ostream": "cpp",
+    "sstream": "cpp",
+    "streambuf": "cpp",
+    "system_error": "cpp",
+    "thread": "cpp"
   }
 }
