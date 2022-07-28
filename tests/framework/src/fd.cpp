@@ -41,12 +41,36 @@ void waitfdstr(int fd, unsigned int timeoutMs, const std::string token) {
     if (!isNonBlocking(fd)) {
         throw std::runtime_error("Non-blocking descriptor expected");
     }
+    if (!token.length()) {
+        throw std::runtime_error("Empty token received");
+    }
 
     std::chrono::system_clock::time_point deadline = std::chrono::system_clock::now();
     deadline += std::chrono::milliseconds(timeoutMs);
 
+    char c;
+    size_t currentIndex = 0;
+    size_t tokenLength = token.length();
+    errno = 0;
     while (std::chrono::system_clock::now() < deadline) {
-        // read (od)bytes
+        if (read(fd, &c, 1) <= 0) {
+            if (errno != EAGAIN) {
+                throw std::runtime_error("Error reading from descriptor");
+            }
+            
+            continue;
+        }
+
+        if (c == token.at(currentIndex)) {
+            ++currentIndex;
+        }
+        else {
+            currentIndex == 0;
+        }
+
+        if (currentIndex == tokenLength) {
+            return;
+        }
     }
 
     throw std::runtime_error("Waiting for token timed out");
