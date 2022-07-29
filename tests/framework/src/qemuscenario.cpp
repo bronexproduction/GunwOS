@@ -200,6 +200,8 @@ void QemuScenarioPrivate::AttachGdb() {
     writefd(gdbOut, gdbStrings.targetRemoteString);
     waitfd(gdbIn, 30000);
 
+    // Check if connection succeeded
+
     printf("ridink\n");
     for (int i=0; i<10000; ++i) {
         char b;
