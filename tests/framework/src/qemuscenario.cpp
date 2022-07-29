@@ -27,7 +27,7 @@ class QemuScenarioPrivate {
         const std::string BuildGdbCommand();
         void ConfigureQemu(void);
         void ConfigureGdb(void);
-        void LaunchAndConfigure(const std::string binPath, pid_t * const pid, int * const inFd, int * const outFd);
+        void LaunchAndConfigure(const std::string command, pid_t * const pid, int * const inFd, int * const outFd);
         void AttachGdb(void);
 
     private:
@@ -139,12 +139,12 @@ const std::string QemuScenarioPrivate::BuildQemuCommand() {
 
 const std::string QemuScenarioPrivate::BuildGdbCommand() {
     std::stringstream ss;
-    ss << "gdb";
+    ss << "gdb 2>&1";
     return ss.str();
 }
 
 void QemuScenarioPrivate::ConfigureQemu(void) {
-    // LaunchAndConfigure(BuildQemuCommand(), &qemuPid, &qemuIn, &qemuOut);
+    LaunchAndConfigure(BuildQemuCommand(), &qemuPid, &qemuIn, &qemuOut);
 }
 
 void QemuScenarioPrivate::ConfigureGdb(void) {
@@ -154,7 +154,7 @@ void QemuScenarioPrivate::ConfigureGdb(void) {
     AttachGdb();
 }
 
-void QemuScenarioPrivate::LaunchAndConfigure(const std::string binPath, pid_t * const pid, int * const inFd, int * const outFd) {
+void QemuScenarioPrivate::LaunchAndConfigure(const std::string command, pid_t * const pid, int * const inFd, int * const outFd) {
     if (!(pid && inFd && outFd)) {
         throw std::runtime_error("NULL pointer passed as argument");
     }
@@ -169,7 +169,7 @@ void QemuScenarioPrivate::LaunchAndConfigure(const std::string binPath, pid_t * 
         throw std::runtime_error("Failed to create output pipe");
     }
     
-    *pid = spawnShell(BuildGdbCommand(), [=](){
+    *pid = spawnShell(command, [=](){
         if (close(STDIN_FILENO)) {                      throw std::runtime_error("Unable to close stdin"); }
         if (dup2(inputPipe[0], STDIN_FILENO) < 0) {     throw std::runtime_error("Unable to duplicate input pipe descriptor"); }
         if (close(inputPipe[0])) {                      throw std::runtime_error("Unable to close input pipe read side"); }
@@ -201,7 +201,7 @@ void QemuScenarioPrivate::AttachGdb() {
     waitfd(gdbIn, 30000);
 
     printf("ridink\n");
-    for (int i=0; i<100; ++i) {
+    for (int i=0; i<10000; ++i) {
         char b;
         read(gdbIn, &b, 1);
         printf("%c", b);

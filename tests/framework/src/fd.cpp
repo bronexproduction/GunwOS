@@ -11,6 +11,7 @@
 #include <stdexcept>
 #include <fcntl.h>
 #include <poll.h>
+#include <chrono>
 
 bool isNonBlocking(int fd) {
     return fcntl(fd, F_GETFL) & O_NONBLOCK;
