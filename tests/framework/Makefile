@@ -24,4 +24,5 @@ $(O_FRAMEWORK_INPUT):
 	g++ $(CXX_FRAMEWORK_FLAGS) $(CXX_INCLUDE) -o $@ $(shell echo $@ | sed 's/.o$$//')
 
 clean:
+	rm -f $(shell $(O_FRAMEWORK_LISTING))
 	rm -f $(BUILD_DIR)/$(FRAMEWORK)

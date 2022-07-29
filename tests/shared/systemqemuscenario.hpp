@@ -18,7 +18,7 @@ class SystemQemuScenario: public QemuScenario {
         ~SystemQemuScenario();
 
     private:
-        SystemQemuScenarioPrivate *d;
+        SystemQemuScenarioPrivate * const d;
 };
 
 #endif // SYSTEMQEMUSCENARIO_HPP

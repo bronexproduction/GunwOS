@@ -8,25 +8,25 @@
 #include <algorithm>
 
 #include "runner.hpp"
-#include "scenario.hpp"
+#include "scenario/scenario.hpp"
 
 Runner& Runner::Shared() {
     // TODO: thread safety
     static std::unique_ptr<Runner> sharedInstance;
 
-    if (!sharedInstance.get()) {
+    if (!sharedInstance) {
         sharedInstance = std::make_unique<Runner>();    
     }
 
-    return *(sharedInstance.get());
+    return *(sharedInstance);
 }
 
 void Runner::Run(void) {
 
     const auto runScenario = [](const std::unique_ptr<Scenario> &scenario){
-        scenario.get()->Prepare();
-        scenario.get()->Run();
-        scenario.get()->Cleanup();
+        scenario->Prepare();
+        scenario->Run();
+        scenario->Cleanup();
     };
 
     std::for_each(scenarioRegistry.begin(), scenarioRegistry.end(), runScenario);

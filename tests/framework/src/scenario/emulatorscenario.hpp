@@ -1,25 +1,26 @@
 //
-//  qemuscenario.hpp
+//  emulatorscenario.hpp
 //  GunwOS Tests
 //
-//  Created by Artur Danielewski on 21.07.2022.
+//  Created by Artur Danielewski on 29.07.2022.
 //
 
-#ifndef QEMUSCENARIO_HPP
-#define QEMUSCENARIO_HPP
+#ifndef EMULATORSCENARIO_HPP
+#define EMULATORSCENARIO_HPP
 
-#include <memory>
 #include <string>
 
 #include "scenario.hpp"
-#include "regset.hpp"
+#include "../emulator/emulator.hpp"
+#include "../debugger/debugger.hpp"
+#include "../regset.hpp"
 
-class QemuScenarioPrivate;
-class QemuScenario: public Scenario {
-    
+class EmulatorScenarioPrivate;
+class EmulatorScenario: public Scenario {
+
     public:
-        QemuScenario(std::string binPath);
-        ~QemuScenario();
+        EmulatorScenario(Emulator*, Debugger*, const std::string binPath);
+        ~EmulatorScenario();
 
     public:
         void Prepare(void);
@@ -42,7 +43,7 @@ class QemuScenario: public Scenario {
         void CheckRegisters(const i386_regSet &ref);
 
     private:
-        QemuScenarioPrivate *d;
+        EmulatorScenarioPrivate * const d;
 };
 
-#endif // QEMUSCENARIO_HPP
+#endif // EMULATORSCENARIO_HPP

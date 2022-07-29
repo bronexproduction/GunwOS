@@ -10,8 +10,8 @@
 
 #include "../src/regset.hpp"
 
-#include "../src/scenario.hpp"
-#include "../src/qemuscenario.hpp"
+#include "../src/scenario/scenario.hpp"
+#include "../src/scenario/qemuscenario.hpp"
 
 #include "../src/runner.hpp"
 
