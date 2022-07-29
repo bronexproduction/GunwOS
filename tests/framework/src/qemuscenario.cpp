@@ -13,7 +13,7 @@
 
 #include "exec.hpp"
 #include "fd.hpp"
-#include "gdbstrings.hpp"
+#include "lldbstrings.hpp"
 
 class QemuScenarioPrivate {
     
@@ -24,22 +24,22 @@ class QemuScenarioPrivate {
         void Cleanup(void);
 
         const std::string BuildQemuCommand();
-        const std::string BuildGdbCommand();
+        const std::string BuildDebuggerCommand();
         void ConfigureQemu(void);
-        void ConfigureGdb(void);
+        void ConfigureDebugger(void);
         void LaunchAndConfigure(const std::string command, pid_t * const pid, int * const inFd, int * const outFd);
-        void AttachGdb(void);
+        void AttachDebugger(void);
 
     private:
         const std::string binPath;
         pid_t qemuPid = -1;
-        pid_t gdbPid = -1;
+        pid_t dbgPid = -1;
         int qemuIn = -1;
         int qemuOut = -1;
-        int gdbIn = -1;
-        int gdbOut = -1;
+        int dbgIn = -1;
+        int dbgOut = -1;
 
-        const GdbStrings gdbStrings;
+        const LldbStrings dbgStrings;
 
     friend class QemuScenario;
 };
@@ -51,7 +51,7 @@ QemuScenario::~QemuScenario() {
 
 void QemuScenario::Prepare(void) {
     d->ConfigureQemu();
-    d->ConfigureGdb();
+    d->ConfigureDebugger();
 }
 
 void QemuScenario::Cleanup(void) {
@@ -106,8 +106,8 @@ void QemuScenarioPrivate::Cleanup(void) {
     if (qemuPid > -1) {
         kill(qemuPid, SIGKILL);
     }
-    if (gdbPid > -1) {
-        kill(gdbPid, SIGKILL);
+    if (dbgPid > -1) {
+        kill(dbgPid, SIGKILL);
     }
     
     if (qemuIn >= 0) {
@@ -116,19 +116,19 @@ void QemuScenarioPrivate::Cleanup(void) {
     if (qemuOut >= 0) {
         close(qemuOut);
     }
-    if (gdbIn >= 0) {
-        close(gdbIn);
+    if (dbgIn >= 0) {
+        close(dbgIn);
     }
-    if (gdbOut >= 0) {
-        close(gdbOut);
+    if (dbgOut >= 0) {
+        close(dbgOut);
     }
 
     qemuPid = -1;
-    gdbPid = -1;
+    dbgPid = -1;
     qemuIn = -1;
     qemuOut = -1;
-    gdbIn = -1;
-    gdbOut = -1;
+    dbgIn = -1;
+    dbgOut = -1;
 }
 
 const std::string QemuScenarioPrivate::BuildQemuCommand() {
@@ -137,9 +137,9 @@ const std::string QemuScenarioPrivate::BuildQemuCommand() {
     return ss.str();
 }
 
-const std::string QemuScenarioPrivate::BuildGdbCommand() {
+const std::string QemuScenarioPrivate::BuildDebuggerCommand() {
     std::stringstream ss;
-    ss << "gdb 2>&1";
+    ss << "lldb 2>&1";
     return ss.str();
 }
 
@@ -147,11 +147,11 @@ void QemuScenarioPrivate::ConfigureQemu(void) {
     LaunchAndConfigure(BuildQemuCommand(), &qemuPid, &qemuIn, &qemuOut);
 }
 
-void QemuScenarioPrivate::ConfigureGdb(void) {
-    LaunchAndConfigure(BuildGdbCommand(), &gdbPid, &gdbIn, &gdbOut);
-    setNonBlocking(gdbIn);
-    waitfd(gdbIn, 5000);
-    AttachGdb();
+void QemuScenarioPrivate::ConfigureDebugger(void) {
+    LaunchAndConfigure(BuildDebuggerCommand(), &dbgPid, &dbgIn, &dbgOut);
+    setNonBlocking(dbgIn);
+    waitfd(dbgIn, 5000);
+    AttachDebugger();
 }
 
 void QemuScenarioPrivate::LaunchAndConfigure(const std::string command, pid_t * const pid, int * const inFd, int * const outFd) {
@@ -193,19 +193,19 @@ void QemuScenarioPrivate::LaunchAndConfigure(const std::string command, pid_t * 
     *inFd = outputPipe[0];
 }
 
-void QemuScenarioPrivate::AttachGdb() {
-    waitfdstr(gdbIn, 10000, gdbStrings.prompt);
-    flushfd(gdbIn);
+void QemuScenarioPrivate::AttachDebugger() {
+    waitfdstr(dbgIn, 10000, dbgStrings.prompt);
+    flushfd(dbgIn);
 
-    writefd(gdbOut, gdbStrings.targetRemoteString);
-    waitfd(gdbIn, 30000);
+    writefd(dbgOut, dbgStrings.targetRemoteString);
+    waitfd(dbgIn, 30000);
 
     // Check if connection succeeded
 
     printf("ridink\n");
     for (int i=0; i<10000; ++i) {
         char b;
-        read(gdbIn, &b, 1);
+        read(dbgIn, &b, 1);
         printf("%c", b);
     }
     printf("Juz nie riding\n");

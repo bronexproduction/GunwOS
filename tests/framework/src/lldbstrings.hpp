@@ -1,5 +1,5 @@
 //
-//  gdbstrings.hpp
+//  lldbstrings.hpp
 //  GunwOS Tests
 //
 //  Created by Artur Danielewski on 26.07.2022.
@@ -7,7 +7,7 @@
 
 #include <string>
 
-struct GdbStrings {
-    const std::string prompt = "(gdb)";
+struct LldbStrings {
+    const std::string prompt = "(lldb)";
     const std::string targetRemoteString = "target remote :1234\n";
 };
