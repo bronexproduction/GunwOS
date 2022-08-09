@@ -1,15 +1,15 @@
-SRC_DIR=$(PWD)/src
-TOOLS_DIR=$(PWD)/tools
-UTL_DIR=$(PWD)/utl
-TESTS_DIR=$(PWD)/tests/modules
-export SCRIPTS_DIR=$(PWD)/scripts
-export TEST_FRAMEWORK_DIR=$(PWD)/tests/framework
-export TEST_SHARED_DIR=$(PWD)/tests/shared
-export BUILD_DIR=$(PWD)/build
+SRC_DIR="$(PWD)/src"
+TOOLS_DIR="$(PWD)/tools"
+UTL_DIR="$(PWD)/utl"
+TESTS_DIR="$(PWD)/tests/modules"
+export SCRIPTS_DIR="$(PWD)/scripts"
+export TEST_FRAMEWORK_DIR="$(PWD)/tests/framework"
+export TEST_SHARED_DIR="$(PWD)/tests/shared"
+export BUILD_DIR="$(PWD)/build"
 
 export ASM=nasm
-export C=$(TOOLS_DIR)/gunwxcc_9.2.0/bin/i386-elf-gcc
-export CXX=$(TOOLS_DIR)/gunwxcc_9.2.0/bin/i386-elf-g++
+export C="$(TOOLS_DIR)/gunwxcc_9.2.0/bin/i386-elf-gcc"
+export CXX="$(TOOLS_DIR)/gunwxcc_9.2.0/bin/i386-elf-g++"
 export L=ld
 
 export CFLAGS_GLOBAL=-fdebug-prefix-map=$(BUILD_DIR)=.
