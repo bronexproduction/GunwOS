@@ -18,5 +18,5 @@ const std::string LldbDebuggerStringProvider::targetRemoteCmd() const {
 LldbDebugger::LldbDebugger(): Debugger(new LldbDebuggerStringProvider) {}
 
 const std::string LldbDebugger::BuildCommand() const {
-    return "lldb 2>&1";
+    return "lldb -X 2>&1";
 }
