@@ -88,8 +88,7 @@ io_read_disk:
     int 0x13
     jc .io_read_disk_error
 
-    mov dl, al
-    pop ax
+    pop dx
     cmp dl, al
     jne .io_read_disk_error
     
