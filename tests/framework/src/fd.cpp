@@ -25,6 +25,16 @@ void setNonBlocking(int fd) {
     }
 }
 
+int getFlags(int fd) {
+    return fcntl(fd, F_GETFL);
+}
+
+void setFlags(int fd, int flags) {
+    if (fcntl(fd, F_SETFL, flags)) {
+        throw std::runtime_error("Unable to set descriptor flags");
+    }
+}
+
 void waitfd(int fd, unsigned int timeoutMs) {
     if (!isNonBlocking(fd)) {
         throw std::runtime_error("Non-blocking descriptor expected");

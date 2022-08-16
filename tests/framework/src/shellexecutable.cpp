@@ -12,6 +12,7 @@
 #include <signal.h>
 
 #include "exec.hpp"
+#include "fd.hpp"
 
 class ShellExecutablePrivate {
 
@@ -44,12 +45,16 @@ void ShellExecutable::Launch() {
     
     const std::string command = BuildCommand();
     d->pid = spawnShell(command, [=](){
+        int flags = getFlags(STDIN_FILENO);
         if (close(STDIN_FILENO)) {                      throw std::runtime_error("Unable to close stdin"); }
         if (dup2(inputPipe[0], STDIN_FILENO) < 0) {     throw std::runtime_error("Unable to duplicate input pipe descriptor"); }
+        setFlags(STDIN_FILENO, flags);
         if (close(inputPipe[0])) {                      throw std::runtime_error("Unable to close input pipe read side"); }
         if (close(inputPipe[1])) {                      throw std::runtime_error("Unable to close input pipe write side"); }
+        flags = getFlags(STDOUT_FILENO);
         if (close(STDOUT_FILENO)) {                     throw std::runtime_error("Unable to close stdout"); }
         if (dup2(outputPipe[1], STDOUT_FILENO) < 0) {   throw std::runtime_error("Unable to duplicate output pipe descriptor"); }
+        setFlags(STDOUT_FILENO, flags);
         if (close(outputPipe[0])) {                     throw std::runtime_error("Unable to close output pipe read side"); }
         if (close(outputPipe[1])) {                     throw std::runtime_error("Unable to close output pipe write side"); }
     });

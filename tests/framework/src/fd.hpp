@@ -12,6 +12,8 @@
 
 bool isNonBlocking(int fd);
 void setNonBlocking(int fd);
+int getFlags(int fd);
+void setFlags(int fd, int flags);
 void waitfd(int fd, unsigned int timeoutMs);
 void waitfdstr(int fd, unsigned int timeoutMs, const std::string token);
 void flushfd(int fd);
