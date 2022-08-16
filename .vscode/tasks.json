@@ -98,10 +98,10 @@
         "label": "Install dependencies",
         "type": "shell",
         "windows": {
-            "command": "sudo apt-get update && sudo apt-get install -y build-essential nasm qemu-system-x86 && bash scripts/download_tools.sh",
+            "command": "sudo apt-get update && sudo apt-get install -y build-essential nasm qemu-system-x86 lldb && bash scripts/download_tools.sh",
         },
         "linux": {
-            "command": "sudo apt-get update && sudo apt-get install -y build-essential nasm qemu-system-x86 && bash scripts/download_tools.sh",
+            "command": "sudo apt-get update && sudo apt-get install -y build-essential nasm qemu-system-x86 lldb && bash scripts/download_tools.sh",
         },
         "osx": {
             "command": "brew install pup nasm qemu truncate && bash scripts/download_tools.sh",

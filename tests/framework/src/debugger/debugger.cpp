@@ -6,6 +6,7 @@
 //
 
 #include "debugger.hpp"
+#include <memory>
 
 class DebuggerPrivate {
 
