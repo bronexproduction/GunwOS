@@ -116,12 +116,4 @@ void EmulatorScenarioPrivate::AttachDebugger() {
     waitfd(debugger->GetInFd(), 30000);
 
     // Check if connection succeeded
-
-    printf("ridink\n");
-    for (int i=0; i<10000; ++i) {
-        char b;
-        read(debugger->GetInFd(), &b, 1);
-        printf("%c", b);
-    }
-    printf("Juz nie riding\n");
 }
