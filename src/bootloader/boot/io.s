@@ -88,7 +88,6 @@ io_read_disk:
     int 0x13
     jc .io_read_disk_error
 
-    xor dx, dx
     mov dl, al
     pop ax
     cmp dl, al
