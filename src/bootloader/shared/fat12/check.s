@@ -22,7 +22,7 @@ fat12_checkValidForRead:
     mov bx, 2
     mov cx, FAT12_MAX_READABLE_CLUSTER
 
-    jmp fat12_checkRange
+    jmp _fat12_checkRange
 
     ; ---------------------------------------
     ; Check if sector if EOF
@@ -49,7 +49,7 @@ fat12_checkEOF:
     ; Result - CF set if not in range
     ; ---------------------------------------
 
-fat12_checkRange:
+_fat12_checkRange:
 
     cmp ax, bx
     jl .fat12_checkRange_error
