@@ -48,16 +48,13 @@ io_read_disk:
     pusha
     push dx
 
+    ; ax = LBA
+    mov ax, cx
+
+    ; cx = (BPB_NUMBER_OF_HEADS * BPB_PHYSICAL_SECTORS_PER_TRACK)
+    mov cx, BPB_NUMBER_OF_HEADS * BPB_PHYSICAL_SECTORS_PER_TRACK
+
     ; cylinder = LBA / (BPB_NUMBER_OF_HEADS * BPB_PHYSICAL_SECTORS_PER_TRACK)
-	; temp = LBA % (BPB_NUMBER_OF_HEADS * BPB_PHYSICAL_SECTORS_PER_TRACK)
-    mov ax, BPB_NUMBER_OF_HEADS
-    mov bx, BPB_PHYSICAL_SECTORS_PER_TRACK
-    mul bx
-
-    push cx
-    mov cx, ax
-    pop ax
-
     xor dx, dx
     div cx
 
