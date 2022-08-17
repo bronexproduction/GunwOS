@@ -45,13 +45,14 @@ io_read_disk:
 .io_read_disk_calculate_chs:
 
     ; Calculate CHS
-    pusha
+    push ax
+    push bx
     push dx
 
     ; ax = LBA
     mov ax, cx
 
-    ; cx = (BPB_NUMBER_OF_HEADS * BPB_PHYSICAL_SECTORS_PER_TRACK)
+    ; cx = BPB_NUMBER_OF_HEADS * BPB_PHYSICAL_SECTORS_PER_TRACK
     mov cx, BPB_NUMBER_OF_HEADS * BPB_PHYSICAL_SECTORS_PER_TRACK
 
     ; cylinder = LBA / (BPB_NUMBER_OF_HEADS * BPB_PHYSICAL_SECTORS_PER_TRACK)
@@ -75,7 +76,8 @@ io_read_disk:
     pop dx
     mov dh, al
 
-    popa
+    pop bx
+    pop ax
 
 .io_read_disk_read_chs:
 
