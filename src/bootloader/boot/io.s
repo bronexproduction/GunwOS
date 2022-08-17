@@ -53,7 +53,7 @@ io_read_disk:
     ; bx = BPB_NUMBER_OF_HEADS * BPB_PHYSICAL_SECTORS_PER_TRACK
     ; cylinder = LBA / (BPB_NUMBER_OF_HEADS * BPB_PHYSICAL_SECTORS_PER_TRACK)
     mov ax, cx
-    mov bx, BPB_NUMBER_OF_HEADS * BPB_PHYSICAL_SECTORS_PER_TRACK
+    mov bx, FAT12_LBA_CYLINDER_DIVISOR
     xor dx, dx
     div bx
 
