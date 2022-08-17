@@ -22,10 +22,7 @@ fat12_checkValidForRead:
     mov bx, 2
     mov cx, FAT12_MAX_READABLE_CLUSTER
 
-    call fat12_checkRange
-    
-    popa
-    ret
+    jmp fat12_checkRange
 
     ; ---------------------------------------
     ; Check if sector if EOF
@@ -41,12 +38,7 @@ fat12_checkEOF:
 
     mov bx, 0xFF8
     mov cx, 0xFFF
-
-    call fat12_checkRange
     
-    popa
-    ret
-
     ; ---------------------------------------
     ; Check if value in range
     ; 
@@ -58,8 +50,6 @@ fat12_checkEOF:
     ; ---------------------------------------
 
 fat12_checkRange:
-
-    pusha
 
     cmp ax, bx
     jl .fat12_checkRange_error
