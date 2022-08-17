@@ -50,14 +50,12 @@ io_read_disk:
     push dx
 
     ; ax = LBA
-    mov ax, cx
-
-    ; cx = BPB_NUMBER_OF_HEADS * BPB_PHYSICAL_SECTORS_PER_TRACK
-    mov cx, BPB_NUMBER_OF_HEADS * BPB_PHYSICAL_SECTORS_PER_TRACK
-
+    ; bx = BPB_NUMBER_OF_HEADS * BPB_PHYSICAL_SECTORS_PER_TRACK
     ; cylinder = LBA / (BPB_NUMBER_OF_HEADS * BPB_PHYSICAL_SECTORS_PER_TRACK)
+    mov ax, cx
+    mov bx, BPB_NUMBER_OF_HEADS * BPB_PHYSICAL_SECTORS_PER_TRACK
     xor dx, dx
-    div cx
+    div bx
 
     ; Set cylinder (limited to 8 bits)
     mov ch, al
@@ -65,6 +63,7 @@ io_read_disk:
     ; head = temp / BPB_PHYSICAL_SECTORS_PER_TRACK
 	; sector = temp % BPB_PHYSICAL_SECTORS_PER_TRACK + 1
     mov ax, dx
+    mov bx, BPB_PHYSICAL_SECTORS_PER_TRACK
     xor dx, dx
     div bx
     
