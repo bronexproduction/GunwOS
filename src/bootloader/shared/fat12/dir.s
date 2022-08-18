@@ -65,8 +65,7 @@ fat12_findDir:
 
 .fat12_findDir_entryNotFound:
 
-    mov bx, FAT12_LOADER_NOT_FOUND_STRING
-    call print_err_16
+    jmp fat12_err_entryNotFound
 
 .fat12_findDir_entryFound:
     
@@ -97,7 +96,7 @@ fat12_getSizeClusters:
     mov ax, [bx]
 
     cmp ax, 0
-    jne .fat12_getSizeClusters_sizeInvalid
+    jne fat12_err_sizeLimitExceeded
 
     ; Get lower size bytes value
     sub bx, 2
@@ -105,7 +104,7 @@ fat12_getSizeClusters:
 
     ; Make sure size not equal 0
     cmp ax, 0
-    je .fat12_getSizeClusters_sizeInvalid
+    je fat12_err_sizeInvalid
 
     ; Convert to clusters
     mov cx, FAT12_CLUSTER_SIZE_BYTES
@@ -125,8 +124,3 @@ fat12_getSizeClusters:
 
     popa
     ret
-
-.fat12_getSizeClusters_sizeInvalid:
-
-    mov bx, FAT12_FILE_SIZE_INVALID
-    call print_err_16

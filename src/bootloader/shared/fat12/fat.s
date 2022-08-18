@@ -36,7 +36,7 @@ fat12_verifyFATs:
 
     ; Compare bytes
     cmp al, bl
-    jne .fat12_verifyFATs_error
+    jne fat12_err_fatValidationFailed
 
     ; Check if all bytes verified
     cmp cx, 0
@@ -46,11 +46,6 @@ fat12_verifyFATs:
 
     popa
     ret
-
-.fat12_verifyFATs_error:
-
-    mov bx, FAT12_INVALID_ERROR_STRING
-    call print_err_16
 
     ; ---------------------------------------
     ; Get entry from FAT table

@@ -77,6 +77,7 @@ boot_2nd_stage:
 %include "print.s"
 %include "io.s"
 %include "../shared/fat12/fat12.s"
+%include "fat12err.s"
 %include "msg.s"
 
 BOOT_2ND_STAGE_FILENAME db "BOOT    GFB"

@@ -31,7 +31,7 @@ fat12_readFile:
 
     ; Validate current cluster
     call fat12_checkValidForRead
-    jc .fat12_readFile_fatInvalid
+    jc fat12_err_clusterNotValidForRead
 
     ; Get next cluster
     push ax
@@ -42,7 +42,7 @@ fat12_readFile:
     jnc .fat12_readFile_readValidCluster
     call fat12_checkEOF
     jnc .fat12_readFile_readValidCluster
-    jmp .fat12_readFile_fatInvalid
+    jmp fat12_err_fatEntryInvalid
 
 .fat12_readFile_readValidCluster:
 
@@ -76,15 +76,10 @@ fat12_readFile:
 
     ; Fail if next cluster is not EOF
     call fat12_checkEOF
-    jc .fat12_readFile_fatInvalid
+    jc fat12_err_fatEntryInvalidEOFExpected
 
     mov di, 0
     mov es, di
 
     popa
     ret
-
-.fat12_readFile_fatInvalid:
-
-    mov bx, FAT12_INVALID_ERROR_STRING
-    call print_err_16
