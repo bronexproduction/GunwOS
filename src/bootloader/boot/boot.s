@@ -14,8 +14,6 @@ RMODE_STACK_ADDR            equ 0x700
 FAT_HEADER_ADDR             equ 0x1000
 SECOND_STAGE_SEG            equ 0x1000
 
-%include "../shared/data.s"
-
     jmp boot_init
     times 3-($-$$) db 0
 
