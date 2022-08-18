@@ -12,7 +12,7 @@
     ; AX - address of 11-bytes long filename
     ; SI - address of FAT header
     ;
-    ; Result - AX - address of dir entry
+    ; Result - BX - address of dir entry
     ; ---------------------------------------
 
 fat12_findDir:
@@ -70,9 +70,9 @@ fat12_findDir:
 
 .fat12_findDir_entryFound:
     
-    ; Replace AX on stack
+    ; Replace BX on stack
     mov di, sp
-    add di, 14
+    add di, 8
     mov [di], bx
 
 .fat12_findDir_end:
@@ -85,7 +85,7 @@ fat12_findDir:
     ; 
     ; AX - address of dir entry
     ;
-    ; Result - AX - file size in bytes
+    ; Result - CX - file size in bytes
     ; ---------------------------------------
 
 fat12_getSizeClusters:    
@@ -119,9 +119,9 @@ fat12_getSizeClusters:
 
 .fat12_getSizeClusters_end:
 
-    ; Replace AX on stack
+    ; Replace CX on stack
     mov di, sp
-    add di, 14
+    add di, 12
     mov [di], ax
 
     popa

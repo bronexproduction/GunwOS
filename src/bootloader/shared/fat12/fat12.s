@@ -38,14 +38,12 @@ fat12_loadFile:
     ; Find root directory entry for the file
     call fat12_findDir
 
-    ; Now AX contains dir entry
-    mov bx, ax
+    ; Now BX contains dir entry
 
     ; Get size in clusters
     call fat12_getSizeClusters
 
-    ; Now AX contains file size
-    mov cx, ax
+    ; Now CX contains file size in clusters
 
     ; Get first cluster
     add bx, FAT12_DIR_ENTRY_FIRST_CLUSTER_OFFSET
