@@ -83,7 +83,7 @@ fat12_findDir:
     ; ---------------------------------------
     ; Get file size from root dir entry
     ; 
-    ; AX - address of dir entry
+    ; BX - address of dir entry
     ;
     ; Result - CX - file size in bytes
     ; ---------------------------------------
@@ -93,7 +93,6 @@ fat12_getSizeClusters:
     pusha
 
     ; Make sure upper size bytes equal 0
-    mov bx, ax
     add bx, FAT12_DIR_ENTRY_SIZE_BYTES_OFFSET + 2
     mov ax, [bx]
 
