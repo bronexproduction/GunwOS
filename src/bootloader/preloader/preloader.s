@@ -46,3 +46,5 @@ boot_kernel:
     mov ecx, kernel_data    ; __kernel_start will receive kernel_data pointer as parameter (fastcall)
     call KERNEL_MEM_OFFSET
     jmp $
+
+BOOT_KERNEL_FILENAME db "KERNEL  GFB"
