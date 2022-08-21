@@ -78,7 +78,7 @@ fat12_readFile:
     call fat12_checkEOF
     jc fat12_err_fatEntryInvalidEOFExpected
 
-    mov di, 0
+    xor di, di
     mov es, di
 
     popa
