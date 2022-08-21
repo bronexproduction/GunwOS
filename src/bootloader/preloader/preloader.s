@@ -6,7 +6,7 @@
 ;  Created by Artur Danielewski on 03.01.2021.
 ;
 
-ORG 0x1000
+ORG 0x10000
 
 BITS 16 
 
