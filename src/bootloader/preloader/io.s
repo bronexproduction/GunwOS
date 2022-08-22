@@ -21,7 +21,7 @@ io_data_drive_heads:
 
 ; Current CHS address
 ;
-; used by io_read_sect
+; used by io_read_disk
 
 io_data_sector:
     db 0x00
@@ -86,7 +86,7 @@ io_read_drive_parameters_error:
 ; BX - destination memory address
 ; Drive and CHS config taken from io_data_* (see above)
 
-io_read_sect:
+io_read_disk:
     pusha
 
     mov al, [io_data_drive_sectors_per_track]   ; check drive configuration

@@ -8,18 +8,11 @@
 
 ORG 0x10000
 
-BITS 16 
-
-jmp preloader_start
-
-%include "io.s"
-%include "print_16.s"
-%include "print_32.s"
 %include "data.s"
 
-%include "mem.s"
-%include "msg.s"
-%include "read_kernel.s"
+BITS 16
+
+jmp preloader_start
 
 BITS 16
 
@@ -44,7 +37,17 @@ BITS 32
 boot_kernel:
 %include "kernel/kernel_data.s"
     mov ecx, kernel_data    ; __kernel_start will receive kernel_data pointer as parameter (fastcall)
-    call KERNEL_MEM_OFFSET
+    call KERNEL_SEG:0
     jmp $
+
+
+%include "io.s"
+%include "print_16.s"
+%include "print_32.s"
+%include "mem.s"
+%include "msg.s"
+%include "read_kernel.s"
+%include "../shared/fat12/fat12.s"
+%include "fat12err.s"
 
 BOOT_KERNEL_FILENAME db "KERNEL  GFB"
