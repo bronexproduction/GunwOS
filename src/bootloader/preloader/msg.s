@@ -8,7 +8,6 @@
 
 MSG_PRELOADER_START                         db 'GunwOS preloader starting...', 0xa, 0xd, 0
 MSG_KERNEL_START                            db 'GunwOS kernel starting...', 0xa, 0xd, 0
-MSG_KERNEL_PATTERN_ERR                      db 'Kernel pattern verification failed', 0
 MSG_KERNEL_END_OF_DRIVE_ERR                 db 'Loading failed: reached end of drive!', 0
 MSG_KERNEL_LOAD_SUCCESS                     db 'Kernel loaded successfully', 0xa, 0xd, 0
 MSG_A20_15H_ACTIVATED                       db 'A20 line activated using BIOS interrupt', 0xa, 0xd, 0
@@ -27,6 +26,7 @@ MSG_BOOT_DRIVE_INDEX                        db ' * drive: ', 0
 MSG_BOOT_DRIVE_SECTORS_PER_TRACK            db ' * sectors per track: ', 0
 MSG_BOOT_DRIVE_CYLINDERS                    db ' * cylinders: ', 0
 MSG_BOOT_DRIVE_HEADS                        db ' * heads: ', 0
+
 MSG_FAT12_ENTRY_NOT_FOUND                   db 'MSG_FAT12_ENTRY_NOT_FOUND', 0
 MSG_FAT12_SIZE_LIMIT_EXCEEDED               db 'MSG_FAT12_SIZE_LIMIT_EXCEEDED', 0
 MSG_FAT12_SIZE_INVALID                      db 'MSG_FAT12_SIZE_INVALID', 0
