@@ -59,8 +59,16 @@ BITS 32
 %include "kernel/kernel_data.s"
     mov ecx, kernel_data    ; __kernel_start will receive kernel_data pointer as parameter (fastcall)
     call KERNEL_SEG:0
-    jmp $
 
+    ; ---------------------------------------
+    ; Halt the CPU
+    ;
+    ; NOTE:
+    ; Just in case kernel entry
+    ; fails for some reason
+    ; ---------------------------------------
+    cli
+    hlt
 
 %include "io.s"
 %include "print_16.s"
