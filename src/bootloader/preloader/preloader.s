@@ -44,7 +44,6 @@ boot_kernel:
 %include "io.s"
 %include "print_16.s"
 %include "print_32.s"
-%include "mem.s"
 %include "msg.s"
 %include "read_kernel.s"
 %include "../shared/fat12/fat12.s"
