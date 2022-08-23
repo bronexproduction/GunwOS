@@ -22,28 +22,28 @@ read_kernel:
     call print_str_16
     mov al, [io_data_drive_index]
     call print_hex_byte
-    mov bx, IO_NEWLINE
+    mov bx, MSG_IO_NEWLINE
     call print_str_16
 
     mov bx, MSG_BOOT_DRIVE_SECTORS_PER_TRACK
     call print_str_16
     mov al, [io_data_drive_sectors_per_track]
     call print_hex_byte
-    mov bx, IO_NEWLINE
+    mov bx, MSG_IO_NEWLINE
     call print_str_16
 
     mov bx, MSG_BOOT_DRIVE_CYLINDERS
     call print_str_16
     mov ax, [io_data_drive_cylinders]
     call print_hex_word
-    mov bx, IO_NEWLINE
+    mov bx, MSG_IO_NEWLINE
     call print_str_16
 
     mov bx, MSG_BOOT_DRIVE_HEADS
     call print_str_16
     mov al, [io_data_drive_heads]
     call print_hex_byte
-    mov bx, IO_NEWLINE
+    mov bx, MSG_IO_NEWLINE
     call print_str_16
 
     ; ---------------------------------------

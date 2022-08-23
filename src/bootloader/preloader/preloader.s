@@ -44,6 +44,8 @@ preloader_start:
     ; ---------------------------------------
     call read_kernel
 
+    jmp $
+
     ; ---------------------------------------
     ; Jump to protected mode
     ; ---------------------------------------
@@ -84,6 +86,7 @@ BITS 32
 %include "msg.s"
 %include "read_kernel.s"
 %include "../shared/fat12/fat12.s"
+%include "ioerr.s"
 %include "fat12err.s"
 
 BOOT_KERNEL_FILENAME db "KERNEL  GFB"

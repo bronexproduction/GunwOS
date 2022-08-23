@@ -73,102 +73,11 @@ io_read_drive_parameters_end:
     ret
 
 io_read_drive_parameters_error:
-    mov bx, IO_DISK_READ_PARAMETER_ERROR_MSG
+    mov bx, MSG_IO_DISK_READ_PARAMETER_ERROR_MSG
     call print_str_16
     
     mov al, ah                                  ; print error code
     call print_hex_byte
     jmp $
 
-; Read DH sectors to ES:BX from drive DL
-;
-; Params:
-; BX - destination memory address
-; Drive and CHS config taken from io_data_* (see above)
-
-io_read_disk:
-    pusha
-
-    mov al, [io_data_drive_sectors_per_track]   ; check drive configuration
-    cmp al, 0
-    je .io_read_disk_no_drive_data_error
-    mov ax, [io_data_drive_cylinders]
-    cmp ax, 0
-    je .io_read_disk_no_drive_data_error
-    mov al, [io_data_drive_heads]
-    cmp al, 0
-    je .io_read_disk_no_drive_data_error
-
-    mov ah, 0x02                    ; BIOS read sector function
-    mov al, 0x01                    ; number of sectors to read
-
-    mov dx, [io_data_cylinder]      ; cylinder            
-    mov cl, dh                      ; CL bits (7-6) - upper bits of cylinder number
-    shl cl, 6
-    mov ch, dl                      ; CH - lower bits of cylinder number
-
-    mov dl, [io_data_sector]        ; sector
-    and dl, 0x3F                    ; CL bits (5-0) - sector number
-    or cl, dl                       
-   
-    mov dh, [io_data_head]          ; head
-    mov dl, [io_data_drive_index]   ; drive
-    
-    int 0x13
-    
-    jc .io_read_disk_error          ; if error happened - jump to error handler
-
-    cmp al, 0x01                    ; if sectors read count incorrect - jump to error handler
-    jne .io_read_disk_sector_count_error 
-    
-    popa
-    ret
-
-.io_read_disk_error:
-    mov bx, IO_DISK_ERROR_MSG
-    call print_str_16
-    
-    mov al, ah                      ; print error code
-    call print_hex_byte
-
-    mov bx, IO_DISK_READ_SECT       ; print sector
-    call print_str_16
-    mov al, [io_data_sector]
-    call print_hex_byte
-
-    mov bx, IO_DISK_READ_CYLINDER   ; print cylinder
-    call print_str_16
-    mov ax, [io_data_cylinder]
-    call print_hex_word
-
-    mov bx, IO_DISK_READ_HEAD       ; print head
-    call print_str_16
-    mov al, [io_data_head]
-    call print_hex_byte
-    
-    mov bx, IO_DISK_READ_DRIVE      ; print drive
-    call print_str_16
-    mov al, [io_data_drive_index]
-    call print_hex_byte
-
-    jmp $
-
-.io_read_disk_no_drive_data_error:
-    mov bx, IO_DISK_SECTOR_NO_DRIVE_DATA_ERROR_MSG
-    call print_str_16
-    jmp $
-
-.io_read_disk_sector_count_error:
-    mov bx, IO_DISK_SECTOR_COUNT_ERROR_MSG
-    call print_str_16
-    jmp $
-
-IO_DISK_ERROR_MSG db 'Disk read error! Code: ', 0
-IO_DISK_READ_PARAMETER_ERROR_MSG db 'Read drive parameters error! Code: ', 0
-IO_DISK_SECTOR_COUNT_ERROR_MSG db 'Disk read sector count mismatch!', 0
-IO_DISK_SECTOR_NO_DRIVE_DATA_ERROR_MSG db 'Drive data not set!', 0
-IO_DISK_READ_SECT db ' at sect: ', 0
-IO_DISK_READ_CYLINDER db ', cyl: ', 0
-IO_DISK_READ_HEAD db ', head: ', 0
-IO_DISK_READ_DRIVE db ', drive: ', 0
-IO_NEWLINE db 0xa, 0xd, 0
+%include "../shared/io.s"
