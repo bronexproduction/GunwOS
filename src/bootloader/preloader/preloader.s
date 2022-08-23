@@ -18,13 +18,20 @@ BITS 16
 
 preloader_start:
 
+    ; ---------------------------------------
+    ; Initialize data segment
+    ; with code segment address
+    ; ---------------------------------------
+    mov bx, cs
+    mov ds, bx
+
     mov bx, MSG_PRELOADER_START
     call print_str_16
 
     ; ---------------------------------------
     ; Try to activate A20 line
     ; ---------------------------------------
-%include "a20/a20_16.s"
+    call a20_16
 
     ; ---------------------------------------
     ; Load kernel binary
@@ -70,6 +77,7 @@ BITS 32
     cli
     hlt
 
+%include "a20/a20_16.s"
 %include "io.s"
 %include "print_16.s"
 %include "print_32.s"
