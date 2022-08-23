@@ -27,7 +27,7 @@ io_read_disk:
     mov ah, 0x00
     
     int 0x13
-    jc .io_read_disk_error
+    jc io_fdc_reset_failed
 
     ; --------------------------------------- 
     ; BIOS read function
@@ -82,15 +82,11 @@ io_read_disk:
 
     ; Read (interrupt)
     int 0x13
-    jc .io_read_disk_error
+    jc io_read_sector_failed
 
     pop dx
     cmp dl, al
-    jne .io_read_disk_error
+    jne io_sector_count_mismatch
     
     popa
     ret
-
-.io_read_disk_error:
-    mov bx, IO_DISK_ERROR_MSG
-    call print_err_16
