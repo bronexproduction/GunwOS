@@ -78,6 +78,7 @@ io_read_drive_parameters_error:
     
     mov al, ah                                  ; print error code
     call print_hex_byte
-    jmp $
+    cli
+    hlt
 
 %include "../shared/io.s"
