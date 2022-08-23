@@ -13,6 +13,8 @@ BITS 16
 ; Checks if the memory wraps over 1MB limit to ensure access to extended memory
 
 a20_16:
+    pusha
+
     call a20_16_check
     cmp al, 1
     je a20_16_end
@@ -38,7 +40,8 @@ a20_16:
 a20_16_fail:
     mov bx, MSG_A20_DISABLED_ERROR
     call print_str_16
-    jmp $
+    cli
+    hlt
 
 a20_16_check:
     pushf
@@ -90,3 +93,6 @@ a20_16_check_end:
 a20_16_end:
     mov bx, MSG_A20_ENABLED
     call print_str_16
+
+    popa
+    ret
