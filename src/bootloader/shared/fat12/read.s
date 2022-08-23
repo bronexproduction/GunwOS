@@ -20,9 +20,10 @@
 fat12_readFile:
 
     pusha
+    push es
 
     mov es, di
-    mov bx, 0
+    xor bx, bx
 
     ; AX - First cluster
     ; CX - File size in clusters 
@@ -78,8 +79,6 @@ fat12_readFile:
     call fat12_checkEOF
     jc fat12_err_fatEntryInvalidEOFExpected
 
-    xor di, di
-    mov es, di
-
+    pop es
     popa
     ret
