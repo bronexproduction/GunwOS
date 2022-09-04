@@ -37,8 +37,7 @@ fat12_findDir:
 
     dec di
 
-    mov cx, FAT12_FILENAME_FULL_BYTES
-    inc cx
+    mov cx, FAT12_FILENAME_FULL_BYTES + 1
 
 .fat12_findDir_checkChar:
 
