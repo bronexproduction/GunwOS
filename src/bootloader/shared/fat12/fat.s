@@ -30,12 +30,9 @@ fat12_verifyFATs:
 
     ; Get value from second FAT
     add bx, FAT12_FAT_BYTES
-    push ax
-    mov al, [bx]
-    pop bx
 
     ; Compare bytes
-    cmp al, bl
+    cmp al, [bx]
     jne fat12_err_fatValidationFailed
 
     ; Check if all bytes verified
