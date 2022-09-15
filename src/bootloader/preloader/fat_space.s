@@ -1,0 +1,21 @@
+;
+;  fat_space.s
+;  GunwOS Bootloader
+;  Part of GunwOS project
+;
+;  Created by Artur Danielewski on 15.09.2022.
+;
+
+fat_table_space:
+; ---------------------------------------
+;
+;   Empty space dedicated
+;   for FAT tables
+;
+;   Allows to use FAT12 code
+;   from 1st stage bootloader
+;   without messing with DS
+;
+; ---------------------------------------
+
+times FAT12_HEADER_BYTES db 0

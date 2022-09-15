@@ -13,6 +13,7 @@ BITS 16
 jmp preloader_start
 
 %include "data.s"
+%include "fat_space.s"
 
 BITS 16
 
