@@ -50,7 +50,7 @@ read_kernel:
     ; Fetch kernel from filesystem 
     ; ---------------------------------------
     mov ax, BOOT_KERNEL_FILENAME
-    mov si, FAT_HEADER_ADDR
+    mov si, fat_table_space
     mov di, KERNEL_SEG
     call fat12_loadFile
 

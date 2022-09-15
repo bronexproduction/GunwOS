@@ -15,6 +15,8 @@ fat_table_space:
 ;   Allows to use FAT12 code
 ;   from 1st stage bootloader
 ;   without messing with DS
+;   (fat12_loadHeader loads FAT header
+;   into DS:SI)
 ;
 ; ---------------------------------------
 
