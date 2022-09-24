@@ -16,7 +16,7 @@ fat_table_space:
 ;   from 1st stage bootloader
 ;   without messing with DS
 ;   (fat12_loadHeader loads FAT header
-;   into DS:SI)
+;   into ES:SI)
 ;
 ; ---------------------------------------
 

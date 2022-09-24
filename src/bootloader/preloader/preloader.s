@@ -43,6 +43,8 @@ preloader_start:
     ; (starting from 0x2000:0x0 up to 640K)
     ; Which gives 512K for kernel binary
     ; ---------------------------------------
+    mov bx, cs
+    mov es, bx
     call read_kernel
 
     jmp $
