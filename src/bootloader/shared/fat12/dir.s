@@ -90,20 +90,18 @@ fat12_getSizeClusters:
     
     pusha
 
-    ; Make sure upper size bytes equal 0
-    add bx, FAT12_DIR_ENTRY_SIZE_BYTES_OFFSET + 2
-    mov ax, [bx]
-
-    cmp ax, 0
-    jne fat12_err_sizeLimitExceeded
-
     ; Get lower size bytes value
-    sub bx, 2
+    add bx, FAT12_DIR_ENTRY_SIZE_BYTES_OFFSET
     mov ax, [bx]
+
+    ; Get upper size bytes value
+    add bx, 2
+    mov dx, [bx]
 
     ; Make sure size not equal 0
-    cmp ax, 0
-    je fat12_err_sizeInvalid
+    mov bx, ax
+    or bx, dx
+    jz fat12_err_sizeInvalid
 
     ; Convert to clusters
     mov cx, FAT12_CLUSTER_SIZE_BYTES
@@ -115,6 +113,11 @@ fat12_getSizeClusters:
     inc ax
 
 .fat12_getSizeClusters_end:
+
+    ; Check size 
+    jo fat12_err_sizeLimitExceeded
+    cmp ax, FAT12_MAX_FILE_CLUSTERS
+    jg fat12_err_sizeLimitExceeded
 
     ; Replace CX on stack
     mov di, sp
