@@ -8,6 +8,8 @@
 
 BITS 16
 
+    jmp pmode_switch
+
 %include "pmode/gdt.s"
 
 pmode_switch:

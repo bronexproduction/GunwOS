@@ -47,13 +47,12 @@ preloader_start:
     mov es, bx
     call read_kernel
 
-    jmp $
-
     ; ---------------------------------------
     ; Jump to protected mode
     ; ---------------------------------------
-    jmp pmode_switch
 %include "pmode/pmode.s"
+
+    jmp $
 
     ; ---------------------------------------
     ; Verify A20 line in protected mode
