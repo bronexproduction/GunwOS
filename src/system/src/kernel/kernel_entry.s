@@ -16,4 +16,6 @@ BITS 32
 EXTERN __kernel_start
 
     call __kernel_start
-    jmp $
+    cli
+    hlt
+    

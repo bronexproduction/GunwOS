@@ -48,7 +48,8 @@ a20_32_enable:
 a20_32_error:
     mov ebx, MSG_A20_DISABLED_ERROR
     call print_str_32
-    jmp $
+    cli
+    hlt
 
 a20_32_ok:
     mov [esi], eax              ; restore original conventional memory content
