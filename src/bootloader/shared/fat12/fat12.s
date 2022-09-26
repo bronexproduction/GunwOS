@@ -45,6 +45,10 @@ fat12_loadFile:
 
     ; Now CX contains file size in clusters
 
+    ; Check the size against the limit
+    cmp cx, FAT12_READ_FILE_SIZE_LIMIT_CLUSTERS
+    jg fat12_err_sizeLimitExceeded
+
     ; Get first cluster
     add bx, FAT12_DIR_ENTRY_FIRST_CLUSTER_OFFSET
     mov ax, [bx]

@@ -83,7 +83,8 @@ boot_2nd_stage:
 %include "fat12err.s"
 %include "msg.s"
 
-BOOT_2ND_STAGE_FILENAME db "BOOT    GFB"
+BOOT_2ND_STAGE_FILENAME             db "BOOT    GFB"
+FAT12_READ_FILE_SIZE_LIMIT_BYTES    equ 65536
 
 boot_fill:
     times 510-($-$$) db 0

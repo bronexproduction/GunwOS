@@ -92,4 +92,5 @@ BITS 32
 %include "ioerr.s"
 %include "fat12err.s"
 
-BOOT_KERNEL_FILENAME db "KERNEL  GFB"
+BOOT_KERNEL_FILENAME                db "KERNEL  GFB"
+FAT12_READ_FILE_SIZE_LIMIT_BYTES    equ 524288 
