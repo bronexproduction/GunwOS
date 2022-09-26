@@ -70,6 +70,17 @@ fat12_readFile:
     dec cx
     pop ax ; Next cluster
     add bx, FAT12_CLUSTER_SIZE_BYTES
+    jnc .fat12_readFile_checkEOF
+
+    ; Handle address overflow
+    ; (changing segment)
+    push bx
+    mov bx, es
+    add bx, 0x1000
+    mov es, bx
+    pop bx
+
+.fat12_readFile_checkEOF:    
 
     ; Check if all sectors read
     cmp cx, 0
