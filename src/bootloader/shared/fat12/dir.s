@@ -71,7 +71,7 @@ fat12_findDir:
     ; Replace BX on stack
     mov di, sp
     add di, 8
-    mov [di], bx
+    mov [ss:di], bx
 
 .fat12_findDir_end:
 
@@ -119,7 +119,7 @@ fat12_getSizeClusters:
     ; Replace CX on stack
     mov di, sp
     add di, 12
-    mov [di], ax
+    mov [ss:di], ax
 
     popa
     ret
