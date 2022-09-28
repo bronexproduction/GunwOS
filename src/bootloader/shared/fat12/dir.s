@@ -68,8 +68,7 @@ fat12_findDir:
     
     ; Replace BX on stack
     mov di, sp
-    add di, 8
-    mov [di], bx
+    mov [di + 8], bx
 
 .fat12_findDir_end:
 
@@ -89,12 +88,10 @@ fat12_getSizeClusters:
     pusha
 
     ; Get lower size bytes value
-    add bx, FAT12_DIR_ENTRY_SIZE_BYTES_OFFSET
-    mov ax, [bx]
+    mov ax, [bx + FAT12_DIR_ENTRY_SIZE_BYTES_OFFSET]
 
     ; Get upper size bytes value
-    add bx, 2
-    mov dx, [bx]
+    mov dx, [bx + FAT12_DIR_ENTRY_SIZE_BYTES_OFFSET + 2]
 
     ; Make sure size not equal 0
     mov bx, ax
@@ -119,8 +116,7 @@ fat12_getSizeClusters:
 
     ; Replace CX on stack
     mov di, sp
-    add di, 12
-    mov [di], ax
+    mov [di + 12], ax
 
     popa
     ret
