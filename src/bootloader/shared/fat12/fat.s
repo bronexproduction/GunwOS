@@ -22,15 +22,11 @@ fat12_verifyFATs:
     dec cx
 
     ; Get value from first FAT
-    mov bx, FAT_HEADER_ADDR
-    add bx, cx
-    mov al, [bx]
+    mov bx, cx
+    mov al, [bx + FAT_HEADER_ADDR]
 
-    ; Get value from second FAT
-    add bx, FAT12_FAT_BYTES
-
-    ; Compare bytes
-    cmp al, [bx]
+    ; Compare bytes with value from second FAT
+    cmp al, [bx + FAT_HEADER_ADDR + FAT12_FAT_BYTES]
     jne fat12_err_fatValidationFailed
 
     ; Check if all bytes verified
@@ -60,8 +56,7 @@ fat12_getEntry:
     pushf
 
     mov bx, ax
-    add bx, FAT_HEADER_ADDR
-    mov ax, [bx]
+    mov ax, [bx + FAT_HEADER_ADDR]
 
     popf
     jnc .fat12_getEntry_even
@@ -77,8 +72,7 @@ fat12_getEntry:
 
     ; Replace AX on stack
     mov di, sp
-    add di, 14
-    mov [di], ax
+    mov [di + 14], ax
 
     popa
     ret
