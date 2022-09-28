@@ -81,7 +81,7 @@ fat12_getEntry:
     ; Replace AX on stack
     mov di, sp
     add di, 14
-    mov [ss:di], ax
+    mov [di], ax
 
     popa
     ret
