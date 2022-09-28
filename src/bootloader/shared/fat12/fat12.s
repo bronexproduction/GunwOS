@@ -48,8 +48,7 @@ fat12_loadFile:
     jg fat12_err_sizeLimitExceeded
 
     ; Get first cluster
-    add bx, FAT12_DIR_ENTRY_FIRST_CLUSTER_OFFSET
-    mov ax, [bx]
+    mov ax, [bx + FAT12_DIR_ENTRY_FIRST_CLUSTER_OFFSET]
 
     ; AX - First cluster
     ; CX - File size in clusters 
