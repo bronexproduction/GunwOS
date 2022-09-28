@@ -20,8 +20,6 @@ BITS 16
     ; 
     ; AX - address of 11-bytes long filename
     ; DL - disk number
-    ; SI - address of 16K unused memory
-    ;      block to store FAT12 header
     ; DI - segment of read buffer (segment)
     ; ---------------------------------------
 

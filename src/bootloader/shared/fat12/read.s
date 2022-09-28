@@ -12,8 +12,6 @@
     ; AX - First cluster
     ; CX - File size in clusters
     ; DL - disk number
-    ; SI - address of 16K unused memory
-    ;      block to store FAT12 header
     ; DI - segment of read buffer (segment)
     ; ---------------------------------------
 

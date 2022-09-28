@@ -10,7 +10,6 @@
     ; Find root directory entry
     ; 
     ; AX - address of 11-bytes long filename
-    ; SI - address of FAT header
     ;
     ; Result - BX - address of dir entry
     ; ---------------------------------------
@@ -25,8 +24,7 @@ fat12_findDir:
 
     ; move to previous entry
     sub cx, FAT12_DIR_ENTRY_BYTES
-    mov bx, si
-    add bx, FAT12_FATS_BYTES
+    mov bx, FAT_HEADER_ADDR + FAT12_FATS_BYTES
     add bx, cx
     
     ; compare filenames

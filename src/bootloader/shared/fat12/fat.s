@@ -8,8 +8,6 @@
 
     ; ---------------------------------------
     ; Verify loaded FAT tables
-    ; 
-    ; SI - address of FAT header
     ; ---------------------------------------
 
 fat12_verifyFATs:
@@ -24,7 +22,7 @@ fat12_verifyFATs:
     dec cx
 
     ; Get value from first FAT
-    mov bx, si
+    mov bx, FAT_HEADER_ADDR
     add bx, cx
     mov al, [bx]
 
@@ -48,7 +46,6 @@ fat12_verifyFATs:
     ; Get entry from FAT table
     ; 
     ; AX - current cluster
-    ; SI - address of FAT header
     ;
     ; Result - AX - next cluster
     ; ---------------------------------------
@@ -63,7 +60,7 @@ fat12_getEntry:
     pushf
 
     mov bx, ax
-    add bx, si
+    add bx, FAT_HEADER_ADDR
     mov ax, [bx]
 
     popf

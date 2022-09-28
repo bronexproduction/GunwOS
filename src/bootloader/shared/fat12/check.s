@@ -1,4 +1,3 @@
-
 ;
 ;  check.s
 ;  GunwOS Bootloader

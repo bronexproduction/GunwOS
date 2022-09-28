@@ -59,7 +59,6 @@ read_kernel:
     ; ---------------------------------------
     
     mov ax, BOOT_KERNEL_FILENAME
-    mov si, FAT_HEADER_ADDR
     mov di, KERNEL_SEG
     call fat12_loadFile
 
