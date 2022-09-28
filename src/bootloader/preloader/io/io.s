@@ -18,18 +18,7 @@ io_data_drive_cylinders:
     dw 0x0000
 io_data_drive_heads:
     db 0x00
-
-; Current CHS address
-;
-; used by io_read_disk
-
-io_data_sector:
-    db 0x00
-io_data_cylinder:
-    dw 0x0000
-io_data_head:
-    db 0x00
-
+    
 ; Read drive parameters
 ;
 ; Performs 13h BIOS interrupt with function 08h

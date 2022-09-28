@@ -8,6 +8,16 @@
 
 BITS 16
 
+%include "io/io.s"
+%include "../shared/fat12/fat12.s"
+%include "io/ioerr.s"
+%include "io/fat/fat12err.s"
+
+%include "io/fat/fat_space.s"
+
+BOOT_KERNEL_FILENAME                db "KERNEL  GFB"
+FAT12_READ_FILE_SIZE_LIMIT_BYTES    equ 524288 
+
 ; Read kernel binary
 
 read_kernel:

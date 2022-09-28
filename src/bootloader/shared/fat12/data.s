@@ -6,6 +6,8 @@
 ;  Created by Artur Danielewski on 08.07.2022.
 ;
 
+BITS 16
+
 FAT12_DIR_ENTRY_BYTES                   equ 32
 FAT12_DIR_ENTRY_FIRST_CLUSTER_OFFSET    equ 26
 FAT12_DIR_ENTRY_SIZE_BYTES_OFFSET       equ 28

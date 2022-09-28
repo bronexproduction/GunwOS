@@ -16,5 +16,3 @@ BPB_TOTAL_LOGICAL_SECTORS           equ 2880
 BPB_LOGICAL_SECTORS_PER_FAT         equ 9
 BPB_PHYSICAL_SECTORS_PER_TRACK      equ 18
 BPB_NUMBER_OF_HEADS                 equ 2
-
-FAT_HEADER_ADDR                     equ 0x1000

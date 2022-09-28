@@ -12,6 +12,8 @@ BITS 16
 
 RMODE_STACK_ADDR            equ 0x700
 SECOND_STAGE_SEG            equ 0x1000
+FAT_HEADER_ADDR             equ 0x1000
+
 %include "../shared/data.s"
 
 BITS 16

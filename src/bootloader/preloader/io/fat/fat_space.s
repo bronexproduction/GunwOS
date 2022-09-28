@@ -6,6 +6,8 @@
 ;  Created by Artur Danielewski on 15.09.2022.
 ;
 
+BITS 16
+
 fat_table_space:
 ; ---------------------------------------
 ;
