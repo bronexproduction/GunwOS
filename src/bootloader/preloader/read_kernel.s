@@ -13,10 +13,8 @@ BITS 16
 %include "io/ioerr.s"
 %include "io/fat/fat12err.s"
 
-%include "io/fat/fat_space.s"
-
 BOOT_KERNEL_FILENAME                db "KERNEL  GFB"
-FAT12_READ_FILE_SIZE_LIMIT_BYTES    equ 524288 
+FAT12_READ_FILE_SIZE_LIMIT_BYTES    equ (0xA0000 - KERNEL_ADDR)
 
 ; Read kernel binary
 
@@ -59,8 +57,9 @@ read_kernel:
     ; ---------------------------------------
     ; Fetch kernel from filesystem 
     ; ---------------------------------------
+    
     mov ax, BOOT_KERNEL_FILENAME
-    mov si, fat_table_space
+    mov si, FAT_HEADER_ADDR
     mov di, KERNEL_SEG
     call fat12_loadFile
 

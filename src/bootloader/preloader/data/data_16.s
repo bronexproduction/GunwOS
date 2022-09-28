@@ -8,6 +8,7 @@
 
 BITS 16
 
-KERNEL_SEG          equ 0x2000
+KERNEL_SEG          equ 0x1000
+
 %include "../shared/data.s"
 %include "../shared/fat12/data.s"

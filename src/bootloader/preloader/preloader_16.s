@@ -20,14 +20,6 @@ BITS 16
 
 preloader_start:
 
-    ; ---------------------------------------
-    ; Initialize data segment
-    ; with code segment address
-    ; ---------------------------------------
-
-    mov bx, cs
-    mov ds, bx
-
     mov bx, MSG_PRELOADER_START
     call print_str_16
 
@@ -42,13 +34,11 @@ preloader_start:
     ;
     ; NOTE:
     ; Binary is expected to fit
-    ; in 0x20000 - 0x9FFFF address range
-    ; (starting from 0x2000:0x0 up to 640K)
-    ; Which gives 512K for kernel binary
+    ; in 0x10000 - 0x9FFFF address range
+    ; (starting from 0x1000:0x0 up to 640K)
+    ; Which gives 576K for kernel binary
     ; ---------------------------------------
     
-    mov bx, cs
-    mov es, bx
     call read_kernel
 
     ; ---------------------------------------

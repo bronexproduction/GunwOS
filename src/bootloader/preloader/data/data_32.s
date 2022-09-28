@@ -8,5 +8,7 @@
 
 BITS 32
 
+KERNEL_ADDR         equ (KERNEL_SEG << 4)
+
 PMODE_STACK         equ 0x90000
 A20_CHECK_OFFSET    equ 0x10000

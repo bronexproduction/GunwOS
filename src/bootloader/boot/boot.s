@@ -11,8 +11,8 @@ ORG 0x7c00
 BITS 16
 
 RMODE_STACK_ADDR            equ 0x700
-SECOND_STAGE_SEG            equ 0x1000
-FAT_HEADER_ADDR             equ 0x1000
+SECOND_STAGE_ADDR           equ 0x8000
+SECOND_STAGE_SEG            equ (SECOND_STAGE_ADDR >> 4)
 
 %include "../shared/data.s"
 
@@ -72,7 +72,7 @@ boot_2nd_stage:
     ; ---------------------------------------
     ; Jump to preloader (2-nd stage)
     ; ---------------------------------------
-    jmp SECOND_STAGE_SEG:0
+    jmp SECOND_STAGE_ADDR
 
     ; ---------------------------------------
     ; Additional routines and utilities
@@ -86,7 +86,7 @@ boot_2nd_stage:
 %include "msg.s"
 
 BOOT_2ND_STAGE_FILENAME             db "BOOT    GFB"
-FAT12_READ_FILE_SIZE_LIMIT_BYTES    equ 65536
+FAT12_READ_FILE_SIZE_LIMIT_BYTES    equ (0x10000 - SECOND_STAGE_ADDR)
 
 boot_fill:
     times 510-($-$$) db 0

@@ -33,6 +33,4 @@ BITS 32
 %include "kernel/kernel_data.s"
 
     mov ecx, kernel_data    ; __kernel_start will receive kernel_data pointer as parameter (fastcall)
-    mov ebx, KERNEL_SEG
-    shl ebx, 4
-    call [ebx]
+    call KERNEL_ADDR
