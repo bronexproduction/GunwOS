@@ -40,6 +40,7 @@ boot.gfb:
 
 kernel.gfb: kernel.elf
 # Remove bytes before .text section
+# TO BE IMPROVED - no fixed offset, removing debug data
 	dd if="$(BUILD_DIR)/kernel.elf" of="$(BUILD_DIR)/$@" bs=4096 skip=1
 
 kernel.elf: lib.o kernel.o
