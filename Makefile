@@ -38,7 +38,11 @@ boot.gfb:
 	mv $(SRC_DIR)/bootloader/preloader/boot.gfb $(BUILD_DIR)/$@
 	mv $(SRC_DIR)/bootloader/preloader/boot.lst $(BUILD_DIR)/$@.lst
 
-kernel.gfb: lib.o kernel.o
+kernel.gfb: kernel.elf
+# Remove bytes before .text section
+	dd if="$(BUILD_DIR)/kernel.elf" of="$(BUILD_DIR)/$@" bs=4096 skip=1
+
+kernel.elf: lib.o kernel.o
 	$(L) $(LFLAGS_SYSTEM) -o $(BUILD_DIR)/$@ $(BUILD_DIR)/kernel.o $(BUILD_DIR)/lib.o
 
 lib.o:
