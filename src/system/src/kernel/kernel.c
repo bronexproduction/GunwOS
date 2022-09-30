@@ -28,9 +28,9 @@ static void k_init() {
     k_tmr_init();
 }
 
-extern void __attribute__((fastcall)) __kernel_start(const struct k_krn_bootData * const bootData);
+extern void __attribute__((fastcall, section(".start"))) __kernel_start(const struct k_krn_bootData * const bootData) ;
 
-void __attribute__((fastcall)) __kernel_start(const struct k_krn_bootData * const bootData) {
+void __attribute__((fastcall, section(".start"))) __kernel_start(const struct k_krn_bootData * const bootData) {
     k_init();
 
     k_hal_init(bootData->gdt_codeSegOffset);
