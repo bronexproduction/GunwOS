@@ -110,15 +110,16 @@ a20_32_enable:
     inc ecx
     jmp a20_32_check_overlap
 
-a20_32_ok:
-    mov ebx, MSG_A20_ENABLED
-    call print_str_32
-
-    popad
-
 a20_32_error:
     mov ebx, MSG_A20_DISABLED_ERROR
     call print_str_32
     
     cli
     hlt
+
+a20_32_ok:
+    mov ebx, MSG_A20_ENABLED
+    call print_str_32
+
+    popad
+    
