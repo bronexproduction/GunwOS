@@ -8,53 +8,117 @@
 
 BITS 32
 
-; Checking access to extended memory
-;
-; Checks if the memory wraps over 1MB limit to ensure access to extended memory
+    ; ---------------------------------------
+    ; Checking access to extended memory
+    ;
+    ; Checks if the memory wraps over 1MB limit to ensure access to extended memory
+    ; ---------------------------------------
 
 a20_32_check:
     pushad
 
-    mov ecx, 0                  ; A20 enable retries count
+    ; ---------------------------------------
+    ; Set retry count to zero
+    ; (only single retry allowed)
+    ; ---------------------------------------
+
+    mov ecx, 0
+
+    ; ---------------------------------------
+    ; Prepare source and destination
+    ; memory locations
+    ;
+    ; EAX (ESI) - conventional memory offset
+    ; EBX (EDI) - extended memory address
+    ;             (ESI + 1MiB)
+    ; ---------------------------------------
 
     mov eax, A20_CHECK_OFFSET
-    mov ebx, 0x100000
+    add ebx, A20_CHECK_OFFSET + 0x100000
 
-    mov esi, eax                ; make ESI an conventional memory address (over FFF0h, writable)
-    add eax, ebx
-    mov edi, eax                ; make EDI an extended memory address (esi + 1MB)
+    ; ---------------------------------------
+    ; Set source memory address
+    ; ---------------------------------------
+
+    mov esi, eax
 
 a20_32_check_overlap:
-    mov eax, [esi]              ; backup original conventional memory content
+    
+    ; ---------------------------------------
+    ; Reset destination memory address
+    ; to default value
+    ; ---------------------------------------
+    
+    mov edi, ebx
 
-    mov ebx, [edi]              ; copy content of extended memory
-    inc ebx                     ; increment
-    mov [esi], ebx              ; write to conventional memory
+    ; ---------------------------------------
+    ; Backup original source memory content,
+    ; get and increment the value found
+    ; under destination address,
+    ; put it under source address
+    ; and then compare the two locations
+    ; ---------------------------------------
 
-    cmpsd                       ; compare addresses to see if the're equivalent
-    jne a20_32_ok               ; if not equivalent - the A20 line is set.
+    mov edx, [esi]
+
+    mov ebx, [edi]
+    inc ebx
+    mov [esi], ebx
+
+    cmpsd
+
+    ; ---------------------------------------
+    ; Restore original memory content
+    ;
+    ; NOTE: CMPSD alters ESI and EDI
+    ;       and therefore previous values
+    ;       have to be stored  
+    ;       or the operation reverse to 
+    ;       the CMPSD operation mode
+    ;       has to be applied
+    ;       (INC/DEC - depends on DF flag)
+    ; ---------------------------------------
+
+    mov esi, eax
+    mov [esi], edx
+
+    ; ---------------------------------------
+    ; If values are not equal - A20 set
+    ; ---------------------------------------
+
+    jne a20_32_ok
 
 a20_32_enable:
-    mov [esi], eax              ; restore original conventional memory content
+
+    ; ---------------------------------------
+    ; If values are equal - set A20 and retry
+    ; ---------------------------------------
+
+    ; ---------------------------------------
+    ; Check if already retried
+    ; and end with error if it did
+    ; ---------------------------------------
 
     cmp ecx, 0
-    jnz a20_32_error            ; if retry - fail
+    jnz a20_32_error
 
+    ; ---------------------------------------
+    ; TODO
     ; ACTIVATE A20
+    ; ---------------------------------------
 
-    inc ecx                     ; increment retry count
-    jmp a20_32_check_overlap    ; check again
-
-a20_32_error:
-    mov ebx, MSG_A20_DISABLED_ERROR
-    call print_str_32
-    cli
-    hlt
+    inc ecx
+    jmp a20_32_check_overlap
 
 a20_32_ok:
-    mov [esi], eax              ; restore original conventional memory content
-    
     mov ebx, MSG_A20_ENABLED
     call print_str_32
 
     popad
+
+a20_32_error:
+    mov ebx, MSG_A20_DISABLED_ERROR
+    call print_str_32
+    
+    cli
+    hlt
