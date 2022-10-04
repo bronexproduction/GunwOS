@@ -8,8 +8,12 @@
 
 BITS 32
 
+jmp start_32
+
 %include "data/data_32.s"
 %include "io/print/print_32.s"
+
+start_32:
 
     ; ---------------------------------------
     ; Initialize protected mode
