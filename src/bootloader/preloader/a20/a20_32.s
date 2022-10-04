@@ -118,7 +118,7 @@ a20_32_error:
     hlt
 
 a20_32_ok:
-    mov ebx, MSG_A20_ENABLED
+    mov ebx, MSG_A20_ENABLED_32
     call print_str_32
 
     popad

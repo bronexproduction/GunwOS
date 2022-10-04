@@ -91,7 +91,7 @@ a20_16_check_end:
     ret 
 
 a20_16_end:
-    mov bx, MSG_A20_ENABLED
+    mov bx, MSG_A20_ENABLED_16
     call print_str_16
 
     popa
