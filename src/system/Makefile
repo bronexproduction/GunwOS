@@ -1,6 +1,6 @@
 ASMFLAGS=-f elf
 CFLAGS=-std=c11 -c -ffreestanding -mno-red-zone -Wall -Wextra -ggdb $(CFLAGS_GLOBAL)
-CXXFLAGS=-std=c11 -c -ffreestanding -mno-red-zone -Wall -Wextra -ggdb $(CXXFLAGS_GLOBAL)
+CXXFLAGS=-std=c++11 -c -ffreestanding -mno-red-zone -Wall -Wextra -ggdb $(CXXFLAGS_GLOBAL)
 LFLAGS=-melf_i386 -i
 
 O_DIR_LISTING=find . -name '*.o' -type f
