@@ -19,6 +19,7 @@ _Static_assert(CMD_NUM_MAX == (commandCount_t)CMD_NUM_MAX, "commandLastIndex val
 #define CMD_HELP
 
 void (*s_cli_cmdSelector(const char * const cmd))(const char * const) {
+    CMD_REG(help)
     CMD_REG(busr)
     CMD_REG(busw)
     CMD_REG(memr)
