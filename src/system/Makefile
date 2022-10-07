@@ -8,7 +8,7 @@ EXEC_TERMINATOR=\;
 
 .PHONY: all
 
-all: kernel.o
+all: kernel.o clean_o
 
 kernel.o: _kernel_entry.o _kernel.o
 	$(L) $(LFLAGS) -o $@ $(shell $(O_DIR_LISTING))
@@ -20,3 +20,5 @@ _kernel.o:
 	$(C_DIR_LISTING) -exec $(C) $(CFLAGS) -o {}.o {} $(EXEC_TERMINATOR)
 	$(CXX_DIR_LISTING) -exec $(C) $(CXXFLAGS) -o {}.o {} $(EXEC_TERMINATOR)
 	
+clean_o:
+	find . -type f -name '*.o' ! -name 'kernel.o' -delete
