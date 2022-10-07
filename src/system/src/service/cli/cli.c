@@ -25,7 +25,7 @@ static void prompt();
 void s_cli_init() {
     s_kbf_register((struct s_kbf_listener){0, onKeyDown});
     
-    s_trm_puts("GunwOS 0.0.0_DEV started. (C) Bronex Production 2020\n\n");
+    s_trm_puts("GunwOS 0.0.1_DEV started. (C) Bronex Production 2022\n\n");
 
     prompt();
 }

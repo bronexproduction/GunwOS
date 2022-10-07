@@ -1,0 +1,13 @@
+//
+//  scenarios
+//  GunwOS Tests
+//
+//  Created by Artur Danielewski on 21.07.2022.
+//
+
+#ifndef SCENARIOS
+#define SCENARIOS
+
+#include "systemqemuscenario.hpp"
+
+#endif // SCENARIOS

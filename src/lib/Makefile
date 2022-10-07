@@ -7,9 +7,12 @@ O_DIR_LISTING=find . -maxdepth 1 -name '*.o' -type f
 MODULES=	stdgunw \
 			cxxabi
 
-all: $(MODULES) link
+.PHONY: all $(MODULES)
 
-.PHONY: $(MODULES)
+all: lib.o 
+
+lib.o: $(MODULES) link_dry_run
+	$(L) $(LFLAGS_FINAL) -o lib.o $(shell $(O_DIR_LISTING))
 
 $(MODULES):
 	make -C $@
@@ -20,5 +23,3 @@ $(MODULES):
 link_dry_run:
 	$(L) $(LFLAGS_DRY) -o lib_dry.o $(shell $(O_DIR_LISTING)) && rm lib_dry.o
 
-link: link_dry_run
-	$(L) $(LFLAGS_FINAL) -o lib.o $(shell $(O_DIR_LISTING))
