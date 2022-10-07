@@ -6,14 +6,17 @@ LFLAGS=-melf_i386 -i
 O_DIR_LISTING=find . -name '*.o' -type f
 EXEC_TERMINATOR=\;
 
-all: kernel._o build system.o
+.PHONY: all
 
-kernel._o:
-	$(ASM) $(ASMFLAGS) -o $@ src/kernel/kernel.s
+all: kernel.o
 
-build:
+kernel.o: _kernel_entry.o _kernel.o
+	$(L) $(LFLAGS) -o $@ $(shell $(O_DIR_LISTING))
+
+_kernel_entry.o:
+	$(ASM) $(ASMFLAGS) -o $@ src/kernel/kernel_entry.s
+
+_kernel.o:
 	$(C_DIR_LISTING) -exec $(C) $(CFLAGS) -o {}.o {} $(EXEC_TERMINATOR)
 	$(CXX_DIR_LISTING) -exec $(C) $(CXXFLAGS) -o {}.o {} $(EXEC_TERMINATOR)
-
-system.o:
-	$(L) $(LFLAGS) -o $@ $(shell $(O_DIR_LISTING))
+	

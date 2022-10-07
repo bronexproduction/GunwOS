@@ -1,7 +1,11 @@
 ENTRY("__kernel_start")
 
 SECTIONS {
-    . = 0x00007E00;
+    . = 0x00010000;
+
+    .start : {
+        *(.start)
+    }
 
     .text : {
         *(.text)

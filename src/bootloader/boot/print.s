@@ -8,18 +8,17 @@
 
 BITS 16
 
-print_str_16:
-    pusha
+print_err_16:
     mov ah, 0x0e
-    mov si, bx
+    mov si, ERROR_STRING
 
-.print_str_16_char:
+.print_err_16_char:
+    cmp bx, si
+    jl .print_err_16_end
     lodsb
-    cmp al, 0
-    je .print_str_16_end
     int 0x10
-    jmp .print_str_16_char
+    jmp .print_err_16_char
 
-.print_str_16_end:
-    popa
-    ret
+.print_err_16_end:
+    cli
+    hlt

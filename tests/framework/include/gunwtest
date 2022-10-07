@@ -1,0 +1,18 @@
+//
+//  gunwtest
+//  GunwOS Tests
+//
+//  Created by Artur Danielewski on 18.07.2022.
+//
+
+#ifndef LIBGUNW_TEST
+#define LIBGUNW_TEST
+
+#include "../src/regset.hpp"
+
+#include "../src/scenario/scenario.hpp"
+#include "../src/scenario/qemuscenario.hpp"
+
+#include "../src/runner.hpp"
+
+#endif // LIBGUNW_TEST

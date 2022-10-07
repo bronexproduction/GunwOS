@@ -1,5 +1,5 @@
 ;
-;  kernel.s
+;  kernel_entry.s
 ;  GunwOS
 ;
 ;  Created by Artur Danielewski on 17.01.2018.
@@ -16,4 +16,6 @@ BITS 32
 EXTERN __kernel_start
 
     call __kernel_start
-    jmp $
+    cli
+    hlt
+    

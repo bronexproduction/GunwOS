@@ -1,12 +1,6 @@
 ASMFLAGS=-f
 
-ASMFLAGS_BOOT=$(ASMFLAGS) bin
+ASMFLAGS_BOOT=$(ASMFLAGS) bin -l boot.lst
 
-all: preloader allocate
-
-preloader:
-	$(ASM) $(ASMFLAGS_BOOT) -o preloader_raw.bin preloader.s
-
-allocate:
-	dd if=preloader_raw.bin of=preloader.bin bs=512 conv=sync
-	rm preloader_raw.bin
+all:
+	$(ASM) $(ASMFLAGS_BOOT) -o boot.gfb preloader.s

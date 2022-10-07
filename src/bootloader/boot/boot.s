@@ -10,69 +10,89 @@ ORG 0x7c00
 
 BITS 16
 
-jmp boot_init
+RMODE_STACK_ADDR            equ 0x700
+SECOND_STAGE_ADDR           equ 0x8000
+SECOND_STAGE_SEG            equ (SECOND_STAGE_ADDR >> 4)
 
 %include "../shared/data.s"
 
 BITS 16
 
+    jmp boot_init
+    times 3-($-$$) db 0
+
+    ; ---------------------------------------
+    ; IMPORTANT NOTE
+    ; 
+    ; DL register contains boot drive number
+    ; remember not to overwrite it
+    ; ---------------------------------------
+
+    ; ---------------------------------------
+    ; FAT reserved sectors
+    ; 
+    ; OEM name
+    ; ---------------------------------------
+oem_name:   db "GunwOS  "
+    
+    ; ---------------------------------------
+    ; FAT reserved sectors
+    ; 
+    ; BIOS parameter block
+    ; ---------------------------------------
+%include "bpb.s"
+
+BITS 16
+
 boot_init:
-    mov ax, 0x00
+    ; ---------------------------------------
+    ; Clear accumulator and segment registers
+    ; ---------------------------------------
+    xor ax, ax
     mov ds, ax
     mov ss, ax
     mov es, ax
-    mov fs, ax
-    mov gs, ax
 
-    mov bp, RMODE_STACK
+    ; ---------------------------------------
+    ; Configure stack
+    ; ---------------------------------------
+    mov bp, RMODE_STACK_ADDR
     mov sp, bp
 
-    mov [preloader_data_bootDrive], dl
+boot_load_2nd_stage:
+    ; ---------------------------------------
+    ; Fetch 2nd stage loader from filesystem 
+    ; ---------------------------------------
+    mov ax, BOOT_2ND_STAGE_FILENAME
+    mov di, SECOND_STAGE_SEG
+    call fat12_loadFile
 
-    mov bx, BOOT_LOAD_MSG
-    call print_str_16
+boot_2nd_stage:
+    ; ---------------------------------------
+    ; Jump to preloader (2-nd stage)
+    ; ---------------------------------------
+    jmp SECOND_STAGE_ADDR
 
-boot_load_prep:
-    mov cl, BOOT_LOAD_SECTOR_BEGIN    ; first sector after boot loader
+    ; ---------------------------------------
+    ; Additional routines and utilities
+    ; ---------------------------------------
 
-boot_load:
-    mov bx, PRELOADER_MEM_OFFSET
-    mov dh, BOOT_LOAD_SECTOR_COUNT
-    mov dl, [preloader_data_bootDrive]
-    call io_read_disk
-
-boot_check_entry:
-    mov eax, PRELOADER_MEM_OFFSET
-    mov ebx, [eax]
-    cmp ebx, ELF_HEADER
-    jne boot_preloader
-
-boot_elf:
-    mov bx, BOOT_LOAD_DEBUG_ENTRY
-    call print_str_16
-    
-boot_offset:
-    mov cl, BOOT_LOAD_SECTOR_BEGIN
-    add cl, BOOT_LOAD_SECTOR_ELF_OFFSET
-    jmp boot_load
-
-boot_preloader:
-    mov bx, BOOT_PRELOADER_MSG
-    call print_str_16
-
-    mov cx, preloader_data     ; preloader_start will receive preloader_data pointer as parameter (fastcall)
-    jmp PRELOADER_MEM_OFFSET
-    jmp $
-
-%include "preloader_data.s"
 %include "print.s"
-%include "io.s"
+%include "../shared/io.s"
+%include "../shared/fat12/fat12.s"
+%include "ioerr.s"
+%include "fat12err.s"
+%include "msg.s"
 
-BOOT_LOAD_MSG db 'GunwOS loading...', 0xa, 0xd, 0
-BOOT_LOAD_DEBUG_ENTRY db 'ELF header found. Offsetting...', 0xa, 0xd, 0
-BOOT_PRELOADER_MSG db 'GunwOS preloader booting...', 0xa, 0xd, 0
+BOOT_2ND_STAGE_FILENAME             db "BOOT    GFB"
+FAT12_READ_FILE_SIZE_LIMIT_BYTES    equ (0x10000 - SECOND_STAGE_ADDR)
 
 boot_fill:
     times 510-($-$$) db 0
 
-    dw 0xaa55               ; boot sector magic number
+    ; ---------------------------------------
+    ; FAT reserved sectors
+    ;
+    ; Boot sector signature
+    ; ---------------------------------------
+    dw 0xaa55

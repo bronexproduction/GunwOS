@@ -13,23 +13,25 @@ BITS 16
 ; Checks if the memory wraps over 1MB limit to ensure access to extended memory
 
 a20_16:
-    call a20_16_check
-    cmp al, 1
-    je a20_16_end
-
-%include "a20_16_interrupt.s"
+    pusha
 
     call a20_16_check
     cmp al, 1
     je a20_16_end
 
-%include "a20_16_keyboard.s"
+%include "a20/a20_16_interrupt.s"
 
     call a20_16_check
     cmp al, 1
     je a20_16_end
 
-%include "a20_16_fast.s"
+%include "a20/a20_16_keyboard.s"
+
+    call a20_16_check
+    cmp al, 1
+    je a20_16_end
+
+%include "a20/a20_16_fast.s"
 
     call a20_16_check
     cmp al, 1
@@ -38,7 +40,8 @@ a20_16:
 a20_16_fail:
     mov bx, MSG_A20_DISABLED_ERROR
     call print_str_16
-    jmp $
+    cli
+    hlt
 
 a20_16_check:
     pushf
@@ -88,5 +91,8 @@ a20_16_check_end:
     ret 
 
 a20_16_end:
-    mov bx, MSG_A20_ENABLED
+    mov bx, MSG_A20_ENABLED_16
     call print_str_16
+
+    popa
+    ret

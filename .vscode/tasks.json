@@ -4,13 +4,16 @@
   "version": "2.0.0",
 "tasks": [
     {
-        "label": "Build",
+        "label": "Build and write floppy (rawwritewin)",
         "type": "shell",
-        "command": "make rebuild",
+        "command": "/mnt/d/Software/rawwritewin-0.7/rawwritewin.exe build/gunwos.img",
         "group": {
             "kind": "build",
-            "isDefault": false
+            "isDefault": true
         },
+        "dependsOn": [
+            "Build and image"
+        ],
         "problemMatcher": []
     },
     {
@@ -18,14 +21,30 @@
         "type": "shell",
         "command": "bash scripts/qemu_run.sh",
         "windows": {
-            "command": "export DISPLAY=:0 && scripts/qemu_run.sh"
+            "command": "export DISPLAY=:0 && scripts/qemu_run.sh build/gunwos.img"
         },
         "group": {
             "kind": "build",
             "isDefault": true
         },
         "dependsOn": [
-            "Build"
+            "Build and image"
+        ],
+        "problemMatcher": []
+    },
+    {
+        "label": "Build and debug (QEMU)",
+        "type": "shell",
+        "command": "bash scripts/qemu_run_debug.sh",
+        "windows": {
+            "command": "export DISPLAY=:0 && scripts/qemu_run_debug.sh build/gunwos.img"
+        },
+        "group": {
+            "kind": "build",
+            "isDefault": false
+        },
+        "dependsOn": [
+            "Build and image"
         ],
         "problemMatcher": []
     },
@@ -38,30 +57,14 @@
             "isDefault": true
         },
         "dependsOn": [
-            "Build"
+            "Build and image"
         ],
         "problemMatcher": []
     },
     {
-        "label": "Build and write floppy (rawwritewin)",
+        "label": "Build and image",
         "type": "shell",
-        "command": "/mnt/d/Software/rawwritewin-0.7/rawwritewin.exe build/system.img",
-        "group": {
-            "kind": "build",
-            "isDefault": true
-        },
-        "dependsOn": [
-            "Build"
-        ],
-        "problemMatcher": []
-    },
-    {
-        "label": "Build and debug (QEMU)",
-        "type": "shell",
-        "command": "bash scripts/qemu_run_debug.sh",
-        "windows": {
-            "command": "export DISPLAY=:0 && scripts/qemu_run_debug.sh"
-        },
+        "command": "make img",
         "group": {
             "kind": "build",
             "isDefault": false
@@ -72,17 +75,36 @@
         "problemMatcher": []
     },
     {
+        "label": "Build",
+        "type": "shell",
+        "command": "make clean all",
+        "group": {
+            "kind": "build",
+            "isDefault": false
+        },
+        "problemMatcher": []
+    },
+    {
+        "label": "Run tests",
+        "type": "shell",
+        "command": "make test",
+        "group": {
+            "kind": "test",
+            "isDefault": false
+        },
+        "problemMatcher": []
+    },
+    {
         "label": "Install dependencies",
         "type": "shell",
         "windows": {
-            "command": "sudo apt-get update && sudo apt-get install -y build-essential nasm qemu-system-x86",
+            "command": "sudo apt-get update && sudo apt-get install -y build-essential nasm qemu-system-x86 lldb && bash scripts/download_tools.sh",
         },
         "linux": {
-            "command": "sudo apt-get update && sudo apt-get install -y build-essential nasm qemu-system-x86",
+            "command": "sudo apt-get update && sudo apt-get install -y build-essential nasm qemu-system-x86 lldb && bash scripts/download_tools.sh",
         },
         "osx": {
-            // not working - support for 64-bit to be added
-            "command": "brew install nasm qemu",
+            "command": "brew install pup nasm qemu truncate && bash scripts/download_tools.sh",
         },
         "group": {
             "kind": "none",
