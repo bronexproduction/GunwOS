@@ -8,7 +8,6 @@
 #include "../../../../lib/stdgunw/types.h"
 #include "../../../../lib/stdgunw/string.h"
 
-#define CMD_NUM_MAX 64
 #define CMD_LEN_MAX 64
 
 #define CMD_PARAM_SEPARATOR ' '
