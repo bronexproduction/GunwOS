@@ -68,4 +68,3 @@ test:
 	make -C $(TESTS_DIR)/bootloader/preloader clean all run
 	make -C $(TESTS_DIR)/lib clean all run
 	make -C $(TESTS_DIR)/system clean all run
-	

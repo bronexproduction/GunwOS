@@ -12,8 +12,7 @@
 #include "../../shared/log/log.h"
 #include "../../../../lib/stdgunw/types.h"
 #include "../../../../lib/stdgunw/mem.h"
-
-#define CMD_LEN_MAX 64
+#include "cmdutil.h"
 
 static void onKeyDown(const uint_8 c);
 
