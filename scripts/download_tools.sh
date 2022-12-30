@@ -4,12 +4,15 @@ set -e
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # macOS
-    TOOLS_ID=
+    if [[ "$(uname -m)" == "x86_64" ]]; then
+        TOOLS_ID=1lFFKgdm-P1xWkPZV1mojCOeyCxg9KSrK
+    else
+        TOOLS_ID=
+    fi    
 else
     # Linux
     TOOLS_ID=1lFFKgdm-P1xWkPZV1mojCOeyCxg9KSrK
 fi
-
 
 QUERY=`curl -s -L "https://drive.google.com/uc?export=download&id=$TOOLS_ID" \
     | pup 'form#downloadForm attr{action}' \
