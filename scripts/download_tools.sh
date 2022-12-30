@@ -5,7 +5,7 @@ set -e
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # macOS
     if [[ "$(uname -m)" == "x86_64" ]]; then
-        TOOLS_ID=1lFFKgdm-P1xWkPZV1mojCOeyCxg9KSrK
+        TOOLS_ID=
     else
         TOOLS_ID=
     fi    
