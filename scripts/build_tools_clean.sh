@@ -10,6 +10,7 @@ INSTALL_DIR="$PWD/tools/gunwxcc_$VERSION"
 TARGET=$2
 
 set -e
+set -x
 
 THREADS=$(grep -c ^processor /proc/cpuinfo)
 
@@ -40,7 +41,7 @@ fi
 
 # Unpack sources
 echo "Step 5: Unpacking sources"
-tar -xvzf "gcc-$VERSION.tar.gz"
+tar -xzf "gcc-$VERSION.tar.gz"
 
 # Download dependencies
 echo "Step 6: Downloading dependencies"
@@ -51,7 +52,7 @@ LIBGMP_FILENAME=$(grep -o gmp-.*tar.xz <<< "$LIBGMP_URL")
 LIBGMP_SRC_DIR="$WORKSPACE_DIR/$(awk -F.tar '{print $1}' <<< $LIBGMP_FILENAME)"
 LIBGMP_DIR="$GCC_SRC_DIR/gmp"
 wget "$LIBGMP_URL"
-tar -xvf "$LIBGMP_FILENAME"
+tar -xf "$LIBGMP_FILENAME"
 mv "$LIBGMP_SRC_DIR" "$LIBGMP_DIR"
 
 # libmpfr
@@ -61,7 +62,7 @@ LIBMPFR_FILENAME="mpfr-$LIBMPFR_VERSION.tar.gz"
 LIBMPFR_URL="https://www.mpfr.org/mpfr-current/$LIBMPFR_FILENAME"
 LIBMPFR_DIR="$GCC_SRC_DIR/mpfr"
 wget "$LIBMPFR_URL"
-tar -xvzf "$LIBMPFR_FILENAME"
+tar -xzf "$LIBMPFR_FILENAME"
 mv "$LIBMPFR_SRC_DIR" "$LIBMPFR_DIR"
 
 # libmpc
@@ -70,7 +71,7 @@ LIBMPC_URL="https://ftp.gnu.org/gnu/mpc/$LIBMPC_FILENAME"
 LIBMPC_SRC_DIR="$WORKSPACE_DIR/$(awk -F.tar '{print $1}' <<< $LIBMPC_FILENAME)"
 LIBMPC_DIR="$GCC_SRC_DIR/mpc"
 wget "$LIBMPC_URL"
-tar -xvzf "$LIBMPC_FILENAME"
+tar -xzf "$LIBMPC_FILENAME"
 mv "$LIBMPC_SRC_DIR" "$LIBMPC_DIR"
 
 # Create build directory
