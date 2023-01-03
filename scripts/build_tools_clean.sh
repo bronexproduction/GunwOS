@@ -6,7 +6,7 @@ MIRROR="https://ftp.mpi-inf.mpg.de/mirrors/gnu/mirror/gcc.gnu.org/pub/gcc/releas
 VERSION=$1
 GCC_SRC_DIR="$WORKSPACE_DIR/gcc-$VERSION"
 CHECKSUM_FILE="sha512.sum"
-INSTALL_DIR="$PWD/tools/gunwxcc-$VERSION"
+INSTALL_DIR="$PWD/tools/gunwxcc_$VERSION"
 TARGET=$2
 
 set -e
@@ -90,5 +90,6 @@ make "-j$THREADS"
 
 # Install
 echo "Step 10: Installing"
+rm -rf $INSTALL_DIR
 mkdir $INSTALL_DIR
 make install
