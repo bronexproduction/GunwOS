@@ -1,124 +1,143 @@
 {
-  // See https://go.microsoft.com/fwlink/?LinkId=733558
-  // for the documentation about the tasks.json format
-  "version": "2.0.0",
-"tasks": [
-    {
-        "label": "Build and write floppy (rawwritewin)",
-        "type": "shell",
-        "command": "/mnt/d/Software/rawwritewin-0.7/rawwritewin.exe build/gunwos.img",
-        "group": {
-            "kind": "build",
-            "isDefault": true
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build and write floppy (rawwritewin)",
+            "type": "shell",
+            "command": "/mnt/d/Software/rawwritewin-0.7/rawwritewin.exe build/gunwos.img",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOn": [
+                "Build and image"
+            ],
+            "problemMatcher": []
         },
-        "dependsOn": [
-            "Build and image"
-        ],
-        "problemMatcher": []
-    },
-    {
-        "label": "Build and run (QEMU)",
-        "type": "shell",
-        "command": "bash scripts/qemu_run.sh",
-        "windows": {
-            "command": "export DISPLAY=:0 && scripts/qemu_run.sh build/gunwos.img"
+        {
+            "label": "Build and run (QEMU)",
+            "type": "shell",
+            "command": "bash scripts/qemu_run.sh",
+            "windows": {
+                "command": "export DISPLAY=:0 && scripts/qemu_run.sh build/gunwos.img"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOn": [
+                "Build and image"
+            ],
+            "problemMatcher": []
         },
-        "group": {
-            "kind": "build",
-            "isDefault": true
+        {
+            "label": "Build and debug (QEMU)",
+            "type": "shell",
+            "command": "bash scripts/qemu_run_debug.sh",
+            "windows": {
+                "command": "export DISPLAY=:0 && scripts/qemu_run_debug.sh build/gunwos.img"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "dependsOn": [
+                "Build and image"
+            ],
+            "problemMatcher": []
         },
-        "dependsOn": [
-            "Build and image"
-        ],
-        "problemMatcher": []
-    },
-    {
-        "label": "Build and debug (QEMU)",
-        "type": "shell",
-        "command": "bash scripts/qemu_run_debug.sh",
-        "windows": {
-            "command": "export DISPLAY=:0 && scripts/qemu_run_debug.sh build/gunwos.img"
+        {
+            "label": "Build and run (VirtualBox)",
+            "type": "shell",
+            "command": "bash scripts/virtualbox_run.sh",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOn": [
+                "Build and image"
+            ],
+            "problemMatcher": []
         },
-        "group": {
-            "kind": "build",
-            "isDefault": false
+        {
+            "label": "Build and image",
+            "type": "shell",
+            "command": "make img",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "dependsOn": [
+                "Build"
+            ],
+            "problemMatcher": []
         },
-        "dependsOn": [
-            "Build and image"
-        ],
-        "problemMatcher": []
-    },
-    {
-        "label": "Build and run (VirtualBox)",
-        "type": "shell",
-        "command": "bash scripts/virtualbox_run.sh",
-        "group": {
-            "kind": "build",
-            "isDefault": true
+        {
+            "label": "Build",
+            "type": "shell",
+            "command": "make clean all",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": []
         },
-        "dependsOn": [
-            "Build and image"
-        ],
-        "problemMatcher": []
-    },
-    {
-        "label": "Build and image",
-        "type": "shell",
-        "command": "make img",
-        "group": {
-            "kind": "build",
-            "isDefault": false
+        {
+            "label": "Run tests",
+            "type": "shell",
+            "command": "make test",
+            "group": {
+                "kind": "test",
+                "isDefault": false
+            },
+            "problemMatcher": []
         },
-        "dependsOn": [
-            "Build"
-        ],
-        "problemMatcher": []
-    },
-    {
-        "label": "Build",
-        "type": "shell",
-        "command": "make clean all",
-        "group": {
-            "kind": "build",
-            "isDefault": false
+        {
+            "label": "Install dependencies",
+            "type": "shell",
+            "windows": {
+                "command": "sudo apt-get update && sudo apt-get install -y build-essential nasm qemu-system-x86 lldb && bash scripts/download_tools.sh",
+            },
+            "linux": {
+                "command": "sudo apt-get update && sudo apt-get install -y build-essential nasm qemu-system-x86 lldb && bash scripts/download_tools.sh",
+            },
+            "osx": {
+                "command": "brew install pup nasm qemu && bash scripts/download_tools.sh",
+            },
+            "group": {
+                "kind": "none",
+                "isDefault": false
+            }
         },
-        "problemMatcher": []
-    },
-    {
-        "label": "Run tests",
-        "type": "shell",
-        "command": "make test",
-        "group": {
-            "kind": "test",
-            "isDefault": false
-        },
-        "problemMatcher": []
-    },
-    {
-        "label": "Install dependencies",
-        "type": "shell",
-        "windows": {
-            "command": "sudo apt-get update && sudo apt-get install -y build-essential nasm qemu-system-x86 lldb && bash scripts/download_tools.sh",
-        },
-        "linux": {
-            "command": "sudo apt-get update && sudo apt-get install -y build-essential nasm qemu-system-x86 lldb && bash scripts/download_tools.sh",
-        },
-        "osx": {
-            "command": "brew install pup nasm qemu && bash scripts/download_tools.sh",
-        },
-        "group": {
-            "kind": "none",
-            "isDefault": false
+        {
+            "label": "Build tools (GCC, LD)",
+            "type": "shell",
+            "command": "bash scripts/build_tools_clean.sh ${input:gccVersion} ${input:targetSystemArch}-${input:gccExecutableFormat}",
+            "group": {
+                "kind": "none",
+                "isDefault": false
+            }
         }
-    },
-    {
-        "label": "Build tools (GCC, LD)",
-        "type": "shell",
-        "command": "bash scripts/build_tools_clean.sh 9.2.0 i386-elf",
-        "group": {
-            "kind": "none",
-            "isDefault": false
+    ],
+    "inputs": [
+        {
+            "id": "gccVersion",
+            "description": "GCC version:",
+            "type": "promptString"
+        },
+        {
+            "id": "targetSystemArch",
+            "description": "Target system architecture:",
+            "default": "i386",
+            "type": "promptString"
+        },
+        {
+            "id": "gccExecutableFormat",
+            "description": "GCC executable format:",
+            "default": "elf",
+            "type": "promptString"
         }
-    }
-]
+    ]
 }
