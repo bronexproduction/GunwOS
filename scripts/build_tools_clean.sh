@@ -1,6 +1,6 @@
 #!/bin/bash
 
-WORKSPACE_DIR="$PWD/gcc-workspace"
+WORKSPACE_DIR="$PWD/temp/gcc-workspace"
 BUILD_DIR="$WORKSPACE_DIR/gcc-build"
 MIRROR="https://ftp.mpi-inf.mpg.de/mirrors/gnu/mirror/gcc.gnu.org/pub/gcc/releases"
 VERSION=$1
