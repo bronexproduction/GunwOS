@@ -110,6 +110,15 @@
             "kind": "none",
             "isDefault": false
         }
+    },
+    {
+        "label": "Build tools (GCC, LD)",
+        "type": "shell",
+        "command": "bash scripts/build_tools_clean.sh 9.2.0 i386-elf",
+        "group": {
+            "kind": "none",
+            "isDefault": false
+        }
     }
 ]
 }
