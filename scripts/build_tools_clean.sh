@@ -4,10 +4,10 @@ TEMP_DIR="$PWD/temp"
 WORKSPACE_DIR="$TEMP_DIR/gcc-workspace"
 BUILD_DIR="$WORKSPACE_DIR/gcc-build"
 MIRROR="https://ftp.mpi-inf.mpg.de/mirrors/gnu/mirror/gcc.gnu.org/pub/gcc/releases"
-VERSION=$1
-GCC_SRC_DIR="$WORKSPACE_DIR/gcc-$VERSION"
+GCC_VERSION=$1
+GCC_SRC_DIR="$WORKSPACE_DIR/gcc-$GCC_VERSION"
 CHECKSUM_FILE="sha512.sum"
-INSTALL_DIR="$PWD/tools/gunwxcc_$VERSION"
+TOOLS_DIR="$PWD/tools"
 TARGET=$2
 
 set -e
@@ -24,7 +24,7 @@ echo "Step 1: Install dependencies"
 if [[ "$OSTYPE" == "darwin"* ]]; then
     brew install wget
 else 
-    sudo apt update && sudo apt install build-essential m4 texinfo
+    sudo apt update && sudo apt install build-essential m4 texinfo bison
 fi
 
 # Create directory structure
@@ -35,13 +35,13 @@ cd "$WORKSPACE_DIR"
 
 # Download sources
 echo "Step 3: Downloading sources"
-wget "$MIRROR/gcc-$VERSION/gcc-$VERSION.tar.gz"
-wget "$MIRROR/gcc-$VERSION/$CHECKSUM_FILE"
+wget "$MIRROR/gcc-$GCC_VERSION/gcc-$GCC_VERSION.tar.gz"
+wget "$MIRROR/gcc-$GCC_VERSION/$CHECKSUM_FILE"
 
 # Verify checksum
 echo "Step 4: Verifying checksum"
-CHECKSUM="$(echo $(shasum -a512 gcc-$VERSION.tar.gz) | awk '{print $1}')"
-EXPECTED_CHECKSUM="$(cat sha512.sum | grep gcc-$VERSION.tar.gz$ | awk '{print $1}')"
+CHECKSUM="$(echo $(shasum -a512 gcc-$GCC_VERSION.tar.gz) | awk '{print $1}')"
+EXPECTED_CHECKSUM="$(cat sha512.sum | grep gcc-$GCC_VERSION.tar.gz$ | awk '{print $1}')"
 
 if [ $CHECKSUM != $EXPECTED_CHECKSUM ]; then
     echo "Invalid file checksum"
@@ -50,7 +50,7 @@ fi
 
 # Unpack sources
 echo "Step 5: Unpacking sources"
-tar -xzf "gcc-$VERSION.tar.gz"
+tar -xzf "gcc-$GCC_VERSION.tar.gz"
 
 # # Download prerequisites
 echo "Step 6: Downloading prerequisites"
@@ -58,35 +58,55 @@ cd "$GCC_SRC_DIR"
 bash contrib/download_prerequisites
 cd "$WORKSPACE_DIR"
 
-# Download binutils
+# # Download binutils
 echo "Step 7: Downloading binutils"
 BINUTILS_FILENAME="$(wget https://ftp.gnu.org/gnu/binutils/ -q -O - | grep -o -P "(?<=<a href=\").*(?=.tar.gz\">)" | sort --version-sort | tail -n 1).tar.gz"
 BINUTILS_SRC_DIR="$WORKSPACE_DIR/$(awk -F.tar '{print $1}' <<< $BINUTILS_FILENAME)"
 BINUTILS_URL="https://ftp.gnu.org/gnu/binutils/$BINUTILS_FILENAME"
 BINUTILS_DIR="$GCC_SRC_DIR/binutils"
+BINUTILS_VERSION="$(grep -o -P "(?<=binutils-).*(?=.tar.gz)" <<< $BINUTILS_FILENAME)"
 wget "$BINUTILS_URL"
 tar -xzf "$BINUTILS_FILENAME"
-mv "$BINUTILS_SRC_DIR" "$BINUTILS_DIR"
 
 # Create build directory
 echo "Step 8: Creating build directory"
 cd "$WORKSPACE_DIR"
-mkdir build-gcc
-cd build-gcc
+BINUTILS_BUILD_DIR="$WORKSPACE_DIR/build-binutils"
+GCC_BUILD_DIR="$WORKSPACE_DIR/build-gcc"
+mkdir "$BINUTILS_BUILD_DIR"
+mkdir "$GCC_BUILD_DIR"
+
+INSTALL_DIR_NAME="gunwxcc-${GCC_VERSION}_binutils-${BINUTILS_VERSION}"
+INSTALL_DIR="$TOOLS_DIR/$INSTALL_DIR_NAME"
+TEMP_INSTALL_DIR="$WORKSPACE_DIR/$INSTALL_DIR_NAME"
 
 # Build
-echo "Step 9: Build - configuring"
-bash "../gcc-$VERSION/configure" "--prefix=$INSTALL_DIR" "--target=$TARGET" \
-        --enable-languages=c,c++ --disable-multilib --disable-nls --without-headers \
-        --with-gnu-ld
+echo "Step 9: Configuring binutils"
+cd "$BINUTILS_BUILD_DIR"
+bash "$BINUTILS_SRC_DIR/configure" "--prefix=$TEMP_INSTALL_DIR" "--target=$TARGET"
 
-echo "Step 10: Build - building"
+echo "Step 10: Building binutils"
+make "-j$THREADS"
+
+echo "Step 11: Installing binutils"
+rm -rf $TEMP_INSTALL_DIR
+mkdir -p $TEMP_INSTALL_DIR
+make install
+
+echo "Step 12: Configuring gcc"
+cd "$GCC_BUILD_DIR"
+bash "$GCC_SRC_DIR/configure" "--prefix=$TEMP_INSTALL_DIR" "--target=$TARGET" \
+    --enable-languages=c,c++ --disable-multilib --disable-nls --without-headers \
+    --with-gnu-as --with-gnu-ld
+
+echo "Step 13: Building gcc"
 make "-j$THREADS"
 
 # Install
-echo "Step 11: Installing"
-rm -rf $INSTALL_DIR
-mkdir $INSTALL_DIR
+echo "Step 14: Installing gcc"
 make install
+mv "$TEMP_INSTALL_DIR" "$INSTALL_DIR"
 
+# Cleanup
+echo "Step 15: Cleanup"
 rm -rf "$TEMP_DIR"
