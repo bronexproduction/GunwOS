@@ -13,11 +13,19 @@ TARGET=$2
 set -e
 set -x
 
-THREADS=$(grep -c ^processor /proc/cpuinfo)
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    THREADS=$(sysctl -n hw.ncpu)
+else
+    THREADS=$(grep -c ^processor /proc/cpuinfo)
+fi
 
 # Install dependencies
 echo "Step 1: Install dependencies"
-sudo apt update && sudo apt install build-essential m4 texinfo
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    brew install wget
+else 
+    sudo apt update && sudo apt install build-essential m4 texinfo
+fi
 
 # Create directory structure
 echo "Step 2: Creating directory structure"
