@@ -95,3 +95,5 @@ echo "Step 10: Installing"
 rm -rf $INSTALL_DIR
 mkdir $INSTALL_DIR
 make install
+
+rm -rf "$TEMP_DIR"
