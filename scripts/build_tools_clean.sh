@@ -1,6 +1,7 @@
 #!/bin/bash
 
-WORKSPACE_DIR="$PWD/temp/gcc-workspace"
+TEMP_DIR="$PWD/temp"
+WORKSPACE_DIR="$TEMP_DIR/gcc-workspace"
 BUILD_DIR="$WORKSPACE_DIR/gcc-build"
 MIRROR="https://ftp.mpi-inf.mpg.de/mirrors/gnu/mirror/gcc.gnu.org/pub/gcc/releases"
 VERSION=$1
@@ -20,8 +21,8 @@ sudo apt update && sudo apt install build-essential m4
 
 # Create directory structure
 echo "Step 2: Creating directory structure"
-rm -rf "$WORKSPACE_DIR"
-mkdir "$WORKSPACE_DIR"
+rm -rf "$TEMP_DIR"
+mkdir -p "$WORKSPACE_DIR"
 cd "$WORKSPACE_DIR"
 
 # Download sources
