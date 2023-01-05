@@ -3,10 +3,13 @@
 set -e
 set -x
 
-TARGET="$HOME/.local/"
-
-sudo apt install python3-pip python3-testresources
-pip install --upgrade gdown
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    brew install python
+    pip3 install gdown
+else
+    sudo apt install python3-pip python3-testresources
+    pip install gdown
+fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # macOS
@@ -20,7 +23,7 @@ else
     TOOLS_ID=1-e8cyz_aMVlYcX5I7LyHgV2JNmd7Wu65
 fi
 
-"$TARGET/bin/gdown" "$TOOLS_ID" -O tools.zip
+gdown "$TOOLS_ID" -O tools.zip
 rm -rf tools
 unzip tools.zip
 rm tools.zip
