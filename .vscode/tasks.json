@@ -108,7 +108,7 @@
         {
             "label": "Build tools (GCC, LD)",
             "type": "shell",
-            "command": "bash scripts/build_tools_clean.sh ${input:targetSystemArch}-${input:gccExecutableFormat} ${input:gccVersion} ${input:binutilsVersion} ${input:newlibVersion}",
+            "command": "time bash scripts/build_tools_clean.sh ${input:targetSystemArch}-${input:gccExecutableFormat} ${input:gccVersion} ${input:binutilsVersion} ${input:newlibVersion}",
             "group": {
                 "kind": "none",
                 "isDefault": false
