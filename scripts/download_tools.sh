@@ -32,4 +32,5 @@ rm -rf temp && mkdir temp && cd temp
 "$GDOWN" "$TOOLS_ID" -O tools.zip
 unzip tools.zip
 rm -rf ../tools && mv tools ../tools
+cd ..
 rm -rf temp
