@@ -29,7 +29,7 @@ fi
 # Install dependencies
 echo "Step 1: Install dependencies"
 if [[ "$OSTYPE" == "darwin"* ]]; then
-    brew install wget
+    brew install wget texinfo
 else 
     sudo apt update && sudo apt install build-essential m4 texinfo bison
 fi
