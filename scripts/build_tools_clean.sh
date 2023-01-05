@@ -121,6 +121,7 @@ make "-j$THREADS"
 # Install
 echo "Step 15: Installing gcc"
 make install
+rm -rf "$INSTALL_DIR"
 mv "$TEMP_INSTALL_DIR" "$INSTALL_DIR"
 
 # Cleanup
