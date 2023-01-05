@@ -28,7 +28,8 @@ else
     GDOWN="$HOME/.local/bin/gdown"
 fi
 
+rm -rf temp && mkdir temp && cd temp
 "$GDOWN" "$TOOLS_ID" -O tools.zip
-rm -rf tools
 unzip tools.zip
-rm tools.zip
+rm -rf ../tools && mv tools ../tools
+rm -rf temp
