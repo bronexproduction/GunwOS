@@ -89,13 +89,13 @@
             "problemMatcher": []
         },
         {
-            "label": "Install dependencies",
+            "label": "Install tools",
             "type": "shell",
             "linux": {
-                "command": "sudo apt-get update && sudo apt-get install -y build-essential nasm qemu-system-x86 lldb && bash scripts/download_tools.sh",
+                "command": "sudo apt-get update && sudo apt-get install -y nasm qemu-system-x86 lldb && bash scripts/download_tools.sh",
             },
             "osx": {
-                "command": "brew install pup nasm qemu && bash scripts/download_tools.sh",
+                "command": "brew install nasm qemu && bash scripts/download_tools.sh",
             },
             "group": {
                 "kind": "none",

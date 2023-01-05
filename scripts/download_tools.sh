@@ -1,6 +1,12 @@
 #!/bin/bash
 
 set -e
+set -x
+
+TARGET="$HOME/.local/"
+
+sudo apt install python3-pip python3-testresources
+pip install --upgrade gdown
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # macOS
@@ -14,10 +20,7 @@ else
     TOOLS_ID=1-e8cyz_aMVlYcX5I7LyHgV2JNmd7Wu65
 fi
 
-QUERY=`curl -s -L "https://drive.google.com/uc?export=download&id=$TOOLS_ID" \
-    | pup 'form#downloadForm attr{action}' \
-    | sed -e 's/amp;//g'` 
-    
-curl -L -o tools.zip "${QUERY}"
+"$TARGET/bin/gdown" "$TOOLS_ID" -O tools.zip
+rm -rf tools
 unzip tools.zip
 rm tools.zip
