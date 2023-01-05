@@ -15,7 +15,7 @@ export BUILD_DIR="$(PWD)/build"
 export ASM=nasm
 export C="$(GCC_DIR)/bin/i386-elf-gcc"
 export CXX="$(GCC_DIR)/bin/i386-elf-g++"
-export L=ld
+export L="$(GCC_DIR)/bin/i386-elf-ld"
 
 export CFLAGS_GLOBAL=-fdebug-prefix-map=$(BUILD_DIR)=.
 export CXXFLAGS_GLOBAL=-fdebug-prefix-map=$(BUILD_DIR)=.
