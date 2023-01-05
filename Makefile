@@ -1,5 +1,10 @@
+GCC_VERSION=9.4.0
+BINUTILS_VERSION=2.39
+NEWLIB_VERSION=4.2.0.20211231
+
 SRC_DIR="$(PWD)/src"
 TOOLS_DIR="$(PWD)/tools"
+GCC_DIR="$(TOOLS_DIR)/gunwxcc-$(GCC_VERSION)_binutils-$(BINUTILS_VERSION)_newlib-$(NEWLIB_VERSION)"
 UTL_DIR="$(PWD)/utl"
 TESTS_DIR="$(PWD)/tests/modules"
 export SCRIPTS_DIR="$(PWD)/scripts"
@@ -8,8 +13,8 @@ export TEST_SHARED_DIR="$(PWD)/tests/shared"
 export BUILD_DIR="$(PWD)/build"
 
 export ASM=nasm
-export C="$(TOOLS_DIR)/gunwxcc_9.2.0/bin/i386-elf-gcc"
-export CXX="$(TOOLS_DIR)/gunwxcc_9.2.0/bin/i386-elf-g++"
+export C="$(GCC_DIR)/bin/i386-elf-gcc"
+export CXX="$(GCC_DIR)/bin/i386-elf-g++"
 export L=ld
 
 export CFLAGS_GLOBAL=-fdebug-prefix-map=$(BUILD_DIR)=.

@@ -19,10 +19,7 @@
         {
             "label": "Build and run (QEMU)",
             "type": "shell",
-            "command": "bash scripts/qemu_run.sh",
-            "windows": {
-                "command": "export DISPLAY=:0 && scripts/qemu_run.sh build/gunwos.img"
-            },
+            "command": "bash scripts/qemu_run.sh build/gunwos.img",
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -35,10 +32,7 @@
         {
             "label": "Build and debug (QEMU)",
             "type": "shell",
-            "command": "bash scripts/qemu_run_debug.sh",
-            "windows": {
-                "command": "export DISPLAY=:0 && scripts/qemu_run_debug.sh build/gunwos.img"
-            },
+            "command": "bash scripts/qemu_run_debug.sh build/gunwos.img",
             "group": {
                 "kind": "build",
                 "isDefault": false
@@ -114,7 +108,7 @@
         {
             "label": "Build tools (GCC, LD)",
             "type": "shell",
-            "command": "bash scripts/build_tools_clean.sh ${input:gccVersion} ${input:targetSystemArch}-${input:gccExecutableFormat}",
+            "command": "bash scripts/build_tools_clean.sh ${input:targetSystemArch}-${input:gccExecutableFormat} ${input:gccVersion} ${input:binutilsVersion} ${input:newlibVersion}",
             "group": {
                 "kind": "none",
                 "isDefault": false
@@ -125,6 +119,16 @@
         {
             "id": "gccVersion",
             "description": "GCC version:",
+            "type": "promptString"
+        },
+        {
+            "id": "binutilsVersion",
+            "description": "Binutils version:",
+            "type": "promptString"
+        },
+        {
+            "id": "newlibVersion",
+            "description": "Newlib version:",
             "type": "promptString"
         },
         {

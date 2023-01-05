@@ -1,14 +1,21 @@
 #!/bin/bash
 
+if [ "$#" -ne 4 ]; then
+    echo "Incorrect number of arguments"
+fi
+
+TARGET=$1
+GCC_VERSION=$2
+BINUTILS_VERSION=$3
+NEWLIB_VERSION=$4
+
 TEMP_DIR="$PWD/temp"
 WORKSPACE_DIR="$TEMP_DIR/gcc-workspace"
 BUILD_DIR="$WORKSPACE_DIR/gcc-build"
 MIRROR="https://ftp.mpi-inf.mpg.de/mirrors/gnu/mirror/gcc.gnu.org/pub/gcc/releases"
-GCC_VERSION=$1
 GCC_SRC_DIR="$WORKSPACE_DIR/gcc-$GCC_VERSION"
 CHECKSUM_FILE="sha512.sum"
 TOOLS_DIR="$PWD/tools"
-TARGET=$2
 
 set -e
 set -x
@@ -52,61 +59,70 @@ fi
 echo "Step 5: Unpacking sources"
 tar -xzf "gcc-$GCC_VERSION.tar.gz"
 
-# # Download prerequisites
+# Download prerequisites
 echo "Step 6: Downloading prerequisites"
 cd "$GCC_SRC_DIR"
 bash contrib/download_prerequisites
 cd "$WORKSPACE_DIR"
 
-# # Download binutils
+# Download binutils
 echo "Step 7: Downloading binutils"
-BINUTILS_FILENAME="$(wget https://ftp.gnu.org/gnu/binutils/ -q -O - | grep -o -P "(?<=<a href=\").*(?=.tar.gz\">)" | sort --version-sort | tail -n 1).tar.gz"
-BINUTILS_SRC_DIR="$WORKSPACE_DIR/$(awk -F.tar '{print $1}' <<< $BINUTILS_FILENAME)"
+BINUTILS_FILENAME="binutils-$BINUTILS_VERSION.tar.gz"
+BINUTILS_SRC_DIR="$WORKSPACE_DIR/binutils-$BINUTILS_VERSION"
 BINUTILS_URL="https://ftp.gnu.org/gnu/binutils/$BINUTILS_FILENAME"
 BINUTILS_DIR="$GCC_SRC_DIR/binutils"
-BINUTILS_VERSION="$(grep -o -P "(?<=binutils-).*(?=.tar.gz)" <<< $BINUTILS_FILENAME)"
 wget "$BINUTILS_URL"
 tar -xzf "$BINUTILS_FILENAME"
 
+echo "Step 8: Downloading newlib"
+NEWLIB_FILENAME="newlib-$NEWLIB_VERSION.tar.gz"
+NEWLIB_SRC_DIR="$WORKSPACE_DIR/newlib-$NEWLIB_VERSION"
+NEWLIB_URL="https://sourceware.org/ftp/newlib/$NEWLIB_FILENAME"
+wget "$NEWLIB_URL"
+tar -xzf "$NEWLIB_FILENAME"
+
 # Create build directory
-echo "Step 8: Creating build directory"
+echo "Step 9: Creating build directory"
 cd "$WORKSPACE_DIR"
 BINUTILS_BUILD_DIR="$WORKSPACE_DIR/build-binutils"
 GCC_BUILD_DIR="$WORKSPACE_DIR/build-gcc"
 mkdir "$BINUTILS_BUILD_DIR"
 mkdir "$GCC_BUILD_DIR"
 
-INSTALL_DIR_NAME="gunwxcc-${GCC_VERSION}_binutils-${BINUTILS_VERSION}"
+INSTALL_DIR_NAME="gunwxcc-${GCC_VERSION}_binutils-${BINUTILS_VERSION}_newlib-${NEWLIB_VERSION}"
 INSTALL_DIR="$TOOLS_DIR/$INSTALL_DIR_NAME"
 TEMP_INSTALL_DIR="$WORKSPACE_DIR/$INSTALL_DIR_NAME"
 
 # Build
-echo "Step 9: Configuring binutils"
+echo "Step 10: Configuring binutils"
 cd "$BINUTILS_BUILD_DIR"
 bash "$BINUTILS_SRC_DIR/configure" "--prefix=$TEMP_INSTALL_DIR" "--target=$TARGET"
 
-echo "Step 10: Building binutils"
+echo "Step 11: Building binutils"
 make "-j$THREADS"
 
-echo "Step 11: Installing binutils"
+echo "Step 12: Installing binutils"
 rm -rf $TEMP_INSTALL_DIR
 mkdir -p $TEMP_INSTALL_DIR
 make install
 
-echo "Step 12: Configuring gcc"
+echo "Step 13: Configuring gcc"
 cd "$GCC_BUILD_DIR"
 bash "$GCC_SRC_DIR/configure" "--prefix=$TEMP_INSTALL_DIR" "--target=$TARGET" \
-    --enable-languages=c,c++ --disable-multilib --disable-nls --without-headers \
+    --disable-multilib --disable-nls --without-headers \
+    --enable-languages=c,c++ \
+    --disable-libquadmath \
+    --with-newlib "--with-headers=$NEWLIB_SRC_DIR/newlib/libc/include" \
     --with-gnu-as --with-gnu-ld
 
-echo "Step 13: Building gcc"
+echo "Step 14: Building gcc"
 make "-j$THREADS"
 
 # Install
-echo "Step 14: Installing gcc"
+echo "Step 15: Installing gcc"
 make install
 mv "$TEMP_INSTALL_DIR" "$INSTALL_DIR"
 
 # Cleanup
-echo "Step 15: Cleanup"
+echo "Step 16: Cleanup"
 rm -rf "$TEMP_DIR"
