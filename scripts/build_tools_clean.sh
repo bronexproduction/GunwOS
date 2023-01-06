@@ -29,7 +29,20 @@ fi
 # Install dependencies
 echo "Step 1: Install dependencies"
 if [[ "$OSTYPE" == "darwin"* ]]; then
-    brew install wget texinfo
+    brew install wget texinfo gcc
+    # Using GCC instead of the clang (default)
+    GCC_LOCATION=$(brew --prefix gcc)
+    GCC_BIN_VERSION_SUFFIX="[0-9.]\+"
+
+    get_gcc_bin_path () {
+        bin_filename=$(ls $GCC_LOCATION/bin | grep "^$1-$GCC_BIN_VERSION_SUFFIX$" | head -n 1)
+        echo "$GCC_LOCATION/bin/$bin_filename"
+    }
+    
+    export CC=$(get_gcc_bin_path gcc)
+    export CXX=$(get_gcc_bin_path g++)
+    export CPP=$(get_gcc_bin_path cpp)
+    export LD=$(get_gcc_bin_path gcc)
 else 
     sudo apt update && sudo apt install build-essential m4 texinfo bison
 fi
