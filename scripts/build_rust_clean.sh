@@ -1,9 +1,12 @@
 #!/bin/bash
 
+RUST_VERSION=$1
+
 TEMP_DIR="$PWD/temp"
 WORKSPACE_DIR="$TEMP_DIR/rust-workspace"
 BUILD_DIR="$WORKSPACE_DIR/rust-build"
-MIRROR="https://github.com/rust-lang/rust.git"
+RUST_FILENAME="$RUST_VERSION.tar.gz"
+RUST_URL="https://github.com/rust-lang/rust/archive/refs/tags/$RUST_FILENAME"
 RUST_SRC_DIR="$WORKSPACE_DIR/rust-$RUST_VERSION"
 TOOLS_DIR="$PWD/tools"
 
@@ -13,9 +16,9 @@ set -x
 # Install dependencies
 echo "Step 1: Install dependencies"
 if [[ "$OSTYPE" == "darwin"* ]]; then
-    brew install git
-else 
-    sudo apt update && sudo apt install git
+    brew install wget
+# else 
+    # sudo apt update && sudo apt install git
 fi
 
 # Create directory structure
@@ -26,14 +29,24 @@ cd "$WORKSPACE_DIR"
 
 # Download sources
 echo "Step 3: Downloading sources"
-git clone "$MIRROR"
+wget "$RUST_URL"
 
+# Unpack sources
+echo "Step 4: Unpacking sources"
+tar -xzf "$RUST_FILENAME"
 
+# Create build directory
+echo "Step 5: Creating build directory"
+mkdir "$BUILD_DIR"
 
+# Create configuration
+echo "Step 6: Creating Rust configuration"
+cd "$BUILD_DIR"
+bash "$RUST_SRC_DIR/x" setup
 
-
-
-
+# Build
+echo "Step 6: Building Rust compiler"
+bash "$RUST_SRC_DIR/x"
 
 
 

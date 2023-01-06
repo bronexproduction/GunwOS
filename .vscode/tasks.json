@@ -114,7 +114,7 @@
         {
             "label": "Build tools (Rust)",
             "type": "shell",
-            "command": "time bash scripts/build_rust_clean.sh",
+            "command": "time bash scripts/build_rust_clean.sh ${input:rustVersion}",
             "group": {
                 "kind": "none",
                 "isDefault": false
@@ -148,6 +148,11 @@
             "description": "GCC executable format:",
             "default": "elf",
             "type": "promptString"
-        }
+        },
+        {
+            "id": "rustVersion",
+            "description": "Rust version:",
+            "type": "promptString"
+        },
     ]
 }
