@@ -105,7 +105,16 @@
         {
             "label": "Build tools (GCC, LD)",
             "type": "shell",
-            "command": "time bash scripts/build_tools_clean.sh ${input:targetSystemArch}-${input:gccExecutableFormat} ${input:gccVersion} ${input:binutilsVersion} ${input:newlibVersion}",
+            "command": "time bash scripts/build_gcc_clean.sh ${input:targetSystemArch}-${input:gccExecutableFormat} ${input:gccVersion} ${input:binutilsVersion} ${input:newlibVersion}",
+            "group": {
+                "kind": "none",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "Build tools (Rust)",
+            "type": "shell",
+            "command": "time bash scripts/build_rust_clean.sh",
             "group": {
                 "kind": "none",
                 "isDefault": false
