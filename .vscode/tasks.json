@@ -32,7 +32,7 @@
         {
             "label": "Build and debug (QEMU)",
             "type": "shell",
-            "command": "bash scripts/qemu_run_debug.sh build/gunwos.img",
+            "command": "bash scripts/qemu_run.sh build/gunwos.img debug",
             "group": {
                 "kind": "build",
                 "isDefault": false

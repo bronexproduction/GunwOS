@@ -1,5 +1,14 @@
 #!/bin/bash
 
 set -e
+set -x
 
-qemu-system-i386 -monitor stdio -soundhw pcspk -drive file=$1,index=0,if=floppy,format=raw
+MODE=$2
+
+if [[ "$MODE" == "debug"* ]]; then
+    EPARAMS=("-s" "-S")
+else
+    EPARAMS=()
+fi
+
+qemu-system-i386 ${EPARAMS[@]} -monitor stdio -drive file=$1,index=0,if=floppy,format=raw
