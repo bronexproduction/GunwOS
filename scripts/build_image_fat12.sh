@@ -1,7 +1,6 @@
 #!/bin/bash
 
 set -e
-set -x
 
 BOOTLOADER_BYTES_EXPECTED=512
 BOOTLOADER_SIGNATURE_EXPECTED=aa55
@@ -38,7 +37,7 @@ if [ $BOOTLOADER_BYTES -ne $BOOTLOADER_BYTES_EXPECTED ]; then
 fi
 
 # Check bootloader signature
-BOOTLOADER_SIGNATURE=$(tail -c 2 "$BOOTLOADER_FILE" | hexdump | awk '{print $2}')
+BOOTLOADER_SIGNATURE=$(tail -c 2 "$BOOTLOADER_FILE" | hexdump -x | awk '{print $2}')
 if [[ "$BOOTLOADER_SIGNATURE" != "$BOOTLOADER_SIGNATURE_EXPECTED" ]]; then
     echo "Invalid bootloader signature: $BOOTLOADER_SIGNATURE"
     exit 1
