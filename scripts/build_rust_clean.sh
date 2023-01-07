@@ -23,13 +23,12 @@ else
 fi
 
 # Install dependencies
-echo "Step 1: Install dependencies" 
-DEPS=("git" "cmake" "ninja")
+echo "Step 1: Install dependencies"
     
 if [[ "$OSTYPE" == "darwin"* ]]; then
-    brew install ${DEPS[@]}
+    brew install git cmake ninja
 else 
-    sudo apt update && sudo apt ${DEPS[@]}
+    sudo apt update && sudo apt install git
 fi
 
 # Create directory structure
