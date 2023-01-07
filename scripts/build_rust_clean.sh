@@ -17,8 +17,8 @@ set -x
 echo "Step 1: Install dependencies"
 if [[ "$OSTYPE" == "darwin"* ]]; then
     brew install wget
-# else 
-    # sudo apt update && sudo apt install git
+else 
+    # sudo apt update && sudo apt install
 fi
 
 # Create directory structure
@@ -42,14 +42,14 @@ mkdir "$BUILD_DIR"
 # Create configuration
 echo "Step 6: Creating Rust configuration"
 cd "$BUILD_DIR"
-bash "$RUST_SRC_DIR/x" setup
+bash "$RUST_SRC_DIR/x" setup compiler
 
 # Build
-echo "Step 6: Building Rust compiler"
-bash "$RUST_SRC_DIR/x"
+echo "Step 7: Building Rust compiler"
+bash "$RUST_SRC_DIR/x" build compiler
 
 
-
+exit 4
 
 
 
