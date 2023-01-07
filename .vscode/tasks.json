@@ -152,6 +152,7 @@
         {
             "id": "rustVersion",
             "description": "Rust version:",
+            "default": "latest",
             "type": "promptString"
         },
     ]
