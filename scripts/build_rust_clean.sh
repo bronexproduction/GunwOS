@@ -4,7 +4,8 @@ if [ "$#" -ne 1 ]; then
     echo "Incorrect number of arguments"
 fi
 
-RUST_VERSION=$1
+TARGET=$1
+RUST_VERSION=$2
 
 TEMP_DIR="$PWD/temp"
 TOOLS_DIR="$PWD/tools"
@@ -59,7 +60,7 @@ mkdir "$BUILD_DIR"
 # Create configuration
 echo "Step 5: Creating Rust configuration"
 cd "$BUILD_DIR"
-"$RUST_SRC_DIR/configure" --prefix="$TEMP_INSTALL_DIR"
+"$RUST_SRC_DIR/configure" --prefix="$TEMP_INSTALL_DIR" --target="$TARGET"
 
 # Install
 echo "Step 6: Building and installing"

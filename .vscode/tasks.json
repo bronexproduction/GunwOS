@@ -114,7 +114,7 @@
         {
             "label": "Build tools (Rust)",
             "type": "shell",
-            "command": "time bash scripts/build_rust_clean.sh ${input:rustVersion}",
+            "command": "time bash scripts/build_rust_clean.sh ${input:targetSystemArch}-${input:gccExecutableFormat} ${input:rustVersion}",
             "group": {
                 "kind": "none",
                 "isDefault": false
