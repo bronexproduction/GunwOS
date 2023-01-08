@@ -28,7 +28,7 @@ echo "Step 1: Install dependencies"
 if [[ "$OSTYPE" == "darwin"* ]]; then
     brew install git cmake ninja
 else 
-    sudo apt update && sudo apt install git curl build-essential
+    sudo apt update && sudo apt install git curl build-essential cmake
 fi
 
 # Create directory structure
