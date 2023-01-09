@@ -60,7 +60,8 @@ mkdir "$BUILD_DIR"
 # Create configuration
 echo "Step 5: Creating Rust configuration"
 cd "$BUILD_DIR"
-"$RUST_SRC_DIR/configure" --prefix="$TEMP_INSTALL_DIR" --target="$TARGET"
+"$RUST_SRC_DIR/configure" --prefix="$TEMP_INSTALL_DIR" --target="$TARGET" \
+    --disable-docs
 
 # Install
 echo "Step 6: Building and installing"
