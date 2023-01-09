@@ -8,7 +8,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     if [[ "$(uname -m)" == "x86_64" ]]; then
         TOOLS_ID=1w17A9ZFjoRMMtxyVQItj0KvqCjhsdtTF
     else
-        TOOLS_ID=1w17A9ZFjoRMMtxyVQItj0KvqCjhsdtTF
+        TOOLS_ID=1bo9BwLs_HF9UcCaXWXEDess6__xXpBP4
     fi    
 else
     # Linux

@@ -1,10 +1,12 @@
 GCC_VERSION=9.4.0
 BINUTILS_VERSION=2.39
 NEWLIB_VERSION=4.2.0.20211231
+RUST_VERSION=1.66.0
 
 SRC_DIR="$(PWD)/src"
 TOOLS_DIR="$(PWD)/tools"
 GCC_DIR="$(TOOLS_DIR)/gunwxcc-$(GCC_VERSION)_binutils-$(BINUTILS_VERSION)_newlib-$(NEWLIB_VERSION)"
+RUST_DIR="$(TOOLS_DIR)/rust-$(RUST_VERSION)"
 UTL_DIR="$(PWD)/utl"
 TESTS_DIR="$(PWD)/tests/modules"
 export SCRIPTS_DIR="$(PWD)/scripts"
@@ -16,12 +18,15 @@ export ASM=nasm
 export C="$(GCC_DIR)/bin/i386-elf-gcc"
 export CXX="$(GCC_DIR)/bin/i386-elf-g++"
 export L="$(GCC_DIR)/bin/i386-elf-ld"
+export RUSTC="$(RUST_DIR)/bin/rustc"
 
 export CFLAGS_GLOBAL=-fdebug-prefix-map=$(BUILD_DIR)=.
 export CXXFLAGS_GLOBAL=-fdebug-prefix-map=$(BUILD_DIR)=.
+export RSFLAGS_GLOBAL=
 
 export C_DIR_LISTING=find . -name '*.c' -type f
 export CXX_DIR_LISTING=find . -name '*.cpp' -type f
+export RS_DIR_LISTING=find . -name '*.rs' -type f
 
 LFLAGS=-melf_i386 -T linker.ld
 LFLAGS_SYSTEM=$(LFLAGS)

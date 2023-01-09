@@ -5,8 +5,6 @@
   "disable-redzone": true,
   "dynamic-linking-available": false,
   "executables": true,
-  "linker-flavor": "ld.lld",          // ??
-  "linker": "rust-lld",               // ??
   "llvm-target": "i386-unknown-none",
   "os": "none",
   "panic-strategy": "abort",
