@@ -5,6 +5,7 @@ RUST_VERSION=1.66.0
 
 SRC_DIR="$(PWD)/src"
 TOOLS_DIR="$(PWD)/tools"
+SPEC_DIR="$(PWD)/spec"
 GCC_DIR="$(TOOLS_DIR)/gunwxcc-$(GCC_VERSION)_binutils-$(BINUTILS_VERSION)_newlib-$(NEWLIB_VERSION)"
 RUST_DIR="$(TOOLS_DIR)/rust-$(RUST_VERSION)"
 UTL_DIR="$(PWD)/utl"
