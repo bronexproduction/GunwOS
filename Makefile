@@ -22,7 +22,7 @@ export RUSTC="$(RUST_DIR)/bin/rustc"
 
 export CFLAGS_GLOBAL=-fdebug-prefix-map=$(BUILD_DIR)=.
 export CXXFLAGS_GLOBAL=-fdebug-prefix-map=$(BUILD_DIR)=.
-export RSFLAGS_GLOBAL=--emit=obj
+export RSFLAGS_GLOBAL=--emit=obj --crate-type=lib
 
 export C_DIR_LISTING=find . -name '*.c' -type f
 export CXX_DIR_LISTING=find . -name '*.cpp' -type f
