@@ -10,7 +10,8 @@ RUST_VERSION=$2
 TEMP_DIR="$PWD/temp"
 TOOLS_DIR="$PWD/tools"
 WORKSPACE_DIR="$TEMP_DIR/rust-workspace"
-BUILD_DIR="$WORKSPACE_DIR/rust-build"
+XCOMP_BUILD_DIR="$WORKSPACE_DIR/rust-build"
+LIBCORE_BUILD_DIR="$WORKSPACE_DIR/libcore-build"
 RUST_GIT="https://github.com/rust-lang/rust.git"
 RUST_LATEST_URL="https://github.com/rust-lang/rust/releases/latest"
 
@@ -46,38 +47,42 @@ if [[ "$RUST_VERSION" == "latest" ]]; then
     RUST_VERSION=${latest_version_url##*/}
 fi
 
-INSTALL_DIR_NAME="rust-${RUST_VERSION}"
-RUST_SRC_DIR="$WORKSPACE_DIR/$INSTALL_DIR_NAME"
-INSTALL_DIR="$TOOLS_DIR/$INSTALL_DIR_NAME"
-TEMP_INSTALL_DIR="$WORKSPACE_DIR/temp-$INSTALL_DIR_NAME"
+XCOMP_INSTALL_DIR_NAME="rust-${RUST_VERSION}"
+LIBCORE_COMPILER_INSTALL_DIR_NAME="libcore-compiler-${RUST_VERSION}"
+LIBCORE_INSTALL_DIR_NAME="libcore-${RUST_VERSION}"
+RUST_SRC_DIR="$WORKSPACE_DIR/$XCOMP_INSTALL_DIR_NAME"
+XCOMP_INSTALL_DIR="$TOOLS_DIR/$XCOMP_INSTALL_DIR_NAME"
+LIBCORE_COMPILER_INSTALL_DIR="$WORKSPACE_DIR/$LIBCORE_COMPILER_INSTALL_DIR_NAME"
+TEMP_XCOMP_INSTALL_DIR="$WORKSPACE_DIR/temp-$XCOMP_INSTALL_DIR_NAME"
+TEMP_LIBCORE_INSTALL_DIR="$WORKSPACE_DIR/temp-$LIBCORE_INSTALL_DIR_NAME"
 
 git clone --depth 1 --branch "$RUST_VERSION" "$RUST_GIT" "$RUST_SRC_DIR"
 
-# Create build directory
-echo "Step 4: Creating build directory"
-mkdir "$BUILD_DIR"
-
 # Create configuration
-echo "Step 5: Creating Rust configuration"
-cd "$BUILD_DIR"
-"$RUST_SRC_DIR/configure" --prefix="$TEMP_INSTALL_DIR" --target="$TARGET" \
+echo "Step 4: Creating Rust configuration"
+mkdir "$XCOMP_BUILD_DIR" && cd "$XCOMP_BUILD_DIR"
+"$RUST_SRC_DIR/configure" --prefix="$TEMP_XCOMP_INSTALL_DIR" --target="$TARGET" \
     --disable-docs
 
 # Build
-echo "Step 6: Building and installing"
-rm -rf "$TEMP_INSTALL_DIR"
+echo "Step 5: Building and installing"
+rm -rf "$TEMP_XCOMP_INSTALL_DIR"
 make "-j$THREADS" install
 
 # Build core library
-echo "Step 7: Building and installing core library"
-"$TEMP_INSTALL_DIR/bin/rustc" "$RUST_SRC_DIR/library/core/src/lib.rs"
+echo "Step 6: Building and installing core library"
+mkdir "$LIBCORE_BUILD_DIR" && cd "$LIBCORE_BUILD_DIR"
+"$RUST_SRC_DIR/configure" --prefix="$LIBCORE_COMPILER_INSTALL_DIR" --disable-docs
+rm -rf "$LIBCORE_COMPILER_INSTALL_DIR"
+make "-j$THREADS" install
+"$LIBCORE_COMPILER_INSTALL_DIR/bin/rustc" "$RUST_SRC_DIR/library/core/src/lib.rs"
 
 # Install
-echo "Step 8: Installing"
-rm -rf "$INSTALL_DIR"
+echo "Step 7: Installing"
+rm -rf "$XCOMP_INSTALL_DIR"
 mkdir -p "$TOOLS_DIR"
-mv "$TEMP_INSTALL_DIR" "$INSTALL_DIR"
+mv "$TEMP_XCOMP_INSTALL_DIR" "$XCOMP_INSTALL_DIR"
 
 # Cleanup
-echo "Step 9: Cleanup"
+echo "Step 8: Cleanup"
 rm -rf "$TEMP_DIR"
