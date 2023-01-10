@@ -11,6 +11,7 @@ TEMP_DIR="$PWD/temp"
 TOOLS_DIR="$PWD/tools"
 WORKSPACE_DIR="$TEMP_DIR/rust-workspace"
 XCOMP_BUILD_DIR="$WORKSPACE_DIR/rust-build"
+LIBCORE_COMPILER_BUILD_DIR="$WORKSPACE_DIR/libcore-compiler-build"
 LIBCORE_BUILD_DIR="$WORKSPACE_DIR/libcore-build"
 RUST_GIT="https://github.com/rust-lang/rust.git"
 RUST_LATEST_URL="https://github.com/rust-lang/rust/releases/latest"
@@ -71,10 +72,11 @@ make "-j$THREADS" install
 
 # Build core library
 echo "Step 6: Building and installing core library"
-mkdir "$LIBCORE_BUILD_DIR" && cd "$LIBCORE_BUILD_DIR"
+mkdir "$LIBCORE_COMPILER_BUILD_DIR" && cd "$LIBCORE_COMPILER_BUILD_DIR"
 "$RUST_SRC_DIR/configure" --prefix="$LIBCORE_COMPILER_INSTALL_DIR" --disable-docs
 rm -rf "$LIBCORE_COMPILER_INSTALL_DIR"
 make "-j$THREADS" install
+mkdir "$LIBCORE_BUILD_DIR" && cd "$LIBCORE_BUILD_DIR"
 "$LIBCORE_COMPILER_INSTALL_DIR/bin/rustc" "$RUST_SRC_DIR/library/core/src/lib.rs"
 
 # Install
