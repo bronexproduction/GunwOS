@@ -63,14 +63,21 @@ cd "$BUILD_DIR"
 "$RUST_SRC_DIR/configure" --prefix="$TEMP_INSTALL_DIR" --target="$TARGET" \
     --disable-docs
 
-# Install
+# Build
 echo "Step 6: Building and installing"
 rm -rf "$TEMP_INSTALL_DIR"
 make "-j$THREADS" install
+
+# Build core library
+echo "Step 7: Building and installing core library"
+"$TEMP_INSTALL_DIR/bin/rustc" "$RUST_SRC_DIR/library/core/src/lib.rs"
+
+# Install
+echo "Step 8: Installing"
 rm -rf "$INSTALL_DIR"
 mkdir -p "$TOOLS_DIR"
 mv "$TEMP_INSTALL_DIR" "$INSTALL_DIR"
 
 # Cleanup
-echo "Step 7: Cleanup"
+echo "Step 9: Cleanup"
 rm -rf "$TEMP_DIR"
