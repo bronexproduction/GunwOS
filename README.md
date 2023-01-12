@@ -14,6 +14,7 @@ Cross-compiler and the tools required for building are available ([here](https:/
 
 ## Languages
 
+* x86 Assembly
 * C
 * Rust
 
