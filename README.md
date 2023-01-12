@@ -12,9 +12,10 @@ GuwnOS is an hobbyist attempt to create an operating system for x86 architecture
 
 Cross-compiler and the tools required for building are available ([here](https://drive.google.com/file/d/1lFFKgdm-P1xWkPZV1mojCOeyCxg9KSrK/view?usp=sharing))
 
-## Known issues
+## Languages
 
-* Building on a 64-bit-only or M1 Mac is not supported yet
+* C
+* Rust
 
 ## Contributors
 
