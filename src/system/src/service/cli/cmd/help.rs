@@ -7,7 +7,7 @@
 
 #![no_std]
 
-extern "C" { pub fn s_trm_puts(szText: &str); }
+extern "C" { fn s_trm_puts(szText: &str); }
 
 #[no_mangle]
 fn cmd_help(_params: &[char]) {
