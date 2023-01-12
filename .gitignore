@@ -4,3 +4,5 @@ tools
 build
 *.o
 *.lst
+gcc-workspace
+temp

@@ -1,6 +1,4 @@
-ASMFLAGS=-f
-
-ASMFLAGS_BOOT=$(ASMFLAGS) bin -l boot.lst
+ASMFLAGS=-f bin -l boot.lst
 
 all:
-	$(ASM) $(ASMFLAGS_BOOT) -o boot.gfb preloader.s
+	$(ASM) $(ASMFLAGS) -o boot.gfb preloader.s
