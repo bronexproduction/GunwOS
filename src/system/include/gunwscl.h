@@ -59,8 +59,7 @@ static inline enum gnwDriverError devInstall(const struct gnwDeviceDescriptor * 
     SYSCALL_FUNC(DEV_INSTALL);
     SYSCALL_INT;
 
-#warning TO BE IMPLEMENTED
-    return NO_ERROR;
+    SYSCALL_RETVAL(32);
 }
 
 /*
@@ -75,8 +74,7 @@ static inline enum gnwDriverError devStart(const struct gnwDeviceDescriptor * co
     SYSCALL_FUNC(DEV_START);
     SYSCALL_INT;
 
-#warning TO BE IMPLEMENTED
-    return NO_ERROR;
+    SYSCALL_RETVAL(32);
 }
 
 #endif // GUNWOS_GUNWSCL_H

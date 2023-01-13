@@ -174,6 +174,7 @@
     ISR_PUSH
     __asm__ volatile ("sti");
     __asm__ volatile ("call k_scl_syscall");
+    /* EAX on stack should contain return value (if any) */
     ISR_POP
     __asm__ volatile ("iret");
 }

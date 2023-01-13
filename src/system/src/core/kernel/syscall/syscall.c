@@ -55,7 +55,7 @@ __attribute__((naked)) void k_scl_syscall() {
     }
 
     /*
-        Calling service routine associated with requested IRQ
+        Calling requested syscall function
     */
     __asm__ volatile ("call *%0" : : "r" (scr));
     

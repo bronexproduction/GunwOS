@@ -32,6 +32,7 @@
 */
 #define SYSCALL_FUNC(CODE) REG(32, _code, eax); _code = (uint_32) SYSCALL_FUNCTION_ ## CODE ;
 #define SYSCALL_INT { __asm__ volatile ("int $" STR(SYSCALL_INTERRUPT) ); }
+#define SYSCALL_RETVAL(BITS) { REG_RET(BITS, _retVal); return _retVal; }
 
 #define SYSCALL_PAR(NAME, VALUE, REG_NAME) REG(32, _param ## NAME , REG_NAME); _param ## NAME = (uint_32) VALUE ;
 #define SYSCALL_PAR1(VALUE) SYSCALL_PAR(1, VALUE, ebx)
