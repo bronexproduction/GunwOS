@@ -10,7 +10,7 @@
 */
 
 extern void c_drv_loadDefaults();
-#warning Terminal to be implemented as character device driver
+#warning Terminal to be implemented as character device
 extern void c_trm_init();
 extern void s_init();
 
