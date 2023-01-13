@@ -5,7 +5,7 @@
 //  Created by Artur Danielewski on 13.03.2020.
 //
 
-#include "../../../../lib/stdgunw/types.h"
+#include <stdgunw/types.h>
 
 struct k_kbf_listener {
     void (*up)(const uint_8 c);

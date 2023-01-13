@@ -1,5 +1,5 @@
 //
-//  memmgr.h
+//  mem.h
 //  GunwOS
 //
 //  Created by Artur Danielewski on 27.12.2022.
@@ -10,9 +10,9 @@
 /*
     Returns system memory size in bytes
 */
-size_t s_memmgr_totalMemBytes();
+size_t s_mem_totalMemBytes();
 
 /*
     Returns free system memory size in bytes
 */
-size_t s_memmgr_freeMemBytes();
+size_t s_mem_freeMemBytes();

@@ -8,8 +8,8 @@
 #ifndef GUNWOS_SCL_DEF_H
 #define GUNWOS_SCL_DEF_H
 
-#include "../../lib/stdgunw/types.h"
-#include "../../lib/stdgunw/utils.h"
+#include <stdgunw/types.h>
+#include <stdgunw/utils.h>
 
 #define SYSCALL_INTERRUPT           0x69
 

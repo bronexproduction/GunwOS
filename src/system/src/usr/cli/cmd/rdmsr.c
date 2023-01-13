@@ -6,8 +6,8 @@
 //
 
 #include "../cmdutil.h"
-#include "../../../terminal/terminal.h"
-#include "../../hal/io/reg.h"
+#include "../../../core/driver/terminal/terminal.h"
+#include "../../../core/kernel/hal/io/reg.h"
 
 void cmd_rdmsr(const char * const params) {
     CMD_PARAM_INT(0, uint_32, msrAddr, "MSR address")

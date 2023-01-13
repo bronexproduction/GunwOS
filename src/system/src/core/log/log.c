@@ -7,7 +7,7 @@
 
 #include "log.h"
 
-#include "../terminal/terminal.h"
+#include "../driver/terminal/terminal.h"
 
 void k_log(const enum k_log_lvl level, const char *msg) {
     char *lvlString;

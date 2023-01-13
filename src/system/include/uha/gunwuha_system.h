@@ -9,7 +9,7 @@
 #ifndef GUNWOS_GUNWUHA_SYSTEM_H
 #define GUNWOS_GUNWUHA_SYSTEM_H
 
-#include "../../../lib/stdgunw/types.h"
+#include <stdgunw/types.h>
 
 struct gnwDeviceUHA_system {
     uint_32 _unused;

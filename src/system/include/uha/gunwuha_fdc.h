@@ -9,7 +9,7 @@
 #ifndef GUNWOS_GUNWUHA_FDC_H
 #define GUNWOS_GUNWUHA_FDC_H
 
-#include "../../../lib/stdgunw/types.h"
+#include <stdgunw/types.h>
 #include "../gunwstor.h"
 
 struct gnwDeviceUHA_fdc {

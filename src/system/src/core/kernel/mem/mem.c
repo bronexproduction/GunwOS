@@ -1,16 +1,16 @@
 //
-//  memmgr.c
+//  mem.c
 //  GunwOS
 //
 //  Created by Artur Danielewski on 27.12.2022.
 //
 
-#include "memmgr.h"
+#include "mem.h"
 
-size_t s_memmgr_totalMemBytes() {
+size_t s_mem_totalMemBytes() {
     return 0;
 }
 
-size_t s_memmgr_freeMemBytes() {
+size_t s_mem_freeMemBytes() {
     return 0;
 }

@@ -9,7 +9,7 @@
 
 #include <stdgunw/utils.h>
 #include <stdgunw/string.h>
-#include "../../terminal/terminal.h"
+#include "../../core/driver/terminal/terminal.h"
 #include "cmdutil.h"
 
 #define CMD_REG(NAME)                              \
@@ -32,7 +32,6 @@ void (*k_cli_cmdSelector(const char *const cmd))(const char *const) {
     CMD_REG(help)
     CMD_REG(busr)
     CMD_REG(busw)
-    CMD_REG(memr)
     CMD_REG(rdmsr)
     CMD_REG(uptime)
     CMD_REG(sysinfo)

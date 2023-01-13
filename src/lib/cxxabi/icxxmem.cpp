@@ -5,7 +5,7 @@
 //  Created by Artur Danielewski on 20.01.2018.
 //
 
-#include "../stdgunw/types.h"
+#include <stdgunw/types.h>
 
 void *operator new(size_t size) {
     return 0; // requires system call - NOT IMPLEMENTED YET

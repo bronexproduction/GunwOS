@@ -9,7 +9,7 @@
 #include <stdgunw/string.h>
 #include <stdgunw/math.h>
 #include <stdgunw/mem.h>
-#include "../driver/display/video/video.h"
+#include "../display/video/video.h"
 
 #define IO_GENERAL_FAILURE -1
 

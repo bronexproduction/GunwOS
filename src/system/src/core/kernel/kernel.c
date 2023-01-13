@@ -10,7 +10,7 @@
 extern void k_tmr_init();
 extern void k_hal_init(const char codeSegOffset);
 extern void k_trm_init();
-extern void k_devmgr_init();
+extern void k_dev_init();
 extern void k_cli_init();
 extern void k_rlp_start();
 
@@ -38,7 +38,7 @@ void __attribute__((fastcall, section(".start"))) __kernel_start(const struct k_
     k_hal_init(bootData->gdt_codeSegOffset);
     
     k_trm_init();
-    k_devmgr_init();
+    k_dev_init();
     k_cli_init();
 
     k_rlp_start();

@@ -5,7 +5,7 @@
 //  Created by Artur Danielewski on 19.01.2018.
 //
 
-#include "../../../../lib/stdgunw/types.h"
+#include <stdgunw/types.h>
 
 void k_trm_init();
 

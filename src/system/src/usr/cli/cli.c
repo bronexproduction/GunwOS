@@ -5,11 +5,11 @@
 //  Created by Artur Danielewski on 14.03.2020.
 //
 
-#include "../../terminal/terminal.h"
-#include "../../terminal/keybuf.h"
-#include "../../terminal/keymap.h"
-#include "../../terminal/charset.h"
-#include "../../log/log.h"
+#include "../../core/driver/terminal/terminal.h"
+#include "../../core/driver/terminal/keybuf.h"
+#include "../../core/driver/terminal/keymap.h"
+#include "../../core/driver/terminal/charset.h"
+#include "../../core/log/log.h"
 #include <stdgunw/types.h>
 #include <stdgunw/mem.h>
 #include "cmdutil.h"

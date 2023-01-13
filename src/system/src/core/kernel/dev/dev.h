@@ -1,5 +1,5 @@
 //
-//  devmgr.h
+//  dev.h
 //  GunwOS
 //
 //  Created by Artur Danielewski on 09.03.2020.
@@ -11,14 +11,14 @@
 /*
     Returns number of available device descriptors
 */
-size_t k_devmgr_descriptorCount();
+size_t k_dev_descriptorCount();
 
 /*
     Listing of devices of given type
 */
-struct gnwDeviceDescriptor k_devmgr_descriptorFor(const uint_32 descriptorID);
+struct gnwDeviceDescriptor k_dev_descriptorFor(const uint_32 descriptorID);
 
 /*
     Installs new device and the driver
 */
-enum gnwDriverError k_devmgr_install(struct gnwDeviceDescriptor descriptor);
+enum gnwDriverError k_dev_install(struct gnwDeviceDescriptor descriptor);

@@ -8,9 +8,9 @@
 #include "keybuf.h"
 
 #include "keymap.h"
-#include "../log/log.h"
-#include "../../../include/gunwdispatch.h"
-#include "../../../include/gunwscl.h"
+#include "../../log/log.h"
+#include <gunwdispatch.h>
+#include <gunwscl.h>
 
 static char kbuf[SCANCODES_MAX];
 static struct k_kbf_listener klsn;

@@ -9,7 +9,7 @@
 #ifndef GUNWOS_GUNWUHA_DRIVECTRL_H
 #define GUNWOS_GUNWUHA_DRIVECTRL_H
 
-#include "../../../lib/stdgunw/types.h"
+#include <stdgunw/types.h>
 #include "../gunwstor.h"
 
 struct gnwDeviceUHA_driveCtrl {

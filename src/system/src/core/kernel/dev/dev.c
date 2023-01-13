@@ -1,12 +1,12 @@
 //
-//  devmgr.c
+//  dev.c
 //  GunwOS
 //
 //  Created by Artur Danielewski on 06.03.2020.
 //
 
 #include <gunwdrv.h>
-#include "devmgr.h"
+#include "dev.h"
 #include "../../log/log.h"
 
 #define MAX_DEVICES 8
@@ -27,7 +27,7 @@ extern struct gnwDeviceUHA s_drv_keyboard_uha();
 extern int k_trm_putc(const char c);
 extern int k_trm_puts(const char * const s);
 
-enum gnwDriverError k_devmgr_install(struct gnwDeviceDescriptor descriptor) {
+enum gnwDriverError k_dev_install(struct gnwDeviceDescriptor descriptor) {
 
     k_trm_puts("Device manager: Install driver named ");
     k_trm_puts(descriptor.name);
@@ -50,7 +50,7 @@ enum gnwDriverError k_devmgr_install(struct gnwDeviceDescriptor descriptor) {
     return NO_ERROR;
 }
 
-enum gnwDriverError k_devmgr_start(struct gnwDeviceDescriptor descriptor) {
+enum gnwDriverError k_dev_start(struct gnwDeviceDescriptor descriptor) {
 
     k_trm_puts("Device manager: ");
     k_trm_puts(descriptor.name);
@@ -85,7 +85,7 @@ struct gnwDeviceDescriptor createDeviceDescriptor(const enum gnwDeviceType devic
     };
 }
 
-void k_devmgr_init() {
+void k_dev_init() {
 
     k_trm_puts("Device manager: Init\n");
 
@@ -99,13 +99,13 @@ void k_devmgr_init() {
                                                             0x40,
                                                             s_drv_pit(),
                                                             "8253/8254 Programmable Interrupt Timer");
-    e = k_devmgr_install(pit);
+    e = k_dev_install(pit);
     if (e != NO_ERROR) { 
         LOG_FATAL("Fatal error: PIT driver installation failed"); 
         return; 
     }
     else {
-        e = k_devmgr_start(pit);
+        e = k_dev_start(pit);
         if (e != NO_ERROR) { LOG_FATAL("Fatal error: PIT driver startup failed"); return; }
     }
 
@@ -117,22 +117,22 @@ void k_devmgr_init() {
                                                             0x60,
                                                             s_drv_keyboard(),
                                                             "8042 PS/2 Controller");
-    e = k_devmgr_install(kbd);
+    e = k_dev_install(kbd);
     if (e != NO_ERROR) { 
         LOG_FATAL("Fatal error: Keyboard driver installation failed"); 
         return; 
     }
     else {
-        e = k_devmgr_start(kbd);
+        e = k_dev_start(kbd);
         if (e != NO_ERROR) { LOG_FATAL("Fatal error: Keyboard driver startup failed"); return; }
     }
 }
 
-size_t k_devmgr_descriptorCount() {
+size_t k_dev_descriptorCount() {
     return MAX_DEVICES;
 }
 
-struct gnwDeviceDescriptor k_devmgr_descriptorFor(const uint_32 descriptorID) {
+struct gnwDeviceDescriptor k_dev_descriptorFor(const uint_32 descriptorID) {
     if (descriptorID >= MAX_DEVICES) {
         LOG_FATAL("Device descriptor over limit")
         __builtin_unreachable();

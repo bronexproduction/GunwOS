@@ -8,7 +8,7 @@
 #ifndef GUNWOS_GUNWDISPATCH_H
 #define GUNWOS_GUNWDISPATCH_H
 
-#include "../../lib/stdgunw/types.h"
+#include <stdgunw/types.h>
 
 /*
     Function dispatch descriptor

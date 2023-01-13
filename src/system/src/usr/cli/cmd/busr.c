@@ -7,7 +7,7 @@
 
 #include <gunwio.h>
 #include "../cmdutil.h"
-#include "../../../terminal/terminal.h"
+#include "../../../core/driver/terminal/terminal.h"
 
 void cmd_busr(const char * const params) {
     CMD_PARAM_INT(0, uint_16, addr, "bus address")

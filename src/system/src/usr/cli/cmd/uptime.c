@@ -6,8 +6,8 @@
 //
 
 #include "../cmdutil.h"
-#include "../../../terminal/terminal.h"
-#include "../../timer/timer.h"
+#include "../../../core/driver/terminal/terminal.h"
+#include "../../../core/kernel/timer/timer.h"
 
 void cmd_uptime(const char * const params) {
     CMD_NOPARAM

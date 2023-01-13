@@ -76,7 +76,7 @@ SCR(exit,
         * ECX - string length
 
 */
-#include "../../terminal/terminal.h"
+#include "../../driver/terminal/terminal.h"
 SCR(printl,
     REG(32, str, ebx)
     REG(32, len, ecx)

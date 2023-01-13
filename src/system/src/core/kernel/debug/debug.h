@@ -5,7 +5,7 @@
 //  Created by Artur Danielewski on 07.02.2021.
 //
 
-#include "../../../../lib/stdgunw/string.h"
+#include <stdgunw/string.h>
 #include "../../video/video.h"
 
 #define DBG_PREVIEW_FRAME {\
