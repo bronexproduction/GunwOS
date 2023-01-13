@@ -8,11 +8,12 @@
 #ifndef GUNWOS_GUNWDRV_H
 #define GUNWOS_GUNWDRV_H
 
-#include "../../lib/stdgunw/types.h"
+#include <stdgunw/types.h>
 #include "uha/gunwuha_system.h"
 #include "uha/gunwuha_keyboard.h"
 #include "uha/gunwuha_fdc.h"
 #include "uha/gunwuha_drivectrl.h"
+#include "uha/gunwuha_char.h"
 
 /*
     Device driver error codes
@@ -32,6 +33,8 @@ enum gnwDeviceType {
     DEV_TYPE_SYSTEM,
     DEV_TYPE_KEYBOARD,
     DEV_TYPE_FDC,
+    DEV_TYPE_CHAR_IN,
+    DEV_TYPE_CHAR_OUT,
     DEV_TYPE_UNKNOWN
 };
 
@@ -45,7 +48,9 @@ struct gnwDeviceUHA {
     struct gnwDeviceUHA_system system;      // DEV_TYPE_SYSTEM
     struct gnwDeviceUHA_keyboard keyboard;  // DEV_TYPE_KEYBOARD
     struct gnwDeviceUHA_fdc fdc;            // DEV_TYPE_FDC
-    struct gnwDeviceUHA_driveCtrl storage;    // for storage devices
+    struct gnwDeviceUHA_driveCtrl storage;  // for storage devices
+    struct gnwDeviceUHA_char_in charIn;     // DEV_TYPE_CHAR_IN
+    struct gnwDeviceUHA_char_out charOut;   // DEV_TYPE_CHAR_OUT
 };
 
 /*  Device driver descriptor
