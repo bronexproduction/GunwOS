@@ -1,5 +1,5 @@
 ASMFLAGS=-f elf
-CFLAGS=-std=c11 -c -ffreestanding -mno-red-zone -Wall -Wextra -ggdb $(CFLAGS_GLOBAL)
+CFLAGS=-std=c11 -c -ffreestanding -mno-red-zone -Wall -Wextra -ggdb -I include $(CFLAGS_GLOBAL)
 CXXFLAGS=-std=c++11 -c -ffreestanding -mno-red-zone -Wall -Wextra -ggdb $(CXXFLAGS_GLOBAL)
 RSFLAGS=$(RSFLAGS_GLOBAL)
 LFLAGS=-melf_i386 -i
@@ -15,7 +15,7 @@ kernel.o: _kernel_entry.o _kernel.o
 	$(L) $(LFLAGS) -o $@ $(shell $(O_DIR_LISTING))
 
 _kernel_entry.o:
-	$(ASM) $(ASMFLAGS) -o $@ src/kernel/kernel_entry.s
+	$(ASM) $(ASMFLAGS) -o $@ src/core/kernel/kernel_entry.s
 
 _kernel.o:
 	$(C_DIR_LISTING) -exec $(C) $(CFLAGS) -o {}.o {} $(EXEC_TERMINATOR)
