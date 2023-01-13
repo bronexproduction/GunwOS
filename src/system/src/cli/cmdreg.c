@@ -30,8 +30,6 @@ void (*s_cli_cmdSelector(const char *const cmd))(const char *const) {
         c_trm_puts("Available commands:");
     }
     CMD_REG(help)
-    CMD_REG(busr)
-    CMD_REG(busw)
     CMD_REG(rdmsr)
     CMD_REG(uptime)
     CMD_REG(sysinfo)
