@@ -5,7 +5,6 @@
 //  Created by Artur Danielewski on 27.12.2022.
 //
 
-#include <gunwio.h>
 #include "../cmdutil.h"
 #include "../../core/driver/terminal/terminal.h"
 #include "../../core/kernel/mem/mem.h"

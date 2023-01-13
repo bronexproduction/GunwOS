@@ -69,35 +69,6 @@ SCR(exit,
 
 /*
     Code - 0x04
-    Function - PRINTL
-
-    Params:
-    
-        * EBX - pointer to char array
-        * ECX - string length
-
-*/
-#include "../../driver/terminal/terminal.h"
-SCR(printl,
-    REG(32, str, ebx)
-    REG(32, len, ecx)
-
-    REG_RET(32, wrCount)
-
-    __asm__ volatile ("cmpl $0, %ecx");
-    __asm__ volatile ("jz k_scr_printl_atZeroLength");
-
-    wrCount = c_trm_putsl((char *)str, len);
-    __asm__ volatile ("jmp k_scr_printl_end");
-
-    __asm__ volatile ("k_scr_printl_atZeroLength:");
-    wrCount = c_trm_puts((char *)str);
-
-    __asm__ volatile ("k_scr_printl_end:")
-)
-
-/*
-    Code - 0x05
     Function - DISPATCH
 
     Params:
@@ -111,7 +82,7 @@ SCR(dispatch,
 )
 
 /*
-    Code - 0x06
+    Code - 0x05
     Function - SLEEPMS
 
     Params:
@@ -125,7 +96,7 @@ SCR(sleepms,
 )
 
 /*
-    Code - 0x07
+    Code - 0x06
     Function - DEV_INSTALL
 
     Params:
@@ -144,7 +115,7 @@ SCR(devInstall,
 )
 
 /*
-    Code - 0x08
+    Code - 0x07
     Function - DEV_START
 
     Params:

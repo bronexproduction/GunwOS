@@ -27,30 +27,24 @@ __attribute__((naked)) void k_scr_exit();
 
 /*
     Code - 0x04
-    Function - PRINTL
-*/
-__attribute__((naked)) void k_scr_printl();
-
-/*
-    Code - 0x05
     Function - DISPATCH
 */
 __attribute__((naked)) void k_scr_dispatch();
 
 /*
-    Code - 0x06
+    Code - 0x05
     Function - SLEEPMS
 */
 __attribute__((naked)) void k_scr_sleepms();
 
 /*
-    Code - 0x07
+    Code - 0x06
     Function - DEV_INSTALL
 */
 __attribute__((naked)) enum gnwDriverError k_scr_devInstall(const struct gnwDeviceDescriptor * const);
 
 /*
-    Code - 0x08
+    Code - 0x07
     Function - DEV_START
 */
 __attribute__((naked)) enum gnwDriverError k_scr_devStart(const struct gnwDeviceDescriptor * const);
