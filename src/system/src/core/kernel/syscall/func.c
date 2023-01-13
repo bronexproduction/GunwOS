@@ -82,7 +82,7 @@ SCR(printl,
     REG(32, str, ebx)
     REG(32, len, ecx)
 
-    REG(32, wrCount, eax)
+    REG_RET(32, wrCount)
 
     __asm__ volatile ("cmpl $0, %ecx");
     __asm__ volatile ("jz k_scr_printl_atZeroLength");
@@ -137,8 +137,10 @@ SCR(sleepms,
 SCR(devInstall,
     REG(32, desc, ebx)
 
+    REG_RET(32, err)
+
     enum gnwDriverError k_dev_install(const struct gnwDeviceDescriptor * const);
-    k_dev_install((struct gnwDeviceDescriptor*)desc);
+    err = k_dev_install((struct gnwDeviceDescriptor*)desc);
 )
 
 /*
@@ -154,6 +156,8 @@ SCR(devInstall,
 SCR(devStart,
     REG(32, desc, ebx)
 
+    REG_RET(32, err)
+
     enum gnwDriverError k_dev_start(const struct gnwDeviceDescriptor * const);
-    k_dev_start((struct gnwDeviceDescriptor*)desc);
+    err = k_dev_start((struct gnwDeviceDescriptor*)desc);
 )

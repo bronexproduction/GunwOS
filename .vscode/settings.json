@@ -65,6 +65,11 @@
     "system_error": "cpp",
     "thread": "cpp",
     "typeindex": "c",
-    "internet": "c"
+    "internet": "c",
+    "*.tcc": "c",
+    "array": "c",
+    "functional": "c",
+    "regex": "c",
+    "utility": "c"
   }
 }
