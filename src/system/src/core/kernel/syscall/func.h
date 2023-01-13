@@ -5,6 +5,8 @@
 //  Created by Artur Danielewski on 11.01.2021.
 //
 
+#include <gunwdrv.h>
+
 /*
     Code - 0x01
     Function - RDB
@@ -40,3 +42,15 @@ __attribute__((naked)) void k_scr_dispatch();
     Function - SLEEPMS
 */
 __attribute__((naked)) void k_scr_sleepms();
+
+/*
+    Code - 0x07
+    Function - DEV_INSTALL
+*/
+__attribute__((naked)) enum gnwDriverError k_scr_devInstall(const struct gnwDeviceDescriptor * const);
+
+/*
+    Code - 0x08
+    Function - DEV_START
+*/
+__attribute__((naked)) enum gnwDriverError k_scr_devStart(const struct gnwDeviceDescriptor * const);

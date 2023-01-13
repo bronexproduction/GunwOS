@@ -17,8 +17,3 @@ size_t k_dev_descriptorCount();
     Listing of devices of given type
 */
 struct gnwDeviceDescriptor k_dev_descriptorFor(const uint_32 descriptorID);
-
-/*
-    Installs new device and the driver
-*/
-enum gnwDriverError k_dev_install(struct gnwDeviceDescriptor descriptor);

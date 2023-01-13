@@ -9,6 +9,7 @@
 #define GUNWOS_GUNWSCL_H
 
 #include "scl_def.h"
+#include "gunwdrv.h"
 
 /*
     Ends process execution
@@ -44,6 +45,38 @@ static inline void sleepms(const unsigned int ms) {
 
     SYSCALL_FUNC(SLEEPMS);
     SYSCALL_INT;
+}
+
+/*
+    Requests installation of given hardware driver
+
+    Params:
+        * desc - device descriptor (see gunwdrv.h)
+*/
+static inline enum gnwDriverError devInstall(const struct gnwDeviceDescriptor * const desc) {
+    SYSCALL_PAR1(desc);
+
+    SYSCALL_FUNC(DEV_INSTALL);
+    SYSCALL_INT;
+
+#warning TO BE IMPLEMENTED
+    return NO_ERROR;
+}
+
+/*
+    Requests start of given hardware driver
+
+    Params:
+        * desc - device descriptor (see gunwdrv.h)
+*/
+static inline enum gnwDriverError devStart(const struct gnwDeviceDescriptor * const desc) {
+    SYSCALL_PAR1(desc);
+
+    SYSCALL_FUNC(DEV_START);
+    SYSCALL_INT;
+
+#warning TO BE IMPLEMENTED
+    return NO_ERROR;
 }
 
 #endif // GUNWOS_GUNWSCL_H

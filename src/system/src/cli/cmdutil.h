@@ -12,16 +12,16 @@
 
 #define CMD_PARAM_SEPARATOR ' '
 
-#define CMD_NOPARAM { if (params) { k_trm_puts("Error: Parameters not supported"); return; } }
+#define CMD_NOPARAM { if (params) { c_trm_puts("Error: Parameters not supported"); return; } }
 
 #define CMD_PARAM_INT(INDEX, TYPE, PAR, PAR_DESC) \
     TYPE PAR = 0; \
     { \
         struct k_cmd_param desc = k_cmd_paramAt(params, INDEX); \
         if (!desc.length) { \
-            k_trm_puts("Error: No "); \
-            k_trm_puts(PAR_DESC); \
-            k_trm_puts(" specified"); \
+            c_trm_puts("Error: No "); \
+            c_trm_puts(PAR_DESC); \
+            c_trm_puts(" specified"); \
             return; \
         } \
         char curr [desc.length + 1]; \
@@ -29,11 +29,11 @@
         k_cmd_paramLoad(params, curr, desc); \
         PAR = (TYPE)str2int(curr, &err); \
         if (err) { \
-            k_trm_puts("Error: Incorrect "); \
-            k_trm_puts(PAR_DESC); \
-            k_trm_puts(": \""); \
-            k_trm_puts(curr); \
-            k_trm_puts("\""); \
+            c_trm_puts("Error: Incorrect "); \
+            c_trm_puts(PAR_DESC); \
+            c_trm_puts(": \""); \
+            c_trm_puts(curr); \
+            c_trm_puts("\""); \
             return;\
         } \
     }

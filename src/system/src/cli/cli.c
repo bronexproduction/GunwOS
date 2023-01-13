@@ -5,11 +5,11 @@
 //  Created by Artur Danielewski on 14.03.2020.
 //
 
-#include "../../core/driver/terminal/terminal.h"
-#include "../../core/driver/terminal/keybuf.h"
-#include "../../core/driver/terminal/keymap.h"
-#include "../../core/driver/terminal/charset.h"
-#include "../../core/log/log.h"
+#include "../core/driver/terminal/terminal.h"
+#include "../core/driver/terminal/keybuf.h"
+#include "../core/driver/terminal/keymap.h"
+#include "../core/driver/terminal/charset.h"
+#include "../core/log/log.h"
 #include <stdgunw/types.h>
 #include <stdgunw/mem.h>
 #include "cmdutil.h"
@@ -21,10 +21,10 @@ static uint_8 cmdBufIndex;
 
 static void prompt();
 
-void k_cli_init() {
+void s_cli_init() {
     k_kbf_register((struct k_kbf_listener){0, onKeyDown});
     
-    k_trm_puts("GunwOS 0.0.3_DEV started. (C) Bronex Production 2022\n\n");
+    c_trm_puts("GunwOS 0.0.3_DEV started. (C) Bronex Production 2022\n\n");
 
     prompt();
 }
@@ -33,12 +33,12 @@ static void prompt() {
     memnull(cmdBuf, CMD_LEN_MAX * sizeof(char) + 1);
     cmdBufIndex = 0;
 
-    k_trm_puts("[GunwCLI]: ");
+    c_trm_puts("[GunwCLI]: ");
 }
 
-extern void (*k_cli_cmdSelector(const char * const cmd))(const char * const);
+extern void (*s_cli_cmdSelector(const char * const cmd))(const char * const);
 
-uint_8 k_cli_command(const char * const cmd) {
+uint_8 s_cli_command(const char * const cmd) {
     uint_8 i = 0;
 
     while (cmd[i] && cmd[i] != ' ') ++i;
@@ -49,7 +49,7 @@ uint_8 k_cli_command(const char * const cmd) {
     memnull(cmdOnly, (i + 1) * sizeof(char));
     memcopy(cmd, cmdOnly, i * sizeof(char));
 
-    void (*sel)(const char * const) = k_cli_cmdSelector(cmdOnly);
+    void (*sel)(const char * const) = s_cli_cmdSelector(cmdOnly);
 
     if (sel) {
         sel(params);
@@ -63,14 +63,14 @@ static void exec() {
     if (cmdBufIndex) {
         cmdBuf[CMD_LEN_MAX] = 0;    // Just in case
 
-        if (!k_cli_command(cmdBuf)) {
-            k_trm_puts("Command not recognized: \"");
-            k_trm_puts(cmdBuf);
-            k_trm_puts("\"\n");
+        if (!s_cli_command(cmdBuf)) {
+            c_trm_puts("Command not recognized: \"");
+            c_trm_puts(cmdBuf);
+            c_trm_puts("\"\n");
         }
     }
     
-    k_trm_putc('\n');
+    c_trm_putc('\n');
     prompt();
 }
 
@@ -83,7 +83,7 @@ static void append(const char c) {
         
         // Execute command
         
-        k_trm_putc(c);
+        c_trm_putc(c);
         exec();
     } else if (c == '\b') { 
         
@@ -94,7 +94,7 @@ static void append(const char c) {
         }
 
         cmdBuf[--cmdBufIndex] = 0;
-        k_trm_putc(c);
+        c_trm_putc(c);
     } else {                    
         
         // Append new character
@@ -104,15 +104,15 @@ static void append(const char c) {
         }
 
         cmdBuf[cmdBufIndex++] = c;
-        k_trm_putc(c);
+        c_trm_putc(c);
     }
 }
 
 static void onKeyDown(const uint_8 c) {
     if (!k_kmp_defines(k_kmp_default, c)) {
-        k_trm_puts("[UNKNOWN SCANCODE: ");
-        k_trm_putin(c);
-        k_trm_putc(']');
+        c_trm_puts("[UNKNOWN SCANCODE: ");
+        c_trm_putin(c);
+        c_trm_putc(']');
         return;
     }
 

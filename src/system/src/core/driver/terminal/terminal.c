@@ -17,23 +17,23 @@ const VideoCharColor    TERMINAL_CHAR_COLOR_DFLT    = White;
 const VideoCharColor    TERMINAL_BG_COLOR_DFLT      = Black;
 const unsigned char     TERMINAL_CMD_MAXLEN         = 255;
 
-struct k_trm_terminal {
+struct c_trm_terminal {
     char cursorX;
     char cursorY;
-} k_trm_default;
+} c_trm_default;
 
-void k_trm_clear() {
-    k_trm_default.cursorX = 0;
-    k_trm_default.cursorY = 0;
+void c_trm_clear() {
+    c_trm_default.cursorX = 0;
+    c_trm_default.cursorY = 0;
 
     k_vid_clear();
 }
 
-void k_trm_init() {
-    k_trm_clear();
+void c_trm_init() {
+    c_trm_clear();
 }
 
-void k_trm_lineShift(struct k_trm_terminal * const trm) {
+void c_trm_lineShift(struct c_trm_terminal * const trm) {
     uint_8 columns = k_vid_dimension(0);
     uint_8 rows = k_vid_dimension(1);
     point_t lastRowBegin = (point_t){ 0, rows - 1 };
@@ -47,16 +47,16 @@ void k_trm_lineShift(struct k_trm_terminal * const trm) {
     trm->cursorY--;
 }
 
-static void k_trm_newline(struct k_trm_terminal * const trm) {
+static void c_trm_newline(struct c_trm_terminal * const trm) {
     trm->cursorX = 0;
     ++(trm->cursorY);
 
     while (trm->cursorY == k_vid_dimension(1)) {
-        k_trm_lineShift(trm);
+        c_trm_lineShift(trm);
     }
 }
 
-static void k_trm_back(struct k_trm_terminal * const trm) {
+static void c_trm_back(struct c_trm_terminal * const trm) {
     if (!(trm->cursorX)) {
         --(trm->cursorY);
         trm->cursorX = k_vid_dimension(0) - 1;
@@ -65,42 +65,42 @@ static void k_trm_back(struct k_trm_terminal * const trm) {
     }
 }
 
-int k_trm_append(const char c) {
+int c_trm_append(const char c) {
     if (c == '\n') {
-        k_trm_newline(&k_trm_default);
+        c_trm_newline(&c_trm_default);
     } else if (c == '\b') {
-        if (!(k_trm_default.cursorX || k_trm_default.cursorY)) {
+        if (!(c_trm_default.cursorX || c_trm_default.cursorY)) {
             return 0;
         }
 
-        k_trm_back(&k_trm_default);
-        k_trm_append(' ');
-        k_trm_back(&k_trm_default);
+        c_trm_back(&c_trm_default);
+        c_trm_append(' ');
+        c_trm_back(&c_trm_default);
     } else {
         char defaultAttr = k_vid_charAttr(TERMINAL_CHAR_COLOR_DFLT, TERMINAL_BG_COLOR_DFLT);
 
         const struct k_vid_character vChar = {c, defaultAttr};
-        k_vid_draw(vChar, k_trm_default.cursorX, k_trm_default.cursorY);
+        k_vid_draw(vChar, c_trm_default.cursorX, c_trm_default.cursorY);
     
-        k_trm_default.cursorX++;
+        c_trm_default.cursorX++;
         
-        if (k_trm_default.cursorX >= k_vid_dimension(0)) {
-            k_trm_newline(&k_trm_default);
+        if (c_trm_default.cursorX >= k_vid_dimension(0)) {
+            c_trm_newline(&c_trm_default);
         }
     }
 
     return 1;
 }
 
-int k_trm_putc(const char c) {
-     return k_trm_append(c);
+int c_trm_putc(const char c) {
+     return c_trm_append(c);
 }
 
-int k_trm_puts(const char * const s) {
+int c_trm_puts(const char * const s) {
     int bWritten = 0;
 
     while (*(s + bWritten)) {
-        if (k_trm_putc(*(s + bWritten))) {
+        if (c_trm_putc(*(s + bWritten))) {
             bWritten++;
         } else return IO_GENERAL_FAILURE;
     }
@@ -108,7 +108,7 @@ int k_trm_puts(const char * const s) {
     return bWritten;
 }
 
-int k_trm_putsl(const char * const s, unsigned int l) {
+int c_trm_putsl(const char * const s, unsigned int l) {
     if (!l) {
         return 0;
     }
@@ -117,7 +117,7 @@ int k_trm_putsl(const char * const s, unsigned int l) {
     int bWritten = 0;
 
     while (*(s + bWritten) && l--) {
-        if (k_trm_putc(*(s + bWritten))) {
+        if (c_trm_putc(*(s + bWritten))) {
             bWritten++;
         } else return IO_GENERAL_FAILURE;
     }
@@ -130,33 +130,33 @@ int k_trm_putsl(const char * const s, unsigned int l) {
 }
 
 // TODO: 64-bit version
-int k_trm_putun_base(uint_32 i, uint_8 base) {
+int c_trm_putun_base(uint_32 i, uint_8 base) {
     char buffer[32];
     memnull(buffer, 32);
     size_t length = uint2str(i, buffer, base);
 
     if (!length) return IO_GENERAL_FAILURE;
 
-    return k_trm_putsl(buffer, length);
+    return c_trm_putsl(buffer, length);
 }
 
 // TODO: 64-bit version
-int k_trm_putun(uint_32 i) {
-    return k_trm_putun_base(i, 10);
+int c_trm_putun(uint_32 i) {
+    return c_trm_putun_base(i, 10);
 }
 
 // TODO: 64-bit version
-int k_trm_putun_h(uint_32 i) {
-    return k_trm_putun_base(i, 16);
+int c_trm_putun_h(uint_32 i) {
+    return c_trm_putun_base(i, 16);
 }
 
 // TODO: 64-bit version
-int k_trm_putin(int_32 i) {
+int c_trm_putin(int_32 i) {
     char buffer[32];
     memnull(buffer, 32);
     size_t length = int2str(i, buffer);
 
     if (!length) return IO_GENERAL_FAILURE;
 
-    return k_trm_putsl(buffer, length);
+    return c_trm_putsl(buffer, length);
 }

@@ -46,8 +46,8 @@ void k_oops(const char *reason) {
     for (size_t i = 0; i < 20; ++i) {
         // uint_32 val = *(stackPtr + sizeof(uint_32 *)*i);
 
-        // k_trm_putin(val);
-        // k_trm_putc(' ');
+        // c_trm_putin(val);
+        // c_trm_putc(' ');
     } 
 
     while(1);

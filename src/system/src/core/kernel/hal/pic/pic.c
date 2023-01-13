@@ -18,9 +18,9 @@
 #include "../io/io.h"
 #include "../../../log/log.h"
  
-extern int k_trm_putc(const char c);
-extern int k_trm_puts(const char * const s);
-extern int k_trm_putun(uint_32 i);
+extern int c_trm_putc(const char c);
+extern int c_trm_puts(const char * const s);
+extern int c_trm_putun(uint_32 i);
 
 static uint_8 init() {
 

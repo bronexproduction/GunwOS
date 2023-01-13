@@ -14,6 +14,7 @@
 #include "../hal/io/bus.h"
 #include <stdgunw/utils.h>
 #include <gunwdispatch.h>
+#include <gunwdrv.h>
 
 #define SCR_END {__asm__ volatile ("ret");};
 #define SCR(NAME, CODE) __attribute__((naked)) void k_scr_ ## NAME () { CODE; SCR_END }
@@ -86,11 +87,11 @@ SCR(printl,
     __asm__ volatile ("cmpl $0, %ecx");
     __asm__ volatile ("jz k_scr_printl_atZeroLength");
 
-    wrCount = k_trm_putsl((char *)str, len);
+    wrCount = c_trm_putsl((char *)str, len);
     __asm__ volatile ("jmp k_scr_printl_end");
 
     __asm__ volatile ("k_scr_printl_atZeroLength:");
-    wrCount = k_trm_puts((char *)str);
+    wrCount = c_trm_puts((char *)str);
 
     __asm__ volatile ("k_scr_printl_end:")
 )
@@ -121,4 +122,38 @@ SCR(sleepms,
 
     extern void k_tmr_sleepms(const unsigned int);
     k_tmr_sleepms(timems);
+)
+
+/*
+    Code - 0x07
+    Function - DEV_INSTALL
+
+    Params:
+        * EBX - device descriptor (struct gnwDeviceDescriptor *)
+
+    Note:
+        * Not allowed from user-level
+*/
+SCR(devInstall,
+    REG(32, desc, ebx)
+
+    enum gnwDriverError k_dev_install(const struct gnwDeviceDescriptor * const);
+    k_dev_install((struct gnwDeviceDescriptor*)desc);
+)
+
+/*
+    Code - 0x08
+    Function - DEV_START
+
+    Params:
+        * EBX - device descriptor (struct gnwDeviceDescriptor *)
+
+    Note:
+        * Not allowed from user-level
+*/
+SCR(devStart,
+    REG(32, desc, ebx)
+
+    enum gnwDriverError k_dev_start(const struct gnwDeviceDescriptor * const);
+    k_dev_start((struct gnwDeviceDescriptor*)desc);
 )

@@ -32,10 +32,10 @@ void k_log(const enum k_log_lvl level, const char *msg) {
             return;
     }
 
-    k_trm_puts(lvlString);
-    k_trm_puts(": ");
-    k_trm_puts(msg);
-    k_trm_putc('\n');
+    c_trm_puts(lvlString);
+    c_trm_puts(": ");
+    c_trm_puts(msg);
+    c_trm_putc('\n');
 
     while(level == FATAL);
 }
