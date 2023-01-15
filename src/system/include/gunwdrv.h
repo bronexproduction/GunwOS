@@ -36,7 +36,8 @@ enum gnwDeviceType {
     DEV_TYPE_FDC,
     DEV_TYPE_CHAR_IN,
     DEV_TYPE_CHAR_OUT,
-    DEV_TYPE_UNKNOWN
+    DEV_TYPE_DISPLAY,
+    DEV_TYPE_UNKNOWN    = 0xFFFFFFFF
 };
 
 /*
@@ -52,6 +53,7 @@ struct gnwDeviceUHA {
     struct gnwDeviceUHA_driveCtrl storage;  // for storage devices
     struct gnwDeviceUHA_char_in charIn;     // DEV_TYPE_CHAR_IN
     struct gnwDeviceUHA_char_out charOut;   // DEV_TYPE_CHAR_OUT
+    struct gnwDeviceUHA_display display;    // DEV_TYPE_DISPLAY
 };
 
 /*  Device driver descriptor

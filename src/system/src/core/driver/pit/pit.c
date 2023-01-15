@@ -113,14 +113,28 @@ ISR(
     k_pit_routine();
 )
 
-struct gnwDriverDesc s_drv_pit() {
+static struct gnwDriverDesc desc() {
     return (struct gnwDriverDesc){ init, 0, isr, 0 };
 }
 
-struct gnwDeviceUHA s_drv_pit_uha() {
+static struct gnwDeviceUHA uha() {
     struct gnwDeviceUHA uha;
 
     uha.system._unused = 0;
 
     return uha;
+}
+
+struct gnwDeviceDescriptor c_drv_pit_descriptor() {
+    return (struct gnwDeviceDescriptor) {
+        DEV_TYPE_SYSTEM,
+        uha(),
+        (struct gnwDeviceDriver) {
+            (struct gnwDeviceIO) {
+                0x40
+            },
+            desc()
+        },
+        "8253/8254 Programmable Interrupt Timer"
+    }
 }

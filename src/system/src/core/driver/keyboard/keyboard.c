@@ -112,14 +112,28 @@ ISR(
     }
 )
 
-struct gnwDriverDesc s_drv_keyboard() {
+static struct gnwDriverDesc desc() {
     return (struct gnwDriverDesc){ 0, 0, isr, 1 };
 }
 
-struct gnwDeviceUHA s_drv_keyboard_uha() {
+static struct gnwDeviceUHA uha() {
     struct gnwDeviceUHA uha;
 
     uha.system._unused = 0;
 
     return uha;
+}
+
+struct gnwDeviceDescriptor c_drv_keyboard_descriptor() {
+    return (struct gnwDeviceDescriptor) {
+        DEV_TYPE_KEYBOARD,
+        uha(),
+        (struct gnwDeviceDriver) {
+            (struct gnwDeviceIO) {
+                0x60
+            },
+            desc()
+        },
+        "8042 PS/2 Controller"
+    }
 }
