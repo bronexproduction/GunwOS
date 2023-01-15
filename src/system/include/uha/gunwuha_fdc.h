@@ -22,7 +22,7 @@ struct gnwDeviceUHA_fdc {
         Result:
             * 1 if drive present, 0 otherwise
     */
-    uint_8 (*drivePresent)(const uint_8 index);
+    bool (*drivePresent)(const uint_8 index);
 
     /*
         Check drive geometry

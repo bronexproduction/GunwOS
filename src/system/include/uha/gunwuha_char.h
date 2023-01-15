@@ -22,7 +22,7 @@ struct gnwDeviceUHA_char_in {
         Result:
             * 1 if data available, 0 otherwise
     */
-    uint_8 (*hasData)();
+    bool (*hasData)();
 
     /*
         Read character
@@ -46,7 +46,7 @@ struct gnwDeviceUHA_char_out {
         Result:
             * 1 if device ready, 0 otherwise
     */
-    uint_8 (*isReadyToWrite)();
+    bool (*isReadyToWrite)();
 
     /*
         Write character to the device
