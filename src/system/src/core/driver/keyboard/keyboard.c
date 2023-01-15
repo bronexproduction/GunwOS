@@ -135,5 +135,5 @@ struct gnwDeviceDescriptor c_drv_keyboard_descriptor() {
             desc()
         },
         "8042 PS/2 Controller"
-    }
+    };
 }
