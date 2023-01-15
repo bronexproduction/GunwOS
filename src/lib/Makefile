@@ -5,7 +5,7 @@ LFLAGS_FINAL=$(LFLAGS) -i
 O_DIR_LISTING=find . -maxdepth 1 -name '*.o' -type f
 
 MODULES=	stdgunw \
-			cxxabi
+			# cxxabi
 
 .PHONY: all $(MODULES)
 
