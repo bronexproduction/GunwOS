@@ -79,7 +79,7 @@ enum gnwDriverError k_dev_install(size_t *id, const struct gnwDeviceDescriptor *
         return IRQ_CONFLICT;
     }
 
-    struct device dev = { descriptor, 0, 0 };
+    struct device dev = { *descriptor, 0, 0 };
 
     dev.initialized = (driverDesc->init ? driverDesc->init() : 1);
     if (!dev.initialized) {
