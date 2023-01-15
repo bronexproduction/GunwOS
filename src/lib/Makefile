@@ -24,4 +24,4 @@ link_dry_run:
 	$(L) $(LFLAGS_DRY) -o lib_dry.o $(shell $(O_DIR_LISTING)) && rm lib_dry.o
 
 clean_o:
-	find . -type f -name '*.o' ! -name 'kernel.o' -delete
+	find . -type f -name '*.o' ! -name 'lib.o' -delete
