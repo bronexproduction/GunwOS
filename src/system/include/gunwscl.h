@@ -10,6 +10,7 @@
 
 #include "scl_def.h"
 #include "gunwdrv.h"
+#include "gunwdispatch.h"
 
 /*
     Ends process execution
