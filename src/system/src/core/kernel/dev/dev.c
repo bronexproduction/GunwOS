@@ -110,7 +110,7 @@ enum gnwDriverError k_dev_start(size_t id) {
         return UNKNOWN;
     }
 
-    static struct device *dev = &devices[id];
+    struct device *dev = &devices[id];
 
     c_trm_puts("Device manager: ");
     c_trm_puts(dev->desc.name);
