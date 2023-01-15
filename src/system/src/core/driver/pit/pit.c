@@ -136,5 +136,5 @@ struct gnwDeviceDescriptor c_drv_pit_descriptor() {
             desc()
         },
         "8253/8254 Programmable Interrupt Timer"
-    }
+    };
 }
