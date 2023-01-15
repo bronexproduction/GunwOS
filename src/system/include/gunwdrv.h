@@ -14,6 +14,7 @@
 #include "uha/gunwuha_fdc.h"
 #include "uha/gunwuha_drivectrl.h"
 #include "uha/gunwuha_char.h"
+#include "uha/gunwuha_display.h"
 
 /*
     Device driver error codes
