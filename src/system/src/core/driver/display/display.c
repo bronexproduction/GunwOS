@@ -9,10 +9,10 @@
 
 static struct gnwDriverDesc desc() {
     return (struct gnwDriverDesc){ 
-        0,  // init
-        0,  // start
-        0,  // isr
-        0   // IRQ
+        nullptr,    // init
+        nullptr,    // start
+        nullptr,    // isr
+        NULL        // IRQ
     };
 }
 
