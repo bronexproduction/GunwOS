@@ -23,7 +23,7 @@ struct gnwDeviceUHA_display {
         Result:
             * X and Y display dimensions
     */
-    const point_t dimensions;
+    point_t dimensions;
 
     /*
         Display type
@@ -31,7 +31,7 @@ struct gnwDeviceUHA_display {
         Result:
             * Display type - enum gnwDeviceUHA_display_type
     */
-    const enum gnwDeviceUHA_display_type type;
+    enum gnwDeviceUHA_display_type type;
 
     /*
         Format
@@ -39,7 +39,7 @@ struct gnwDeviceUHA_display {
         Result:
             * Pixel/character format size (bytes)
     */
-    const size_t formatBytes;
+    size_t formatBytes;
 
     /*
         Update the framebuffer
@@ -47,7 +47,7 @@ struct gnwDeviceUHA_display {
         Params:
             * Framebuffer data (X*Y*formatBytes)
     */
-    const size_t (*update)(const uint_8 * const buffer);
+    size_t (*update)(const uint_8 * const buffer);
 };
 
 #endif // GUNWOS_GUNWUHA_DISPLAY_H
