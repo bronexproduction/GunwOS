@@ -6,6 +6,7 @@
 //
 
 #include <gunwdrv.h>
+#include <stdgunw/types.h>
 
 static struct gnwDriverDesc desc() {
     return (struct gnwDriverDesc){ 
