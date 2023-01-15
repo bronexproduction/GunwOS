@@ -36,5 +36,5 @@ struct gnwDeviceDescriptor c_drv_display_descriptor() {
             desc()
         },
         "Default text mode display"
-    }
+    };
 }
