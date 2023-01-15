@@ -51,7 +51,7 @@ static uint_8 validate(const struct gnwDeviceDescriptor * const descriptor) {
 
 enum gnwDriverError k_dev_install(size_t *id, const struct gnwDeviceDescriptor * const descriptor) {
     if (!id) {
-        LOG_FATAL("Identifier storage cannot be nullptr")
+        LOG_FATAL("Identifier storage cannot be nullptr");
         return UNKNOWN;
     }
     if (devicesCount >= MAX_DEVICES) {
@@ -66,21 +66,21 @@ enum gnwDriverError k_dev_install(size_t *id, const struct gnwDeviceDescriptor *
     c_trm_puts(descriptor->name);
     c_trm_putc('\n');
 
-    gnwDriverDesc *driverDesc = &(descriptor->driver.descriptor);
+    struct gnwDriverDesc *driverDesc = &(descriptor->driver.descriptor);
 
     if (driverDesc->irq >= DEV_IRQ_LIMIT) {
-        LOG_FATAL("Invalid IRQ value")
+        LOG_FATAL("Invalid IRQ value");
         return IRQ_INVALID;
     }
 
     if (k_hal_isIRQRegistered(driverDesc->irq)) {
-        LOG_FATAL("IRQ conflict")
+        LOG_FATAL("IRQ conflict");
         return IRQ_CONFLICT;
     }
 
     struct device dev = { descriptor, 0, 0 };
 
-    dev.initialized = driverDesc->init ? driverDesc->init() : 1;
+    dev.initialized = (driverDesc->init ? driverDesc->init() : 1);
     if (!dev.initialized) {
         LOG_ERR("Driver init failed");
         return UNINITIALIZED;
@@ -90,7 +90,7 @@ enum gnwDriverError k_dev_install(size_t *id, const struct gnwDeviceDescriptor *
 
     if (driverDesc->isr) {
         extern enum gnwDriverError k_hal_install(const struct gnwDriverDesc);
-        e = k_hal_install(descriptor->driver.descriptor)   
+        e = k_hal_install(descriptor->driver.descriptor);   
     }
 
     if (e != NO_ERROR) {
@@ -109,19 +109,20 @@ enum gnwDriverError k_dev_start(size_t id) {
         return UNKNOWN;
     }
 
-    c_trm_puts("Device manager: ");
-    c_trm_puts(descriptor->name);
-    c_trm_puts(" starting\n");
-
     static struct device *dev = &devices[id];
+
+    c_trm_puts("Device manager: ");
+    c_trm_puts(dev->desc.name);
+    c_trm_puts(" starting\n");
 
     if (!dev->initialized) {
         LOG_FATAL("Trying to start uninitialized driver");
         return UNINITIALIZED;
     }
 
-    dev->started = dev->driver.desc.start ? dev->driver.desc.start() : 1;
+    void (*start)(void) = dev->desc.driver.descriptor.start;
 
+    dev->started = (start ? start() : 1);
     if (!dev->started) {
         LOG_ERR("Error: Driver startup failed");
         return START_FAILED;

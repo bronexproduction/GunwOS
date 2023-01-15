@@ -62,10 +62,7 @@ struct gnwDeviceUHA {
 /*  Device driver descriptor
 
     Provides the kernel with entry points for general device operations
-    
-    In order to register a device in kernel
-    an instance of this type to be prepared
-    and passed to k_hal_install()  */
+*/
 struct gnwDriverDesc {
    
 /*  Pointer to device initialization routine
@@ -119,6 +116,10 @@ struct gnwDeviceDriver {
 
 /*
     Device descriptor
+
+    In order to register a device in kernel
+    an instance of this type to be prepared
+    and passed to k_dev_install()  
 */
 struct gnwDeviceDescriptor {
     /*

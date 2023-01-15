@@ -14,9 +14,9 @@
 
 #include "../log/log.h"
 
-extern struct gnwDriverDesc c_drv_display_descriptor();
-extern struct gnwDriverDesc c_drv_pit_descriptor();
-extern struct gnwDriverDesc c_drv_keyboard_descriptor();
+extern struct gnwDeviceDescriptor c_drv_display_descriptor();
+extern struct gnwDeviceDescriptor c_drv_pit_descriptor();
+extern struct gnwDeviceDescriptor c_drv_keyboard_descriptor();
 
 void c_drv_loadDefaults() {
     
