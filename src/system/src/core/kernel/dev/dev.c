@@ -12,7 +12,7 @@
 
 #define MAX_DEVICES 8
 
-static struct device {
+struct device {
     /*
         Driver descriptor
     */
@@ -21,12 +21,12 @@ static struct device {
     /*
         Initialization mark
     */
-    uint_8 initialized;
+    bool initialized;
 
     /*
         Driver start mark
     */
-    uint_8 started;
+    bool started;
 };
 
 static struct device devices[MAX_DEVICES];
