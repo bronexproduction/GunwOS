@@ -7,6 +7,7 @@
 
 #include <gunwdrv.h>
 #include "dev.h"
+#include "../hal/int/irq.h"
 #include "../../log/log.h"
 
 #define MAX_DEVICES 8
