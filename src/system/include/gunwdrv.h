@@ -9,6 +9,7 @@
 #define GUNWOS_GUNWDRV_H
 
 #include <stdgunw/types.h>
+#include <stdgunw/defs.h>
 #include "uha/gunwuha_system.h"
 #include "uha/gunwuha_keyboard.h"
 #include "uha/gunwuha_fdc.h"
@@ -72,7 +73,7 @@ struct gnwDriverDesc {
     Returns 1 on success, 0 otherwise
     
     NOTE: In this phase the interrupts are DISABLED */
-    uint_8 (*init)();
+    bool (*init)();
 
 /*
     Pointer to device start routine
@@ -80,7 +81,7 @@ struct gnwDriverDesc {
     Returns 1 on success, 0 otherwise
 
     Called after device is being initialized */
-    uint_8 (*start)();
+    bool (*start)();
 
 /*  Pointer to device interrupt service routine
 

@@ -121,7 +121,7 @@ enum gnwDriverError k_dev_start(size_t id) {
         return UNINITIALIZED;
     }
 
-    void (*start)(void) = dev->desc.driver.descriptor.start;
+    bool (*start)(void) = dev->desc.driver.descriptor.start;
 
     dev->started = (start ? start() : 1);
     if (!dev->started) {
