@@ -146,5 +146,5 @@ struct gnwDeviceDescriptor k_dev_descriptorFor(const uint_32 descriptorID) {
         __builtin_unreachable();
     }
 
-    return devices[descriptorID];
+    return devices[descriptorID].desc;
 }
