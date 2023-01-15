@@ -22,7 +22,7 @@ static uint_8 cmdBufIndex;
 static void prompt();
 
 void s_cli_init() {
-    k_kbf_register((struct k_kbf_listener){0, onKeyDown});
+    c_kbf_register((struct c_kbf_listener){0, onKeyDown});
     
     c_trm_puts("GunwOS 0.0.3_DEV started. (C) Bronex Production 2022\n\n");
 
@@ -109,21 +109,21 @@ static void append(const char c) {
 }
 
 static void onKeyDown(const uint_8 c) {
-    if (!k_kmp_defines(k_kmp_default, c)) {
+    if (!c_kmp_defines(c_kmp_default, c)) {
         c_trm_puts("[UNKNOWN SCANCODE: ");
         c_trm_putin(c);
         c_trm_putc(']');
         return;
     }
 
-    uint_8 charCode = *(&(k_kmp_default[c].code) + k_kbf_currModMask());
+    uint_8 charCode = *(&(c_kmp_default[c].code) + c_kbf_currModMask());
 
     if (charCode >= CHARSET_CODES_MAX) {
         LOG_FATAL("Character code over accepted limit")
         return;
     }
 
-    if (k_chs_defines(k_chs_default, charCode)) {
-        append(k_chs_default[charCode].character);
+    if (c_chs_defines(c_chs_default, charCode)) {
+        append(c_chs_default[charCode].character);
     }    
 }

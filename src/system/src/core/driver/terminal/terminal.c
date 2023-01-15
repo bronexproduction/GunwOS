@@ -9,7 +9,7 @@
 #include <stdgunw/string.h>
 #include <stdgunw/math.h>
 #include <stdgunw/mem.h>
-#include "../display/video/video.h"
+#include "video.h"
 
 #define IO_GENERAL_FAILURE -1
 
@@ -26,7 +26,7 @@ void c_trm_clear() {
     c_trm_default.cursorX = 0;
     c_trm_default.cursorY = 0;
 
-    k_vid_clear();
+    c_vid_clear();
 }
 
 void c_trm_init() {
@@ -34,15 +34,15 @@ void c_trm_init() {
 }
 
 void c_trm_lineShift(struct c_trm_terminal * const trm) {
-    uint_8 columns = k_vid_dimension(0);
-    uint_8 rows = k_vid_dimension(1);
+    uint_8 columns = c_vid_dimension(0);
+    uint_8 rows = c_vid_dimension(1);
     point_t lastRowBegin = (point_t){ 0, rows - 1 };
     point_t lastRowEnd = (point_t){ columns - 1, rows - 1 };
     
-    k_vid_shift(columns);
-    k_vid_fill(lastRowBegin,
+    c_vid_shift(columns);
+    c_vid_fill(lastRowBegin,
                lastRowEnd,
-               (struct k_vid_character){ 0, 0 });
+               (struct c_vid_character){ 0, 0 });
 
     trm->cursorY--;
 }
@@ -51,7 +51,7 @@ static void c_trm_newline(struct c_trm_terminal * const trm) {
     trm->cursorX = 0;
     ++(trm->cursorY);
 
-    while (trm->cursorY == k_vid_dimension(1)) {
+    while (trm->cursorY == c_vid_dimension(1)) {
         c_trm_lineShift(trm);
     }
 }
@@ -59,7 +59,7 @@ static void c_trm_newline(struct c_trm_terminal * const trm) {
 static void c_trm_back(struct c_trm_terminal * const trm) {
     if (!(trm->cursorX)) {
         --(trm->cursorY);
-        trm->cursorX = k_vid_dimension(0) - 1;
+        trm->cursorX = c_vid_dimension(0) - 1;
     } else {
         --(trm->cursorX);
     }
@@ -77,14 +77,14 @@ int c_trm_append(const char c) {
         c_trm_append(' ');
         c_trm_back(&c_trm_default);
     } else {
-        char defaultAttr = k_vid_charAttr(TERMINAL_CHAR_COLOR_DFLT, TERMINAL_BG_COLOR_DFLT);
+        char defaultAttr = c_vid_charAttr(TERMINAL_CHAR_COLOR_DFLT, TERMINAL_BG_COLOR_DFLT);
 
-        const struct k_vid_character vChar = {c, defaultAttr};
-        k_vid_draw(vChar, c_trm_default.cursorX, c_trm_default.cursorY);
+        const struct c_vid_character vChar = {c, defaultAttr};
+        c_vid_draw(vChar, c_trm_default.cursorX, c_trm_default.cursorY);
     
         c_trm_default.cursorX++;
         
-        if (c_trm_default.cursorX >= k_vid_dimension(0)) {
+        if (c_trm_default.cursorX >= c_vid_dimension(0)) {
             c_trm_newline(&c_trm_default);
         }
     }

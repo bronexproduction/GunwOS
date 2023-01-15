@@ -8,6 +8,8 @@
 #include <gunwdrv.h>
 #include <stdgunw/defs.h>
 
+const volatile ptr_t VIDEO_HW_MEM   = (volatile ptr_t)0xb8000;
+
 static struct gnwDriverDesc desc() {
     return (struct gnwDriverDesc){ 
         nullptr,    // init
