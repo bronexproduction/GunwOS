@@ -6,6 +6,7 @@
 //
 
 #include <stdgunw/types.h>
+#include <stdgunw/defs.h>
 #include <gunwdrv.h>
 #include "int/irq.h"
 #include "io/bus.h"
