@@ -19,6 +19,8 @@ static struct gnwDriverDesc desc() {
 static struct gnwDeviceUHA uha() {
     struct gnwDeviceUHA uha;
 
+    uha.system._unused = 0;
+
     return uha;
 }
 

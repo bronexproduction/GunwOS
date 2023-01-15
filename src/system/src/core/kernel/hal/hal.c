@@ -27,57 +27,33 @@ void k_hal_init(const char codeSegOffset) {
     __asm__ volatile ("sti");
 }
 
-struct driver {
-    /*
-        Driver descriptor
-    */
-    struct gnwDriverDesc desc;
+static void (*isrReg[DEV_IRQ_LIMIT]) (void);
 
-    /*
-        Initialization mark
-    */
-    uint_8 initialized;
+uint_8 k_hal_isIRQRegistered(uint_8 num) {
+    if (num >= DEV_IRQ_LIMIT) {
+        return 0;
+    }
+    if (isrReg[num] == nullptr) {
+        return 0;
+    }
 
-    /*
-        Driver start mark
-    */
-    uint_8 started;
-};
-
-static struct driver driverReg[DEV_IRQ_LIMIT];
+    return 1;
+}
 
 enum gnwDriverError k_hal_install(struct gnwDriverDesc driver) {
-    struct driver drv = { driver, 0, 0 };
-
-    if (driverReg[driver.irq].desc.isr) {
-        LOG_FATAL("IRQ conflict")
+    if (!driver.isr) {
+        return ISR_MISSING;
+    }
+    if (k_hal_isIRQRegistered(driver.irq)) {
         return IRQ_CONFLICT;
     }
 
-    drv.initialized = driver.init ? driver.init() : 1;
-    if (drv.initialized) {
-        driverReg[driver.irq] = drv;
+    isrReg[driver.irq] = driver.isr;
         
-        extern void k_pic_enableIRQ(const enum k_dev_irq);
-        k_pic_enableIRQ(driver.irq);
-    }
-    else {
-        LOG_ERR("Driver init failed");
-        return UNINITIALIZED;
-    }
-
-    return NO_ERROR;
-}
-
-enum gnwDriverError k_hal_start(struct gnwDriverDesc driver) {
-    if (!driverReg[driver.irq].desc.isr) {
-        LOG_FATAL("Trying to start uninitialized driver");
-        return UNINITIALIZED;
-    }
+    extern void k_pic_enableIRQ(const enum k_dev_irq);
+    k_pic_enableIRQ(driver.irq);
     
-    driverReg[driver.irq].started = driverReg[driver.irq].desc.start ? driverReg[driver.irq].desc.start() : 1;
-
-    return driverReg[driver.irq].started ? NO_ERROR : START_FAILED;
+    return NO_ERROR;
 }
 
 /*
@@ -101,7 +77,7 @@ __attribute__((naked)) void k_hal_irqHandle() {
     /*
         Checking if service routine for given IRQ is available
     */
-    void (*isr)() = driverReg[irq].desc.isr;
+    void (*isr)() = isrReg[irq];
     if (!isr) {
         __asm__ volatile ("jmp k_hal_irqHandle_irqServiceRoutineUnavailable");
     }

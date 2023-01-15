@@ -23,7 +23,9 @@ enum gnwDriverError {
     UNINITIALIZED   = 1,        // Driver initialization failed or driver expected to be initialized before requested operation
     START_FAILED    = 2,        // Driver start failed
     IRQ_CONFLICT    = 3,        // Driver caused IRQ conflict with another driver previously installed
-    LIMIT_REACHED   = 4,
+    IRQ_INVALID     = 4,
+    LIMIT_REACHED   = 5,
+    ISR_MISSING     = 6,
     UNKNOWN         = 0xFFFFFFFF
 };
 
