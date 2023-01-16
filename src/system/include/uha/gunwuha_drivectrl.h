@@ -26,7 +26,11 @@ struct gnwDeviceUHA_driveCtrl {
         Result:
             * number of sectors read
     */
-    size_t (*read)(const uint_8 index, const size_t lba, const size_t count, uint_8 * const buffer, struct gnwStorError *error);
+    size_t (*read)(const uint_8 index, 
+                   const size_t lba, 
+                   const size_t count, 
+                   uint_8 * const buffer, 
+                   struct gnwStorError *error);
 };
 
 #endif // GUNWOS_GUNWUHA_DRIVECTRL_H
