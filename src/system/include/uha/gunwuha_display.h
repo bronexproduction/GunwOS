@@ -48,7 +48,8 @@ enum gnwDeviceUHA_display_format {
           for given device
 */
 struct gnwDeviceUHA_display_character {
-    uint_8 color;
+    uint_8 bgColor;
+    uint_8 charColor;
     uint_8 character;
 };
 

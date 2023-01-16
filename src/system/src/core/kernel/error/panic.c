@@ -34,9 +34,9 @@ struct k_vid_character {
     char attr;
 };
 
-const volatile ptr_t VIDEO_HW_MEM   = (volatile ptr_t)0xb8000;
-const int VIDEO_HW_ROWS             = 25;
-const int VIDEO_HW_COLS             = 80;
+static const volatile ptr_t VIDEO_HW_MEM = (volatile ptr_t)0xb8000;
+#define VIDEO_HW_ROWS   25
+#define VIDEO_HW_COLS   80
 
 #define VIDEO_HW_OFFSET(ROW, COL) ((volatile ptr_t)(VIDEO_HW_MEM + (COL + VIDEO_HW_COLS * ROW) * 2))
 #define VIDEO_HW_END VIDEO_HW_OFFSET(VIDEO_HW_ROWS, VIDEO_HW_COLS)
