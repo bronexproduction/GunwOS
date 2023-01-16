@@ -30,20 +30,9 @@ typedef enum c_vid_charColor {
     White = 15
 } VideoCharColor;
 
-static inline char c_vid_charAttr(const VideoCharColor main, const VideoCharColor bg) {
-    return main | (bg << 4);
-}
-
-struct c_vid_character {
-    char c;
-    char attr;
-};
-
-unsigned char c_vid_dimension(int vertical);
-int c_vid_draw(const struct c_vid_character c, unsigned char x, unsigned char y);
+int c_vid_draw(const struct gnwDeviceUHA_display_character c, unsigned char x, unsigned char y);
 void c_vid_shift(const size_t charCount);
-void c_vid_fill(const point_t start, const point_t end, const struct c_vid_character c);
+void c_vid_fill(const point_t start, const point_t end, const struct gnwDeviceUHA_display_character c);
 void c_vid_clear();
-void c_vid_strToChar(const char * const str, struct c_vid_character * const result, const char attributes, const size_t len);
 
 #endif // VIDEO_H

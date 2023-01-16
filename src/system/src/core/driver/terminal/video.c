@@ -6,76 +6,69 @@
 //
 
 #include <stdgunw/mem.h>
+#include <uha/gunwuha_display.h>
 #include "video.h"
 
-#define DISPLAY_ROWS            25
-#define DISPLAY_COLS            80
-#define DISPLAY_BYTES_PER_CHAR  2
+#define DISPLAY_ROWS 25
+#define DISPLAY_COLS 80
 
-static uint_8 frameBuffer[DISPLAY_ROWS * DISPLAY_COLS * DISPLAY_BYTES_PER_CHAR];
+struct gnwDeviceUHA_display_character frameBuffer[DISPLAY_ROWS * DISPLAY_COLS];
 
-#define BUFFER_OFFSET(ROW, COL) ((volatile ptr_t)(frameBuffer + (COL + DISPLAY_COLS * ROW) * 2))
-#define BUFFER_END BUFFER_OFFSET(DISPLAY_ROWS, DISPLAY_COLS)
+#define BUFFER_INDEX(ROW, COL) (COL + DISPLAY_COLS * ROW)
+#define BUFFER_END (((ptr_t)frameBuffer) + BUFFER_INDEX(DISPLAY_ROWS, DISPLAY_COLS) * sizeof(struct gnwDeviceUHA_display_character)) 
 
-unsigned char c_vid_dimension(int vertical) {
-    return vertical ? DISPLAY_ROWS : DISPLAY_COLS;
+uint_8 c_vid_init() {
+    #warning GET DISPLAY
+    #warning ATTACH TO THE DISPLAY
+
+    return 0;
 }
 
-static inline ptr_t charAt(size_t row, size_t col) {
-    return BUFFER_OFFSET(row, col);
+static void c_vid_push() {
+    #warning PUSH BUFFER TO THE DISPLAY
 }
 
-static inline ptr_t attrAt(size_t row, size_t col) {
-    return BUFFER_OFFSET(row, col) + 1;
-}
-
-int c_vid_draw(const struct c_vid_character c, unsigned char x, unsigned char y) {
+int c_vid_draw(const struct gnwDeviceUHA_display_character c, unsigned char x, unsigned char y) {
     if (x >= DISPLAY_COLS || y >= DISPLAY_ROWS) {
         return -1;
     }
 
-    *(charAt(y,x)) = c.c;
-    *(attrAt(y,x)) = c.attr;
+    frameBuffer[BUFFER_INDEX(y, x)] = c;
+    
+    c_vid_push();
 
     return 1;
 }
 
 void c_vid_shift(const size_t charCount) {
-    ptr_t source = frameBuffer + (charCount * 2);
+    ptr_t source = frameBuffer + (charCount * sizeof(struct gnwDeviceUHA_display_character));
     size_t bytes = (source >= BUFFER_END) ? 0 : (BUFFER_END - source);
     if (!bytes) { return; }
 
     uint_8 buffer[bytes];
     memcopy(source, buffer, bytes);
     memcopy(buffer, frameBuffer, bytes);
+
+    c_vid_push();
 }
 
-void c_vid_fill(const point_t start, const point_t end, const struct c_vid_character c) {
+void c_vid_fill(const point_t start, const point_t end, const struct gnwDeviceUHA_display_character c) {
     if (start.x < 0 || start.x >= DISPLAY_COLS) { return; }
     if (start.y < 0 || start.y >= DISPLAY_ROWS) { return; }
     if (end.x < 0 || end.x >= DISPLAY_COLS) { return; }
     if (end.y < 0 || end.y >= DISPLAY_ROWS) { return; }
 
-    const volatile ptr_t lastOffset = charAt(end.y, end.x);
-    for (volatile ptr_t offset = charAt(start.y, start.x); offset <= lastOffset; offset += 2) {
-        *offset = c.c;
-        *(offset + 1) = c.attr;
+    const size_t lastIndex = BUFFER_INDEX(end.y, end.x);
+    for (size_t index = BUFFER_INDEX(start.y, start.x); index <= lastIndex; ++index) {
+        frameBuffer[index] = c;
     }
+
+    c_vid_push();
 }
 
 void c_vid_clear() {
     const point_t start = { 0, 0 };
-    const point_t end = { c_vid_dimension(0) - 1, c_vid_dimension(1) - 1 };
+    const point_t end = { DISPLAY_COLS - 1, DISPLAY_ROWS - 1 };
 
-    c_vid_fill(start, end, (struct c_vid_character){ 0, 0 });
-}
-
-void c_vid_strToChar(const char * const str, struct c_vid_character * const result, const char attributes, const size_t len) {
-    if (!str || !result) {
-        return;
-    }
-    
-    for (size_t i = 0; i < len; ++i) {
-        *(result + i) = (struct c_vid_character){ str[i], attributes };
-    }
+    c_vid_fill(start, end, (struct gnwDeviceUHA_display_character){ 0, 0, 0 });
 }

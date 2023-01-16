@@ -30,6 +30,11 @@ void c_trm_clear() {
 }
 
 void c_trm_init() {
+    if (c_vid_init()) {
+        LOG_FATAL("Unable to initialize terminal video output");
+        return;
+    }
+    
     c_trm_clear();
 }
 
