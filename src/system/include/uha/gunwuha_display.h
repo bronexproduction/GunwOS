@@ -11,9 +11,56 @@
 
 #include <stdgunw/types.h>
 
-enum gnwDeviceUHA_display_type {
-    CHARACTER,
-    GRAPHICS
+/*
+    Display format
+
+    Bit mask:
+    | 7            | 6-0                                 |
+    | Mode         | Resolution and color format variant |
+    | 0 - text     |                                     |
+    | 1 - graphics |                                     |
+*/
+
+#define _FMT_TEXT(VAL) (VAL)
+#define _FMT_GRAP(VAL) ((1 << 7) & VAL)
+
+/*
+    Display format
+
+    Naming scheme:
+    {1}_H{2}V{3}{4}{5}B{6}
+    1 - Mode: [TEXT,GRAPHICS]
+    2 - Horizontal resolution (number of characters/points)
+    3 - Vertical resolution (number of characters/points)
+    4 - Color type: [(C)olor,(G)reyscale]
+    5 - Number of colors/values on a greyscale
+*/
+enum gnwDeviceUHA_display_format {
+    TEXT_H80V25C16  = _FMT_TEXT(1),
+    GRAPHICS_H320V200C16    = _FMT_GRAP(1)
+};
+
+/*
+    Structure for text mode character storage
+
+    Note: Values are expected to be converted
+          to match the expected memory layout
+          for given device
+*/
+struct gnwDeviceUHA_display_character {
+    uint_8 color;
+    uint_8 character;
+};
+
+/*
+    Structure for graphics mode pixel storage
+
+    Note: Values are expected to be converted
+          to match the expected memory layout
+          for given device
+*/
+struct gnwDeviceUHA_display_pixel {
+    uint_32 color;
 };
 
 struct gnwDeviceUHA_display {
@@ -26,28 +73,28 @@ struct gnwDeviceUHA_display {
     point_t dimensions;
 
     /*
-        Display type
+        Display format
     
         Result:
-            * Display type - enum gnwDeviceUHA_display_type
+            * Display format - enum gnwDeviceUHA_display_format
     */
-    enum gnwDeviceUHA_display_type type;
+    enum gnwDeviceUHA_display_format format;
 
     /*
-        Format
-    
-        Result:
-            * Pixel/character format size (bytes)
-    */
-    size_t formatBytes;
-
-    /*
-        Update the framebuffer
+        Update the framebuffer (text mode)
     
         Params:
-            * Framebuffer data (X*Y*formatBytes)
+            * Framebuffer data (X * Y * sizeof(struct gnwDeviceUHA_display_character))
     */
-    size_t (*update)(const uint_8 * const buffer);
+    void (*updateText)(const struct gnwDeviceUHA_display_character * const buffer);
+
+    /*
+        Update the framebuffer (graphics mode)
+    
+        Params:
+            * Framebuffer data (X * Y * sizeof(struct gnwDeviceUHA_display_pixel))
+    */
+    void (*updateGraphics)(const struct gnwDeviceUHA_display_pixel * const buffer);
 };
 
 #endif // GUNWOS_GUNWUHA_DISPLAY_H
