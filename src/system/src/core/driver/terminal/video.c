@@ -19,17 +19,18 @@ struct gnwDeviceUHA_display_character frameBuffer[DISPLAY_ROWS * DISPLAY_COLS];
 static struct gnwTextDisplayHandle displayHandle;
 
 bool c_vid_init() {
-    struct gnwDisplayDescriptor desc = getTextDisplay();
-    if (!desc.identifier) {
-        OOPS("Unexpected display identifier");
+    struct gnwDisplayDescriptor desc;
+    enum gnwDeviceError e = getTextDisplay(&desc);
+
+    if (e) {
+        OOPS("Error retrieving available text display");
         return 1;
     }
 
-    enum gnwDisplayError e;
-    displayHandle = attachToTextDisplay(desc.identifier, &e);
+    e = attachToTextDisplay(desc.identifier, &displayHandle);
     if (e) {
         LOG_FATAL("Unable to attach display");
-        return 1;
+        return 2;
     }
 
     return 0;

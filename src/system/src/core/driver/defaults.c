@@ -10,7 +10,7 @@
 */
 
 #include <gunwdrv.h>
-#include <gunwscl.h>
+#include <gunwdev.h>
 
 #include "../log/log.h"
 

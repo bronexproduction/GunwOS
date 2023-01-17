@@ -11,8 +11,17 @@
 
 #include <stdgunw/types.h>
 
-struct gnwDeviceUHA_keyboard {
+struct gnwDeviceUHA_keyboard_desc {
     uint_32 _unused;
+};
+
+struct gnwDeviceUHA_keyboard_routine {
+    void (*_unused)();
+};
+
+struct gnwDeviceUHA_keyboard {
+    struct gnwDeviceUHA_keyboard_desc desc;
+    struct gnwDeviceUHA_keyboard_routine routine;
 };
 
 #endif // GUNWOS_GUNWUHA_KEYBOARD_H

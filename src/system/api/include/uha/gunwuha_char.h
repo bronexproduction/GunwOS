@@ -12,10 +12,14 @@
 #include <stdgunw/types.h>
 #include <gunwstor.h>
 
+struct gnwDeviceUHA_char_in_desc {
+    uint_32 _unused;
+};
+
 /*
     Character input device
 */
-struct gnwDeviceUHA_char_in {
+struct gnwDeviceUHA_char_in_routine {
     /*
         Determines if the device has data to be read
     
@@ -36,10 +40,14 @@ struct gnwDeviceUHA_char_in {
     size_t (*read)(const uint_8 * c);
 };
 
+struct gnwDeviceUHA_char_out_desc {
+    uint_32 _unused;
+};
+
 /*
     Character output device
 */
-struct gnwDeviceUHA_char_out {
+struct gnwDeviceUHA_char_out_routine {
     /*
         Determines if the device is ready to be written to
 
@@ -58,6 +66,16 @@ struct gnwDeviceUHA_char_out {
             * 1 if write succeeded, 0 otherwise
     */
     uint_8 (*write)(const uint_8 c);
+};
+
+struct gnwDeviceUHA_char_in {
+    struct gnwDeviceUHA_char_in_desc desc;
+    struct gnwDeviceUHA_char_in_routine routine;
+};
+
+struct gnwDeviceUHA_char_out {
+    struct gnwDeviceUHA_char_out_desc desc;
+    struct gnwDeviceUHA_char_out_routine routine;
 };
 
 #endif // GUNWOS_GUNWUHA_CHAR_H

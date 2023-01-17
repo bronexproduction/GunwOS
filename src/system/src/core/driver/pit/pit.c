@@ -113,14 +113,14 @@ ISR(
     k_pit_routine();
 )
 
-static struct gnwDriverDesc desc() {
-    return (struct gnwDriverDesc){ init, 0, isr, 0 };
+static struct gnwDriverConfig desc() {
+    return (struct gnwDriverConfig){ init, 0, isr, 0 };
 }
 
 static struct gnwDeviceUHA uha() {
     struct gnwDeviceUHA uha;
 
-    uha.system._unused = 0;
+    uha.system.desc._unused = 0;
 
     return uha;
 }

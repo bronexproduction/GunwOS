@@ -112,8 +112,8 @@ ISR(
     }
 )
 
-static struct gnwDriverDesc desc() {
-    return (struct gnwDriverDesc){ 0, 0, isr, 1 };
+static struct gnwDriverConfig desc() {
+    return (struct gnwDriverConfig){ 0, 0, isr, 1 };
 }
 
 static struct gnwDeviceUHA uha() {

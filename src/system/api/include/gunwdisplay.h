@@ -10,11 +10,7 @@
 
 #include <stdgunw/types.h>
 #include <uha/gunwuha_display.h>
-
-enum gnwDisplayError {
-    NONE = 0,
-    HANDLE_INVALID
-};
+#include <gunwdev.h>
 
 struct gnwDisplayDescriptor { 
     /*
@@ -69,22 +65,22 @@ struct gnwGraphicsDisplayHandle {
     Result:
         * Display descriptor for the default display of given type (text/graphics)
 */
-struct gnwDisplayDescriptor getTextDisplay();
-struct gnwDisplayDescriptor getGraphicsDisplay();
+enum gnwDeviceError getTextDisplay(struct gnwDisplayDescriptor * const displayDescriptor);
+enum gnwDeviceError getGraphicsDisplay(struct gnwDisplayDescriptor * const displayDescriptor);
 
 /*
     Functions for attaching to the display
 
     Params:
         * displayId - Display identifier, found in struct gnwDisplayDescriptor - see getTextDisplay/getGraphicsDisplay
-        * e - Error return pointer (mandatory) - stores an error value indicating what went wrong while attaching
+        * handle - Display handle location (mandatory) - filled with handle information on success
 
     Result:
-        * Display handle for attached screen
+        * Error value indicating what went wrong while attaching
 
     Note: Only the process attached to the display can access it
 */
-struct gnwTextDisplayHandle attachToTextDisplay(uint_32 displayId, enum gnwDisplayError *e);
-struct gnwGraphicsDisplayHandle attachToGraphicsDisplay(uint_32 displayId, enum gnwDisplayError *e);
+enum gnwDeviceError attachToTextDisplay(uint_32 displayId, struct gnwTextDisplayHandle * const handle);
+enum gnwDeviceError attachToGraphicsDisplay(uint_32 displayId, struct gnwGraphicsDisplayHandle * const handle);
 
 #endif // GUNWOS_GUNWDISPLAY_H

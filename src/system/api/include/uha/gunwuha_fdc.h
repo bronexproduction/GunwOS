@@ -12,7 +12,11 @@
 #include <stdgunw/types.h>
 #include "../gunwstor.h"
 
-struct gnwDeviceUHA_fdc {
+struct gnwDeviceUHA_fdc_desc {
+    uint_32 _unused;
+};
+
+struct gnwDeviceUHA_fdc_routine {
     /*
         Check for drive presence
 
@@ -34,6 +38,11 @@ struct gnwDeviceUHA_fdc {
             * drive geometry data
     */
     struct gnwStorGeometry (*driveGeometry)(const uint_8 index);
+};
+
+struct gnwDeviceUHA_fdc {
+    struct gnwDeviceUHA_fdc_desc desc;
+    struct gnwDeviceUHA_fdc_routine routine;
 };
 
 #endif // GUNWOS_GUNWUHA_FDC_H

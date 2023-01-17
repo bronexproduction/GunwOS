@@ -11,8 +11,17 @@
 
 #include <stdgunw/types.h>
 
-struct gnwDeviceUHA_system {
+struct gnwDeviceUHA_system_desc {
     uint_32 _unused;
+};
+
+struct gnwDeviceUHA_system_routine {
+    void (*_unused)();
+};
+
+struct gnwDeviceUHA_system {
+    struct gnwDeviceUHA_system_desc desc;
+    struct gnwDeviceUHA_system_routine routine;
 };
 
 #endif // GUNWOS_GUNWUHA_SYSTEM_H

@@ -6,29 +6,65 @@
 //
 
 #include <gunwdisplay.h>
+#include <gunwdev.h>
+#include <gunwfug.h>
 
 enum displayType {
     TEXT,
     GRAPHICS
 };
 
-static struct gnwDisplayDescriptor getDisplay(enum displayType type) {
+static enum gnwDeviceError getDisplay(enum displayType type, 
+                                      struct gnwDisplayDescriptor * const displayDescriptor) {
+    if (!displayDescriptor) {
+        fug(NULLPTR);
+        __builtin_unreachable();
+    }
+    
+    struct gnwDeviceUHADesc deviceDescriptor;
+    enum gnwDeviceError e = devGet(DEV_TYPE_DISPLAY, &deviceDescriptor);
 
+    if (!e) {
+        displayDescriptor->identifier = deviceDescriptor.identifier;
+        displayDescriptor->dimensions = deviceDescriptor.display.dimensions;
+        displayDescriptor->format = deviceDescriptor.display.format;
+    }
+
+    return e;
 }
 
-struct gnwDisplayDescriptor getTextDisplay() {
-    return getDisplay(TEXT);
+enum gnwDeviceError getTextDisplay(struct gnwDisplayDescriptor * const displayDescriptor) {
+    return getDisplay(TEXT, displayDescriptor);
 }
 
-struct gnwDisplayDescriptor getGraphicsDisplay() {
-    return getDisplay(GRAPHICS);
+enum gnwDeviceError getGraphicsDisplay(struct gnwDisplayDescriptor * const displayDescriptor) {
+    return getDisplay(GRAPHICS, displayDescriptor);
 }
 
-struct gnwTextDisplayHandle attachToTextDisplay(uint_32 displayId, enum gnwDisplayError *e) {
+enum gnwDeviceError attachToTextDisplay(uint_32 displayId, struct gnwTextDisplayHandle * const handle) {
+    if (!handle) {
+        fug(NULLPTR);
+        __builtin_unreachable();
+    }
 
+    enum gnwDeviceError e;
+
+#warning TO BE IMPLEMENTED
+    // struct gnwTextDisplayHandle handle = attachToDisplay(displayId, TEXT, e);
+
+    return e;
 }
 
-struct gnwGraphicsDisplayHandle attachToGraphicsDisplay(uint_32 displayId, enum gnwDisplayError *e) {
+enum gnwDeviceError attachToGraphicsDisplay(uint_32 displayId, struct gnwGraphicsDisplayHandle * const handle) {
+    if (!handle) {
+        fug(NULLPTR);
+        __builtin_unreachable();
+    }
+    
+    enum gnwDeviceError e;
 
+    #warning TO BE IMPLEMENTED
+    
+    return e;
 }
  

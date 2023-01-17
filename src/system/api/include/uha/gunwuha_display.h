@@ -64,7 +64,7 @@ struct gnwDeviceUHA_display_pixel {
     uint_32 color;
 };
 
-struct gnwDeviceUHA_display {
+struct gnwDeviceUHA_display_desc {
     /*
         Display resolution
     
@@ -80,7 +80,9 @@ struct gnwDeviceUHA_display {
             * Display format - enum gnwDeviceUHA_display_format
     */
     enum gnwDeviceUHA_display_format format;
+};
 
+struct gnwDeviceUHA_display_routine {
     /*
         Update the framebuffer (text mode)
     
@@ -96,6 +98,11 @@ struct gnwDeviceUHA_display {
             * Framebuffer data (X * Y * sizeof(struct gnwDeviceUHA_display_pixel))
     */
     void (*updateGraphics)(const struct gnwDeviceUHA_display_pixel * const buffer);
+};
+
+struct gnwDeviceUHA_display {
+    struct gnwDeviceUHA_display_desc desc;
+    struct gnwDeviceUHA_display_routine routine;
 };
 
 #endif // GUNWOS_GUNWUHA_DISPLAY_H

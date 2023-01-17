@@ -67,7 +67,7 @@ enum gnwDriverError k_dev_install(size_t *id, const struct gnwDeviceDescriptor *
     c_trm_puts(descriptor->name);
     c_trm_putc('\n');
 
-    const struct gnwDriverDesc *driverDesc = &(descriptor->driver.descriptor);
+    const struct gnwDriverConfig *driverDesc = &(descriptor->driver.descriptor);
 
     if (driverDesc->irq >= DEV_IRQ_LIMIT) {
         LOG_FATAL("Invalid IRQ value");
@@ -90,7 +90,7 @@ enum gnwDriverError k_dev_install(size_t *id, const struct gnwDeviceDescriptor *
     enum gnwDriverError e = NO_ERROR;
 
     if (driverDesc->isr) {
-        extern enum gnwDriverError k_hal_install(const struct gnwDriverDesc);
+        extern enum gnwDriverError k_hal_install(const struct gnwDriverConfig);
         e = k_hal_install(descriptor->driver.descriptor);   
     }
 

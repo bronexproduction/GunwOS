@@ -29,8 +29,8 @@ static void updateText(const struct gnwDeviceUHA_display_character * const buffe
     }
 }
 
-static struct gnwDriverDesc desc() {
-    return (struct gnwDriverDesc){ 
+static struct gnwDriverConfig desc() {
+    return (struct gnwDriverConfig){ 
         nullptr,    // init
         nullptr,    // start
         nullptr,    // isr
@@ -41,11 +41,10 @@ static struct gnwDriverDesc desc() {
 static struct gnwDeviceUHA uha() {
     struct gnwDeviceUHA uha;
 
-    uha.system._unused = 0;
-    uha.display.dimensions = (point_t){ 80, 25 };
-    uha.display.format = TEXT_H80V25C16;
-    uha.display.updateText = updateText;
-    uha.display.updateGraphics = nullptr;
+    uha.display.desc.dimensions = (point_t){ 80, 25 };
+    uha.display.desc.format = TEXT_H80V25C16;
+    uha.display.routine.updateText = updateText;
+    uha.display.routine.updateGraphics = nullptr;
 
     return uha;
 }

@@ -10,7 +10,7 @@
 #include "keymap.h"
 #include "../../log/log.h"
 #include <gunwdispatch.h>
-#include <gunwscl.h>
+#include <gunwctrl.h>
 
 static char kbuf[SCANCODES_MAX];
 static struct c_kbf_listener klsn;

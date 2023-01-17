@@ -20,6 +20,9 @@
 #define SYSCALL_FUNCTION_SLEEPMS        0x05
 #define SYSCALL_FUNCTION_DEV_INSTALL    0x06
 #define SYSCALL_FUNCTION_DEV_START      0x07
+#define SYSCALL_FUNCTION_DEV_GET        0x08
+#define SYSCALL_FUNCTION_DEV_ACQUIRE    0x09
+#define SYSCALL_FUNCTION_FUG            0x0a
 
 /*
     Important note:

@@ -46,8 +46,10 @@ enum gnwDeviceType {
 
 /*
     Hardware-specific API
+    Not available directly for user-level processes
 
-    Set of routines expected to be provided by hardware driver
+    Set of routines and information
+    expected to be provided by hardware driver
     specific for the exact gnwDeviceType
 */
 struct gnwDeviceUHA {
@@ -60,11 +62,26 @@ struct gnwDeviceUHA {
     struct gnwDeviceUHA_display display;    // DEV_TYPE_DISPLAY
 };
 
-/*  Device driver descriptor
+/*
+    Hardware-specific descriptor
+    Part of UHA available for user-level processes
+*/
+struct gnwDeviceUHADesc {
+    const uint_32 identifier;
+    const struct gnwDeviceUHA_system_desc system;       // DEV_TYPE_SYSTEM
+    const struct gnwDeviceUHA_keyboard_desc keyboard;   // DEV_TYPE_KEYBOARD
+    const struct gnwDeviceUHA_fdc_desc fdc;             // DEV_TYPE_FDC
+    const struct gnwDeviceUHA_driveCtrl_desc storage;   // for storage devices
+    const struct gnwDeviceUHA_char_in_desc charIn;      // DEV_TYPE_CHAR_IN
+    const struct gnwDeviceUHA_char_out_desc charOut;    // DEV_TYPE_CHAR_OUT
+    const struct gnwDeviceUHA_display_desc display;     // DEV_TYPE_DISPLAY
+};
+
+/*  Device driver configuration
 
     Provides the kernel with entry points for general device operations
 */
-struct gnwDriverDesc {
+struct gnwDriverConfig {
    
 /*  Pointer to device initialization routine
 
@@ -110,9 +127,9 @@ struct gnwDeviceDriver {
     struct gnwDeviceIO io;
 
     /*
-        Driver descriptor
+        Driver configuration
     */
-    struct gnwDriverDesc descriptor;
+    struct gnwDriverConfig descriptor;
 };
 
 /*
