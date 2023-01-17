@@ -6,7 +6,7 @@
 //
 
 #include <stdgunw/mem.h>
-#include <uha/gunwuha_display.h>
+#include <gunwdisplay.h>
 #include "video.h"
 
 struct gnwDeviceUHA_display_character frameBuffer[DISPLAY_ROWS * DISPLAY_COLS];
@@ -14,15 +14,29 @@ struct gnwDeviceUHA_display_character frameBuffer[DISPLAY_ROWS * DISPLAY_COLS];
 #define BUFFER_INDEX(ROW, COL) (COL + DISPLAY_COLS * ROW)
 #define BUFFER_END (((ptr_t)frameBuffer) + BUFFER_INDEX(DISPLAY_ROWS, DISPLAY_COLS) * sizeof(struct gnwDeviceUHA_display_character)) 
 
+static struct gnwTextDisplayHandle displayHandle;
+
 bool c_vid_init() {
-    #warning GET DISPLAY
-    #warning ATTACH TO THE DISPLAY
+    struct gnwDisplayDescriptor desc = getTextDisplay();
+    if (!desc.identifier) {
+        OOPS("Unexpected display identifier");
+        return 1;
+    }
+
+    enum gnwDisplayError e;
+    displayHandle = attachToTextDisplay(desc.identifier, &e);
+    if (e) {
+        LOG_FATAL("Unable to attach display");
+        return 1;
+    }
 
     return 0;
 }
 
 static void c_vid_push() {
-    #warning PUSH BUFFER TO THE DISPLAY
+    if (displayHandle.update(frameBuffer)) {
+        LOG_FATAL("Error updating display buffer");
+    }
 }
 
 int c_vid_draw(const struct gnwDeviceUHA_display_character c, unsigned char x, unsigned char y) {
