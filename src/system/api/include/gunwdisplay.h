@@ -12,6 +12,11 @@
 #include <uha/gunwuha_display.h>
 #include <gunwdev.h>
 
+enum gnwDisplayError {
+    GDSE_NONE = 0,
+    GDSE_HANDLE_INVALID
+};
+
 struct gnwDisplayDescriptor { 
     /*
         Display identifier

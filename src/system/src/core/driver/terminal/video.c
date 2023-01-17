@@ -37,7 +37,8 @@ bool c_vid_init() {
 }
 
 static void c_vid_push() {
-    if (displayHandle.update(frameBuffer)) {
+    enum gnwDisplayError e = displayHandle.update(frameBuffer);
+    if (e) {
         LOG_FATAL("Error updating display buffer");
     }
 }
@@ -55,7 +56,7 @@ int c_vid_draw(const struct gnwDeviceUHA_display_character c, unsigned char x, u
 }
 
 void c_vid_shift(const size_t charCount) {
-    ptr_t source = frameBuffer + (charCount * sizeof(struct gnwDeviceUHA_display_character));
+    ptr_t source = (ptr_t)frameBuffer + (charCount * sizeof(struct gnwDeviceUHA_display_character));
     size_t bytes = (source >= BUFFER_END) ? 0 : (BUFFER_END - source);
     if (!bytes) { return; }
 

@@ -47,7 +47,7 @@ enum gnwDeviceError attachToTextDisplay(uint_32 displayId, struct gnwTextDisplay
         __builtin_unreachable();
     }
 
-    enum gnwDeviceError e;
+    enum gnwDeviceError e = GDE_NONE;
 
 #warning TO BE IMPLEMENTED
     // struct gnwTextDisplayHandle handle = attachToDisplay(displayId, TEXT, e);
@@ -61,7 +61,7 @@ enum gnwDeviceError attachToGraphicsDisplay(uint_32 displayId, struct gnwGraphic
         __builtin_unreachable();
     }
     
-    enum gnwDeviceError e;
+    enum gnwDeviceError e = GDE_NONE;
 
     #warning TO BE IMPLEMENTED
     

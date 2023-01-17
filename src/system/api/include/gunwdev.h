@@ -56,7 +56,7 @@ static inline enum gnwDriverError devStart(const struct gnwDeviceDescriptor * co
         * type - type of the device (see gunwdrv.h)
         * desc - address of the result description (see gunwdrv.h)
 */
-static inline enum gnwDeviceError devGet(const enum gnwDeviceType const type, struct gnwDeviceUHADesc * const desc) {
+static inline enum gnwDeviceError devGet(const enum gnwDeviceType type, struct gnwDeviceUHADesc * const desc) {
     if (!desc) {
         fug(NULLPTR);
         __builtin_unreachable();
