@@ -9,15 +9,12 @@
 #include <uha/gunwuha_display.h>
 #include "video.h"
 
-#define DISPLAY_ROWS 25
-#define DISPLAY_COLS 80
-
 struct gnwDeviceUHA_display_character frameBuffer[DISPLAY_ROWS * DISPLAY_COLS];
 
 #define BUFFER_INDEX(ROW, COL) (COL + DISPLAY_COLS * ROW)
 #define BUFFER_END (((ptr_t)frameBuffer) + BUFFER_INDEX(DISPLAY_ROWS, DISPLAY_COLS) * sizeof(struct gnwDeviceUHA_display_character)) 
 
-uint_8 c_vid_init() {
+bool c_vid_init() {
     #warning GET DISPLAY
     #warning ATTACH TO THE DISPLAY
 

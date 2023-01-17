@@ -11,6 +11,9 @@
 #include <stdgunw/utils.h>
 #include <stdgunw/types.h>
 
+#define DISPLAY_ROWS 25
+#define DISPLAY_COLS 80
+
 typedef enum c_vid_charColor {
     Black = 0,
     Blue = 1,
