@@ -7,6 +7,8 @@
 
 #include <stdgunw/mem.h>
 #include <gunwdisplay.h>
+#include "../../log/log.h"
+#include "../../kernel/error/panic.h"
 #include "video.h"
 
 struct gnwDeviceUHA_display_character frameBuffer[DISPLAY_ROWS * DISPLAY_COLS];

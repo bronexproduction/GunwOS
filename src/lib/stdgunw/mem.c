@@ -8,13 +8,15 @@
 #include "mem.h"
 
 void memset(void *ptr, const uint_8 val, size_t bytes) {
-    while (bytes) {
-        *(uint_8 *)(ptr + --bytes) = val;
+    uint_8 *p = (uint_8 *)ptr;
+    while (bytes--) {
+        *(p++) = val;
     }
 }
 
 void memnull(void *ptr, size_t bytes) {
-    return memset(ptr, 0, bytes);
+    memset(ptr, 0, bytes);
+    return;
 }
 
 void memcopy(const void * const src, void *dst, size_t count) {
