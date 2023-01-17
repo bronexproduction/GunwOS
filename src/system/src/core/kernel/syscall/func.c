@@ -102,6 +102,9 @@ SCR(sleepms,
     Params:
         * EBX - device descriptor (struct gnwDeviceDescriptor *)
 
+    Return:
+        * EAX - error code (enum gnwDriverError)
+
     Note:
         * Not allowed from user-level
 */
@@ -121,6 +124,9 @@ SCR(devInstall,
     Params:
         * EBX - device descriptor (struct gnwDeviceDescriptor *)
 
+    Return:
+        * EAX - error code (enum gnwDriverError)
+
     Note:
         * Not allowed from user-level
 */
@@ -131,4 +137,44 @@ SCR(devStart,
 
     enum gnwDriverError k_dev_start(const struct gnwDeviceDescriptor * const);
     err = k_dev_start((struct gnwDeviceDescriptor*)desc);
+)
+
+/*
+    Code - 0x08
+    Function - DEV_GET
+
+    Params:
+        * EBX - device type (enum gnwDeviceType)
+        * ECX - device descriptor pointer (struct gnwDeviceUHADesc *)
+
+    Return:
+        * EAX - error code (enum gnwDeviceError)
+*/
+SCR(devGet,
+    #warning TO BE IMPLEMENTED
+)
+
+/*
+    Code - 0x09
+    Function - DEV_ACQUIRE
+
+    Params:
+        * EBX - device identifier
+
+    Return:
+        * EAX - error code (enum gnwDeviceError)
+*/
+SCR(devAcquire,
+    #warning TO BE IMPLEMENTED
+)
+
+/*
+    Code - 0x0a
+    Function - FUG
+
+    Params:
+        * EBX - FUG code
+*/
+SCR(fug,
+    #warning TO BE IMPLEMENTED
 )

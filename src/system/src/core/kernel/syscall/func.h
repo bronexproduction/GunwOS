@@ -6,6 +6,7 @@
 //
 
 #include <gunwdrv.h>
+#include <gunwfug.h>
 
 /*
     Code - 0x01
@@ -48,3 +49,21 @@ __attribute__((naked)) enum gnwDriverError k_scr_devInstall(const struct gnwDevi
     Function - DEV_START
 */
 __attribute__((naked)) enum gnwDriverError k_scr_devStart(const struct gnwDeviceDescriptor * const);
+
+/*
+    Code - 0x08
+    Function - DEV_GET
+*/
+__attribute__((naked)) enum gnwDeviceError k_scr_devGet(const enum gnwDeviceType, struct gnwDeviceUHADesc * const);
+
+/*
+    Code - 0x09
+    Function - DEV_ACQUIRE
+*/
+__attribute__((naked)) enum gnwDeviceError k_scr_devAcquire(const uint_32);
+
+/*
+    Code - 0x0a
+    Function - FUG
+*/
+__attribute__((naked)) void k_scr_fug(enum gnwFugCode);
