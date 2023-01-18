@@ -24,7 +24,7 @@
 #define _FMT_TEXT(VAL) (VAL)
 #define _FMT_GRAP(VAL) ((1 << 7) & VAL)
 
-#define GDD_FMT_ISGRAP(VAL) ((1 << 7) & VAL)
+#define GDD_FMT_ISGRAP(VAL) (((1 << 7) & VAL) != 0)
 #define GDD_FMT_ISTEXT(VAL) (!GDD_FMT_ISGRAP(VAL))
 
 /*

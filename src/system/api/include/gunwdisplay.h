@@ -12,11 +12,6 @@
 #include <uha/gunwuha_display.h>
 #include <gunwdev.h>
 
-enum gnwDisplayError {
-    GDSE_NONE = 0,
-    GDSE_HANDLE_INVALID
-};
-
 struct gnwDisplayDescriptor { 
     /*
         Display identifier
@@ -46,7 +41,8 @@ struct gnwTextDisplayHandle {
         Params:
             * Framebuffer data (X * Y * sizeof(struct gnwDeviceUHA_display_character))
     */
-    enum gnwDisplayError (*update)(const struct gnwDeviceUHA_display_character * const buffer);
+    enum gnwDeviceError (*update)(const struct gnwTextDisplayHandle * const handle,
+                                  const struct gnwDeviceUHA_display_character * const buffer);
 };
 
 struct gnwGraphicsDisplayHandle {
@@ -61,7 +57,8 @@ struct gnwGraphicsDisplayHandle {
         Params:
             * Framebuffer data (X * Y * sizeof(struct gnwDeviceUHA_display_pixel))
     */
-    enum gnwDisplayError (*update)(const struct gnwDeviceUHA_display_pixel * const buffer);
+    enum gnwDeviceError (*update)(const struct gnwGraphicsDisplayHandle * const handle,
+                                  const struct gnwDeviceUHA_display_pixel * const buffer);
 };
 
 /*

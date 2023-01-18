@@ -18,6 +18,7 @@ enum gnwDeviceError {
     GDE_NOT_FOUND,
     GDE_CANNOT_BE_HELD,
     GDE_ALREADY_HELD,
+    GDE_HANDLE_INVALID,
     GDE_UNKNOWN
 };
 
