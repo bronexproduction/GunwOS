@@ -15,6 +15,8 @@
 #include <stdgunw/utils.h>
 #include <gunwdispatch.h>
 #include <gunwdrv.h>
+#include <stdgunw/string.h>
+#include "../error/fug.h"
 
 #define SCR_END {__asm__ volatile ("ret");};
 #define SCR(NAME, CODE) __attribute__((naked)) void k_scr_ ## NAME () { CODE; SCR_END }
@@ -176,5 +178,7 @@ SCR(devAcquire,
         * EBX - FUG code
 */
 SCR(fug,
-    #warning TO BE IMPLEMENTED
+    REG(32, code, ebx)
+
+    k_err_fug(code);
 )
