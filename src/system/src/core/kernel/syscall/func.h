@@ -52,18 +52,24 @@ __attribute__((naked)) enum gnwDriverError k_scr_devStart(size_t id);
 
 /*
     Code - 0x08
-    Function - DEV_GET
+    Function - DEV_GET_BY_ID
 */
-__attribute__((naked)) enum gnwDeviceError k_scr_devGet(const enum gnwDeviceType, struct gnwDeviceUHADesc * const);
+__attribute__((naked)) enum gnwDeviceError k_scr_devGetById(const size_t id, struct gnwDeviceUHADesc * const);
 
 /*
     Code - 0x09
+    Function - DEV_GET_BY_TYPE
+*/
+__attribute__((naked)) enum gnwDeviceError k_scr_devGetByType(const enum gnwDeviceType, struct gnwDeviceUHADesc * const);
+
+/*
+    Code - 0x0a
     Function - DEV_ACQUIRE
 */
 __attribute__((naked)) enum gnwDeviceError k_scr_devAcquire(const uint_32);
 
 /*
-    Code - 0x0a
+    Code - 0x0b
     Function - FUG
 */
 __attribute__((naked)) void k_scr_fug(enum gnwFugCode);

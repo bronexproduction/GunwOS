@@ -148,6 +148,21 @@ void k_dev_init() {
     c_trm_puts("Device manager: Init\n");
 }
 
+enum gnwDeviceError k_dev_getById(const size_t id, struct gnwDeviceUHADesc * const desc) {
+    if (!validateId(id) || id >= devicesCount) {
+        LOG_FATAL("Device identifier invalid")
+        return GDE_UNKNOWN;
+    }
+    
+    if (!desc) {
+        LOG_FATAL("Device descriptor descriptor over limit");
+        return GDE_UNKNOWN;
+    }
+
+    *desc = uhaGetDesc(id, devices[id].desc.api);
+    return GDE_NONE;
+}
+
 enum gnwDeviceError k_dev_getByType(enum gnwDeviceType type, struct gnwDeviceUHADesc * const desc) {
     if (!desc) {
         LOG_FATAL("Device descriptor descriptor over limit");
@@ -156,8 +171,7 @@ enum gnwDeviceError k_dev_getByType(enum gnwDeviceType type, struct gnwDeviceUHA
 
     for (size_t index = 0; index < MAX_DEVICES; ++index) {
         if (devices[index].desc.type == type) {
-            *desc = uhaGetDesc(index, devices[index].desc.api);
-            return GDE_NONE;
+            return k_dev_getById(index, desc);
         }
     }
 
@@ -165,8 +179,7 @@ enum gnwDeviceError k_dev_getByType(enum gnwDeviceType type, struct gnwDeviceUHA
 }
 
 enum gnwDeviceError k_dev_acquireHold(size_t processId, size_t deviceId) {
-    if (!validateId(deviceId) ||
-        deviceId >= devicesCount) {
+    if (!validateId(deviceId) || deviceId >= devicesCount) {
         LOG_FATAL("Device identifier invalid")
         return GDE_UNKNOWN;
     }

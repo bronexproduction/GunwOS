@@ -11,7 +11,7 @@
 
 #include "func.h"
 
-#define SYSCALL_COUNT 11
+#define SYSCALL_COUNT 12
 
 /*
     Array of pointers to syscall handlers
@@ -27,9 +27,10 @@ static void (*syscallReg[SYSCALL_COUNT])() = {
     /* 0x05 */ k_scr_sleepms,
     /* 0x06 */ (void *)k_scr_devInstall,
     /* 0x07 */ (void *)k_scr_devStart,
-    /* 0x08 */ (void *)k_scr_devGet,
-    /* 0x09 */ (void *)k_scr_devAcquire,
-    /* 0x0a */ k_scr_fug
+    /* 0x08 */ (void *)k_scr_devGetById,
+    /* 0x09 */ (void *)k_scr_devGetByType,
+    /* 0x0a */ (void *)k_scr_devAcquire,
+    /* 0x0b */ k_scr_fug
 };
 
 /*

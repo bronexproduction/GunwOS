@@ -22,7 +22,7 @@ static enum gnwDeviceError getDisplay(enum displayType type,
     }
     
     struct gnwDeviceUHADesc deviceDescriptor;
-    enum gnwDeviceError e = devGet(DEV_TYPE_DISPLAY, &deviceDescriptor);
+    enum gnwDeviceError e = devGetByType(DEV_TYPE_DISPLAY, &deviceDescriptor);
 
     if (!e) {
         displayDescriptor->identifier = deviceDescriptor.identifier;
@@ -47,7 +47,20 @@ enum gnwDeviceError attachToTextDisplay(uint_32 displayId, struct gnwTextDisplay
         __builtin_unreachable();
     }
 
-    enum gnwDeviceError e = GDE_NONE;
+    struct gnwDeviceUHADesc desc;
+    enum gnwDeviceError e = devGetById(displayId, &desc);
+    
+    if (e) {
+        return e;
+    }
+    if (!GDD_FMT_ISTEXT(desc.display.format)) {
+        return GDE_ID_INVALID;
+    }
+
+    e = devAcquire(displayId);
+    if (e) {
+        return e;
+    }
 
 #warning TO BE IMPLEMENTED
     // struct gnwTextDisplayHandle handle = attachToDisplay(displayId, TEXT, e);

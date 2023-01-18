@@ -145,7 +145,28 @@ SCR(devStart,
 
 /*
     Code - 0x08
-    Function - DEV_GET
+    Function - DEV_GET_BY_ID
+
+    Params:
+        * EBX - device identifier
+        * ECX - device descriptor pointer (struct gnwDeviceUHADesc *)
+
+    Return:
+        * EAX - error code (enum gnwDeviceError)
+*/
+SCR(devGetById,
+    REG(32, id, ebx)
+    REG(32, desc, ecx)
+
+    REG_RET(32, err)
+
+    enum gnwDeviceError k_dev_getById(const size_t, struct gnwDeviceUHADesc * const);
+    err = k_dev_getById((const size_t)id, (struct gnwDeviceUHADesc * const)desc);
+)
+
+/*
+    Code - 0x09
+    Function - DEV_GET_BY_TYPE
 
     Params:
         * EBX - device type (enum gnwDeviceType)
@@ -154,7 +175,7 @@ SCR(devStart,
     Return:
         * EAX - error code (enum gnwDeviceError)
 */
-SCR(devGet,
+SCR(devGetByType,
     REG(32, type, ebx)
     REG(32, desc, ecx)
 
@@ -165,7 +186,7 @@ SCR(devGet,
 )
 
 /*
-    Code - 0x09
+    Code - 0x0a
     Function - DEV_ACQUIRE
 
     Params:
@@ -186,7 +207,7 @@ SCR(devAcquire,
 )
 
 /*
-    Code - 0x0a
+    Code - 0x0b
     Function - FUG
 
     Params:

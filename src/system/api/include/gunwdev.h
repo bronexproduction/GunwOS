@@ -14,6 +14,7 @@
 
 enum gnwDeviceError {
     GDE_NONE = 0,
+    GDE_ID_INVALID,
     GDE_NOT_FOUND,
     GDE_CANNOT_BE_HELD,
     GDE_ALREADY_HELD,
@@ -54,13 +55,35 @@ static inline enum gnwDriverError devStart(size_t id) {
 }
 
 /*
+    Requests device information for given id
+
+    Params:
+        * id - id of the device
+        * desc - address of the result description (see gunwdrv.h)
+*/
+static inline enum gnwDeviceError devGetById(const size_t deviceId, struct gnwDeviceUHADesc * const desc) {
+    if (!desc) {
+        fug(NULLPTR);
+        __builtin_unreachable();
+    }
+
+    SYSCALL_PAR1(deviceId);
+    SYSCALL_PAR2(desc);
+
+    SYSCALL_FUNC(DEV_GET_BY_ID);
+    SYSCALL_INT;
+
+    SYSCALL_RETVAL(32);
+}
+
+/*
     Requests device information for given type
 
     Params:
         * type - type of the device (see gunwdrv.h)
         * desc - address of the result description (see gunwdrv.h)
 */
-static inline enum gnwDeviceError devGet(const enum gnwDeviceType type, struct gnwDeviceUHADesc * const desc) {
+static inline enum gnwDeviceError devGetByType(const enum gnwDeviceType type, struct gnwDeviceUHADesc * const desc) {
     if (!desc) {
         fug(NULLPTR);
         __builtin_unreachable();
@@ -69,7 +92,7 @@ static inline enum gnwDeviceError devGet(const enum gnwDeviceType type, struct g
     SYSCALL_PAR1(type);
     SYSCALL_PAR2(desc);
 
-    SYSCALL_FUNC(DEV_GET);
+    SYSCALL_FUNC(DEV_GET_BY_TYPE);
     SYSCALL_INT;
 
     SYSCALL_RETVAL(32);
