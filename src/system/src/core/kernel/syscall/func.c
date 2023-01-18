@@ -14,7 +14,7 @@
 #include "../hal/io/bus.h"
 #include <stdgunw/utils.h>
 #include <gunwdispatch.h>
-#include <gunwdrv.h>
+#include <gunwdev.h>
 #include <stdgunw/string.h>
 #include "../error/fug.h"
 
@@ -155,7 +155,13 @@ SCR(devStart,
         * EAX - error code (enum gnwDeviceError)
 */
 SCR(devGet,
-    #warning TO BE IMPLEMENTED
+    REG(32, type, ebx)
+    REG(32, desc, ecx)
+
+    REG_RET(32, err)
+
+    enum gnwDeviceError k_dev_getByType(enum gnwDeviceType, struct gnwDeviceUHADesc * const);
+    err = k_dev_getByType((enum gnwDeviceType)type, (struct gnwDeviceUHADesc * const)desc);
 )
 
 /*

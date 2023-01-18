@@ -5,8 +5,7 @@
 //  Created by Artur Danielewski on 06.03.2020.
 //
 
-#include <gunwdrv.h>
-#include "dev.h"
+#include <gunwdev.h>
 #include "../hal/int/irq.h"
 #include "../../log/log.h"
 
@@ -137,15 +136,18 @@ void k_dev_init() {
     c_trm_puts("Device manager: Init\n");
 }
 
-size_t k_dev_descriptorCount() {
-    return MAX_DEVICES;
-}
-
-struct gnwDeviceDescriptor k_dev_descriptorFor(const uint_32 descriptorID) {
-    if (descriptorID >= MAX_DEVICES) {
-        LOG_FATAL("Device descriptor over limit")
-        __builtin_unreachable();
+enum gnwDeviceError k_dev_getByType(enum gnwDeviceType type, struct gnwDeviceUHADesc * const desc) {
+    if (!desc) {
+        LOG_FATAL("Device descriptor descriptor over limit");
+        return GDE_UNKNOWN;
     }
 
-    return devices[descriptorID].desc;
+    for (size_t index = 0; index < MAX_DEVICES; ++index) {
+        if (devices[index].desc.type == type) {
+            *desc = uhaGetDesc(index, devices[index].desc.api);
+            return GDE_NONE;
+        }
+    }
+
+    return GDE_NOT_FOUND;
 }

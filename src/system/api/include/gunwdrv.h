@@ -67,15 +67,31 @@ struct gnwDeviceUHA {
     Part of UHA available for user-level processes
 */
 struct gnwDeviceUHADesc {
-    const uint_32 identifier;
-    const struct gnwDeviceUHA_system_desc system;       // DEV_TYPE_SYSTEM
-    const struct gnwDeviceUHA_keyboard_desc keyboard;   // DEV_TYPE_KEYBOARD
-    const struct gnwDeviceUHA_fdc_desc fdc;             // DEV_TYPE_FDC
-    const struct gnwDeviceUHA_driveCtrl_desc storage;   // for storage devices
-    const struct gnwDeviceUHA_char_in_desc charIn;      // DEV_TYPE_CHAR_IN
-    const struct gnwDeviceUHA_char_out_desc charOut;    // DEV_TYPE_CHAR_OUT
-    const struct gnwDeviceUHA_display_desc display;     // DEV_TYPE_DISPLAY
+    uint_32 identifier;
+    struct gnwDeviceUHA_system_desc system;       // DEV_TYPE_SYSTEM
+    struct gnwDeviceUHA_keyboard_desc keyboard;   // DEV_TYPE_KEYBOARD
+    struct gnwDeviceUHA_fdc_desc fdc;             // DEV_TYPE_FDC
+    struct gnwDeviceUHA_driveCtrl_desc storage;   // for storage devices
+    struct gnwDeviceUHA_char_in_desc charIn;      // DEV_TYPE_CHAR_IN
+    struct gnwDeviceUHA_char_out_desc charOut;    // DEV_TYPE_CHAR_OUT
+    struct gnwDeviceUHA_display_desc display;     // DEV_TYPE_DISPLAY
 };
+
+/*
+    Extracts UHA descriptor from UHA structure
+*/
+static inline struct gnwDeviceUHADesc uhaGetDesc(const size_t identifier, const struct gnwDeviceUHA api) {
+    return (struct gnwDeviceUHADesc) {
+        identifier,
+        api.system.desc,
+        api.keyboard.desc,
+        api.fdc.desc,
+        api.storage.desc,
+        api.charIn.desc,
+        api.charOut.desc,
+        api.display.desc
+    };
+}
 
 /*  Device driver configuration
 

@@ -22,8 +22,6 @@ bool c_vid_init() {
     struct gnwDisplayDescriptor desc;
     enum gnwDeviceError e = getTextDisplay(&desc);
 
-    return false;
-
     if (e) {
         OOPS("Error retrieving available text display");
         return true;
@@ -39,7 +37,10 @@ bool c_vid_init() {
 }
 
 static void c_vid_push() {
-    return;
+    if (!displayHandle.update) {
+        return;
+    }
+
     enum gnwDisplayError e = displayHandle.update(frameBuffer);
     if (e) {
         LOG_FATAL("Error updating display buffer");
