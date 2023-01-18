@@ -23,10 +23,13 @@ enum gnwDeviceError {
     Requests installation of given hardware driver
 
     Params:
+        * id - device identifier 
+               to be returned if the installation succeeds
         * desc - device descriptor (see gunwdrv.h)
 */
-static inline enum gnwDriverError devInstall(const struct gnwDeviceDescriptor * const desc) {
-    SYSCALL_PAR1(desc);
+static inline enum gnwDriverError devInstall(size_t * const id, const struct gnwDeviceDescriptor * const desc) {
+    SYSCALL_PAR1(id);
+    SYSCALL_PAR2(desc);
 
     SYSCALL_FUNC(DEV_INSTALL);
     SYSCALL_INT;
@@ -38,10 +41,10 @@ static inline enum gnwDriverError devInstall(const struct gnwDeviceDescriptor * 
     Requests start of given hardware driver
 
     Params:
-        * desc - device descriptor (see gunwdrv.h)
+        * id - device identifier
 */
-static inline enum gnwDriverError devStart(const struct gnwDeviceDescriptor * const desc) {
-    SYSCALL_PAR1(desc);
+static inline enum gnwDriverError devStart(size_t id) {
+    SYSCALL_PAR1(id);
 
     SYSCALL_FUNC(DEV_START);
     SYSCALL_INT;

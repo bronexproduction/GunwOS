@@ -29,6 +29,8 @@ typedef struct {
 } point_t;
 
 #ifndef __cplusplus
+    #define true  1
+    #define false 0
     typedef uint_8 bool;
 #endif
 

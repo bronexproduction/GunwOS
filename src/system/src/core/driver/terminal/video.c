@@ -22,21 +22,24 @@ bool c_vid_init() {
     struct gnwDisplayDescriptor desc;
     enum gnwDeviceError e = getTextDisplay(&desc);
 
+    return false;
+
     if (e) {
         OOPS("Error retrieving available text display");
-        return 1;
+        return true;
     }
 
     e = attachToTextDisplay(desc.identifier, &displayHandle);
     if (e) {
         LOG_FATAL("Unable to attach display");
-        return 2;
+        return true;
     }
 
-    return 0;
+    return false;
 }
 
 static void c_vid_push() {
+    return;
     enum gnwDisplayError e = displayHandle.update(frameBuffer);
     if (e) {
         LOG_FATAL("Error updating display buffer");

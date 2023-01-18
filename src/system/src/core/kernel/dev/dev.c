@@ -50,7 +50,7 @@ static uint_8 validate(const struct gnwDeviceDescriptor * const descriptor) {
     return 1;
 }
 
-enum gnwDriverError k_dev_install(size_t *id, const struct gnwDeviceDescriptor * const descriptor) {
+enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescriptor * const descriptor) {
     if (!id) {
         LOG_FATAL("Identifier storage cannot be nullptr");
         return UNKNOWN;
@@ -99,6 +99,7 @@ enum gnwDriverError k_dev_install(size_t *id, const struct gnwDeviceDescriptor *
         return e;
     }
 
+    *id = devicesCount;
     devices[devicesCount++] = dev;
 
     return NO_ERROR;

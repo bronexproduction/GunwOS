@@ -42,13 +42,13 @@ __attribute__((naked)) void k_scr_sleepms();
     Code - 0x06
     Function - DEV_INSTALL
 */
-__attribute__((naked)) enum gnwDriverError k_scr_devInstall(const struct gnwDeviceDescriptor * const);
+__attribute__((naked)) enum gnwDriverError k_scr_devInstall(size_t * const id, const struct gnwDeviceDescriptor * const);
 
 /*
     Code - 0x07
     Function - DEV_START
 */
-__attribute__((naked)) enum gnwDriverError k_scr_devStart(const struct gnwDeviceDescriptor * const);
+__attribute__((naked)) enum gnwDriverError k_scr_devStart(size_t id);
 
 /*
     Code - 0x08
