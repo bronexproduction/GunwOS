@@ -24,6 +24,9 @@ static enum gnwDeviceError getDisplay(enum displayType type,
     struct gnwDeviceUHADesc deviceDescriptor;
     enum gnwDeviceError e = devGetByType(DEV_TYPE_DISPLAY, &deviceDescriptor);
 
+    // select TEXT device from the list
+    // which does not exist yet
+
     if (!e) {
         displayDescriptor->identifier = deviceDescriptor.identifier;
         displayDescriptor->dimensions = deviceDescriptor.display.dimensions;
