@@ -175,7 +175,14 @@ SCR(devGet,
         * EAX - error code (enum gnwDeviceError)
 */
 SCR(devAcquire,
-    #warning TO BE IMPLEMENTED
+    REG(32, devId, ebx)
+
+    size_t procId = 0; // TODO: get caller process id
+
+    REG_RET(32, err)
+
+    enum gnwDeviceError k_dev_acquireHold(size_t, size_t);
+    err = k_dev_acquireHold((size_t)procId, (size_t)devId);
 )
 
 /*

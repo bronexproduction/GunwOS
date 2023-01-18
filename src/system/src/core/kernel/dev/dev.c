@@ -26,6 +26,14 @@ struct device {
         Driver start mark
     */
     bool started;
+
+    /*
+        Device holder identifier
+
+        Identifier of the process allowed to access the device
+        or 0 if none allowed (kernel only)
+    */
+    size_t holder;
 };
 
 static struct device devices[MAX_DEVICES];
@@ -47,6 +55,10 @@ static uint_8 validate(const struct gnwDeviceDescriptor * const descriptor) {
     }
 
     return 1;
+}
+
+static bool validateId(size_t id) {
+    return id < MAX_DEVICES;
 }
 
 enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescriptor * const descriptor) {
@@ -78,7 +90,7 @@ enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescr
         return IRQ_CONFLICT;
     }
 
-    struct device dev = { *descriptor, 0, 0 };
+    struct device dev = { *descriptor, 0, 0, 0 };
 
     dev.initialized = (driverDesc->init ? driverDesc->init() : 1);
     if (!dev.initialized) {
@@ -105,8 +117,8 @@ enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescr
 }
 
 enum gnwDriverError k_dev_start(size_t id) {
-    if (id >= MAX_DEVICES) {
-        LOG_FATAL("Device identifier over limit")
+    if (!validateId(id)) {
+        LOG_FATAL("Device identifier invalid")
         return UNKNOWN;
     }
 
@@ -150,4 +162,16 @@ enum gnwDeviceError k_dev_getByType(enum gnwDeviceType type, struct gnwDeviceUHA
     }
 
     return GDE_NOT_FOUND;
+}
+
+enum gnwDeviceError k_dev_acquireHold(size_t processId, size_t deviceId) {
+    if (!validateId(deviceId) ||
+        deviceId >= devicesCount) {
+        LOG_FATAL("Device identifier invalid")
+        return GDE_UNKNOWN;
+    }
+
+    devices[deviceId].holder = processId;
+
+    return GDE_NONE;
 }
