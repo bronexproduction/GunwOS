@@ -188,3 +188,30 @@ enum gnwDeviceError k_dev_acquireHold(size_t processId, size_t deviceId) {
 
     return GDE_NONE;
 }
+
+void k_dev_releaseHold(size_t processId, size_t deviceId) {
+    if (!validateId(deviceId) || deviceId >= devicesCount) {
+        LOG_FATAL("Device identifier invalid")
+    }
+    
+    // TODO: Check if the process is current holder of the device
+    //       if not - ignore the request
+
+    devices[deviceId].holder = 0;
+}
+
+enum gnwDeviceError k_dev_write(const size_t processId, 
+                                const size_t deviceId,
+                                const void * const buffer) {
+    // TODO: checks
+    // * check if process exists
+    // * check if device exists
+    // * check if process holds the device
+    // * check if buffer does not exceed process memory
+                                
+    // get device
+    // if memory does not support memory write - fail
+    // write
+
+    return GDE_NONE;
+}

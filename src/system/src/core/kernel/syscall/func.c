@@ -208,6 +208,44 @@ SCR(devAcquire,
 
 /*
     Code - 0x0b
+    Function - DEV_RELEASE
+
+    Params:
+        * EBX - device identifier
+*/
+SCR(devRelease,
+    REG(32, devId, ebx)
+
+    size_t procId = 0; // TODO: get caller process id
+
+    void k_dev_releaseHold(size_t, size_t);
+    k_dev_releaseHold((size_t)procId, (size_t)devId);
+)
+
+/*
+    Code - 0x0c
+    Function - DEV_WRITE
+
+    Params:
+        * EBX - device identifier
+        * ECX - data buffer
+*/
+SCR(devWrite,
+    REG(32, devId, ebx)
+    REG(32, buf, ecx)
+
+    REG_RET(32, err)
+
+    size_t procId = 0; // TODO: get caller process id
+
+    enum gnwDeviceError k_dev_write(const size_t,
+                                    const size_t,
+                                    const void * const);
+    err = k_dev_write((const size_t)procId, (const size_t)devId, (const void * const)buf);                                        
+)
+
+/*
+    Code - 0x0d
     Function - FUG
 
     Params:

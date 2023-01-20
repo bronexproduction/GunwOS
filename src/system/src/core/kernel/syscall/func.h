@@ -70,6 +70,19 @@ __attribute__((naked)) enum gnwDeviceError k_scr_devAcquire(const uint_32);
 
 /*
     Code - 0x0b
+    Function - DEV_RELEASE
+*/
+__attribute__((naked)) void k_scr_devRelease(const uint_32);
+
+/*
+    Code - 0x0c
+    Function - DEV_WRITE
+*/
+__attribute__((naked)) enum gnwDeviceError k_scr_devWrite(const size_t,
+                                                          const void * const);
+
+/*
+    Code - 0x0d
     Function - FUG
 */
 __attribute__((naked)) void k_scr_fug(enum gnwFugCode);

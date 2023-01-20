@@ -23,7 +23,9 @@
 #define SYSCALL_FUNCTION_DEV_GET_BY_ID      0x08
 #define SYSCALL_FUNCTION_DEV_GET_BY_TYPE    0x09
 #define SYSCALL_FUNCTION_DEV_ACQUIRE        0x0a
-#define SYSCALL_FUNCTION_FUG                0x0b
+#define SYSCALL_FUNCTION_DEV_RELEASE        0x0b
+#define SYSCALL_FUNCTION_DEV_WRITE          0x0c
+#define SYSCALL_FUNCTION_FUG                0x0d
 
 /*
     Important note:
