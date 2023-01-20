@@ -17,7 +17,7 @@ static const volatile ptr_t VIDEO_HW_MEM   = (volatile ptr_t)0xb8000;
 #define MEM_CHAR(INDEX) (VIDEO_HW_MEM + (INDEX * VIDEO_BYTES_PER_CHAR))
 #define MEM_COLOR(INDEX) (MEM_CHAR(INDEX) + 1)
 
-static void updateText(const struct gnwDeviceUHA_display_character * const buffer) {
+static void update(const struct gnwDeviceUHA_display_character * const buffer) {
     if (!buffer) {
         LOG_FATAL("Unexpected nullptr in buffer reference");
         return;
@@ -43,8 +43,13 @@ static struct gnwDeviceUHA uha() {
 
     uha.display.desc.dimensions = (point_t){ 80, 25 };
     uha.display.desc.format = TEXT_H80V25C16;
-    uha.display.routine.updateText = updateText;
-    uha.display.routine.updateGraphics = nullptr;
+    uha.mem.desc.sizeBytes = uha.display.desc.dimensions.x * 
+                             uha.display.desc.dimensions.y * 
+                             2;
+    uha.mem.desc.inputSizeBytes = uha.display.desc.dimensions.x * 
+                                  uha.display.desc.dimensions.y * 
+                                  sizeof(struct gnwDeviceUHA_display_character);
+    uha.mem.routine.write = (void (*)(const void * const))update;
 
     return uha;
 }
