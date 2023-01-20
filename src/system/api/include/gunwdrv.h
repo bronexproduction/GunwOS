@@ -11,6 +11,7 @@
 #include <stdgunw/types.h>
 #include <stdgunw/defs.h>
 #include "uha/gunwuha_system.h"
+#include "uha/gunwuha_mem.h"
 #include "uha/gunwuha_keyboard.h"
 #include "uha/gunwuha_fdc.h"
 #include "uha/gunwuha_drivectrl.h"
@@ -54,6 +55,7 @@ enum gnwDeviceType {
 */
 struct gnwDeviceUHA {
     struct gnwDeviceUHA_system system;      // DEV_TYPE_SYSTEM
+    struct gnwDeviceUHA_mem mem;            // memory-mapped devices
     struct gnwDeviceUHA_keyboard keyboard;  // DEV_TYPE_KEYBOARD
     struct gnwDeviceUHA_fdc fdc;            // DEV_TYPE_FDC
     struct gnwDeviceUHA_driveCtrl storage;  // for storage devices
@@ -69,6 +71,7 @@ struct gnwDeviceUHA {
 struct gnwDeviceUHADesc {
     uint_32 identifier;
     struct gnwDeviceUHA_system_desc system;       // DEV_TYPE_SYSTEM
+    struct gnwDeviceUHA_mem_desc mem;             // memory-mapped devices
     struct gnwDeviceUHA_keyboard_desc keyboard;   // DEV_TYPE_KEYBOARD
     struct gnwDeviceUHA_fdc_desc fdc;             // DEV_TYPE_FDC
     struct gnwDeviceUHA_driveCtrl_desc storage;   // for storage devices
@@ -84,6 +87,7 @@ static inline struct gnwDeviceUHADesc uhaGetDesc(const size_t identifier, const 
     return (struct gnwDeviceUHADesc) {
         identifier,
         api.system.desc,
+        api.mem.desc,
         api.keyboard.desc,
         api.fdc.desc,
         api.storage.desc,
