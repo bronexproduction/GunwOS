@@ -44,6 +44,7 @@ static void c_vid_push() {
     enum gnwDeviceError e = displayHandle.update(&displayHandle, frameBuffer);
     if (e) {
         LOG_FATAL("Error updating display buffer");
+        displayHandle.update = nullptr;
     }
 }
 

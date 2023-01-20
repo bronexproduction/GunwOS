@@ -92,7 +92,7 @@ static enum gnwDeviceError pushTextFrame(const struct gnwTextDisplayHandle * con
 }
 
 static enum gnwDeviceError pushGraphicsFrame(const struct gnwGraphicsDisplayHandle * const handle,
-                                             const struct gnwDeviceUHA_display_character * const buffer) {
+                                             const struct gnwDeviceUHA_display_pixel * const buffer) {
 #warning TO BE IMPLEMENTED
     return GDE_NONE;
 }
