@@ -103,7 +103,7 @@ static inline enum gnwDeviceError devGetByType(const enum gnwDeviceType type, st
     Attempts to take hold of the device
 
     Params:
-        * type - device type (see gunwdrv.h)
+        * identifier - device identifier
 
     Note: In order to use the device
           the process has to be exclusive holder of it
@@ -112,6 +112,37 @@ static inline enum gnwDeviceError devAcquire(const uint_32 identifier) {
     SYSCALL_PAR1(identifier);
 
     SYSCALL_FUNC(DEV_ACQUIRE);
+    SYSCALL_INT;
+
+    SYSCALL_RETVAL(32);
+}
+
+/*
+    Releases the hold taken on the device (if any)
+
+    Params:
+        * identifier - device identifier
+*/
+static inline void devRelease(const uint_32 identifier) {
+    SYSCALL_PAR1(identifier);
+
+    SYSCALL_FUNC(DEV_RELEASE);
+    SYSCALL_INT;
+}
+
+/*
+    Write to the device
+
+    Params:
+        * identifier - device identifier
+        * buffer - data buffer pointer
+*/
+static inline enum gnwDeviceError devWrite(const size_t identifier,
+                                           const void * const buffer) {
+    SYSCALL_PAR1(identifier);
+    SYSCALL_PAR2(buffer);
+
+    SYSCALL_FUNC(DEV_WRITE);
     SYSCALL_INT;
 
     SYSCALL_RETVAL(32);
