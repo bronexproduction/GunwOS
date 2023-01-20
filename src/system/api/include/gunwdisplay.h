@@ -36,12 +36,17 @@ struct gnwTextDisplayHandle {
     struct gnwDisplayDescriptor descriptor;
 
     /*
+        Invalidate and clear the handle
+    */
+    void (*invalidate)(struct gnwTextDisplayHandle * const handle);
+
+    /*
         Update the framebuffer (text mode)
     
         Params:
             * Framebuffer data (X * Y * sizeof(struct gnwDeviceUHA_display_character))
     */
-    enum gnwDeviceError (*update)(const struct gnwTextDisplayHandle * const handle,
+    enum gnwDeviceError (*update)(struct gnwTextDisplayHandle * const handle,
                                   const struct gnwDeviceUHA_display_character * const buffer);
 };
 
@@ -52,12 +57,17 @@ struct gnwGraphicsDisplayHandle {
     struct gnwDisplayDescriptor descriptor;
 
     /*
+        Invalidate and clear the handle
+    */
+    void (*invalidate)(struct gnwGraphicsDisplayHandle * const handle);
+
+    /*
         Update the framebuffer (graphics mode)
     
         Params:
             * Framebuffer data (X * Y * sizeof(struct gnwDeviceUHA_display_pixel))
     */
-    enum gnwDeviceError (*update)(const struct gnwGraphicsDisplayHandle * const handle,
+    enum gnwDeviceError (*update)(struct gnwGraphicsDisplayHandle * const handle,
                                   const struct gnwDeviceUHA_display_pixel * const buffer);
 };
 

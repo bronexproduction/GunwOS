@@ -86,21 +86,7 @@ struct gnwDeviceUHA_display_desc {
 };
 
 struct gnwDeviceUHA_display_routine {
-    /*
-        Update the framebuffer (text mode)
-    
-        Params:
-            * Framebuffer data (X * Y * sizeof(struct gnwDeviceUHA_display_character))
-    */
-    void (*updateText)(const struct gnwDeviceUHA_display_character * const buffer);
-
-    /*
-        Update the framebuffer (graphics mode)
-    
-        Params:
-            * Framebuffer data (X * Y * sizeof(struct gnwDeviceUHA_display_pixel))
-    */
-    void (*updateGraphics)(const struct gnwDeviceUHA_display_pixel * const buffer);
+    void (*_unused)();
 };
 
 struct gnwDeviceUHA_display {
