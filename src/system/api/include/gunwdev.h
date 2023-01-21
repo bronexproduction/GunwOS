@@ -33,6 +33,9 @@ enum gnwDeviceError {
         * desc - device descriptor (see gunwdrv.h)
 */
 static inline enum gnwDriverError devInstall(size_t * const id, const struct gnwDeviceDescriptor * const desc) {
+    CHECKPTR(id);
+    CHECKPTR(desc);
+
     SYSCALL_PAR1(id);
     SYSCALL_PAR2(desc);
 
@@ -65,10 +68,7 @@ static inline enum gnwDriverError devStart(size_t id) {
         * desc - address of the result description (see gunwdrv.h)
 */
 static inline enum gnwDeviceError devGetById(const size_t deviceId, struct gnwDeviceUHADesc * const desc) {
-    if (!desc) {
-        fug(NULLPTR);
-        __builtin_unreachable();
-    }
+    CHECKPTR(desc);
 
     SYSCALL_PAR1(deviceId);
     SYSCALL_PAR2(desc);
@@ -87,10 +87,7 @@ static inline enum gnwDeviceError devGetById(const size_t deviceId, struct gnwDe
         * desc - address of the result description (see gunwdrv.h)
 */
 static inline enum gnwDeviceError devGetByType(const enum gnwDeviceType type, struct gnwDeviceUHADesc * const desc) {
-    if (!desc) {
-        fug(NULLPTR);
-        __builtin_unreachable();
-    }
+    CHECKPTR(desc);
 
     SYSCALL_PAR1(type);
     SYSCALL_PAR2(desc);
@@ -141,6 +138,8 @@ static inline void devRelease(const uint_32 identifier) {
 */
 static inline enum gnwDeviceError devWrite(const size_t identifier,
                                            const void * const buffer) {
+    CHECKPTR(buffer);
+
     SYSCALL_PAR1(identifier);
     SYSCALL_PAR2(buffer);
 

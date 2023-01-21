@@ -14,8 +14,6 @@
 #include <stdgunw/mem.h>
 #include <scl_def.h>
 
-#define CHECKPTR(PTR) { if (!PTR) { fug(NULLPTR); __builtin_unreachable(); } }
-
 enum displayType {
     TEXT,
     GRAPHICS
