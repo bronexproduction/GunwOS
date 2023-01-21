@@ -155,7 +155,7 @@ enum gnwDeviceError k_dev_getById(const size_t id, struct gnwDeviceUHADesc * con
     }
     
     if (!desc) {
-        LOG_FATAL("Device descriptor descriptor over limit");
+        LOG_FATAL("Device descriptor nullptr");
         return GDE_UNKNOWN;
     }
 
@@ -203,15 +203,37 @@ void k_dev_releaseHold(size_t processId, size_t deviceId) {
 enum gnwDeviceError k_dev_write(const size_t processId, 
                                 const size_t deviceId,
                                 const void * const buffer) {
+    
+    if (!validateId(deviceId) || deviceId >= devicesCount) {
+        LOG_FATAL("Device identifier invalid")
+        return UNKNOWN;
+    }
+    if (!buffer) {
+        LOG_FATAL("Buffer cannot be nullptr");
+        return UNKNOWN;
+    }
+
     // TODO: checks
     // * check if process exists
     // * check if device exists
     // * check if process holds the device
     // * check if buffer does not exceed process memory
-                                
-    // get device
-    // if memory does not support memory write - fail
-    // write
+
+    struct device *dev = &devices[deviceId];
+    if (!dev) {
+        return GDE_ID_INVALID;
+    }
+    if (dev->holder != processId) {
+        return GDE_HANDLE_INVALID;
+    }
+    if (!dev->started) {
+        return GDE_INVALID_DEVICE_STATE;
+    }
+    if (!dev->desc.api.mem.routine.write) {
+        return GDE_INVALID_OPERATION;
+    }
+
+    dev->desc.api.mem.routine.write(buffer);
 
     return GDE_NONE;
 }
