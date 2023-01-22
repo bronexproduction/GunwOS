@@ -29,7 +29,7 @@ enum gnwDriverError {
     IRQ_INVALID     = 4,
     LIMIT_REACHED   = 5,
     ISR_MISSING     = 6,
-    UNKNOWN         = 0xFFFFFFFF
+    UNKNOWN         = -1
 };
 
 /*
@@ -42,7 +42,7 @@ enum gnwDeviceType {
     DEV_TYPE_CHAR_IN,
     DEV_TYPE_CHAR_OUT,
     DEV_TYPE_DISPLAY,
-    DEV_TYPE_UNKNOWN    = 0xFFFFFFFF
+    DEV_TYPE_UNKNOWN    = -1
 };
 
 /*

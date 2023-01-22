@@ -21,7 +21,7 @@ enum gnwDeviceError {
     GDE_HANDLE_INVALID,
     GDE_INVALID_DEVICE_STATE,
     GDE_INVALID_OPERATION,
-    GDE_UNKNOWN
+    GDE_UNKNOWN         = -1
 };
 
 /*
