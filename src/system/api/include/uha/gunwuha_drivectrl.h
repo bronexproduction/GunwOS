@@ -12,7 +12,11 @@
 #include <stdgunw/types.h>
 #include "../gunwstor.h"
 
-struct gnwDeviceUHA_driveCtrl {
+struct gnwDeviceUHA_driveCtrl_desc {
+    uint_32 _unused;
+};
+
+struct gnwDeviceUHA_driveCtrl_routine {
     /*
         Read data from drive
 
@@ -26,7 +30,16 @@ struct gnwDeviceUHA_driveCtrl {
         Result:
             * number of sectors read
     */
-    size_t (*read)(const uint_8 index, const size_t lba, const size_t count, uint_8 * const buffer, struct gnwStorError *error);
+    size_t (*read)(const uint_8 index, 
+                   const size_t lba, 
+                   const size_t count, 
+                   uint_8 * const buffer, 
+                   struct gnwStorError *error);
+};
+
+struct gnwDeviceUHA_driveCtrl {
+    struct gnwDeviceUHA_driveCtrl_desc desc;
+    struct gnwDeviceUHA_driveCtrl_routine routine;
 };
 
 #endif // GUNWOS_GUNWUHA_DRIVECTRL_H

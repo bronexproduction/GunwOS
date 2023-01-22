@@ -1,15 +1,16 @@
 //
-//  gunwscl.h
+//  gunwctrl.h
 //  GunwOS
 //
 //  Created by Artur Danielewski on 08.01.2021.
 //
 
-#ifndef GUNWOS_GUNWSCL_H
-#define GUNWOS_GUNWSCL_H
+#ifndef GUNWOS_GUNWCTRL_H
+#define GUNWOS_GUNWCTRL_H
 
 #include "scl_def.h"
 #include "gunwdrv.h"
+#include "gunwdispatch.h"
 
 /*
     Ends process execution
@@ -47,34 +48,4 @@ static inline void sleepms(const unsigned int ms) {
     SYSCALL_INT;
 }
 
-/*
-    Requests installation of given hardware driver
-
-    Params:
-        * desc - device descriptor (see gunwdrv.h)
-*/
-static inline enum gnwDriverError devInstall(const struct gnwDeviceDescriptor * const desc) {
-    SYSCALL_PAR1(desc);
-
-    SYSCALL_FUNC(DEV_INSTALL);
-    SYSCALL_INT;
-
-    SYSCALL_RETVAL(32);
-}
-
-/*
-    Requests start of given hardware driver
-
-    Params:
-        * desc - device descriptor (see gunwdrv.h)
-*/
-static inline enum gnwDriverError devStart(const struct gnwDeviceDescriptor * const desc) {
-    SYSCALL_PAR1(desc);
-
-    SYSCALL_FUNC(DEV_START);
-    SYSCALL_INT;
-
-    SYSCALL_RETVAL(32);
-}
-
-#endif // GUNWOS_GUNWSCL_H
+#endif // GUNWOS_GUNWCTRL_H

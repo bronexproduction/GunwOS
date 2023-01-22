@@ -9,11 +9,14 @@
 #define GUNWOS_GUNWDRV_H
 
 #include <stdgunw/types.h>
+#include <stdgunw/defs.h>
 #include "uha/gunwuha_system.h"
+#include "uha/gunwuha_mem.h"
 #include "uha/gunwuha_keyboard.h"
 #include "uha/gunwuha_fdc.h"
 #include "uha/gunwuha_drivectrl.h"
 #include "uha/gunwuha_char.h"
+#include "uha/gunwuha_display.h"
 
 /*
     Device driver error codes
@@ -23,8 +26,10 @@ enum gnwDriverError {
     UNINITIALIZED   = 1,        // Driver initialization failed or driver expected to be initialized before requested operation
     START_FAILED    = 2,        // Driver start failed
     IRQ_CONFLICT    = 3,        // Driver caused IRQ conflict with another driver previously installed
-    LIMIT_REACHED   = 4,
-    UNKNOWN         = 0xFFFFFFFF
+    IRQ_INVALID     = 4,
+    LIMIT_REACHED   = 5,
+    ISR_MISSING     = 6,
+    UNKNOWN         = -1
 };
 
 /*
@@ -36,32 +41,67 @@ enum gnwDeviceType {
     DEV_TYPE_FDC,
     DEV_TYPE_CHAR_IN,
     DEV_TYPE_CHAR_OUT,
-    DEV_TYPE_UNKNOWN
+    DEV_TYPE_DISPLAY,
+    DEV_TYPE_UNKNOWN    = -1
 };
 
 /*
     Hardware-specific API
+    Not available directly for user-level processes
 
-    Set of routines expected to be provided by hardware driver
+    Set of routines and information
+    expected to be provided by hardware driver
     specific for the exact gnwDeviceType
 */
 struct gnwDeviceUHA {
     struct gnwDeviceUHA_system system;      // DEV_TYPE_SYSTEM
+    struct gnwDeviceUHA_mem mem;            // memory-mapped devices
     struct gnwDeviceUHA_keyboard keyboard;  // DEV_TYPE_KEYBOARD
     struct gnwDeviceUHA_fdc fdc;            // DEV_TYPE_FDC
     struct gnwDeviceUHA_driveCtrl storage;  // for storage devices
     struct gnwDeviceUHA_char_in charIn;     // DEV_TYPE_CHAR_IN
     struct gnwDeviceUHA_char_out charOut;   // DEV_TYPE_CHAR_OUT
+    struct gnwDeviceUHA_display display;    // DEV_TYPE_DISPLAY
 };
 
-/*  Device driver descriptor
+/*
+    Hardware-specific descriptor
+    Part of UHA available for user-level processes
+*/
+struct gnwDeviceUHADesc {
+    uint_32 identifier;
+    struct gnwDeviceUHA_system_desc system;       // DEV_TYPE_SYSTEM
+    struct gnwDeviceUHA_mem_desc mem;             // memory-mapped devices
+    struct gnwDeviceUHA_keyboard_desc keyboard;   // DEV_TYPE_KEYBOARD
+    struct gnwDeviceUHA_fdc_desc fdc;             // DEV_TYPE_FDC
+    struct gnwDeviceUHA_driveCtrl_desc storage;   // for storage devices
+    struct gnwDeviceUHA_char_in_desc charIn;      // DEV_TYPE_CHAR_IN
+    struct gnwDeviceUHA_char_out_desc charOut;    // DEV_TYPE_CHAR_OUT
+    struct gnwDeviceUHA_display_desc display;     // DEV_TYPE_DISPLAY
+};
+
+/*
+    Extracts UHA descriptor from UHA structure
+*/
+static inline struct gnwDeviceUHADesc uhaGetDesc(const size_t identifier, const struct gnwDeviceUHA api) {
+    return (struct gnwDeviceUHADesc) {
+        identifier,
+        api.system.desc,
+        api.mem.desc,
+        api.keyboard.desc,
+        api.fdc.desc,
+        api.storage.desc,
+        api.charIn.desc,
+        api.charOut.desc,
+        api.display.desc
+    };
+}
+
+/*  Device driver configuration
 
     Provides the kernel with entry points for general device operations
-    
-    In order to register a device in kernel
-    an instance of this type to be prepared
-    and passed to k_hal_install()  */
-struct gnwDriverDesc {
+*/
+struct gnwDriverConfig {
    
 /*  Pointer to device initialization routine
 
@@ -70,7 +110,7 @@ struct gnwDriverDesc {
     Returns 1 on success, 0 otherwise
     
     NOTE: In this phase the interrupts are DISABLED */
-    uint_8 (*init)();
+    bool (*init)();
 
 /*
     Pointer to device start routine
@@ -78,7 +118,7 @@ struct gnwDriverDesc {
     Returns 1 on success, 0 otherwise
 
     Called after device is being initialized */
-    uint_8 (*start)();
+    bool (*start)();
 
 /*  Pointer to device interrupt service routine
 
@@ -107,13 +147,17 @@ struct gnwDeviceDriver {
     struct gnwDeviceIO io;
 
     /*
-        Driver descriptor
+        Driver configuration
     */
-    struct gnwDriverDesc descriptor;
+    struct gnwDriverConfig descriptor;
 };
 
 /*
     Device descriptor
+
+    In order to register a device in kernel
+    an instance of this type to be prepared
+    and passed to k_dev_install()  
 */
 struct gnwDeviceDescriptor {
     /*

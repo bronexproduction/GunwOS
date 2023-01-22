@@ -11,15 +11,21 @@
 #include <stdgunw/types.h>
 #include <stdgunw/utils.h>
 
-#define SYSCALL_INTERRUPT               0x69
+#define SYSCALL_INTERRUPT                   0x69
 
-#define SYSCALL_FUNCTION_RDB            0x01
-#define SYSCALL_FUNCTION_WRB            0x02
-#define SYSCALL_FUNCTION_EXIT           0x03
-#define SYSCALL_FUNCTION_DISPATCH       0x04
-#define SYSCALL_FUNCTION_SLEEPMS        0x05
-#define SYSCALL_FUNCTION_DEV_INSTALL    0x06
-#define SYSCALL_FUNCTION_DEV_START      0x07
+#define SYSCALL_FUNCTION_RDB                0x01
+#define SYSCALL_FUNCTION_WRB                0x02
+#define SYSCALL_FUNCTION_EXIT               0x03
+#define SYSCALL_FUNCTION_DISPATCH           0x04
+#define SYSCALL_FUNCTION_SLEEPMS            0x05
+#define SYSCALL_FUNCTION_DEV_INSTALL        0x06
+#define SYSCALL_FUNCTION_DEV_START          0x07
+#define SYSCALL_FUNCTION_DEV_GET_BY_ID      0x08
+#define SYSCALL_FUNCTION_DEV_GET_BY_TYPE    0x09
+#define SYSCALL_FUNCTION_DEV_ACQUIRE        0x0a
+#define SYSCALL_FUNCTION_DEV_RELEASE        0x0b
+#define SYSCALL_FUNCTION_DEV_WRITE          0x0c
+#define SYSCALL_FUNCTION_FUG                0x0d
 
 /*
     Important note:

@@ -5,6 +5,9 @@
 //  Created by Artur Danielewski on 25.03.2020.
 //
 
+#ifndef IRQ_H
+#define IRQ_H
+
 #define DEV_IRQ_LIMIT 16
 
 enum k_dev_irq {
@@ -26,3 +29,5 @@ enum k_dev_irq {
     HDD           = 14, // 14/6	    76h	    Hard disk controller
     RESERVED_15   = 15  // 15/7	    77h	    Reserved
 };
+
+#endif // IRQ_H

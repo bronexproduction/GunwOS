@@ -22,8 +22,9 @@ export CXX="$(GCC_DIR)/bin/i386-elf-g++"
 export L="$(GCC_DIR)/bin/i386-elf-ld"
 export RUSTC="$(RUST_DIR)/bin/rustc"
 
-export CFLAGS_GLOBAL=-fdebug-prefix-map=$(BUILD_DIR)=. -I $(LIB_DIR)
-export CXXFLAGS_GLOBAL=-fdebug-prefix-map=$(BUILD_DIR)=. -I $(LIB_DIR)
+WARN_PARAMS=-Wall -Wextra -Werror -Wno-error=cpp -Wno-error=unused-parameter
+export CFLAGS_GLOBAL=-fdebug-prefix-map=$(BUILD_DIR)=. -I $(LIB_DIR) $(WARN_PARAMS)
+export CXXFLAGS_GLOBAL=$(CFLAGS_GLOBAL)
 export RSFLAGS_GLOBAL=--emit=obj --crate-type=lib -g --target=$(SPEC_DIR)/i386-none-none.json
 
 export C_DIR_LISTING=find . -name '*.c' -type f

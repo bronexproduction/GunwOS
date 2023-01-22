@@ -7,7 +7,7 @@
 
 #include "keymap.h"
 
-const struct k_kmp_mapping k_kmp_default[SCANCODES_MAX] = {
+const struct c_kmp_mapping c_kmp_default[SCANCODES_MAX] = {
     /*          NO_MOD  S       C       C+S     A       A+S     A+C     A+C+S   MOD     SPEC */
     /* 0   */ { 0,      0,      0,      0,      0,      0,      0,      0,      0,      0 },
     /* 1   */ { 0,      0,      0,      0,      0,      0,      0,      0,      0,      ESC },
@@ -139,7 +139,7 @@ const struct k_kmp_mapping k_kmp_default[SCANCODES_MAX] = {
     /* 127 */ { 0,      0,      0,      0,      0,      0,      0,      0,      0,      0 }
 };
 
-uint_8 k_kmp_defines(const struct k_kmp_mapping *map, const uint_8 c) {
+uint_8 c_kmp_defines(const struct c_kmp_mapping *map, const uint_8 c) {
     return map[c].code                      ||
            map[c].code_shift                ||
            map[c].code_ctrl                 ||

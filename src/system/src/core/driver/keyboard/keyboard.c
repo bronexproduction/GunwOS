@@ -86,8 +86,8 @@
 #define KBD_STAT_TIM        0x40    /* Timeout bit (TIM) */
 #define KBD_STAT_PARERR     0x80    /* Parity error bit (PARE) */
 
-extern void k_kbf_up(uint_8 k);
-extern void k_kbf_down(uint_8 k);
+extern void c_kbf_up(uint_8 k);
+extern void c_kbf_down(uint_8 k);
 
 ISR(
     /* Checking output buffer status */
@@ -105,21 +105,35 @@ ISR(
         MSB contains information whether key was pressed or released
     */
     if (c & 0b10000000) {
-        k_kbf_up(c & 0b01111111);
+        c_kbf_up(c & 0b01111111);
     }
     else {
-        k_kbf_down(c);
+        c_kbf_down(c);
     }
 )
 
-struct gnwDriverDesc s_drv_keyboard() {
-    return (struct gnwDriverDesc){ 0, 0, isr, 1 };
+static struct gnwDriverConfig desc() {
+    return (struct gnwDriverConfig){ 0, 0, isr, 1 };
 }
 
-struct gnwDeviceUHA s_drv_keyboard_uha() {
+static struct gnwDeviceUHA uha() {
     struct gnwDeviceUHA uha;
 
-    uha.system._unused = 0;
+    uha.system.desc._unused = 0;
 
     return uha;
+}
+
+struct gnwDeviceDescriptor c_drv_keyboard_descriptor() {
+    return (struct gnwDeviceDescriptor) {
+        DEV_TYPE_KEYBOARD,
+        uha(),
+        (struct gnwDeviceDriver) {
+            (struct gnwDeviceIO) {
+                0x60
+            },
+            desc()
+        },
+        "8042 PS/2 Controller"
+    };
 }

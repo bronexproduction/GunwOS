@@ -1,6 +1,6 @@
 ASMFLAGS=-f elf
-CFLAGS=-std=c11 -c -ffreestanding -mno-red-zone -Wall -Wextra -ggdb -I include $(CFLAGS_GLOBAL)
-CXXFLAGS=-std=c++11 -c -ffreestanding -mno-red-zone -Wall -Wextra -ggdb $(CXXFLAGS_GLOBAL)
+CFLAGS=-std=c11 -c -ffreestanding -mno-red-zone -ggdb -I api/include $(CFLAGS_GLOBAL)
+CXXFLAGS=-std=c++11 -c -ffreestanding -mno-red-zone -ggdb $(CXXFLAGS_GLOBAL)
 RSFLAGS=$(RSFLAGS_GLOBAL)
 LFLAGS=-melf_i386 -i
 

@@ -54,12 +54,12 @@ struct gnwStorGeometry {
     Storage operations error codes
 */
 enum gnwStorErrorCode {
-    NONE = 0,
-    DRIVE_NOT_PRESENT,
-    API_UNAVAILABLE,
-    INVALID_FORMAT,
-    COMMAND_FAILED,
-    BUFFER_OVERFLOW
+    GSEC_NONE = 0,
+    GSEC_DRIVE_NOT_PRESENT,
+    GSEC_API_UNAVAILABLE,
+    GSEC_INVALID_FORMAT,
+    GSEC_COMMAND_FAILED,
+    GSEC_BUFFER_OVERFLOW
 };
 
 struct gnwStorError {

@@ -70,6 +70,8 @@
     "array": "c",
     "functional": "c",
     "regex": "c",
-    "utility": "c"
+    "utility": "c",
+    "cmath": "c",
+    "complex": "c"
   }
 }
