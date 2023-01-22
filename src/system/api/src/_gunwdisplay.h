@@ -14,7 +14,7 @@
 #include <stdgunw/mem.h>
 #include <scl_def.h>
 
-enum displayType {
+enum DisplayType {
     TEXT,
     GRAPHICS
 };
@@ -22,10 +22,10 @@ enum displayType {
 void fillDisplayDescriptorWithUHA(const struct gnwDeviceUHADesc * const uha,
                                   struct gnwDisplayDescriptor * const desc);
 
-enum gnwDeviceError getDisplay(enum displayType type, 
+enum gnwDeviceError getDisplay(enum DisplayType type, 
                                struct gnwDisplayDescriptor * const displayDescriptor);
                                
-enum gnwDeviceError attachToDisplay(const enum displayType type, 
+enum gnwDeviceError attachToDisplay(const enum DisplayType type, 
                                     const uint_32 displayId, 
                                     struct gnwDeviceUHADesc * const uha);
 

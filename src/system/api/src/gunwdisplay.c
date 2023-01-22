@@ -17,7 +17,7 @@ void fillDisplayDescriptorWithUHA(const struct gnwDeviceUHADesc * const uha,
     desc->format = uha->display.format;
 }
 
-enum gnwDeviceError getDisplay(enum displayType type, 
+enum gnwDeviceError getDisplay(enum DisplayType type, 
                                struct gnwDisplayDescriptor * const displayDescriptor) {
     CHECKPTR(displayDescriptor)
     
@@ -36,7 +36,7 @@ enum gnwDeviceError getDisplay(enum displayType type,
     return GDE_NONE;
 }
 
-enum gnwDeviceError attachToDisplay(const enum displayType type, 
+enum gnwDeviceError attachToDisplay(const enum DisplayType type, 
                                     const uint_32 displayId, 
                                     struct gnwDeviceUHADesc * const uha) {
     CHECKPTR(uha)
