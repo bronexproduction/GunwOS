@@ -7,11 +7,19 @@
 
 #include <stdgunw/types.h>
 
+#include "../error/panic.h"
+#include "../error/fug.h"
+
 static time_t ticks = 0;
 static time_t ms = 0;
 
 static uint_32 pitDrift = 0;
 static uint_32 driftCurrent = 0;
+
+#define MAX_MS_HANDLERS     1
+static size_t msHandlerCount = 0;
+
+static void (*auxMsHandlers[MAX_MS_HANDLERS]) (void);
 
 static void k_tmr_tick() {
     extern const uint_32 k_pit_freq;
@@ -33,6 +41,10 @@ static void k_tmr_tick() {
     }
 
     ++ms;
+    
+    for (size_t i = 0; i < msHandlerCount; ++i) {
+        auxMsHandlers[i]();
+    }
 }
 
 void k_tmr_init() {
@@ -65,4 +77,13 @@ void k_tmr_sleepms(const unsigned int milliseconds) {
 
 void k_tmr_sleeps(const unsigned int seconds) {
     k_tmr_sleepms(seconds * 1000);
+}
+
+void k_tmr_regMsHandler(void (*handler)()) {
+    CHECKPTR(handler);
+    if (msHandlerCount >= MAX_MS_HANDLERS) {
+        OOPS("Max auxiliary tick handler count reached");
+    }
+
+    auxMsHandlers[msHandlerCount++] = handler;
 }

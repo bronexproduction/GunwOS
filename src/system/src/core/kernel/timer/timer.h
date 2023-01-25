@@ -22,3 +22,8 @@ void k_tmr_sleeps(const unsigned int seconds);
     Sleep function (in milliseconds)
 */
 void k_tmr_sleepms(const unsigned int milliseconds);
+
+/*
+    Register auxiliary handler for millisecond event
+*/
+void k_tmr_regMsHandler(void (*handler)());
