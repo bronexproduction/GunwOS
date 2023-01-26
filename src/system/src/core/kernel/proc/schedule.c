@@ -10,6 +10,12 @@
 #define GRANULARITY_MS  100
 
 static size_t intervalCounter = GRANULARITY_MS;
+/*
+    Process identifier
+
+    Note: 0 is always considered to be kernel
+*/
+// static size_t currentProcId = 0;
 
 static void k_proc_schedule_switch(const size_t procId) {
 
