@@ -11,6 +11,18 @@
 
 static size_t intervalCounter = GRANULARITY_MS;
 
+static void k_proc_schedule_switch(const size_t procId) {
+
+}
+
+static size_t k_proc_schedule_select() {
+    return 0;
+}
+
+static void k_proc_schedule_evaluate() {
+    k_proc_schedule_switch(k_proc_schedule_select());
+}
+
 /*
     Note: As launched intermediately via hardware interrupt
           its execution time should be as short as possible
@@ -21,5 +33,7 @@ void k_proc_schedule_tick() {
     }
      
     intervalCounter = GRANULARITY_MS;
-        // CHECK SCHEDULE
+    
+    #warning RETURN FROM INTERRUPT FIRST
+    k_proc_schedule_evaluate();
 }
