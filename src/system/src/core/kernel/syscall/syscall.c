@@ -63,7 +63,7 @@ static void (*userSyscallReg[SYSCALL_COUNT])() = {
     /* 0x0d */ k_scr_fug
 };
 
-__attribute__((naked)) static void k_scl_syscall() {
+__attribute__((naked)) void k_scl_syscall() {
     register void (*scr)() __asm__ ("eax");
     if (!scr) {
         __asm__ volatile ("jmp k_scl_syscall_serviceRoutineUnavailable");
@@ -79,7 +79,7 @@ __attribute__((naked)) static void k_scl_syscall() {
 /*
     Handling error - Syscall function number over limit
 */
-__attribute__((naked)) static void k_scl_syscall_functionOverLimitFailure() {
+__attribute__((naked, unused)) static void k_scl_syscall_functionOverLimitFailure() {
     LOG_FATAL("Requested syscall function code over limit");
     __asm__ volatile ("jmp k_scl_syscall_end");
 }
@@ -87,7 +87,7 @@ __attribute__((naked)) static void k_scl_syscall_functionOverLimitFailure() {
 /*
     Handling error - Syscall service routine unavailable 
 */
-__attribute__((naked)) static void k_scl_syscall_serviceRoutineUnavailable() {
+__attribute__((naked, unused)) static void k_scl_syscall_serviceRoutineUnavailable() {
     LOG_DEBUG("Syscall function code unavailable");
     __asm__ volatile ("jmp k_scl_syscall_end");
 }
@@ -99,7 +99,7 @@ __attribute__((naked)) static void k_scl_syscall_serviceRoutineUnavailable() {
 
     NOTE: service routines MUST end with ret
 */
-__attribute__((naked)) static void k_scl_syscall_end() {
+__attribute__((naked, unused)) static void k_scl_syscall_end() {
     /*
         Replace caller EAX value on the stack with current value
         
@@ -116,7 +116,7 @@ __attribute__((naked)) static void k_scl_syscall_end() {
     NOTE: Function number has to be put in EAX register
     before making jump to k_scl_kernelSyscall label
 */
-__attribute__((naked)) static void k_scl_kernelSyscall() {
+__attribute__((naked, unused)) static void k_scl_kernelSyscall() {
     /*
         Syscall function number
     */
@@ -140,7 +140,7 @@ __attribute__((naked)) static void k_scl_kernelSyscall() {
     NOTE: Function number has to be put in EAX register
     before making jump to k_scl_driverSyscall label
 */
-__attribute__((naked)) static void k_scl_driverSyscall() {
+__attribute__((naked, unused)) static void k_scl_driverSyscall() {
     /*
         Syscall function number
     */
@@ -164,7 +164,7 @@ __attribute__((naked)) static void k_scl_driverSyscall() {
     NOTE: Function number has to be put in EAX register
     before making jump to k_scl_userSyscall label
 */
-__attribute__((naked)) static void k_scl_userSyscall() {
+__attribute__((naked, unused)) static void k_scl_userSyscall() {
     /*
         Syscall function number
     */
