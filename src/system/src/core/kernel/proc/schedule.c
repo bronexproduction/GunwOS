@@ -27,7 +27,7 @@ static size_t k_proc_schedule_select() {
     return 0;
 }
 
-static void k_proc_schedule_evaluate() {
+void k_proc_schedule_evaluate() {
     k_proc_schedule_switch(k_proc_schedule_select());
 }
 
