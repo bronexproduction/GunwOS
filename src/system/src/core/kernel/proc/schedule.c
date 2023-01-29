@@ -7,7 +7,9 @@
 
 #include "proc.h"
 
-#define GRANULARITY_MS  100
+#include <scl_def.h>
+
+#define GRANULARITY_MS  30000
 
 static size_t intervalCounter = GRANULARITY_MS;
 /*
@@ -40,5 +42,6 @@ void k_proc_schedule_tick() {
      
     intervalCounter = GRANULARITY_MS;
     
-    #warning k_proc_schedule_evaluate interrupt
+    SYSCALL_KERNEL_FUNC(PROC_SCHED_EVAL);
+    SYSCALL_KERNEL_INT;
 }
