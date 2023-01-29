@@ -146,7 +146,7 @@ void k_idt_loadDefault(const char codeSegOffset) {
     // 66
     // 67
     // 68
-    // 69
+    k_idt_default[69] = k_idt_gateInterrupt(k_isr_kernelSyscall, DPL_0);
     // 70
     // 71
     // 72
@@ -181,8 +181,8 @@ void k_idt_loadDefault(const char codeSegOffset) {
     // 101
     // 102
     // 103
-    // 104
-    k_idt_default[105] = k_idt_gateInterrupt(k_isr_syscall, DPL_0);
+    k_idt_default[104] = k_idt_gateInterrupt(k_isr_driverSyscall, DPL_0);
+    k_idt_default[105] = k_idt_gateInterrupt(k_isr_userSyscall, DPL_0);
     // 106 - 255
 
     k_idt_load(&k_idt_default, IDT_SIZE_DEFAULT);

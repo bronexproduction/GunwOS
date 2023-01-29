@@ -19,8 +19,8 @@
 static inline uint_8 rdb(uint_16 const port) {
     SYSCALL_PAR1(port);
 
-    SYSCALL_FUNC(RDB);
-    SYSCALL_INT;
+    SYSCALL_DRIVER_FUNC(RDB);
+    SYSCALL_DRIVER_INT;
     
     register uint_8 ret __asm__ ("al");
     return ret;
@@ -36,8 +36,8 @@ static inline void wrb(uint_16 const port, uint_8 const val) {
     SYSCALL_PAR1(port);
     SYSCALL_PAR2(val);
 
-    SYSCALL_FUNC(WRB);
-    SYSCALL_INT;
+    SYSCALL_DRIVER_FUNC(WRB);
+    SYSCALL_DRIVER_INT;
 }
 
 #endif // GUNWOS_GUNWIO_H

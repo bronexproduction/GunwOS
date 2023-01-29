@@ -11,21 +11,26 @@
 #include <stdgunw/types.h>
 #include <stdgunw/utils.h>
 
-#define SYSCALL_INTERRUPT                   0x69
+#define SYSCALL_KERNEL_INTERRUPT                0x45
+#define SYSCALL_DRIVER_INTERRUPT                0x68
+#define SYSCALL_USER_INTERRUPT                  0x69
 
-#define SYSCALL_FUNCTION_RDB                0x01
-#define SYSCALL_FUNCTION_WRB                0x02
-#define SYSCALL_FUNCTION_EXIT               0x03
-#define SYSCALL_FUNCTION_DISPATCH           0x04
-#define SYSCALL_FUNCTION_SLEEPMS            0x05
-#define SYSCALL_FUNCTION_DEV_INSTALL        0x06
-#define SYSCALL_FUNCTION_DEV_START          0x07
-#define SYSCALL_FUNCTION_DEV_GET_BY_ID      0x08
-#define SYSCALL_FUNCTION_DEV_GET_BY_TYPE    0x09
-#define SYSCALL_FUNCTION_DEV_ACQUIRE        0x0a
-#define SYSCALL_FUNCTION_DEV_RELEASE        0x0b
-#define SYSCALL_FUNCTION_DEV_WRITE          0x0c
-#define SYSCALL_FUNCTION_FUG                0x0d
+#define SYSCALL_KERNEL_FUNCTION_PROC_SCHED_EVAL 0x01
+
+#define SYSCALL_DRIVER_FUNCTION_RDB             0x01
+#define SYSCALL_DRIVER_FUNCTION_WRB             0x02
+#define SYSCALL_DRIVER_FUNCTION_DEV_INSTALL     0x06
+#define SYSCALL_DRIVER_FUNCTION_DEV_START       0x07
+
+#define SYSCALL_USER_FUNCTION_EXIT              0x03
+#define SYSCALL_USER_FUNCTION_DISPATCH          0x04
+#define SYSCALL_USER_FUNCTION_SLEEPMS           0x05
+#define SYSCALL_USER_FUNCTION_DEV_GET_BY_ID     0x08
+#define SYSCALL_USER_FUNCTION_DEV_GET_BY_TYPE   0x09
+#define SYSCALL_USER_FUNCTION_DEV_ACQUIRE       0x0a
+#define SYSCALL_USER_FUNCTION_DEV_RELEASE       0x0b
+#define SYSCALL_USER_FUNCTION_DEV_WRITE         0x0c
+#define SYSCALL_USER_FUNCTION_FUG               0x0d
 
 /*
     Important note:
@@ -36,8 +41,14 @@
     as EAX register is used as intermediate register
     and stores the last assigned value
 */
-#define SYSCALL_FUNC(CODE) REG(32, _code, eax); _code = (uint_32) SYSCALL_FUNCTION_ ## CODE ;
-#define SYSCALL_INT { __asm__ volatile ("int $" STR(SYSCALL_INTERRUPT) ); }
+#define SYSCALL_FUNC(LEVEL, CODE) REG(32, _code, eax); _code = (uint_32) SYSCALL_ ## LEVEL ## _FUNCTION_ ## CODE ;
+#define SYSCALL_KERNEL_FUNC(CODE) SYSCALL_FUNC(KERNEL, CODE)
+#define SYSCALL_DRIVER_FUNC(CODE) SYSCALL_FUNC(DRIVER, CODE)
+#define SYSCALL_USER_FUNC(CODE) SYSCALL_FUNC(USER, CODE)
+#define SYSCALL_INT(CODE) { __asm__ volatile ("int $" STR(CODE) ); }
+#define SYSCALL_KERNEL_INT SYSCALL_INT(SYSCALL_KERNEL_INTERRUPT)
+#define SYSCALL_DRIVER_INT SYSCALL_INT(SYSCALL_DRIVER_INTERRUPT)
+#define SYSCALL_USER_INT SYSCALL_INT(SYSCALL_USER_INTERRUPT)
 #define SYSCALL_RETVAL(BITS) { REG_RET(BITS, _retVal); return _retVal; }
 
 #define SYSCALL_PAR(NAME, VALUE, REG_NAME) REG(32, _param ## NAME , REG_NAME); _param ## NAME = (uint_32) VALUE ;

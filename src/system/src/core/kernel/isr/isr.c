@@ -133,7 +133,16 @@
 // 66
 // 67
 // 68
-// 69
+
+/* 69 */ __attribute__((naked)) void k_isr_kernelSyscall() {
+    ISR_PUSH
+    __asm__ volatile ("sti");
+    __asm__ volatile ("call k_scl_kernelSyscall");
+    /* EAX on stack should contain return value (if any) */
+    ISR_POP
+    __asm__ volatile ("iret");
+}
+
 // 70
 // 71
 // 72
@@ -168,12 +177,20 @@
 // 101
 // 102
 // 103
-// 104
 
-/* 105 */ __attribute__((naked)) void k_isr_syscall() {
+/* 104 */ __attribute__((naked)) void k_isr_driverSyscall() {
     ISR_PUSH
     __asm__ volatile ("sti");
-    __asm__ volatile ("call k_scl_syscall");
+    __asm__ volatile ("call k_scl_driverSyscall");
+    /* EAX on stack should contain return value (if any) */
+    ISR_POP
+    __asm__ volatile ("iret");
+}
+
+/* 105 */ __attribute__((naked)) void k_isr_userSyscall() {
+    ISR_PUSH
+    __asm__ volatile ("sti");
+    __asm__ volatile ("call k_scl_userSyscall");
     /* EAX on stack should contain return value (if any) */
     ISR_POP
     __asm__ volatile ("iret");

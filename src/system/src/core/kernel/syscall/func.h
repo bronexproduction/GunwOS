@@ -9,6 +9,20 @@
 #include <gunwfug.h>
 
 /*
+    Kernel-level system calls
+*/
+
+/*
+    Code - 0x01
+    Function - PROC_SCHED_EVAL
+*/
+__attribute__((naked)) void k_scr_procSchedulerEvaluate(); 
+
+/*
+    Driver-level system calls
+*/
+
+/*
     Code - 0x01
     Function - RDB
 */
@@ -19,6 +33,10 @@ __attribute__((naked)) void k_scr_rdb();
     Function - WRB
 */
 __attribute__((naked)) void k_scr_wrb();
+
+/*
+    User-level system calls
+*/
 
 /*
     Code - 0x03

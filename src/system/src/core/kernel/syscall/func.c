@@ -22,6 +22,23 @@
 #define SCR(NAME, CODE) __attribute__((naked)) void k_scr_ ## NAME () { CODE; SCR_END }
 
 /*
+    Kernel-level system calls
+*/
+
+/*
+    Code - 0x01
+    Function - PROC_SCHED_EVAL
+*/
+SCR(procSchedulerEvaluate,
+    extern void k_proc_schedule_evaluate();
+    k_proc_schedule_evaluate();
+)
+
+/*
+    Driver-level system calls
+*/
+
+/*
     Code - 0x01
     Function - RDB
 
@@ -54,6 +71,10 @@ SCR(wrb,
 
     k_bus_outb(port, value);
 )
+
+/*
+    User-level system calls
+*/
 
 /*
     Code - 0x03

@@ -32,6 +32,7 @@ enum gnwDeviceError {
                to be returned if the installation succeeds
         * desc - device descriptor (see gunwdrv.h)
 */
+#warning Consider removing - no reason to be part of the API
 static inline enum gnwDriverError devInstall(size_t * const id, const struct gnwDeviceDescriptor * const desc) {
     CHECKPTR(id);
     CHECKPTR(desc);
@@ -39,8 +40,8 @@ static inline enum gnwDriverError devInstall(size_t * const id, const struct gnw
     SYSCALL_PAR1(id);
     SYSCALL_PAR2(desc);
 
-    SYSCALL_FUNC(DEV_INSTALL);
-    SYSCALL_INT;
+    SYSCALL_DRIVER_FUNC(DEV_INSTALL);
+    SYSCALL_DRIVER_INT;
 
     SYSCALL_RETVAL(32);
 }
@@ -51,11 +52,12 @@ static inline enum gnwDriverError devInstall(size_t * const id, const struct gnw
     Params:
         * id - device identifier
 */
+#warning Consider removing - no reason to be part of the API
 static inline enum gnwDriverError devStart(size_t id) {
     SYSCALL_PAR1(id);
 
-    SYSCALL_FUNC(DEV_START);
-    SYSCALL_INT;
+    SYSCALL_DRIVER_FUNC(DEV_START);
+    SYSCALL_DRIVER_INT;
 
     SYSCALL_RETVAL(32);
 }
@@ -73,8 +75,8 @@ static inline enum gnwDeviceError devGetById(const size_t deviceId, struct gnwDe
     SYSCALL_PAR1(deviceId);
     SYSCALL_PAR2(desc);
 
-    SYSCALL_FUNC(DEV_GET_BY_ID);
-    SYSCALL_INT;
+    SYSCALL_USER_FUNC(DEV_GET_BY_ID);
+    SYSCALL_USER_INT;
 
     SYSCALL_RETVAL(32);
 }
@@ -92,8 +94,8 @@ static inline enum gnwDeviceError devGetByType(const enum gnwDeviceType type, st
     SYSCALL_PAR1(type);
     SYSCALL_PAR2(desc);
 
-    SYSCALL_FUNC(DEV_GET_BY_TYPE);
-    SYSCALL_INT;
+    SYSCALL_USER_FUNC(DEV_GET_BY_TYPE);
+    SYSCALL_USER_INT;
 
     SYSCALL_RETVAL(32);
 }
@@ -110,8 +112,8 @@ static inline enum gnwDeviceError devGetByType(const enum gnwDeviceType type, st
 static inline enum gnwDeviceError devAcquire(const uint_32 identifier) {
     SYSCALL_PAR1(identifier);
 
-    SYSCALL_FUNC(DEV_ACQUIRE);
-    SYSCALL_INT;
+    SYSCALL_USER_FUNC(DEV_ACQUIRE);
+    SYSCALL_USER_INT;
 
     SYSCALL_RETVAL(32);
 }
@@ -125,8 +127,8 @@ static inline enum gnwDeviceError devAcquire(const uint_32 identifier) {
 static inline void devRelease(const uint_32 identifier) {
     SYSCALL_PAR1(identifier);
 
-    SYSCALL_FUNC(DEV_RELEASE);
-    SYSCALL_INT;
+    SYSCALL_USER_FUNC(DEV_RELEASE);
+    SYSCALL_USER_INT;
 }
 
 /*
@@ -143,8 +145,8 @@ static inline enum gnwDeviceError devWrite(const size_t identifier,
     SYSCALL_PAR1(identifier);
     SYSCALL_PAR2(buffer);
 
-    SYSCALL_FUNC(DEV_WRITE);
-    SYSCALL_INT;
+    SYSCALL_USER_FUNC(DEV_WRITE);
+    SYSCALL_USER_INT;
 
     SYSCALL_RETVAL(32);
 }

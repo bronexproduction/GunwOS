@@ -18,8 +18,8 @@
 static inline void exit(uint_32 const status) {
     SYSCALL_PAR1(status);
 
-    SYSCALL_FUNC(EXIT);
-    SYSCALL_INT;
+    SYSCALL_USER_FUNC(EXIT);
+    SYSCALL_USER_INT;
 }
 
 /*
@@ -31,8 +31,8 @@ static inline void exit(uint_32 const status) {
 static inline void dispatch(const struct gnwDispatchDesc * const desc) {
     SYSCALL_PAR1(desc);
 
-    SYSCALL_FUNC(DISPATCH);
-    SYSCALL_INT;
+    SYSCALL_USER_FUNC(DISPATCH);
+    SYSCALL_USER_INT;
 }
 
 /*
@@ -44,8 +44,8 @@ static inline void dispatch(const struct gnwDispatchDesc * const desc) {
 static inline void sleepms(const unsigned int ms) {
     SYSCALL_PAR1(ms);
 
-    SYSCALL_FUNC(SLEEPMS);
-    SYSCALL_INT;
+    SYSCALL_USER_FUNC(SLEEPMS);
+    SYSCALL_USER_INT;
 }
 
 #endif // GUNWOS_GUNWCTRL_H

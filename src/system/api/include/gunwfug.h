@@ -25,8 +25,8 @@ enum gnwFugCode {
 static inline void fug(enum gnwFugCode code) {
     SYSCALL_PAR1(code);
 
-    SYSCALL_FUNC(FUG);
-    SYSCALL_INT;
+    SYSCALL_USER_FUNC(FUG);
+    SYSCALL_USER_INT;
 }
 
 #endif // GUNWOS_GUNWFUG_H

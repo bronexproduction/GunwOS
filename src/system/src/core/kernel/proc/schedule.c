@@ -40,6 +40,5 @@ void k_proc_schedule_tick() {
      
     intervalCounter = GRANULARITY_MS;
     
-    #warning RETURN FROM INTERRUPT FIRST
-    k_proc_schedule_evaluate();
+    #warning k_proc_schedule_evaluate interrupt
 }
