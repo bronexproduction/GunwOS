@@ -8,7 +8,7 @@
 #include "proc.h"
 
 #include <stdgunw/defs.h>
-#include "../runloop/runloop.h"
+#include "../queue/queue.h"
 
 #define GRANULARITY_MS  1000
 
@@ -42,6 +42,9 @@ void k_proc_schedule_tick() {
     }
      
     intervalCounter = GRANULARITY_MS;
-    k_rlp_dispatch(k_proc_schedule_evaluate);
+    k_que_dispatch(k_proc_schedule_evaluate);
+}
+
+void k_proc_schedule_setNeedsKernelHandling() {
     k_proc_schedule_switch(0);
 }

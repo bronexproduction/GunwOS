@@ -12,7 +12,7 @@ extern void k_hal_init(const char codeSegOffset);
 extern void k_proc_init();
 extern void k_dev_init();
 extern void c_init();
-extern void k_rlp_start();
+extern void k_que_start();
 
 static void bss_clear() {
     extern int _BSS_START_, _BSS_END_;
@@ -39,5 +39,5 @@ void __attribute__((fastcall, section(".start"))) __kernel_start(const struct k_
     k_proc_init();
     k_dev_init();
     c_init();
-    k_rlp_start();
+    k_que_start();
 }

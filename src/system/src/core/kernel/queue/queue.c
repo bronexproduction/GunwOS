@@ -1,5 +1,5 @@
 //
-//  runloop.c
+//  queue.c
 //  GunwOS
 //
 //  Created by Artur Danielewski on 02.02.2021.
@@ -8,6 +8,7 @@
 #include <stdgunw/types.h>
 #include <stdgunw/defs.h>
 #include "../../log/log.h"
+#include "../proc/schedule.h"
 
 #define MAX_QUEUE_LENGTH 255
 
@@ -20,7 +21,7 @@ struct dispatchEntry {
 static struct dispatchEntry queue[MAX_QUEUE_LENGTH];
 static struct dispatchEntry *current = 0;
 
-void k_rlp_dispatch(void (* const func)()) {
+void k_que_dispatch(void (* const func)()) {
     
     size_t i;
     for (i = 0; i < MAX_QUEUE_LENGTH; ++i) {
@@ -43,7 +44,7 @@ void k_rlp_dispatch(void (* const func)()) {
     }
 
     if (i >= MAX_QUEUE_LENGTH) {
-        LOG_FATAL("Run loop capacity exceeded");
+        LOG_FATAL("Run queue capacity exceeded");
         return;
     }
 
@@ -57,10 +58,11 @@ void k_rlp_dispatch(void (* const func)()) {
     else {
         current = (queue + i);
     }
-    
+
+    k_proc_schedule_setNeedsKernelHandling();
 }
 
-void k_rlp_start() {
+void k_que_start() {
     
     while (1) {
 
