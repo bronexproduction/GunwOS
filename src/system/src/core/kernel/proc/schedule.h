@@ -8,6 +8,18 @@
 #ifndef SCHEDULE_H
 #define SCHEDULE_H
 
-void k_proc_schedule_setNeedsKernelHandling();
+/*
+    Called by the kernel queue
+    in case code got dispatched by an interrupt handler
+    to be executed on ISR return
+*/
+void k_proc_schedule_intNeedsKernelHandling();
+
+/*
+    Called by the kernel queue
+    in case all the dispatched code got executed
+    and execution can be switched to another process
+*/
+void k_proc_schedule_onKernelHandlingFinished();
 
 #endif // SCHEDULE_H

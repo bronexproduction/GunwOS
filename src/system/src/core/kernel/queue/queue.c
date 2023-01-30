@@ -59,7 +59,7 @@ void k_que_dispatch(void (* const func)()) {
         current = (queue + i);
     }
 
-    k_proc_schedule_setNeedsKernelHandling();
+    k_proc_schedule_intNeedsKernelHandling();
 }
 
 void k_que_start() {
@@ -86,5 +86,7 @@ void k_que_start() {
             enqueued->func = nullptr;
             enqueued->reserved = 0;
         }
+
+        #warning After emptying the queue k_proc_schedule_onKernelHandlingFinished has to be called
     }
 }

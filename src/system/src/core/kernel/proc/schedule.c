@@ -19,17 +19,33 @@ static size_t intervalCounter = GRANULARITY_MS;
     Note: 0 is always considered to be kernel
 */
 static size_t currentProcId = 0;
+static size_t nextProcId = 0;
 
-static void k_proc_schedule_switch(const size_t procId) {
+static void k_proc_schedule_switchStack(const size_t procId) {
+    #warning TODO
     currentProcId = procId;
 }
 
+static void k_proc_schedule_switch(const size_t procId) {
+    #warning TODO
+    currentProcId = nextProcId;
+}
+
+void k_proc_schedule_intNeedsKernelHandling() {
+    k_proc_schedule_switchStack(0);
+}
+
+void k_proc_schedule_onKernelHandlingFinished() {
+    k_proc_schedule_switch(nextProcId);
+}
+
 static size_t k_proc_schedule_select() {
+    #warning TODO calculation
     return 0;
 }
 
 void k_proc_schedule_evaluate() {
-    k_proc_schedule_switch(k_proc_schedule_select());
+    nextProcId = k_proc_schedule_select();
 }
 
 /*
@@ -43,8 +59,4 @@ void k_proc_schedule_tick() {
      
     intervalCounter = GRANULARITY_MS;
     k_que_dispatch(k_proc_schedule_evaluate);
-}
-
-void k_proc_schedule_setNeedsKernelHandling() {
-    k_proc_schedule_switch(0);
 }
