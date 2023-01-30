@@ -22,19 +22,6 @@
 #define SCR(NAME, CODE) __attribute__((naked)) void k_scr_ ## NAME () { CODE; SCR_END }
 
 /*
-    Kernel-level system calls
-*/
-
-/*
-    Code - 0x01
-    Function - PROC_SCHED_EVAL
-*/
-SCR(procSchedulerEvaluate,
-    extern void k_proc_schedule_evaluate();
-    k_proc_schedule_evaluate();
-)
-
-/*
     Driver-level system calls
 */
 
@@ -73,6 +60,21 @@ SCR(wrb,
 )
 
 /*
+    Code - 0x04
+    Function - DISPATCH
+
+    Params:
+        * EBX - struct gnwDispatchDesc pointer
+*/
+#warning to be removed?
+SCR(dispatch,
+    REG(32, descPtr, ebx)
+
+    extern void k_rlp_dispatch(const struct gnwDispatchDesc * const);
+    k_rlp_dispatch((struct gnwDispatchDesc *)descPtr);
+)
+
+/*
     User-level system calls
 */
 
@@ -88,20 +90,6 @@ SCR(wrb,
 // TODO: wip
 SCR(exit,
     REG(32, status, ebx)
-)
-
-/*
-    Code - 0x04
-    Function - DISPATCH
-
-    Params:
-        * EBX - struct gnwDispatchDesc pointer
-*/
-SCR(dispatch,
-    REG(32, descPtr, ebx)
-
-    extern void k_rlp_dispatch(const struct gnwDispatchDesc * const);
-    k_rlp_dispatch((struct gnwDispatchDesc *)descPtr);
 )
 
 /*

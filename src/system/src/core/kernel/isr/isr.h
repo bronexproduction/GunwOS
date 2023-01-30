@@ -75,7 +75,7 @@ __attribute__((naked)) void k_isr_picIRQ6();    // 38   - IRQ 6 PIC input (remap
 // 66
 // 67
 // 68
-__attribute__((naked)) void k_isr_kernelSyscall();  // 69   - Kernel system call
+__attribute__((naked)) void k_isr_driverSyscall();  // 69   - Driver system call
 // 70
 // 71
 // 72
@@ -110,6 +110,6 @@ __attribute__((naked)) void k_isr_kernelSyscall();  // 69   - Kernel system call
 // 101
 // 102
 // 103
-__attribute__((naked)) void k_isr_driverSyscall();  // 104   - Driver system call
+// 104
 __attribute__((naked)) void k_isr_userSyscall();    // 105   - User system call
 // 106 - 255

@@ -31,8 +31,8 @@ static inline void exit(uint_32 const status) {
 static inline void dispatch(const struct gnwDispatchDesc * const desc) {
     SYSCALL_PAR1(desc);
 
-    SYSCALL_USER_FUNC(DISPATCH);
-    SYSCALL_USER_INT;
+    SYSCALL_DRIVER_FUNC(DISPATCH);
+    SYSCALL_DRIVER_INT;
 }
 
 /*

@@ -17,6 +17,7 @@
 */
 struct gnwDispatchDesc {
     
+    void (*function)();
     void (*function_u8)(uint_8 param);
     uint_32 param1;
 };

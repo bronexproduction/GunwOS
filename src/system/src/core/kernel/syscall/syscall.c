@@ -11,19 +11,8 @@
 
 #include "func.h"
 
-#define KERNEL_SYSCALL_COUNT 2
 #define DRIVER_SYSCALL_COUNT 8
 #define SYSCALL_COUNT 14
-
-/*
-    Array of pointers to kernel syscall handlers
-
-    Array index corresponds to syscall function code
-*/
-static void (*kernelSyscallReg[KERNEL_SYSCALL_COUNT])() = {
-    /* 0x00 */ 0,
-    /* 0x01 */ k_scr_procSchedulerEvaluate
-};
 
 /*
     Array of pointers to driver syscall handlers
@@ -35,7 +24,7 @@ static void (*driverSyscallReg[DRIVER_SYSCALL_COUNT])() = {
     /* 0x01 */ k_scr_rdb,
     /* 0x02 */ k_scr_wrb,
     /* 0x03 */ 0,
-    /* 0x04 */ 0,
+    /* 0x04 */ k_scr_dispatch,
     /* 0x05 */ 0,
     /* 0x06 */ (void *)k_scr_devInstall,
     /* 0x07 */ (void *)k_scr_devStart,
@@ -51,7 +40,7 @@ static void (*userSyscallReg[SYSCALL_COUNT])() = {
     /* 0x01 */ 0,
     /* 0x02 */ 0,
     /* 0x03 */ k_scr_exit,
-    /* 0x04 */ k_scr_dispatch,
+    /* 0x04 */ 0,
     /* 0x05 */ k_scr_sleepms,
     /* 0x06 */ 0,
     /* 0x07 */ 0,
@@ -108,30 +97,6 @@ __attribute__((naked, unused)) static void k_scl_syscall_end() {
 
     __asm__ volatile ("movl %eax, 32(%esp)");
     __asm__ volatile ("ret");
-}
-
-/*
-    Kernel syscall interrupt (int 69) request global service routine
-
-    NOTE: Function number has to be put in EAX register
-    before making jump to k_scl_kernelSyscall label
-*/
-__attribute__((naked)) void k_scl_kernelSyscall() {
-    /*
-        Syscall function number
-    */
-    register uint_32 function __asm__ ("eax");
-
-    __asm__ volatile ("pushl %ebx");
-    __asm__ volatile ("cmp %%ebx, %%eax" : : "b" (SYSCALL_COUNT));
-    __asm__ volatile ("popl %ebx");
-    __asm__ volatile ("jae k_scl_syscall_functionOverLimitFailure");
-
-    // /*
-    //     Checking if requested syscall function is available
-    // */
-    register void (*scr)() __asm__ ("eax") __attribute__ ((unused)) = kernelSyscallReg[function];
-    __asm__ volatile ("jmp k_scl_syscall");
 }
 
 /*

@@ -11,7 +11,6 @@
 #define MAX_QUEUE_LENGTH 255
 
 struct dispatchEntry {
-
     volatile uint_8 reserved;
     struct gnwDispatchDesc descriptor;
     struct dispatchEntry *next;
@@ -26,7 +25,8 @@ void k_rlp_dispatch(const struct gnwDispatchDesc * const descriptor) {
     for (i = 0; i < MAX_QUEUE_LENGTH; ++i) {
         if (!queue[i].reserved) {
             queue[i].reserved = 1;
-            if (queue[i].descriptor.function_u8) {
+            if (queue[i].descriptor.function_u8 || 
+                queue[i].descriptor.function) {
                 
                 // some higher-priority code already reserved this slot
                 // after we checked the reservation but before we set reserved to 1
@@ -73,6 +73,9 @@ void k_rlp_start() {
             if (enqueued->descriptor.function_u8) {
                 enqueued->descriptor.function_u8(enqueued->descriptor.param1 & 0xFF);
             }
+            else if (enqueued->descriptor.function) {
+                enqueued->descriptor.function();
+            }
             else {
                 LOG_FATAL("Null pointer queued");
                 return;
@@ -81,6 +84,7 @@ void k_rlp_start() {
             struct dispatchEntry * const next = enqueued->next;
             current = next;
             enqueued->next = 0;
+            enqueued->descriptor.function = 0;
             enqueued->descriptor.function_u8 = 0;
             enqueued->reserved = 0;
         }

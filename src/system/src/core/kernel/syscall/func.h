@@ -9,16 +9,6 @@
 #include <gunwfug.h>
 
 /*
-    Kernel-level system calls
-*/
-
-/*
-    Code - 0x01
-    Function - PROC_SCHED_EVAL
-*/
-__attribute__((naked)) void k_scr_procSchedulerEvaluate(); 
-
-/*
     Driver-level system calls
 */
 
@@ -35,6 +25,12 @@ __attribute__((naked)) void k_scr_rdb();
 __attribute__((naked)) void k_scr_wrb();
 
 /*
+    Code - 0x04
+    Function - DISPATCH
+*/
+__attribute__((naked)) void k_scr_dispatch();
+
+/*
     User-level system calls
 */
 
@@ -43,12 +39,6 @@ __attribute__((naked)) void k_scr_wrb();
     Function - EXIT
 */
 __attribute__((naked)) void k_scr_exit();
-
-/*
-    Code - 0x04
-    Function - DISPATCH
-*/
-__attribute__((naked)) void k_scr_dispatch();
 
 /*
     Code - 0x05
