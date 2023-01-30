@@ -25,12 +25,6 @@ __attribute__((naked)) void k_scr_rdb();
 __attribute__((naked)) void k_scr_wrb();
 
 /*
-    Code - 0x04
-    Function - DISPATCH
-*/
-__attribute__((naked)) void k_scr_dispatch();
-
-/*
     User-level system calls
 */
 

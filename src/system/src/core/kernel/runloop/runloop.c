@@ -5,28 +5,28 @@
 //  Created by Artur Danielewski on 02.02.2021.
 //
 
-#include <gunwdispatch.h>
+#include <stdgunw/types.h>
+#include <stdgunw/defs.h>
 #include "../../log/log.h"
 
 #define MAX_QUEUE_LENGTH 255
 
 struct dispatchEntry {
     volatile uint_8 reserved;
-    struct gnwDispatchDesc descriptor;
+    void (*func)();
     struct dispatchEntry *next;
 };
 
 static struct dispatchEntry queue[MAX_QUEUE_LENGTH];
 static struct dispatchEntry *current = 0;
 
-void k_rlp_dispatch(const struct gnwDispatchDesc * const descriptor) {
+void k_rlp_dispatch(void (* const func)()) {
     
     size_t i;
     for (i = 0; i < MAX_QUEUE_LENGTH; ++i) {
         if (!queue[i].reserved) {
             queue[i].reserved = 1;
-            if (queue[i].descriptor.function_u8 || 
-                queue[i].descriptor.function) {
+            if (queue[i].func) {
                 
                 // some higher-priority code already reserved this slot
                 // after we checked the reservation but before we set reserved to 1
@@ -36,7 +36,7 @@ void k_rlp_dispatch(const struct gnwDispatchDesc * const descriptor) {
 
                 continue;
             }
-            queue[i].descriptor = *descriptor;
+            queue[i].func = func;
             queue[i].next = 0;
             break;
         }
@@ -70,11 +70,8 @@ void k_rlp_start() {
                 LOG_FATAL("Enqueued item disabled");
                 return;
             }
-            if (enqueued->descriptor.function_u8) {
-                enqueued->descriptor.function_u8(enqueued->descriptor.param1 & 0xFF);
-            }
-            else if (enqueued->descriptor.function) {
-                enqueued->descriptor.function();
+            if (enqueued->func) {
+                enqueued->func();
             }
             else {
                 LOG_FATAL("Null pointer queued");
@@ -84,8 +81,7 @@ void k_rlp_start() {
             struct dispatchEntry * const next = enqueued->next;
             current = next;
             enqueued->next = 0;
-            enqueued->descriptor.function = 0;
-            enqueued->descriptor.function_u8 = 0;
+            enqueued->func = nullptr;
             enqueued->reserved = 0;
         }
     }

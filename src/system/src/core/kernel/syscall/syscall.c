@@ -24,7 +24,7 @@ static void (*driverSyscallReg[DRIVER_SYSCALL_COUNT])() = {
     /* 0x01 */ k_scr_rdb,
     /* 0x02 */ k_scr_wrb,
     /* 0x03 */ 0,
-    /* 0x04 */ k_scr_dispatch,
+    /* 0x04 */ 0,
     /* 0x05 */ 0,
     /* 0x06 */ (void *)k_scr_devInstall,
     /* 0x07 */ (void *)k_scr_devStart,

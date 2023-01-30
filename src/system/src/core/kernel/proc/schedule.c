@@ -7,7 +7,7 @@
 
 #include "proc.h"
 
-#include <scl_def.h>
+#include <stdgunw/defs.h>
 #include "../runloop/runloop.h"
 
 #define GRANULARITY_MS  1000
@@ -21,7 +21,7 @@ static size_t intervalCounter = GRANULARITY_MS;
 static size_t currentProcId = 0;
 
 static void k_proc_schedule_switch(const size_t procId) {
-
+    currentProcId = procId;
 }
 
 static size_t k_proc_schedule_select() {
@@ -42,7 +42,6 @@ void k_proc_schedule_tick() {
     }
      
     intervalCounter = GRANULARITY_MS;
-    currentProcId = 0;
-
-    #warning launch evaluate?
+    k_rlp_dispatch(k_proc_schedule_evaluate);
+    k_proc_schedule_switch(0);
 }

@@ -9,8 +9,6 @@
 
 #include "keymap.h"
 #include "../../log/log.h"
-#include <gunwdispatch.h>
-#include <gunwctrl.h>
 
 static char kbuf[SCANCODES_MAX];
 static struct c_kbf_listener klsn;
@@ -34,12 +32,7 @@ void c_kbf_up(const uint_8 k) {
     kmod &= ~(c_kmp_default[k].modifier);
 
     if (klsn.up) {
-        struct gnwDispatchDesc d;
-        
-        d.function_u8 = klsn.up;
-        d.param1 = k;
-        
-        dispatch(&d);
+        klsn.up(k);
     }
 }
 
@@ -52,11 +45,6 @@ void c_kbf_down(const uint_8 k) {
     kmod |= c_kmp_default[k].modifier;
 
     if (klsn.down) {
-        struct gnwDispatchDesc d;
-        
-        d.function_u8 = klsn.down;
-        d.param1 = k;
-        
-        dispatch(&d);
+        klsn.down(k);
     }
 }

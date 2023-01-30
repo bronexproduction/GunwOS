@@ -8,8 +8,6 @@
 #ifndef RUNLOOP_H
 #define RUNLOOP_H
 
-#include <gunwdispatch.h>
-
-void k_rlp_dispatch(const struct gnwDispatchDesc * const descriptor);
+void k_rlp_dispatch(void (* const func)());
 
 #endif // RUNLOOP_H

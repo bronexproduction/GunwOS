@@ -10,7 +10,6 @@
 
 #include "scl_def.h"
 #include "gunwdrv.h"
-#include "gunwdispatch.h"
 
 /*
     Ends process execution
@@ -20,19 +19,6 @@ static inline void exit(uint_32 const status) {
 
     SYSCALL_USER_FUNC(EXIT);
     SYSCALL_USER_INT;
-}
-
-/*
-    Adds function call described in gnwDispatchDesc to global run loop
-
-    Params:
-        * desc - pointer to struct gnwDispatchDesc instance
-*/
-static inline void dispatch(const struct gnwDispatchDesc * const desc) {
-    SYSCALL_PAR1(desc);
-
-    SYSCALL_DRIVER_FUNC(DISPATCH);
-    SYSCALL_DRIVER_INT;
 }
 
 /*

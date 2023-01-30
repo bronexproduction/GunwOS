@@ -13,7 +13,6 @@
 
 #include "../hal/io/bus.h"
 #include <stdgunw/utils.h>
-#include <gunwdispatch.h>
 #include <gunwdev.h>
 #include <stdgunw/string.h>
 #include "../error/fug.h"
@@ -57,21 +56,6 @@ SCR(wrb,
     REG(8, value, cl)
 
     k_bus_outb(port, value);
-)
-
-/*
-    Code - 0x04
-    Function - DISPATCH
-
-    Params:
-        * EBX - struct gnwDispatchDesc pointer
-*/
-#warning to be removed?
-SCR(dispatch,
-    REG(32, descPtr, ebx)
-
-    extern void k_rlp_dispatch(const struct gnwDispatchDesc * const);
-    k_rlp_dispatch((struct gnwDispatchDesc *)descPtr);
 )
 
 /*
