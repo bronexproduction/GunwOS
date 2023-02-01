@@ -9,10 +9,9 @@
 #include <stdgunw/defs.h>
 #include "../../log/log.h"
 #include "../proc/schedule.h"
+#include "../common/criticalsec.h"
 
 #define MAX_QUEUE_LENGTH 64
-
-#define CRITICAL_SECTION(CODE) { __asm__ volatile ("cli"); { CODE; } __asm__ volatile ("sti"); }
 
 struct dispatchEntry {
     volatile uint_8 reserved;
@@ -44,7 +43,7 @@ void k_que_dispatch(void (* const func)()) {
     queue[i].next = 0;
 
     CRITICAL_SECTION(
-    struct dispatchEntry * last = current;
+        struct dispatchEntry * last = current;
         if (last) {
             while (last->next) {
                 last = last->next;
@@ -62,12 +61,15 @@ void k_que_dispatch(void (* const func)()) {
 void k_que_start() {
     while (1) {
         struct dispatchEntry *enqueued;
-        CRITICAL_SECTION(
+        CRITICAL_SECTION_BEGIN {
             enqueued = current;
             if (!enqueued) {
-                #warning After emptying the queue k_proc_schedule_onKernelHandlingFinished has to be called
+                k_proc_schedule_onKernelHandlingFinished();
             }
-        )
+            else {
+                CRITICAL_SECTION_END;
+            }
+        }
         
         if (!enqueued->reserved) {
             LOG_FATAL("Enqueued item disabled");

@@ -9,6 +9,7 @@
 
 #include <stdgunw/defs.h>
 #include "../queue/queue.h"
+#include "../common/criticalsec.h"
 
 #define GRANULARITY_MS  1000
 
@@ -29,6 +30,7 @@ static void k_proc_schedule_switchStack(const size_t procId) {
 static void k_proc_schedule_switch(const size_t procId) {
     #warning TODO
     currentProcId = nextProcId;
+    CRITICAL_SECTION_END;
 }
 
 void k_proc_schedule_intNeedsKernelHandling() {
