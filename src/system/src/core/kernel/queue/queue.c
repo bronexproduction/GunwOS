@@ -10,7 +10,9 @@
 #include "../../log/log.h"
 #include "../proc/schedule.h"
 
-#define MAX_QUEUE_LENGTH 255
+#define MAX_QUEUE_LENGTH 64
+
+#define CRITICAL_SECTION(CODE) { __asm__ volatile ("cli"); { CODE; } __asm__ volatile ("sti"); }
 
 struct dispatchEntry {
     volatile uint_8 reserved;
@@ -22,71 +24,69 @@ static struct dispatchEntry queue[MAX_QUEUE_LENGTH];
 static struct dispatchEntry *current = 0;
 
 void k_que_dispatch(void (* const func)()) {
-    
     size_t i;
-    for (i = 0; i < MAX_QUEUE_LENGTH; ++i) {
-        if (!queue[i].reserved) {
-            queue[i].reserved = 1;
-            if (queue[i].func) {
-                
-                // some higher-priority code already reserved this slot
-                // after we checked the reservation but before we set reserved to 1
-
-                // retry looking for free slot
-                i = 0;
-
-                continue;
+    
+    CRITICAL_SECTION(
+        for (i = 0; i < MAX_QUEUE_LENGTH; ++i) {
+            if (!queue[i].reserved) {    
+                queue[i].reserved = 1;
+                break;
             }
-            queue[i].func = func;
-            queue[i].next = 0;
-            break;
         }
-    }
-
+    )
+    
     if (i >= MAX_QUEUE_LENGTH) {
         LOG_FATAL("Run queue capacity exceeded");
         return;
     }
 
+    queue[i].func = func;
+    queue[i].next = 0;
+
+    CRITICAL_SECTION(
     struct dispatchEntry * last = current;
-    if (last) {
-        while (last->next) {
-            last = last->next;
+        if (last) {
+            while (last->next) {
+                last = last->next;
+            }
+            last->next = (queue + i);
         }
-        last->next = (queue + i);
-    }
-    else {
-        current = (queue + i);
-    }
+        else {
+            current = (queue + i);
+        }
+    )
 
     k_proc_schedule_intNeedsKernelHandling();
 }
 
 void k_que_start() {
-    
     while (1) {
+        struct dispatchEntry *enqueued;
+        CRITICAL_SECTION(
+            enqueued = current;
+            if (!enqueued) {
+                #warning After emptying the queue k_proc_schedule_onKernelHandlingFinished has to be called
+            }
+        )
+        
+        if (!enqueued->reserved) {
+            LOG_FATAL("Enqueued item disabled");
+            return;
+        }
+        if (enqueued->func) {
+            enqueued->func();
+        }   
+        else {
+            LOG_FATAL("Null pointer queued");
+            return;
+        }
 
-        struct dispatchEntry * const enqueued = current;
-        if (enqueued) {
-            if (!enqueued->reserved) {
-                LOG_FATAL("Enqueued item disabled");
-                return;
-            }
-            if (enqueued->func) {
-                enqueued->func();
-            }
-            else {
-                LOG_FATAL("Null pointer queued");
-                return;
-            }
-
+        CRITICAL_SECTION(
             struct dispatchEntry * const next = enqueued->next;
             current = next;
             enqueued->next = 0;
             enqueued->func = nullptr;
             enqueued->reserved = 0;
-        }
-
-        #warning After emptying the queue k_proc_schedule_onKernelHandlingFinished has to be called
+        )
     }
 }
