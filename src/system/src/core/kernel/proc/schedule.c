@@ -10,6 +10,7 @@
 #include <stdgunw/defs.h>
 #include "../queue/queue.h"
 #include "../common/criticalsec.h"
+#include "../error/panic.h"
 
 #define GRANULARITY_MS  1000
 
@@ -23,6 +24,8 @@ static size_t currentProcId = 0;
 static size_t nextProcId = 0;
 
 static void k_proc_schedule_switchStack(const size_t procId) {
+    // store currentProcId values
+    // replace stack with procId values
     #warning TODO
     currentProcId = procId;
 }
@@ -34,10 +37,15 @@ static void k_proc_schedule_switch(const size_t procId) {
 }
 
 void k_proc_schedule_intNeedsKernelHandling() {
-    k_proc_schedule_switchStack(0);
+    if (currentProcId) {
+        k_proc_schedule_switchStack(0);
+    }
 }
 
 void k_proc_schedule_onKernelHandlingFinished() {
+    if (currentProcId) {
+        OOPS("Unexpected current process identifier");
+    }
     k_proc_schedule_switch(nextProcId);
 }
 
