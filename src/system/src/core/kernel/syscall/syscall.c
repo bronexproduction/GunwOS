@@ -9,7 +9,8 @@
 #include <stdgunw/mem.h>
 #include "../../log/log.h"
 
-#include "func.h"
+#include "drvfunc.h"
+#include "usrfunc.h"
 
 #define DRIVER_SYSCALL_COUNT 8
 #define SYSCALL_COUNT 14

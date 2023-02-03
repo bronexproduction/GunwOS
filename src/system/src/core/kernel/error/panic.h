@@ -10,7 +10,7 @@
 
 #include <stdgunw/utils.h>
 
-#define OOPS(REASON) {k_oops(REASON); __builtin_unreachable();}
+#define OOPS(REASON) { k_oops(REASON); __builtin_unreachable(); }
 
 void k_oops(const char *reason);
 

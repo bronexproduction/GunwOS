@@ -1,28 +1,15 @@
 //
-//  func.c
+//  usrfunc.h
 //  GunwOS
 //
 //  Created by Artur Danielewski on 11.01.2021.
 //
 
+#ifndef USRFUNC_H
+#define USRFUNC_H
+
 #include <gunwdrv.h>
 #include <gunwfug.h>
-
-/*
-    Driver-level system calls
-*/
-
-/*
-    Code - 0x01
-    Function - RDB
-*/
-__attribute__((naked)) void k_scr_rdb(); 
-
-/*
-    Code - 0x02
-    Function - WRB
-*/
-__attribute__((naked)) void k_scr_wrb();
 
 /*
     User-level system calls
@@ -39,18 +26,6 @@ __attribute__((naked)) void k_scr_exit();
     Function - SLEEPMS
 */
 __attribute__((naked)) void k_scr_sleepms();
-
-/*
-    Code - 0x06
-    Function - DEV_INSTALL
-*/
-__attribute__((naked)) enum gnwDriverError k_scr_devInstall(size_t * const id, const struct gnwDeviceDescriptor * const);
-
-/*
-    Code - 0x07
-    Function - DEV_START
-*/
-__attribute__((naked)) enum gnwDriverError k_scr_devStart(size_t id);
 
 /*
     Code - 0x08
@@ -88,3 +63,5 @@ __attribute__((naked)) enum gnwDeviceError k_scr_devWrite(const size_t,
     Function - FUG
 */
 __attribute__((naked)) void k_scr_fug(enum gnwFugCode);
+
+#endif // USRFUNC_H
