@@ -71,15 +71,14 @@ void k_que_start() {
             LOG_FATAL("Enqueued item disabled");
             return;
         }
-        if (enqueued->func) {
-            enqueued->func();
-        }   
-        else {
+        if (!enqueued->func) {
             LOG_FATAL("Null pointer queued");
             return;
         }
 
-        CRITICAL_SECTION(
+        enqueued->func();
+
+        CRITICAL_SECTION (
             struct dispatchEntry * const next = enqueued->next;
             current = next;
             enqueued->next = 0;
