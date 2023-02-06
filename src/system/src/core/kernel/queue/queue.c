@@ -61,6 +61,7 @@ void k_que_start() {
             enqueued = current;
             if (!enqueued) {
                 k_proc_schedule_onKernelHandlingFinished();
+                continue;
             }
             else {
                 CRITICAL_SECTION_END;
