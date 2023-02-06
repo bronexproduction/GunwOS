@@ -25,14 +25,12 @@ static struct dispatchEntry *current = 0;
 void k_que_dispatch(void (* const func)()) {
     size_t i;
     
-    CRITICAL_SECTION(
-        for (i = 0; i < MAX_QUEUE_LENGTH; ++i) {
-            if (!queue[i].reserved) {    
-                queue[i].reserved = 1;
-                break;
-            }
+    for (i = 0; i < MAX_QUEUE_LENGTH; ++i) {
+        if (!queue[i].reserved) {    
+            queue[i].reserved = 1;
+            break;
         }
-    )
+    }
     
     if (i >= MAX_QUEUE_LENGTH) {
         LOG_FATAL("Run queue capacity exceeded");
@@ -42,18 +40,16 @@ void k_que_dispatch(void (* const func)()) {
     queue[i].func = func;
     queue[i].next = 0;
 
-    CRITICAL_SECTION(
-        struct dispatchEntry * last = current;
-        if (last) {
-            while (last->next) {
-                last = last->next;
-            }
-            last->next = (queue + i);
+    struct dispatchEntry * last = current;
+    if (last) {
+        while (last->next) {
+            last = last->next;
         }
-        else {
-            current = (queue + i);
-        }
-    )
+        last->next = (queue + i);
+    }
+    else {
+        current = (queue + i);
+    }
 
     k_proc_schedule_intNeedsKernelHandling();
 }
