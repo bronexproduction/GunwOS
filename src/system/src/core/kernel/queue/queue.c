@@ -55,6 +55,7 @@ void k_que_dispatch(void (* const func)()) {
 }
 
 void k_que_start() {
+    #warning SAVE THE QUEUE STACK POINTER
     while (1) {
         struct dispatchEntry *enqueued;
         CRITICAL_SECTION_BEGIN {
