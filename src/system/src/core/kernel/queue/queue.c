@@ -21,8 +21,13 @@ struct dispatchEntry {
 
 static struct dispatchEntry queue[MAX_QUEUE_LENGTH];
 static struct dispatchEntry *current = 0;
+static ptr_t sPtr = 0;
 
 void k_que_dispatch(void (* const func)()) {
+    if (!sPtr) {
+        return;
+    }
+
     size_t i;
     
     for (i = 0; i < MAX_QUEUE_LENGTH; ++i) {
@@ -55,7 +60,8 @@ void k_que_dispatch(void (* const func)()) {
 }
 
 void k_que_start() {
-    #warning SAVE THE QUEUE STACK POINTER
+    #warning SAVE THE QUEUE STACK POINTER (sPtr)
+    #warning how to avoid duplicates?
     while (1) {
         struct dispatchEntry *enqueued;
         CRITICAL_SECTION_BEGIN {
