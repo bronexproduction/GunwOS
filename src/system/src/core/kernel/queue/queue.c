@@ -20,7 +20,7 @@ struct dispatchEntry {
 };
 
 static struct dispatchEntry queue[MAX_QUEUE_LENGTH];
-static struct dispatchEntry *current = 0;
+struct dispatchEntry *k_que_currentDispatchEntry = 0;
 static bool running = 0;
 
 void k_que_dispatch(void (* const func)()) {
@@ -48,7 +48,7 @@ void k_que_dispatch(void (* const func)()) {
     queue[i].func = func;
     queue[i].next = 0;
 
-    struct dispatchEntry * last = current;
+    struct dispatchEntry * last = k_que_currentDispatchEntry;
     if (last) {
         while (last->next) {
             last = last->next;
@@ -56,7 +56,7 @@ void k_que_dispatch(void (* const func)()) {
         last->next = (queue + i);
     }
     else {
-        current = (queue + i);
+        k_que_currentDispatchEntry = (queue + i);
     }
 
     k_proc_schedule_intNeedsKernelHandling();
@@ -67,7 +67,7 @@ void k_que_start() {
     while (1) {
         struct dispatchEntry *enqueued;
         CRITICAL_SECTION_BEGIN {
-            enqueued = current;
+            enqueued = k_que_currentDispatchEntry;
             if (!enqueued) {
                 k_proc_schedule_onKernelHandlingFinished();
                 continue;
@@ -90,7 +90,7 @@ void k_que_start() {
 
         CRITICAL_SECTION (
             struct dispatchEntry * const next = enqueued->next;
-            current = next;
+            k_que_currentDispatchEntry = next;
             enqueued->next = 0;
             enqueued->func = nullptr;
             enqueued->reserved = 0;
