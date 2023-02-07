@@ -17,11 +17,6 @@
         - Push current DS, ES, FS, GS on the stack
         - Push all-purpose registers (just in case)
 
-    // --------------------------------------------------------------------------
-    // TODO: It could be potencially important when calling from userspace
-    // Reload DS, ES, FS, GS from kernel data segment
-    // --------------------------------------------------------------------------
-
     Note: Syscall interrupts do not disable maskable interrupts
 */
 #define ISR_PUSH { \
@@ -43,13 +38,9 @@
     Operations:
         - Restore all-purpose registers
         - Restore GS, FS, ES, DS from the stack
+        - Switch to the kernel process if needed (after return from interrupt)
         - Enable interrupts
         - Return from interrupt
-        
-    // --------------------------------------------------------------------------
-    // TODO: It could be potencially important when called from userspace
-    // Pop from stack and restore DS
-    // --------------------------------------------------------------------------
 
     Note: Syscall interrupts do not enable maskable interrupts
 */
