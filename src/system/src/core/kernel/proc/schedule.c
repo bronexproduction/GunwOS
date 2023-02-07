@@ -23,11 +23,11 @@ static size_t intervalCounter = GRANULARITY_MS;
 static size_t currentProcId = 0;
 static size_t nextProcId = 0;
 
-static void k_proc_schedule_switchStack(const size_t procId) {
+static void k_proc_schedule_prepareRetiKernelStack() {
     // store currentProcId values
     // replace stack with procId values
     #warning TODO
-    currentProcId = procId;
+    currentProcId = 0;
 }
 
 static void k_proc_schedule_switch(const size_t procId) {
@@ -38,7 +38,7 @@ static void k_proc_schedule_switch(const size_t procId) {
 
 void k_proc_schedule_intNeedsKernelHandling() {
     if (currentProcId) {
-        k_proc_schedule_switchStack(0);
+        k_proc_schedule_prepareRetiKernelStack();
     }
 }
 
