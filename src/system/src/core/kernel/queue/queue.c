@@ -58,8 +58,6 @@ void k_que_dispatch(void (* const func)()) {
     else {
         k_que_currentDispatchEntry = (queue + i);
     }
-
-    k_proc_schedule_intNeedsKernelHandling();
 }
 
 void k_que_start() {

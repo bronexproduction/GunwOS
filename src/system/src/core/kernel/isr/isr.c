@@ -7,6 +7,7 @@
 
 #include "../../log/log.h"
 #include "../error/panic.h"
+#include <stdgunw/types.h>
 
 /*
     Interrupt service routine handling preparation
@@ -70,6 +71,8 @@
     ISR_BEGIN \
     __asm__ volatile ("mov $" STR(NUM) ", %eax"); \
     __asm__ volatile ("call k_hal_irqHandle"); \
+    extern ptr_t k_que_currentDispatchEntry; \
+    if (k_que_currentDispatchEntry) __asm__ volatile ("call k_proc_schedule_intNeedsKernelHandling"); \
     ISR_END \
 }
 
