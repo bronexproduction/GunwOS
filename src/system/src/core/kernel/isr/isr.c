@@ -48,7 +48,7 @@
         - Enable interrupts
         - Return from interrupt
 
-    Note: Syscall interrupts do not enable maskable interrupts
+    Note: Syscall interrupts do not enable maskable interrupts at the end
 */
 #define ISR_POP { \
     __asm__ volatile ("popal"); \
