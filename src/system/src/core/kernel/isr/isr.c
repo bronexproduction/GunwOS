@@ -9,12 +9,14 @@
 #include "../error/panic.h"
 #include <stdgunw/types.h>
 
+#warning analyse the need for SS, ESI, EDI, EFLAGS on the stack
+
 /*
     Interrupt service routine handling preparation
 
     Operations:
         - Disable interrupts
-        - Push current DS, ES, FS, GS on the stack
+        - Push current DS, ES, FS, GS, SS, ESI, EDI, EFLAGS on the stack
         - Push all-purpose registers (just in case)
 
     Note: Syscall interrupts do not disable maskable interrupts
@@ -24,6 +26,10 @@
     __asm__ volatile ("pushw %es"); \
     __asm__ volatile ("pushw %fs"); \
     __asm__ volatile ("pushw %gs"); \
+    __asm__ volatile ("pushw %ss"); \
+    __asm__ volatile ("pushl %esi"); \
+    __asm__ volatile ("pushl %edi"); \
+    __asm__ volatile ("pushfl"); \
     __asm__ volatile ("pushal"); \
 }
 
@@ -37,7 +43,7 @@
 
     Operations:
         - Restore all-purpose registers
-        - Restore GS, FS, ES, DS from the stack
+        - Restore GS, FS, ES, DS, SS, ESI, EDI, EFLAGS from the stack
         - Switch to the kernel process if needed (after return from interrupt)
         - Enable interrupts
         - Return from interrupt
@@ -46,6 +52,10 @@
 */
 #define ISR_POP { \
     __asm__ volatile ("popal"); \
+    __asm__ volatile ("popfl"); \
+    __asm__ volatile ("popl %edi"); \
+    __asm__ volatile ("popl %esi"); \
+    __asm__ volatile ("popw %ss"); \
     __asm__ volatile ("popw %gs"); \
     __asm__ volatile ("popw %fs"); \
     __asm__ volatile ("popw %es"); \
