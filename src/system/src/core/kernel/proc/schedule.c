@@ -24,7 +24,6 @@ static size_t currentProcId = 0;
 static size_t nextProcId = 0;
 
 static void k_proc_schedule_switchStack(const size_t procId) {
-    // destination stack should point to k_que_start (reti should go to the desired location)
     // store currentProcId values
     // replace stack with procId values
     #warning TODO
