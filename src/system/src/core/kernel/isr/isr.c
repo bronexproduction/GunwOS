@@ -9,8 +9,6 @@
 #include "../error/panic.h"
 #include <stdgunw/types.h>
 
-#warning analyse the need for SS, ESI, EDI, EFLAGS on the stack
-
 /*
     Interrupt service routine handling preparation
 
