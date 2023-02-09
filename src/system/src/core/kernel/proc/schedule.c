@@ -23,22 +23,14 @@ static size_t intervalCounter = GRANULARITY_MS;
 static size_t currentProcId = 0;
 static size_t nextProcId = 0;
 
-static void k_proc_schedule_prepareRetiKernelStack() {
-    // store currentProcId values
-    // replace stack with procId values
-    #warning TODO
-    currentProcId = 0;
-}
-
 static void k_proc_schedule_switch(const size_t procId) {
     #warning TODO
     currentProcId = nextProcId;
-    CRITICAL_SECTION_END;
 }
 
 void k_proc_schedule_intNeedsKernelHandling() {
     if (currentProcId) {
-        k_proc_schedule_prepareRetiKernelStack();
+        k_proc_schedule_switch(0);
     }
 }
 
@@ -46,6 +38,7 @@ void k_proc_schedule_onKernelHandlingFinished() {
     if (currentProcId) {
         OOPS("Unexpected current process identifier");
     }
+    pTab[0].state = PS_BLOCKED;
     k_proc_schedule_switch(nextProcId);
 }
 

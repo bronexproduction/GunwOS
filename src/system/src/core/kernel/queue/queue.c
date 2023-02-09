@@ -68,11 +68,10 @@ void k_que_start() {
             enqueued = k_que_currentDispatchEntry;
             if (!enqueued) {
                 k_proc_schedule_onKernelHandlingFinished();
+                CRITICAL_SECTION_END;
                 continue;
             }
-            else {
-                CRITICAL_SECTION_END;
-            }
+            CRITICAL_SECTION_END;
         }
         
         if (!enqueued->reserved) {
