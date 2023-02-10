@@ -41,8 +41,8 @@ static void k_proc_prepareKernelProc() {
 void k_proc_init() {
     k_proc_prepareKernelProc();
 
-    extern void k_proc_schedule_tick();
-    k_tmr_regMsHandler(k_proc_schedule_tick);
+    extern void k_proc_schedule_onTick();
+    k_tmr_regMsHandler(k_proc_schedule_onTick);
 
     extern void TEST_PROC_SPAWN();
     TEST_PROC_SPAWN();

@@ -34,8 +34,10 @@ static void procSwitch(const size_t procId) {
     }
     pTab[currentProcId].state = PS_READY;
     executionTimeCounter = 0;
-    currentProcId = nextProcId;
-    countExecutionTime = true;
+    currentProcId = procId;
+    if (currentProcId) {
+        countExecutionTime = true;
+    }
 }
 
 static size_t procSelect() {
@@ -66,6 +68,10 @@ void k_proc_schedule_onKernelHandlingFinished() {
     if (currentProcId) {
         OOPS("Unexpected current process identifier");
     }
+    if (!nextProcId) {
+        return;
+    }
+
     procSwitch(nextProcId);
 }
 
@@ -73,7 +79,7 @@ void k_proc_schedule_onKernelHandlingFinished() {
     Note: As launched intermediately via hardware interrupt
           its execution time should be as short as possible
 */
-void k_proc_schedule_tick() {
+void k_proc_schedule_onTick() {
     #warning hardware interrupts may affect the calculations slightly
     if (!countExecutionTime) {
         return;
