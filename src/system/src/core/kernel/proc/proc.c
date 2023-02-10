@@ -12,7 +12,7 @@
 
 struct k_proc_process pTab[MAX_PROC];
 
-enum k_proc_error k_proc_spawn() {
+enum k_proc_error k_proc_spawn(void (*entry)()) {
     int pIndex;
     
     CRITICAL_SECTION_BEGIN {
