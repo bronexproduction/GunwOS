@@ -14,25 +14,28 @@
 
 #define GRANULARITY_MS  1000
 
-static size_t intervalCounter = 0;
+static bool countExecutionTime = false;
+static size_t executionTimeCounter = 0;
+
 /*
-    Process identifier
+    Process identifiers (last, current, next)
 
     Note: 0 is always considered to be kernel
 */
 static size_t lastProcId = 0;
 static size_t currentProcId = 0;
-static size_t countedProcId = 0;
 static size_t nextProcId = 0;
 
 static void procSwitch(const size_t procId) {
     #warning TODO
+    #warning analyse the need for critical section (may be useful BUT can't be used if we're called from interrupt)
     if (currentProcId) {
         lastProcId = currentProcId;
     }
     pTab[currentProcId].state = PS_READY;
-    intervalCounter = 0;
-    countedProcId = currentProcId = nextProcId;
+    executionTimeCounter = 0;
+    currentProcId = nextProcId;
+    countExecutionTime = true;
 }
 
 static size_t procSelect() {
@@ -71,13 +74,14 @@ void k_proc_schedule_onKernelHandlingFinished() {
           its execution time should be as short as possible
 */
 void k_proc_schedule_tick() {
-    if (!countedProcId) {
+    #warning hardware interrupts may affect the calculations slightly
+    if (!countExecutionTime) {
         return;
     }
-    if (++intervalCounter < GRANULARITY_MS) {
+    if (++executionTimeCounter < GRANULARITY_MS) {
         return;
     }
      
-    countedProcId = 0;
+    countExecutionTime = false;
     k_que_dispatch(schedEvaluate);
 }
