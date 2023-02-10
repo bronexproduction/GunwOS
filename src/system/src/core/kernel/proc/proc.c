@@ -17,7 +17,7 @@ enum k_proc_error k_proc_spawn() {
     
     CRITICAL_SECTION_BEGIN {
         for (pIndex = 1; pIndex < MAX_PROC; ++pIndex) {
-            if (!pTab[pIndex].identifier) {
+            if (pTab[pIndex].state == PS_NONE) {
                 break;
             }
         }
@@ -28,11 +28,14 @@ enum k_proc_error k_proc_spawn() {
         }
 
         pTab[pIndex].state = PS_NEW;
-        pTab[pIndex].identifier = pIndex;
         
     } CRITICAL_SECTION_END;
 
     return PE_NONE;
+}
+
+static void k_proc_prepareKernelProc() {
+    pTab[0].state = PS_RUNNING;
 }
 
 void k_proc_init() {
@@ -43,8 +46,4 @@ void k_proc_init() {
 
     extern void TEST_PROC_SPAWN();
     TEST_PROC_SPAWN();
-}
-
-static void k_proc_prepareKernelProc() {
-    pTab[0].state = PS_RUNNING;
 }

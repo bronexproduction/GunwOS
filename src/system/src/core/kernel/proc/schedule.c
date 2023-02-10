@@ -14,23 +14,48 @@
 
 #define GRANULARITY_MS  1000
 
-static size_t intervalCounter = GRANULARITY_MS;
+static size_t intervalCounter = 0;
 /*
     Process identifier
 
     Note: 0 is always considered to be kernel
 */
+static size_t lastProcId = 0;
 static size_t currentProcId = 0;
+static size_t countedProcId = 0;
 static size_t nextProcId = 0;
 
-static void k_proc_schedule_switch(const size_t procId) {
+static void procSwitch(const size_t procId) {
     #warning TODO
-    currentProcId = nextProcId;
+    if (currentProcId) {
+        lastProcId = currentProcId;
+    }
+    pTab[currentProcId].state = PS_READY;
+    intervalCounter = 0;
+    countedProcId = currentProcId = nextProcId;
+}
+
+static size_t procSelect() {
+    /*
+        Simple round robin algorithm
+    */
+    for (size_t i = 0; i < MAX_PROC - 1; ++i) {
+        size_t procId = (lastProcId + i) % (MAX_PROC - 1) + 1;
+        if (pTab[procId].state == PS_READY) {
+            return procId;
+        }
+    }
+    
+    return 0;
+}
+
+static void schedEvaluate() {
+    nextProcId = procSelect();
 }
 
 void k_proc_schedule_intNeedsKernelHandling() {
     if (currentProcId) {
-        k_proc_schedule_switch(0);
+        procSwitch(0);
     }
 }
 
@@ -38,17 +63,7 @@ void k_proc_schedule_onKernelHandlingFinished() {
     if (currentProcId) {
         OOPS("Unexpected current process identifier");
     }
-    pTab[0].state = PS_BLOCKED;
-    k_proc_schedule_switch(nextProcId);
-}
-
-static size_t k_proc_schedule_select() {
-    #warning TODO calculation
-    return 0;
-}
-
-void k_proc_schedule_evaluate() {
-    nextProcId = k_proc_schedule_select();
+    procSwitch(nextProcId);
 }
 
 /*
@@ -56,10 +71,13 @@ void k_proc_schedule_evaluate() {
           its execution time should be as short as possible
 */
 void k_proc_schedule_tick() {
-    if (--intervalCounter) {
+    if (!countedProcId) {
+        return;
+    }
+    if (++intervalCounter < GRANULARITY_MS) {
         return;
     }
      
-    intervalCounter = GRANULARITY_MS;
-    k_que_dispatch(k_proc_schedule_evaluate);
+    countedProcId = 0;
+    k_que_dispatch(schedEvaluate);
 }

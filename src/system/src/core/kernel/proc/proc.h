@@ -26,11 +26,6 @@ enum k_proc_state {
 
 struct k_proc_process {
     /*
-        Process identifier (pTab index)
-    */
-    size_t identifier;
-
-    /*
         Process state
     */
     enum k_proc_state state;
