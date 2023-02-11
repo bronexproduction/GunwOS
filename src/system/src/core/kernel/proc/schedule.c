@@ -29,12 +29,14 @@ static size_t nextProcId = 0;
 static void procSwitch(const size_t procId) {
     #warning TODO
     #warning analyse the need for critical section (may be useful BUT can't be used if we're called from interrupt)
-    if (currentProcId) {
+    if (!procId) {
         lastProcId = currentProcId;
     }
+
     pTab[currentProcId].state = PS_READY;
     executionTimeCounter = 0;
     currentProcId = procId;
+
     if (currentProcId) {
         countExecutionTime = true;
     }

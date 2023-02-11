@@ -28,10 +28,11 @@ enum k_proc_error k_proc_spawn(void (*entry)()) {
             return PE_LIMIT_REACHED;
         }
 
-        pTab[pIndex].state = PS_READY;
+        pTab[pIndex].state = PS_NEW;
         
     } CRITICAL_SECTION_END;
 
+    pTab[pIndex].state = PS_READY;
     k_proc_schedule_didSpawn();
 
     return PE_NONE;
