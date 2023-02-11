@@ -75,6 +75,12 @@ void k_proc_schedule_onKernelHandlingFinished() {
     procSwitch(nextProcId);
 }
 
+void k_proc_schedule_didSpawn() {
+    if (!nextProcId) {
+        schedEvaluate();
+    }
+}
+
 /*
     Note: As launched intermediately via hardware interrupt
           its execution time should be as short as possible
@@ -87,7 +93,7 @@ void k_proc_schedule_onTick() {
     if (++executionTimeCounter < GRANULARITY_MS) {
         return;
     }
-     
+
     countExecutionTime = false;
     k_que_dispatch(schedEvaluate);
 }

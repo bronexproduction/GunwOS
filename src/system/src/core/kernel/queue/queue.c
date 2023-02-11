@@ -28,6 +28,7 @@ void k_que_dispatch(void (* const func)()) {
     #warning how to avoid duplicates?
 
     if (!running) {
+        LOG_FATAL("Running queue required to dispatch items - aborting");
         return;
     }
 

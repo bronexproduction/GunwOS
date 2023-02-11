@@ -9,7 +9,7 @@
 #define SCHEDULE_H
 
 /*
-    Called by the kernel queue
+    Called by the ISR
     in case code got dispatched by an interrupt handler
     to be executed on ISR return
 */
@@ -21,5 +21,11 @@ void k_proc_schedule_intNeedsKernelHandling();
     and execution can be switched to another process
 */
 void k_proc_schedule_onKernelHandlingFinished();
+
+/*
+    Called by the k_proc_spawn
+    in case a new process got spawned
+*/
+void k_proc_schedule_didSpawn();
 
 #endif // SCHEDULE_H

@@ -6,6 +6,7 @@
 //
 
 #include "proc.h"
+#include "schedule.h"
 
 #include "../common/criticalsec.h"
 #include "../timer/timer.h"
@@ -27,9 +28,11 @@ enum k_proc_error k_proc_spawn(void (*entry)()) {
             return PE_LIMIT_REACHED;
         }
 
-        pTab[pIndex].state = PS_NEW;
+        pTab[pIndex].state = PS_READY;
         
     } CRITICAL_SECTION_END;
+
+    k_proc_schedule_didSpawn();
 
     return PE_NONE;
 }
@@ -43,7 +46,4 @@ void k_proc_init() {
 
     extern void k_proc_schedule_onTick();
     k_tmr_regMsHandler(k_proc_schedule_onTick);
-
-    extern void TEST_PROC_SPAWN();
-    TEST_PROC_SPAWN();
 }
