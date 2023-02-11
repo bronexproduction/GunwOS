@@ -13,7 +13,7 @@
 
 struct k_proc_process pTab[MAX_PROC];
 
-enum k_proc_error k_proc_spawn(void (*entry)()) {
+enum k_proc_error k_proc_spawn(ptr_t imageStart) {
     int pIndex;
     
     CRITICAL_SECTION_BEGIN {

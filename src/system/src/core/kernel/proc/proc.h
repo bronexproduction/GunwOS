@@ -43,6 +43,6 @@ extern struct k_proc_process pTab[MAX_PROC];
 /*
     Spawning new userland processes
 */
-enum k_proc_error k_proc_spawn(void (*entry)());
+enum k_proc_error k_proc_spawn(ptr_t imageStart);
 
 #endif // PROC_H
