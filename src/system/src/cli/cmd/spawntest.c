@@ -1,3 +1,12 @@
+//
+//  spawntest.c
+//  GunwOS
+//
+//  Created by Artur Danielewski on 11.02.2023.
+//
+
+#include "../cmdutil.h"
+
 extern void k_proc_spawn(void (*func)());
 extern int c_trm_puts(const char * const s);
 
@@ -13,7 +22,9 @@ static void proc2() {
     }
 }
 
-void TEST_PROC_SPAWN() {
+void cmd_spawntest(const char * const params) {
+    CMD_NOPARAM
+
     k_proc_spawn(proc1);
     k_proc_spawn(proc2);
 }

@@ -33,6 +33,7 @@ void (*s_cli_cmdSelector(const char *const cmd))(const char *const) {
     CMD_REG(rdmsr)
     CMD_REG(uptime)
     CMD_REG(sysinfo)
+    CMD_REG(spawntest)
 
     return isHalp ? cmd_nop : NULL;
 }
