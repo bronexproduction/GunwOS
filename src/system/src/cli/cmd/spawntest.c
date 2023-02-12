@@ -8,8 +8,8 @@
 #include "../cmdutil.h"
 #include <stdgunw/mem.h>
 #include <stdgunw/types.h>
+#include "../../core/kernel/proc/proc.h"
 
-extern void k_proc_spawn(ptr_t imageStart);
 extern int c_trm_puts(const char * const s);
 
 static void proc1() {
@@ -25,12 +25,18 @@ static void proc2() {
 }
 
 static void spawn(int index, ptr_t imageStart, size_t imageSize) {
-    ptr_t loc = (ptr_t)(0x100000 + (0x100000 * index)); // 2 MB
+    ptr_t img = (ptr_t)(0x200000 * index);
+    ptr_t stack = img + 0x100000;
     
     // Copy to another location (outsize of kernel space)
-    memcopy(imageStart, loc, imageSize);
+    memcopy(imageStart, img, imageSize);
 
-    k_proc_spawn(loc);
+    struct k_proc_descriptor desc;
+
+    desc.img = img;
+    desc.stack = stack;
+
+    k_proc_spawn(&desc);
 }
 
 static bool alreadyDone = false;

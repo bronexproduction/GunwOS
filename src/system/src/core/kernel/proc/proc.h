@@ -11,6 +11,11 @@
 #include <stdgunw/types.h>
 #include "../hal/cpu/cpu.h"
 
+struct k_proc_descriptor {
+    ptr_t img;
+    ptr_t stack;
+};
+
 enum k_proc_error {
     PE_NONE = 0,
     PE_LIMIT_REACHED
@@ -43,6 +48,6 @@ extern struct k_proc_process pTab[MAX_PROC];
 /*
     Spawning new userland processes
 */
-enum k_proc_error k_proc_spawn(ptr_t imageStart);
+enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const);
 
 #endif // PROC_H
