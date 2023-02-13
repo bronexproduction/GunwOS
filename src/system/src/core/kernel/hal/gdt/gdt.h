@@ -30,8 +30,8 @@ struct __attribute__((packed)) k_gdt_codeEntry {
     uint_8 limitH               :4;
     uint_8 available            :1;
     const uint_8 _53_0          :1;
-    uint_8 defOperandSize       :1;         // 1 - 32-bit, 0 - 16-bit
-    uint_8 granularity          :1;         // 1 - 4K, 0 - 1 byte
+    uint_8 defOperandSize32Bit  :1;
+    uint_8 granularity4K        :1;
     uint_8 baseH                :8;
 };
 
@@ -40,7 +40,7 @@ struct __attribute__((packed)) k_gdt_dataEntry {
     uint_32 baseL               :24;
     uint_8 accessed             :1;
     uint_8 writeable            :1;
-    uint_8 expansionDirection   :1;
+    uint_8 expandDown           :1;
     const uint_8 _43_0          :1;
     const uint_8 _44_1          :1;
     enum k_gdt_dpl privilege    :2;
@@ -49,7 +49,7 @@ struct __attribute__((packed)) k_gdt_dataEntry {
     uint_8 available            :1;
     const uint_8 _53_0          :1;
     uint_8 big                  :1;         // 1 - 32-bit, 0 - 16-bit
-    uint_8 granularity          :1;         // 1 - 4K, 0 - 1 byte
+    uint_8 granularity4K        :1;
     uint_8 baseH                :8;
 };
 
@@ -59,7 +59,7 @@ struct __attribute__((packed)) k_gdt_tssEntry {
     const uint_8 _40_1          :1;
     uint_8 busy                 :1;
     const uint_8 _42_0          :1;
-    uint_8 big                  :1;         // 1 - 32-bit, 0 - 16-bit
+    const uint_8 _43_1          :1;
     const uint_8 _44_0          :1;
     const uint_8 _45_0          :1;
     const uint_8 _46_0          :1;
@@ -68,7 +68,7 @@ struct __attribute__((packed)) k_gdt_tssEntry {
     const uint_8 _52_0          :1;
     const uint_8 _53_0          :1;
     const uint_8 _54_0          :1;
-    uint_8 granularity          :1;         // 1 - 4K, 0 - 1 byte
+    uint_8 granularity4K        :1;
     uint_8 baseH                :8;
 };
 
