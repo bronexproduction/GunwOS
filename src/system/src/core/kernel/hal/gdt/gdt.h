@@ -8,6 +8,15 @@
 #ifndef GDT_H
 #define GDT_H
 
+
+
+enum k_gdt_dpl {
+    DPL_0 = 0b00,
+    DPL_1 = 0b01,
+    DPL_2 = 0b10,
+    DPL_3 = 0b11
+};
+
 struct __attribute__((packed)) k_gdt_codeEntry {
     uint_16 limitL              :16;
     uint_32 baseL               :24;
@@ -16,7 +25,7 @@ struct __attribute__((packed)) k_gdt_codeEntry {
     uint_8 conforming           :1;
     const uint_8 _43_1          :1;
     const uint_8 _44_1          :1;
-    uint_8 privilege            :2;
+    enum k_gdt_dpl privilege    :2;
     uint_8 present              :1;
     uint_8 limitH               :4;
     uint_8 available            :1;
@@ -34,7 +43,7 @@ struct __attribute__((packed)) k_gdt_dataEntry {
     uint_8 expansionDirection   :1;
     const uint_8 _43_0          :1;
     const uint_8 _44_1          :1;
-    uint_8 privilege            :2;
+    enum k_gdt_dpl privilege    :2;
     uint_8 present              :1;
     uint_8 limitH               :4;
     uint_8 available            :1;

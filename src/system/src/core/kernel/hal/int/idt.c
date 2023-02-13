@@ -11,21 +11,14 @@
 
 #define IDT_SIZE_DEFAULT 256
 
-enum k_idt_dpl {
-    DPL_0 = 0b00,
-    DPL_1 = 0b01,
-    DPL_2 = 0b10,
-    DPL_3 = 0b11
-};
-
 struct __attribute__((packed)) k_idt_entry {
-    uint_16 offset_l;   // offset 0-15
-    uint_16 selector;   // selector (index of GDT/LDT entry)
-    uint_8 zeroed;      // not used or zeroed
-    uint_8 flags:5;     // gate type flags
-    uint_8 dpl:2;       // Descriptor Privilege Level
-    uint_8 p:1;         // is present
-    uint_16 offset_h;   // offset 16-31
+    uint_16 offset_l;       // offset 0-15
+    uint_16 selector;       // selector (offset of GDT/LDT entry from its start)
+    uint_8 zeroed;          // not used or zeroed
+    uint_8 flags:5;         // gate type flags
+    enum k_gdt_dpl dpl:2;   // Descriptor Privilege Level
+    uint_8 p:1;             // is present
+    uint_16 offset_h;       // offset 16-31
 } k_idt_default[IDT_SIZE_DEFAULT];
 
 static inline void k_idt_load(void *base, uint_16 size) {
@@ -40,7 +33,7 @@ static inline void k_idt_load(void *base, uint_16 size) {
     __asm__ ( "lidt %0" : : "m"(idtr) );
 }
 
-static struct k_idt_entry k_idt_gate_stub(void (* const proc)(void), const enum k_idt_dpl dpl) {
+static struct k_idt_entry k_idt_gate_stub(void (* const proc)(void), const enum k_gdt_dpl dpl) {
     struct k_idt_entry d;
 
     d.offset_l = (uint_16)((uint_32)proc & 0xFFFF);
@@ -54,20 +47,20 @@ static struct k_idt_entry k_idt_gate_stub(void (* const proc)(void), const enum 
 }
 
 // TODO: Not implemented yet
-// static struct k_idt_entry k_idt_gateTask(void (* const proc)(void), const enum k_idt_dpl dpl) {
+// static struct k_idt_entry k_idt_gateTask(void (* const proc)(void), const enum k_gdt_dpl dpl) {
 //     struct k_idt_entry d = k_idt_gate_stub(proc, dpl);
 //     d.flags = 0b10100;
 //     return d;
 // }
 
-static struct k_idt_entry k_idt_gateInterrupt(void (* const proc)(void), const enum k_idt_dpl dpl) {
+static struct k_idt_entry k_idt_gateInterrupt(void (* const proc)(void), const enum k_gdt_dpl dpl) {
     struct k_idt_entry d = k_idt_gate_stub(proc, dpl);
     d.flags = 0b01110;    
     return d;
 }
 
 // TODO: Not implemented yet
-// static struct k_idt_entry k_idt_gateTrap(void (* const proc)(void), const enum k_idt_dpl dpl) {
+// static struct k_idt_entry k_idt_gateTrap(void (* const proc)(void), const enum k_gdt_dpl dpl) {
 //     struct k_idt_entry d = k_idt_gate_stub(proc, dpl);
 //     d.flags = 0b11110;
 //     return d;
