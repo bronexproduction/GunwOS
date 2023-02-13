@@ -8,6 +8,7 @@
 #include <stdgunw/types.h>
 #include <stdgunw/defs.h>
 #include <gunwdrv.h>
+#include "gdt/gdt.h"
 #include "int/irq.h"
 #include "io/bus.h"
 #include "pic/pic.h"
@@ -21,6 +22,7 @@ void k_hal_init() {
 
     // TODO: CPU configuration? seen on http://www.brokenthorn.com/Resources/OSDev20.html
     #warning TODO: move GDT configuration from the boot loader
+    k_gdt_loadDefault();
     k_idt_loadDefault();
 
     k_pic_configure();
