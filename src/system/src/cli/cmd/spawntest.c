@@ -8,7 +8,7 @@
 #include "../cmdutil.h"
 #include <stdgunw/mem.h>
 #include <stdgunw/types.h>
-#include "../../core/kernel/proc/proc.h"
+#include "../../core/kernel/hal/proc/proc.h"
 
 extern int c_trm_puts(const char * const s);
 

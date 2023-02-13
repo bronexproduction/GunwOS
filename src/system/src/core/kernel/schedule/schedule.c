@@ -5,7 +5,7 @@
 //  Created by Artur Danielewski on 25.01.2023.
 //
 
-#include "proc.h"
+#include "../hal/proc/proc.h"
 
 #include <stdgunw/defs.h>
 #include "../queue/queue.h"
@@ -27,13 +27,16 @@ static size_t currentProcId = 0;
 static size_t nextProcId = 0;
 
 static void procSwitch(const size_t procId) {
-    #warning TODO
     #warning analyse the need for critical section (may be useful BUT can't be used if we're called from interrupt)
     if (!procId) {
         lastProcId = currentProcId;
     }
 
-    pTab[currentProcId].state = PS_READY;
+    enum k_proc_error err = k_proc_switch(currentProcId, procId);
+    if (err) {
+        OOPS("Error switching process");
+    }
+
     executionTimeCounter = 0;
     currentProcId = procId;
 

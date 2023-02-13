@@ -5,8 +5,8 @@
 //  Created by Artur Danielewski on 06.03.2020.
 //
 
-#include "../../log/log.h"
-#include "../error/panic.h"
+#include "../../../log/log.h"
+#include "../../error/panic.h"
 #include <stdgunw/types.h>
 
 /*

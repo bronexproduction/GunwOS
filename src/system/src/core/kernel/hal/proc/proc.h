@@ -9,7 +9,7 @@
 #define PROC_H
 
 #include <stdgunw/types.h>
-#include "../hal/cpu/cpu.h"
+#include "../cpu/cpu.h"
 
 struct k_proc_descriptor {
     ptr_t img;
@@ -49,5 +49,10 @@ extern struct k_proc_process pTab[MAX_PROC];
     Spawning new userland processes
 */
 enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const);
+
+/*
+    Switching between processes
+*/
+enum k_proc_error k_proc_switch(const size_t currentProcId, const size_t procId);
 
 #endif // PROC_H

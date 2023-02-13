@@ -73,7 +73,7 @@ static struct k_idt_entry k_idt_gateInterrupt(void (* const proc)(void), const e
 //     return d;
 // }
 
-#include "../../isr/isr.h"
+#include "../isr/isr.h"
 
 void k_idt_loadDefault(const char codeSegOffset) {
     k_idt_defaultSel = codeSegOffset;

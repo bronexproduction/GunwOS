@@ -6,10 +6,10 @@
 //
 
 #include "proc.h"
-#include "schedule.h"
+#include "../../schedule/schedule.h"
 
-#include "../common/criticalsec.h"
-#include "../timer/timer.h"
+#include "../../common/criticalsec.h"
+#include "../../timer/timer.h"
 
 struct k_proc_process pTab[MAX_PROC];
 
@@ -34,6 +34,14 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
 
     pTab[pIndex].state = PS_READY;
     k_proc_schedule_didSpawn();
+
+    return PE_NONE;
+}
+
+enum k_proc_error k_proc_switch(const size_t currentProcId, const size_t nextProcId) {
+    #warning analyse the need for critical section (may be useful BUT can't be used if we're called from interrupt)
+    pTab[currentProcId].state = PS_READY;
+    pTab[nextProcId].state = PS_RUNNING;
 
     return PE_NONE;
 }
