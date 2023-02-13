@@ -22,7 +22,7 @@ struct __attribute__((packed)) k_idt_entry {
 } k_idt_default[IDT_SIZE_DEFAULT];
 
 static inline void k_idt_load(void *base, uint_16 size) {
-    struct __attribute__((packed)) k_idt_descriptor {
+    struct __attribute__((packed)) idtr_desc_t {
         uint_16 limit;      // length of IDT
         uint_32 base;       // memory location (pointer to k_idt_default)
     } idtr;

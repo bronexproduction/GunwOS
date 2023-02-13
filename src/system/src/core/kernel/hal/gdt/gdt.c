@@ -113,11 +113,13 @@ void k_gdt_loadDefault() {
     gdt->tss.granularity            = GRAN_BYTE;
     gdt->tss.baseH                  = GDT_BASE_H(&k_cpu_tss);
 
-    struct gdtDesc {
+    struct __attribute__((packed)) gdt_desc_t {
         uint_16 limit;
         uint_32 base;
     } gdtDesc = {
-        sizeof(struct k_gdt_gdt),
+        sizeof(struct k_gdt_gdt) - 1,
         (uint_32)&k_gdt_gdt
     };
+
+    __asm__ ( "lgdt %0" : : "m"(gdtDesc) );
 }
