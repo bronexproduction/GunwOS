@@ -8,7 +8,7 @@
 #ifndef GDT_H
 #define GDT_H
 
-
+#define GDT_OFFSET(FIELD) ((ptr_t)&k_gdt_gdt.FIELD - (ptr_t)&k_gdt_gdt)
 
 enum k_gdt_dpl {
     DPL_0 = 0b00,
