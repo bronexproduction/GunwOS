@@ -44,7 +44,7 @@ static struct k_idt_entry k_idt_gate_stub(void (* const proc)(void), const enum 
     struct k_idt_entry d;
 
     d.offset_l = (uint_16)((uint_32)proc & 0xFFFF);
-    d.selector = &k_gdt_gdt.r0code;
+    d.selector = GDT_OFFSET(r0code);
     d.zeroed = 0;
     d.dpl = dpl;
     d.p = 0b1;
