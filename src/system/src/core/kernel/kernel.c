@@ -9,7 +9,6 @@
 
 extern void k_tmr_init();
 extern void k_hal_init();
-extern void k_proc_init();
 extern void k_dev_init();
 extern void c_init();
 extern void k_que_start();
@@ -36,7 +35,6 @@ void __attribute__((fastcall, section(".start"))) __kernel_start(const struct k_
     k_init();
 
     k_hal_init();
-    k_proc_init();
     k_dev_init();
     c_init();
     k_que_start();

@@ -17,6 +17,7 @@
 
 extern void k_pic_configure();
 extern void k_idt_loadDefault();
+extern void k_proc_init();
 
 void k_hal_init() {
 
@@ -26,6 +27,8 @@ void k_hal_init() {
     k_idt_loadDefault();
 
     k_pic_configure();
+
+    k_proc_init();
 
     __asm__ volatile ("sti");
 }
