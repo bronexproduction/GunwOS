@@ -51,7 +51,7 @@ struct k_cpu_state {
 /*
     Task State Segment
 */
-#warning TO BE DOCUMENTED
+#warning TO BE DOCUMENTED and checked if the values are aligned correctly
 struct __attribute__((packed, aligned(4))) k_cpu_tss {
     uint_16 prevTss;
     uint_32 esp0;
@@ -82,6 +82,8 @@ struct __attribute__((packed, aligned(4))) k_cpu_tss {
         bool trap;
         uint_16 ioMapBase;
     };
-} k_cpu_tss;
+};
+
+extern struct k_cpu_tss k_cpu_tss;
 
 #endif // CPU_H
