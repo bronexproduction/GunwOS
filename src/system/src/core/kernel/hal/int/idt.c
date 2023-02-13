@@ -7,6 +7,8 @@
 
 #include <stdgunw/mem.h>
 
+#include "../gdt/gdt.h"
+
 #define IDT_SIZE_DEFAULT 256
 
 enum k_idt_dpl {
@@ -38,13 +40,11 @@ static inline void k_idt_load(void *base, uint_16 size) {
     __asm__ ( "lidt %0" : : "m"(idtr) );
 }
 
-char k_idt_defaultSel = 0;  // Must be initialized in k_idt_loadDefault()
-
 static struct k_idt_entry k_idt_gate_stub(void (* const proc)(void), const enum k_idt_dpl dpl) {
     struct k_idt_entry d;
 
     d.offset_l = (uint_16)((uint_32)proc & 0xFFFF);
-    d.selector = k_idt_defaultSel;
+    d.selector = &k_gdt_gdt.r0code;
     d.zeroed = 0;
     d.dpl = dpl;
     d.p = 0b1;
@@ -75,10 +75,8 @@ static struct k_idt_entry k_idt_gateInterrupt(void (* const proc)(void), const e
 
 #include "../isr/isr.h"
 
-void k_idt_loadDefault(const char codeSegOffset) {
-    k_idt_defaultSel = codeSegOffset;
-    
-    memnull(&k_idt_default, sizeof(struct k_idt_entry) * IDT_SIZE_DEFAULT);
+void k_idt_loadDefault() {
+    memnull(&k_gdt_gdt.r0code, sizeof(struct k_idt_entry) * IDT_SIZE_DEFAULT);
 
     /*
         CPU Exceptions

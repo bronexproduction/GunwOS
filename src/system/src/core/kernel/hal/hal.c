@@ -15,13 +15,13 @@
 #include "../../log/log.h"
 
 extern void k_pic_configure();
-extern void k_idt_loadDefault(const char codeSegOffset);
+extern void k_idt_loadDefault();
 
 void k_hal_init() {
 
     // TODO: CPU configuration? seen on http://www.brokenthorn.com/Resources/OSDev20.html
-    // TODO: move GDT configuration from the boot loader
-    k_idt_loadDefault(codeSegOffset);
+    #warning TODO: move GDT configuration from the boot loader
+    k_idt_loadDefault();
 
     k_pic_configure();
 
