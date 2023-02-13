@@ -9,6 +9,9 @@
 //  https://pdos.csail.mit.edu/6.828/2008/readings/hardware/8259A.pdf
 //
 
+#ifndef PIC_H
+#define PIC_H
+
 /*
     Master PIC command word register
 */
@@ -104,3 +107,5 @@
 */
 
 #define PIC_EOI             0x20    // End of interrupt
+
+#endif // PIC_H
