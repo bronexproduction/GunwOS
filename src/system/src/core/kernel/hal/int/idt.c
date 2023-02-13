@@ -76,7 +76,7 @@ static struct k_idt_entry k_idt_gateInterrupt(void (* const proc)(void), const e
 #include "../isr/isr.h"
 
 void k_idt_loadDefault() {
-    memnull(&k_gdt_gdt.r0code, sizeof(struct k_idt_entry) * IDT_SIZE_DEFAULT);
+    memnull(k_idt_default, sizeof(struct k_idt_entry) * IDT_SIZE_DEFAULT);
 
     /*
         CPU Exceptions
