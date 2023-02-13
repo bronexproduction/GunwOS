@@ -17,7 +17,7 @@
 extern void k_pic_configure();
 extern void k_idt_loadDefault(const char codeSegOffset);
 
-void k_hal_init(const char codeSegOffset) {
+void k_hal_init() {
 
     // TODO: CPU configuration? seen on http://www.brokenthorn.com/Resources/OSDev20.html
     // TODO: move GDT configuration from the boot loader
