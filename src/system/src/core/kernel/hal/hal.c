@@ -15,13 +15,13 @@
 
 #include "../../log/log.h"
 
+extern void k_cpu_init();
 extern void k_pic_configure();
 extern void k_idt_loadDefault();
 extern void k_proc_init();
 
 void k_hal_init() {
-
-    // TODO: CPU configuration? seen on http://www.brokenthorn.com/Resources/OSDev20.html
+    k_cpu_init();
     #warning TODO: move GDT configuration from the boot loader
     k_gdt_loadDefault();
     k_idt_loadDefault();
