@@ -9,6 +9,7 @@
 #include <stdgunw/mem.h>
 #include <stdgunw/types.h>
 #include "../../core/kernel/hal/proc/proc.h"
+#include "../../core/kernel/hal/mem/mem.h"
 
 extern int c_trm_puts(const char * const s);
 
@@ -25,8 +26,11 @@ static void proc2() {
 }
 
 static void spawn(int index, ptr_t imageStart, size_t imageSize) {
-    ptr_t img = (ptr_t)(0x200000 * index);
-    ptr_t stack = img + 0x100000;
+    /*
+        Each process takes 2 MB of space, starting from MEM_KERNEL_START + MEM_KERNEL_RESERVED_BYTES
+    */
+    ptr_t img = (ptr_t)(MEM_KERNEL_START + MEM_KERNEL_RESERVED_BYTES + MB(index * 2));
+    ptr_t stack = img + MB(1);
     
     // Copy to another location (outsize of kernel space)
     memcopy(imageStart, img, imageSize);

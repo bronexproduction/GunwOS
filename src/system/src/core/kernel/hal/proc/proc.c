@@ -32,6 +32,9 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
         
     } CRITICAL_SECTION_END;
 
+    pTab[pIndex].cpuState.esp = descriptor->stack;
+    pTab[pIndex].cpuState.eip = descriptor->img;
+
     pTab[pIndex].state = PS_READY;
     k_proc_schedule_didSpawn();
 
