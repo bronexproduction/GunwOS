@@ -32,17 +32,14 @@ static void procSwitch(const size_t procId) {
         lastProcId = currentProcId;
     }
 
-    enum k_proc_error err = k_proc_switch(currentProcId, procId);
-    if (err) {
-        OOPS("Error switching process");
-    }
-
     executionTimeCounter = 0;
     currentProcId = procId;
 
     if (currentProcId) {
         countExecutionTime = true;
     }
+
+    k_proc_switch(currentProcId, procId);
 }
 
 static size_t procSelect() {

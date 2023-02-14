@@ -41,12 +41,17 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
     return PE_NONE;
 }
 
-enum k_proc_error k_proc_switch(const size_t currentProcId, const size_t nextProcId) {
+void k_proc_switch(const size_t currentProcId, const size_t nextProcId) {
     #warning analyse the need for critical section (may be useful BUT can't be used if we're called from interrupt)
     pTab[currentProcId].state = PS_READY;
     pTab[nextProcId].state = PS_RUNNING;
 
-    return PE_NONE;
+    if (nextProcId) {
+        // not inside an ISR
+        __asm__ volatile ("iret");
+    } else {
+        // inside an ISR
+    }
 }
 
 static void k_proc_prepareKernelProc() {
