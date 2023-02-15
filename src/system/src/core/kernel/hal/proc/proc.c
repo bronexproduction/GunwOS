@@ -6,8 +6,10 @@
 //
 
 #include "proc.h"
-#include "../../schedule/schedule.h"
 
+#include <stdgunw/mem.h>
+
+#include "../../schedule/schedule.h"
 #include "../../common/criticalsec.h"
 #include "../../timer/timer.h"
 
@@ -31,6 +33,8 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
         pTab[pIndex].state = PS_NEW;
         
     } CRITICAL_SECTION_END;
+
+    memnull(&pTab[pIndex].cpuState, sizeof pTab[pIndex].cpuState);
 
     pTab[pIndex].cpuState.esp = (uint_32)descriptor->stack;
     pTab[pIndex].cpuState.eip = (uint_32)descriptor->img;
