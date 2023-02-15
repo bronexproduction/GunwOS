@@ -77,7 +77,9 @@ void k_proc_schedule_onKernelHandlingFinished() {
     procSwitch(nextProcId);
 }
 
-void k_proc_schedule_didSpawn() {
+void k_proc_schedule_didSpawn(size_t procId) {
+    pTab[procId].state = PS_READY;
+    
     if (!nextProcId) {
         schedEvaluate();
     }

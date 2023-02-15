@@ -39,8 +39,7 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
     pTab[pIndex].cpuState.esp = (uint_32)descriptor->stack;
     pTab[pIndex].cpuState.eip = (uint_32)descriptor->img;
 
-    pTab[pIndex].state = PS_READY;
-    k_proc_schedule_didSpawn();
+    k_proc_schedule_didSpawn(pIndex);
 
     return PE_NONE;
 }

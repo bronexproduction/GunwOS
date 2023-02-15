@@ -26,6 +26,6 @@ void k_proc_schedule_onKernelHandlingFinished();
     Called by the k_proc_spawn
     in case a new process got spawned
 */
-void k_proc_schedule_didSpawn();
+void k_proc_schedule_didSpawn(size_t procId);
 
 #endif // SCHEDULE_H
