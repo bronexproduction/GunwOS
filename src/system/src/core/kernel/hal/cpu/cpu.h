@@ -35,12 +35,10 @@ struct k_cpu_state {
     /*
         Segment selectors
     */
-    uint_16 cs;
     uint_16 ds;
     uint_16 es;
     uint_16 fs;
     uint_16 gs;
-    uint_16 ss;
 
     /*
         Status register
