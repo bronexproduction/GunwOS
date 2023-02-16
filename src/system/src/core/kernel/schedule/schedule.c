@@ -9,7 +9,6 @@
 
 #include <stdgunw/defs.h>
 #include "../queue/queue.h"
-#include "../common/criticalsec.h"
 #include "../error/panic.h"
 
 #define GRANULARITY_MS  1000
