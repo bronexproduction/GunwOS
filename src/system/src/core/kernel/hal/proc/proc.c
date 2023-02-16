@@ -48,10 +48,15 @@ void k_proc_switch(const size_t currentProcId, const size_t nextProcId, const bo
     pTab[currentProcId].state = PS_READY;
     pTab[nextProcId].state = PS_RUNNING;
 
+    // ISR puts 12 bytes on the stack?
+
     if (isr) {
         // inside an ISR
+        // switching from R3 to kernel
     } else {
         // not inside an ISR
+        // switching from kernel to R3
+        CRITICAL_SECTION_END;
         __asm__ volatile ("iret");
     }
 }
