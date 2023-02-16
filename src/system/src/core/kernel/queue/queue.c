@@ -9,7 +9,7 @@
 #include <stdgunw/defs.h>
 #include "../../log/log.h"
 #include "../schedule/schedule.h"
-#include "../common/criticalsec.h"
+#include "../hal/criticalsec/criticalsec.h"
 
 #define MAX_QUEUE_LENGTH 64
 
