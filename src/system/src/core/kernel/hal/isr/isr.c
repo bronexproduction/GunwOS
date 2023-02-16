@@ -130,7 +130,6 @@
 
 /* 69 */ __attribute__((naked)) void k_isr_driverSyscall() {
     ISR_PUSH
-    __asm__ volatile ("sti");
     __asm__ volatile ("call k_scl_driverSyscall");
     /* EAX on stack should contain return value (if any) */
     ISR_POP
@@ -175,7 +174,6 @@
 
 /* 105 */ __attribute__((naked)) void k_isr_userSyscall() {
     ISR_PUSH
-    __asm__ volatile ("sti");
     __asm__ volatile ("call k_scl_userSyscall");
     /* EAX on stack should contain return value (if any) */
     ISR_POP
