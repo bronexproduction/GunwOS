@@ -52,7 +52,12 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const);
 
 /*
     Switching between processes
+
+    Params:
+    * currentProcId - Identifier of the current process
+    * procId - Identifier to the next process
+    * isr - Whether the switch is triggered inside an ISR (critical section handling)
 */
-void k_proc_switch(const size_t currentProcId, const size_t procId);
+void k_proc_switch(const size_t currentProcId, const size_t procId, const bool isr);
 
 #endif // PROC_H

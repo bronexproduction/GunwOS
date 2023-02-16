@@ -10,7 +10,7 @@
 #include <stdgunw/mem.h>
 
 #include "../../schedule/schedule.h"
-#include "../../common/criticalsec.h"
+#include "../criticalsec/criticalsec.h"
 #include "../../timer/timer.h"
 
 struct k_proc_process pTab[MAX_PROC];
@@ -44,16 +44,15 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
     return PE_NONE;
 }
 
-void k_proc_switch(const size_t currentProcId, const size_t nextProcId) {
-    #warning analyse the need for critical section (may be useful BUT can't be used if we're called from interrupt)
+void k_proc_switch(const size_t currentProcId, const size_t nextProcId, const bool isr) {
     pTab[currentProcId].state = PS_READY;
     pTab[nextProcId].state = PS_RUNNING;
 
-    if (nextProcId) {
+    if (isr) {
+        // inside an ISR
+    } else {
         // not inside an ISR
         __asm__ volatile ("iret");
-    } else {
-        // inside an ISR
     }
 }
 

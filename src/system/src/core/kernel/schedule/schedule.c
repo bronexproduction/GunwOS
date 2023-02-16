@@ -10,6 +10,7 @@
 #include <stdgunw/defs.h>
 #include "../queue/queue.h"
 #include "../error/panic.h"
+#include "../hal/criticalsec/criticalsec.h"
 
 #define GRANULARITY_MS  1000
 
@@ -24,18 +25,27 @@ static size_t lastProcId = 0;
 static size_t currentProcId = 0;
 static size_t nextProcId = 0;
 
-static void procSwitch(const size_t procId) {
-    if (!procId) {
+static void procSwitch() {
+    if (nextProcId) {
+        CRITICAL_SECTION_BEGIN;
+    }
+    else {
         lastProcId = currentProcId;
     }
 
-    currentProcId = procId;
-
+    if (currentProcId == nextProcId) {
+        OOPS("Switching to already running process");
+    }
+    if (currentProcId & nextProcId) {
+        OOPS("Process switch flow inconsistency");
+    }
+    
+    currentProcId = nextProcId;
     if (currentProcId) {
         executionTimeCounter = 0;
     }
 
-    k_proc_switch(currentProcId, procId);
+    k_proc_switch(currentProcId, nextProcId, !nextProcId);
 }
 
 static size_t procSelect() {
@@ -58,7 +68,8 @@ static void schedEvaluate() {
 
 void k_proc_schedule_intNeedsKernelHandling() {
     if (currentProcId) {
-        procSwitch(0);
+        nextProcId = 0;
+        procSwitch();
     }
 }
 
@@ -70,7 +81,7 @@ void k_proc_schedule_onKernelHandlingFinished() {
         return;
     }
 
-    procSwitch(nextProcId);
+    procSwitch();
 }
 
 void k_proc_schedule_didSpawn(size_t procId) {
