@@ -14,7 +14,7 @@
 #include "../../timer/timer.h"
 
 struct k_proc_process pTab[MAX_PROC];
-size_t currentProcId = 0;
+size_t k_proc_currentProcId = 0;
 
 enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor) {
     int pIndex;
@@ -46,7 +46,7 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
 }
 
 void k_proc_switch(const size_t nextProcId, const bool isr) {
-    pTab[currentProcId].state = PS_READY;
+    pTab[k_proc_currentProcId].state = PS_READY;
     pTab[nextProcId].state = PS_RUNNING;
 
     // ISR puts 12 bytes on the stack?

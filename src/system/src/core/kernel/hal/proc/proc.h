@@ -44,7 +44,7 @@ struct k_proc_process {
 #define MAX_PROC 16
 
 extern struct k_proc_process pTab[MAX_PROC];
-extern size_t currentProcId;
+extern size_t k_proc_currentProcId;
 
 /*
     Spawning new userland processes

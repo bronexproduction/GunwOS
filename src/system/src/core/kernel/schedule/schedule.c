@@ -17,12 +17,11 @@
 static size_t executionTimeCounter = GRANULARITY_MS;
 
 /*
-    Process identifiers (last, current, next)
+    Process identifiers (last, next)
 
     Note: 0 is always considered to be kernel
 */
 static size_t lastProcId = 0;
-extern size_t k_proc_currentProcId = 0;
 static size_t nextProcId = 0;
 
 static void procSwitch() {
