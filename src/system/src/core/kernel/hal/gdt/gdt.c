@@ -6,7 +6,6 @@
 //
 
 #include <stdgunw/types.h>
-
 #include "gdt.h"
 #include "../cpu/cpu.h"
 #include "../mem/mem.h"
@@ -27,7 +26,7 @@ const struct k_gdt_gdt k_gdt_gdt = {
     GDT_TSS_EMPTY
 };
 
-void k_gdt_loadDefault() {
+void k_gdt_init() {
 
     struct k_gdt_gdt * gdt = (struct k_gdt_gdt *)&k_gdt_gdt;
 
@@ -66,15 +65,15 @@ void k_gdt_loadDefault() {
     /*
         Ring 3 memory base and limit
     */
-    const size_t r3base = MEM_KERNEL_START + MEM_KERNEL_RESERVED_BYTES;
-    const size_t r3limit = (0 - r3base - MEM_MMIO_RESERVED_BYTES) / KB(4);
+    const size_t r3baseBytes = MEM_KERNEL_START + MEM_KERNEL_RESERVED_BYTES;
+    const size_t r3limit = (0 - r3baseBytes - MEM_MMIO_RESERVED_BYTES) / KB(4);
 
     /*
         Ring 3 code segment
     */
 
     gdt->r3code.limitL              = r3limit;
-    gdt->r3code.baseL               = r3base;
+    gdt->r3code.baseL               = r3baseBytes;
     gdt->r3code.accessed            = false;
     gdt->r3code.readable            = true;
     gdt->r3code.conforming          = false;
@@ -84,13 +83,13 @@ void k_gdt_loadDefault() {
     gdt->r3code.available           = false;
     gdt->r3code.defOperandSize      = OPS_32BIT;
     gdt->r3code.granularity         = GRAN_4K;
-    gdt->r3code.baseH               = GDT_BASE_H(r3base);
+    gdt->r3code.baseH               = GDT_BASE_H(r3baseBytes);
 
     /*
         Ring 3 data segment
     */
     gdt->r3data.limitL              = r3limit;
-    gdt->r3data.baseL               = r3base;
+    gdt->r3data.baseL               = r3baseBytes;
     gdt->r3data.accessed            = false;
     gdt->r3data.writeable           = true;
     gdt->r3data.expandDirection     = EXD_UP;
@@ -100,7 +99,7 @@ void k_gdt_loadDefault() {
     gdt->r3data.available           = false;
     gdt->r3data.big                 = true;
     gdt->r3data.granularity         = GRAN_4K;
-    gdt->r3data.baseH               = GDT_BASE_H(r3base);
+    gdt->r3data.baseH               = GDT_BASE_H(r3baseBytes);
 
     /*
         TSS segment

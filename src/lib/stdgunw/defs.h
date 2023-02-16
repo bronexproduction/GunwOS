@@ -11,4 +11,8 @@
 #define NULL 0
 #define nullptr 0
 
+#define KB(C) (C * 1024)
+#define MB(C) (KB(C) * 1024)
+#define GB(C) (MB(C) * 1024)
+
 #endif // STDGUNW_DEFS_H

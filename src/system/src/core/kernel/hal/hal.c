@@ -23,7 +23,8 @@ extern void k_proc_init();
 void k_hal_init() {
     k_cpu_init();
     #warning TODO: move GDT configuration from the boot loader
-    k_gdt_loadDefault();
+
+    k_gdt_init();
     k_idt_loadDefault();
 
     k_pic_configure();

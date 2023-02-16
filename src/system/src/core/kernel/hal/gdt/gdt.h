@@ -98,6 +98,6 @@ struct __attribute__((packed)) k_gdt_gdt {
 
 extern const struct k_gdt_gdt k_gdt_gdt;
 
-void k_gdt_loadDefault();
+void k_gdt_init();
 
 #endif // GDT_H
