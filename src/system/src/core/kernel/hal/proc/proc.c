@@ -14,6 +14,7 @@
 #include "../../timer/timer.h"
 
 struct k_proc_process pTab[MAX_PROC];
+size_t currentProcId = 0;
 
 enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor) {
     int pIndex;
@@ -44,7 +45,7 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
     return PE_NONE;
 }
 
-void k_proc_switch(const size_t currentProcId, const size_t nextProcId, const bool isr) {
+void k_proc_switch(const size_t nextProcId, const bool isr) {
     pTab[currentProcId].state = PS_READY;
     pTab[nextProcId].state = PS_RUNNING;
 

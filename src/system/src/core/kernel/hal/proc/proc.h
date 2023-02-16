@@ -44,6 +44,7 @@ struct k_proc_process {
 #define MAX_PROC 16
 
 extern struct k_proc_process pTab[MAX_PROC];
+extern size_t currentProcId;
 
 /*
     Spawning new userland processes
@@ -58,6 +59,6 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const);
     * procId - Identifier to the next process
     * isr - Whether the switch is triggered inside an ISR (critical section handling)
 */
-void k_proc_switch(const size_t currentProcId, const size_t procId, const bool isr);
+void k_proc_switch(const size_t procId, const bool isr);
 
 #endif // PROC_H
