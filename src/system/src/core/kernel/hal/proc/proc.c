@@ -101,6 +101,10 @@ void k_proc_cpuSave() {
     // */
     // uint_32 eip;
     
+    // STACK SEGMENT - ss
+    
+    // CODE SEGMENT - cs
+
     // /*
     //     Status register
     // */
@@ -128,6 +132,10 @@ void k_proc_cpuRestore() {
     // */
     // uint_32 eip;
     
+    // STACK SEGMENT - ss
+    
+    // CODE SEGMENT - cs
+
     // /*
     //     Status register
     // */
