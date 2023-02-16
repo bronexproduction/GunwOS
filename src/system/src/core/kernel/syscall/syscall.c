@@ -91,12 +91,14 @@ __attribute__((naked, unused)) static void k_scl_syscall_serviceRoutineUnavailab
 */
 __attribute__((naked, unused)) static void k_scl_syscall_end() {
     /*
-        Replace caller EAX value on the stack with current value
+        Replace stored caller EAX value with current value
         
         It puts the result into the EAX register or just does nothing
     */
 
-    __asm__ volatile ("movl %eax, 32(%esp)");
+    __asm__ volatile ("pushl %eax");
+    __asm__ volatile ("call k_proc_updateEAX");
+    __asm__ volatile ("popl %eax");
     __asm__ volatile ("ret");
 }
 

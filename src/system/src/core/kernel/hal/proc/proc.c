@@ -13,6 +13,22 @@
 #include "../criticalsec/criticalsec.h"
 #include "../../timer/timer.h"
 
+#define CPU_PUSH { \
+    __asm__ volatile ("pushw %ds"); \
+    __asm__ volatile ("pushw %es"); \
+    __asm__ volatile ("pushw %fs"); \
+    __asm__ volatile ("pushw %gs"); \
+    __asm__ volatile ("pushal"); \
+}
+
+#define CPU_POP { \
+    __asm__ volatile ("popal"); \
+    __asm__ volatile ("popw %gs"); \
+    __asm__ volatile ("popw %fs"); \
+    __asm__ volatile ("popw %es"); \
+    __asm__ volatile ("popw %ds"); \
+}
+
 struct k_proc_process pTab[MAX_PROC];
 size_t k_proc_currentProcId = 0;
 
@@ -60,6 +76,66 @@ void k_proc_switch(const size_t nextProcId, const bool isr) {
         CRITICAL_SECTION_END;
         __asm__ volatile ("iret");
     }
+}
+
+void k_proc_cpuSave() {
+    CPU_PUSH
+    CPU_PUSH
+    __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.edi));
+    __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.esi));
+    __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ebp));
+    __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.esp)); // it may not be the ESP we need
+    __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ebx));
+    __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.edx));
+    __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ecx));
+    __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.eax));
+    __asm__ volatile ("popw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.gs));
+    __asm__ volatile ("popw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.fs));
+    __asm__ volatile ("popw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.es));
+    __asm__ volatile ("popw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ds));
+    CPU_POP
+    
+    #warning TO BE IMPLEMENTED
+    // /*
+    //     Instruction pointer
+    // */
+    // uint_32 eip;
+    
+    // /*
+    //     Status register
+    // */
+    // uint_32 eflags;
+}
+
+void k_proc_cpuRestore() {
+    __asm__ volatile ("pushw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ds));
+    __asm__ volatile ("pushw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.es));
+    __asm__ volatile ("pushw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.fs));
+    __asm__ volatile ("pushw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.gs));
+    __asm__ volatile ("pushl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.eax));
+    __asm__ volatile ("pushl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ecx));
+    __asm__ volatile ("pushl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.edx));
+    __asm__ volatile ("pushl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ebx));
+    __asm__ volatile ("pushl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.esp)); // it may not be the ESP we need
+    __asm__ volatile ("pushl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ebp));
+    __asm__ volatile ("pushl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.esi));
+    __asm__ volatile ("pushl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.edi));
+    CPU_POP
+        
+    #warning TO BE IMPLEMENTED
+    // /*
+    //     Instruction pointer
+    // */
+    // uint_32 eip;
+    
+    // /*
+    //     Status register
+    // */
+    // uint_32 eflags;
+}
+
+void __attribute__ ((cdecl)) k_proc_updateEAX(const uint_32 eax) {
+    pTab[k_proc_currentProcId].cpuState.eax = eax;
 }
 
 static void k_proc_prepareKernelProc() {

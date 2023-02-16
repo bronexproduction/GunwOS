@@ -7,6 +7,7 @@
 
 #include "../../../log/log.h"
 #include "../../error/panic.h"
+#include "../proc/proc.h"
 #include <stdgunw/types.h>
 
 /*
@@ -14,50 +15,45 @@
 
     Operations:
         - Disable interrupts
-        - Push current DS, ES, FS, GS on the stack
-        - Push all-purpose registers (just in case)
+        - Save CPU state
 
-    Note: Syscall interrupts do not disable maskable interrupts
+    Note: Syscall interrupts do not disable maskable interrupts - to be implemented
 */
-#define ISR_PUSH { \
-    __asm__ volatile ("pushw %ds"); \
-    __asm__ volatile ("pushw %es"); \
-    __asm__ volatile ("pushw %fs"); \
-    __asm__ volatile ("pushw %gs"); \
-    __asm__ volatile ("pushal"); \
-}
-
+#warning TO BE IMPLEMENTED - up
 #define ISR_BEGIN   { \
     __asm__ volatile ("cli"); \
-    ISR_PUSH \
+    k_proc_cpuSave(); \
 }
 
 /*
     Interrupt service routine handling end
 
     Operations:
-        - Restore all-purpose registers
-        - Restore GS, FS, ES, DS from the stack
-        - Switch to the kernel process if needed (after return from interrupt)
+        - Restore CPU state
         - Enable interrupts
         - Return from interrupt
 
-    Note: Syscall interrupts do not enable maskable interrupts at the end
+    Note: Syscall interrupts do not enable maskable interrupts at the end - to be implemented
 */
-#define ISR_POP { \
-    __asm__ volatile ("popal"); \
-    __asm__ volatile ("popw %gs"); \
-    __asm__ volatile ("popw %fs"); \
-    __asm__ volatile ("popw %es"); \
-    __asm__ volatile ("popw %ds"); \
-}
-
+#warning TO BE IMPLEMENTED - up
 #define ISR_END { \
-    ISR_POP \
+    k_proc_cpuRestore(); \
     __asm__ volatile ("sti"); \
     __asm__ volatile ("iret"); \
 }
 
+/*
+    Hardware interrupt service routine handler
+
+    Operations:
+        - Disable interrupts
+        - Save CPU state
+        - Call IRQ handler
+        - Switch to the kernel process if needed (after return from interrupt)
+        - Restore CPU state
+        - Enable interrupts
+        - Return from interrupt
+*/
 #define ISR_HW(NUM) __attribute__((naked)) void k_isr_picIRQ ## NUM () { \
     ISR_BEGIN \
     __asm__ volatile ("mov $" STR(NUM) ", %eax"); \
@@ -129,11 +125,11 @@
 // 68
 
 /* 69 */ __attribute__((naked)) void k_isr_driverSyscall() {
-    ISR_PUSH
+    ISR_BEGIN
+    #warning SYSTEM CALLS CAN CAUSE KERNEL LOCKS - to be analysed
     __asm__ volatile ("call k_scl_driverSyscall");
-    /* EAX on stack should contain return value (if any) */
-    ISR_POP
-    __asm__ volatile ("iret");
+    /* EAX stored for current process should contain return value (if any) */
+    ISR_END
 }
 
 // 70
@@ -173,11 +169,11 @@
 // 104
 
 /* 105 */ __attribute__((naked)) void k_isr_userSyscall() {
-    ISR_PUSH
+    ISR_BEGIN
+    #warning SYSTEM CALLS CAN CAUSE KERNEL LOCKS - to be analysed
     __asm__ volatile ("call k_scl_userSyscall");
-    /* EAX on stack should contain return value (if any) */
-    ISR_POP
-    __asm__ volatile ("iret");
+    /* EAX stored for current process should contain return value (if any) */
+    ISR_END
 }
 
 // 106 - 255

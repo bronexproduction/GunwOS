@@ -61,4 +61,25 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const);
 */
 void k_proc_switch(const size_t procId, const bool isr);
 
+/*
+    Saving current process CPU status
+
+    Usually before interrupt handling
+*/
+void k_proc_cpuSave();
+
+/*
+    Restoring current process CPU status
+
+    Usually before return from interrupt
+*/
+void k_proc_cpuRestore();
+
+/*
+    Updating stored EAX value for current process
+
+    Usually used by system calls to pass the return value
+*/
+void __attribute__ ((cdecl)) k_proc_updateEAX(const uint_32 eax);
+
 #endif // PROC_H
