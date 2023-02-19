@@ -12,7 +12,11 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     fi    
 else
     # Linux
-    TOOLS_ID=1-e8cyz_aMVlYcX5I7LyHgV2JNmd7Wu65
+    if [[ "$(uname -m)" == "x86_64" ]]; then
+    	TOOLS_ID=1-e8cyz_aMVlYcX5I7LyHgV2JNmd7Wu65
+    else
+        TOOLS_ID=
+    fi
 fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
