@@ -16,7 +16,7 @@ else
     # Linux
     if [[ "$ARCH" == "x86_64" ]]; then
     	TOOLS_ID=1-e8cyz_aMVlYcX5I7LyHgV2JNmd7Wu65
-    else if [[ "$ARCH" == "i686" ]]
+    elif [[ "$ARCH" == "i686" ]]; then
         TOOLS_ID=1ymPFp3nLYnFQ0Zp9lFYrNhS2oVWCp_EQ
     else 
         TOOLS_ID=
