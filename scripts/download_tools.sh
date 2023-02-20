@@ -3,18 +3,22 @@
 set -e
 set -x
 
+ARCH=$(uname -m)
+
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # macOS
-    if [[ "$(uname -m)" == "x86_64" ]]; then
+    if [[ "$ARCH" == "x86_64" ]]; then
         TOOLS_ID=1w17A9ZFjoRMMtxyVQItj0KvqCjhsdtTF
     else
         TOOLS_ID=1bo9BwLs_HF9UcCaXWXEDess6__xXpBP4
     fi    
 else
     # Linux
-    if [[ "$(uname -m)" == "x86_64" ]]; then
+    if [[ "$ARCH" == "x86_64" ]]; then
     	TOOLS_ID=1-e8cyz_aMVlYcX5I7LyHgV2JNmd7Wu65
-    else
+    else if [[ "$ARCH" == "i686" ]]
+        TOOLS_ID=1ymPFp3nLYnFQ0Zp9lFYrNhS2oVWCp_EQ
+    else 
         TOOLS_ID=
     fi
 fi
