@@ -166,13 +166,13 @@ void k_proc_switch(const size_t nextProcId, const bool isr) {
     }
 }
 
-void k_proc_cpuSave() {
+void __attribute__ ((cdecl)) k_proc_cpuSave(const uint_32 esp) {
     CPU_PUSH
     CPU_PUSH
     __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.edi));
     __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.esi));
     __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ebp));
-    __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.esp)); // it may not be the ESP we need
+    __asm__ volatile ("addl $4, %esp");
     __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ebx));
     __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.edx));
     __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ecx));
@@ -182,8 +182,9 @@ void k_proc_cpuSave() {
     __asm__ volatile ("popw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.es));
     __asm__ volatile ("popw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ds));
     CPU_POP
-    
+
     #warning TO BE IMPLEMENTED
+    // // it may not be the ESP we need
     // /*
     //     Instruction pointer
     // */

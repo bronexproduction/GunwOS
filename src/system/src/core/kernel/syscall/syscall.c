@@ -98,7 +98,7 @@ __attribute__((naked, unused)) static void k_scl_syscall_end() {
 
     __asm__ volatile ("pushl %eax");
     __asm__ volatile ("call k_proc_updateEAX");
-    __asm__ volatile ("popl %eax");
+    __asm__ volatile ("addl $4, %esp");
     __asm__ volatile ("ret");
 }
 

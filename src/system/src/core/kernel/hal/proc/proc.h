@@ -66,7 +66,7 @@ void k_proc_switch(const size_t procId, const bool isr);
 
     Usually before interrupt handling
 */
-void k_proc_cpuSave();
+void __attribute__ ((cdecl)) k_proc_cpuSave(const uint_32 esp);
 
 /*
     Restoring current process CPU status

@@ -22,7 +22,9 @@
 #warning TO BE IMPLEMENTED - up
 #define ISR_BEGIN   { \
     __asm__ volatile ("cli"); \
-    k_proc_cpuSave(); \
+    __asm__ volatile ("pushl %esp"); \
+    __asm__ volatile ("call k_proc_cpuSave"); \
+    __asm__ volatile ("addl $4, %esp"); \
 }
 
 /*
