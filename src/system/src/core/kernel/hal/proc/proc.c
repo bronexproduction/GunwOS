@@ -65,7 +65,95 @@ void k_proc_switch(const size_t nextProcId, const bool isr) {
     pTab[k_proc_currentProcId].state = PS_READY;
     pTab[nextProcId].state = PS_RUNNING;
 
-    // ISR puts 12 bytes on the stack?
+    // 7.5 Task Switching
+    // The 80386 switches execution to another task in any of four cases:
+    // 1. The current task executes a JMP or CALL that refers to a TSS descriptor.
+    // 2. The current task executes a JMP or CALL that refers to a task gate.
+    // 3. An interrupt or exception vectors to a task gate in the IDT.
+    // 4. The current task executes an IRET when the NT flag is set.
+
+    // Whether invoked as a task or as a procedure of the interrupted task, an
+    // interrupt handler always returns control to the interrupted procedure in the
+    // interrupted task. If the NT flag is set, however, the handler is an
+    // interrupt task, and the IRET switches back to the interrupted task.
+    // A task switching operation involves these steps:
+    // 1. Checking that the current task is allowed to switch to the designated
+    // task. Data-access privilege rules apply in the case of JMP or CALL
+    // instructions. The DPL of the TSS descriptor or task gate must be less
+    // than or equal to the maximum of CPL and the RPL of the gate selector.
+    // Exceptions, interrupts, and IRETs are permitted to switch tasks
+    // regardless of the DPL of the target task gate or TSS descriptor.
+    // 2. Checking that the TSS descriptor of the new task is marked present
+    // and has a valid limit. Any errors up to this point occur in the
+    // context of the outgoing task. Errors are restartable and can be
+    // handled in a way that is transparent to applications procedures.
+    // 3. Saving the state of the current task. The processor finds the base
+    // address of the current TSS cached in the task register. It copies the
+    // registers into the current TSS (EAX, ECX, EDX, EBX, ESP, EBP, ESI,
+    // EDI, ES, CS, SS, DS, FS, GS, and the flag register). The EIP field of
+    // the TSS points to the instruction after the one that caused the task
+    // switch.
+    // 4. Loading the task register with the selector of the incoming task's
+    // TSS descriptor, marking the incoming task's TSS descriptor as busy,
+    // and setting the TS (task switched) bit of the MSW. The selector is
+    // either the operand of a control transfer instruction or is taken from
+    // a task gate.
+    // 5. Loading the incoming task's state from its TSS and resuming
+    // execution. The registers loaded are the LDT register; the flag
+    // register; the general registers EIP, EAX, ECX, EDX, EBX, ESP, EBP,
+    // ESI, EDI; the segment registers ES, CS, SS, DS, FS, and GS; and PDBR.
+    // Any errors detected in this step occur in the context of the incoming
+    // task. To an exception handler, it appears that the first instruction
+    // of the new task has not yet executed.
+
+    // 9.6.1.2 Returning from an Interrupt Procedure
+    // An interrupt procedure also differs from a normal procedure in the method
+    // of leaving the procedure. The IRET instruction is used to exit from an
+    // interrupt procedure. IRET is similar to RET except that IRET increments EIP
+    // by an extra four bytes (because of the flags on the stack) and moves the
+    // saved flags into the EFLAGS register. The IOPL field of EFLAGS is changed
+    // only if the CPL is zero. The IF flag is changed only if CPL ≤ IOPL.
+    
+    // Figure 9-5. Stack Layout after Exception of Interrupt
+    
+    //                 WITHOUT PRIVILEGE TRANSITION
+    // D O     31              0           31              0
+    // I F     ╠═══════╦═══════╣           ╠═══════╦═══════╣
+    // R       ║▒▒▒▒▒▒▒║▒▒▒▒▒▒▒║ OLD       ║▒▒▒▒▒▒▒║▒▒▒▒▒▒▒║ OLD
+    // E E     ╠═══════╬═══════╣ SS:ESP    ╠═══════╬═══════╣ SS:ESP
+    // C X     ║▒▒▒▒▒▒▒║▒▒▒▒▒▒▒║   │       ║▒▒▒▒▒▒▒║▒▒▒▒▒▒▒║   │
+    // T P     ╠═══════╩═══════╣◄──┘       ╠═══════╩═══════╣◄──┘
+    // I A     ║  OLD EFLAGS   ║           ║  OLD EFLAGS   ║
+    // O N     ╠═══════╦═══════╣           ╠═══════╦═══════╣
+    // N S     ║▒▒▒▒▒▒▒║OLD CS ║ NEW       ║▒▒▒▒▒▒▒║OLD CS ║
+    //   I     ╠═══════╩═══════╣ SS:ESP    ╠═══════╩═══════╣
+    // │ O     ║    OLD EIP    ║   │       ║    OLD EIP    ║ NEW
+    // │ N     ╠═══════════════╣◄──┘       ╠═══════════════╣ SS:ESP
+    // │       ║               ║           ║  ERROR CODE   ║   │
+    // ▼       ·               ·           ╠═══════════════╣◄──┘
+    //         ·               ·           ║               ║
+            
+    //         WITHOUT ERROR CODE          WITH ERROR CODE
+    
+
+    //                 WITH PRIVILEGE TRANSITION
+    // D O     31              0           31              0
+    // I F     ╔═══════╦═══════╗◄──┐       ╔═══════╦═══════╗◄──┐
+    // R       ║▒▒▒▒▒▒▒║OLD SS ║   │       ║▒▒▒▒▒▒▒║OLD SS ║   │
+    // E E     ╠═══════╩═══════╣ SS:ESP    ╠═══════╩═══════╣ SS:ESP
+    // C X     ║    OLD ESP    ║ FROM TSS  ║    OLD ESP    ║ FROM TSS
+    // T P     ╠═══════════════╣           ╠═══════════════╣
+    // I A     ║  OLD EFLAGS   ║           ║  OLD EFLAGS   ║
+    // O N     ╠═══════╦═══════╣           ╠═══════╦═══════╣
+    // N S     ║▒▒▒▒▒▒▒║OLD CS ║ NEW       ║▒▒▒▒▒▒▒║OLD CS ║
+    //   I     ╠═══════╩═══════╣ SS:EIP    ╠═══════╩═══════╣
+    // │ O     ║    OLD EIP    ║   │       ║    OLD EIP    ║ NEW
+    // │ N     ╠═══════════════╣◄──┘       ╠═══════════════╣ SS:ESP
+    // │       ║               ║           ║  ERROR CODE   ║   │
+    // ▼       ·               ·           ╠═══════════════╣◄──┘
+    //         ·               ·           ║               ║
+
+    //         WITHOUT ERROR CODE          WITH ERROR CODE
 
     if (isr) {
         // inside an ISR
