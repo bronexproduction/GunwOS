@@ -7,6 +7,8 @@
 
 #![no_std]
 
+use std::os:raw::c_char;
+
 extern "C" {
     fn c_trm_puts(szText: *const c_char);
 }
