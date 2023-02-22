@@ -7,7 +7,9 @@
 
 #![no_std]
 
-extern "C" { fn c_trm_puts(szText: &str); }
+extern "C" {
+    fn c_trm_puts(szText: *const c_char);
+}
 
 #[no_mangle]
 fn cmd_help(_params: &[char]) {
