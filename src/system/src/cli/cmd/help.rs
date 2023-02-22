@@ -13,7 +13,9 @@ extern "C" {
 
 #[no_mangle]
 fn cmd_help(_params: &[char]) {
+    let message = "Command not recognized: help - did you mean \"halp\"?";
+    let message_null_terminated = CString::new(message).unwrap();
     unsafe {
-        c_trm_puts("Command not recognized: help - did you mean \"halp\"?");
+        c_trm_puts(message_null_terminated.as_ptr());
     }
 }
