@@ -167,37 +167,39 @@ void k_proc_switch(const size_t nextProcId, const bool isr) {
 }
 
 void __attribute__ ((cdecl)) k_proc_cpuSave(const uint_32 esp) {
+
+    // NO PRIVILEGE TRANSITION, NO ERROR CODE
+    //
+    // Privilege transition or exceptions with error code
+    // currently not supported
+
     CPU_PUSH
-    CPU_PUSH
-    __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.edi));
-    __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.esi));
-    __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ebp));
-    __asm__ volatile ("addl $4, %esp");
-    __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ebx));
-    __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.edx));
-    __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ecx));
-    __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.eax));
-    __asm__ volatile ("popw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.gs));
-    __asm__ volatile ("popw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.fs));
-    __asm__ volatile ("popw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.es));
-    __asm__ volatile ("popw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ds));
+    {
+        __asm__ volatile ("pushw %ss");
+        CPU_PUSH
+
+        __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.edi));
+        __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.esi));
+        __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ebp));
+        __asm__ volatile ("addl $4, %esp");
+        __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ebx));
+        __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.edx));
+        __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ecx));
+        __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.eax));
+        __asm__ volatile ("popw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.gs));
+        __asm__ volatile ("popw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.fs));
+        __asm__ volatile ("popw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.es));
+        __asm__ volatile ("popw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ds));
+        __asm__ volatile ("popw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ss));
+
+        pTab[k_proc_currentProcId].cpuState.esp = esp + 12;
+
+        #warning TO BE IMPLEMENTED
+        // EIP
+        // CS
+        // EFLAGS
+    }
     CPU_POP
-
-    #warning TO BE IMPLEMENTED
-    // // it may not be the ESP we need
-    // /*
-    //     Instruction pointer
-    // */
-    // uint_32 eip;
-    
-    // STACK SEGMENT - ss
-    
-    // CODE SEGMENT - cs
-
-    // /*
-    //     Status register
-    // */
-    // uint_32 eflags;
 }
 
 void k_proc_cpuRestore() {
