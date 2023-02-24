@@ -175,6 +175,7 @@ void __attribute__ ((cdecl)) k_proc_cpuSave(const uint_32 esp) {
 
     CPU_PUSH
     {
+        #warning TO BE OPTIMIZED
         __asm__ volatile ("pushw %ss");
         CPU_PUSH
 
@@ -192,12 +193,10 @@ void __attribute__ ((cdecl)) k_proc_cpuSave(const uint_32 esp) {
         __asm__ volatile ("popw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ds));
         __asm__ volatile ("popw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ss));
 
+        pTab[k_proc_currentProcId].cpuState.eip = *(uint_32 *)esp;
+        pTab[k_proc_currentProcId].cpuState.cs = *(uint_16 *)(esp + 4);
+        pTab[k_proc_currentProcId].cpuState.eflags = *(uint_32 *)(esp + 8);
         pTab[k_proc_currentProcId].cpuState.esp = esp + 12;
-
-        #warning TO BE IMPLEMENTED
-        // EIP
-        // CS
-        // EFLAGS
     }
     CPU_POP
 }
