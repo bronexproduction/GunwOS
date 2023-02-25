@@ -122,7 +122,7 @@ __attribute__((naked)) void k_scl_driverSyscall() {
     // /*
     //     Checking if requested syscall function is available
     // */
-    register void (*scr)() __asm__ ("eax") __attribute__ ((unused)) = driverSyscallReg[function];
+    register void (*scr)() __asm__ ("eax") __attribute__((unused)) = driverSyscallReg[function];
     __asm__ volatile ("jmp k_scl_syscall");
 }
 
@@ -146,6 +146,6 @@ __attribute__((naked)) void k_scl_userSyscall() {
     // /*
     //     Checking if requested syscall function is available
     // */
-    register void (*scr)() __asm__ ("eax") __attribute__ ((unused)) = userSyscallReg[function];
+    register void (*scr)() __asm__ ("eax") __attribute__((unused)) = userSyscallReg[function];
     __asm__ volatile ("jmp k_scl_syscall");
 }

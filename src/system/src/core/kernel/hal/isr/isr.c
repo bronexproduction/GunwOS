@@ -39,7 +39,9 @@
 */
 #warning TO BE IMPLEMENTED - up
 #define ISR_END { \
-    k_proc_cpuRestore(); \
+    __asm__ volatile ("pushl %esp"); \
+    __asm__ volatile ("call k_proc_cpuRestore"); \
+    __asm__ volatile ("addl $4, %esp"); \
     __asm__ volatile ("sti"); \
     __asm__ volatile ("iret"); \
 }

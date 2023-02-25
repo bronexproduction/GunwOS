@@ -29,7 +29,7 @@
     __asm__ volatile ("popw %ds"); \
 }
 
-register uint_32 cur_esp __asm__ ("esp");
+register const uint_32 cur_esp __asm__ ("esp");
 
 #define STACK_VAL(SIZE, OFFSET) (*(uint_ ## SIZE *)(cur_esp + OFFSET))
 #define STACK_EDI STACK_VAL(32, 0)
@@ -196,7 +196,7 @@ void k_proc_switch(const size_t nextProcId, const bool isr) {
     refer to Intel i386 Programmer's Reference Manual (1986)
     section 9.6.1 Interrupt Procedures
 */
-void __attribute__ ((cdecl)) k_proc_cpuSave(const uint_32 esp) {
+void __attribute__((cdecl)) k_proc_cpuSave(const uint_32 esp) {
 
     // NO ERROR CODE
     //
@@ -251,7 +251,7 @@ void __attribute__ ((cdecl)) k_proc_cpuSave(const uint_32 esp) {
     refer to Intel i386 Programmer's Reference Manual (1986)
     section 9.6.1 Interrupt Procedures
 */
-void k_proc_cpuRestore() {
+void __attribute__((cdecl)) k_proc_cpuRestore(const uint_32 esp) {
     __asm__ volatile ("pushw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ds));
     __asm__ volatile ("pushw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.es));
     __asm__ volatile ("pushw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.fs));
@@ -282,7 +282,7 @@ void k_proc_cpuRestore() {
     // uint_32 eflags;
 }
 
-void __attribute__ ((cdecl)) k_proc_updateEAX(const uint_32 eax) {
+void __attribute__((cdecl)) k_proc_updateEAX(const uint_32 eax) {
     pTab[k_proc_currentProcId].cpuState.eax = eax;
 }
 

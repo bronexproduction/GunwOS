@@ -66,20 +66,20 @@ void k_proc_switch(const size_t procId, const bool isr);
 
     Usually before interrupt handling
 */
-void __attribute__ ((cdecl)) k_proc_cpuSave(const uint_32 esp);
+void __attribute__((cdecl)) k_proc_cpuSave(const uint_32 esp);
 
 /*
     Restoring current process CPU status
 
     Usually before return from interrupt
 */
-void k_proc_cpuRestore();
+void __attribute__((cdecl)) k_proc_cpuRestore(const uint_32 esp);
 
 /*
     Updating stored EAX value for current process
 
     Usually used by system calls to pass the return value
 */
-void __attribute__ ((cdecl)) k_proc_updateEAX(const uint_32 eax);
+void __attribute__((cdecl)) k_proc_updateEAX(const uint_32 eax);
 
 #endif // PROC_H
