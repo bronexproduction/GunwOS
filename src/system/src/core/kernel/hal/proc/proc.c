@@ -173,32 +173,62 @@ void __attribute__ ((cdecl)) k_proc_cpuSave(const uint_32 esp) {
     // Privilege transition or exceptions with error code
     // currently not supported
 
-    CPU_PUSH
-    {
-        #warning TO BE OPTIMIZED
+    bool new = false;
+
+    if (new) {
         __asm__ volatile ("pushw %ss");
         CPU_PUSH
+        {
+            register uint_32 cur_esp __asm__ ("esp");
+            pTab[k_proc_currentProcId].cpuState.edi = *(uint_32 *)cur_esp;
+            pTab[k_proc_currentProcId].cpuState.esi = *(uint_32 *)(cur_esp + 4);
+            pTab[k_proc_currentProcId].cpuState.ebp = *(uint_32 *)(cur_esp + 8);
+            pTab[k_proc_currentProcId].cpuState.ebx = *(uint_32 *)(cur_esp + 16);
+            pTab[k_proc_currentProcId].cpuState.edx = *(uint_32 *)(cur_esp + 20);
+            pTab[k_proc_currentProcId].cpuState.ecx = *(uint_32 *)(cur_esp + 24);
+            pTab[k_proc_currentProcId].cpuState.eax = *(uint_32 *)(cur_esp + 28);
+            pTab[k_proc_currentProcId].cpuState.gs  = *(uint_16 *)(cur_esp + 32);
+            pTab[k_proc_currentProcId].cpuState.fs  = *(uint_16 *)(cur_esp + 34);
+            pTab[k_proc_currentProcId].cpuState.es  = *(uint_16 *)(cur_esp + 36);
+            pTab[k_proc_currentProcId].cpuState.ds  = *(uint_16 *)(cur_esp + 38);
+            pTab[k_proc_currentProcId].cpuState.ss  = *(uint_16 *)(cur_esp + 40);
 
-        __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.edi));
-        __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.esi));
-        __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ebp));
+            pTab[k_proc_currentProcId].cpuState.eip = *(uint_32 *)esp;
+            pTab[k_proc_currentProcId].cpuState.cs = *(uint_16 *)(esp + 4);
+            pTab[k_proc_currentProcId].cpuState.eflags = *(uint_32 *)(esp + 8);
+            pTab[k_proc_currentProcId].cpuState.esp = esp + 12;
+        }
+        CPU_POP
         __asm__ volatile ("addl $4, %esp");
-        __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ebx));
-        __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.edx));
-        __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ecx));
-        __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.eax));
-        __asm__ volatile ("popw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.gs));
-        __asm__ volatile ("popw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.fs));
-        __asm__ volatile ("popw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.es));
-        __asm__ volatile ("popw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ds));
-        __asm__ volatile ("popw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ss));
-
-        pTab[k_proc_currentProcId].cpuState.eip = *(uint_32 *)esp;
-        pTab[k_proc_currentProcId].cpuState.cs = *(uint_16 *)(esp + 4);
-        pTab[k_proc_currentProcId].cpuState.eflags = *(uint_32 *)(esp + 8);
-        pTab[k_proc_currentProcId].cpuState.esp = esp + 12;
     }
-    CPU_POP
+    else {
+        CPU_PUSH
+        {
+            #warning TO BE OPTIMIZED
+            __asm__ volatile ("pushw %ss");
+            CPU_PUSH
+
+            __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.edi));
+            __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.esi));
+            __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ebp));
+            __asm__ volatile ("addl $4, %esp");
+            __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ebx));
+            __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.edx));
+            __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ecx));
+            __asm__ volatile ("popl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.eax));
+            __asm__ volatile ("popw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.gs));
+            __asm__ volatile ("popw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.fs));
+            __asm__ volatile ("popw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.es));
+            __asm__ volatile ("popw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ds));
+            __asm__ volatile ("popw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ss));
+
+            pTab[k_proc_currentProcId].cpuState.eip = *(uint_32 *)esp;
+            pTab[k_proc_currentProcId].cpuState.cs = *(uint_16 *)(esp + 4);
+            pTab[k_proc_currentProcId].cpuState.eflags = *(uint_32 *)(esp + 8);
+            pTab[k_proc_currentProcId].cpuState.esp = esp + 12;
+        }
+        CPU_POP
+    }
 }
 
 void k_proc_cpuRestore() {
