@@ -29,6 +29,21 @@
     __asm__ volatile ("popw %ds"); \
 }
 
+register uint_32 cur_esp __asm__ ("esp");
+
+#define STACK_VAL(SIZE, OFFSET) (*(uint_ ## SIZE *)(cur_esp + OFFSET))
+#define STACK_EDI STACK_VAL(32, 0)
+#define STACK_ESI STACK_VAL(32, 4)
+#define STACK_EBP STACK_VAL(32, 8)
+#define STACK_EBX STACK_VAL(32, 16)
+#define STACK_EDX STACK_VAL(32, 20)
+#define STACK_ECX STACK_VAL(32, 24)
+#define STACK_EAX STACK_VAL(32, 28)
+#define STACK_GS  STACK_VAL(16, 32)
+#define STACK_FS  STACK_VAL(16, 34)
+#define STACK_ES  STACK_VAL(16, 36)
+#define STACK_DS  STACK_VAL(16, 38)
+
 struct k_proc_process pTab[MAX_PROC];
 size_t k_proc_currentProcId = 0;
 
@@ -61,6 +76,13 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
     return PE_NONE;
 }
 
+/*
+    Switching between processes
+
+    For more information
+    refer to Intel i386 Programmer's Reference Manual (1986)
+    section 7.5 Task Switching
+*/
 void k_proc_switch(const size_t nextProcId, const bool isr) {
     pTab[k_proc_currentProcId].state = PS_READY;
     pTab[nextProcId].state = PS_RUNNING;
@@ -146,7 +168,7 @@ void k_proc_switch(const size_t nextProcId, const bool isr) {
     // I A     ║  OLD EFLAGS   ║           ║  OLD EFLAGS   ║
     // O N     ╠═══════╦═══════╣           ╠═══════╦═══════╣
     // N S     ║▒▒▒▒▒▒▒║OLD CS ║ NEW       ║▒▒▒▒▒▒▒║OLD CS ║
-    //   I     ╠═══════╩═══════╣ SS:EIP    ╠═══════╩═══════╣
+    //   I     ╠═══════╩═══════╣ SS:ESP    ╠═══════╩═══════╣
     // │ O     ║    OLD EIP    ║   │       ║    OLD EIP    ║ NEW
     // │ N     ╠═══════════════╣◄──┘       ╠═══════════════╣ SS:ESP
     // │       ║               ║           ║  ERROR CODE   ║   │
@@ -166,41 +188,69 @@ void k_proc_switch(const size_t nextProcId, const bool isr) {
     }
 }
 
+/*
+    Saving current process CPU state
+    in case of an interrupt
+
+    For more information
+    refer to Intel i386 Programmer's Reference Manual (1986)
+    section 9.6.1 Interrupt Procedures
+*/
 void __attribute__ ((cdecl)) k_proc_cpuSave(const uint_32 esp) {
 
-    // NO PRIVILEGE TRANSITION, NO ERROR CODE
+    // NO ERROR CODE
     //
-    // Privilege transition or exceptions with error code
+    // Exceptions with error code
     // currently not supported
 
-    __asm__ volatile ("pushw %ss");
     CPU_PUSH
     {
         register uint_32 cur_esp __asm__ ("esp");
         struct k_cpu_state *cpuState = &pTab[k_proc_currentProcId].cpuState;
         
-        cpuState->edi = *(uint_32 *)cur_esp;
-        cpuState->esi = *(uint_32 *)(cur_esp + 4);
-        cpuState->ebp = *(uint_32 *)(cur_esp + 8);
-        cpuState->ebx = *(uint_32 *)(cur_esp + 16);
-        cpuState->edx = *(uint_32 *)(cur_esp + 20);
-        cpuState->ecx = *(uint_32 *)(cur_esp + 24);
-        cpuState->eax = *(uint_32 *)(cur_esp + 28);
-        cpuState->gs  = *(uint_16 *)(cur_esp + 32);
-        cpuState->fs  = *(uint_16 *)(cur_esp + 34);
-        cpuState->es  = *(uint_16 *)(cur_esp + 36);
-        cpuState->ds  = *(uint_16 *)(cur_esp + 38);
-        cpuState->ss  = *(uint_16 *)(cur_esp + 40);
+        cpuState->edi = STACK_EDI;
+        cpuState->esi = STACK_ESI;
+        cpuState->ebp = STACK_EBP;
+        cpuState->ebx = STACK_EBX;
+        cpuState->edx = STACK_EDX;
+        cpuState->ecx = STACK_ECX;
+        cpuState->eax = STACK_EAX;
+        cpuState->gs  = STACK_GS;
+        cpuState->fs  = STACK_FS;
+        cpuState->es  = STACK_ES;
+        cpuState->ds  = STACK_DS;
 
         cpuState->eip = *(uint_32 *)esp;
         cpuState->cs  = *(uint_16 *)(esp + 4);
         cpuState->eflags = *(uint_32 *)(esp + 8);
-        cpuState->esp = esp + 12;
+
+        if (k_proc_currentProcId) {
+            // With privilege transition
+
+            cpuState->esp = *(uint_32 *)(esp + 12);
+            cpuState->ss  = *(uint_16 *)(esp + 16);
+        } else {
+            // No privilege transition
+
+            cpuState->esp = esp + 12;
+            {
+                __asm__ volatile ("pushw %ss");
+                cpuState->ss  = *(uint_16 *)cur_esp;
+                cur_esp += 2;
+            }
+        }
     }
     CPU_POP
-    __asm__ volatile ("addl $2, %esp");
 }
 
+/*
+    Restoring previous process CPU state
+    called just before return from interrupt
+
+    For more information
+    refer to Intel i386 Programmer's Reference Manual (1986)
+    section 9.6.1 Interrupt Procedures
+*/
 void k_proc_cpuRestore() {
     __asm__ volatile ("pushw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ds));
     __asm__ volatile ("pushw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.es));
