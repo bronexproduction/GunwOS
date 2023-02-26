@@ -34,6 +34,7 @@ register uint_32 cur_esp __asm__ ("esp");
 #define STACK_VAL(SIZE, OFFSET) (*(uint_ ## SIZE *)(cur_esp + OFFSET))
 
 struct k_proc_process pTab[MAX_PROC];
+size_t k_proc_interruptedProcessId = 0;
 size_t k_proc_currentProcId = 0;
 
 enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor) {
@@ -194,7 +195,9 @@ void __attribute__((cdecl)) k_proc_cpuSave(const uint_32 esp) {
 
     CPU_PUSH
     {
-        struct k_cpu_state *cpuState = &pTab[k_proc_currentProcId].cpuState;
+        k_proc_interruptedProcessId = k_proc_currentProcId;
+
+        struct k_cpu_state *cpuState = &pTab[k_proc_interruptedProcessId].cpuState;
         
         cpuState->edi = STACK_VAL(32, 0);
         cpuState->esi = STACK_VAL(32, 4);
@@ -212,7 +215,7 @@ void __attribute__((cdecl)) k_proc_cpuSave(const uint_32 esp) {
         cpuState->cs  = *(uint_16 *)(esp + 4);
         cpuState->eflags = *(uint_32 *)(esp + 8);
 
-        if (k_proc_currentProcId) {
+        if (k_proc_interruptedProcessId) {
             // With privilege transition
 
             cpuState->esp = *(uint_32 *)(esp + 12);
