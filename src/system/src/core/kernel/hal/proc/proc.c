@@ -251,26 +251,11 @@ void __attribute__((cdecl)) k_proc_cpuRestore(const uint_32 esp) {
     __asm__ volatile ("pushl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ecx));
     __asm__ volatile ("pushl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.edx));
     __asm__ volatile ("pushl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ebx));
-    __asm__ volatile ("pushl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.esp)); // it may not be the ESP we need
+    __asm__ volatile ("pushl %esp");
     __asm__ volatile ("pushl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ebp));
     __asm__ volatile ("pushl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.esi));
     __asm__ volatile ("pushl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.edi));
     CPU_POP
-        
-    #warning TO BE IMPLEMENTED
-    // /*
-    //     Instruction pointer
-    // */
-    // uint_32 eip;
-    
-    // STACK SEGMENT - ss
-    
-    // CODE SEGMENT - cs
-
-    // /*
-    //     Status register
-    // */
-    // uint_32 eflags;
 }
 
 void __attribute__((cdecl)) k_proc_updateEAX(const uint_32 eax) {
