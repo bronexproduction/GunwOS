@@ -22,6 +22,7 @@ static size_t executionTimeCounter = GRANULARITY_MS;
     Note: 0 is always considered to be kernel
 */
 static size_t lastProcId = 0;
+static size_t currentProcId = 0;
 static size_t nextProcId = 0;
 
 static void procSwitch() {
@@ -29,18 +30,18 @@ static void procSwitch() {
         CRITICAL_SECTION_BEGIN;
     }
     else {
-        lastProcId = k_proc_currentProcId;
+        lastProcId = currentProcId;
     }
 
-    if (k_proc_currentProcId == nextProcId) {
+    if (currentProcId == nextProcId) {
         OOPS("Switching to already running process");
     }
-    if (k_proc_currentProcId & nextProcId) {
+    if (currentProcId & nextProcId) {
         OOPS("Process switch flow inconsistency");
     }
     
-    k_proc_currentProcId = nextProcId;
-    if (k_proc_currentProcId) {
+    currentProcId = nextProcId;
+    if (currentProcId) {
         executionTimeCounter = 0;
     }
 
@@ -66,14 +67,14 @@ static void schedEvaluate() {
 }
 
 void k_proc_schedule_intNeedsKernelHandling() {
-    if (k_proc_currentProcId) {
+    if (currentProcId) {
         nextProcId = 0;
         procSwitch();
     }
 }
 
 void k_proc_schedule_onKernelHandlingFinished() {
-    if (k_proc_currentProcId) {
+    if (currentProcId) {
         OOPS("Unexpected current process identifier");
     }
     if (!nextProcId) {
