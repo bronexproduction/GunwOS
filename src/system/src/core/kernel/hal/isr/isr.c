@@ -7,8 +7,23 @@
 
 #include "../../../log/log.h"
 #include "../../error/panic.h"
-#include "../proc/proc.h"
 #include <stdgunw/types.h>
+
+#define ISR_PUSH { \
+    __asm__ volatile ("pushw %ds"); \
+    __asm__ volatile ("pushw %es"); \
+    __asm__ volatile ("pushw %fs"); \
+    __asm__ volatile ("pushw %gs"); \
+    __asm__ volatile ("pushal"); \
+}
+
+#define ISR_POP { \
+    __asm__ volatile ("popal"); \
+    __asm__ volatile ("popw %gs"); \
+    __asm__ volatile ("popw %fs"); \
+    __asm__ volatile ("popw %es"); \
+    __asm__ volatile ("popw %ds"); \
+}
 
 /*
     Interrupt service routine handling preparation
@@ -22,9 +37,7 @@
 #warning TO BE IMPLEMENTED - up
 #define ISR_BEGIN   { \
     __asm__ volatile ("cli"); \
-    __asm__ volatile ("pushl %esp"); \
-    __asm__ volatile ("call k_proc_cpuSave"); \
-    __asm__ volatile ("addl $4, %esp"); \
+    ISR_PUSH \
 }
 
 /*
@@ -39,9 +52,7 @@
 */
 #warning TO BE IMPLEMENTED - up
 #define ISR_END { \
-    __asm__ volatile ("pushl %esp"); \
-    __asm__ volatile ("call k_proc_cpuRestore"); \
-    __asm__ volatile ("addl $4, %esp"); \
+    ISR_POP \
     __asm__ volatile ("sti"); \
     __asm__ volatile ("iret"); \
 }

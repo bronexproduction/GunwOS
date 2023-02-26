@@ -44,7 +44,6 @@ struct k_proc_process {
 #define MAX_PROC 16
 
 extern struct k_proc_process pTab[MAX_PROC];
-extern size_t k_proc_currentProcId;
 
 /*
     Spawning new userland processes
@@ -59,27 +58,6 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const);
     * procId - Identifier to the next process
     * isr - Whether the switch is triggered inside an ISR (critical section handling)
 */
-void k_proc_switch(const size_t procId, const bool isr);
-
-/*
-    Saving current process CPU status
-
-    Usually before interrupt handling
-*/
-void __attribute__((cdecl)) k_proc_cpuSave(const uint_32 esp);
-
-/*
-    Restoring current process CPU status
-
-    Usually before return from interrupt
-*/
-void __attribute__((cdecl)) k_proc_cpuRestore(const uint_32 esp);
-
-/*
-    Updating stored EAX value for current process
-
-    Usually used by system calls to pass the return value
-*/
-void __attribute__((cdecl)) k_proc_updateEAX(const uint_32 eax);
+void k_proc_switch(const size_t currentProcId, const size_t procId, const bool isr);
 
 #endif // PROC_H
