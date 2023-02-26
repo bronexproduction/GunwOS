@@ -21,12 +21,11 @@ extern struct gnwDeviceDescriptor c_drv_keyboard_descriptor();
 void c_drv_loadDefaults() {
     
     enum gnwDriverError e;
+    size_t id;
 
     /*
         Default text mode display driver
     */
-    size_t id;
-
     struct gnwDeviceDescriptor display = c_drv_display_descriptor();
     e = devInstall(&id, &display);
     if (e != NO_ERROR) { 
