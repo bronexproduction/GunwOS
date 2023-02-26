@@ -29,20 +29,9 @@
     __asm__ volatile ("popw %ds"); \
 }
 
-register const uint_32 cur_esp __asm__ ("esp");
+register uint_32 cur_esp __asm__ ("esp");
 
 #define STACK_VAL(SIZE, OFFSET) (*(uint_ ## SIZE *)(cur_esp + OFFSET))
-#define STACK_EDI STACK_VAL(32, 0)
-#define STACK_ESI STACK_VAL(32, 4)
-#define STACK_EBP STACK_VAL(32, 8)
-#define STACK_EBX STACK_VAL(32, 16)
-#define STACK_EDX STACK_VAL(32, 20)
-#define STACK_ECX STACK_VAL(32, 24)
-#define STACK_EAX STACK_VAL(32, 28)
-#define STACK_GS  STACK_VAL(16, 32)
-#define STACK_FS  STACK_VAL(16, 34)
-#define STACK_ES  STACK_VAL(16, 36)
-#define STACK_DS  STACK_VAL(16, 38)
 
 struct k_proc_process pTab[MAX_PROC];
 size_t k_proc_currentProcId = 0;
@@ -208,17 +197,17 @@ void __attribute__((cdecl)) k_proc_cpuSave(const uint_32 esp) {
         register uint_32 cur_esp __asm__ ("esp");
         struct k_cpu_state *cpuState = &pTab[k_proc_currentProcId].cpuState;
         
-        cpuState->edi = STACK_EDI;
-        cpuState->esi = STACK_ESI;
-        cpuState->ebp = STACK_EBP;
-        cpuState->ebx = STACK_EBX;
-        cpuState->edx = STACK_EDX;
-        cpuState->ecx = STACK_ECX;
-        cpuState->eax = STACK_EAX;
-        cpuState->gs  = STACK_GS;
-        cpuState->fs  = STACK_FS;
-        cpuState->es  = STACK_ES;
-        cpuState->ds  = STACK_DS;
+        cpuState->edi = STACK_VAL(32, 0);
+        cpuState->esi = STACK_VAL(32, 4);
+        cpuState->ebp = STACK_VAL(32, 8);
+        cpuState->ebx = STACK_VAL(32, 16);
+        cpuState->edx = STACK_VAL(32, 20);
+        cpuState->ecx = STACK_VAL(32, 24);
+        cpuState->eax = STACK_VAL(32, 28);
+        cpuState->gs  = STACK_VAL(16, 32);
+        cpuState->fs  = STACK_VAL(16, 34);
+        cpuState->es  = STACK_VAL(16, 36);
+        cpuState->ds  = STACK_VAL(16, 38);
 
         cpuState->eip = *(uint_32 *)esp;
         cpuState->cs  = *(uint_16 *)(esp + 4);
@@ -235,7 +224,7 @@ void __attribute__((cdecl)) k_proc_cpuSave(const uint_32 esp) {
             cpuState->esp = esp + 12;
             {
                 __asm__ volatile ("pushw %ss");
-                cpuState->ss  = *(uint_16 *)cur_esp;
+                cpuState->ss = *(uint_16 *)cur_esp;
                 cur_esp += 2;
             }
         }
