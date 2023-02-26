@@ -243,18 +243,34 @@ void __attribute__((cdecl)) k_proc_cpuSave(const uint_32 esp) {
     section 9.6.1 Interrupt Procedures
 */
 void __attribute__((cdecl)) k_proc_cpuRestore(const uint_32 esp) {
-    __asm__ volatile ("pushw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ds));
-    __asm__ volatile ("pushw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.es));
-    __asm__ volatile ("pushw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.fs));
-    __asm__ volatile ("pushw %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.gs));
-    __asm__ volatile ("pushl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.eax));
-    __asm__ volatile ("pushl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ecx));
-    __asm__ volatile ("pushl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.edx));
-    __asm__ volatile ("pushl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ebx));
+
+    struct k_cpu_state *cpuState = &pTab[k_proc_interruptedProcessId].cpuState;
+
+    if (k_proc_interruptedProcessId) {
+        // With privilege transition
+
+        // cpuState->esp = *(uint_32 *)(esp + 12);
+        // cpuState->ss  = *(uint_16 *)(esp + 16);
+    } else {
+        // No privilege transition
+
+        // *(uint_32 *)esp = cpuState->eip;
+        // *(uint_16 *)(esp + 4) = cpuState->cs;
+        // *(uint_32 *)(esp + 8) = cpuState->eflags;
+    }
+
+    __asm__ volatile ("pushw %[mem]" : [mem] "=m" (cpuState->ds));
+    __asm__ volatile ("pushw %[mem]" : [mem] "=m" (cpuState->es));
+    __asm__ volatile ("pushw %[mem]" : [mem] "=m" (cpuState->fs));
+    __asm__ volatile ("pushw %[mem]" : [mem] "=m" (cpuState->gs));
+    __asm__ volatile ("pushl %[mem]" : [mem] "=m" (cpuState->eax));
+    __asm__ volatile ("pushl %[mem]" : [mem] "=m" (cpuState->ecx));
+    __asm__ volatile ("pushl %[mem]" : [mem] "=m" (cpuState->edx));
+    __asm__ volatile ("pushl %[mem]" : [mem] "=m" (cpuState->ebx));
     __asm__ volatile ("pushl %esp");
-    __asm__ volatile ("pushl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.ebp));
-    __asm__ volatile ("pushl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.esi));
-    __asm__ volatile ("pushl %[mem]" : [mem] "=m" (pTab[k_proc_currentProcId].cpuState.edi));
+    __asm__ volatile ("pushl %[mem]" : [mem] "=m" (cpuState->ebp));
+    __asm__ volatile ("pushl %[mem]" : [mem] "=m" (cpuState->esi));
+    __asm__ volatile ("pushl %[mem]" : [mem] "=m" (cpuState->edi));
     CPU_POP
 }
 
