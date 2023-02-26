@@ -194,7 +194,6 @@ void __attribute__((cdecl)) k_proc_cpuSave(const uint_32 esp) {
 
     CPU_PUSH
     {
-        register uint_32 cur_esp __asm__ ("esp");
         struct k_cpu_state *cpuState = &pTab[k_proc_currentProcId].cpuState;
         
         cpuState->edi = STACK_VAL(32, 0);
