@@ -34,7 +34,7 @@ register uint_32 cur_esp __asm__ ("esp");
 #define STACK_VAL(SIZE, OFFSET) (*(uint_ ## SIZE *)(cur_esp + OFFSET))
 
 struct k_proc_process pTab[MAX_PROC];
-size_t k_proc_interruptedProcessId = 0;
+static size_t k_proc_interruptedProcessId = 0;
 size_t k_proc_currentProcId = 0;
 
 enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor) {
