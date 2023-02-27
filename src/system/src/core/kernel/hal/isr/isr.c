@@ -5,25 +5,13 @@
 //  Created by Artur Danielewski on 06.03.2020.
 //
 
-#include "../../../log/log.h"
-#include "../../error/panic.h"
 #include <stdgunw/types.h>
 
-#define ISR_PUSH { \
-    __asm__ volatile ("pushw %ds"); \
-    __asm__ volatile ("pushw %es"); \
-    __asm__ volatile ("pushw %fs"); \
-    __asm__ volatile ("pushw %gs"); \
-    __asm__ volatile ("pushal"); \
-}
+#include "../../../log/log.h"
+#include "../../error/panic.h"
+#include "../cpu/cpu.h"
 
-#define ISR_POP { \
-    __asm__ volatile ("popal"); \
-    __asm__ volatile ("popw %gs"); \
-    __asm__ volatile ("popw %fs"); \
-    __asm__ volatile ("popw %es"); \
-    __asm__ volatile ("popw %ds"); \
-}
+
 
 /*
     Interrupt service routine handling preparation
@@ -37,7 +25,7 @@
 #warning TO BE IMPLEMENTED - up
 #define ISR_BEGIN   { \
     __asm__ volatile ("cli"); \
-    ISR_PUSH \
+    CPU_PUSH \
 }
 
 /*
@@ -52,7 +40,7 @@
 */
 #warning TO BE IMPLEMENTED - up
 #define ISR_END { \
-    ISR_POP \
+    CPU_POP \
     __asm__ volatile ("sti"); \
     __asm__ volatile ("iret"); \
 }
