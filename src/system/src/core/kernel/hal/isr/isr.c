@@ -11,7 +11,13 @@
 #include "../../error/panic.h"
 #include "../cpu/cpu.h"
 
+/*
+    ISR stack height counter
 
+    Counts how many interrupt service routines 
+    are currently on the stack
+*/
+static size_t isrStackHeight = 0;
 
 /*
     Interrupt service routine handling preparation
@@ -40,6 +46,7 @@
 */
 #warning TO BE IMPLEMENTED - up
 #define ISR_END { \
+    extern ptr_t k_que_currentDispatchEntry; \
     CPU_POP \
     __asm__ volatile ("sti"); \
     __asm__ volatile ("iret"); \
@@ -61,8 +68,6 @@
     ISR_BEGIN \
     __asm__ volatile ("mov $" STR(NUM) ", %eax"); \
     __asm__ volatile ("call k_hal_irqHandle"); \
-    extern ptr_t k_que_currentDispatchEntry; \
-    if (k_que_currentDispatchEntry) __asm__ volatile ("call k_proc_schedule_intNeedsKernelHandling"); \
     ISR_END \
 }
 
