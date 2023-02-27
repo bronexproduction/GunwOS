@@ -58,7 +58,7 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
     refer to Intel i386 Programmer's Reference Manual (1986)
     section 9.6.1 Interrupt Procedures
 */
-static void __attribute__((cdecl, unused)) k_proc_cpuSave(const uint_32 esp) {
+static void k_proc_cpuSave(const uint_32 esp, const size_t procId) {
 
     // NO ERROR CODE
     //
@@ -105,7 +105,7 @@ static void __attribute__((cdecl, unused)) k_proc_cpuSave(const uint_32 esp) {
     refer to Intel i386 Programmer's Reference Manual (1986)
     section 9.6.1 Interrupt Procedures
 */
-static void __attribute__((cdecl, unused)) k_proc_cpuRestore(const uint_32 esp) {
+static void k_proc_cpuRestore(const uint_32 esp, const size_t procId) {
 
     const size_t interruptedProcessId = 0; // HOW TO GET IT
 
