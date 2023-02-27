@@ -146,9 +146,18 @@ static void __attribute__((cdecl, unused)) k_proc_cpuRestore(const uint_32 esp) 
     refer to Intel i386 Programmer's Reference Manual (1986)
     section 7.5 Task Switching
 */
-void k_proc_switch(const size_t currentProcId, const size_t nextProcId, const bool isr) {
+void k_proc_switch(const size_t currentProcId, const size_t nextProcId) {
+    if (currentProcId == nextProcId)  {
+        OOPS("Process identifers equal during switch");
+    }
+    if (currentProcId && nextProcId) {
+        OOPS("Invalid process identifers during switch");
+    }
     if (pTab[currentProcId].state != PS_RUNNING) {
-        OOPS("Invalid process state during switch");
+        OOPS("Invalid current process state during switch");
+    }
+    if (pTab[nextProcId].state != PS_READY) {
+        OOPS("Invalid next process state during switch");
     }
     
     pTab[currentProcId].state = PS_READY;
@@ -244,7 +253,7 @@ void k_proc_switch(const size_t currentProcId, const size_t nextProcId, const bo
 
     //         WITHOUT ERROR CODE          WITH ERROR CODE
 
-    if (isr) {
+    if (currentProcId) {
         // inside an ISR
         // switching from R3 to kernel
     } else {
