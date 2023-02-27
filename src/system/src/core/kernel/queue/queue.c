@@ -68,8 +68,7 @@ void k_que_start() {
         CRITICAL_SECTION_BEGIN {
             enqueued = k_que_currentDispatchEntry;
             if (!enqueued) {
-                __asm__ volatile ("pushl %esp");
-                __asm__ volatile ("call k_proc_schedule_onKernelHandlingFinished");
+                k_proc_schedule_onKernelHandlingFinished();
                 CRITICAL_SECTION_END;
                 continue;
             }

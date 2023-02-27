@@ -22,11 +22,8 @@ void __attribute__((cdecl)) k_proc_schedule_intNeedsKernelHandling(const uint_32
     Called by the kernel queue
     in case all the dispatched code got executed
     and execution can be switched to another process
-
-    Params:
-    * esp - reference stack pointer
 */
-void __attribute__((cdecl)) k_proc_schedule_onKernelHandlingFinished(const uint_32 esp);
+void k_proc_schedule_onKernelHandlingFinished();
 
 /*
     Called by the k_proc_spawn

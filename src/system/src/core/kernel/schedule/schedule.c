@@ -73,7 +73,7 @@ void __attribute__((cdecl)) k_proc_schedule_intNeedsKernelHandling(const uint_32
     }
 }
 
-void __attribute__((cdecl)) k_proc_schedule_onKernelHandlingFinished(const uint_32 esp) {
+void k_proc_schedule_onKernelHandlingFinished() {
     if (currentProcId) {
         OOPS("Unexpected current process identifier");
     }
