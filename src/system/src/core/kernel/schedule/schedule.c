@@ -45,7 +45,7 @@ static void procSwitch(const uint_32 esp) {
         executionTimeCounter = 0;
     }
 
-    k_proc_switch(currentProcId, nextProcId);
+    k_proc_switch(esp, currentProcId, nextProcId);
 }
 
 static size_t procSelect() {

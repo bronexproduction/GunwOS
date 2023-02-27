@@ -146,7 +146,7 @@ static void __attribute__((cdecl, unused)) k_proc_cpuRestore(const uint_32 esp) 
     refer to Intel i386 Programmer's Reference Manual (1986)
     section 7.5 Task Switching
 */
-void k_proc_switch(const size_t currentProcId, const size_t nextProcId) {
+void k_proc_switch(const uint_32 esp, const size_t currentProcId, const size_t nextProcId) {
     if (currentProcId == nextProcId)  {
         OOPS("Process identifers equal during switch");
     }

@@ -54,9 +54,10 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const);
     Switching between processes
 
     Params:
+    * esp - reference stack pointer
     * currentProcId - Identifier of the current process
     * nextProcId - Identifier to the next process
 */
-void k_proc_switch(const size_t currentProcId, const size_t nextProcId);
+void k_proc_switch(const uint_32 esp, const size_t currentProcId, const size_t nextProcId);
 
 #endif // PROC_H
