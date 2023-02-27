@@ -13,22 +13,7 @@
 #include "../criticalsec/criticalsec.h"
 #include "../../timer/timer.h"
 #include "../../error/panic.h"
-
-#define CPU_PUSH { \
-    __asm__ volatile ("pushw %ds"); \
-    __asm__ volatile ("pushw %es"); \
-    __asm__ volatile ("pushw %fs"); \
-    __asm__ volatile ("pushw %gs"); \
-    __asm__ volatile ("pushal"); \
-}
-
-#define CPU_POP { \
-    __asm__ volatile ("popal"); \
-    __asm__ volatile ("popw %gs"); \
-    __asm__ volatile ("popw %fs"); \
-    __asm__ volatile ("popw %es"); \
-    __asm__ volatile ("popw %ds"); \
-}
+#include "../cpu/cpu.h"
 
 register uint_32 cur_esp __asm__ ("esp");
 
@@ -162,7 +147,7 @@ static void __attribute__((cdecl, unused)) k_proc_cpuRestore(const uint_32 esp) 
     section 7.5 Task Switching
 */
 void k_proc_switch(const size_t currentProcId, const size_t nextProcId, const bool isr) {
-    if (!pTab[currentProcId].state == PS_RUNNING) {
+    if (pTab[currentProcId].state != PS_RUNNING) {
         OOPS("Invalid process state during switch");
     }
     

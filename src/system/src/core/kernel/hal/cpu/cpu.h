@@ -10,6 +10,22 @@
 
 #include <stdgunw/types.h>
 
+#define CPU_PUSH { \
+    __asm__ volatile ("pushw %ds"); \
+    __asm__ volatile ("pushw %es"); \
+    __asm__ volatile ("pushw %fs"); \
+    __asm__ volatile ("pushw %gs"); \
+    __asm__ volatile ("pushal"); \
+}
+
+#define CPU_POP { \
+    __asm__ volatile ("popal"); \
+    __asm__ volatile ("popw %gs"); \
+    __asm__ volatile ("popw %fs"); \
+    __asm__ volatile ("popw %es"); \
+    __asm__ volatile ("popw %ds"); \
+}
+
 struct k_cpu_state {
     /*
         Main registers
