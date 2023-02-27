@@ -68,10 +68,9 @@ static void k_proc_cpuSave(const uint_32 esp, const size_t procId) {
     CPU_PUSH
     {
         #warning TO BE IMPLEMENTED
-        const size_t interruptedProcessId = 0; // HOW TO GET IT
 
-        if (interruptedProcessId) {
-            struct k_cpu_state *cpuState = &pTab[interruptedProcessId].cpuState;
+        if (procId) {
+            struct k_cpu_state *cpuState = &pTab[procId].cpuState;
         
             cpuState->edi = STACK_VAL(32, 0);
             cpuState->esi = STACK_VAL(32, 4);
@@ -107,11 +106,17 @@ static void k_proc_cpuSave(const uint_32 esp, const size_t procId) {
 */
 static void k_proc_cpuRestore(const uint_32 esp, const size_t procId) {
 
-    const size_t interruptedProcessId = 0; // HOW TO GET IT
+    struct k_cpu_state *cpuState = &pTab[procId].cpuState;
 
-    struct k_cpu_state *cpuState = &pTab[interruptedProcessId].cpuState;
+    if (procId) {
+        // not inside an ISR
+        // switching from kernel to R3
+    } else {
+        // inside an ISR
+        // switching from R3 to kernel
+    }
 
-    if (interruptedProcessId) {
+    if (procId) {
         // With privilege transition
 
         // cpuState->esp = *(uint_32 *)(esp + 12);
@@ -253,12 +258,10 @@ void k_proc_switch(const uint_32 esp, const size_t currentProcId, const size_t n
 
     //         WITHOUT ERROR CODE          WITH ERROR CODE
 
-    if (currentProcId) {
-        // inside an ISR
-        // switching from R3 to kernel
-    } else {
-        // not inside an ISR
-        // switching from kernel to R3
+    k_proc_cpuSave(esp, currentProcId);
+    k_proc_cpuRestore(esp, nextProcId);
+
+    if (nextProcId) {
         CRITICAL_SECTION_END;
         __asm__ volatile ("iret");
     }

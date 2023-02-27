@@ -25,7 +25,7 @@ static size_t lastProcId = 0;
 static size_t currentProcId = 0;
 static size_t nextProcId = 0;
 
-static void procSwitch(const uint_32 esp) {
+static void __attribute__((cdecl)) procSwitch(const uint_32 esp) {
     if (nextProcId) {
         CRITICAL_SECTION_BEGIN;
     }
@@ -81,7 +81,9 @@ void k_proc_schedule_onKernelHandlingFinished() {
         return;
     }
 
-    procSwitch(esp);
+    __asm__ volatile ("pushl %esp");
+    __asm__ volatile ("call procSwitch");
+    __asm__ volatile ("addl $4, %esp");
 }
 
 void k_proc_schedule_didSpawn(size_t procId) {
