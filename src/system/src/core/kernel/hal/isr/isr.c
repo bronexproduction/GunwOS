@@ -48,8 +48,10 @@ static size_t isrStackHeight = 0;
 #warning TO BE IMPLEMENTED - up
 #define ISR_END { \
     __asm__ volatile ("decl %[mem]" : [mem] "=m" (isrStackHeight)); \
+    __asm__ volatile ("pushl %esp"); \
     extern ptr_t k_que_currentDispatchEntry; \
     if (!isrStackHeight && k_que_currentDispatchEntry) __asm__ volatile ("call k_proc_schedule_intNeedsKernelHandling"); \
+    __asm__ volatile ("addl $4, %esp"); \
     CPU_POP \
     __asm__ volatile ("sti"); \
     __asm__ volatile ("iret"); \

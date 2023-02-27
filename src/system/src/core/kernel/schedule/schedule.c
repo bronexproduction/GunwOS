@@ -66,14 +66,14 @@ static void schedEvaluate() {
     nextProcId = procSelect();
 }
 
-void k_proc_schedule_intNeedsKernelHandling() {
+void __attribute__((cdecl)) k_proc_schedule_intNeedsKernelHandling(const uint_32 esp) {
     if (currentProcId) {
         nextProcId = 0;
         procSwitch();
     }
 }
 
-void k_proc_schedule_onKernelHandlingFinished() {
+void __attribute__((cdecl)) k_proc_schedule_onKernelHandlingFinished(const uint_32 esp) {
     if (currentProcId) {
         OOPS("Unexpected current process identifier");
     }
