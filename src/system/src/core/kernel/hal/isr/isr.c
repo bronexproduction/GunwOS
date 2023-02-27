@@ -47,6 +47,7 @@ static size_t isrStackHeight = 0;
 #warning TO BE IMPLEMENTED - up
 #define ISR_END { \
     extern ptr_t k_que_currentDispatchEntry; \
+    if (k_que_currentDispatchEntry) __asm__ volatile ("call k_proc_schedule_intNeedsKernelHandling"); \
     CPU_POP \
     __asm__ volatile ("sti"); \
     __asm__ volatile ("iret"); \
