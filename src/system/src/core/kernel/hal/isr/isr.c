@@ -32,6 +32,7 @@ static size_t isrStackHeight = 0;
 #define ISR_BEGIN   { \
     __asm__ volatile ("cli"); \
     CPU_PUSH \
+    ++isrStackHeight; \
 }
 
 /*
@@ -46,6 +47,7 @@ static size_t isrStackHeight = 0;
 */
 #warning TO BE IMPLEMENTED - up
 #define ISR_END { \
+    --isrStackHeight; \
     extern ptr_t k_que_currentDispatchEntry; \
     if (k_que_currentDispatchEntry) __asm__ volatile ("call k_proc_schedule_intNeedsKernelHandling"); \
     CPU_POP \
