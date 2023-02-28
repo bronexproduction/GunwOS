@@ -10,6 +10,7 @@
 
 #include <stdgunw/types.h>
 #include "../cpu/cpu.h"
+#include "../gdt/gdt.h"
 
 struct k_proc_descriptor {
     ptr_t img;
@@ -34,6 +35,11 @@ struct k_proc_process {
         Process state
     */
     enum k_proc_state state;
+
+    /*
+        Process privilege level
+    */
+    enum k_gdt_dpl dpl;
 
     /*
         Process CPU state

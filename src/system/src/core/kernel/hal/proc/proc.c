@@ -42,6 +42,7 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
 
     memnull(&pTab[pIndex].cpuState, sizeof pTab[pIndex].cpuState);
 
+    pTab[pIndex].dpl = DPL_3;
     pTab[pIndex].cpuState.esp = (uint_32)descriptor->stack;
     pTab[pIndex].cpuState.eip = (uint_32)descriptor->img;
 
@@ -58,105 +59,13 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
 }
 
 /*
-    Saving current process CPU state
-    in case of an interrupt
-
-    For more information
-    refer to Intel i386 Programmer's Reference Manual (1986)
-    section 9.6.1 Interrupt Procedures
-*/
-static void k_proc_cpuSave(const uint_32 esp, const size_t procId) {
-
-    // NO ERROR CODE
-    //
-    // Exceptions with error code
-    // currently not supported
-
-    CPU_PUSH
-    {
-        #warning TO BE IMPLEMENTED
-
-        if (procId) {
-            struct k_cpu_state *cpuState = &pTab[procId].cpuState;
-        
-            cpuState->edi = STACK_VAL(32, 0);
-            cpuState->esi = STACK_VAL(32, 4);
-            cpuState->ebp = STACK_VAL(32, 8);
-            cpuState->ebx = STACK_VAL(32, 16);
-            cpuState->edx = STACK_VAL(32, 20);
-            cpuState->ecx = STACK_VAL(32, 24);
-            cpuState->eax = STACK_VAL(32, 28);
-            cpuState->gs  = STACK_VAL(16, 32);
-            cpuState->fs  = STACK_VAL(16, 34);
-            cpuState->es  = STACK_VAL(16, 36);
-            cpuState->ds  = STACK_VAL(16, 38);
-
-            // Stack with privilege transition
-
-            cpuState->eip = *(uint_32 *)esp;
-            cpuState->cs  = *(uint_16 *)(esp + 4);
-            cpuState->eflags = *(uint_32 *)(esp + 8);
-            cpuState->esp = *(uint_32 *)(esp + 12);
-            cpuState->ss  = *(uint_16 *)(esp + 16);
-        }
-    }
-    CPU_POP
-}
-
-/*
-    Restoring previous process CPU state
-    called just before return from interrupt
-
-    For more information
-    refer to Intel i386 Programmer's Reference Manual (1986)
-    section 9.6.1 Interrupt Procedures
-*/
-static void k_proc_cpuRestore(const uint_32 esp, const size_t procId) {
-
-    struct k_cpu_state *cpuState = &pTab[procId].cpuState;
-
-    if (procId) {
-        // not inside an ISR
-        // switching from kernel to R3
-    } else {
-        // inside an ISR
-        // switching from R3 to kernel
-    }
-
-    if (procId) {
-        // With privilege transition
-
-        // cpuState->esp = *(uint_32 *)(esp + 12);
-        // cpuState->ss  = *(uint_16 *)(esp + 16);
-    } else {
-        // No privilege transition
-
-        // *(uint_32 *)esp = cpuState->eip;
-        // *(uint_16 *)(esp + 4) = cpuState->cs;
-        // *(uint_32 *)(esp + 8) = cpuState->eflags;
-    }
-
-    __asm__ volatile ("pushw %[mem]" : [mem] "=m" (cpuState->ds));
-    __asm__ volatile ("pushw %[mem]" : [mem] "=m" (cpuState->es));
-    __asm__ volatile ("pushw %[mem]" : [mem] "=m" (cpuState->fs));
-    __asm__ volatile ("pushw %[mem]" : [mem] "=m" (cpuState->gs));
-    __asm__ volatile ("pushl %[mem]" : [mem] "=m" (cpuState->eax));
-    __asm__ volatile ("pushl %[mem]" : [mem] "=m" (cpuState->ecx));
-    __asm__ volatile ("pushl %[mem]" : [mem] "=m" (cpuState->edx));
-    __asm__ volatile ("pushl %[mem]" : [mem] "=m" (cpuState->ebx));
-    __asm__ volatile ("pushl %esp");
-    __asm__ volatile ("pushl %[mem]" : [mem] "=m" (cpuState->ebp));
-    __asm__ volatile ("pushl %[mem]" : [mem] "=m" (cpuState->esi));
-    __asm__ volatile ("pushl %[mem]" : [mem] "=m" (cpuState->edi));
-    CPU_POP
-}
-
-/*
     Switching between processes
 
     For more information
     refer to Intel i386 Programmer's Reference Manual (1986)
     section 7.5 Task Switching
+    and 
+    section 9.6.1 Interrupt Procedures
 */
 void k_proc_switch(const size_t currentProcId, const size_t nextProcId) {
     if (currentProcId == nextProcId)  {
@@ -265,12 +174,111 @@ void k_proc_switch(const size_t currentProcId, const size_t nextProcId) {
 
     //         WITHOUT ERROR CODE          WITH ERROR CODE
 
-    k_proc_cpuSave(cur_esp, currentProcId);
-    k_proc_cpuRestore(cur_esp, nextProcId);
+    struct k_cpu_state * const currentCpuState = &pTab[currentProcId].cpuState;
+    const struct k_cpu_state * const nextCpuState = &pTab[nextProcId].cpuState;
+    const enum k_gdt_dpl currentDpl = pTab[currentProcId].dpl;
+    const enum k_gdt_dpl nextDpl = pTab[nextProcId].dpl;
 
-    if (nextProcId) {
+    if (currentDpl == DPL_0 && nextDpl == DPL_3) {
+        // Switching to DPL3 process
+
+        // Save kernel CPU state
+        CPU_PUSH
+        {
+            currentCpuState->edi = STACK_VAL(32, 0);
+            currentCpuState->esi = STACK_VAL(32, 4);
+            currentCpuState->ebp = STACK_VAL(32, 8);
+            currentCpuState->ebx = STACK_VAL(32, 16);
+            currentCpuState->edx = STACK_VAL(32, 20);
+            currentCpuState->ecx = STACK_VAL(32, 24);
+            currentCpuState->eax = STACK_VAL(32, 28);
+            currentCpuState->gs  = STACK_VAL(16, 32);
+            currentCpuState->fs  = STACK_VAL(16, 34);
+            currentCpuState->es  = STACK_VAL(16, 36);
+            currentCpuState->ds  = STACK_VAL(16, 38);        
+        }
+        CPU_POP
+
+        extern ptr_t k_proc_kernelRet;
+        currentCpuState->eip = (uint_32)&k_proc_kernelRet;
+        currentCpuState->esp = cur_esp;
+        __asm__ volatile ("pushw %cs"); __asm__ volatile ("popw %[mem]" : [mem] "=m" (currentCpuState->cs));
+        __asm__ volatile ("pushfl");    __asm__ volatile ("popl %[mem]" : [mem] "=m" (currentCpuState->eflags));
+        __asm__ volatile ("pushw %ss"); __asm__ volatile ("popw %[mem]" : [mem] "=m" (currentCpuState->ss));
+
+        // Restore next process CPU state
+
+        // From 
+        // D O     31              0         
+        // I F     ╔═══════╦═══════╗◄──┐     
+        // R       ║▒▒▒▒▒▒▒║OLD SS ║   │     
+        // E E     ╠═══════╩═══════╣ SS:ESP  
+        // C X     ║    OLD ESP    ║ FROM TSS
+        // T P     ╠═══════════════╣         
+        // I A     ║  OLD EFLAGS   ║         
+        // O N     ╠═══════╦═══════╣         
+        // N S     ║▒▒▒▒▒▒▒║OLD CS ║ NEW     
+        //   I     ╠═══════╩═══════╣ SS:ESP  
+        // │ O     ║    OLD EIP    ║   │     
+        // ▼ N     ╠═══════════════╣◄──┘     
+
+        // Prepare IRET stack
+
+    	// mov ax, (4 * 8) | 3 ; ring 3 data with bottom 2 bits set for ring 3
+    	// mov ds, ax
+    	// mov es, ax 
+    	// mov fs, ax 
+    	// mov gs, ax ; SS is handled by iret
+ 
+	    // ; set up the stack frame iret expects
+	    // mov eax, esp
+	    // push (4 * 8) | 3 ; data selector
+	    // push eax ; current esp
+	    // pushf ; eflags
+	    // push (3 * 8) | 3 ; code selector (ring 3 code with bottom 2 bits set for ring 3)
+	    // push test_user_function ; instruction address to return to
+	    // iret
+
+        
+        const uint_32 nextCodeSel = nextCpuState->cs | nextDpl;
+        const uint_32 nextDataSel = nextCpuState->ss | nextDpl;
+
+        __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextDataSel));
+        __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->esp));
+        __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->eflags));
+        __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCodeSel));
+        __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->eip));
+        
+        // Restore general purpose registers
+        __asm__ volatile ("pushw %[mem]" : : [mem] "m" (nextCpuState->ds));
+        __asm__ volatile ("pushw %[mem]" : : [mem] "m" (nextCpuState->es));
+        __asm__ volatile ("pushw %[mem]" : : [mem] "m" (nextCpuState->fs));
+        __asm__ volatile ("pushw %[mem]" : : [mem] "m" (nextCpuState->gs));
+        __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->eax));
+        __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->ecx));
+        __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->edx));
+        __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->ebx));
+        __asm__ volatile ("pushl %esp");
+        __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->ebp));
+        __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->esi));
+        __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->edi));
+        CPU_POP
+
+        // Enable exceptions and call iret to move to the next process
         CRITICAL_SECTION_END;
         __asm__ volatile ("iret");
+
+        // Kernel return location
+        __asm__ volatile ("k_proc_kernelRet:");
+    }
+    else if (currentDpl == DPL_3 && nextDpl == DPL_0) {
+        // Inside an interrupt - switching to kernel
+
+        // k_proc_cpuSave(currentProcId);
+        // k_proc_cpuRestore(nextProcId);
+    }
+    else {
+        OOPS("Unexpected privilege jump");
     }
 }
 
