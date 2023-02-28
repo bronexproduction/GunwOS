@@ -40,12 +40,13 @@ static void procSwitch() {
         OOPS("Process switch flow inconsistency");
     }
     
+    const size_t prevProcId = currentProcId;
     currentProcId = nextProcId;
     if (currentProcId) {
         executionTimeCounter = 0;
     }
 
-    k_proc_switch(currentProcId, nextProcId);
+    k_proc_switch(prevProcId, nextProcId);
 }
 
 static size_t procSelect() {
