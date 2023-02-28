@@ -13,6 +13,7 @@
 #include "../criticalsec/criticalsec.h"
 #include "../../timer/timer.h"
 #include "../../error/panic.h"
+#include "../gdt/gdt.h"
 #include "../cpu/cpu.h"
 
 register const uint_32 cur_esp __asm__ ("esp");
@@ -43,6 +44,13 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
 
     pTab[pIndex].cpuState.esp = (uint_32)descriptor->stack;
     pTab[pIndex].cpuState.eip = (uint_32)descriptor->img;
+
+    pTab[pIndex].cpuState.cs = (uint_16)GDT_OFFSET(r3code);
+    pTab[pIndex].cpuState.ds = (uint_16)GDT_OFFSET(r3data);
+    pTab[pIndex].cpuState.es = (uint_16)GDT_OFFSET(r3data);
+    pTab[pIndex].cpuState.fs = (uint_16)GDT_OFFSET(r3data);
+    pTab[pIndex].cpuState.gs = (uint_16)GDT_OFFSET(r3data);
+    pTab[pIndex].cpuState.ss = (uint_16)GDT_OFFSET(r3data);
 
     k_proc_schedule_didSpawn(pIndex);
 
