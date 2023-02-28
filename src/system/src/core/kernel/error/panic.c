@@ -82,7 +82,7 @@ static void strToChar(const char * const str, struct k_vid_character * const res
     }
 }
 
-void k_oops(const char *reason) {
+void __attribute__((cdecl)) k_oops(const char *reason, uint_32 errCode) {
     switchToVGATextMode();
 
     struct k_vid_character bgChar;

@@ -240,8 +240,8 @@ void k_proc_switch(const size_t currentProcId, const size_t nextProcId) {
 	    // iret
 
         
-        const uint_32 nextCodeSel = nextCpuState->cs | nextDpl;
-        const uint_32 nextDataSel = nextCpuState->ss | nextDpl;
+        const uint_32 nextCodeSel = nextCpuState->cs | 0/*nextDpl*/;
+        const uint_32 nextDataSel = nextCpuState->ss | 0/*nextDpl*/;
 
         __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextDataSel));
         __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->esp));

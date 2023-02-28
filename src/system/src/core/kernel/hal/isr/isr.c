@@ -87,7 +87,7 @@ static size_t isrStackHeight = 0;
 /* 10 */ __attribute__((naked)) void k_isr_invTSS() {   LOG_FATAL("Invalid TSS interrupt triggered") }
 /* 11 */ __attribute__((naked)) void k_isr_segNP() {    LOG_FATAL("Segment not present interrupt triggered") }
 /* 12 */ __attribute__((naked)) void k_isr_stExc() {    LOG_FATAL("Stack exception interrupt triggered") }
-/* 13 */ __attribute__((naked)) void k_isr_genPrt() {   OOPS("General protection interrupt triggered") }
+/* 13 */ __attribute__((naked)) void k_isr_genPrt() {   OOPS_WITH_CODE("General protection interrupt triggered") }
 /* 14 */ __attribute__((naked)) void k_isr_pgFlt() {    LOG_FATAL("Page fault interrupt triggered") }
 // 15 (reserved)
 /* 16 */ __attribute__((naked)) void k_isr_coProcErr() { LOG_FATAL("Coprocessor error interrupt triggered") }
