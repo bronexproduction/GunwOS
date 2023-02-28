@@ -46,12 +46,12 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
     pTab[pIndex].cpuState.esp = (uint_32)descriptor->stack;
     pTab[pIndex].cpuState.eip = (uint_32)descriptor->img;
 
-    pTab[pIndex].cpuState.cs = (uint_16)GDT_OFFSET(r3code);
-    pTab[pIndex].cpuState.ds = (uint_16)GDT_OFFSET(r3data);
-    pTab[pIndex].cpuState.es = (uint_16)GDT_OFFSET(r3data);
-    pTab[pIndex].cpuState.fs = (uint_16)GDT_OFFSET(r3data);
-    pTab[pIndex].cpuState.gs = (uint_16)GDT_OFFSET(r3data);
-    pTab[pIndex].cpuState.ss = (uint_16)GDT_OFFSET(r3data);
+    pTab[pIndex].cpuState.cs = (uint_16)(GDT_OFFSET(r3code) | pTab[pIndex].dpl);
+    pTab[pIndex].cpuState.ds = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].dpl);
+    pTab[pIndex].cpuState.es = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].dpl);
+    pTab[pIndex].cpuState.fs = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].dpl);
+    pTab[pIndex].cpuState.gs = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].dpl);
+    pTab[pIndex].cpuState.ss = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].dpl);
 
     k_proc_schedule_didSpawn(pIndex);
 
@@ -239,14 +239,10 @@ void k_proc_switch(const size_t currentProcId, const size_t nextProcId) {
 	    // push test_user_function ; instruction address to return to
 	    // iret
 
-        
-        const uint_32 nextCodeSel = nextCpuState->cs | 0/*nextDpl*/;
-        const uint_32 nextDataSel = nextCpuState->ss | 0/*nextDpl*/;
-
-        __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextDataSel));
+        __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->ss));
         __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->esp));
         __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->eflags));
-        __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCodeSel));
+        __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->cs));
         __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->eip));
         
         // Restore general purpose registers
