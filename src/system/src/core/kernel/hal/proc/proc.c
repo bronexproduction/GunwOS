@@ -15,8 +15,7 @@
 #include "../../error/panic.h"
 #include "../cpu/cpu.h"
 
-register uint_32 cur_esp __asm__ ("esp");
-
+register const uint_32 cur_esp __asm__ ("esp");
 #define STACK_VAL(SIZE, OFFSET) (*(uint_ ## SIZE *)(cur_esp + OFFSET))
 
 struct k_proc_process pTab[MAX_PROC];
@@ -151,7 +150,7 @@ static void k_proc_cpuRestore(const uint_32 esp, const size_t procId) {
     refer to Intel i386 Programmer's Reference Manual (1986)
     section 7.5 Task Switching
 */
-void k_proc_switch(const uint_32 esp, const size_t currentProcId, const size_t nextProcId) {
+void k_proc_switch(const size_t currentProcId, const size_t nextProcId) {
     if (currentProcId == nextProcId)  {
         OOPS("Process identifers equal during switch");
     }
@@ -258,8 +257,8 @@ void k_proc_switch(const uint_32 esp, const size_t currentProcId, const size_t n
 
     //         WITHOUT ERROR CODE          WITH ERROR CODE
 
-    k_proc_cpuSave(esp, currentProcId);
-    k_proc_cpuRestore(esp, nextProcId);
+    k_proc_cpuSave(cur_esp, currentProcId);
+    k_proc_cpuRestore(cur_esp, nextProcId);
 
     if (nextProcId) {
         CRITICAL_SECTION_END;

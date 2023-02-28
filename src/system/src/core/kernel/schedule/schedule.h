@@ -12,11 +12,8 @@
     Called by the ISR
     in case code got dispatched by an interrupt handler
     to be executed on ISR return
-
-    Params:
-    * esp - reference stack pointer
 */
-void __attribute__((cdecl)) k_proc_schedule_intNeedsKernelHandling(const uint_32 esp);
+void k_proc_schedule_intNeedsKernelHandling();
 
 /*
     Called by the kernel queue
