@@ -8,6 +8,7 @@
 #include <stdgunw/types.h>
 #include <stdgunw/defs.h>
 #include <gunwdrv.h>
+#include "cpu/cpu.h"
 #include "gdt/gdt.h"
 #include "int/irq.h"
 #include "io/bus.h"
@@ -15,7 +16,6 @@
 
 #include "../../log/log.h"
 
-extern void k_cpu_init();
 extern void k_pic_configure();
 extern void k_idt_loadDefault();
 extern void k_proc_init();
@@ -25,6 +25,7 @@ void k_hal_init() {
     #warning TODO: move GDT configuration from the boot loader
 
     k_gdt_init();
+    k_cpu_loadTaskRegister();
     k_idt_loadDefault();
 
     k_pic_configure();

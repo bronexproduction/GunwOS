@@ -119,4 +119,11 @@ struct __attribute__((packed, aligned(4))) k_cpu_tss {
 
 extern struct k_cpu_tss k_cpu_tss;
 
+void k_cpu_init();
+
+/*
+    Loads segment selector field of the task register
+*/
+void k_cpu_loadTaskRegister();
+
 #endif // CPU_H

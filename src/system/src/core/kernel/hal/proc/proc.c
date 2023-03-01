@@ -183,6 +183,8 @@ void k_proc_switch(const size_t currentProcId, const size_t nextProcId) {
     if (currentDpl == DPL_0 && nextDpl == DPL_3) {
         // Switching to DPL3 process
 
+        #warning probably a lot of these operations can be removed
+
         // Save kernel CPU state
         CPU_PUSH
         {
@@ -208,6 +210,9 @@ void k_proc_switch(const size_t currentProcId, const size_t nextProcId) {
         __asm__ volatile ("pushw %ss"); __asm__ volatile ("popw %[mem]" : [mem] "=m" (currentCpuState->ss));
 
         // Restore next process CPU state
+
+        // Set kernel stack pointer in TSS
+        k_cpu_tss.esp0 = cur_esp;
 
         // Prepare IRET stack
         __asm__ volatile ("pushw $0");
