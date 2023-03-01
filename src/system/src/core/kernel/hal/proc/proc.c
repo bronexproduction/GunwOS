@@ -73,8 +73,8 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
         OOPS("Attempted to spawn process outside its segments");
     }
 
-    ptr_t relativeImgPtr = codeStartPtr - GDT_SEGMENT_START(r3code);
-    ptr_t relativeStackPtr = dataEndPtr - GDT_SEGMENT_START(r3data);
+    ptr_t relativeImgPtr = (ptr_t)(codeStartPtr - GDT_SEGMENT_START(r3code));
+    ptr_t relativeStackPtr = (ptr_t)(dataEndPtr - GDT_SEGMENT_START(r3data));
 
     pTab[pIndex].cpuState.esp = (uint_32)relativeStackPtr;
     pTab[pIndex].cpuState.eip = (uint_32)relativeImgPtr;

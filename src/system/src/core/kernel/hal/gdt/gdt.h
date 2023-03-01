@@ -9,6 +9,9 @@
 #define GDT_H
 
 #define GDT_OFFSET(FIELD) ((ptr_t)&k_gdt_gdt.FIELD - (ptr_t)&k_gdt_gdt)
+#define GDT_LIMIT_BYTES(FIELD) ((((size_t)k_gdt_gdt.FIELD.limitH) << 16 | (size_t)k_gdt_gdt.FIELD.limitL) * ((k_gdt_gdt.FIELD.granularity == GRAN_4K) ? KB(4) : 1))
+#define GDT_SEGMENT_START(FIELD) ((ptr_t)(((size_t)k_gdt_gdt.FIELD.baseH) << 24 | (size_t)k_gdt_gdt.FIELD.baseL))
+#define GDT_SEGMENT_END(FIELD) ((ptr_t)(GDT_SEGMENT_START(FIELD) + GDT_LIMIT_BYTES(FIELD) - 1))
 
 enum k_gdt_dpl {
     DPL_0 = 0b00,
