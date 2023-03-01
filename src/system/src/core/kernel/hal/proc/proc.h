@@ -14,7 +14,7 @@
 
 struct k_proc_descriptor {
     ptr_t img;
-    ptr_t stack;
+    size_t imgBytes;
 };
 
 enum k_proc_error {

@@ -30,7 +30,6 @@ static void spawn(int index, ptr_t imageStart, size_t imageSize) {
         Each process takes 2 MB of space, starting from MEM_KERNEL_START + MEM_KERNEL_RESERVED_BYTES
     */
     ptr_t img = (ptr_t)(MEM_KERNEL_START + MEM_KERNEL_RESERVED_BYTES + MB(index * 2 + 1));
-    ptr_t stack = img + MB(1);
     
     // Copy to another location (outsize of kernel space)
     memcopy(imageStart, img, imageSize);
@@ -38,7 +37,7 @@ static void spawn(int index, ptr_t imageStart, size_t imageSize) {
     struct k_proc_descriptor desc;
 
     desc.img = img;
-    desc.stack = stack;
+    desc.imgBytes = imageSize;
 
     k_proc_spawn(&desc);
 }
