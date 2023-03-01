@@ -71,7 +71,6 @@ void k_gdt_init() {
     /*
         Ring 3 code segment
     */
-
     gdt->r3code.limitL              = r3limit;
     gdt->r3code.baseL               = r3baseBytes;
     gdt->r3code.accessed            = false;
