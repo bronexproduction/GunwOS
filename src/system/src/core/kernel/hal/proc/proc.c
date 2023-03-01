@@ -45,6 +45,7 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
     pTab[pIndex].dpl = DPL_3;
     pTab[pIndex].cpuState.esp = (uint_32)descriptor->stack;
     pTab[pIndex].cpuState.eip = (uint_32)descriptor->img;
+    pTab[pIndex].cpuState.eflags = FLAGS_INTERRUPT;
 
     pTab[pIndex].cpuState.cs = (uint_16)(GDT_OFFSET(r3code) | pTab[pIndex].dpl);
     pTab[pIndex].cpuState.ds = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].dpl);
@@ -209,10 +210,12 @@ void k_proc_switch(const size_t currentProcId, const size_t nextProcId) {
         // Restore next process CPU state
 
         // Prepare IRET stack
-        __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->ss));
+        __asm__ volatile ("pushw $0");
+        __asm__ volatile ("pushw %[mem]" : : [mem] "m" (nextCpuState->ss));
         __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->esp));
         __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->eflags));
-        __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->cs));
+        __asm__ volatile ("pushw $0");
+        __asm__ volatile ("pushw %[mem]" : : [mem] "m" (nextCpuState->cs));
         __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->eip));
         
         // Restore general purpose registers
@@ -230,8 +233,7 @@ void k_proc_switch(const size_t currentProcId, const size_t nextProcId) {
         __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->edi));
         CPU_POP
 
-        // Enable exceptions and call iret to move to the next process
-        CRITICAL_SECTION_END;
+        // Call iret to move to the next process
         __asm__ volatile ("iret");
 
         // Kernel return location

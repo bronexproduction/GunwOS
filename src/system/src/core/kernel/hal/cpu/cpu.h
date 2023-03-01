@@ -26,6 +26,23 @@
     __asm__ volatile ("popw %ds"); \
 }
 
+enum k_cpu_eflags {
+    FLAGS_CARRY     = 0x0001,
+    FLAGS_PARITY    = 0x0004,
+    FLAGS_AUXCARRY  = 0x0010,
+    FLAGS_ZERO      = 0x0040,
+    FLAGS_SIGN      = 0x0080,
+    FLAGS_TRAP      = 0x0100,
+    FLAGS_INTERRUPT = 0x0200,
+    FLAGS_DIRECTION = 0x0400,
+    FLAGS_OVERFLOW  = 0x0800,
+    FLAGS_IOPL      = 0x3000,
+    FLAGS_NESTED    = 0x4000,
+    FLAGS_MODE      = 0x8000,
+    EFLAGS_RESUME   = 0x00010000,
+    EFLAGS_V8086    = 0x00020000
+};
+
 struct k_cpu_state {
     /*
         Main registers
