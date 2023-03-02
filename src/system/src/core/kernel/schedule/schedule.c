@@ -12,7 +12,7 @@
 #include "../error/panic.h"
 #include "../hal/criticalsec/criticalsec.h"
 
-#define GRANULARITY_MS  1000
+#define GRANULARITY_MS  30000
 
 static size_t executionTimeCounter = GRANULARITY_MS;
 
