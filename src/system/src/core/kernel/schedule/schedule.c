@@ -17,7 +17,7 @@
 static size_t executionTimeCounter = GRANULARITY_MS;
 
 /*
-    Process identifiers (last, next)
+    Process identifiers (last, current, next)
 
     Note: 0 is always considered to be kernel
 */
