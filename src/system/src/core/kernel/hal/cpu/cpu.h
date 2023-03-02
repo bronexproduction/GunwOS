@@ -85,14 +85,18 @@ struct k_cpu_state {
     Task State Segment
 */
 #warning TO BE DOCUMENTED and checked if the values are aligned correctly
-struct __attribute__((packed, aligned(4))) k_cpu_tss {
+struct __attribute__((packed)) k_cpu_tss {
     uint_16 prevTss;
+    const uint_16 _res0;
     uint_32 esp0;
     uint_16 ss0;
+    const uint_16 _res1;
     uint_32 esp1;
     uint_16 ss1;
+    const uint_16 _res2;
     uint_32 esp2;
     uint_16 ss2;
+    const uint_16 _res3;
     uint_32 cr3;
     uint_32 eip;
     uint_32 eflags;
@@ -105,17 +109,24 @@ struct __attribute__((packed, aligned(4))) k_cpu_tss {
     uint_32 esi;
     uint_32 edi;
     uint_16 es;
+    const uint_16 _res4;
     uint_16 cs;
+    const uint_16 _res5;
     uint_16 ss;
+    const uint_16 _res6;
     uint_16 ds;
+    const uint_16 _res7;
     uint_16 fs;
+    const uint_16 _res8;
     uint_16 gs;
+    const uint_16 _res9;
     uint_16 ldt;
-    struct __attribute__((packed, aligned(2))) {
-        bool trap;
-        uint_16 ioMapBase;
-    };
+    const uint_16 _res10;
+    bool trap               :1;
+    const uint_16 _res11    :15;
+    uint_16 ioMapBase;
 };
+_Static_assert(sizeof(struct k_cpu_tss) == 104, "Unexpected k_cpu_tss size");
 
 extern struct k_cpu_tss k_cpu_tss;
 
