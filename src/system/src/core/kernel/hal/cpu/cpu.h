@@ -84,7 +84,7 @@ struct k_cpu_state {
 /*
     Task State Segment
 */
-#warning TO BE DOCUMENTED and checked if the values are aligned correctly
+#warning LINK TO THE DOCUMENTATION
 struct __attribute__((packed)) k_cpu_tss {
     uint_16 prevTss;
     const uint_16 _res0;
