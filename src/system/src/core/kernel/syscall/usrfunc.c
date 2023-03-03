@@ -14,9 +14,10 @@
 #include <stdgunw/utils.h>
 #include <gunwdev.h>
 #include "../error/fug.h"
+#include "func.h"
+#include "../hal/proc/proc.h"
+#include "../hal/mem/mem.h"
 
-#define SCR_END {__asm__ volatile ("ret");};
-#define SCR(NAME, CODE) __attribute__((naked)) void k_scr_ ## NAME () { CODE; SCR_END }
 
 /*
     User-level system calls
@@ -35,7 +36,11 @@
 SCR(debugPrint,
     REG(32, buffer, ebx)
 
-    size_t procId = 0; // TODO: get caller process id
+    // check location of the buffer
+    // there might be (must be) a better way to do it
+    // struct k_mem_zone procZone = k_mem_zoneForProc(k_proc_getCurrentId());
+    #warning to be implemented
+    // (void)procZone;
 
     REG_RET(32, bytesWritten)
     bytesWritten = -1;

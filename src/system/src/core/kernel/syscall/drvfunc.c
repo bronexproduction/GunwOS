@@ -14,9 +14,9 @@
 #include "../hal/io/bus.h"
 #include <stdgunw/utils.h>
 #include <gunwdrv.h>
+#include "func.h"
 
-#define SCR_END {__asm__ volatile ("ret");};
-#define SCR(NAME, CODE) __attribute__((naked)) void k_scr_ ## NAME () { CODE; SCR_END }
+#warning how to prevent these functions from being called from DPL_3 ?
 
 /*
     Driver-level system calls
