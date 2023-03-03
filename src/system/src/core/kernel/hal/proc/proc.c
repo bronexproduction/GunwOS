@@ -18,7 +18,7 @@
 #include "../cpu/cpu.h"
 
 register const uint_32 cur_esp __asm__ ("esp");
-#define STACK_VAL(SIZE, OFFSET) (*(uint_ ## SIZE *)(cur_esp + OFFSET))
+#define STACK_VAL(REFESP, SIZE, OFFSET) (*(uint_ ## SIZE *)(REFESP + OFFSET))
 
 struct k_proc_process pTab[MAX_PROC];
 
@@ -224,17 +224,17 @@ void k_proc_switch(const uint_32 refEsp, const size_t currentProcId, const size_
         // Save kernel CPU state
         CPU_PUSH
         {
-            currentCpuState->edi = STACK_VAL(32, 0);
-            currentCpuState->esi = STACK_VAL(32, 4);
-            currentCpuState->ebp = STACK_VAL(32, 8);
-            currentCpuState->ebx = STACK_VAL(32, 16);
-            currentCpuState->edx = STACK_VAL(32, 20);
-            currentCpuState->ecx = STACK_VAL(32, 24);
-            currentCpuState->eax = STACK_VAL(32, 28);
-            currentCpuState->gs  = STACK_VAL(16, 32);
-            currentCpuState->fs  = STACK_VAL(16, 34);
-            currentCpuState->es  = STACK_VAL(16, 36);
-            currentCpuState->ds  = STACK_VAL(16, 38);        
+            currentCpuState->edi = STACK_VAL(cur_esp, 32, 0);
+            currentCpuState->esi = STACK_VAL(cur_esp, 32, 4);
+            currentCpuState->ebp = STACK_VAL(cur_esp, 32, 8);
+            currentCpuState->ebx = STACK_VAL(cur_esp, 32, 16);
+            currentCpuState->edx = STACK_VAL(cur_esp, 32, 20);
+            currentCpuState->ecx = STACK_VAL(cur_esp, 32, 24);
+            currentCpuState->eax = STACK_VAL(cur_esp, 32, 28);
+            currentCpuState->gs  = STACK_VAL(cur_esp, 16, 32);
+            currentCpuState->fs  = STACK_VAL(cur_esp, 16, 34);
+            currentCpuState->es  = STACK_VAL(cur_esp, 16, 36);
+            currentCpuState->ds  = STACK_VAL(cur_esp, 16, 38);        
         }
         CPU_POP
 
@@ -282,9 +282,80 @@ void k_proc_switch(const uint_32 refEsp, const size_t currentProcId, const size_
     }
     else if (currentDpl == DPL_3 && nextDpl == DPL_0) {
         // Inside an interrupt - switching to kernel
+        
+        // D       31              0         
+        // I       ╔═══════╦═══════╗◄──┐     
+        // R       ║▒▒▒▒▒▒▒║OLD SS ║   │     
+        // E       ╠═══════╩═══════╣ SS:ESP  
+        // C       ║    OLD ESP    ║ FROM TSS
+        // T       ╠═══════════════╣◄── refEsp + 52    
+        // I       ║  OLD EFLAGS   ║         
+        // O       ╠═══════╦═══════╣◄── refEsp + 48    
+        // N       ║▒▒▒▒▒▒▒║OLD CS ║ 
+        //         ╠═══════╩═══════╣◄── refEsp + 44 
+        // O       ║    OLD EIP    ║        
+        // F       ╠═══════╦═══════╣◄── refEsp + 40
+        //         ║OLD DS ║OLD ES ║
+        // E       ╠═══════╬═══════╣◄── refEsp + 36
+        // X       ║OLD FS ║OLD GS ║
+        // P       ╠═══════╩═══════╣◄── refEsp + 32
+        // A       ║    OLD EAX    ║
+        // N       ╠═══════════════╣◄── refEsp + 28
+        // S       ║    OLD ECX    ║
+        // I       ╠═══════════════╣◄── refEsp + 24
+        // O       ║    OLD EDX    ║
+        // N       ╠═══════════════╣◄── refEsp + 20
+        //         ║    OLD EBX    ║
+        // │       ╠═══════════════╣◄── refEsp + 16
+        // │       ║ ESP (IGNORED) ║
+        // ▼       ╠═══════════════╣◄── refEsp + 12
+        //         ║    OLD EBP    ║
+        //         ╠═══════════════╣◄── refEsp + 8
+        //         ║    OLD ESI    ║ 
+        //         ╠═══════════════╣◄── refEsp + 4   
+        //         ║    OLD EDI    ║   
+        //         ╠═══════════════╣◄── refEsp
+        //         ·               ·
+            
+        // Save current process CPU state
 
-        // k_proc_cpuSave(currentProcId);
-        // k_proc_cpuRestore(nextProcId);
+        #warning try to replace some segments and see what it does
+
+        currentCpuState->edi    = STACK_VAL(refEsp, 32, 0);
+        currentCpuState->esi    = STACK_VAL(refEsp, 32, 4);
+        currentCpuState->ebp    = STACK_VAL(refEsp, 32, 8);
+        currentCpuState->ebx    = STACK_VAL(refEsp, 32, 16);
+        currentCpuState->edx    = STACK_VAL(refEsp, 32, 20);
+        currentCpuState->ecx    = STACK_VAL(refEsp, 32, 24);
+        currentCpuState->eax    = STACK_VAL(refEsp, 32, 28);
+        currentCpuState->gs     = STACK_VAL(refEsp, 16, 32);
+        currentCpuState->fs     = STACK_VAL(refEsp, 16, 34);
+        currentCpuState->es     = STACK_VAL(refEsp, 16, 36);
+        currentCpuState->ds     = STACK_VAL(refEsp, 16, 38);
+        currentCpuState->eip    = STACK_VAL(refEsp, 32, 40);
+        currentCpuState->cs     = STACK_VAL(refEsp, 16, 44);
+        currentCpuState->eflags = STACK_VAL(refEsp, 32, 48);
+        currentCpuState->esp    = STACK_VAL(refEsp, 32, 52);
+        currentCpuState->ss     = STACK_VAL(refEsp, 16, 56);
+
+        // Restore kernel CPU state
+
+        STACK_VAL(refEsp, 32, 0)  = nextCpuState->edi;
+        STACK_VAL(refEsp, 32, 4)  = nextCpuState->esi;
+        STACK_VAL(refEsp, 32, 8)  = nextCpuState->ebp;
+        STACK_VAL(refEsp, 32, 16) = nextCpuState->ebx;
+        STACK_VAL(refEsp, 32, 20) = nextCpuState->edx;
+        STACK_VAL(refEsp, 32, 24) = nextCpuState->ecx;
+        STACK_VAL(refEsp, 32, 28) = nextCpuState->eax;
+        STACK_VAL(refEsp, 16, 32) = nextCpuState->gs;
+        STACK_VAL(refEsp, 16, 34) = nextCpuState->fs;
+        STACK_VAL(refEsp, 16, 36) = nextCpuState->es;
+        STACK_VAL(refEsp, 16, 38) = nextCpuState->ds;
+        STACK_VAL(refEsp, 32, 40) = nextCpuState->eip;
+        STACK_VAL(refEsp, 16, 44) = nextCpuState->cs;
+        STACK_VAL(refEsp, 32, 48) = nextCpuState->eflags;
+        STACK_VAL(refEsp, 32, 52) = nextCpuState->esp;
+        STACK_VAL(refEsp, 16, 56) = nextCpuState->ss;
     }
     else {
         OOPS("Unexpected privilege jump");
