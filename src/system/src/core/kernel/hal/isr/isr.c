@@ -34,11 +34,13 @@ static size_t isrStackHeight = 0;
 #define ISR_BEGIN   { \
     __asm__ volatile ("cli"); \
     CPU_PUSH \
+    __asm__ volatile ("pushl %eax"); \
     __asm__ volatile ("movw %ss, %ax"); \
     __asm__ volatile ("movw %ax, %ds"); \
     __asm__ volatile ("movw %ax, %es"); \
     __asm__ volatile ("movw %ax, %fs"); \
     __asm__ volatile ("movw %ax, %gs"); \
+    __asm__ volatile ("popl %eax"); \
     __asm__ volatile ("incl %[mem]" : [mem] "=m" (isrStackHeight)); \
 }
 
