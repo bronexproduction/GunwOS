@@ -16,6 +16,12 @@
 */
 
 /*
+    Code - 0x01
+    Function - DEBUG_PRINT
+*/
+__attribute__((naked)) void k_scr_debugPrint(const char * const buffer);
+
+/*
     Code - 0x03
     Function - EXIT
 */

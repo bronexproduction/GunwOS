@@ -23,6 +23,25 @@
 */
 
 /*
+    Code - 0x01
+    Function - DEBUG_PRINT
+
+    Params:
+        * EBX - null-terminated character array pointer
+
+    Return:
+        * EAX - number of bytes written
+*/
+SCR(debugPrint,
+    REG(32, buffer, ebx)
+
+    size_t procId = 0; // TODO: get caller process id
+
+    REG_RET(32, bytesWritten)
+    bytesWritten = -1;
+)
+
+/*
     Code - 0x03
     Function - EXIT
 

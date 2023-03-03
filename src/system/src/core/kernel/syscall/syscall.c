@@ -38,7 +38,7 @@ static void (*driverSyscallReg[DRIVER_SYSCALL_COUNT])() = {
 */
 static void (*userSyscallReg[SYSCALL_COUNT])() = {
     /* 0x00 */ 0,
-    /* 0x01 */ 0,
+    /* 0x01 */ k_scr_debugPrint,
     /* 0x02 */ 0,
     /* 0x03 */ k_scr_exit,
     /* 0x04 */ 0,
