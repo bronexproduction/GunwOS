@@ -13,7 +13,7 @@
     in case code got dispatched by an interrupt handler
     to be executed on ISR return
 */
-void k_proc_schedule_intNeedsKernelHandling();
+void __attribute__((cdecl)) k_proc_schedule_intNeedsKernelHandling(const uint_32 refEsp);
 
 /*
     Called by the kernel queue

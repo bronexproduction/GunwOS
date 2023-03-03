@@ -101,7 +101,7 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
     and 
     section 9.6.1 Interrupt Procedures
 */
-void k_proc_switch(const size_t currentProcId, const size_t nextProcId) {
+void k_proc_switch(const uint_32 refEsp, const size_t currentProcId, const size_t nextProcId) {
     if (currentProcId == nextProcId)  {
         OOPS("Process identifers equal during switch");
     }
@@ -113,6 +113,9 @@ void k_proc_switch(const size_t currentProcId, const size_t nextProcId) {
     }
     if (pTab[nextProcId].state != PS_READY) {
         OOPS("Invalid next process state during switch");
+    }
+    if (!nextProcId && !refEsp) {
+        OOPS("Invalid reference stack pointer during switch");
     }
     
     pTab[currentProcId].state = PS_READY;

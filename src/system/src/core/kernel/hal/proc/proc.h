@@ -62,7 +62,8 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const);
     Params:
     * currentProcId - Identifier of the current process
     * nextProcId - Identifier to the next process
+    * refEsp - Reference stack pointer
 */
-void k_proc_switch(const size_t currentProcId, const size_t nextProcId);
+void k_proc_switch(const uint_32 refEsp, const size_t currentProcId, const size_t nextProcId);
 
 #endif // PROC_H
