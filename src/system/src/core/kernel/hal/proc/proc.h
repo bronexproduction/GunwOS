@@ -57,13 +57,20 @@ extern struct k_proc_process pTab[MAX_PROC];
 enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const);
 
 /*
-    Switching between processes
+    Switching from kernel to process
 
     Params:
-    * currentProcId - Identifier of the current process
-    * nextProcId - Identifier to the next process
-    * refEsp - Reference stack pointer
+    * procId - Identifier of the next process
 */
-void k_proc_switch(const uint_32 refEsp, const size_t currentProcId, const size_t nextProcId);
+void k_proc_switch(const int_32 procId);
+
+/*
+    Switching from process to kernel (if needed)
+
+    Params:
+    * refEsp - Reference stack pointer
+    * currentProcId - Identifier of the current process
+*/
+void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const int_32 currentProcId);
 
 #endif // PROC_H

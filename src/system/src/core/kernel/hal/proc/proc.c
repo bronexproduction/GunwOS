@@ -20,13 +20,14 @@
 register const uint_32 cur_esp __asm__ ("esp");
 #define STACK_VAL(REFESP, SIZE, OFFSET) (*(uint_ ## SIZE *)(REFESP + OFFSET))
 
+static struct k_proc_process kernelProc;
 struct k_proc_process pTab[MAX_PROC];
 
 enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor) {
-    int pIndex;
+    uint_32 pIndex;
     
     CRITICAL_SECTION_BEGIN {
-        for (pIndex = 1; pIndex < MAX_PROC; ++pIndex) {
+        for (pIndex = 0; pIndex < MAX_PROC; ++pIndex) {
             if (pTab[pIndex].state == PS_NONE) {
                 break;
             }
@@ -95,32 +96,15 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
 /*
     Switching between processes
 
+    k_proc_switch
+    k_proc_switchKernel
+
     For more information
     refer to Intel i386 Programmer's Reference Manual (1986)
     section 7.5 Task Switching
     and 
     section 9.6.1 Interrupt Procedures
-*/
-void k_proc_switch(const uint_32 refEsp, const size_t currentProcId, const size_t nextProcId) {
-    if (currentProcId == nextProcId)  {
-        OOPS("Process identifers equal during switch");
-    }
-    if (currentProcId && nextProcId) {
-        OOPS("Invalid process identifers during switch");
-    }
-    if (pTab[currentProcId].state != PS_RUNNING) {
-        OOPS("Invalid current process state during switch");
-    }
-    if (pTab[nextProcId].state != PS_READY) {
-        OOPS("Invalid next process state during switch");
-    }
-    if (!nextProcId && !refEsp) {
-        OOPS("Invalid reference stack pointer during switch");
-    }
     
-    pTab[currentProcId].state = PS_READY;
-    pTab[nextProcId].state = PS_RUNNING;
-
     // 7.5 Task Switching
     // The 80386 switches execution to another task in any of four cases:
     // 1. The current task executes a JMP or CALL that refers to a TSS descriptor.
@@ -210,160 +194,182 @@ void k_proc_switch(const uint_32 refEsp, const size_t currentProcId, const size_
     //         ·               ·           ║               ║
 
     //         WITHOUT ERROR CODE          WITH ERROR CODE
+*/
+void k_proc_switch(const int_32 procId) {
+    if (procId < 0) {
+        OOPS("Invalid next process id during switch");   
+    }
+    if (kernelProc.state != PS_RUNNING) {
+        OOPS("Invalid kernel process state during switch");
+    }
+    if (pTab[procId].state != PS_READY) {
+        OOPS("Invalid next process state during switch");
+    }
+    
+    kernelProc.state = PS_READY;
+    pTab[procId].state = PS_RUNNING;
+
+    // Save kernel CPU state
+    #warning probably a lot of these operations can be removed
+    CPU_PUSH
+    {
+        kernelProc.cpuState.edi = STACK_VAL(cur_esp, 32, 0);
+        kernelProc.cpuState.esi = STACK_VAL(cur_esp, 32, 4);
+        kernelProc.cpuState.ebp = STACK_VAL(cur_esp, 32, 8);
+        kernelProc.cpuState.ebx = STACK_VAL(cur_esp, 32, 16);
+        kernelProc.cpuState.edx = STACK_VAL(cur_esp, 32, 20);
+        kernelProc.cpuState.ecx = STACK_VAL(cur_esp, 32, 24);
+        kernelProc.cpuState.eax = STACK_VAL(cur_esp, 32, 28);
+        kernelProc.cpuState.gs  = STACK_VAL(cur_esp, 16, 32);
+        kernelProc.cpuState.fs  = STACK_VAL(cur_esp, 16, 34);
+        kernelProc.cpuState.es  = STACK_VAL(cur_esp, 16, 36);
+        kernelProc.cpuState.ds  = STACK_VAL(cur_esp, 16, 38);        
+    }
+    CPU_POP
+
+    extern ptr_t k_proc_kernelRet;
+    kernelProc.cpuState.eip = (uint_32)&k_proc_kernelRet;
+    kernelProc.cpuState.esp = cur_esp;
+    __asm__ volatile ("pushw %cs"); __asm__ volatile ("popw %[mem]" : [mem] "=m" (kernelProc.cpuState.cs));
+    __asm__ volatile ("pushfl");    __asm__ volatile ("popl %[mem]" : [mem] "=m" (kernelProc.cpuState.eflags));
+    __asm__ volatile ("pushw %ss"); __asm__ volatile ("popw %[mem]" : [mem] "=m" (kernelProc.cpuState.ss));
+
+    // Restore next process CPU state
+
+    const struct k_cpu_state * const nextCpuState = &pTab[procId].cpuState;
+
+    // Set kernel stack pointer in TSS
+    k_cpu_tss.esp0 = cur_esp;
+
+    // Prepare IRET stack
+    __asm__ volatile ("pushw $0");
+    __asm__ volatile ("pushw %[mem]" : : [mem] "m" (nextCpuState->ss));
+    __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->esp));
+    __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->eflags));
+    __asm__ volatile ("pushw $0");
+    __asm__ volatile ("pushw %[mem]" : : [mem] "m" (nextCpuState->cs));
+    __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->eip));
+    
+    // Restore general purpose registers
+    __asm__ volatile ("pushw %[mem]" : : [mem] "m" (nextCpuState->ds));
+    __asm__ volatile ("pushw %[mem]" : : [mem] "m" (nextCpuState->es));
+    __asm__ volatile ("pushw %[mem]" : : [mem] "m" (nextCpuState->fs));
+    __asm__ volatile ("pushw %[mem]" : : [mem] "m" (nextCpuState->gs));
+    __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->eax));
+    __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->ecx));
+    __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->edx));
+    __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->ebx));
+    __asm__ volatile ("pushl %esp");
+    __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->ebp));
+    __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->esi));
+    __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->edi));
+    CPU_POP
+
+    // Call iret to move to the next process
+    __asm__ volatile ("iret");
+
+    // Kernel return location
+    __asm__ volatile ("k_proc_kernelRet:");
+}
+
+void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const int_32 currentProcId) {
+    if (kernelProc.state == PS_RUNNING) {
+        return;
+    }
+    if (currentProcId < 0) {
+        OOPS("Invalid current process id during switch");
+    }
+    if (pTab[currentProcId].state != PS_RUNNING) {
+        OOPS("Invalid current process state during switch");
+    }
+    if (kernelProc.state != PS_READY) {
+        OOPS("Invalid kernel process state during switch");
+    }
+    if (!refEsp) {
+        OOPS("Invalid reference stack pointer during switch");
+    }
+    
+    pTab[currentProcId].state = PS_READY;
+    kernelProc.state = PS_RUNNING;
 
     struct k_cpu_state * const currentCpuState = &pTab[currentProcId].cpuState;
-    const struct k_cpu_state * const nextCpuState = &pTab[nextProcId].cpuState;
-    const enum k_gdt_dpl currentDpl = pTab[currentProcId].dpl;
-    const enum k_gdt_dpl nextDpl = pTab[nextProcId].dpl;
-
-    if (currentDpl == DPL_0 && nextDpl == DPL_3) {
-        // Switching to DPL3 process
-
-        #warning probably a lot of these operations can be removed
-
-        // Save kernel CPU state
-        CPU_PUSH
-        {
-            currentCpuState->edi = STACK_VAL(cur_esp, 32, 0);
-            currentCpuState->esi = STACK_VAL(cur_esp, 32, 4);
-            currentCpuState->ebp = STACK_VAL(cur_esp, 32, 8);
-            currentCpuState->ebx = STACK_VAL(cur_esp, 32, 16);
-            currentCpuState->edx = STACK_VAL(cur_esp, 32, 20);
-            currentCpuState->ecx = STACK_VAL(cur_esp, 32, 24);
-            currentCpuState->eax = STACK_VAL(cur_esp, 32, 28);
-            currentCpuState->gs  = STACK_VAL(cur_esp, 16, 32);
-            currentCpuState->fs  = STACK_VAL(cur_esp, 16, 34);
-            currentCpuState->es  = STACK_VAL(cur_esp, 16, 36);
-            currentCpuState->ds  = STACK_VAL(cur_esp, 16, 38);        
-        }
-        CPU_POP
-
-        extern ptr_t k_proc_kernelRet;
-        currentCpuState->eip = (uint_32)&k_proc_kernelRet;
-        currentCpuState->esp = cur_esp;
-        __asm__ volatile ("pushw %cs"); __asm__ volatile ("popw %[mem]" : [mem] "=m" (currentCpuState->cs));
-        __asm__ volatile ("pushfl");    __asm__ volatile ("popl %[mem]" : [mem] "=m" (currentCpuState->eflags));
-        __asm__ volatile ("pushw %ss"); __asm__ volatile ("popw %[mem]" : [mem] "=m" (currentCpuState->ss));
-
-        // Restore next process CPU state
-
-        // Set kernel stack pointer in TSS
-        k_cpu_tss.esp0 = cur_esp;
-
-        // Prepare IRET stack
-        __asm__ volatile ("pushw $0");
-        __asm__ volatile ("pushw %[mem]" : : [mem] "m" (nextCpuState->ss));
-        __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->esp));
-        __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->eflags));
-        __asm__ volatile ("pushw $0");
-        __asm__ volatile ("pushw %[mem]" : : [mem] "m" (nextCpuState->cs));
-        __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->eip));
         
-        // Restore general purpose registers
-        __asm__ volatile ("pushw %[mem]" : : [mem] "m" (nextCpuState->ds));
-        __asm__ volatile ("pushw %[mem]" : : [mem] "m" (nextCpuState->es));
-        __asm__ volatile ("pushw %[mem]" : : [mem] "m" (nextCpuState->fs));
-        __asm__ volatile ("pushw %[mem]" : : [mem] "m" (nextCpuState->gs));
-        __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->eax));
-        __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->ecx));
-        __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->edx));
-        __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->ebx));
-        __asm__ volatile ("pushl %esp");
-        __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->ebp));
-        __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->esi));
-        __asm__ volatile ("pushl %[mem]" : : [mem] "m" (nextCpuState->edi));
-        CPU_POP
-
-        // Call iret to move to the next process
-        __asm__ volatile ("iret");
-
-        // Kernel return location
-        __asm__ volatile ("k_proc_kernelRet:");
-    }
-    else if (currentDpl == DPL_3 && nextDpl == DPL_0) {
-        // Inside an interrupt - switching to kernel
+    // D       31              0         
+    // I       ╔═══════╦═══════╗◄──┐     
+    // R       ║▒▒▒▒▒▒▒║OLD SS ║   │     
+    // E       ╠═══════╩═══════╣ SS:ESP  
+    // C       ║    OLD ESP    ║ FROM TSS
+    // T       ╠═══════════════╣◄── refEsp + 52    
+    // I       ║  OLD EFLAGS   ║         
+    // O       ╠═══════╦═══════╣◄── refEsp + 48    
+    // N       ║▒▒▒▒▒▒▒║OLD CS ║ 
+    //         ╠═══════╩═══════╣◄── refEsp + 44 
+    // O       ║    OLD EIP    ║        
+    // F       ╠═══════╦═══════╣◄── refEsp + 40
+    //         ║OLD DS ║OLD ES ║
+    // E       ╠═══════╬═══════╣◄── refEsp + 36
+    // X       ║OLD FS ║OLD GS ║
+    // P       ╠═══════╩═══════╣◄── refEsp + 32
+    // A       ║    OLD EAX    ║
+    // N       ╠═══════════════╣◄── refEsp + 28
+    // S       ║    OLD ECX    ║
+    // I       ╠═══════════════╣◄── refEsp + 24
+    // O       ║    OLD EDX    ║
+    // N       ╠═══════════════╣◄── refEsp + 20
+    //         ║    OLD EBX    ║
+    // │       ╠═══════════════╣◄── refEsp + 16
+    // │       ║ ESP (IGNORED) ║
+    // ▼       ╠═══════════════╣◄── refEsp + 12
+    //         ║    OLD EBP    ║
+    //         ╠═══════════════╣◄── refEsp + 8
+    //         ║    OLD ESI    ║ 
+    //         ╠═══════════════╣◄── refEsp + 4   
+    //         ║    OLD EDI    ║   
+    //         ╠═══════════════╣◄── refEsp
+    //         ·               ·
         
-        // D       31              0         
-        // I       ╔═══════╦═══════╗◄──┐     
-        // R       ║▒▒▒▒▒▒▒║OLD SS ║   │     
-        // E       ╠═══════╩═══════╣ SS:ESP  
-        // C       ║    OLD ESP    ║ FROM TSS
-        // T       ╠═══════════════╣◄── refEsp + 52    
-        // I       ║  OLD EFLAGS   ║         
-        // O       ╠═══════╦═══════╣◄── refEsp + 48    
-        // N       ║▒▒▒▒▒▒▒║OLD CS ║ 
-        //         ╠═══════╩═══════╣◄── refEsp + 44 
-        // O       ║    OLD EIP    ║        
-        // F       ╠═══════╦═══════╣◄── refEsp + 40
-        //         ║OLD DS ║OLD ES ║
-        // E       ╠═══════╬═══════╣◄── refEsp + 36
-        // X       ║OLD FS ║OLD GS ║
-        // P       ╠═══════╩═══════╣◄── refEsp + 32
-        // A       ║    OLD EAX    ║
-        // N       ╠═══════════════╣◄── refEsp + 28
-        // S       ║    OLD ECX    ║
-        // I       ╠═══════════════╣◄── refEsp + 24
-        // O       ║    OLD EDX    ║
-        // N       ╠═══════════════╣◄── refEsp + 20
-        //         ║    OLD EBX    ║
-        // │       ╠═══════════════╣◄── refEsp + 16
-        // │       ║ ESP (IGNORED) ║
-        // ▼       ╠═══════════════╣◄── refEsp + 12
-        //         ║    OLD EBP    ║
-        //         ╠═══════════════╣◄── refEsp + 8
-        //         ║    OLD ESI    ║ 
-        //         ╠═══════════════╣◄── refEsp + 4   
-        //         ║    OLD EDI    ║   
-        //         ╠═══════════════╣◄── refEsp
-        //         ·               ·
-            
-        // Save current process CPU state
+    // Save current process CPU state
 
-        #warning try to replace some segments and see what it does
+    currentCpuState->edi    = STACK_VAL(refEsp, 32, 0);
+    currentCpuState->esi    = STACK_VAL(refEsp, 32, 4);
+    currentCpuState->ebp    = STACK_VAL(refEsp, 32, 8);
+    currentCpuState->ebx    = STACK_VAL(refEsp, 32, 16);
+    currentCpuState->edx    = STACK_VAL(refEsp, 32, 20);
+    currentCpuState->ecx    = STACK_VAL(refEsp, 32, 24);
+    currentCpuState->eax    = STACK_VAL(refEsp, 32, 28);
+    currentCpuState->gs     = STACK_VAL(refEsp, 16, 32);
+    currentCpuState->fs     = STACK_VAL(refEsp, 16, 34);
+    currentCpuState->es     = STACK_VAL(refEsp, 16, 36);
+    currentCpuState->ds     = STACK_VAL(refEsp, 16, 38);
+    currentCpuState->eip    = STACK_VAL(refEsp, 32, 40);
+    currentCpuState->cs     = STACK_VAL(refEsp, 16, 44);
+    currentCpuState->eflags = STACK_VAL(refEsp, 32, 48);
+    currentCpuState->esp    = STACK_VAL(refEsp, 32, 52);
+    currentCpuState->ss     = STACK_VAL(refEsp, 16, 56);
 
-        currentCpuState->edi    = STACK_VAL(refEsp, 32, 0);
-        currentCpuState->esi    = STACK_VAL(refEsp, 32, 4);
-        currentCpuState->ebp    = STACK_VAL(refEsp, 32, 8);
-        currentCpuState->ebx    = STACK_VAL(refEsp, 32, 16);
-        currentCpuState->edx    = STACK_VAL(refEsp, 32, 20);
-        currentCpuState->ecx    = STACK_VAL(refEsp, 32, 24);
-        currentCpuState->eax    = STACK_VAL(refEsp, 32, 28);
-        currentCpuState->gs     = STACK_VAL(refEsp, 16, 32);
-        currentCpuState->fs     = STACK_VAL(refEsp, 16, 34);
-        currentCpuState->es     = STACK_VAL(refEsp, 16, 36);
-        currentCpuState->ds     = STACK_VAL(refEsp, 16, 38);
-        currentCpuState->eip    = STACK_VAL(refEsp, 32, 40);
-        currentCpuState->cs     = STACK_VAL(refEsp, 16, 44);
-        currentCpuState->eflags = STACK_VAL(refEsp, 32, 48);
-        currentCpuState->esp    = STACK_VAL(refEsp, 32, 52);
-        currentCpuState->ss     = STACK_VAL(refEsp, 16, 56);
+    // Restore kernel CPU state
 
-        // Restore kernel CPU state
-
-        STACK_VAL(refEsp, 32, 0)  = nextCpuState->edi;
-        STACK_VAL(refEsp, 32, 4)  = nextCpuState->esi;
-        STACK_VAL(refEsp, 32, 8)  = nextCpuState->ebp;
-        STACK_VAL(refEsp, 32, 16) = nextCpuState->ebx;
-        STACK_VAL(refEsp, 32, 20) = nextCpuState->edx;
-        STACK_VAL(refEsp, 32, 24) = nextCpuState->ecx;
-        STACK_VAL(refEsp, 32, 28) = nextCpuState->eax;
-        STACK_VAL(refEsp, 16, 32) = nextCpuState->gs;
-        STACK_VAL(refEsp, 16, 34) = nextCpuState->fs;
-        STACK_VAL(refEsp, 16, 36) = nextCpuState->es;
-        STACK_VAL(refEsp, 16, 38) = nextCpuState->ds;
-        STACK_VAL(refEsp, 32, 40) = nextCpuState->eip;
-        STACK_VAL(refEsp, 16, 44) = nextCpuState->cs;
-        STACK_VAL(refEsp, 32, 48) = nextCpuState->eflags;
-        STACK_VAL(refEsp, 32, 52) = nextCpuState->esp;
-        STACK_VAL(refEsp, 16, 56) = nextCpuState->ss;
-    }
-    else {
-        OOPS("Unexpected privilege jump");
-    }
+    STACK_VAL(refEsp, 32, 0)  = kernelProc.cpuState.edi;
+    STACK_VAL(refEsp, 32, 4)  = kernelProc.cpuState.esi;
+    STACK_VAL(refEsp, 32, 8)  = kernelProc.cpuState.ebp;
+    STACK_VAL(refEsp, 32, 16) = kernelProc.cpuState.ebx;
+    STACK_VAL(refEsp, 32, 20) = kernelProc.cpuState.edx;
+    STACK_VAL(refEsp, 32, 24) = kernelProc.cpuState.ecx;
+    STACK_VAL(refEsp, 32, 28) = kernelProc.cpuState.eax;
+    STACK_VAL(refEsp, 16, 32) = kernelProc.cpuState.gs;
+    STACK_VAL(refEsp, 16, 34) = kernelProc.cpuState.fs;
+    STACK_VAL(refEsp, 16, 36) = kernelProc.cpuState.es;
+    STACK_VAL(refEsp, 16, 38) = kernelProc.cpuState.ds;
+    STACK_VAL(refEsp, 32, 40) = kernelProc.cpuState.eip;
+    STACK_VAL(refEsp, 16, 44) = kernelProc.cpuState.cs;
+    STACK_VAL(refEsp, 32, 48) = kernelProc.cpuState.eflags;
+    STACK_VAL(refEsp, 32, 52) = kernelProc.cpuState.esp;
+    STACK_VAL(refEsp, 16, 56) = kernelProc.cpuState.ss;
 }
 
 static void k_proc_prepareKernelProc() {
-    pTab[0].state = PS_RUNNING;
+    memset(&kernelProc, 0, sizeof(struct k_proc_process));
+    kernelProc.state = PS_RUNNING;
 }
 
 void k_proc_init() {

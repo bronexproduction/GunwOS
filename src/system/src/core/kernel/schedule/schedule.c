@@ -17,50 +17,25 @@
 static size_t executionTimeCounter = GRANULARITY_MS;
 
 /*
-    Process identifiers (last, current, next)
+    Process identifiers (last, next)
 
-    Note: 0 is always considered to be kernel
+    Note: -1 for none
 */
-static size_t lastProcId = 0;
-static size_t currentProcId = 0;
-static size_t nextProcId = 0;
+static int_32 lastProcId = -1;
+static int_32 nextProcId = -1;
 
-static void procSwitch(const uint_32 refEsp) {
-    if (nextProcId) {
-        CRITICAL_SECTION_BEGIN;
-    }
-    else {
-        lastProcId = currentProcId;
-    }
-
-    if (currentProcId == nextProcId) {
-        OOPS("Switching to already running process");
-    }
-    if (currentProcId & nextProcId) {
-        OOPS("Process switch flow inconsistency");
-    }
-    
-    const size_t prevProcId = currentProcId;
-    currentProcId = nextProcId;
-    if (currentProcId) {
-        executionTimeCounter = 0;
-    }
-
-    k_proc_switch(refEsp, prevProcId, currentProcId);
-}
-
-static size_t procSelect() {
+static int_32 procSelect() {
     /*
         Simple round robin algorithm
     */
-    for (size_t i = 0; i < MAX_PROC - 1; ++i) {
-        size_t procId = (lastProcId + i) % (MAX_PROC - 1) + 1;
+    for (size_t i = 0; i < MAX_PROC; ++i) {
+        size_t procId = (lastProcId + i + 1) % MAX_PROC;
         if (pTab[procId].state == PS_READY) {
             return procId;
         }
     }
     
-    return 0;
+    return -1;
 }
 
 static void schedEvaluate() {
@@ -68,27 +43,32 @@ static void schedEvaluate() {
 }
 
 void __attribute__((cdecl)) k_proc_schedule_intNeedsKernelHandling(const uint_32 refEsp) {
-    if (currentProcId) {
-        nextProcId = 0;
-        procSwitch(refEsp);
-    }
+    k_proc_switchToKernelIfNeeded(refEsp, nextProcId);
 }
 
 void k_proc_schedule_onKernelHandlingFinished() {
-    if (currentProcId) {
-        OOPS("Unexpected current process identifier");
-    }
-    if (!nextProcId) {
+    if (nextProcId < 0) {
         return;
     }
 
-    procSwitch(0);
+    CRITICAL_SECTION_BEGIN;
+    
+    executionTimeCounter = 0;
+    k_proc_switch(nextProcId);
+    lastProcId = nextProcId;
 }
 
-void k_proc_schedule_didSpawn(size_t procId) {
+void k_proc_schedule_didSpawn(int_32 procId) {
+    if (procId < 0 || procId >= MAX_PROC) {
+        OOPS("Invalid spawned process id");
+    }
+    if (pTab[procId].state != PS_NEW) {
+        OOPS("Unexpected process state");
+    }
+    
     pTab[procId].state = PS_READY;
 
-    if (!nextProcId) {
+    if (nextProcId < 0) {
         schedEvaluate();
     }
 }
