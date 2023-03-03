@@ -20,15 +20,40 @@
 register const uint_32 cur_esp __asm__ ("esp");
 #define STACK_VAL(REFESP, SIZE, OFFSET) (*(uint_ ## SIZE *)(REFESP + OFFSET))
 
-static struct k_proc_process kernelProc;
-struct k_proc_process pTab[MAX_PROC];
+struct process {
+    /*
+        Process info
+    */
+    struct k_proc_process info;
+
+    /*
+        Process CPU state
+    */
+    struct k_cpu_state cpuState;
+};
+
+static struct process kernelProc;
+static struct process pTab[MAX_PROC];
+static int_32 k_proc_current = -1;
+
+int_32 k_proc_getCurrentId() {
+    return k_proc_current;
+}
+
+struct k_proc_process k_proc_getInfo(const int_32 procId) {
+    if (procId < -1 || procId >= MAX_PROC) {
+        OOPS("Process id out of range");
+    }
+    
+    return (procId == -1) ? kernelProc.info : pTab[procId].info;
+}
 
 enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor) {
     uint_32 pIndex;
     
     CRITICAL_SECTION_BEGIN {
         for (pIndex = 0; pIndex < MAX_PROC; ++pIndex) {
-            if (pTab[pIndex].state == PS_NONE) {
+            if (pTab[pIndex].info.state == PS_NONE) {
                 break;
             }
         }
@@ -38,13 +63,13 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
             return PE_LIMIT_REACHED;
         }
 
-        pTab[pIndex].state = PS_NEW;
+        pTab[pIndex].info.state = PS_NEW;
         
     } CRITICAL_SECTION_END;
 
     memnull(&pTab[pIndex].cpuState, sizeof pTab[pIndex].cpuState);
 
-    pTab[pIndex].dpl = DPL_3;
+    pTab[pIndex].info.dpl = DPL_3;
 
     size_t stackBytes = MB(1);
     ptr_t codeStartPtr = descriptor->img;
@@ -81,13 +106,14 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
     pTab[pIndex].cpuState.eip = (uint_32)relativeImgPtr;
     pTab[pIndex].cpuState.eflags = FLAGS_INTERRUPT;
 
-    pTab[pIndex].cpuState.cs = (uint_16)(GDT_OFFSET(r3code) | pTab[pIndex].dpl);
-    pTab[pIndex].cpuState.ds = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].dpl);
-    pTab[pIndex].cpuState.es = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].dpl);
-    pTab[pIndex].cpuState.fs = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].dpl);
-    pTab[pIndex].cpuState.gs = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].dpl);
-    pTab[pIndex].cpuState.ss = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].dpl);
+    pTab[pIndex].cpuState.cs = (uint_16)(GDT_OFFSET(r3code) | pTab[pIndex].info.dpl);
+    pTab[pIndex].cpuState.ds = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].info.dpl);
+    pTab[pIndex].cpuState.es = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].info.dpl);
+    pTab[pIndex].cpuState.fs = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].info.dpl);
+    pTab[pIndex].cpuState.gs = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].info.dpl);
+    pTab[pIndex].cpuState.ss = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].info.dpl);
 
+    pTab[pIndex].info.state = PS_READY;
     k_proc_schedule_didSpawn(pIndex);
 
     return PE_NONE;
@@ -199,15 +225,20 @@ void k_proc_switch(const int_32 procId) {
     if (procId < 0) {
         OOPS("Invalid next process id during switch");   
     }
-    if (kernelProc.state != PS_RUNNING) {
+    if (procId >= MAX_PROC) {
+        OOPS("Next process id over limit during switch");
+    }
+    if (kernelProc.info.state != PS_RUNNING) {
         OOPS("Invalid kernel process state during switch");
     }
-    if (pTab[procId].state != PS_READY) {
+    if (pTab[procId].info.state != PS_READY) {
         OOPS("Invalid next process state during switch");
     }
     
-    kernelProc.state = PS_READY;
-    pTab[procId].state = PS_RUNNING;
+    kernelProc.info.state = PS_READY;
+    pTab[procId].info.state = PS_RUNNING;
+
+    k_proc_current = procId;
 
     // Save kernel CPU state
     #warning probably a lot of these operations can be removed
@@ -273,24 +304,29 @@ void k_proc_switch(const int_32 procId) {
 }
 
 void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const int_32 currentProcId) {
-    if (kernelProc.state == PS_RUNNING) {
+    if (kernelProc.info.state == PS_RUNNING) {
         return;
     }
     if (currentProcId < 0) {
         OOPS("Invalid current process id during switch");
     }
-    if (pTab[currentProcId].state != PS_RUNNING) {
+    if (currentProcId >= MAX_PROC) {
+        OOPS("Current process id over limit during switch");
+    }
+    if (pTab[currentProcId].info.state != PS_RUNNING) {
         OOPS("Invalid current process state during switch");
     }
-    if (kernelProc.state != PS_READY) {
+    if (kernelProc.info.state != PS_READY) {
         OOPS("Invalid kernel process state during switch");
     }
     if (!refEsp) {
         OOPS("Invalid reference stack pointer during switch");
     }
     
-    pTab[currentProcId].state = PS_READY;
-    kernelProc.state = PS_RUNNING;
+    pTab[currentProcId].info.state = PS_READY;
+    kernelProc.info.state = PS_RUNNING;
+
+    k_proc_current = -1;
 
     struct k_cpu_state * const currentCpuState = &pTab[currentProcId].cpuState;
         
@@ -369,7 +405,7 @@ void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const int_32 currentPro
 
 static void k_proc_prepareKernelProc() {
     memset(&kernelProc, 0, sizeof(struct k_proc_process));
-    kernelProc.state = PS_RUNNING;
+    kernelProc.info.state = PS_RUNNING;
 }
 
 void k_proc_init() {

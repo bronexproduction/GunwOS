@@ -12,6 +12,8 @@
 #include "../cpu/cpu.h"
 #include "../gdt/gdt.h"
 
+#define MAX_PROC 16
+
 struct k_proc_descriptor {
     ptr_t img;
     size_t imgBytes;
@@ -40,16 +42,19 @@ struct k_proc_process {
         Process privilege level
     */
     enum k_gdt_dpl dpl;
-
-    /*
-        Process CPU state
-    */
-    struct k_cpu_state cpuState;
 };
 
-#define MAX_PROC 16
+/*
+    Returns current process identifier
 
-extern struct k_proc_process pTab[MAX_PROC];
+    -1 for kernel
+*/
+int_32 k_proc_getCurrentId();
+
+/*
+    Returns information about the process with given procId
+*/
+struct k_proc_process k_proc_getInfo(const int_32 procId);
 
 /*
     Spawning new userland processes

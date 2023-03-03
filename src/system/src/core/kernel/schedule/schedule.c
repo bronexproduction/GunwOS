@@ -30,7 +30,7 @@ static int_32 procSelect() {
     */
     for (size_t i = 0; i < MAX_PROC; ++i) {
         size_t procId = (lastProcId + i + 1) % MAX_PROC;
-        if (pTab[procId].state == PS_READY) {
+        if (k_proc_getInfo(procId).state == PS_READY) {
             return procId;
         }
     }
@@ -62,12 +62,10 @@ void k_proc_schedule_didSpawn(int_32 procId) {
     if (procId < 0 || procId >= MAX_PROC) {
         OOPS("Invalid spawned process id");
     }
-    if (pTab[procId].state != PS_NEW) {
+    if (k_proc_getInfo(procId).state != PS_READY) {
         OOPS("Unexpected process state");
     }
     
-    pTab[procId].state = PS_READY;
-
     if (nextProcId < 0) {
         schedEvaluate();
     }
