@@ -24,7 +24,9 @@ static size_t isrStackHeight = 0;
 
     Operations:
         - Disable interrupts
-        - Save CPU state
+        - Save CPU state on stack
+        - Restore DS, ES, FS, GS values according to loaded SS
+        - Increment ISR stack height counter
 
     Note: Syscall interrupts do not disable maskable interrupts - to be implemented
 */
@@ -32,6 +34,11 @@ static size_t isrStackHeight = 0;
 #define ISR_BEGIN   { \
     __asm__ volatile ("cli"); \
     CPU_PUSH \
+    __asm__ volatile ("movw %ss, %ax"); \
+    __asm__ volatile ("movw %ax, %ds"); \
+    __asm__ volatile ("movw %ax, %es"); \
+    __asm__ volatile ("movw %ax, %fs"); \
+    __asm__ volatile ("movw %ax, %gs"); \
     __asm__ volatile ("incl %[mem]" : [mem] "=m" (isrStackHeight)); \
 }
 
@@ -39,6 +46,9 @@ static size_t isrStackHeight = 0;
     Interrupt service routine handling end
 
     Operations:
+        - Decrement ISR stack height counter
+        - Request kernel handling if current interrupt 
+          is the last on the stack and the queue is not empty
         - Restore CPU state
         - Enable interrupts
         - Return from interrupt
