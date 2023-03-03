@@ -2,7 +2,7 @@
 //  gunwio.h
 //  GunwOS
 //
-//  Created by Artur Danielewski on 05.02.2021.
+//  Created by Artur Danielewski on 03.03.2023.
 //
 
 #ifndef GUNWOS_GUNWIO_H
@@ -11,33 +11,20 @@
 #include "scl_def.h"
 
 /*
-    Read byte from system bus
+    Print string to debug output
 
-    Note:
-        * Not allowed from user-level
+    Parameters:
+    * buffer - zero-terminated character array
+    Return value: number of bytes written or -1 on error
 */
-static inline uint_8 rdb(uint_16 const port) {
-    SYSCALL_PAR1(port);
+static inline int_32 debugPrint(const char * const buffer) {
+    SYSCALL_PAR1(buffer);
 
-    SYSCALL_DRIVER_FUNC(RDB);
-    SYSCALL_DRIVER_INT;
+    SYSCALL_USER_FUNC(DEBUG_PRINT);
+    SYSCALL_USER_INT;
     
-    register uint_8 ret __asm__ ("al");
+    register int_32 ret __asm__ ("eax");
     return ret;
-}
-
-/*
-    Write byte to system bus
-
-    Note:
-        * Not allowed from user-level
-*/
-static inline void wrb(uint_16 const port, uint_8 const val) {
-    SYSCALL_PAR1(port);
-    SYSCALL_PAR2(val);
-
-    SYSCALL_DRIVER_FUNC(WRB);
-    SYSCALL_DRIVER_INT;
 }
 
 #endif // GUNWOS_GUNWIO_H

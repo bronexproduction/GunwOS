@@ -10,7 +10,7 @@
 //  https://wiki.osdev.org/8259_PIC
 //
 
-#include <gunwio.h>
+#include <gunwbus.h>
 
 #include "pic.h"
 
