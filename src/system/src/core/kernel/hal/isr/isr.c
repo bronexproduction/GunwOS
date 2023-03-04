@@ -34,13 +34,7 @@ static size_t isrStackHeight = 0;
 #define ISR_BEGIN   { \
     __asm__ volatile ("cli"); \
     CPU_PUSH \
-    __asm__ volatile ("pushl %eax"); \
-    __asm__ volatile ("movw %ss, %ax"); \
-    __asm__ volatile ("movw %ax, %ds"); \
-    __asm__ volatile ("movw %ax, %es"); \
-    __asm__ volatile ("movw %ax, %fs"); \
-    __asm__ volatile ("movw %ax, %gs"); \
-    __asm__ volatile ("popl %eax"); \
+    CPU_SEG_RESTORE \
     __asm__ volatile ("incl %[mem]" : [mem] "=m" (isrStackHeight)); \
 }
 
@@ -90,23 +84,23 @@ static size_t isrStackHeight = 0;
     ISR_END \
 }
 
-/* 0 */ __attribute__((naked)) void k_isr_divErr() {    OOPS("Division by zero interrupt triggered") }
-/* 1 */ __attribute__((naked)) void k_isr_dbgExc() {    LOG_FATAL("Debug exceptions interrupt triggered") }
-/* 2 */ __attribute__((naked)) void k_isr_nmi() {       LOG_FATAL("Non-maskable interrupt triggered") }
-/* 3 */ __attribute__((naked)) void k_isr_brkpt() {     LOG_FATAL("Breakpoint interrupt triggered") }
-/* 4 */ __attribute__((naked)) void k_isr_ofl() {       LOG_FATAL("Overflow interrupt triggered") }
-/* 5 */ __attribute__((naked)) void k_isr_bdsChk() {    LOG_FATAL("Bounds check interrupt triggered") }
-/* 6 */ __attribute__((naked)) void k_isr_invOpc() {    LOG_FATAL("Invalid opcode interrupt triggered") }
-/* 7 */ __attribute__((naked)) void k_isr_coProcNA() {  LOG_FATAL("Coprocessor not available interrupt triggered") }
-/* 8 */ __attribute__((naked)) void k_isr_dblFlt() {    LOG_FATAL("Double fault interrupt triggered") }
+/* 0 */ __attribute__((naked)) void k_isr_divErr() {        CPU_SEG_RESTORE; OOPS("Division by zero interrupt triggered") }
+/* 1 */ __attribute__((naked)) void k_isr_dbgExc() {        CPU_SEG_RESTORE; LOG_FATAL("Debug exceptions interrupt triggered") }
+/* 2 */ __attribute__((naked)) void k_isr_nmi() {           CPU_SEG_RESTORE; LOG_FATAL("Non-maskable interrupt triggered") }
+/* 3 */ __attribute__((naked)) void k_isr_brkpt() {         CPU_SEG_RESTORE; LOG_FATAL("Breakpoint interrupt triggered") }
+/* 4 */ __attribute__((naked)) void k_isr_ofl() {           CPU_SEG_RESTORE; LOG_FATAL("Overflow interrupt triggered") }
+/* 5 */ __attribute__((naked)) void k_isr_bdsChk() {        CPU_SEG_RESTORE; LOG_FATAL("Bounds check interrupt triggered") }
+/* 6 */ __attribute__((naked)) void k_isr_invOpc() {        CPU_SEG_RESTORE; LOG_FATAL("Invalid opcode interrupt triggered") }
+/* 7 */ __attribute__((naked)) void k_isr_coProcNA() {      CPU_SEG_RESTORE; LOG_FATAL("Coprocessor not available interrupt triggered") }
+/* 8 */ __attribute__((naked)) void k_isr_dblFlt() {        CPU_SEG_RESTORE; LOG_FATAL("Double fault interrupt triggered") }
 // 9 (reserved)
-/* 10 */ __attribute__((naked)) void k_isr_invTSS() {   LOG_FATAL("Invalid TSS interrupt triggered") }
-/* 11 */ __attribute__((naked)) void k_isr_segNP() {    LOG_FATAL("Segment not present interrupt triggered") }
-/* 12 */ __attribute__((naked)) void k_isr_stExc() {    LOG_FATAL("Stack exception interrupt triggered") }
-/* 13 */ __attribute__((naked)) void k_isr_genPrt() {   OOPS_WITH_CODE("General protection interrupt triggered") }
-/* 14 */ __attribute__((naked)) void k_isr_pgFlt() {    LOG_FATAL("Page fault interrupt triggered") }
+/* 10 */ __attribute__((naked)) void k_isr_invTSS() {       CPU_SEG_RESTORE; LOG_FATAL("Invalid TSS interrupt triggered") }
+/* 11 */ __attribute__((naked)) void k_isr_segNP() {        CPU_SEG_RESTORE; LOG_FATAL("Segment not present interrupt triggered") }
+/* 12 */ __attribute__((naked)) void k_isr_stExc() {        CPU_SEG_RESTORE; LOG_FATAL("Stack exception interrupt triggered") }
+/* 13 */ __attribute__((naked)) void k_isr_genPrt() {       CPU_SEG_RESTORE; OOPS_WITH_CODE("General protection interrupt triggered") }
+/* 14 */ __attribute__((naked)) void k_isr_pgFlt() {        CPU_SEG_RESTORE; LOG_FATAL("Page fault interrupt triggered") }
 // 15 (reserved)
-/* 16 */ __attribute__((naked)) void k_isr_coProcErr() { LOG_FATAL("Coprocessor error interrupt triggered") }
+/* 16 */ __attribute__((naked)) void k_isr_coProcErr() {    CPU_SEG_RESTORE; LOG_FATAL("Coprocessor error interrupt triggered") }
 // 17 - 31 (reserved)
 
 /*
