@@ -7,9 +7,18 @@
 
 #include "log.h"
 
+#include <stdgunw/string.h>
+
 #include "../driver/terminal/terminal.h"
 
+#warning LOG functions should not use terminal as it works at the moment
+#warning create separate kernel output independent of "terminal"
+
 void k_log(const enum k_log_lvl level, const char *msg) {
+    k_logl(level, msg, strlen(msg));
+}
+
+void k_logl(const enum k_log_lvl level, const char *msg, const size_t len) {
     char *lvlString;
     
     switch (level) {
@@ -34,7 +43,7 @@ void k_log(const enum k_log_lvl level, const char *msg) {
 
     c_trm_puts(lvlString);
     c_trm_puts(": ");
-    c_trm_puts(msg);
+    c_trm_putsl(msg, len);
     c_trm_putc('\n');
 
     while(level == FATAL);
