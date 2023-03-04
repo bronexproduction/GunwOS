@@ -16,14 +16,17 @@ struct k_mem_zone k_mem_zoneForProc(int_32 procId) {
         case DPL_0:
             result.startPtr = GDT_SEGMENT_START(r0data);
             result.endPtr = GDT_SEGMENT_END(r0data);
+            result.sizeBytes = GDT_LIMIT_BYTES(r0data);
             break;
         case DPL_3:
             result.startPtr = GDT_SEGMENT_START(r3data);
             result.endPtr = GDT_SEGMENT_END(r3data);
+            result.sizeBytes = GDT_LIMIT_BYTES(r3data);
             break;
         default:
             result.startPtr = 0;
             result.endPtr = 0;
+            result.sizeBytes = 0;
     }
 
     return result;

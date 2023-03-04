@@ -19,6 +19,7 @@
 struct k_mem_zone {
     ptr_t startPtr;
     ptr_t endPtr;
+    size_t sizeBytes;
 };
 
 /*
