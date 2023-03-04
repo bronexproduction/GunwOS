@@ -12,12 +12,14 @@
 */
 
 #include <stdgunw/utils.h>
+#include <stdgunw/string.h>
 #include <gunwdev.h>
 #include "../error/fug.h"
 #include "func.h"
 #include "../hal/proc/proc.h"
 #include "../hal/mem/mem.h"
-
+#include "../error/panic.h"
+#include "../../log/log.h"
 
 /*
     User-level system calls
@@ -33,18 +35,28 @@
     Return:
         * EAX - number of bytes written
 */
-SCR(debugPrint,
+SCR_STACK(debugPrint) {
+    // Buffer address (relative to process memory)
     REG(32, buffer, ebx)
 
-    // check location of the buffer
-    // there might be (must be) a better way to do it
-    // struct k_mem_zone procZone = k_mem_zoneForProc(k_proc_getCurrentId());
-    #warning to be implemented
-    // (void)procZone;
-
+    #warning DOES NOT WORK due to SCR_STACK convention
     REG_RET(32, bytesWritten)
-    bytesWritten = -1;
-)
+
+    // check buffer bounds
+    // there might be (must be) a better way to do it
+    struct k_mem_zone procZone = k_mem_zoneForProc(k_proc_getCurrentId());
+    if (buffer >= procZone.sizeBytes) {
+        OOPS("Access violation");
+    }
+    buffer += (uint_32)procZone.startPtr;
+    size_t bufLen = strlen((const char * const)buffer);
+    if ((buffer + bufLen) > (size_t)procZone.endPtr) {
+        OOPS("Access violation");   
+    }
+
+    k_logl(DEBUG, (const char * const)buffer, bufLen);
+    bytesWritten = bufLen;   
+}
 
 /*
     Code - 0x03
