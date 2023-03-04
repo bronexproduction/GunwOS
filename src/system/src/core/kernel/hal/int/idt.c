@@ -173,7 +173,7 @@ void k_idt_loadDefault() {
     // 102
     // 103
     // 104
-    k_idt_default[105] = k_idt_gateInterrupt(k_isr_userSyscall, DPL_0);
+    k_idt_default[105] = k_idt_gateInterrupt(k_isr_userSyscall, DPL_3);
     // 106 - 255
 
     k_idt_load(&k_idt_default, IDT_SIZE_DEFAULT);
