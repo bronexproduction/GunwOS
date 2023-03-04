@@ -12,6 +12,8 @@
 #include <uha/gunwuha_display.h>
 #include <gunwdev.h>
 
+#warning may not work from DPL_3 yet
+
 struct gnwDisplayDescriptor { 
     /*
         Display identifier

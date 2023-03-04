@@ -16,7 +16,7 @@
     Note:
         * Not allowed from user-level
 */
-static inline uint_8 rdb(uint_16 const port) {
+static inline __attribute__((always_inline)) uint_8 rdb(uint_16 const port) {
     SYSCALL_PAR1(port);
 
     SYSCALL_DRIVER_FUNC(RDB);
@@ -32,7 +32,7 @@ static inline uint_8 rdb(uint_16 const port) {
     Note:
         * Not allowed from user-level
 */
-static inline void wrb(uint_16 const port, uint_8 const val) {
+static inline __attribute__((always_inline)) void wrb(uint_16 const port, uint_8 const val) {
     SYSCALL_PAR1(port);
     SYSCALL_PAR2(val);
 

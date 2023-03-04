@@ -33,7 +33,7 @@ enum gnwDeviceError {
         * desc - device descriptor (see gunwdrv.h)
 */
 #warning Consider removing - no reason to be part of the API
-static inline enum gnwDriverError devInstall(size_t * const id, const struct gnwDeviceDescriptor * const desc) {
+static inline __attribute__((always_inline)) enum gnwDriverError devInstall(size_t * const id, const struct gnwDeviceDescriptor * const desc) {
     CHECKPTR(id);
     CHECKPTR(desc);
 
@@ -53,7 +53,7 @@ static inline enum gnwDriverError devInstall(size_t * const id, const struct gnw
         * id - device identifier
 */
 #warning Consider removing - no reason to be part of the API
-static inline enum gnwDriverError devStart(size_t id) {
+static inline __attribute__((always_inline)) enum gnwDriverError devStart(size_t id) {
     SYSCALL_PAR1(id);
 
     SYSCALL_DRIVER_FUNC(DEV_START);
@@ -69,7 +69,7 @@ static inline enum gnwDriverError devStart(size_t id) {
         * id - id of the device
         * desc - address of the result description (see gunwdrv.h)
 */
-static inline enum gnwDeviceError devGetById(const size_t deviceId, struct gnwDeviceUHADesc * const desc) {
+static inline __attribute__((always_inline)) enum gnwDeviceError devGetById(const size_t deviceId, struct gnwDeviceUHADesc * const desc) {
     CHECKPTR(desc);
 
     SYSCALL_PAR1(deviceId);
@@ -88,7 +88,7 @@ static inline enum gnwDeviceError devGetById(const size_t deviceId, struct gnwDe
         * type - type of the device (see gunwdrv.h)
         * desc - address of the result description (see gunwdrv.h)
 */
-static inline enum gnwDeviceError devGetByType(const enum gnwDeviceType type, struct gnwDeviceUHADesc * const desc) {
+static inline __attribute__((always_inline)) enum gnwDeviceError devGetByType(const enum gnwDeviceType type, struct gnwDeviceUHADesc * const desc) {
     CHECKPTR(desc);
 
     SYSCALL_PAR1(type);
@@ -109,7 +109,7 @@ static inline enum gnwDeviceError devGetByType(const enum gnwDeviceType type, st
     Note: In order to use the device
           the process has to be exclusive holder of it
 */
-static inline enum gnwDeviceError devAcquire(const uint_32 identifier) {
+static inline __attribute__((always_inline)) enum gnwDeviceError devAcquire(const uint_32 identifier) {
     SYSCALL_PAR1(identifier);
 
     SYSCALL_USER_FUNC(DEV_ACQUIRE);
@@ -124,7 +124,7 @@ static inline enum gnwDeviceError devAcquire(const uint_32 identifier) {
     Params:
         * identifier - device identifier
 */
-static inline void devRelease(const uint_32 identifier) {
+static inline __attribute__((always_inline)) void devRelease(const uint_32 identifier) {
     SYSCALL_PAR1(identifier);
 
     SYSCALL_USER_FUNC(DEV_RELEASE);
@@ -138,7 +138,7 @@ static inline void devRelease(const uint_32 identifier) {
         * identifier - device identifier
         * buffer - data buffer pointer
 */
-static inline enum gnwDeviceError devWrite(const size_t identifier,
+static inline __attribute__((always_inline)) enum gnwDeviceError devWrite(const size_t identifier,
                                            const void * const buffer) {
     CHECKPTR(buffer);
 
