@@ -8,6 +8,7 @@
 #include "../cmdutil.h"
 #include <stdgunw/mem.h>
 #include <stdgunw/types.h>
+#include <gunwio.h>
 #include "../../core/kernel/hal/proc/proc.h"
 #include "../../core/kernel/hal/mem/mem.h"
 
@@ -15,13 +16,13 @@ extern int c_trm_puts(const char * const s);
 
 static void proc1() {
     while (1) {
-        // c_trm_puts("1");
+        debugPrint("1");
     }
 }
 
 static void proc2() {
     while (1) {
-        // c_trm_puts("2");
+        debugPrint("2");
     }
 }
 
