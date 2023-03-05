@@ -13,7 +13,7 @@
 /*
     Ends process execution
 */
-static inline __attribute__((always_inline)) void exit(uint_32 const status) {
+SYSCALL_DECL void exit(uint_32 const status) {
     SYSCALL_PAR1(status);
 
     SYSCALL_USER_FUNC(EXIT);
@@ -26,7 +26,7 @@ static inline __attribute__((always_inline)) void exit(uint_32 const status) {
     Params:
         * ms - wait length in milliseconds
 */
-static inline __attribute__((always_inline)) void sleepms(const unsigned int ms) {
+SYSCALL_DECL void sleepms(const unsigned int ms) {
     SYSCALL_PAR1(ms);
 
     SYSCALL_USER_FUNC(SLEEPMS);

@@ -83,7 +83,7 @@ struct gnwDeviceUHADesc {
 /*
     Extracts UHA descriptor from UHA structure
 */
-static inline __attribute__((always_inline)) struct gnwDeviceUHADesc uhaGetDesc(const size_t identifier, const struct gnwDeviceUHA api) {
+static inline struct gnwDeviceUHADesc uhaGetDesc(const size_t identifier, const struct gnwDeviceUHA api) {
     return (struct gnwDeviceUHADesc) {
         identifier,
         api.system.desc,

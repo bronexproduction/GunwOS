@@ -22,7 +22,7 @@ enum gnwFugCode {
     happened inside the caller process
     and it should be terminated
 */
-static inline __attribute__((always_inline)) void fug(enum gnwFugCode code) {
+SYSCALL_DECL void fug(enum gnwFugCode code) {
     SYSCALL_PAR1(code);
 
     SYSCALL_USER_FUNC(FUG);

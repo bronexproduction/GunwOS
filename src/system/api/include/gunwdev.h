@@ -31,7 +31,8 @@ enum gnwDeviceError {
         * id - id of the device
         * desc - address of the result description (see gunwdrv.h)
 */
-static inline __attribute__((always_inline)) enum gnwDeviceError devGetById(const size_t deviceId, struct gnwDeviceUHADesc * const desc) {
+SYSCALL_DECL enum gnwDeviceError devGetById(const size_t deviceId, 
+                                            struct gnwDeviceUHADesc * const desc) {
     CHECKPTR(desc);
 
     SYSCALL_PAR1(deviceId);
@@ -50,7 +51,8 @@ static inline __attribute__((always_inline)) enum gnwDeviceError devGetById(cons
         * type - type of the device (see gunwdrv.h)
         * desc - address of the result description (see gunwdrv.h)
 */
-static inline __attribute__((always_inline)) enum gnwDeviceError devGetByType(const enum gnwDeviceType type, struct gnwDeviceUHADesc * const desc) {
+SYSCALL_DECL enum gnwDeviceError devGetByType(const enum gnwDeviceType type, 
+                                              struct gnwDeviceUHADesc * const desc) {
     CHECKPTR(desc);
 
     SYSCALL_PAR1(type);
@@ -71,7 +73,7 @@ static inline __attribute__((always_inline)) enum gnwDeviceError devGetByType(co
     Note: In order to use the device
           the process has to be exclusive holder of it
 */
-static inline __attribute__((always_inline)) enum gnwDeviceError devAcquire(const uint_32 identifier) {
+SYSCALL_DECL enum gnwDeviceError devAcquire(const uint_32 identifier) {
     SYSCALL_PAR1(identifier);
 
     SYSCALL_USER_FUNC(DEV_ACQUIRE);
@@ -86,7 +88,7 @@ static inline __attribute__((always_inline)) enum gnwDeviceError devAcquire(cons
     Params:
         * identifier - device identifier
 */
-static inline __attribute__((always_inline)) void devRelease(const uint_32 identifier) {
+SYSCALL_DECL void devRelease(const uint_32 identifier) {
     SYSCALL_PAR1(identifier);
 
     SYSCALL_USER_FUNC(DEV_RELEASE);
@@ -100,8 +102,8 @@ static inline __attribute__((always_inline)) void devRelease(const uint_32 ident
         * identifier - device identifier
         * buffer - data buffer pointer
 */
-static inline __attribute__((always_inline)) enum gnwDeviceError devWrite(const size_t identifier,
-                                           const void * const buffer) {
+SYSCALL_DECL enum gnwDeviceError devWrite(const size_t identifier,
+                                          const void * const buffer) {
     CHECKPTR(buffer);
 
     SYSCALL_PAR1(identifier);
@@ -113,4 +115,4 @@ static inline __attribute__((always_inline)) enum gnwDeviceError devWrite(const 
     SYSCALL_RETVAL(32);
 }
 
-#endif // GUNWOS_GUNWSCL_H
+#endif // GUNWOS_GUNWDEV_H

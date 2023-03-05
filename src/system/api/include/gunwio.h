@@ -17,7 +17,7 @@
     * buffer - zero-terminated character array
     Return value: number of bytes written or -1 on error
 */
-static inline __attribute__((always_inline)) int_32 debugPrint(const char * const buffer) {
+SYSCALL_DECL int_32 debugPrint(const char * const buffer) {
     SYSCALL_PAR1(buffer);
 
     SYSCALL_USER_FUNC(DEBUG_PRINT);

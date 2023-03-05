@@ -36,6 +36,7 @@
     as EAX register is used as intermediate register
     and stores the last assigned value
 */
+#define SYSCALL_DECL static inline __attribute__((always_inline))
 #define SYSCALL_FUNC(LEVEL, CODE) REG(32, _code, eax); _code = (uint_32) SYSCALL_ ## LEVEL ## _FUNCTION_ ## CODE ;
 #define SYSCALL_DRIVER_FUNC(CODE) SYSCALL_FUNC(DRIVER, CODE)
 #define SYSCALL_USER_FUNC(CODE) SYSCALL_FUNC(USER, CODE)
