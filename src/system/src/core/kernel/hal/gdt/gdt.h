@@ -38,15 +38,15 @@ enum k_gdt_expDir {
 struct __attribute__((packed)) k_gdt_codeEntry {
     uint_16 limitL                      :16;
     uint_32 baseL                       :24;
-    uint_8 accessed                     :1;
-    uint_8 readable                     :1;
-    uint_8 conforming                   :1;
+    bool accessed                       :1;
+    bool readable                       :1;
+    bool conforming                     :1;
     const uint_8 _43_1                  :1;
     const uint_8 _44_1                  :1;
     enum k_gdt_dpl privilege            :2;
-    uint_8 present                      :1;
+    bool present                        :1;
     uint_8 limitH                       :4;
-    uint_8 available                    :1;
+    bool available                      :1;
     const uint_8 _53_0                  :1;
     enum k_gdt_opSize defOperandSize    :1;
     enum k_gdt_granularity granularity  :1;
@@ -56,17 +56,17 @@ struct __attribute__((packed)) k_gdt_codeEntry {
 struct __attribute__((packed)) k_gdt_dataEntry {
     uint_16 limitL                      :16;
     uint_32 baseL                       :24;
-    uint_8 accessed                     :1;
-    uint_8 writeable                    :1;
+    bool accessed                       :1;
+    bool writeable                      :1;
     enum k_gdt_expDir expandDirection   :1;
     const uint_8 _43_0                  :1;
     const uint_8 _44_1                  :1;
     enum k_gdt_dpl privilege            :2;
-    uint_8 present                      :1;
+    bool present                        :1;
     uint_8 limitH                       :4;
-    uint_8 available                    :1;
+    bool available                      :1;
     const uint_8 _53_0                  :1;
-    uint_8 big                          :1;         // 1 - 32-bit, 0 - 16-bit
+    bool big                            :1;         // 1 - 32-bit, 0 - 16-bit
     enum k_gdt_granularity granularity  :1;
     uint_8 baseH                        :8;
 };
@@ -75,13 +75,13 @@ struct __attribute__((packed)) k_gdt_tssEntry {
     uint_16 limitL                      :16;
     uint_32 baseL                       :24;
     const uint_8 _40_1                  :1;
-    uint_8 busy                         :1;
+    bool busy                           :1;
     const uint_8 _42_0                  :1;
     const uint_8 _43_1                  :1;
     const uint_8 _44_0                  :1;
     const uint_8 _45_0                  :1;
     const uint_8 _46_0                  :1;
-    uint_8 present                      :1;
+    bool present                        :1;
     uint_8 limitH                       :4;
     const uint_8 _52_0                  :1;
     const uint_8 _53_0                  :1;
