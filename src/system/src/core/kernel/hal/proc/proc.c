@@ -71,7 +71,7 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
 
     pTab[pIndex].info.dpl = DPL_3;
 
-    size_t stackBytes = MB(1);
+    size_t stackBytes = MiB(1);
     ptr_t codeStartPtr = descriptor->img;
     ptr_t codeEndPtr = codeStartPtr + descriptor->imgBytes - 1;
     ptr_t dataStartPtr = codeEndPtr + 1;

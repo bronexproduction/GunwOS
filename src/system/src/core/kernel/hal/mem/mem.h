@@ -11,10 +11,10 @@
 #include <stdgunw/defs.h>
 #include <stdgunw/types.h>
 
-#define MEM_XMS_START               MB(1)
+#define MEM_XMS_START               MiB(1)
 #define MEM_KERNEL_START            MEM_XMS_START
-#define MEM_KERNEL_RESERVED_BYTES   MB(2)
-#define MEM_MMIO_RESERVED_BYTES     MB(256)
+#define MEM_KERNEL_RESERVED_BYTES   MiB(2)
+#define MEM_MMIO_RESERVED_BYTES     MiB(256)
 
 struct k_mem_zone {
     ptr_t startPtr;
