@@ -28,7 +28,7 @@ static void proc2() {
 
 static void spawn(int index, ptr_t imageStart, size_t imageSize) {
     /*
-        Each process takes 2 MB of space, starting from MEM_KERNEL_START + MEM_KERNEL_RESERVED_BYTES
+        Each process takes 2 MiB of space, starting from MEM_KERNEL_START + MEM_KERNEL_RESERVED_BYTES
     */
     ptr_t img = (ptr_t)(MEM_KERNEL_START + MEM_KERNEL_RESERVED_BYTES + MiB(index * 2 + 1));
     
