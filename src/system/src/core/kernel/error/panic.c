@@ -8,7 +8,6 @@
 #include <stdgunw/string.h>
 #include <stdgunw/utils.h>
 
-// static const char * const title = "Oops!";
 
 typedef enum k_vid_charColor {
     Black = 0,
