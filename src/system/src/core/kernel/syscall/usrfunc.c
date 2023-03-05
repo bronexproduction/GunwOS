@@ -5,12 +5,6 @@
 //  Created by Artur Danielewski on 11.01.2021.
 //
 
-/*
-    Syscall service routine macro
-
-    Implement functions using this macro to prevent from incidentally forgeting the return label
-*/
-
 #include <stdgunw/utils.h>
 #include <stdgunw/string.h>
 #include <gunwdev.h>
@@ -35,13 +29,7 @@
     Return:
         * EAX - number of bytes written
 */
-SCR_STACK(debugPrint) {
-    // Buffer address (relative to process memory)
-    REG(32, buffer, ebx)
-
-    #warning DOES NOT WORK due to SCR_STACK convention
-    REG_RET(32, bytesWritten)
-
+static size_t debugPrint(uint_32 buffer) {
     // check buffer bounds
     // there might be (must be) a better way to do it
     struct k_mem_zone procZone = k_mem_zoneForProc(k_proc_getCurrentId());
@@ -55,8 +43,17 @@ SCR_STACK(debugPrint) {
     }
 
     k_logl(DEBUG, (const char * const)buffer, bufLen);
-    bytesWritten = bufLen;   
+    return bufLen;
 }
+
+SCR(debugPrint,
+    // Buffer address (relative to process memory)
+    REG(32, buffer, ebx)
+
+    REG_RET(32, bytesWritten)
+
+    bytesWritten = debugPrint(buffer);
+)
 
 /*
     Code - 0x03
