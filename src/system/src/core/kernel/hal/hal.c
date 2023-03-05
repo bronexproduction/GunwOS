@@ -37,15 +37,15 @@ void k_hal_init() {
 
 static void (*isrReg[DEV_IRQ_LIMIT]) (void);
 
-uint_8 k_hal_isIRQRegistered(uint_8 num) {
+bool k_hal_isIRQRegistered(uint_8 num) {
     if (num >= DEV_IRQ_LIMIT) {
-        return 0;
+        return false;
     }
     if (isrReg[num] == nullptr) {
-        return 0;
+        return false;
     }
 
-    return 1;
+    return true;
 }
 
 enum gnwDriverError k_hal_install(struct gnwDriverConfig driver) {
