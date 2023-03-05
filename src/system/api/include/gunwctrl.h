@@ -9,7 +9,6 @@
 #define GUNWOS_GUNWCTRL_H
 
 #include "scl_def.h"
-#include "gunwdrv.h"
 
 /*
     Ends process execution
