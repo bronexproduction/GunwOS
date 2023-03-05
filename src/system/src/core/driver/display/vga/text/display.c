@@ -34,7 +34,10 @@ static struct gnwDriverConfig desc() {
         nullptr,    // init
         nullptr,    // start
         nullptr,    // isr
-        NULL        // IRQ
+        /* init = */ nullptr,
+        /* start = */ nullptr,
+        /* isr = */ nullptr,
+        /* IRQ = */ NULL
     };
 }
 
