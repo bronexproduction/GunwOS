@@ -12,7 +12,7 @@
 #include "drvfunc.h"
 #include "usrfunc.h"
 
-#define DRIVER_SYSCALL_COUNT 8
+#define DRIVER_SYSCALL_COUNT 2
 #define SYSCALL_COUNT 14
 
 /*
@@ -21,14 +21,8 @@
     Array index corresponds to syscall function code
 */
 static void (*driverSyscallReg[DRIVER_SYSCALL_COUNT])() = {
-    /* 0x00 */ 0,
-    /* 0x01 */ k_scr_rdb,
-    /* 0x02 */ k_scr_wrb,
-    /* 0x03 */ 0,
-    /* 0x04 */ 0,
-    /* 0x05 */ 0,
-    /* 0x06 */ (void *)k_scr_devInstall,
-    /* 0x07 */ (void *)k_scr_devStart,
+    /* 0x00 */ k_scr_rdb,
+    /* 0x01 */ k_scr_wrb
 };
 
 /*

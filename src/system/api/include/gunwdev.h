@@ -25,44 +25,6 @@ enum gnwDeviceError {
 };
 
 /*
-    Requests installation of given hardware driver
-
-    Params:
-        * id - device identifier 
-               to be returned if the installation succeeds
-        * desc - device descriptor (see gunwdrv.h)
-*/
-#warning Consider removing - no reason to be part of the API
-static inline __attribute__((always_inline)) enum gnwDriverError devInstall(size_t * const id, const struct gnwDeviceDescriptor * const desc) {
-    CHECKPTR(id);
-    CHECKPTR(desc);
-
-    SYSCALL_PAR1(id);
-    SYSCALL_PAR2(desc);
-
-    SYSCALL_DRIVER_FUNC(DEV_INSTALL);
-    SYSCALL_DRIVER_INT;
-
-    SYSCALL_RETVAL(32);
-}
-
-/*
-    Requests start of given hardware driver
-
-    Params:
-        * id - device identifier
-*/
-#warning Consider removing - no reason to be part of the API
-static inline __attribute__((always_inline)) enum gnwDriverError devStart(size_t id) {
-    SYSCALL_PAR1(id);
-
-    SYSCALL_DRIVER_FUNC(DEV_START);
-    SYSCALL_DRIVER_INT;
-
-    SYSCALL_RETVAL(32);
-}
-
-/*
     Requests device information for given id
 
     Params:

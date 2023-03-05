@@ -12,18 +12,14 @@
 */
 
 #include "../hal/io/bus.h"
-#include <stdgunw/utils.h>
-#include <gunwdrv.h>
 #include "func.h"
-
-#warning how to prevent these functions from being called from DPL_3 ?
 
 /*
     Driver-level system calls
 */
 
 /*
-    Code - 0x01
+    Code - 0x00
     Function - RDB
 
     Params:
@@ -40,7 +36,7 @@ SCR(rdb,
 )
 
 /*
-    Code - 0x02
+    Code - 0x01
     Function - WRB
 
     Params:
@@ -54,46 +50,4 @@ SCR(wrb,
     REG(8, value, cl)
 
     k_bus_outb(port, value);
-)
-
-
-/*
-    Code - 0x06
-    Function - DEV_INSTALL
-
-    Params:
-        * EBX - device identifier return pointer
-        * ECX - device descriptor (struct gnwDeviceDescriptor *)
-
-    Return:
-        * EAX - error code (enum gnwDriverError)
-*/
-
-SCR(devInstall,
-    REG(32, id, ebx)
-    REG(32, desc, ecx)
-
-    REG_RET(32, err)
-
-    enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescriptor * const);
-    err = k_dev_install((size_t * const)id, (struct gnwDeviceDescriptor*)desc);
-)
-
-/*
-    Code - 0x07
-    Function - DEV_START
-
-    Params:
-        * EBX - device identifier
-
-    Return:
-        * EAX - error code (enum gnwDriverError)
-*/
-SCR(devStart,
-    REG(32, id, ebx)
-
-    REG_RET(32, err)
-
-    enum gnwDriverError k_dev_start(size_t id);
-    err = k_dev_start((size_t)id);
 )

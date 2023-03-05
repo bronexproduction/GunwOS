@@ -27,16 +27,4 @@ __attribute__((naked)) void k_scr_rdb();
 */
 __attribute__((naked)) void k_scr_wrb();
 
-/*
-    Code - 0x06
-    Function - DEV_INSTALL
-*/
-__attribute__((naked)) enum gnwDriverError k_scr_devInstall(size_t * const id, const struct gnwDeviceDescriptor * const);
-
-/*
-    Code - 0x07
-    Function - DEV_START
-*/
-__attribute__((naked)) enum gnwDriverError k_scr_devStart(size_t id);
-
 #endif // DRVFUNC_H
