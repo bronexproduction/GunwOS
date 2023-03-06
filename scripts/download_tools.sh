@@ -3,16 +3,24 @@
 set -e
 set -x
 
+ARCH=$(uname -m)
+
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # macOS
-    if [[ "$(uname -m)" == "x86_64" ]]; then
+    if [[ "$ARCH" == "x86_64" ]]; then
         TOOLS_ID=1w17A9ZFjoRMMtxyVQItj0KvqCjhsdtTF
     else
         TOOLS_ID=1bo9BwLs_HF9UcCaXWXEDess6__xXpBP4
     fi    
 else
     # Linux
-    TOOLS_ID=1-e8cyz_aMVlYcX5I7LyHgV2JNmd7Wu65
+    if [[ "$ARCH" == "x86_64" ]]; then
+    	TOOLS_ID=1-e8cyz_aMVlYcX5I7LyHgV2JNmd7Wu65
+    elif [[ "$ARCH" == "i686" ]]; then
+        TOOLS_ID=1ymPFp3nLYnFQ0Zp9lFYrNhS2oVWCp_EQ
+    else 
+        TOOLS_ID=
+    fi
 fi
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -23,7 +31,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 else
     # Linux
     sudo apt install python3-pip python3-testresources
-    pip install gdown
+    pip3 install gdown
     # Workaround for Visual Studio Code
     GDOWN="$HOME/.local/bin/gdown"
 fi

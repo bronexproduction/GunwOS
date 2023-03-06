@@ -63,6 +63,16 @@
     "sstream": "cpp",
     "streambuf": "cpp",
     "system_error": "cpp",
-    "thread": "cpp"
+    "thread": "cpp",
+    "typeindex": "c",
+    "internet": "c",
+    "*.tcc": "c",
+    "array": "c",
+    "functional": "c",
+    "regex": "c",
+    "utility": "c",
+    "cmath": "c",
+    "complex": "c",
+    "*.def": "c"
   }
 }

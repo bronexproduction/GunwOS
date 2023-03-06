@@ -10,6 +10,12 @@
 #define ASCII_DIGIT_OFFSET 48
 #define ASCII_LOWERCASE_LETTER_OFFSET 97
 
+/*
+    Returns the length of 0-terminated character array
+
+    The '\0' character is not included in calculation result,
+    therefore buffer length is always 1 byte greater than the result
+*/
 size_t strlen(const char * const);
 int_32 strcmp(const char * const, const char * const);
 void strprefix(const char * const s, size_t l, char * const out);

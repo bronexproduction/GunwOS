@@ -5,11 +5,11 @@ LFLAGS_FINAL=$(LFLAGS) -i
 O_DIR_LISTING=find . -maxdepth 1 -name '*.o' -type f
 
 MODULES=	stdgunw \
-			cxxabi
+			# cxxabi
 
 .PHONY: all $(MODULES)
 
-all: lib.o 
+all: lib.o clean_o
 
 lib.o: $(MODULES) link_dry_run
 	$(L) $(LFLAGS_FINAL) -o lib.o $(shell $(O_DIR_LISTING))
@@ -23,3 +23,5 @@ $(MODULES):
 link_dry_run:
 	$(L) $(LFLAGS_DRY) -o lib_dry.o $(shell $(O_DIR_LISTING)) && rm lib_dry.o
 
+clean_o:
+	find . -type f -name '*.o' ! -name 'lib.o' -delete

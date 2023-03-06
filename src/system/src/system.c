@@ -2,11 +2,15 @@
 //  system.c
 //  GunwOS
 //
-//  Created by Artur Danielewski on 21.01.2021.
+//  Created by Artur Danielewski on 13.01.2023.
 //
 
-extern void s_svc_init();
+/*
+    Initialization of high-level system modules
+*/
 
-void s_sys_init() {
-    s_svc_init();
+extern void s_cli_init(void);
+
+void s_init() {
+    s_cli_init();
 }

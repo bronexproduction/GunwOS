@@ -4,6 +4,7 @@ NEWLIB_VERSION=4.2.0.20211231
 RUST_VERSION=1.66.0
 
 SRC_DIR="$(PWD)/src"
+LIB_DIR="$(PWD)/src/lib"
 TOOLS_DIR="$(PWD)/tools"
 SPEC_DIR="$(PWD)/spec"
 GCC_DIR="$(TOOLS_DIR)/gunwxcc-$(GCC_VERSION)_binutils-$(BINUTILS_VERSION)_newlib-$(NEWLIB_VERSION)"
@@ -21,8 +22,9 @@ export CXX="$(GCC_DIR)/bin/i386-elf-g++"
 export L="$(GCC_DIR)/bin/i386-elf-ld"
 export RUSTC="$(RUST_DIR)/bin/rustc"
 
-export CFLAGS_GLOBAL=-fdebug-prefix-map=$(BUILD_DIR)=.
-export CXXFLAGS_GLOBAL=-fdebug-prefix-map=$(BUILD_DIR)=.
+WARN_PARAMS=-Wall -Wextra -Werror -Wno-error=cpp -Wno-error=unused-parameter
+export CFLAGS_GLOBAL=-fdebug-prefix-map=$(BUILD_DIR)=. -I $(LIB_DIR) $(WARN_PARAMS)
+export CXXFLAGS_GLOBAL=$(CFLAGS_GLOBAL)
 export RSFLAGS_GLOBAL=--emit=obj --crate-type=lib -g --target=$(SPEC_DIR)/i386-none-none.json
 
 export C_DIR_LISTING=find . -name '*.c' -type f
