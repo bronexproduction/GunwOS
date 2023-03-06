@@ -127,14 +127,14 @@ static struct gnwDeviceUHA uha() {
 
 struct gnwDeviceDescriptor c_drv_pit_descriptor() {
     return (struct gnwDeviceDescriptor) {
-        DEV_TYPE_SYSTEM,
-        uha(),
-        (struct gnwDeviceDriver) {
-            (struct gnwDeviceIO) {
-                0x40
+        /* type */ DEV_TYPE_SYSTEM,
+        /* api */ uha(),
+        /* driver */ (struct gnwDeviceDriver) {
+            /* io */ (struct gnwDeviceIO) {
+                /* busBase */ 0x40
             },
-            desc()
+            /* descriptor */ desc()
         },
-        "8253/8254 Programmable Interrupt Timer"
+        /* name */"8253/8254 Programmable Interrupt Timer"
     };
 }
