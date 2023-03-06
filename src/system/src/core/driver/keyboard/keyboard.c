@@ -10,7 +10,7 @@
 //  
 //
 
-#include <gunwio.h>
+#include <gunwbus.h>
 #include <gunwdrv.h>
 
 #include "../driver.h"
@@ -126,14 +126,14 @@ static struct gnwDeviceUHA uha() {
 
 struct gnwDeviceDescriptor c_drv_keyboard_descriptor() {
     return (struct gnwDeviceDescriptor) {
-        DEV_TYPE_KEYBOARD,
-        uha(),
-        (struct gnwDeviceDriver) {
-            (struct gnwDeviceIO) {
-                0x60
+        /* type */ DEV_TYPE_KEYBOARD,
+        /* api */ uha(),
+        /* driver */ (struct gnwDeviceDriver) {
+            /* io */ (struct gnwDeviceIO) {
+                /* busBase */ 0x60
             },
-            desc()
+            /* descriptor */ desc()
         },
-        "8042 PS/2 Controller"
+        /* name */ "8042 PS/2 Controller"
     };
 }

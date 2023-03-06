@@ -8,10 +8,10 @@
 #include "../../../../bootloader/preloader/kernel/kernel_data.h"
 
 extern void k_tmr_init();
-extern void k_hal_init(const char codeSegOffset);
+extern void k_hal_init();
 extern void k_dev_init();
 extern void c_init();
-extern void k_rlp_start();
+extern void k_que_start();
 
 static void bss_clear() {
     extern int _BSS_START_, _BSS_END_;
@@ -34,8 +34,8 @@ extern void __attribute__((fastcall, section(".start"))) __kernel_start(const st
 void __attribute__((fastcall, section(".start"))) __kernel_start(const struct k_krn_bootData * const bootData) {
     k_init();
 
-    k_hal_init(bootData->gdt_codeSegOffset);
+    k_hal_init();
     k_dev_init();
     c_init();
-    k_rlp_start();
+    k_que_start();
 }

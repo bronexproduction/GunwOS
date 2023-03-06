@@ -1,58 +1,58 @@
 //
-//  func.c
+//  usrfunc.c
 //  GunwOS
 //
 //  Created by Artur Danielewski on 11.01.2021.
 //
 
-/*
-    Syscall service routine macro
-
-    Implement functions using this macro to prevent from incidentally forgeting the return label
-*/
-
-#include "../hal/io/bus.h"
 #include <stdgunw/utils.h>
-#include <gunwdispatch.h>
-#include <gunwdev.h>
 #include <stdgunw/string.h>
+#include <gunwdev.h>
 #include "../error/fug.h"
+#include "func.h"
+#include "../hal/proc/proc.h"
+#include "../hal/mem/mem.h"
+#include "../error/panic.h"
+#include "../../log/log.h"
 
-#define SCR_END {__asm__ volatile ("ret");};
-#define SCR(NAME, CODE) __attribute__((naked)) void k_scr_ ## NAME () { CODE; SCR_END }
+/*
+    User-level system calls
+*/
 
 /*
     Code - 0x01
-    Function - RDB
+    Function - DEBUG_PRINT
 
     Params:
-        * BX - port
-        
+        * EBX - null-terminated character array pointer
+
     Return:
-        * AL - value read from bus port
+        * EAX - number of bytes written
 */
-SCR(rdb,
-    REG(16, port, bx)
-    REG(8, value, al)
+static size_t debugPrint(uint_32 buffer) {
+    // check buffer bounds
+    // there might be (must be) a better way to do it
+    struct k_mem_zone procZone = k_mem_zoneForProc(k_proc_getCurrentId());
+    if (buffer >= procZone.sizeBytes) {
+        OOPS("Access violation");
+    }
+    buffer += (uint_32)procZone.startPtr;
+    size_t bufLen = strlen((const char * const)buffer);
+    if ((buffer + bufLen) > (size_t)procZone.endPtr) {
+        OOPS("Access violation");   
+    }
 
-    value = k_bus_inb(port);
-)
+    k_logl(DEBUG, (const char * const)buffer, bufLen);
+    return bufLen;
+}
 
-/*
-    Code - 0x02
-    Function - WRB
+SCR(debugPrint,
+    // Buffer address (relative to process memory)
+    REG(32, buffer, ebx)
 
-    Params:
-    
-        * BX - port
-        * CL - value
+    REG_RET(32, bytesWritten)
 
-*/
-SCR(wrb,
-    REG(16, port, bx)
-    REG(8, value, cl)
-
-    k_bus_outb(port, value);
+    bytesWritten = debugPrint(buffer);
 )
 
 /*
@@ -70,20 +70,6 @@ SCR(exit,
 )
 
 /*
-    Code - 0x04
-    Function - DISPATCH
-
-    Params:
-        * EBX - struct gnwDispatchDesc pointer
-*/
-SCR(dispatch,
-    REG(32, descPtr, ebx)
-
-    extern void k_rlp_dispatch(const struct gnwDispatchDesc * const);
-    k_rlp_dispatch((struct gnwDispatchDesc *)descPtr);
-)
-
-/*
     Code - 0x05
     Function - SLEEPMS
 
@@ -95,52 +81,6 @@ SCR(sleepms,
 
     extern void k_tmr_sleepms(const unsigned int);
     k_tmr_sleepms(timems);
-)
-
-/*
-    Code - 0x06
-    Function - DEV_INSTALL
-
-    Params:
-        * EBX - device identifier return pointer
-        * ECX - device descriptor (struct gnwDeviceDescriptor *)
-
-    Return:
-        * EAX - error code (enum gnwDriverError)
-
-    Note:
-        * Not allowed from user-level
-*/
-SCR(devInstall,
-    REG(32, id, ebx)
-    REG(32, desc, ecx)
-
-    REG_RET(32, err)
-
-    enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescriptor * const);
-    err = k_dev_install((size_t * const)id, (struct gnwDeviceDescriptor*)desc);
-)
-
-/*
-    Code - 0x07
-    Function - DEV_START
-
-    Params:
-        * EBX - device identifier
-
-    Return:
-        * EAX - error code (enum gnwDriverError)
-
-    Note:
-        * Not allowed from user-level
-*/
-SCR(devStart,
-    REG(32, id, ebx)
-
-    REG_RET(32, err)
-
-    enum gnwDriverError k_dev_start(size_t id);
-    err = k_dev_start((size_t)id);
 )
 
 /*

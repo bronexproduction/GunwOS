@@ -7,5 +7,3 @@
 ;
 
 kernel_data:
-    db CODE_SEG
-    db DATA_SEG

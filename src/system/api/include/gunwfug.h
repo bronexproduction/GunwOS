@@ -12,7 +12,7 @@
 #define CHECKPTR(PTR) { if (!PTR) { fug(NULLPTR); __builtin_unreachable(); } }
 
 enum gnwFugCode {
-    NULLPTR
+    FUG_NULLPTR     /* Requested memory access at invalid address - 0 */
 };
 
 /*
@@ -22,11 +22,11 @@ enum gnwFugCode {
     happened inside the caller process
     and it should be terminated
 */
-static inline void fug(enum gnwFugCode code) {
+SYSCALL_DECL void fug(enum gnwFugCode code) {
     SYSCALL_PAR1(code);
 
-    SYSCALL_FUNC(FUG);
-    SYSCALL_INT;
+    SYSCALL_USER_FUNC(FUG);
+    SYSCALL_USER_INT;
 }
 
 #endif // GUNWOS_GUNWFUG_H

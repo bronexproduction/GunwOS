@@ -31,10 +31,10 @@ static void update(const struct gnwDeviceUHA_display_character * const buffer) {
 
 static struct gnwDriverConfig desc() {
     return (struct gnwDriverConfig){ 
-        nullptr,    // init
-        nullptr,    // start
-        nullptr,    // isr
-        NULL        // IRQ
+        /* init */ nullptr,
+        /* start */ nullptr,
+        /* isr */ nullptr,
+        /* IRQ */ NULL
     };
 }
 
@@ -56,14 +56,14 @@ static struct gnwDeviceUHA uha() {
 
 struct gnwDeviceDescriptor c_drv_display_descriptor() {
     return (struct gnwDeviceDescriptor) {
-        DEV_TYPE_DISPLAY,
-        uha(),
-        (struct gnwDeviceDriver) {
-            (struct gnwDeviceIO) {
-                NULL
+        /* type */ DEV_TYPE_DISPLAY,
+        /* api */ uha(),
+        /* driver */ (struct gnwDeviceDriver) {
+            /* io */ (struct gnwDeviceIO) {
+                /* busBase */ NULL
             },
-            desc()
+            /* descriptor */ desc()
         },
-        "Default VGA text mode display"
+        /* name */ "Default VGA text mode display"
     };
 }

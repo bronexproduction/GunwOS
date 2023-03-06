@@ -7,27 +7,22 @@
 
 #include <stdgunw/mem.h>
 
+#include "../gdt/gdt.h"
+
 #define IDT_SIZE_DEFAULT 256
 
-enum k_idt_dpl {
-    DPL_0 = 0b00,
-    DPL_1 = 0b01,
-    DPL_2 = 0b10,
-    DPL_3 = 0b11
-};
-
 struct __attribute__((packed)) k_idt_entry {
-    uint_16 offset_l;   // offset 0-15
-    uint_16 selector;   // selector (index of GDT/LDT entry)
-    uint_8 zeroed;      // not used or zeroed
-    uint_8 flags:5;     // gate type flags
-    uint_8 dpl:2;       // Descriptor Privilege Level
-    uint_8 p:1;         // is present
-    uint_16 offset_h;   // offset 16-31
+    uint_16 offset_l;       // offset 0-15
+    uint_16 selector;       // selector (offset of GDT/LDT entry from its start)
+    uint_8 zeroed;          // not used or zeroed
+    uint_8 flags:5;         // gate type flags
+    enum k_gdt_dpl dpl:2;   // Descriptor Privilege Level
+    uint_8 p:1;             // is present
+    uint_16 offset_h;       // offset 16-31
 } k_idt_default[IDT_SIZE_DEFAULT];
 
 static inline void k_idt_load(void *base, uint_16 size) {
-    struct __attribute__((packed)) k_idt_descriptor {
+    struct __attribute__((packed)) idtr_desc_t {
         uint_16 limit;      // length of IDT
         uint_32 base;       // memory location (pointer to k_idt_default)
     } idtr;
@@ -38,13 +33,11 @@ static inline void k_idt_load(void *base, uint_16 size) {
     __asm__ ( "lidt %0" : : "m"(idtr) );
 }
 
-char k_idt_defaultSel = 0;  // Must be initialized in k_idt_loadDefault()
-
-static struct k_idt_entry k_idt_gate_stub(void (* const proc)(void), const enum k_idt_dpl dpl) {
+static struct k_idt_entry k_idt_gate_stub(void (* const proc)(void), const enum k_gdt_dpl dpl) {
     struct k_idt_entry d;
 
     d.offset_l = (uint_16)((uint_32)proc & 0xFFFF);
-    d.selector = k_idt_defaultSel;
+    d.selector = GDT_OFFSET(r0code);
     d.zeroed = 0;
     d.dpl = dpl;
     d.p = 0b1;
@@ -54,31 +47,29 @@ static struct k_idt_entry k_idt_gate_stub(void (* const proc)(void), const enum 
 }
 
 // TODO: Not implemented yet
-// static struct k_idt_entry k_idt_gateTask(void (* const proc)(void), const enum k_idt_dpl dpl) {
+// static struct k_idt_entry k_idt_gateTask(void (* const proc)(void), const enum k_gdt_dpl dpl) {
 //     struct k_idt_entry d = k_idt_gate_stub(proc, dpl);
 //     d.flags = 0b10100;
 //     return d;
 // }
 
-static struct k_idt_entry k_idt_gateInterrupt(void (* const proc)(void), const enum k_idt_dpl dpl) {
+static struct k_idt_entry k_idt_gateInterrupt(void (* const proc)(void), const enum k_gdt_dpl dpl) {
     struct k_idt_entry d = k_idt_gate_stub(proc, dpl);
     d.flags = 0b01110;    
     return d;
 }
 
 // TODO: Not implemented yet
-// static struct k_idt_entry k_idt_gateTrap(void (* const proc)(void), const enum k_idt_dpl dpl) {
+// static struct k_idt_entry k_idt_gateTrap(void (* const proc)(void), const enum k_gdt_dpl dpl) {
 //     struct k_idt_entry d = k_idt_gate_stub(proc, dpl);
 //     d.flags = 0b11110;
 //     return d;
 // }
 
-#include "../../isr/isr.h"
+#include "../isr/isr.h"
 
-void k_idt_loadDefault(const char codeSegOffset) {
-    k_idt_defaultSel = codeSegOffset;
-    
-    memnull(&k_idt_default, sizeof(struct k_idt_entry) * IDT_SIZE_DEFAULT);
+void k_idt_loadDefault() {
+    memnull(k_idt_default, sizeof(struct k_idt_entry) * IDT_SIZE_DEFAULT);
 
     /*
         CPU Exceptions
@@ -146,7 +137,7 @@ void k_idt_loadDefault(const char codeSegOffset) {
     // 66
     // 67
     // 68
-    // 69
+    k_idt_default[69] = k_idt_gateInterrupt(k_isr_driverSyscall, DPL_0);
     // 70
     // 71
     // 72
@@ -182,7 +173,7 @@ void k_idt_loadDefault(const char codeSegOffset) {
     // 102
     // 103
     // 104
-    k_idt_default[105] = k_idt_gateInterrupt(k_isr_syscall, DPL_0);
+    k_idt_default[105] = k_idt_gateInterrupt(k_isr_userSyscall, DPL_3);
     // 106 - 255
 
     k_idt_load(&k_idt_default, IDT_SIZE_DEFAULT);

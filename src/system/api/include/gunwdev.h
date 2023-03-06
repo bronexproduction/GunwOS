@@ -21,44 +21,8 @@ enum gnwDeviceError {
     GDE_HANDLE_INVALID,
     GDE_INVALID_DEVICE_STATE,
     GDE_INVALID_OPERATION,
-    GDE_UNKNOWN         = -1
+    GDE_UNKNOWN = -1
 };
-
-/*
-    Requests installation of given hardware driver
-
-    Params:
-        * id - device identifier 
-               to be returned if the installation succeeds
-        * desc - device descriptor (see gunwdrv.h)
-*/
-static inline enum gnwDriverError devInstall(size_t * const id, const struct gnwDeviceDescriptor * const desc) {
-    CHECKPTR(id);
-    CHECKPTR(desc);
-
-    SYSCALL_PAR1(id);
-    SYSCALL_PAR2(desc);
-
-    SYSCALL_FUNC(DEV_INSTALL);
-    SYSCALL_INT;
-
-    SYSCALL_RETVAL(32);
-}
-
-/*
-    Requests start of given hardware driver
-
-    Params:
-        * id - device identifier
-*/
-static inline enum gnwDriverError devStart(size_t id) {
-    SYSCALL_PAR1(id);
-
-    SYSCALL_FUNC(DEV_START);
-    SYSCALL_INT;
-
-    SYSCALL_RETVAL(32);
-}
 
 /*
     Requests device information for given id
@@ -67,14 +31,15 @@ static inline enum gnwDriverError devStart(size_t id) {
         * id - id of the device
         * desc - address of the result description (see gunwdrv.h)
 */
-static inline enum gnwDeviceError devGetById(const size_t deviceId, struct gnwDeviceUHADesc * const desc) {
+SYSCALL_DECL enum gnwDeviceError devGetById(const size_t deviceId, 
+                                            struct gnwDeviceUHADesc * const desc) {
     CHECKPTR(desc);
 
     SYSCALL_PAR1(deviceId);
     SYSCALL_PAR2(desc);
 
-    SYSCALL_FUNC(DEV_GET_BY_ID);
-    SYSCALL_INT;
+    SYSCALL_USER_FUNC(DEV_GET_BY_ID);
+    SYSCALL_USER_INT;
 
     SYSCALL_RETVAL(32);
 }
@@ -86,14 +51,15 @@ static inline enum gnwDeviceError devGetById(const size_t deviceId, struct gnwDe
         * type - type of the device (see gunwdrv.h)
         * desc - address of the result description (see gunwdrv.h)
 */
-static inline enum gnwDeviceError devGetByType(const enum gnwDeviceType type, struct gnwDeviceUHADesc * const desc) {
+SYSCALL_DECL enum gnwDeviceError devGetByType(const enum gnwDeviceType type, 
+                                              struct gnwDeviceUHADesc * const desc) {
     CHECKPTR(desc);
 
     SYSCALL_PAR1(type);
     SYSCALL_PAR2(desc);
 
-    SYSCALL_FUNC(DEV_GET_BY_TYPE);
-    SYSCALL_INT;
+    SYSCALL_USER_FUNC(DEV_GET_BY_TYPE);
+    SYSCALL_USER_INT;
 
     SYSCALL_RETVAL(32);
 }
@@ -107,11 +73,11 @@ static inline enum gnwDeviceError devGetByType(const enum gnwDeviceType type, st
     Note: In order to use the device
           the process has to be exclusive holder of it
 */
-static inline enum gnwDeviceError devAcquire(const uint_32 identifier) {
+SYSCALL_DECL enum gnwDeviceError devAcquire(const uint_32 identifier) {
     SYSCALL_PAR1(identifier);
 
-    SYSCALL_FUNC(DEV_ACQUIRE);
-    SYSCALL_INT;
+    SYSCALL_USER_FUNC(DEV_ACQUIRE);
+    SYSCALL_USER_INT;
 
     SYSCALL_RETVAL(32);
 }
@@ -122,11 +88,11 @@ static inline enum gnwDeviceError devAcquire(const uint_32 identifier) {
     Params:
         * identifier - device identifier
 */
-static inline void devRelease(const uint_32 identifier) {
+SYSCALL_DECL void devRelease(const uint_32 identifier) {
     SYSCALL_PAR1(identifier);
 
-    SYSCALL_FUNC(DEV_RELEASE);
-    SYSCALL_INT;
+    SYSCALL_USER_FUNC(DEV_RELEASE);
+    SYSCALL_USER_INT;
 }
 
 /*
@@ -136,17 +102,17 @@ static inline void devRelease(const uint_32 identifier) {
         * identifier - device identifier
         * buffer - data buffer pointer
 */
-static inline enum gnwDeviceError devWrite(const size_t identifier,
-                                           const void * const buffer) {
+SYSCALL_DECL enum gnwDeviceError devWrite(const size_t identifier,
+                                          const void * const buffer) {
     CHECKPTR(buffer);
 
     SYSCALL_PAR1(identifier);
     SYSCALL_PAR2(buffer);
 
-    SYSCALL_FUNC(DEV_WRITE);
-    SYSCALL_INT;
+    SYSCALL_USER_FUNC(DEV_WRITE);
+    SYSCALL_USER_INT;
 
     SYSCALL_RETVAL(32);
 }
 
-#endif // GUNWOS_GUNWSCL_H
+#endif // GUNWOS_GUNWDEV_H

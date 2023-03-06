@@ -92,7 +92,7 @@
             "label": "Install tools",
             "type": "shell",
             "linux": {
-                "command": "sudo apt-get update && sudo apt-get install -y nasm qemu-system-x86 lldb && bash scripts/download_tools.sh",
+                "command": "sudo apt-get update && sudo apt-get install -y nasm qemu-system-x86 lldb gdb && bash scripts/download_tools.sh",
             },
             "osx": {
                 "command": "brew install nasm qemu coreutils && bash scripts/download_tools.sh",

@@ -6,7 +6,7 @@ set -x
 MODE=$2
 
 if [[ "$MODE" == "debug"* ]]; then
-    EPARAMS=("-s" "-S")
+    EPARAMS=("-s" "-S" "-d cpu_reset")
 else
     EPARAMS=()
 fi

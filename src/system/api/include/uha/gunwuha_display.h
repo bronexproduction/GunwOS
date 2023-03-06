@@ -39,7 +39,7 @@
     5 - Number of colors/values on a greyscale
 */
 enum gnwDeviceUHA_display_format {
-    TEXT_H80V25C16  = _FMT_TEXT(1),
+    TEXT_H80V25C16          = _FMT_TEXT(1),
     GRAPHICS_H320V200C16    = _FMT_GRAP(1)
 };
 

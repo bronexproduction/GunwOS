@@ -1,5 +1,5 @@
 ;
-;  fat12_data.s
+;  data.s
 ;  GunwOS Bootloader
 ;  Part of GunwOS project
 ;

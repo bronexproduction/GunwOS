@@ -8,6 +8,8 @@
 #include <stdgunw/types.h>
 #include <stdgunw/defs.h>
 #include <gunwdrv.h>
+#include "cpu/cpu.h"
+#include "gdt/gdt.h"
 #include "int/irq.h"
 #include "io/bus.h"
 #include "pic/pic.h"
@@ -15,30 +17,35 @@
 #include "../../log/log.h"
 
 extern void k_pic_configure();
-extern void k_idt_loadDefault(const char codeSegOffset);
+extern void k_idt_loadDefault();
+extern void k_proc_init();
 
-void k_hal_init(const char codeSegOffset) {
+void k_hal_init() {
+    k_cpu_init();
+    #warning TODO: move GDT configuration from the boot loader
 
-    // TODO: CPU configuration? seen on http://www.brokenthorn.com/Resources/OSDev20.html
-    // TODO: move GDT configuration from the boot loader
-    k_idt_loadDefault(codeSegOffset);
+    k_gdt_init();
+    k_cpu_loadTaskRegister();
+    k_idt_loadDefault();
 
     k_pic_configure();
+
+    k_proc_init();
 
     __asm__ volatile ("sti");
 }
 
 static void (*isrReg[DEV_IRQ_LIMIT]) (void);
 
-uint_8 k_hal_isIRQRegistered(uint_8 num) {
+bool k_hal_isIRQRegistered(uint_8 num) {
     if (num >= DEV_IRQ_LIMIT) {
-        return 0;
+        return false;
     }
     if (isrReg[num] == nullptr) {
-        return 0;
+        return false;
     }
 
-    return 1;
+    return true;
 }
 
 enum gnwDriverError k_hal_install(struct gnwDriverConfig driver) {

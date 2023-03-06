@@ -5,6 +5,8 @@
 //  Created by Artur Danielewski on 08.03.2020.
 //
 
+#include <stdgunw/types.h>
+
 enum k_log_lvl {
     FATAL   = 1,
     ERROR   = 2,
@@ -14,6 +16,7 @@ enum k_log_lvl {
 };
 
 void k_log(const enum k_log_lvl level, const char *msg);
+void k_logl(const enum k_log_lvl level, const char *msg, const size_t len);
 
 #define LOG(LEVEL, MSG)     {k_log(LEVEL, MSG);};
 

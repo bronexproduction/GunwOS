@@ -9,7 +9,7 @@
 
 #include "utils.h"
 
-uint_8 charisnum(const char c, uint_8 base) {   // Base supported up to 16
+uint_8 charisnum(const char c, uint_8 base) {   /* Base supported up to 16 */
     if (!base || base > 16) {
         return 0;
     }

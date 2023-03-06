@@ -21,20 +21,23 @@ extern struct gnwDeviceDescriptor c_drv_keyboard_descriptor();
 void c_drv_loadDefaults() {
     
     enum gnwDriverError e;
+    size_t id;
+
+    #warning it should not exist here for a long time, some drivers should be parts of the kernel
+    extern enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescriptor * const descriptor);
+    extern enum gnwDriverError k_dev_start(size_t id);
 
     /*
         Default text mode display driver
     */
-    size_t id;
-
     struct gnwDeviceDescriptor display = c_drv_display_descriptor();
-    e = devInstall(&id, &display);
+    e = k_dev_install(&id, &display);
     if (e != NO_ERROR) { 
         LOG_FATAL("Fatal error: Display driver installation failed"); 
         return; 
     }
     else {
-        e = devStart(id);
+        e = k_dev_start(id);
         if (e != NO_ERROR) { LOG_FATAL("Fatal error: Display driver startup failed"); return; }
     }
     
@@ -42,13 +45,13 @@ void c_drv_loadDefaults() {
         PIT driver for 8253/8254 chip
     */
     struct gnwDeviceDescriptor pit = c_drv_pit_descriptor();
-    e = devInstall(&id, &pit);
+    e = k_dev_install(&id, &pit);
     if (e != NO_ERROR) { 
         LOG_FATAL("Fatal error: PIT driver installation failed"); 
         return; 
     }
     else {
-        e = devStart(id);
+        e = k_dev_start(id);
         if (e != NO_ERROR) { LOG_FATAL("Fatal error: PIT driver startup failed"); return; }
     }
 
@@ -56,13 +59,13 @@ void c_drv_loadDefaults() {
         Keyboard controller driver for 8042 PS/2 chip
     */
     struct gnwDeviceDescriptor kbd = c_drv_keyboard_descriptor();
-    e = devInstall(&id, &kbd);
+    e = k_dev_install(&id, &kbd);
     if (e != NO_ERROR) { 
         LOG_FATAL("Fatal error: Keyboard driver installation failed"); 
         return; 
     }
     else {
-        e = devStart(id);
+        e = k_dev_start(id);
         if (e != NO_ERROR) { LOG_FATAL("Fatal error: Keyboard driver startup failed"); return; }
     }
 }

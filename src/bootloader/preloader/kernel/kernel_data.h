@@ -8,6 +8,4 @@
 
 struct __attribute__((packed)) k_krn_bootData {
 
-    char gdt_codeSegOffset;
-    char gdt_dataSegOffset;
 };
