@@ -15,6 +15,7 @@
 
     Parameters:
     * buffer - zero-terminated character array
+    
     Return value: number of bytes written or -1 on error
 */
 SYSCALL_DECL int_32 debugPrint(const char * const buffer) {
