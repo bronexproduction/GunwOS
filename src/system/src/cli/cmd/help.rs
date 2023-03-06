@@ -7,7 +7,7 @@
 
 #![no_std]
 
-use core::ffi::c_char;
+use core::ffi::{c_char, CStr};
 
 extern "C" {
     fn c_trm_puts(szText: *const c_char);
@@ -16,7 +16,7 @@ extern "C" {
 #[no_mangle]
 fn cmd_help(_params: &[char]) {
     let message = "Command not recognized: help - did you mean \"halp\"?";
-    let message_null_terminated = CString::new(message).unwrap();
+    let message_null_terminated = CStr::new(message).unwrap();
     unsafe {
         c_trm_puts(message_null_terminated.as_ptr());
     }
