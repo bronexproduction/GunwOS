@@ -5,12 +5,6 @@
 //  Created by Artur Danielewski on 11.01.2021.
 //
 
-/*
-    Syscall service routine macro
-
-    Implement functions using this macro to prevent from incidentally forgeting the return label
-*/
-
 #include "../hal/io/bus.h"
 #include "func.h"
 
