@@ -9,7 +9,7 @@
 
 #include "scl_def.h"
 
-#define CHECKPTR(PTR) { if (!PTR) { fug(NULLPTR); __builtin_unreachable(); } }
+#define CHECKPTR(PTR) { if (!PTR) { fug(FUG_NULLPTR); __builtin_unreachable(); } }
 
 enum gnwFugCode {
     FUG_NULLPTR     /* Requested memory access at invalid address - 0 */
