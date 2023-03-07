@@ -32,6 +32,7 @@ typedef uint_8* ptr_t;
 typedef uint_32 size_t;
 // TODO move to 64-bit time
 typedef uint_32 time_t;
+typedef int_32 procId_t;
 _Static_assert(sizeof(size_t) == sizeof(ptr_t), "sizeof(size_t) != sizeof(ptr_t)");
 
 typedef struct {

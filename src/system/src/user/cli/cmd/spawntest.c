@@ -6,13 +6,14 @@
 //
 
 #include <cli/cmdutil.h>
+#include <cli/cliio.h>
 #include <stdgunw/mem.h>
 #include <stdgunw/types.h>
 #include <gunwio.h>
 #include <hal/proc/proc.h>
 #include <hal/mem/mem.h>
 
-extern int k_trm_puts(const char * const s);
+extern int user_cli_puts(const char * const s);
 
 static void proc1() {
     while (1) {
@@ -49,7 +50,7 @@ void cmd_spawntest(const char * const params) {
     CMD_NOPARAM
 
     if (alreadyDone) {
-        k_trm_puts("Unable to launch - already done");
+        user_cli_puts("Unable to launch - already done");
         return;
     }
 

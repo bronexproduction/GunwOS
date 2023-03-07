@@ -7,7 +7,7 @@
 
 #include <stdgunw/types.h>
 #include <stdgunw/mem.h>
-#include <log/log.h>
+#include <error/panic.h>
 
 #include "drvfunc.h"
 #include "usrfunc.h"
@@ -33,7 +33,7 @@ static void (*driverSyscallReg[DRIVER_SYSCALL_COUNT])() = {
 static void (*userSyscallReg[SYSCALL_COUNT])() = {
     /* 0x00 */ 0,
     /* 0x01 */ k_scr_debugPrint,
-    /* 0x02 */ 0,
+    /* 0x02 */ (void *)k_scr_charOutWrite,
     /* 0x03 */ k_scr_exit,
     /* 0x04 */ 0,
     /* 0x05 */ k_scr_sleepms,
@@ -64,7 +64,7 @@ __attribute__((naked, unused)) static void k_scl_syscall() {
     Handling error - Syscall function number over limit
 */
 __attribute__((naked, unused)) static void k_scl_syscall_functionOverLimitFailure() {
-    LOG_FATAL("Requested syscall function code over limit");
+    OOPS("Requested syscall function code over limit");
     __asm__ volatile ("jmp k_scl_syscall_end");
 }
 
@@ -72,7 +72,7 @@ __attribute__((naked, unused)) static void k_scl_syscall_functionOverLimitFailur
     Handling error - Syscall service routine unavailable 
 */
 __attribute__((naked, unused)) static void k_scl_syscall_serviceRoutineUnavailable() {
-    LOG_DEBUG("Syscall function code unavailable");
+    OOPS("Syscall function code unavailable");
     __asm__ volatile ("jmp k_scl_syscall_end");
 }
 

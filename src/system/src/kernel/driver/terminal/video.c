@@ -7,33 +7,42 @@
 
 #include <stdgunw/mem.h>
 #include <gunwdisplay.h>
-#include <log/log.h>
 #include <error/panic.h>
 #include "video.h"
 
-struct gnwDeviceUHA_display_character frameBuffer[DISPLAY_ROWS * DISPLAY_COLS];
+#warning TAKE IT FROM DISPLAY INSTEAD (requires dynamic memory allocation)
+#define DISPLAY_ROWS 25
+#define DISPLAY_COLS 80
 
-#define BUFFER_INDEX(ROW, COL) (COL + DISPLAY_COLS * ROW)
-#define BUFFER_END (((ptr_t)frameBuffer) + BUFFER_INDEX(DISPLAY_ROWS, DISPLAY_COLS) * sizeof(struct gnwDeviceUHA_display_character)) 
+point_t k_vid_dimensions = { DISPLAY_COLS, DISPLAY_ROWS };
+struct gnwDeviceUHA_display_character frameBuffer[DISPLAY_COLS * DISPLAY_ROWS];
+
+#define BUFFER_INDEX(ROW, COL) (COL + k_vid_dimensions.x * ROW)
+#define BUFFER_END (((ptr_t)frameBuffer) + BUFFER_INDEX(k_vid_dimensions.y, k_vid_dimensions.x) * sizeof(struct gnwDeviceUHA_display_character)) 
 
 static struct gnwTextDisplayHandle displayHandle;
 
-bool k_vid_init() {
+bool k_trm_vid_init() {
     struct gnwDisplayDescriptor desc;
     enum gnwDeviceError e = getTextDisplay(&desc);
 
+    if (desc.dimensions.x != k_vid_dimensions.x ||
+        desc.dimensions.y != k_vid_dimensions.y) {
+        OOPS("Unsupported display dimensions");
+        return false;
+    }
     if (e) {
         OOPS("Error retrieving available text display");
-        return true;
+        return false;
     }
 
     e = attachToTextDisplay(desc.identifier, &displayHandle);
     if (e) {
-        LOG_FATAL("Unable to attach display");
-        return true;
+        OOPS("Unable to attach display");
+        return false;
     }
 
-    return false;
+    return true;
 }
 
 static void k_vid_push() {
@@ -43,13 +52,13 @@ static void k_vid_push() {
 
     enum gnwDeviceError e = displayHandle.update(&displayHandle, frameBuffer);
     if (e) {
-        LOG_FATAL("Error updating display buffer");
+        OOPS("Error updating display buffer");
         displayHandle.update = nullptr;
     }
 }
 
-int k_vid_draw(const struct gnwDeviceUHA_display_character c, unsigned char x, unsigned char y) {
-    if (x >= DISPLAY_COLS || y >= DISPLAY_ROWS) {
+int k_trm_vid_draw(const struct gnwDeviceUHA_display_character c, unsigned char x, unsigned char y) {
+    if (x >= k_vid_dimensions.x || y >= k_vid_dimensions.y) {
         return -1;
     }
 
@@ -60,7 +69,7 @@ int k_vid_draw(const struct gnwDeviceUHA_display_character c, unsigned char x, u
     return 1;
 }
 
-void k_vid_shift(const size_t charCount) {
+void k_trm_vid_shift(const size_t charCount) {
     ptr_t source = (ptr_t)frameBuffer + (charCount * sizeof(struct gnwDeviceUHA_display_character));
     size_t bytes = (source >= BUFFER_END) ? 0 : (BUFFER_END - source);
     if (!bytes) { return; }
@@ -72,11 +81,11 @@ void k_vid_shift(const size_t charCount) {
     k_vid_push();
 }
 
-void k_vid_fill(const point_t start, const point_t end, const struct gnwDeviceUHA_display_character c) {
-    if (start.x < 0 || start.x >= DISPLAY_COLS) { return; }
-    if (start.y < 0 || start.y >= DISPLAY_ROWS) { return; }
-    if (end.x < 0 || end.x >= DISPLAY_COLS) { return; }
-    if (end.y < 0 || end.y >= DISPLAY_ROWS) { return; }
+void k_trm_vid_fill(const point_t start, const point_t end, const struct gnwDeviceUHA_display_character c) {
+    if (start.x < 0 || start.x >= k_vid_dimensions.x) { return; }
+    if (start.y < 0 || start.y >= k_vid_dimensions.y) { return; }
+    if (end.x < 0 || end.x >= k_vid_dimensions.x) { return; }
+    if (end.y < 0 || end.y >= k_vid_dimensions.y) { return; }
 
     const size_t lastIndex = BUFFER_INDEX(end.y, end.x);
     for (size_t index = BUFFER_INDEX(start.y, start.x); index <= lastIndex; ++index) {
@@ -86,9 +95,9 @@ void k_vid_fill(const point_t start, const point_t end, const struct gnwDeviceUH
     k_vid_push();
 }
 
-void k_vid_clear() {
+void k_trm_vid_clear() {
     const point_t start = { 0, 0 };
-    const point_t end = { DISPLAY_COLS - 1, DISPLAY_ROWS - 1 };
+    const point_t end = { k_vid_dimensions.x - 1, k_vid_dimensions.y - 1 };
 
-    k_vid_fill(start, end, (struct gnwDeviceUHA_display_character){ 0, 0, 0 });
+    k_trm_vid_fill(start, end, (struct gnwDeviceUHA_display_character){ 0, 0, 0 });
 }

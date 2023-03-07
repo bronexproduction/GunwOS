@@ -16,11 +16,7 @@
 
 #include <hal/int/irq.h>
 #include <hal/io/io.h>
-#include <log/log.h>
- 
-extern int k_trm_putc(const char c);
-extern int k_trm_puts(const char * const s);
-extern int k_trm_putun(uint_32 i);
+#include <error/panic.h>
 
 static uint_8 init() {
 
@@ -79,8 +75,8 @@ void k_pic_configure() {
 
 void k_pic_enableIRQ(const enum k_dev_irq num) {
 
-    if (num > 15) LOG_FATAL("Attempt to enable IRQ above supported range");
-    if (num > 7) LOG_FATAL("IRQ range not implemented yet");
+    if (num > 15) OOPS("Attempt to enable IRQ above supported range");
+    if (num > 7) OOPS("IRQ range not implemented yet");
 
     #warning IRQ > 7 not supported
     uint_16 port = BUS_PIC_MASTER_DATA;

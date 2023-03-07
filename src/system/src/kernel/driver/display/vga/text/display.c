@@ -7,7 +7,7 @@
 
 #include <gunwdrv.h>
 #include <stdgunw/defs.h>
-#include <log/log.h>
+#include <error/panic.h>
 
 static const volatile ptr_t VIDEO_HW_MEM   = (volatile ptr_t)0xb8000;
 #define VIDEO_HW_ROWS           25
@@ -19,7 +19,7 @@ static const volatile ptr_t VIDEO_HW_MEM   = (volatile ptr_t)0xb8000;
 
 static void update(const struct gnwDeviceUHA_display_character * const buffer) {
     if (!buffer) {
-        LOG_FATAL("Unexpected nullptr in buffer reference");
+        OOPS("Unexpected nullptr in buffer reference");
         return;
     }
 

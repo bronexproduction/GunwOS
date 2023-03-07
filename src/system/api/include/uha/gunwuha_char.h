@@ -65,7 +65,7 @@ struct gnwDeviceUHA_char_out_routine {
         Result:
             * 1 if write succeeded, 0 otherwise
     */
-    uint_8 (*write)(const uint_8 c);
+    bool (*write)(const char c);
 };
 
 struct gnwDeviceUHA_char_in {

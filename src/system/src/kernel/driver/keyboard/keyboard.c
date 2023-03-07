@@ -14,7 +14,7 @@
 #include <gunwdrv.h>
 
 #include <driver/driver.h>
-#include <log/log.h>
+#include <error/panic.h>
 
 /*
     Keyboard controller data register
@@ -92,7 +92,7 @@ extern void k_kbf_down(uint_8 k);
 ISR(
     /* Checking output buffer status */
     if (!rdb(KBD_BUS_STATUS) & KBD_STAT_OUTB) {
-        LOG_FATAL("Keyboard output buffer empty on keyboard interrupt")
+        OOPS("Keyboard output buffer empty on keyboard interrupt")
         ISR_END
     }
 

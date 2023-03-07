@@ -11,9 +11,6 @@
 #include <stdgunw/utils.h>
 #include <stdgunw/types.h>
 
-#define DISPLAY_ROWS 25
-#define DISPLAY_COLS 80
-
 typedef enum k_vid_charColor {
     Black = 0,
     Blue = 1,
@@ -33,9 +30,13 @@ typedef enum k_vid_charColor {
     White = 15
 } VideoCharColor;
 
-int k_vid_draw(const struct gnwDeviceUHA_display_character c, unsigned char x, unsigned char y);
-void k_vid_shift(const size_t charCount);
-void k_vid_fill(const point_t start, const point_t end, const struct gnwDeviceUHA_display_character c);
-void k_vid_clear();
+extern point_t k_vid_dimensions;
+
+bool k_trm_vid_init();
+
+int k_trm_vid_draw(const struct gnwDeviceUHA_display_character c, unsigned char x, unsigned char y);
+void k_trm_vid_shift(const size_t charCount);
+void k_trm_vid_fill(const point_t start, const point_t end, const struct gnwDeviceUHA_display_character c);
+void k_trm_vid_clear();
 
 #endif // VIDEO_H

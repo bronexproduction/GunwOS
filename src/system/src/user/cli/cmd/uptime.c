@@ -6,7 +6,7 @@
 //
 
 #include <cli/cmdutil.h>
-#include <driver/terminal/terminal.h>
+#include <cli/cliio.h>
 #include <timer/timer.h>
 
 void cmd_uptime(const char * const params) {
@@ -19,10 +19,10 @@ void cmd_uptime(const char * const params) {
     uint_32 hours = ticks % 60; ticks /= 60;
     uint_32 days = ticks;
 
-    k_trm_puts("Uptime: ");
-    k_trm_putin(days); k_trm_puts(" days, ");
-    k_trm_putin(hours); k_trm_puts(" hours, ");
-    k_trm_putin(minutes); k_trm_puts(" minutes, ");
-    k_trm_putin(seconds); k_trm_puts(" seconds, ");
-    k_trm_putin(milliseconds); k_trm_puts(" milliseconds");
+    user_cli_puts("Uptime: ");
+    user_cli_putin(days); user_cli_puts(" days, ");
+    user_cli_putin(hours); user_cli_puts(" hours, ");
+    user_cli_putin(minutes); user_cli_puts(" minutes, ");
+    user_cli_putin(seconds); user_cli_puts(" seconds, ");
+    user_cli_putin(milliseconds); user_cli_puts(" milliseconds");
 }

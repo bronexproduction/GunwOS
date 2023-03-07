@@ -18,12 +18,12 @@ static size_t executionTimeCounter = GRANULARITY_MS;
 /*
     Process identifiers (last, next)
 
-    Note: -1 for none
+    Note: KERNEL_PROC_ID for none
 */
-static int_32 lastProcId = -1;
-static int_32 nextProcId = -1;
+static procId_t lastProcId = KERNEL_PROC_ID;
+static procId_t nextProcId = KERNEL_PROC_ID;
 
-static int_32 procSelect() {
+static procId_t procSelect() {
     /*
         Simple round robin algorithm
     */
@@ -34,7 +34,7 @@ static int_32 procSelect() {
         }
     }
     
-    return -1;
+    return KERNEL_PROC_ID;
 }
 
 static void schedEvaluate() {
@@ -57,7 +57,7 @@ void k_proc_schedule_onKernelHandlingFinished() {
     lastProcId = nextProcId;
 }
 
-void k_proc_schedule_didSpawn(int_32 procId) {
+void k_proc_schedule_didSpawn(procId_t procId) {
     if (procId < 0 || procId >= MAX_PROC) {
         OOPS("Invalid spawned process id");
     }

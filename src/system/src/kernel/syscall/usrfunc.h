@@ -22,6 +22,12 @@
 __attribute__((naked)) void k_scr_debugPrint(const char * const buffer);
 
 /*
+    Code - 0x02
+    Function - CHAR_OUT_WRITE
+*/
+__attribute__((naked)) void k_scr_charOutWrite(uint_32 deviceId, const char character);
+
+/*
     Code - 0x03
     Function - EXIT
 */

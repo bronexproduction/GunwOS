@@ -14,7 +14,7 @@
 #include "io/bus.h"
 #include "pic/pic.h"
 
-#include <log/log.h>
+#include <error/panic.h>
 
 extern void k_pic_configure();
 extern void k_idt_loadDefault();
@@ -62,6 +62,24 @@ enum gnwDriverError k_hal_install(struct gnwDriverConfig driver) {
     k_pic_enableIRQ(driver.irq);
     
     return NO_ERROR;
+}
+
+enum failReason_t {
+    FAIL_REASON_IRQ_NOT_FOUND,
+    FAIL_REASON_IRQ_ABOVE_LIMIT
+};
+
+#warning WORKAROUND - OOPS did not link
+
+static void fail(const enum failReason_t reason) {
+    switch (reason) {
+    case FAIL_REASON_IRQ_NOT_FOUND:
+        OOPS("Driver for specified IRQ not found"); break;
+    case FAIL_REASON_IRQ_ABOVE_LIMIT:
+        OOPS("Requested service of IRQ above limit"); break;
+    default:
+        OOPS("Unknown IRQ handling failure"); break;
+    }
 }
 
 /*
@@ -119,13 +137,13 @@ __attribute__((naked)) void k_hal_irqHandle() {
         Handling IRQ service routine unavailable 
     */
     __asm__ volatile ("k_hal_irqHandle_irqServiceRoutineUnavailable:");
-    LOG_DEBUG("Driver for specified IRQ not found");
+    fail(FAIL_REASON_IRQ_NOT_FOUND);
     __asm__ volatile ("jmp k_hal_irqHandle_end");
 
     /*
         Handling error - IRQ number above limit
     */
     __asm__ volatile ("k_hal_irqHandle_irqAboveLimitFailure:");
-    LOG_FATAL("Requested service of IRQ above limit");
+    fail(FAIL_REASON_IRQ_ABOVE_LIMIT);
     __asm__ volatile ("jmp k_hal_irqHandle_end");
 }

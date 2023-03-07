@@ -13,6 +13,8 @@
 #include <hal/gdt/gdt.h>
 
 #define MAX_PROC 16
+#define NONE_PROC_ID -2
+#define KERNEL_PROC_ID -1
 
 struct k_proc_descriptor {
     ptr_t img;
@@ -47,14 +49,14 @@ struct k_proc_process {
 /*
     Returns current process identifier
 
-    -1 for kernel
+    KERNEL_PROC_ID for kernel
 */
-int_32 k_proc_getCurrentId();
+procId_t k_proc_getCurrentId();
 
 /*
     Returns information about the process with given procId
 */
-struct k_proc_process k_proc_getInfo(const int_32 procId);
+struct k_proc_process k_proc_getInfo(const procId_t procId);
 
 /*
     Spawning new userland processes
@@ -67,7 +69,7 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const);
     Params:
     * procId - Identifier of the next process
 */
-void k_proc_switch(const int_32 procId);
+void k_proc_switch(const procId_t procId);
 
 /*
     Switching from process to kernel (if needed)
@@ -76,6 +78,6 @@ void k_proc_switch(const int_32 procId);
     * refEsp - Reference stack pointer
     * currentProcId - Identifier of the current process
 */
-void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const int_32 currentProcId);
+void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const procId_t currentProcId);
 
 #endif // PROC_H
