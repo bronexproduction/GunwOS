@@ -184,6 +184,9 @@ SCR(devRelease,
     Params:
         * EBX - device identifier
         * ECX - data buffer
+
+    Return:
+        * EAX - error code (enum gnwDeviceError)
 */
 SCR(devMemWrite,
     REG(32, devId, ebx)
@@ -205,4 +208,25 @@ SCR(fug,
     REG(32, code, ebx)
 
     k_err_fug(code);
+)
+
+
+/*
+    Code - 0x0e
+    Function - DEV_LISTEN
+
+    Params:
+        * EBX - device identifier
+        * ECX - listener pointer (struct gnwDeviceEventListener *)
+    
+    Return:
+        * EAX - error code (enum gnwDeviceError)
+*/
+SCR(devListen,
+    REG(32, devId, ebx)
+    REG(32, lsnr, ecx)
+
+    REG_RET(32, err)
+
+    err = k_dev_listen((const size_t)k_proc_getCurrentId(), (const size_t)devId, (const struct gnwDeviceEventListener * const)lsnr);
 )

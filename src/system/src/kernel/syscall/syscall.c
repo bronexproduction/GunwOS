@@ -13,7 +13,7 @@
 #include "usrfunc.h"
 
 #define DRIVER_SYSCALL_COUNT 2
-#define SYSCALL_COUNT 14
+#define SYSCALL_COUNT 15
 
 /*
     Array of pointers to driver syscall handlers
@@ -44,7 +44,8 @@ static void (*userSyscallReg[SYSCALL_COUNT])() = {
     /* 0x0a */ (void *)k_scr_devAcquire,
     /* 0x0b */ k_scr_devRelease,
     /* 0x0c */ (void *)k_scr_devMemWrite,
-    /* 0x0d */ k_scr_fug
+    /* 0x0d */ k_scr_fug,
+    /* 0x0e */ (void *)k_scr_devListen,
 };
 
 __attribute__((naked, unused)) static void k_scl_syscall() {

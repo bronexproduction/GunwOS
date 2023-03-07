@@ -266,3 +266,10 @@ enum gnwDeviceError k_dev_writeChar(const procId_t processId,
 
     return GDE_NONE;
 }
+
+enum gnwDeviceError k_dev_listen(const size_t processId, 
+                                 const size_t deviceId, 
+                                 const struct gnwDeviceEventListener * const listener) {
+#warning TO BE IMPLEMENTED
+    return GDE_UNKNOWN;
+}

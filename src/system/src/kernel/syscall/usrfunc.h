@@ -9,6 +9,7 @@
 #define USRFUNC_H
 
 #include <gunwdrv.h>
+#include <gunwdev.h>
 #include <gunwfug.h>
 
 /*
@@ -76,5 +77,12 @@ __attribute__((naked)) enum gnwDeviceError k_scr_devMemWrite(const size_t,
     Function - FUG
 */
 __attribute__((naked)) void k_scr_fug(enum gnwFugCode);
+
+/*
+    Code - 0x0e
+    Function - DEV_LISTEN
+*/
+__attribute__((naked)) enum gnwDeviceError k_scr_devListen(const size_t identifier,
+                                                           const struct gnwDeviceEventListener * const listener);
 
 #endif // USRFUNC_H
