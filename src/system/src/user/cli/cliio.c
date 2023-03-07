@@ -9,7 +9,7 @@
 
 #include <stdgunw/mem.h>
 #include <stdgunw/string.h>
-#include <gunwio.h>
+#include <gunwdev.h>
 
 #define IO_GENERAL_FAILURE -1
 
@@ -20,7 +20,7 @@ static int append(const char c) {
     if (!user_cli_charOutAttached) {
         return IO_GENERAL_FAILURE;
     }
-    enum gnwDeviceError e = charOutWrite(user_cli_charOutIdentifier, c);
+    enum gnwDeviceError e = devCharWrite(user_cli_charOutIdentifier, c);
     if (e != GDE_NONE) {
         return IO_GENERAL_FAILURE;
     }

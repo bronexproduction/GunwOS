@@ -12,58 +12,15 @@
 #include <stdgunw/types.h>
 #include <stdgunw/mem.h>
 #include <gunwdev.h>
+#include <gunwkeyboard.h>
 
 #include "cliio.h"
 #include "cmdutil.h"
-
-static void onKeyDown(const uint_8 c);
 
 static char cmdBuf[CMD_LEN_MAX + 1];    // Ensure null-termination
 static uint_8 cmdBufIndex;
 
 static void prompt();
-
-void s_cli_init() {
-
-    /* 
-        Attach to character output
-    */
-    struct gnwDeviceUHADesc charOutDesc;
-    enum gnwDeviceError e = devGetByType(DEV_TYPE_CHAR_OUT, &charOutDesc);
-
-    if (e) {
-        OOPS("Error retrieving available character output device");
-    }
-
-    e = devAcquire(charOutDesc.identifier);
-    if (e) {
-        OOPS("Unable to attach to character output");
-    }
-    
-    /* 
-        Attach keyboard listener
-    */
-   #warning TODO
-
-    /*
-        Configure variables
-    */
-    user_cli_charOutAttached = true;
-    user_cli_charOutIdentifier = charOutDesc.identifier;
-
-    user_cli_kbf_register((struct user_cli_kbf_listener){0, onKeyDown});
-    
-    user_cli_puts("GunwOS 0.0.4_DEV started. (C) Bronex Production 2022\n\n");
-
-    prompt();
-}
-
-static void prompt() {
-    memnull(cmdBuf, CMD_LEN_MAX * sizeof(char) + 1);
-    cmdBufIndex = 0;
-
-    user_cli_puts("[GunwCLI]: ");
-}
 
 extern void (*s_cli_cmdSelector(const char * const cmd))(const char * const);
 
@@ -155,4 +112,73 @@ static void onKeyDown(const uint_8 c) {
     if (user_cli_chs_defines(user_cli_chs_default, charCode)) {
         append(user_cli_chs_default[charCode].character);
     }    
+}
+
+static GNW_KEYBOARD_EVENT_LISTENER(onKeyboardEvent) {
+    if (code == GKEC_KEY_DOWN) {
+        onKeyDown(data);
+    }
+}
+
+static void prompt() {
+    memnull(cmdBuf, CMD_LEN_MAX * sizeof(char) + 1);
+    cmdBufIndex = 0;
+
+    user_cli_puts("[GunwCLI]: ");
+}
+
+void s_cli_init() {
+
+    /* 
+        Attach to character output
+    */
+    struct gnwDeviceUHADesc charOutDesc;
+    enum gnwDeviceError e = devGetByType(DEV_TYPE_CHAR_OUT, &charOutDesc);
+
+    if (e) {
+        OOPS("Error retrieving available character output device");
+    }
+
+    e = devAcquire(charOutDesc.identifier);
+    if (e) {
+        OOPS("Unable to attach to character output");
+    }
+    
+    /* 
+        Attach keyboard listener
+    */
+    struct gnwDeviceUHADesc keyboardDesc;
+    e = devGetByType(DEV_TYPE_KEYBOARD, &keyboardDesc);
+
+    if (e) {
+        devRelease(charOutDesc.identifier);
+        OOPS("Error retrieving available keyboard");
+    }
+
+    e = devAcquire(keyboardDesc.identifier);
+    if (e) {
+        devRelease(charOutDesc.identifier);
+        OOPS("Unable to attach to keyboard");
+    }
+
+    struct gnwDeviceEventListener listener;
+    listener.onEvent_u8 = (gnwKeyboardEventListener)onKeyboardEvent;
+    e = devListen(keyboardDesc.identifier, &listener);
+    if (e) {
+        devRelease(charOutDesc.identifier);
+        devRelease(keyboardDesc.identifier);
+        OOPS("Unable to attach keyboard listener");
+    }
+
+    /*
+        Configure variables
+    */
+    user_cli_charOutAttached = true;
+    user_cli_charOutIdentifier = charOutDesc.identifier;
+
+    user_cli_kbf_register((struct user_cli_kbf_listener){0, onKeyDown});
+    
+    user_cli_puts("GunwOS 0.0.4_DEV started. (C) Bronex Production 2022\n\n");
+
+    prompt();
 }

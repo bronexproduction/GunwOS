@@ -25,6 +25,10 @@ enum gnwDeviceError {
     GDE_UNKNOWN = -1
 };
 
+struct gnwDeviceEventListener {
+    void (*onEvent_u8)(int_32 type, uint_8 data);
+};
+
 /*
     Requests device information for given id
 
@@ -97,20 +101,62 @@ SYSCALL_DECL void devRelease(const uint_32 identifier) {
 }
 
 /*
+    Write character to character output device
+
+    Parameters:
+    * character - Character to be written
+    
+    Return value: Device error code or GDE_NONE (see enum gnwDeviceError)
+*/
+SYSCALL_DECL enum gnwDeviceError devCharWrite(uint_32 deviceId, 
+                                              const char character) {
+    SYSCALL_PAR1(deviceId);
+    SYSCALL_PAR2(character);
+
+    SYSCALL_USER_FUNC(DEV_CHAR_WRITE);
+    SYSCALL_USER_INT;
+    
+    register enum gnwDeviceError ret __asm__ ("eax");
+    return ret;
+}
+
+/*
     Write to the device
 
     Params:
         * identifier - device identifier
         * buffer - data buffer pointer
+    
+    Return value: Device error code or GDE_NONE (see enum gnwDeviceError)
 */
-SYSCALL_DECL enum gnwDeviceError devWrite(const size_t identifier,
-                                          const void * const buffer) {
+SYSCALL_DECL enum gnwDeviceError devMemWrite(const size_t identifier,
+                                             const void * const buffer) {
     CHECKPTR(buffer);
 
     SYSCALL_PAR1(identifier);
     SYSCALL_PAR2(buffer);
 
-    SYSCALL_USER_FUNC(DEV_WRITE);
+    SYSCALL_USER_FUNC(DEV_MEM_WRITE);
+    SYSCALL_USER_INT;
+
+    SYSCALL_RETVAL(32);
+}
+
+/*
+    Register a listener to device events
+
+    Params:
+        * identifier - device identifier
+        * listener - event listener function pointer
+*/
+SYSCALL_DECL enum gnwDeviceError devListen(const size_t identifier,
+                                           const struct gnwDeviceEventListener * const listener) {
+    CHECKPTR(listener);
+
+    SYSCALL_PAR1(identifier);
+    SYSCALL_PAR2(listener);
+
+    SYSCALL_USER_FUNC(DEV_LISTEN);
     SYSCALL_USER_INT;
 
     SYSCALL_RETVAL(32);

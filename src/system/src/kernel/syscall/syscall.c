@@ -22,7 +22,7 @@
 */
 static void (*driverSyscallReg[DRIVER_SYSCALL_COUNT])() = {
     /* 0x00 */ k_scr_rdb,
-    /* 0x01 */ k_scr_wrb
+    /* 0x01 */ k_scr_wrb,
 };
 
 /*
@@ -33,7 +33,7 @@ static void (*driverSyscallReg[DRIVER_SYSCALL_COUNT])() = {
 static void (*userSyscallReg[SYSCALL_COUNT])() = {
     /* 0x00 */ 0,
     /* 0x01 */ k_scr_debugPrint,
-    /* 0x02 */ (void *)k_scr_charOutWrite,
+    /* 0x02 */ (void *)k_scr_devCharWrite,
     /* 0x03 */ k_scr_exit,
     /* 0x04 */ 0,
     /* 0x05 */ k_scr_sleepms,
@@ -43,7 +43,7 @@ static void (*userSyscallReg[SYSCALL_COUNT])() = {
     /* 0x09 */ (void *)k_scr_devGetByType,
     /* 0x0a */ (void *)k_scr_devAcquire,
     /* 0x0b */ k_scr_devRelease,
-    /* 0x0c */ (void *)k_scr_devWrite,
+    /* 0x0c */ (void *)k_scr_devMemWrite,
     /* 0x0d */ k_scr_fug
 };
 

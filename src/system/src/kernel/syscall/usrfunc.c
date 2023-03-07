@@ -58,7 +58,7 @@ SCR(debugPrint,
 
 /*
     Code - 0x02
-    Function - CHAR_OUT_WRITE
+    Function - DEV_CHAR_WRITE
     
     Params:
         * EBX - character output device identifier
@@ -67,7 +67,7 @@ SCR(debugPrint,
     Return:
         * EAX - error code (see enum gnwDeviceError)
 */
-SCR(charOutWrite,
+SCR(devCharWrite,
     REG(32, devId, ebx);
     REG(8, character, cl);
 
@@ -179,13 +179,13 @@ SCR(devRelease,
 
 /*
     Code - 0x0c
-    Function - DEV_WRITE
+    Function - DEV_MEM_WRITE
 
     Params:
         * EBX - device identifier
         * ECX - data buffer
 */
-SCR(devWrite,
+SCR(devMemWrite,
     REG(32, devId, ebx)
     REG(32, buf, ecx)
 

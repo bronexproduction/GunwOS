@@ -86,8 +86,10 @@
 #define KBD_STAT_TIM        0x40    /* Timeout bit (TIM) */
 #define KBD_STAT_PARERR     0x80    /* Parity error bit (PARE) */
 
-extern void user_cli_kbf_up(uint_8 k);
-extern void user_cli_kbf_down(uint_8 k);
+// struct listener {
+//     gnwSysCallback_u8 keyUp;
+//     gnwSysCallback_u8 keyDown;
+// };
 
 ISR(
     /* Checking output buffer status */
@@ -105,10 +107,10 @@ ISR(
         MSB contains information whether key was pressed or released
     */
     if (c & 0b10000000) {
-        user_cli_kbf_up(c & 0b01111111);
+        // user_cli_kbf_up(c & 0b01111111);
     }
     else {
-        user_cli_kbf_down(c);
+        // user_cli_kbf_down(c);
     }
 )
 
