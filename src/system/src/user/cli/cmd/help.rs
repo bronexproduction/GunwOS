@@ -7,11 +7,11 @@
 
 #![no_std]
 
-extern "C" { fn k_trm_puts(szText: &str); }
+extern "C" { fn user_cli_puts(szText: &str); }
 
 #[no_mangle]
 fn cmd_help(_params: &[char]) {
     unsafe {
-        k_trm_puts("Command not recognized: help - did you mean \"halp\"?");
+        user_cli_puts("Command not recognized: help - did you mean \"halp\"?");
     }
 }

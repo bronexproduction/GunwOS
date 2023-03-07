@@ -111,8 +111,8 @@ void __attribute__((cdecl)) k_oops(const char *reason, uint_32 errCode) {
     for (size_t i = 0; i < 20; ++i) {
         // uint_32 val = *(stackPtr + sizeof(uint_32 *)*i);
 
-        // k_trm_putin(val);
-        // k_trm_putc(' ');
+        // user_cli_putin(val);
+        // user_cli_putc(' ');
     } 
 
     while(1);

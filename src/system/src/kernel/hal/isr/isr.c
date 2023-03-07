@@ -7,7 +7,6 @@
 
 #include <stdgunw/types.h>
 
-#include <log/log.h>
 #include <error/panic.h>
 #include <hal/cpu/cpu.h>
 
@@ -85,22 +84,22 @@ static size_t isrStackHeight = 0;
 }
 
 /* 0 */ __attribute__((naked)) void k_isr_divErr() {        CPU_SEG_RESTORE; OOPS("Division by zero interrupt triggered") }
-/* 1 */ __attribute__((naked)) void k_isr_dbgExc() {        CPU_SEG_RESTORE; LOG_FATAL("Debug exceptions interrupt triggered") }
-/* 2 */ __attribute__((naked)) void k_isr_nmi() {           CPU_SEG_RESTORE; LOG_FATAL("Non-maskable interrupt triggered") }
-/* 3 */ __attribute__((naked)) void k_isr_brkpt() {         CPU_SEG_RESTORE; LOG_FATAL("Breakpoint interrupt triggered") }
-/* 4 */ __attribute__((naked)) void k_isr_ofl() {           CPU_SEG_RESTORE; LOG_FATAL("Overflow interrupt triggered") }
-/* 5 */ __attribute__((naked)) void k_isr_bdsChk() {        CPU_SEG_RESTORE; LOG_FATAL("Bounds check interrupt triggered") }
-/* 6 */ __attribute__((naked)) void k_isr_invOpc() {        CPU_SEG_RESTORE; LOG_FATAL("Invalid opcode interrupt triggered") }
-/* 7 */ __attribute__((naked)) void k_isr_coProcNA() {      CPU_SEG_RESTORE; LOG_FATAL("Coprocessor not available interrupt triggered") }
-/* 8 */ __attribute__((naked)) void k_isr_dblFlt() {        CPU_SEG_RESTORE; LOG_FATAL("Double fault interrupt triggered") }
+/* 1 */ __attribute__((naked)) void k_isr_dbgExc() {        CPU_SEG_RESTORE; OOPS("Debug exceptions interrupt triggered") }
+/* 2 */ __attribute__((naked)) void k_isr_nmi() {           CPU_SEG_RESTORE; OOPS("Non-maskable interrupt triggered") }
+/* 3 */ __attribute__((naked)) void k_isr_brkpt() {         CPU_SEG_RESTORE; OOPS("Breakpoint interrupt triggered") }
+/* 4 */ __attribute__((naked)) void k_isr_ofl() {           CPU_SEG_RESTORE; OOPS("Overflow interrupt triggered") }
+/* 5 */ __attribute__((naked)) void k_isr_bdsChk() {        CPU_SEG_RESTORE; OOPS("Bounds check interrupt triggered") }
+/* 6 */ __attribute__((naked)) void k_isr_invOpc() {        CPU_SEG_RESTORE; OOPS("Invalid opcode interrupt triggered") }
+/* 7 */ __attribute__((naked)) void k_isr_coProcNA() {      CPU_SEG_RESTORE; OOPS("Coprocessor not available interrupt triggered") }
+/* 8 */ __attribute__((naked)) void k_isr_dblFlt() {        CPU_SEG_RESTORE; OOPS("Double fault interrupt triggered") }
 // 9 (reserved)
-/* 10 */ __attribute__((naked)) void k_isr_invTSS() {       CPU_SEG_RESTORE; LOG_FATAL("Invalid TSS interrupt triggered") }
-/* 11 */ __attribute__((naked)) void k_isr_segNP() {        CPU_SEG_RESTORE; LOG_FATAL("Segment not present interrupt triggered") }
-/* 12 */ __attribute__((naked)) void k_isr_stExc() {        CPU_SEG_RESTORE; LOG_FATAL("Stack exception interrupt triggered") }
+/* 10 */ __attribute__((naked)) void k_isr_invTSS() {       CPU_SEG_RESTORE; OOPS("Invalid TSS interrupt triggered") }
+/* 11 */ __attribute__((naked)) void k_isr_segNP() {        CPU_SEG_RESTORE; OOPS("Segment not present interrupt triggered") }
+/* 12 */ __attribute__((naked)) void k_isr_stExc() {        CPU_SEG_RESTORE; OOPS("Stack exception interrupt triggered") }
 /* 13 */ __attribute__((naked)) void k_isr_genPrt() {       CPU_SEG_RESTORE; OOPS_WITH_CODE("General protection interrupt triggered") }
-/* 14 */ __attribute__((naked)) void k_isr_pgFlt() {        CPU_SEG_RESTORE; LOG_FATAL("Page fault interrupt triggered") }
+/* 14 */ __attribute__((naked)) void k_isr_pgFlt() {        CPU_SEG_RESTORE; OOPS("Page fault interrupt triggered") }
 // 15 (reserved)
-/* 16 */ __attribute__((naked)) void k_isr_coProcErr() {    CPU_SEG_RESTORE; LOG_FATAL("Coprocessor error interrupt triggered") }
+/* 16 */ __attribute__((naked)) void k_isr_coProcErr() {    CPU_SEG_RESTORE; OOPS("Coprocessor error interrupt triggered") }
 // 17 - 31 (reserved)
 
 /*

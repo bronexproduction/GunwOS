@@ -9,13 +9,13 @@
 
 #define SCANCODES_MAX 128
 
-enum k_kmp_modifier {
+enum user_cli_kmp_modifier {
     SHIFT   = 1,
     CTRL    = 1 << 1,
     ALT     = 1 << 2
 };
 
-enum k_kmp_special {
+enum user_cli_kmp_special {
     ESC     = 1,
     F1      = 2,
     F2      = 3,
@@ -32,7 +32,7 @@ enum k_kmp_special {
     CAPS    = 14
 };
 
-__attribute__((packed)) struct k_kmp_mapping {
+__attribute__((packed)) struct user_cli_kmp_mapping {
     uint_8 code;
     uint_8 code_shift;
     uint_8 code_ctrl;
@@ -41,10 +41,10 @@ __attribute__((packed)) struct k_kmp_mapping {
     uint_8 code_alt_shift;
     uint_8 code_alt_ctrl;
     uint_8 code_alt_ctrl_shift;
-    enum k_kmp_modifier modifier;
-    enum k_kmp_special special;
+    enum user_cli_kmp_modifier modifier;
+    enum user_cli_kmp_special special;
 };
 
-const struct k_kmp_mapping k_kmp_default[SCANCODES_MAX];
+const struct user_cli_kmp_mapping user_cli_kmp_default[SCANCODES_MAX];
 
-uint_8 k_kmp_defines(const struct k_kmp_mapping *map, const uint_8 c);
+uint_8 user_cli_kmp_defines(const struct user_cli_kmp_mapping *map, const uint_8 c);

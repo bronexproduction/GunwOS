@@ -32,18 +32,18 @@ struct process {
 
 static struct process kernelProc;
 static struct process pTab[MAX_PROC];
-static int_32 k_proc_current = -1;
+static procId_t k_proc_current = KERNEL_PROC_ID;
 
-int_32 k_proc_getCurrentId() {
+procId_t k_proc_getCurrentId() {
     return k_proc_current;
 }
 
-struct k_proc_process k_proc_getInfo(const int_32 procId) {
-    if (procId < -1 || procId >= MAX_PROC) {
+struct k_proc_process k_proc_getInfo(const procId_t procId) {
+    if (procId < KERNEL_PROC_ID || procId >= MAX_PROC) {
         OOPS("Process id out of range");
     }
     
-    return (procId == -1) ? kernelProc.info : pTab[procId].info;
+    return (procId == KERNEL_PROC_ID) ? kernelProc.info : pTab[procId].info;
 }
 
 enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor) {
@@ -129,7 +129,7 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
     and 
     section 9.6.1 Interrupt Procedures
 */
-void k_proc_switch(const int_32 procId) {
+void k_proc_switch(const procId_t procId) {
     if (procId < 0) {
         OOPS("Invalid next process id during switch");   
     }
@@ -211,7 +211,7 @@ void k_proc_switch(const int_32 procId) {
     __asm__ volatile ("k_proc_kernelRet:");
 }
 
-void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const int_32 currentProcId) {
+void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const procId_t currentProcId) {
     if (kernelProc.info.state == PS_RUNNING) {
         return;
     }
@@ -234,7 +234,7 @@ void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const int_32 currentPro
     pTab[currentProcId].info.state = PS_READY;
     kernelProc.info.state = PS_RUNNING;
 
-    k_proc_current = -1;
+    k_proc_current = KERNEL_PROC_ID;
 
     struct k_cpu_state * const currentCpuState = &pTab[currentProcId].cpuState;
         

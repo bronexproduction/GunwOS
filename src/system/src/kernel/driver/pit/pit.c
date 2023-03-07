@@ -13,7 +13,7 @@
 
 #include <driver/driver.h>
 #include <hal/io/io.h>
-#include <log/log.h>
+#include <error/panic.h>
 
 #define PIT_BUS_DATA_CH0    0x40    // Channel 0 (read/write)
 #define PIT_BUS_DATA_CH1    0x41    // Channel 1 (read/write)
@@ -94,7 +94,7 @@ static uint_16 divider() {
 static uint_8 init() {
 
     if (!k_pit_routine) {
-        LOG_FATAL("PIT routine unavailable")
+        OOPS("PIT routine unavailable")
         return 0;
     }
     

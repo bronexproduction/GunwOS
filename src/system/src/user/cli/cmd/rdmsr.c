@@ -6,17 +6,17 @@
 //
 
 #include <cli/cmdutil.h>
-#include <driver/terminal/terminal.h>
+#include <cli/cliio.h>
 #include <hal/io/reg.h>
 
 void cmd_rdmsr(const char * const params) {
     CMD_PARAM_INT(0, uint_32, msrAddr, "MSR address")
 
-    k_trm_puts("Value of MSR at ");
-    k_trm_putun(msrAddr);
-    k_trm_puts(": ");
+    user_cli_puts("Value of MSR at ");
+    user_cli_putun(msrAddr);
+    user_cli_puts(": ");
 
     uint_64 msrValue = k_reg_rdmsr(msrAddr);
 #warning putun is 32-bit only - may affect precision!
-    k_trm_putun(msrValue);
+    user_cli_putun(msrValue);
 }

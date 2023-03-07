@@ -5,13 +5,15 @@
 //  Created by Artur Danielewski on 14.03.2020.
 //
 
-#include <driver/terminal/terminal.h>
-#include <driver/terminal/keybuf.h>
-#include <driver/terminal/keymap.h>
-#include <driver/terminal/charset.h>
-#include <log/log.h>
+#include "keybuf.h"
+#include "keymap.h"
+#include "charset.h"
+#include <error/panic.h>
 #include <stdgunw/types.h>
 #include <stdgunw/mem.h>
+#include <gunwdev.h>
+
+#include "cliio.h"
 #include "cmdutil.h"
 
 static void onKeyDown(const uint_8 c);
@@ -22,9 +24,36 @@ static uint_8 cmdBufIndex;
 static void prompt();
 
 void s_cli_init() {
-    k_kbf_register((struct k_kbf_listener){0, onKeyDown});
+
+    /* 
+        Attach to character output
+    */
+    struct gnwDeviceUHADesc charOutDesc;
+    enum gnwDeviceError e = devGetByType(DEV_TYPE_CHAR_OUT, &charOutDesc);
+
+    if (e) {
+        OOPS("Error retrieving available character output device");
+    }
+
+    e = devAcquire(charOutDesc.identifier);
+    if (e) {
+        OOPS("Unable to attach to character output");
+    }
     
-    k_trm_puts("GunwOS 0.0.4_DEV started. (C) Bronex Production 2022\n\n");
+    /* 
+        Attach keyboard listener
+    */
+   #warning TODO
+
+    /*
+        Configure variables
+    */
+    user_cli_charOutAttached = true;
+    user_cli_charOutIdentifier = charOutDesc.identifier;
+
+    user_cli_kbf_register((struct user_cli_kbf_listener){0, onKeyDown});
+    
+    user_cli_puts("GunwOS 0.0.4_DEV started. (C) Bronex Production 2022\n\n");
 
     prompt();
 }
@@ -33,7 +62,7 @@ static void prompt() {
     memnull(cmdBuf, CMD_LEN_MAX * sizeof(char) + 1);
     cmdBufIndex = 0;
 
-    k_trm_puts("[GunwCLI]: ");
+    user_cli_puts("[GunwCLI]: ");
 }
 
 extern void (*s_cli_cmdSelector(const char * const cmd))(const char * const);
@@ -64,13 +93,13 @@ static void exec() {
         cmdBuf[CMD_LEN_MAX] = 0;    // Just in case
 
         if (!s_cli_command(cmdBuf)) {
-            k_trm_puts("Command not recognized: \"");
-            k_trm_puts(cmdBuf);
-            k_trm_puts("\"\n");
+            user_cli_puts("Command not recognized: \"");
+            user_cli_puts(cmdBuf);
+            user_cli_puts("\"\n");
         }
     }
     
-    k_trm_putc('\n');
+    user_cli_putc('\n');
     prompt();
 }
 
@@ -83,7 +112,7 @@ static void append(const char c) {
         
         // Execute command
         
-        k_trm_putc(c);
+        user_cli_putc(c);
         exec();
     } else if (c == '\b') { 
         
@@ -94,7 +123,7 @@ static void append(const char c) {
         }
 
         cmdBuf[--cmdBufIndex] = 0;
-        k_trm_putc(c);
+        user_cli_putc(c);
     } else {                    
         
         // Append new character
@@ -104,26 +133,26 @@ static void append(const char c) {
         }
 
         cmdBuf[cmdBufIndex++] = c;
-        k_trm_putc(c);
+        user_cli_putc(c);
     }
 }
 
 static void onKeyDown(const uint_8 c) {
-    if (!k_kmp_defines(k_kmp_default, c)) {
-        k_trm_puts("[UNKNOWN SCANCODE: ");
-        k_trm_putin(c);
-        k_trm_putc(']');
+    if (!user_cli_kmp_defines(user_cli_kmp_default, c)) {
+        user_cli_puts("[UNKNOWN SCANCODE: ");
+        user_cli_putin(c);
+        user_cli_putc(']');
         return;
     }
 
-    uint_8 charCode = *(&(k_kmp_default[c].code) + k_kbf_currModMask());
+    uint_8 charCode = *(&(user_cli_kmp_default[c].code) + user_cli_kbf_currModMask());
 
     if (charCode >= CHARSET_CODES_MAX) {
-        LOG_FATAL("Character code over accepted limit")
+        OOPS("Character code over accepted limit")
         return;
     }
 
-    if (k_chs_defines(k_chs_default, charCode)) {
-        append(k_chs_default[charCode].character);
+    if (user_cli_chs_defines(user_cli_chs_default, charCode)) {
+        append(user_cli_chs_default[charCode].character);
     }    
 }

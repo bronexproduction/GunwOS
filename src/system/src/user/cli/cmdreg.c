@@ -9,14 +9,14 @@
 
 #include <stdgunw/utils.h>
 #include <stdgunw/string.h>
-#include <driver/terminal/terminal.h>
 #include "cmdutil.h"
+#include "cliio.h"
 
 #define CMD_REG(NAME)                              \
     {                                              \
         extern void cmd_##NAME(const char *const); \
         if (isHalp)                                \
-            k_trm_puts(" " STR(NAME));             \
+            user_cli_puts(" " STR(NAME));             \
         else if (!strcmp(cmd, STR(NAME) "\0"))     \
             return cmd_##NAME;                     \
     }
@@ -27,7 +27,7 @@ static void cmd_nop(__attribute__((unused)) const char *const params) {
 void (*s_cli_cmdSelector(const char *const cmd))(const char *const) {
     char isHalp = !strcmp(cmd, "halp");
     if (isHalp) {
-        k_trm_puts("Available commands:");
+        user_cli_puts("Available commands:");
     }
     CMD_REG(help)
     CMD_REG(rdmsr)

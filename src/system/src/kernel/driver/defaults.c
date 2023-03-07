@@ -13,59 +13,52 @@
 #include <gunwdev.h>
 
 #include <dev/dev.h>
-#include <log/log.h>
+#include <error/panic.h>
 
-extern struct gnwDeviceDescriptor k_drv_display_descriptor();
-extern struct gnwDeviceDescriptor k_drv_pit_descriptor();
-extern struct gnwDeviceDescriptor k_drv_keyboard_descriptor();
+#define MSG_INSTALL_FAIL(NAME) "Fatal error: ## NAME ## driver installation failed"
+#define MSG_START_FAIL(NAME) "Fatal error: ## NAME ## driver startup failed"
+#define MSGS_FAIL(NAME) MSG_INSTALL_FAIL(NAME), MSG_START_FAIL(NAME)
 
-void k_drv_loadMinimal() {
-    
+static void loadSingle(struct gnwDeviceDescriptor (*descProvider)(),
+                       const char * const installFailureMsg,
+                       const char * const startFailureMsg) {
     enum gnwDriverError e;
     size_t id;
+    const struct gnwDeviceDescriptor desc = descProvider();
+    e = k_dev_install(&id, &desc);
+    if (e != NO_ERROR) { 
+        OOPS(installFailureMsg); 
+    }
+
+    e = k_dev_start(id);
+    if (e != NO_ERROR) { 
+        OOPS(startFailureMsg);
+    }
+}
+
+void k_drv_loadMinimal() {
 
     /*
-        Default text mode display driver
+        Default text mode display
     */
-    struct gnwDeviceDescriptor display = k_drv_display_descriptor();
-    e = k_dev_install(&id, &display);
-    if (e != NO_ERROR) { 
-        LOG_FATAL("Fatal error: Display driver installation failed"); 
-        return; 
-    }
-    else {
-        e = k_dev_start(id);
-        if (e != NO_ERROR) { LOG_FATAL("Fatal error: Display driver startup failed"); return; }
-    }
+    extern struct gnwDeviceDescriptor k_drv_display_descriptor();
+    loadSingle(k_drv_display_descriptor, MSGS_FAIL(Display));
     
     /*
         PIT driver for 8253/8254 chip
     */
-    struct gnwDeviceDescriptor pit = k_drv_pit_descriptor();
-    e = k_dev_install(&id, &pit);
-    if (e != NO_ERROR) { 
-        LOG_FATAL("Fatal error: PIT driver installation failed"); 
-        return; 
-    }
-    else {
-        e = k_dev_start(id);
-        if (e != NO_ERROR) { LOG_FATAL("Fatal error: PIT driver startup failed"); return; }
-    }
+    extern struct gnwDeviceDescriptor k_drv_pit_descriptor();
+    loadSingle(k_drv_pit_descriptor, MSGS_FAIL(PIT));
 
     /*
         Keyboard controller driver for 8042 PS/2 chip
     */
-    struct gnwDeviceDescriptor kbd = k_drv_keyboard_descriptor();
-    e = k_dev_install(&id, &kbd);
-    if (e != NO_ERROR) { 
-        LOG_FATAL("Fatal error: Keyboard driver installation failed"); 
-        return; 
-    }
-    else {
-        e = k_dev_start(id);
-        if (e != NO_ERROR) { LOG_FATAL("Fatal error: Keyboard driver startup failed"); return; }
-    }
+    extern struct gnwDeviceDescriptor k_drv_keyboard_descriptor();
+    loadSingle(k_drv_keyboard_descriptor, MSGS_FAIL(Keyboard));
 
-    extern void k_trm_init();
-    k_trm_init();
+    // /*
+    //     Default character output - terminal
+    // */
+    extern struct gnwDeviceDescriptor k_drv_terminal_descriptor();
+    loadSingle(k_drv_terminal_descriptor, MSGS_FAIL(Terminal));
 }

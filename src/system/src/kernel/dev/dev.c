@@ -6,8 +6,10 @@
 //
 
 #include <gunwdev.h>
+#include <stdgunw/mem.h>
 #include <hal/int/irq.h>
-#include <log/log.h>
+#include <error/panic.h>
+#include <hal/proc/proc.h>
 
 #define MAX_DEVICES 8
 
@@ -33,7 +35,7 @@ struct device {
         Identifier of the process allowed to access the device
         or 0 if none allowed (kernel only)
     */
-    size_t holder;
+    procId_t holder;
 };
 
 static struct device devices[MAX_DEVICES];
@@ -41,16 +43,13 @@ static uint_32 devicesCount;
 
 extern uint_8 k_hal_isIRQRegistered(uint_8 num);
 
-extern int k_trm_putc(const char c);
-extern int k_trm_puts(const char * const s);
-
 static uint_8 validate(const struct gnwDeviceDescriptor * const descriptor) {
     if (!descriptor) {
-        LOG_FATAL("Fatal error: Driver descriptor pointer invalid"); 
+        OOPS("Driver descriptor pointer invalid"); 
         return 0;
     }
     if (!descriptor->name) {
-        LOG_FATAL("Fatal error: Driver description pointer invalid"); 
+        OOPS("Driver descriptor invalid"); 
         return 0;
     }
 
@@ -63,7 +62,7 @@ static bool validateId(size_t id) {
 
 enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescriptor * const descriptor) {
     if (!id) {
-        LOG_FATAL("Identifier storage cannot be nullptr");
+        OOPS("Identifier storage cannot be nullptr");
         return UNKNOWN;
     }
     if (devicesCount >= MAX_DEVICES) {
@@ -73,28 +72,23 @@ enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescr
         return UNKNOWN;
     }
 
-    k_trm_puts("Device manager: Install driver named ");
-    #warning What if the name does not have 0 at end?
-    k_trm_puts(descriptor->name);
-    k_trm_putc('\n');
-
     const struct gnwDriverConfig *driverDesc = &(descriptor->driver.descriptor);
 
     if (driverDesc->irq >= DEV_IRQ_LIMIT) {
-        LOG_FATAL("Invalid IRQ value");
+        OOPS("Invalid IRQ value");
         return IRQ_INVALID;
     }
 
-    if (k_hal_isIRQRegistered(driverDesc->irq)) {
-        LOG_FATAL("IRQ conflict");
+    if (driverDesc->isr && k_hal_isIRQRegistered(driverDesc->irq)) {
+        OOPS("IRQ conflict");
         return IRQ_CONFLICT;
     }
 
-    struct device dev = { *descriptor, 0, 0, 0 };
+    struct device dev = { *descriptor, 0, 0, NONE_PROC_ID };
 
     dev.initialized = (driverDesc->init ? driverDesc->init() : 1);
     if (!dev.initialized) {
-        LOG_ERR("Driver init failed");
+        OOPS("Driver init failed");
         return UNINITIALIZED;
     }
     
@@ -106,7 +100,7 @@ enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescr
     }
 
     if (e != NO_ERROR) {
-        LOG_ERR("Error: Driver initialization failed");
+        OOPS("Error: Driver initialization failed");
         return e;
     }
 
@@ -118,18 +112,14 @@ enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescr
 
 enum gnwDriverError k_dev_start(size_t id) {
     if (!validateId(id)) {
-        LOG_FATAL("Device identifier invalid")
+        OOPS("Device identifier invalid")
         return UNKNOWN;
     }
 
     struct device *dev = &devices[id];
 
-    k_trm_puts("Device manager: ");
-    k_trm_puts(dev->desc.name);
-    k_trm_puts(" starting\n");
-
     if (!dev->initialized) {
-        LOG_FATAL("Trying to start uninitialized driver");
+        OOPS("Trying to start uninitialized driver");
         return UNINITIALIZED;
     }
 
@@ -137,7 +127,7 @@ enum gnwDriverError k_dev_start(size_t id) {
 
     dev->started = (start ? start() : 1);
     if (!dev->started) {
-        LOG_ERR("Error: Driver startup failed");
+        OOPS("Error: Driver startup failed");
         return START_FAILED;
     }
 
@@ -145,17 +135,16 @@ enum gnwDriverError k_dev_start(size_t id) {
 }
 
 void k_dev_init() {
-    k_trm_puts("Device manager: Init\n");
 }
 
 enum gnwDeviceError k_dev_getById(const size_t id, struct gnwDeviceUHADesc * const desc) {
     if (!validateId(id) || id >= devicesCount) {
-        LOG_FATAL("Device identifier invalid")
+        OOPS("Device identifier invalid")
         return GDE_UNKNOWN;
     }
     
     if (!desc) {
-        LOG_FATAL("Device descriptor nullptr");
+        OOPS("Device descriptor nullptr");
         return GDE_UNKNOWN;
     }
 
@@ -165,7 +154,7 @@ enum gnwDeviceError k_dev_getById(const size_t id, struct gnwDeviceUHADesc * con
 
 enum gnwDeviceError k_dev_getByType(enum gnwDeviceType type, struct gnwDeviceUHADesc * const desc) {
     if (!desc) {
-        LOG_FATAL("Device descriptor descriptor over limit");
+        OOPS("Device descriptor descriptor over limit");
         return GDE_UNKNOWN;
     }
 
@@ -178,10 +167,14 @@ enum gnwDeviceError k_dev_getByType(enum gnwDeviceType type, struct gnwDeviceUHA
     return GDE_NOT_FOUND;
 }
 
-enum gnwDeviceError k_dev_acquireHold(size_t processId, size_t deviceId) {
+enum gnwDeviceError k_dev_acquireHold(procId_t processId, size_t deviceId) {
     if (!validateId(deviceId) || deviceId >= devicesCount) {
-        LOG_FATAL("Device identifier invalid")
+        OOPS("Device identifier invalid")
         return GDE_UNKNOWN;
+    }
+
+    if (devices[deviceId].holder != NONE_PROC_ID) {
+        return GDE_ALREADY_HELD;
     }
 
     devices[deviceId].holder = processId;
@@ -189,31 +182,23 @@ enum gnwDeviceError k_dev_acquireHold(size_t processId, size_t deviceId) {
     return GDE_NONE;
 }
 
-void k_dev_releaseHold(size_t processId, size_t deviceId) {
+void k_dev_releaseHold(procId_t processId, size_t deviceId) {
     if (!validateId(deviceId) || deviceId >= devicesCount) {
-        LOG_FATAL("Device identifier invalid")
+        OOPS("Device identifier invalid")
     }
-    
-    // TODO: Check if the process is current holder of the device
-    //       if not - ignore the request
 
-    devices[deviceId].holder = 0;
+    if (devices[deviceId].holder == processId) {
+        devices[deviceId].holder = NONE_PROC_ID;
+    }
 }
 
-enum gnwDeviceError k_dev_write(const size_t processId, 
-                                const size_t deviceId,
-                                const void * const buffer) {
-    
+static enum gnwDeviceError devCheck(const procId_t processId, const size_t deviceId) {
     if (!validateId(deviceId) || deviceId >= devicesCount) {
-        LOG_FATAL("Device identifier invalid")
-        return UNKNOWN;
-    }
-    if (!buffer) {
-        LOG_FATAL("Buffer cannot be nullptr");
-        return UNKNOWN;
+        OOPS("Device identifier invalid")
+        return GDE_UNKNOWN;
     }
 
-    // TODO: checks
+    #warning TODO: checks
     // * check if process exists
     // * check if device exists
     // * check if process holds the device
@@ -229,11 +214,55 @@ enum gnwDeviceError k_dev_write(const size_t processId,
     if (!dev->started) {
         return GDE_INVALID_DEVICE_STATE;
     }
-    if (!dev->desc.api.mem.routine.write) {
-        return GDE_INVALID_OPERATION;
+    
+    return GDE_NONE;
+}
+
+enum gnwDeviceError k_dev_writeMem(const procId_t processId, 
+                                   const size_t deviceId,
+                                   const void * const buffer) {
+    
+    if (!buffer) {
+        OOPS("Buffer cannot be nullptr");
+        return GDE_UNKNOWN;
     }
 
-    dev->desc.api.mem.routine.write(buffer);
+    const enum gnwDeviceError e = devCheck(processId, deviceId);
+    if (e) {
+        return e;
+    }
+
+    const struct gnwDeviceUHA_mem_routine * const routine = &devices[deviceId].desc.api.mem.routine;
+    if (!routine->write) {
+        return GDE_INVALID_OPERATION;
+    }
+    routine->write(buffer);
+
+    return GDE_NONE;
+}
+
+enum gnwDeviceError k_dev_writeChar(const procId_t processId, 
+                                    const size_t deviceId,
+                                    const char character) {
+
+    const enum gnwDeviceError e = devCheck(processId, deviceId);
+    if (e) {
+        return e;
+    }
+
+    const struct gnwDeviceUHA_char_out_routine * const routine = &devices[deviceId].desc.api.charOut.routine;
+    if (!routine->isReadyToWrite) {
+        return GDE_INVALID_OPERATION;
+    }
+    if (!routine->isReadyToWrite()) {
+        return GDE_INVALID_DEVICE_STATE;
+    }
+    if (!routine->write) {
+        return GDE_INVALID_OPERATION;
+    }
+    if (!routine->write(character)) {
+        return GDE_OPERATION_FAILED;
+    }
 
     return GDE_NONE;
 }

@@ -13,7 +13,7 @@
 #include <error/panic.h>
 #include <hal/proc/proc.h>
 #include <hal/mem/mem.h>
-#include <log/log.h>
+#include <dev/dev.h>
 
 /*
     User-level system calls
@@ -42,7 +42,8 @@ static size_t debugPrint(uint_32 buffer) {
         OOPS("Access violation");   
     }
 
-    k_logl(DEBUG, (const char * const)buffer, bufLen);
+    extern int user_cli_putsl(const char * const s, unsigned int l);
+    user_cli_putsl((const char * const)buffer, bufLen);
     return bufLen;
 }
 
@@ -53,6 +54,26 @@ SCR(debugPrint,
     REG_RET(32, bytesWritten)
 
     bytesWritten = debugPrint(buffer);
+)
+
+/*
+    Code - 0x02
+    Function - CHAR_OUT_WRITE
+    
+    Params:
+        * EBX - character output device identifier
+        * CL - character to be written
+
+    Return:
+        * EAX - error code (see enum gnwDeviceError)
+*/
+SCR(charOutWrite,
+    REG(32, devId, ebx);
+    REG(8, character, cl);
+
+    REG_RET(32, err)
+
+    err = k_dev_writeChar((const size_t)k_proc_getCurrentId(), (const size_t)devId, (const char)character);  
 )
 
 /*
@@ -138,12 +159,9 @@ SCR(devGetByType,
 SCR(devAcquire,
     REG(32, devId, ebx)
 
-    size_t procId = 0; // TODO: get caller process id
-
     REG_RET(32, err)
 
-    enum gnwDeviceError k_dev_acquireHold(size_t, size_t);
-    err = k_dev_acquireHold((size_t)procId, (size_t)devId);
+    err = k_dev_acquireHold((size_t)k_proc_getCurrentId(), (size_t)devId);
 )
 
 /*
@@ -156,10 +174,7 @@ SCR(devAcquire,
 SCR(devRelease,
     REG(32, devId, ebx)
 
-    size_t procId = 0; // TODO: get caller process id
-
-    void k_dev_releaseHold(size_t, size_t);
-    k_dev_releaseHold((size_t)procId, (size_t)devId);
+    k_dev_releaseHold((size_t)k_proc_getCurrentId(), (size_t)devId);
 )
 
 /*
@@ -176,12 +191,7 @@ SCR(devWrite,
 
     REG_RET(32, err)
 
-    size_t procId = 0; // TODO: get caller process id
-
-    enum gnwDeviceError k_dev_write(const size_t,
-                                    const size_t,
-                                    const void * const);
-    err = k_dev_write((const size_t)procId, (const size_t)devId, (const void * const)buf);                                        
+    err = k_dev_writeMem((const size_t)k_proc_getCurrentId(), (const size_t)devId, (const void * const)buf);                                        
 )
 
 /*

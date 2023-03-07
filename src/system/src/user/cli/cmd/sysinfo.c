@@ -6,10 +6,10 @@
 //
 
 #include <cli/cmdutil.h>
-#include <driver/terminal/terminal.h>
+#include <cli/cliio.h>
 
 void cmd_sysinfo(const char * const params) {
     CMD_NOPARAM
 
-    k_trm_puts("Not implemented yet");
+    user_cli_puts("Not implemented yet");
 }

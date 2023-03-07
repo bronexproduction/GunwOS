@@ -25,6 +25,6 @@ struct k_mem_zone {
 /*
     Returns accessible memory zone limits for given process id
 */
-struct k_mem_zone k_mem_zoneForProc(int_32 procId);
+struct k_mem_zone k_mem_zoneForProc(procId_t procId);
 
 #endif // MEM_H

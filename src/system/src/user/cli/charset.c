@@ -7,7 +7,7 @@
 
 #include "charset.h"
 
-const struct k_chs_mapping k_chs_default[CHARSET_CODES_MAX] = {
+const struct user_cli_chs_mapping user_cli_chs_default[CHARSET_CODES_MAX] = {
     /* CODE     CHARACTER */
     /* 0   */ { 0 },
     /* 1   */ { '1' },
@@ -110,6 +110,6 @@ const struct k_chs_mapping k_chs_default[CHARSET_CODES_MAX] = {
     /* 98  */ { '?' }
 };
 
-uint_8 k_chs_defines(const struct k_chs_mapping *map, const uint_8 c) {
+uint_8 user_cli_chs_defines(const struct user_cli_chs_mapping *map, const uint_8 c) {
     return map[c].character;
 }

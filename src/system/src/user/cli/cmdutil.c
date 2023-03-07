@@ -9,8 +9,8 @@
 
 #include <stdgunw/stdgunw.h>
 
-struct k_cmd_param k_cmd_paramAt(const char * const params, unsigned int loc) {
-    if (!params) return (struct k_cmd_param){ 0, 0 };
+struct user_cli_cmd_param user_cli_cmd_paramAt(const char * const params, unsigned int loc) {
+    if (!params) return (struct user_cli_cmd_param){ 0, 0 };
 
     size_t len = strlen(params);    
     size_t lastOffset = 0;
@@ -20,7 +20,7 @@ struct k_cmd_param k_cmd_paramAt(const char * const params, unsigned int loc) {
     while (currentOffset <= len) {
         if (!params[currentOffset] || params[currentOffset] == CMD_PARAM_SEPARATOR) {
             if (currentParam == loc) {
-                return (struct k_cmd_param){ lastOffset, currentOffset - lastOffset };
+                return (struct user_cli_cmd_param){ lastOffset, currentOffset - lastOffset };
             }
 
             ++currentParam;
@@ -30,10 +30,10 @@ struct k_cmd_param k_cmd_paramAt(const char * const params, unsigned int loc) {
         }
     }
         
-    return (struct k_cmd_param){ 0, 0 };
+    return (struct user_cli_cmd_param){ 0, 0 };
 }
 
-void k_cmd_paramLoad(const char * const params, char * const loc, const struct k_cmd_param pDesc) {
+void user_cli_cmd_paramLoad(const char * const params, char * const loc, const struct user_cli_cmd_param pDesc) {
     memnull(loc, pDesc.length + 1);
     memcopy(params + pDesc.offset, loc, pDesc.length);
 }

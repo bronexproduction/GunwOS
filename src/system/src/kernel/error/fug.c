@@ -7,11 +7,11 @@
 
 #include "fug.h"
 #include <stdgunw/string.h>
-#include <log/log.h>
+#include <error/panic.h>
 
 void k_err_fug(enum gnwFugCode code) {
     char log[20] = "FUG code ";
 
     uint2hex(code, log + 9);
-    LOG_FATAL(log);
+    OOPS(log);
 }

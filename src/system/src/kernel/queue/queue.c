@@ -7,7 +7,7 @@
 
 #include <stdgunw/types.h>
 #include <stdgunw/defs.h>
-#include <log/log.h>
+#include <error/panic.h>
 #include <schedule/schedule.h>
 #include <hal/criticalsec/criticalsec.h>
 
@@ -28,7 +28,7 @@ void k_que_dispatch(void (* const func)()) {
     #warning how to avoid duplicates?
 
     if (!running) {
-        LOG_FATAL("Running queue required to dispatch items - aborting");
+        OOPS("Running queue required to dispatch items - aborting");
         return;
     }
 
@@ -42,7 +42,7 @@ void k_que_dispatch(void (* const func)()) {
     }
     
     if (i >= MAX_QUEUE_LENGTH) {
-        LOG_FATAL("Run queue capacity exceeded");
+        OOPS("Run queue capacity exceeded");
         return;
     }
 
@@ -76,11 +76,11 @@ void k_que_start() {
         }
         
         if (!enqueued->reserved) {
-            LOG_FATAL("Enqueued item disabled");
+            OOPS("Enqueued item disabled");
             return;
         }
         if (!enqueued->func) {
-            LOG_FATAL("Null pointer queued");
+            OOPS("Null pointer queued");
             return;
         }
 
