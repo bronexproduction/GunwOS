@@ -86,8 +86,8 @@
 #define KBD_STAT_TIM        0x40    /* Timeout bit (TIM) */
 #define KBD_STAT_PARERR     0x80    /* Parity error bit (PARE) */
 
-extern void k_kbf_up(uint_8 k);
-extern void k_kbf_down(uint_8 k);
+extern void user_cli_kbf_up(uint_8 k);
+extern void user_cli_kbf_down(uint_8 k);
 
 ISR(
     /* Checking output buffer status */
@@ -105,10 +105,10 @@ ISR(
         MSB contains information whether key was pressed or released
     */
     if (c & 0b10000000) {
-        k_kbf_up(c & 0b01111111);
+        user_cli_kbf_up(c & 0b01111111);
     }
     else {
-        k_kbf_down(c);
+        user_cli_kbf_down(c);
     }
 )
 
