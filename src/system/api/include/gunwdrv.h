@@ -17,6 +17,7 @@
 #include "uha/gunwuha_drivectrl.h"
 #include "uha/gunwuha_char.h"
 #include "uha/gunwuha_display.h"
+#include "uha/gunwuha_event.h"
 
 /*
     Device driver error codes
@@ -62,6 +63,7 @@ struct gnwDeviceUHA {
     struct gnwDeviceUHA_char_in charIn;     // DEV_TYPE_CHAR_IN
     struct gnwDeviceUHA_char_out charOut;   // DEV_TYPE_CHAR_OUT
     struct gnwDeviceUHA_display display;    // DEV_TYPE_DISPLAY
+    struct gnwDeviceUHA_event event;        // event emitting devices
 };
 
 /*
@@ -78,6 +80,7 @@ struct gnwDeviceUHADesc {
     struct gnwDeviceUHA_char_in_desc charIn;      // DEV_TYPE_CHAR_IN
     struct gnwDeviceUHA_char_out_desc charOut;    // DEV_TYPE_CHAR_OUT
     struct gnwDeviceUHA_display_desc display;     // DEV_TYPE_DISPLAY
+    struct gnwDeviceUHA_event_desc event;         // event emitting devices
 };
 
 /*
@@ -93,7 +96,8 @@ static inline struct gnwDeviceUHADesc uhaGetDesc(const size_t identifier, const 
         api.storage.desc,
         api.charIn.desc,
         api.charOut.desc,
-        api.display.desc
+        api.display.desc,
+        api.event.desc
     };
 }
 

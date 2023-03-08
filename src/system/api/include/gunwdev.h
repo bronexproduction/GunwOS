@@ -26,6 +26,7 @@ enum gnwDeviceError {
 };
 
 struct gnwDeviceEventListener {
+    void (*onEvent_void)(int_32 type);
     void (*onEvent_u8)(int_32 type, uint_8 data);
 };
 
