@@ -12,6 +12,8 @@
 
 #include <driver/gunwbus.h>
 #include <driver/gunwdrv.h>
+#include <driver/gunwdevemitter.h>
+#include <gunwkeyboard.h>
 
 #include <driver/driver.h>
 #include <error/panic.h>
@@ -86,11 +88,6 @@
 #define KBD_STAT_TIM        0x40    /* Timeout bit (TIM) */
 #define KBD_STAT_PARERR     0x80    /* Parity error bit (PARE) */
 
-// struct listener {
-//     gnwSysCallback_u8 keyUp;
-//     gnwSysCallback_u8 keyDown;
-// };
-
 ISR(
     /* Checking output buffer status */
     if (!rdb(KBD_BUS_STATUS) & KBD_STAT_OUTB) {
@@ -107,10 +104,10 @@ ISR(
         MSB contains information whether key was pressed or released
     */
     if (c & 0b10000000) {
-        // user_cli_kbf_up(c & 0b01111111);
+        emit_u8(GKEC_KEY_UP, c & 0b01111111);
     }
     else {
-        // user_cli_kbf_down(c);
+        emit_u8(GKEC_KEY_DOWN, c);
     }
 )
 
