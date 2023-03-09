@@ -41,8 +41,8 @@ enum gnwDeviceError {
 };
 _Static_assert(sizeof(enum gnwDeviceError) == sizeof(int_32), "Unexpected enum gnwDeviceError size");
 
-typedef void (*gnwDeviceEventListener_void)(int_32 type);
-typedef void (*gnwDeviceEventListener_u8)(int_32 type, uint_8 data);
+typedef __attribute__((cdecl)) void (*gnwDeviceEventListener_void)(int_32 type);
+typedef __attribute__((cdecl)) void (*gnwDeviceEventListener_u8)(int_32 type, uint_8 data);
 
 union gnwDeviceEventListener {
     uint_32 _handle;

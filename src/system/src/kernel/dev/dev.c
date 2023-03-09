@@ -332,16 +332,34 @@ static enum gnwDeviceError validateEmitter(const size_t * const devIdPtr,
     return GDE_NONE;
 }
 
+static enum gnwDeviceError validateListenerInvocation(const size_t deviceId) {
+    struct device *dev = &devices[deviceId];
+    if (!dev->listener._handle) {
+        return GDE_NOT_FOUND;
+    }
+    if (dev->holder == NONE_PROC_ID) {
+        OOPS("Inconsistent holder listener state")
+    }
+
+    return GDE_NONE;
+}
+
 enum gnwDeviceError k_dev_emit_void(const int_32 type) {
     enum gnwDeviceError err = validateEmitter(k_hal_servicedDevIdPtr, GDEF_VOID);
     if (err) {
         return err;
     }
-
-    gnwDeviceEventListener_void listener = devices[*k_hal_servicedDevIdPtr].listener.onEvent_void;
-    if (listener) {
-        #warning TO BE IMPLEMENTED
+    err = validateListenerInvocation(*k_hal_servicedDevIdPtr);
+    if (err == GDE_NOT_FOUND) {
+        return GDE_NONE;
+    } else if (err) {
+        return err;
     }
+
+    struct device *dev = &devices[*k_hal_servicedDevIdPtr];
+    gnwDeviceEventListener_void listener = dev->listener.onEvent_void;
+
+    k_proc_invoke_32(dev->holder, (void (*)(uint_32))listener, type);
 
     return GDE_NONE;
 }
@@ -352,11 +370,17 @@ enum gnwDeviceError k_dev_emit_u8(const int_32 type,
     if (err) {
         return err;
     }
-
-    gnwDeviceEventListener_u8 listener = devices[*k_hal_servicedDevIdPtr].listener.onEvent_u8;
-    if (listener) {
-        #warning TO BE IMPLEMENTED
+    err = validateListenerInvocation(*k_hal_servicedDevIdPtr);
+    if (err == GDE_NOT_FOUND) {
+        return GDE_NONE;
+    } else if (err) {
+        return err;
     }
+
+    struct device *dev = &devices[*k_hal_servicedDevIdPtr];
+    gnwDeviceEventListener_u8 listener = dev->listener.onEvent_u8;
+
+    k_proc_invoke_32_8(dev->holder, (void (*)(uint_32, uint_8))listener, type, data);
 
     return GDE_NONE;
 }

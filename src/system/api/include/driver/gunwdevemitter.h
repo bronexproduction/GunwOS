@@ -43,6 +43,7 @@ SYSCALL_DECL enum gnwDeviceError emit_void(const int_32 type) {
 */
 SYSCALL_DECL enum gnwDeviceError emit_u8(const int_32 type, const uint_8 data) {
     SYSCALL_PAR1(type);
+    SYSCALL_PAR2(data);
 
     SYSCALL_DRIVER_FUNC(EMIT_U8);
     SYSCALL_DRIVER_INT;

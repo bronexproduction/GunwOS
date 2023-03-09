@@ -311,6 +311,16 @@ void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const procId_t currentP
     STACK_VAL(refEsp, 16, 56) = kernelProc.cpuState.ss;
 }
 
+void k_proc_invoke_32(const procId_t procId, void (*funPtr)(uint_32), uint_32 p1) {
+    #warning TO BE IMPLEMENTED
+    funPtr(p1);
+}
+
+void k_proc_invoke_32_8(const procId_t procId, void (*funPtr)(uint_32, uint_8), uint_32 p1, uint_8 p2) {
+    #warning TO BE IMPLEMENTED
+    funPtr(p1, p2);
+}
+
 static void k_proc_prepareKernelProc() {
     memset(&kernelProc, 0, sizeof(struct k_proc_process));
     kernelProc.info.state = PS_RUNNING;
