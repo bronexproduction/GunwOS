@@ -6,6 +6,7 @@
 //
 
 #include <gunwdev.h>
+#include <driver/gunwdrv.h>
 #include <stdgunw/mem.h>
 #include <hal/int/irq.h>
 #include <error/panic.h>

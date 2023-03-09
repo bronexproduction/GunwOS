@@ -9,7 +9,7 @@
 #define GUNWOS_GUNWDISPLAY_H
 
 #include <stdgunw/types.h>
-#include <uha/gunwuha_display.h>
+#include <uha/gunwuha_display_desc.h>
 #include <gunwdev.h>
 
 #warning may not work from DPL_3 yet

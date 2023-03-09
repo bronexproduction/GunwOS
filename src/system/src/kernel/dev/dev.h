@@ -9,6 +9,7 @@
 #define DEV_H
 
 #include <gunwdev.h>
+#include <driver/gunwdrv.h>
 
 enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescriptor * const descriptor);
 enum gnwDriverError k_dev_start(size_t id);

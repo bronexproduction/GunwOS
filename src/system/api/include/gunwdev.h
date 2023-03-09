@@ -8,9 +8,22 @@
 #ifndef GUNWOS_GUNWDEV_H
 #define GUNWOS_GUNWDEV_H
 
-#include "scl_def.h"
-#include "gunwdrv.h"
-#include "gunwfug.h"
+#include <scl_def.h>
+#include <gunwfug.h>
+#include <gunwuhadesc.h>
+
+/*
+    Device type
+*/
+enum gnwDeviceType {
+    DEV_TYPE_SYSTEM,
+    DEV_TYPE_KEYBOARD,
+    DEV_TYPE_FDC,
+    DEV_TYPE_CHAR_IN,
+    DEV_TYPE_CHAR_OUT,
+    DEV_TYPE_DISPLAY,
+    DEV_TYPE_UNKNOWN    = -1
+};
 
 enum gnwDeviceError {
     GDE_NONE = 0,

@@ -7,7 +7,7 @@
 
 #include <stdgunw/types.h>
 #include <stdgunw/defs.h>
-#include <gunwdrv.h>
+#include <driver/gunwdrv.h>
 #include "cpu/cpu.h"
 #include "gdt/gdt.h"
 #include "int/irq.h"

@@ -5,8 +5,8 @@
 //  Created by Artur Danielewski on 15.01.2023.  
 //
 
-#include <gunwdrv.h>
 #include <stdgunw/defs.h>
+#include <driver/gunwdrv.h>
 #include <error/panic.h>
 
 static const volatile ptr_t VIDEO_HW_MEM   = (volatile ptr_t)0xb8000;
