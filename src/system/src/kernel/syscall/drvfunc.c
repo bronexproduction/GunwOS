@@ -63,9 +63,7 @@ SCR(emit_void,
 
     REG_RET(32, err)
 
-    #warning GET EMITTER ID
-
-    err = k_dev_emit_void(devId, type);
+    err = k_dev_emit_void(type);
 )
 
 /*
@@ -85,7 +83,5 @@ SCR(emit_u8,
 
     REG_RET(32, err)
 
-    #warning GET EMITTER ID
-
-    err = k_dev_emit_u8(devId, type, data);
+    err = k_dev_emit_u8(type, data);
 )

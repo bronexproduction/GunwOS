@@ -26,6 +26,8 @@ static struct isrEntry {
     void (*routine)();
 } isrReg[DEV_IRQ_LIMIT];
 
+const size_t *k_hal_servicedDevIdPtr;
+
 void k_hal_init() {
     memnull(isrReg, sizeof(struct isrEntry) * DEV_IRQ_LIMIT);
 
@@ -116,6 +118,11 @@ __attribute__((naked)) void k_hal_irqHandle() {
     }
 
     /*
+        Setting currently serviced device identifier
+    */
+    k_hal_servicedDevIdPtr = &isrReg[irq].devId;
+
+    /*
         Calling service routine associated with requested IRQ
     */
     __asm__ volatile ("call *%0" : : "r" (isr));
@@ -129,6 +136,11 @@ __attribute__((naked)) void k_hal_irqHandle() {
     */
 
     __asm__ volatile ("k_hal_irqHandle_end:");
+
+    /*
+        Clearing currently serviced device identifier
+    */
+    k_hal_servicedDevIdPtr = nullptr;
 
     /*
         Send EOI command to PIC

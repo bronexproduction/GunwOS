@@ -13,4 +13,6 @@
 
 enum gnwDriverError k_hal_install(const size_t devId, struct gnwDriverConfig driver);
 
+const size_t *k_hal_servicedDevIdPtr;
+
 #endif // HAL_H
