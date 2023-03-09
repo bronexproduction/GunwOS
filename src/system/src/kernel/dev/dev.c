@@ -5,12 +5,12 @@
 //  Created by Artur Danielewski on 06.03.2020.
 //
 
-#include <gunwdev.h>
-#include <driver/gunwdrv.h>
 #include <stdgunw/mem.h>
+#include <gunwdev.h>
+#include <hal/hal.h>
 #include <hal/int/irq.h>
-#include <error/panic.h>
 #include <hal/proc/proc.h>
+#include <error/panic.h>
 
 #define MAX_DEVICES 8
 
@@ -95,9 +95,10 @@ enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescr
     
     enum gnwDriverError e = NO_ERROR;
 
+    *id = devicesCount;
+
     if (driverDesc->isr) {
-        extern enum gnwDriverError k_hal_install(const struct gnwDriverConfig);
-        e = k_hal_install(descriptor->driver.descriptor);   
+        e = k_hal_install(*id, descriptor->driver.descriptor);   
     }
 
     if (e != NO_ERROR) {
@@ -105,7 +106,6 @@ enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescr
         return e;
     }
 
-    *id = devicesCount;
     devices[devicesCount++] = dev;
 
     return NO_ERROR;

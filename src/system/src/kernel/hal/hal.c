@@ -5,9 +5,10 @@
 //  Created by Artur Danielewski on 21.01.2021.
 //
 
-#include <stdgunw/types.h>
+#include "hal.h"
+
 #include <stdgunw/defs.h>
-#include <driver/gunwdrv.h>
+#include <stdgunw/mem.h>
 #include "cpu/cpu.h"
 #include "gdt/gdt.h"
 #include "int/irq.h"
@@ -20,7 +21,14 @@ extern void k_pic_configure();
 extern void k_idt_loadDefault();
 extern void k_proc_init();
 
+static struct isrEntry {
+    size_t devId;
+    void (*routine)();
+} isrReg[DEV_IRQ_LIMIT];
+
 void k_hal_init() {
+    memnull(isrReg, sizeof(struct isrEntry) * DEV_IRQ_LIMIT);
+
     k_cpu_init();
     #warning TODO: move GDT configuration from the boot loader
 
@@ -35,20 +43,18 @@ void k_hal_init() {
     __asm__ volatile ("sti");
 }
 
-static void (*isrReg[DEV_IRQ_LIMIT]) (void);
-
 bool k_hal_isIRQRegistered(uint_8 num) {
     if (num >= DEV_IRQ_LIMIT) {
         return false;
     }
-    if (isrReg[num] == nullptr) {
+    if (isrReg[num].routine == nullptr) {
         return false;
     }
 
     return true;
 }
 
-enum gnwDriverError k_hal_install(struct gnwDriverConfig driver) {
+enum gnwDriverError k_hal_install(const size_t devId, struct gnwDriverConfig driver) {
     if (!driver.isr) {
         return ISR_MISSING;
     }
@@ -56,7 +62,8 @@ enum gnwDriverError k_hal_install(struct gnwDriverConfig driver) {
         return IRQ_CONFLICT;
     }
 
-    isrReg[driver.irq] = driver.isr;
+    isrReg[driver.irq].devId = devId;
+    isrReg[driver.irq].routine = driver.isr;
         
     extern void k_pic_enableIRQ(const enum k_dev_irq);
     k_pic_enableIRQ(driver.irq);
@@ -103,7 +110,7 @@ __attribute__((naked)) void k_hal_irqHandle() {
     /*
         Checking if service routine for given IRQ is available
     */
-    void (*isr)() = isrReg[irq];
+    void (*isr)() = isrReg[irq].routine;
     if (!isr) {
         __asm__ volatile ("jmp k_hal_irqHandle_irqServiceRoutineUnavailable");
     }
