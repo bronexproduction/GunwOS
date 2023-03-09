@@ -45,3 +45,33 @@ SCR(wrb,
 
     k_bus_outb(port, value);
 )
+
+/*
+    Code - 0x02
+    Function - EMIT_VOID
+
+    Params:
+    
+        * EBX - driver-specific event type
+*/
+SCR(emit_void,
+    REG(32, type, ebx)
+
+    #warning TO BE IMPLEMENTED
+)
+
+/*
+    Code - 0x03
+    Function - EMIT_U8
+
+    Params:
+    
+        * EBX - driver-specific event type
+        * CL - event data
+*/
+SCR(emit_u8,
+    REG(32, type, ebx)
+    REG(8, data, cl)
+
+    #warning TO BE IMPLEMENTED
+)

@@ -8,7 +8,7 @@
 #ifndef GUNWOS_GUNWIO_H
 #define GUNWOS_GUNWIO_H
 
-#include "scl_def.h"
+#include <scl_def.h>
 #include <gunwdev.h>
 
 /*

@@ -12,7 +12,7 @@
 #include "drvfunc.h"
 #include "usrfunc.h"
 
-#define DRIVER_SYSCALL_COUNT 2
+#define DRIVER_SYSCALL_COUNT 4
 #define SYSCALL_COUNT 15
 
 /*
@@ -21,8 +21,10 @@
     Array index corresponds to syscall function code
 */
 static void (*driverSyscallReg[DRIVER_SYSCALL_COUNT])() = {
-    /* 0x00 */ k_scr_rdb,
-    /* 0x01 */ k_scr_wrb,
+    /* 0x00 */ (void *)k_scr_rdb,
+    /* 0x01 */ (void *)k_scr_wrb,
+    /* 0x02 */ (void *)k_scr_emit_void,
+    /* 0x03 */ (void *)k_scr_emit_u8,
 };
 
 /*
@@ -32,19 +34,19 @@ static void (*driverSyscallReg[DRIVER_SYSCALL_COUNT])() = {
 */
 static void (*userSyscallReg[SYSCALL_COUNT])() = {
     /* 0x00 */ 0,
-    /* 0x01 */ k_scr_debugPrint,
+    /* 0x01 */ (void *)k_scr_debugPrint,
     /* 0x02 */ (void *)k_scr_devCharWrite,
-    /* 0x03 */ k_scr_exit,
+    /* 0x03 */ (void *)k_scr_exit,
     /* 0x04 */ 0,
-    /* 0x05 */ k_scr_sleepms,
+    /* 0x05 */ (void *)k_scr_sleepms,
     /* 0x06 */ 0,
     /* 0x07 */ 0,
     /* 0x08 */ (void *)k_scr_devGetById,
     /* 0x09 */ (void *)k_scr_devGetByType,
     /* 0x0a */ (void *)k_scr_devAcquire,
-    /* 0x0b */ k_scr_devRelease,
+    /* 0x0b */ (void *)k_scr_devRelease,
     /* 0x0c */ (void *)k_scr_devMemWrite,
-    /* 0x0d */ k_scr_fug,
+    /* 0x0d */ (void *)k_scr_fug,
     /* 0x0e */ (void *)k_scr_devListen,
 };
 
