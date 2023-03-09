@@ -28,4 +28,10 @@ enum gnwDeviceError k_dev_listen(const size_t processId,
                                  const size_t deviceId, 
                                  const struct gnwDeviceEventListener * const listener);
 
+enum gnwDeviceError k_dev_emit_void(const size_t deviceId, 
+                                    const int_32 type);
+enum gnwDeviceError k_dev_emit_u8(const size_t deviceId,
+                                  const int_32 type,
+                                  const uint_8 data);
+
 #endif // DEV_H

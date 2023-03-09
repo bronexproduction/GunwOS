@@ -272,5 +272,19 @@ enum gnwDeviceError k_dev_listen(const size_t processId,
                                  const size_t deviceId, 
                                  const struct gnwDeviceEventListener * const listener) {
 #warning TO BE IMPLEMENTED
-    return GDE_UNKNOWN;
+    return GDE_NONE;
+}
+
+
+enum gnwDeviceError k_dev_emit_void(const size_t deviceId, 
+                                    const int_32 type) {
+#warning TO BE IMPLEMENTED
+    return GDE_NONE;
+}
+
+enum gnwDeviceError k_dev_emit_u8(const size_t deviceId,
+                                  const int_32 type,
+                                  const uint_8 data) {
+#warning TO BE IMPLEMENTED
+    return GDE_NONE;
 }

@@ -103,11 +103,15 @@ ISR(
 
         MSB contains information whether key was pressed or released
     */
+    enum gnwDeviceError err;
     if (c & 0b10000000) {
-        emit_u8(GKEC_KEY_UP, c & 0b01111111);
+        err = emit_u8(GKEC_KEY_UP, c & 0b01111111);
     }
     else {
-        emit_u8(GKEC_KEY_DOWN, c);
+        err = emit_u8(GKEC_KEY_DOWN, c);
+    }
+    if (err != GDE_NONE) {
+        OOPS("Error emitting keyboard event");
     }
 )
 

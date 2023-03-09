@@ -7,6 +7,8 @@
 
 #include <hal/io/bus.h>
 #include "func.h"
+#include <scl_def.h>
+#include <dev/dev.h>
 
 /*
     Driver-level system calls
@@ -24,7 +26,8 @@
 */
 SCR(rdb,
     REG(16, port, bx)
-    REG(8, value, al)
+
+    REG_RET(8, value)
 
     value = k_bus_inb(port);
 )
@@ -34,7 +37,6 @@ SCR(rdb,
     Function - WRB
 
     Params:
-    
         * BX - port
         * CL - value
 
@@ -51,13 +53,19 @@ SCR(wrb,
     Function - EMIT_VOID
 
     Params:
-    
         * EBX - driver-specific event type
+        
+    Return:
+        * EAX - error code if any, otherwise GDE_NONE (see enum gnwDeviceError)
 */
 SCR(emit_void,
     REG(32, type, ebx)
 
-    #warning TO BE IMPLEMENTED
+    REG_RET(32, err)
+
+    #warning GET EMITTER ID
+
+    err = k_dev_emit_void(devId, type);
 )
 
 /*
@@ -65,13 +73,19 @@ SCR(emit_void,
     Function - EMIT_U8
 
     Params:
-    
         * EBX - driver-specific event type
         * CL - event data
+        
+    Return:
+        * EAX - error code if any, otherwise GDE_NONE (see enum gnwDeviceError)
 */
 SCR(emit_u8,
     REG(32, type, ebx)
     REG(8, data, cl)
 
-    #warning TO BE IMPLEMENTED
+    REG_RET(32, err)
+
+    #warning GET EMITTER ID
+
+    err = k_dev_emit_u8(devId, type, data);
 )

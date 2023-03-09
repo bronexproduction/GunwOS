@@ -22,7 +22,7 @@ enum gnwDeviceType {
     DEV_TYPE_CHAR_IN,
     DEV_TYPE_CHAR_OUT,
     DEV_TYPE_DISPLAY,
-    DEV_TYPE_UNKNOWN    = -1
+    DEV_TYPE_UNKNOWN = -1
 };
 
 enum gnwDeviceError {
@@ -37,6 +37,7 @@ enum gnwDeviceError {
     GDE_OPERATION_FAILED,
     GDE_UNKNOWN = -1
 };
+_Static_assert(sizeof(enum gnwDeviceError) == sizeof(int_32), "Unexpected enum gnwDeviceError size");
 
 struct gnwDeviceEventListener {
     void (*onEvent_void)(int_32 type);
