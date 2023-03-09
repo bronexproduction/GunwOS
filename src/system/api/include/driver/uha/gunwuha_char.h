@@ -9,12 +9,7 @@
 #ifndef GUNWOS_GUNWUHA_CHAR_H
 #define GUNWOS_GUNWUHA_CHAR_H
 
-#include <stdgunw/types.h>
-#include <gunwstor.h>
-
-struct gnwDeviceUHA_char_in_desc {
-    uint_32 _unused;
-};
+#include <uha/gunwuha_char_desc.h>
 
 /*
     Character input device
@@ -38,10 +33,6 @@ struct gnwDeviceUHA_char_in_routine {
             * Number of characters read, 0 on error
     */
     size_t (*read)(const uint_8 * c);
-};
-
-struct gnwDeviceUHA_char_out_desc {
-    uint_32 _unused;
 };
 
 /*

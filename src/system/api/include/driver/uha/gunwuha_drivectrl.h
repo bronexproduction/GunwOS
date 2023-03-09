@@ -9,12 +9,8 @@
 #ifndef GUNWOS_GUNWUHA_DRIVECTRL_H
 #define GUNWOS_GUNWUHA_DRIVECTRL_H
 
-#include <stdgunw/types.h>
-#include "../gunwstor.h"
-
-struct gnwDeviceUHA_driveCtrl_desc {
-    uint_32 _unused;
-};
+#include <uha/gunwuha_drivectrl_desc.h>
+#include <gunwstor.h>
 
 struct gnwDeviceUHA_driveCtrl_routine {
     /*

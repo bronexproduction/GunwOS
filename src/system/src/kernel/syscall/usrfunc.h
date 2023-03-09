@@ -8,7 +8,8 @@
 #ifndef USRFUNC_H
 #define USRFUNC_H
 
-#include <gunwdrv.h>
+#include <driver/gunwdrv.h>
+#include <gunwdev.h>
 #include <gunwfug.h>
 
 /*
@@ -23,9 +24,10 @@ __attribute__((naked)) void k_scr_debugPrint(const char * const buffer);
 
 /*
     Code - 0x02
-    Function - CHAR_OUT_WRITE
+    Function - DEV_CHAR_WRITE
 */
-__attribute__((naked)) void k_scr_charOutWrite(uint_32 deviceId, const char character);
+__attribute__((naked)) void k_scr_devCharWrite(uint_32 deviceId, 
+                                               const char character);
 
 /*
     Code - 0x03
@@ -65,15 +67,22 @@ __attribute__((naked)) void k_scr_devRelease(const uint_32);
 
 /*
     Code - 0x0c
-    Function - DEV_WRITE
+    Function - DEV_MEM_WRITE
 */
-__attribute__((naked)) enum gnwDeviceError k_scr_devWrite(const size_t,
-                                                          const void * const);
+__attribute__((naked)) enum gnwDeviceError k_scr_devMemWrite(const size_t,
+                                                             const void * const);
 
 /*
     Code - 0x0d
     Function - FUG
 */
 __attribute__((naked)) void k_scr_fug(enum gnwFugCode);
+
+/*
+    Code - 0x0e
+    Function - DEV_LISTEN
+*/
+__attribute__((naked)) enum gnwDeviceError k_scr_devListen(const size_t identifier,
+                                                           const union gnwDeviceEventListener listener);
 
 #endif // USRFUNC_H

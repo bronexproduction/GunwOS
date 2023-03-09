@@ -9,6 +9,7 @@
 #define DEV_H
 
 #include <gunwdev.h>
+#include <driver/gunwdrv.h>
 
 enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescriptor * const descriptor);
 enum gnwDriverError k_dev_start(size_t id);
@@ -22,5 +23,13 @@ enum gnwDeviceError k_dev_writeMem(const procId_t processId,
 enum gnwDeviceError k_dev_writeChar(const procId_t processId, 
                                     const size_t deviceId,
                                     const char character);
+
+enum gnwDeviceError k_dev_listen(const procId_t processId, 
+                                 const size_t deviceId, 
+                                 const union gnwDeviceEventListener listener);
+
+enum gnwDeviceError k_dev_emit_void(const int_32 type);
+enum gnwDeviceError k_dev_emit_u8(const int_32 type,
+                                  const uint_8 data);
 
 #endif // DEV_H

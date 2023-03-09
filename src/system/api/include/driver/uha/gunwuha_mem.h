@@ -9,19 +9,7 @@
 #ifndef GUNWOS_GUNWUHA_MEM_H
 #define GUNWOS_GUNWUHA_MEM_H
 
-#include <stdgunw/types.h>
-
-struct gnwDeviceUHA_mem_desc {
-    /*
-        Size of mapped memory in bytes
-    */
-    size_t sizeBytes;
-    
-    /*
-        Size of accepted write buffer
-    */
-    size_t inputSizeBytes;
-};
+#include <uha/gunwuha_mem_desc.h>
 
 struct gnwDeviceUHA_mem_routine {
     /*

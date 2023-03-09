@@ -8,9 +8,22 @@
 #ifndef GUNWOS_GUNWDEV_H
 #define GUNWOS_GUNWDEV_H
 
-#include "scl_def.h"
-#include "gunwdrv.h"
-#include "gunwfug.h"
+#include <scl_def.h>
+#include <gunwfug.h>
+#include <gunwuhadesc.h>
+
+/*
+    Device type
+*/
+enum gnwDeviceType {
+    DEV_TYPE_SYSTEM,
+    DEV_TYPE_KEYBOARD,
+    DEV_TYPE_FDC,
+    DEV_TYPE_CHAR_IN,
+    DEV_TYPE_CHAR_OUT,
+    DEV_TYPE_DISPLAY,
+    DEV_TYPE_UNKNOWN = -1
+};
 
 enum gnwDeviceError {
     GDE_NONE = 0,
@@ -18,12 +31,25 @@ enum gnwDeviceError {
     GDE_NOT_FOUND,
     GDE_CANNOT_BE_HELD,
     GDE_ALREADY_HELD,
+    GDE_ALREADY_SET,
     GDE_HANDLE_INVALID,
+    GDE_LISTENER_INVALID,
     GDE_INVALID_DEVICE_STATE,
     GDE_INVALID_OPERATION,
     GDE_OPERATION_FAILED,
     GDE_UNKNOWN = -1
 };
+_Static_assert(sizeof(enum gnwDeviceError) == sizeof(int_32), "Unexpected enum gnwDeviceError size");
+
+typedef __attribute__((cdecl)) void (*gnwDeviceEventListener_void)(int_32 type);
+typedef __attribute__((cdecl)) void (*gnwDeviceEventListener_u8)(int_32 type, uint_8 data);
+
+union gnwDeviceEventListener {
+    uint_32 _handle;
+    gnwDeviceEventListener_void onEvent_void;
+    gnwDeviceEventListener_u8 onEvent_u8;
+};
+_Static_assert(sizeof(union gnwDeviceEventListener) == sizeof(uint_32), "Unexpected union gnwDeviceEventListener size");
 
 /*
     Requests device information for given id
@@ -97,20 +123,60 @@ SYSCALL_DECL void devRelease(const uint_32 identifier) {
 }
 
 /*
+    Write character to character output device
+
+    Parameters:
+    * character - Character to be written
+    
+    Return value: Device error code or GDE_NONE (see enum gnwDeviceError)
+*/
+SYSCALL_DECL enum gnwDeviceError devCharWrite(uint_32 deviceId, 
+                                              const char character) {
+    SYSCALL_PAR1(deviceId);
+    SYSCALL_PAR2(character);
+
+    SYSCALL_USER_FUNC(DEV_CHAR_WRITE);
+    SYSCALL_USER_INT;
+    
+    register enum gnwDeviceError ret __asm__ ("eax");
+    return ret;
+}
+
+/*
     Write to the device
 
     Params:
         * identifier - device identifier
         * buffer - data buffer pointer
+    
+    Return value: Device error code or GDE_NONE (see enum gnwDeviceError)
 */
-SYSCALL_DECL enum gnwDeviceError devWrite(const size_t identifier,
-                                          const void * const buffer) {
+SYSCALL_DECL enum gnwDeviceError devMemWrite(const size_t identifier,
+                                             const void * const buffer) {
     CHECKPTR(buffer);
 
     SYSCALL_PAR1(identifier);
     SYSCALL_PAR2(buffer);
 
-    SYSCALL_USER_FUNC(DEV_WRITE);
+    SYSCALL_USER_FUNC(DEV_MEM_WRITE);
+    SYSCALL_USER_INT;
+
+    SYSCALL_RETVAL(32);
+}
+
+/*
+    Register a listener to device events
+
+    Params:
+        * identifier - device identifier
+        * listener - event listener
+*/
+SYSCALL_DECL enum gnwDeviceError devListen(const size_t identifier,
+                                           const union gnwDeviceEventListener listener) {
+    SYSCALL_PAR1(identifier);
+    SYSCALL_PAR2(listener._handle);
+
+    SYSCALL_USER_FUNC(DEV_LISTEN);
     SYSCALL_USER_INT;
 
     SYSCALL_RETVAL(32);

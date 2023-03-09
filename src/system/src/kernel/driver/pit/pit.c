@@ -8,8 +8,8 @@
 //  https://wiki.osdev.org/Programmable_Interval_Timer
 //
 
-#include <gunwbus.h>
-#include <gunwdrv.h>
+#include <driver/gunwbus.h>
+#include <driver/gunwdrv.h>
 
 #include <driver/driver.h>
 #include <hal/io/io.h>

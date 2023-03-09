@@ -1,13 +1,13 @@
 //
-//  gunwuha_display.h
+//  gunwuha_display_desc.h
 //  Universal Hardware Abstraction for a display
 //  GunwOS
 //
-//  Created by Artur Danielewski on 15.01.2023.
+//  Created by Artur Danielewski on 09.03.2023.
 //
 
-#ifndef GUNWOS_GUNWUHA_DISPLAY_H
-#define GUNWOS_GUNWUHA_DISPLAY_H
+#ifndef GUNWOS_GUNWUHA_DISPLAY_DESC_H
+#define GUNWOS_GUNWUHA_DISPLAY_DESC_H
 
 #include <stdgunw/types.h>
 
@@ -85,13 +85,4 @@ struct gnwDeviceUHA_display_desc {
     enum gnwDeviceUHA_display_format format;
 };
 
-struct gnwDeviceUHA_display_routine {
-    void (*_unused)();
-};
-
-struct gnwDeviceUHA_display {
-    struct gnwDeviceUHA_display_desc desc;
-    struct gnwDeviceUHA_display_routine routine;
-};
-
-#endif // GUNWOS_GUNWUHA_DISPLAY_H
+#endif // GUNWOS_GUNWUHA_DISPLAY_DESC_H

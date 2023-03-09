@@ -58,7 +58,7 @@ SCR(debugPrint,
 
 /*
     Code - 0x02
-    Function - CHAR_OUT_WRITE
+    Function - DEV_CHAR_WRITE
     
     Params:
         * EBX - character output device identifier
@@ -67,7 +67,7 @@ SCR(debugPrint,
     Return:
         * EAX - error code (see enum gnwDeviceError)
 */
-SCR(charOutWrite,
+SCR(devCharWrite,
     REG(32, devId, ebx);
     REG(8, character, cl);
 
@@ -179,13 +179,16 @@ SCR(devRelease,
 
 /*
     Code - 0x0c
-    Function - DEV_WRITE
+    Function - DEV_MEM_WRITE
 
     Params:
         * EBX - device identifier
         * ECX - data buffer
+
+    Return:
+        * EAX - error code (enum gnwDeviceError)
 */
-SCR(devWrite,
+SCR(devMemWrite,
     REG(32, devId, ebx)
     REG(32, buf, ecx)
 
@@ -205,4 +208,25 @@ SCR(fug,
     REG(32, code, ebx)
 
     k_err_fug(code);
+)
+
+
+/*
+    Code - 0x0e
+    Function - DEV_LISTEN
+
+    Params:
+        * EBX - device identifier
+        * ECX - listener (const union gnwDeviceEventListener)
+    
+    Return:
+        * EAX - error code (enum gnwDeviceError)
+*/
+SCR(devListen,
+    REG(32, devId, ebx)
+    REG(32, lsnr, ecx)
+
+    REG_RET(32, err)
+
+    err = k_dev_listen((const size_t)k_proc_getCurrentId(), (const size_t)devId, (const union gnwDeviceEventListener)lsnr);
 )

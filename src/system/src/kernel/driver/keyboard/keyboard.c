@@ -10,8 +10,10 @@
 //  
 //
 
-#include <gunwbus.h>
-#include <gunwdrv.h>
+#include <driver/gunwbus.h>
+#include <driver/gunwdrv.h>
+#include <driver/gunwdevemitter.h>
+#include <gunwkeyboard.h>
 
 #include <driver/driver.h>
 #include <error/panic.h>
@@ -86,9 +88,6 @@
 #define KBD_STAT_TIM        0x40    /* Timeout bit (TIM) */
 #define KBD_STAT_PARERR     0x80    /* Parity error bit (PARE) */
 
-extern void user_cli_kbf_up(uint_8 k);
-extern void user_cli_kbf_down(uint_8 k);
-
 ISR(
     /* Checking output buffer status */
     if (!rdb(KBD_BUS_STATUS) & KBD_STAT_OUTB) {
@@ -104,11 +103,15 @@ ISR(
 
         MSB contains information whether key was pressed or released
     */
+    enum gnwDeviceError err;
     if (c & 0b10000000) {
-        user_cli_kbf_up(c & 0b01111111);
+        err = emit_u8(GKEC_KEY_UP, c & 0b01111111);
     }
     else {
-        user_cli_kbf_down(c);
+        err = emit_u8(GKEC_KEY_DOWN, c);
+    }
+    if (err != GDE_NONE) {
+        OOPS("Error emitting keyboard event");
     }
 )
 
@@ -119,7 +122,7 @@ static struct gnwDriverConfig desc() {
 static struct gnwDeviceUHA uha() {
     struct gnwDeviceUHA uha;
 
-    uha.system.desc._unused = 0;
+    uha.event.desc.eventDataFormat = GDEF_U8;
 
     return uha;
 }

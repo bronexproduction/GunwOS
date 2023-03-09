@@ -8,7 +8,7 @@
 #ifndef GUNWOS_GUNWBUS_H
 #define GUNWOS_GUNWBUS_H
 
-#include "scl_def.h"
+#include <scl_def.h>
 
 /*
     Read byte from system bus
@@ -18,6 +18,8 @@
 */
 SYSCALL_DECL uint_8 rdb(uint_16 const port) {
     SYSCALL_PAR1(port);
+
+#warning TODO: check if the driver is allowed to access the requested port (driver descriptor)
 
     SYSCALL_DRIVER_FUNC(RDB);
     SYSCALL_DRIVER_INT;
@@ -35,6 +37,8 @@ SYSCALL_DECL uint_8 rdb(uint_16 const port) {
 SYSCALL_DECL void wrb(uint_16 const port, uint_8 const val) {
     SYSCALL_PAR1(port);
     SYSCALL_PAR2(val);
+
+#warning TODO: check if the driver is allowed to access the requested port (driver descriptor)
 
     SYSCALL_DRIVER_FUNC(WRB);
     SYSCALL_DRIVER_INT;

@@ -8,7 +8,7 @@
 #ifndef GUNWOS_GUNWCTRL_H
 #define GUNWOS_GUNWCTRL_H
 
-#include "scl_def.h"
+#include <scl_def.h>
 
 /*
     Ends process execution

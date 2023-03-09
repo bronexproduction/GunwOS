@@ -62,5 +62,5 @@ enum gnwDeviceError pushFrame(const size_t deviceId,
                               const void * const buffer) {
     CHECKPTR(buffer)
 
-    return devWrite(deviceId, buffer);
+    return devMemWrite(deviceId, buffer);
 }

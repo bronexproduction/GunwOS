@@ -8,6 +8,7 @@
 #include <stdgunw/mem.h>
 #include <gunwdisplay.h>
 #include <error/panic.h>
+#include <stdgunw/defs.h>
 #include "video.h"
 
 #warning TAKE IT FROM DISPLAY INSTEAD (requires dynamic memory allocation)
