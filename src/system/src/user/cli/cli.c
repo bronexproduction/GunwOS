@@ -161,9 +161,9 @@ void s_cli_init() {
         OOPS("Unable to attach to keyboard");
     }
 
-    struct gnwDeviceEventListener listener;
+    union gnwDeviceEventListener listener;
     listener.onEvent_u8 = (gnwKeyboardEventListener)onKeyboardEvent;
-    e = devListen(keyboardDesc.identifier, &listener);
+    e = devListen(keyboardDesc.identifier, listener);
     if (e) {
         devRelease(charOutDesc.identifier);
         devRelease(keyboardDesc.identifier);
