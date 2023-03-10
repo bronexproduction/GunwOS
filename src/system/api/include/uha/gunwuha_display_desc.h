@@ -9,7 +9,7 @@
 #ifndef GUNWOS_GUNWUHA_DISPLAY_DESC_H
 #define GUNWOS_GUNWUHA_DISPLAY_DESC_H
 
-#include <stdgunw/types.h>
+#include <types.h>
 
 /*
     Display format

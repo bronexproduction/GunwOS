@@ -8,8 +8,8 @@
 #ifndef GUNWOS_SCL_DEF_H
 #define GUNWOS_SCL_DEF_H
 
-#include <stdgunw/types.h>
-#include <stdgunw/utils.h>
+#include <types.h>
+#include <utils.h>
 
 #define SYSCALL_DRIVER_INTERRUPT                0x45
 #define SYSCALL_USER_INTERRUPT                  0x69

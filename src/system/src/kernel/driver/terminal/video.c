@@ -5,10 +5,10 @@
 //  Created by Artur Danielewski on 18.01.2018.
 //
 
-#include <stdgunw/mem.h>
+#include <mem.h>
 #include <gunwdisplay.h>
 #include <error/panic.h>
-#include <stdgunw/defs.h>
+#include <defs.h>
 #include "video.h"
 
 #warning TAKE IT FROM DISPLAY INSTEAD (requires dynamic memory allocation)

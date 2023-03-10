@@ -8,7 +8,7 @@
 #ifndef GUNWOS_GUNWDEVEMITTER_H
 #define GUNWOS_GUNWDEVEMITTER_H
 
-#include <stdgunw/types.h>
+#include <types.h>
 #include <scl_def.h>
 #include <gunwdev.h>
 

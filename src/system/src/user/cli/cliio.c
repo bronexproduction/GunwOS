@@ -7,8 +7,8 @@
 
 #include "cliio.h"
 
-#include <stdgunw/mem.h>
-#include <stdgunw/string.h>
+#include <mem.h>
+#include <string.h>
 #include <gunwdev.h>
 
 #define IO_GENERAL_FAILURE -1

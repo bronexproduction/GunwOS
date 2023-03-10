@@ -5,8 +5,8 @@
 //  Created by Artur Danielewski on 11.01.2021.
 //
 
-#include <stdgunw/utils.h>
-#include <stdgunw/string.h>
+#include <utils.h>
+#include <string.h>
 #include <gunwdev.h>
 #include "func.h"
 #include <error/fug.h>
@@ -42,8 +42,7 @@ static size_t debugPrint(uint_32 buffer) {
         OOPS("Access violation");   
     }
 
-    extern int user_cli_putsl(const char * const s, unsigned int l);
-    user_cli_putsl((const char * const)buffer, bufLen);
+    #warning TO BE IMPLEMENTED - MISSING CHARACTER OUTPUT
     return bufLen;
 }
 

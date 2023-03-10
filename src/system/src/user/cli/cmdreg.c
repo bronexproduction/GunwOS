@@ -7,8 +7,8 @@
 
 #include <stddef.h>
 
-#include <stdgunw/utils.h>
-#include <stdgunw/string.h>
+#include <utils.h>
+#include <string.h>
 #include "cmdutil.h"
 #include "cliio.h"
 

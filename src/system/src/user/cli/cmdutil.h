@@ -8,8 +8,8 @@
 #ifndef CMDUTIL_H
 #define CMDUTIL_H
 
-#include <stdgunw/types.h>
-#include <stdgunw/string.h>
+#include <types.h>
+#include <string.h>
 
 #define CMD_LEN_MAX 64
 

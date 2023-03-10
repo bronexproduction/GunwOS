@@ -9,7 +9,7 @@
 #ifndef GUNWOS_GUNWUHA_KEYBOARD_DESC_H
 #define GUNWOS_GUNWUHA_KEYBOARD_DESC_H
 
-#include <stdgunw/types.h>
+#include <types.h>
 
 struct gnwDeviceUHA_keyboard_desc {
     uint_32 _unused;

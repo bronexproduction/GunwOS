@@ -8,7 +8,7 @@
 #ifndef GUNWOS_GUNWKEYBOARD_H
 #define GUNWOS_GUNWKEYBOARD_H
 
-#include <stdgunw/types.h>
+#include <types.h>
 
 /*
     Macro for keyboard event listener signature

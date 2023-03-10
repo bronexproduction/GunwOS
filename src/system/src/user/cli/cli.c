@@ -8,11 +8,11 @@
 #include "keybuf.h"
 #include "keymap.h"
 #include "charset.h"
-#include <error/panic.h>
-#include <stdgunw/types.h>
-#include <stdgunw/mem.h>
+#include <types.h>
+#include <mem.h>
 #include <gunwdev.h>
 #include <gunwkeyboard.h>
+#include <gunwfug.h>
 
 #include "cliio.h"
 #include "cmdutil.h"
@@ -105,7 +105,8 @@ static void onKeyDown(const uint_8 c) {
     uint_8 charCode = *(&(user_cli_kmp_default[c].code) + user_cli_kbf_currModMask());
 
     if (charCode >= CHARSET_CODES_MAX) {
-        OOPS("Character code over accepted limit")
+        // OOPS("Character code over accepted limit")
+        fug(FUG_UNDEFINED);
         return;
     }
 
@@ -136,12 +137,14 @@ void s_cli_init() {
     enum gnwDeviceError e = devGetByType(DEV_TYPE_CHAR_OUT, &charOutDesc);
 
     if (e) {
-        OOPS("Error retrieving available character output device");
+        // OOPS("Error retrieving available character output device");
+        fug(FUG_UNDEFINED);
     }
 
     e = devAcquire(charOutDesc.identifier);
     if (e) {
-        OOPS("Unable to attach to character output");
+        // OOPS("Unable to attach to character output");
+        fug(FUG_UNDEFINED);
     }
     
     /* 
@@ -152,13 +155,15 @@ void s_cli_init() {
 
     if (e) {
         devRelease(charOutDesc.identifier);
-        OOPS("Error retrieving available keyboard");
+        // OOPS("Error retrieving available keyboard");
+        fug(FUG_UNDEFINED);
     }
 
     e = devAcquire(keyboardDesc.identifier);
     if (e) {
         devRelease(charOutDesc.identifier);
-        OOPS("Unable to attach to keyboard");
+        // OOPS("Unable to attach to keyboard");
+        fug(FUG_UNDEFINED);
     }
 
     union gnwDeviceEventListener listener;
@@ -167,7 +172,8 @@ void s_cli_init() {
     if (e) {
         devRelease(charOutDesc.identifier);
         devRelease(keyboardDesc.identifier);
-        OOPS("Unable to attach keyboard listener");
+        // OOPS("Unable to attach keyboard listener");
+        fug(FUG_UNDEFINED);
     }
 
     /*
@@ -178,7 +184,7 @@ void s_cli_init() {
 
     user_cli_kbf_register((struct user_cli_kbf_listener){0, onKeyDown});
     
-    user_cli_puts("GunwOS 0.0.4_DEV started. (C) Bronex Production 2022\n\n");
+    user_cli_puts("GunwShell 0.0.4_DEV started. (C) Bronex Production 2023\n\n");
 
     prompt();
 }

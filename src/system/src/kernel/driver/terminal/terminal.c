@@ -6,7 +6,7 @@
 //
 
 #include <driver/gunwdrv.h>
-#include <stdgunw/mem.h>
+#include <mem.h>
 
 #include "video.h"
 

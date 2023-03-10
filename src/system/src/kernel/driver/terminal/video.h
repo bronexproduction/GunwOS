@@ -8,8 +8,8 @@
 #ifndef VIDEO_H
 #define VIDEO_H
 
-#include <stdgunw/utils.h>
-#include <stdgunw/types.h>
+#include <utils.h>
+#include <types.h>
 
 typedef enum k_vid_charColor {
     Black = 0,

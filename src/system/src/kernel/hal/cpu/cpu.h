@@ -8,7 +8,7 @@
 #ifndef CPU_H
 #define CPU_H
 
-#include <stdgunw/types.h>
+#include <types.h>
 
 #define CPU_PUSH { \
     __asm__ volatile ("pushw %ds"); \

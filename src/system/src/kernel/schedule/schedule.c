@@ -5,7 +5,7 @@
 //  Created by Artur Danielewski on 25.01.2023.
 //
 
-#include <stdgunw/defs.h>
+#include <defs.h>
 #include <hal/proc/proc.h>
 #include <queue/queue.h>
 #include <error/panic.h>

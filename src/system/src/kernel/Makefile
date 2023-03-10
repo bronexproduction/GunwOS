@@ -1,8 +1,6 @@
 ASMFLAGS=-f elf
-CFLAGS=-std=c11 -c -ffreestanding -mno-red-zone -ggdb -I api/include $(CFLAGS_GLOBAL)
+CFLAGS=-std=c11 -c -ffreestanding -mno-red-zone -ggdb -I $(STDGUNW_INCLUDE_DIR) -I $(API_INCLUDE_DIR) -I $(KERNEL_DIR) $(CFLAGS_GLOBAL)
 CXXFLAGS=-std=c++11 -c -ffreestanding -mno-red-zone -ggdb $(CXXFLAGS_GLOBAL)
-KERNEL_DIR=src/kernel
-USER_DIR=src/user
 RSFLAGS=$(RSFLAGS_GLOBAL)
 LFLAGS=-melf_i386 -i
 
@@ -17,10 +15,10 @@ kernel.o: _kernel_entry.o _kernel.o
 	$(L) $(LFLAGS) -o $@ $(shell $(O_DIR_LISTING))
 
 _kernel_entry.o:
-	$(ASM) $(ASMFLAGS) -o $@ $(KERNEL_DIR)/kernel_entry.s
+	$(ASM) $(ASMFLAGS) -o $@ kernel_entry.s
 
 _kernel.o:
-	$(C_DIR_LISTING) -exec $(C) -I $(KERNEL_DIR) -I $(USER_DIR) $(CFLAGS) -o {}.o {} $(EXEC_TERMINATOR)
+	$(C_DIR_LISTING) -exec $(C) $(CFLAGS) -o {}.o {} $(EXEC_TERMINATOR)
 	$(CXX_DIR_LISTING) -exec $(CXX) $(CXXFLAGS) -o {}.o {} $(EXEC_TERMINATOR)
 	$(RS_DIR_LISTING) -exec $(RUSTC) $(RSFLAGS) -o {}.o {} $(EXEC_TERMINATOR)
 	

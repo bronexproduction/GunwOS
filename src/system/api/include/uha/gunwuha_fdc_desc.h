@@ -9,7 +9,7 @@
 #ifndef GUNWOS_GUNWUHA_FDC_DESC_H
 #define GUNWOS_GUNWUHA_FDC_DESC_H
 
-#include <stdgunw/types.h>
+#include <types.h>
 
 struct gnwDeviceUHA_fdc_desc {
     uint_32 _unused;

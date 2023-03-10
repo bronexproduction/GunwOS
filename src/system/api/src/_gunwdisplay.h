@@ -11,7 +11,7 @@
 #include <gunwdisplay.h>
 #include <gunwdev.h>
 #include <gunwfug.h>
-#include <stdgunw/mem.h>
+#include <mem.h>
 #include <scl_def.h>
 
 enum DisplayType {

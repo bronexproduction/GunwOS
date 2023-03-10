@@ -5,8 +5,8 @@
 //  Created by Artur Danielewski on 11.01.2021.
 //
 
-#include <stdgunw/types.h>
-#include <stdgunw/mem.h>
+#include <types.h>
+#include <mem.h>
 #include <error/panic.h>
 
 #include "drvfunc.h"

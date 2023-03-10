@@ -5,8 +5,8 @@
 //  Created by Artur Danielewski on 02.02.2021.
 //
 
-#include <stdgunw/types.h>
-#include <stdgunw/defs.h>
+#include <types.h>
+#include <defs.h>
 #include <error/panic.h>
 #include <schedule/schedule.h>
 #include <hal/criticalsec/criticalsec.h>

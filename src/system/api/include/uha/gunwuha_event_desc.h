@@ -9,7 +9,7 @@
 #ifndef GUNWOS_GUNWUHA_EVENT_DESC_H
 #define GUNWOS_GUNWUHA_EVENT_DESC_H
 
-#include <stdgunw/types.h>
+#include <types.h>
 #include <gunwdevevent.h>
 
 /*

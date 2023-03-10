@@ -6,7 +6,7 @@
 //  Mostly copied & pasted from OS-dev wiki
 //
 
-#include <stdgunw/types.h>
+#include <types.h>
 
 static inline void k_bus_outb(uint_16 port, uint_8 val) {
     __asm__ volatile ( "outb %0, %1" : : "a"(val), "Nd"(port) );

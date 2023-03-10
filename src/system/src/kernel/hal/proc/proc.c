@@ -7,8 +7,8 @@
 
 #include "proc.h"
 
-#include <stdgunw/mem.h>
-#include <stdgunw/defs.h>
+#include <mem.h>
+#include <defs.h>
 
 #include <schedule/schedule.h>
 #include <hal/criticalsec/criticalsec.h>

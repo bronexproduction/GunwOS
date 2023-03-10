@@ -5,9 +5,8 @@
 //  Created by Artur Danielewski on 15.02.2020.
 //
 
-#include "char.h"
-
-#include "utils.h"
+#include "include/char.h"
+#include "include/utils.h"
 
 uint_8 charisnum(const char c, uint_8 base) {   /* Base supported up to 16 */
     if (!base || base > 16) {

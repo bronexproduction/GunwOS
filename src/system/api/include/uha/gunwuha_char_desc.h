@@ -9,7 +9,7 @@
 #ifndef GUNWOS_GUNWUHA_CHAR_DESC_H
 #define GUNWOS_GUNWUHA_CHAR_DESC_H
 
-#include <stdgunw/types.h>
+#include <types.h>
 
 struct gnwDeviceUHA_char_in_desc {
     uint_32 _unused;

@@ -8,7 +8,7 @@
 #ifndef PROC_H
 #define PROC_H
 
-#include <stdgunw/types.h>
+#include <types.h>
 #include <hal/cpu/cpu.h>
 #include <hal/gdt/gdt.h>
 

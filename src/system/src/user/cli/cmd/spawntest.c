@@ -5,13 +5,11 @@
 //  Created by Artur Danielewski on 11.02.2023.
 //
 
-#include <cli/cmdutil.h>
-#include <cli/cliio.h>
-#include <stdgunw/mem.h>
-#include <stdgunw/types.h>
+#include <cmdutil.h>
+#include <cliio.h>
+#include <mem.h>
+#include <types.h>
 #include <gunwio.h>
-#include <hal/proc/proc.h>
-#include <hal/mem/mem.h>
 
 extern int user_cli_puts(const char * const s);
 
@@ -31,17 +29,17 @@ static void spawn(int index, ptr_t imageStart, size_t imageSize) {
     /*
         Each process takes 2 MiB of space, starting from MEM_KERNEL_START + MEM_KERNEL_RESERVED_BYTES
     */
-    ptr_t img = (ptr_t)(MEM_KERNEL_START + MEM_KERNEL_RESERVED_BYTES + MiB(index * 2 + 1));
+    // ptr_t img = (ptr_t)(MEM_KERNEL_START + MEM_KERNEL_RESERVED_BYTES + MiB(index * 2 + 1));
     
     // Copy to another location (outsize of kernel space)
-    memcopy(imageStart, img, imageSize);
+    // memcopy(imageStart, img, imageSize);
 
-    struct k_proc_descriptor desc;
+    // struct k_proc_descriptor desc;
 
-    desc.img = img;
-    desc.imgBytes = imageSize;
+    // desc.img = img;
+    // desc.imgBytes = imageSize;
 
-    k_proc_spawn(&desc);
+    // k_proc_spawn(&desc);
 }
 
 static bool alreadyDone = false;

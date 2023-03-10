@@ -5,7 +5,7 @@
 //  Created by Artur Danielewski on 06.03.2020.
 //
 
-#include <stdgunw/mem.h>
+#include <mem.h>
 
 #include <hal/gdt/gdt.h>
 #include <hal/isr/isr.h>

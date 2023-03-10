@@ -5,7 +5,7 @@
 //  Created by Artur Danielewski on 06.03.2020.
 //
 
-#include <stdgunw/mem.h>
+#include <mem.h>
 #include <gunwdev.h>
 #include <hal/hal.h>
 #include <hal/int/irq.h>

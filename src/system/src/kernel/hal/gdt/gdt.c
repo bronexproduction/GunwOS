@@ -5,7 +5,7 @@
 //  Created by Artur Danielewski on 13.02.2023.
 //
 
-#include <stdgunw/types.h>
+#include <types.h>
 #include "gdt.h"
 #include <hal/cpu/cpu.h>
 #include <hal/mem/mem.h>

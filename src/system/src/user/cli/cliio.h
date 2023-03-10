@@ -8,7 +8,7 @@
 #ifndef CLIIO_H
 #define CLIIO_H
 
-#include <stdgunw/types.h>
+#include <types.h>
 
 extern bool user_cli_charOutAttached;
 extern size_t user_cli_charOutIdentifier;

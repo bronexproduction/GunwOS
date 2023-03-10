@@ -6,7 +6,7 @@
 //
 
 #include "cpu.h"
-#include <stdgunw/mem.h>
+#include <mem.h>
 #include <hal/gdt/gdt.h>
 
 struct k_cpu_tss k_cpu_tss;

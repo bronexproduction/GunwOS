@@ -8,8 +8,8 @@
 #ifndef MEM_H
 #define MEM_H
 
-#include <stdgunw/defs.h>
-#include <stdgunw/types.h>
+#include <defs.h>
+#include <types.h>
 
 #define MEM_XMS_START               MiB(1)
 #define MEM_KERNEL_START            MEM_XMS_START

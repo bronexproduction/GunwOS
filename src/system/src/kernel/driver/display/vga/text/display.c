@@ -5,7 +5,7 @@
 //  Created by Artur Danielewski on 15.01.2023.  
 //
 
-#include <stdgunw/defs.h>
+#include <defs.h>
 #include <driver/gunwdrv.h>
 #include <error/panic.h>
 
