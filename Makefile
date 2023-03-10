@@ -92,7 +92,7 @@ app_pack:
 img: $(BUILD_DIR)/gunwos.img
 
 $(BUILD_DIR)/gunwos.img:
-	bash $(SCRIPTS_DIR)/build_image_fat12.sh $@ $(KERNEL_BUILD_DIR)/boot.bin $(KERNEL_BUILD_DIR)/boot.gfb $(KERNEL_BUILD_DIR)/kernel.gfb 
+	bash $(SCRIPTS_DIR)/build_image_fat12.sh $@ $(KERNEL_BUILD_DIR)/boot.bin $(KERNEL_BUILD_DIR)/boot.gfb $(KERNEL_BUILD_DIR)/kernel.gfb $(APP_BUILD_DIR)/*.elf
 
 clean:
 	rm -rf $(BUILD_DIR)

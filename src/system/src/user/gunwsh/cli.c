@@ -128,7 +128,7 @@ static void prompt() {
     user_cli_puts("[GunwCLI]: ");
 }
 
-void s_cli_init() {
+static void s_cli_init() {
 
     /* 
         Attach to character output
@@ -187,4 +187,10 @@ void s_cli_init() {
     user_cli_puts("GunwShell 0.0.4_DEV started. (C) Bronex Production 2023\n\n");
 
     prompt();
+}
+
+void _start() {
+    s_cli_init();
+
+    while(1);
 }
