@@ -60,13 +60,13 @@ struct __attribute__((packed)) elfHeader32 {
 _Static_assert(sizeof(struct elfHeader32) == 52, "Unexpected struct elf32 size");
 
 void k_startup() {
-    ptr_t cliElf = (ptr_t)0x5000;
+    ptr_t cliElf = (ptr_t)0x50000;
     const struct elfHeader32 *headerPtr = (struct elfHeader32 *)cliElf;
-    (void)cliElf;
+
     (void)headerPtr;
-    int i =0;
+
+    int i = 0;
     i++;
-    
     #warning TO BE IMPLEMENTED
     
 }
