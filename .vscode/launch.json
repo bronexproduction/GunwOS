@@ -9,7 +9,7 @@
             "type": "gdb",
             "request": "attach",
             "name": "Attach to gdbserver",
-            "executable": "build/kernel.elf",
+            "executable": "build/kernel/kernel.elf",
             "target": ":1234",
             "remote": true,
             "cwd": "${workspaceRoot}"

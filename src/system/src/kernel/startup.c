@@ -61,7 +61,9 @@ _Static_assert(sizeof(struct elfHeader32) == 52, "Unexpected struct elf32 size")
 
 void k_startup() {
     ptr_t cliElf = (ptr_t)0x5000;
+    const struct elfHeader32 *header = (struct elfHeader32 *)cliElf;
     (void)cliElf;
+    (void)header;
     #warning TO BE IMPLEMENTED
     
 }
