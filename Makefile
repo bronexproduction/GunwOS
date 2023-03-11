@@ -42,10 +42,9 @@ export C_DIR_LISTING=find . -name '*.c' -type f
 export CXX_DIR_LISTING=find . -name '*.cpp' -type f
 export RS_DIR_LISTING=find . -name '*.rs' -type f
 
-LFLAGS=-melf_i386 -T linker.ld
-LFLAGS_KERNEL=$(LFLAGS)
+export LFLAGS_KERNEL=-melf_i386 -T $(KERNEL_DIR)/linker.ld
 
-.PHONY: all pre_build img clean test 
+.PHONY: all libs pre_build img clean test 
 
 all: pre_build boot.bin boot.gfb kernel.gfb app_pack
 
@@ -70,20 +69,17 @@ kernel.gfb: kernel.elf
 # TO BE IMPROVED - no fixed offset, removing debug data
 	dd if="$(KERNEL_BUILD_DIR)/kernel.elf" of="$(KERNEL_BUILD_DIR)/$@" bs=4096 skip=1
 
-kernel.elf: lib.o api.o kernel.o
-	$(L) $(LFLAGS_KERNEL) -o $(KERNEL_BUILD_DIR)/$@ $(KERNEL_BUILD_DIR)/kernel.o $(LIB_BUILD_DIR)/api.o $(LIB_BUILD_DIR)/lib.o
+kernel.elf: libs api.o
+	make -C $(KERNEL_DIR)
+	mv $(KERNEL_DIR)/$@ $(KERNEL_BUILD_DIR)/$@
 
-lib.o:
+libs:
 	make -C $(SRC_DIR)/lib
-	mv $(SRC_DIR)/lib/$@ $(LIB_BUILD_DIR)/$@
+	mv $(SRC_DIR)/lib/*.o $(LIB_BUILD_DIR)/
 	
 api.o:
 	make -C $(API_DIR)
 	mv $(API_DIR)/$@ $(LIB_BUILD_DIR)/$@
-
-kernel.o:
-	make -C $(KERNEL_DIR)
-	mv $(KERNEL_DIR)/$@ $(KERNEL_BUILD_DIR)/$@
 
 app_pack:
 	make -C $(APPS_DIR)

@@ -62,4 +62,4 @@ struct __attribute__((packed)) elfHeader32 {
 };
 _Static_assert(sizeof(struct elfHeader32) == 52, "Unexpected struct elf32 size");
 
-#define // ELF_H
+#endif // ELF_H

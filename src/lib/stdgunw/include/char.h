@@ -13,4 +13,4 @@
 uint_8 charisnum(const char c, uint_8 base);
 uint_8 chartonum(const char c);
 
-#define // CHAR_H
+#endif // CHAR_H

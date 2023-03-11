@@ -7,20 +7,25 @@ LFLAGS=-melf_i386 -i
 O_DIR_LISTING=find . -name '*.o' -type f
 EXEC_TERMINATOR=\;
 
+KERNEL_LIBS=
+
 .PHONY: all
 
-all: kernel.o clean_o
+all: kernel.elf clean_o
 
-kernel.o: _kernel_entry.o _kernel.o
-	$(L) $(LFLAGS) -o $@ $(shell $(O_DIR_LISTING))
+kernel.elf: kernel_entry.o kernel.o
+	$(L) $(LFLAGS_KERNEL) -o $@ $(KERNEL_LIBS) $(shell $(O_DIR_LISTING))
 
-_kernel_entry.o:
+kernel_entry.o:
 	$(ASM) $(ASMFLAGS) -o $@ kernel_entry.s
 
-_kernel.o:
+kernel.o:
 	$(C_DIR_LISTING) -exec $(C) $(CFLAGS) -o {}.o {} $(EXEC_TERMINATOR)
 	$(CXX_DIR_LISTING) -exec $(CXX) $(CXXFLAGS) -o {}.o {} $(EXEC_TERMINATOR)
 	$(RS_DIR_LISTING) -exec $(RUSTC) $(RSFLAGS) -o {}.o {} $(EXEC_TERMINATOR)
 	
 clean_o:
-	find . -type f -name '*.o' ! -name 'kernel.o' -delete
+	find . -type f -name '*.o' -delete
+
+clean: clean_o
+	rm kernel.elf
