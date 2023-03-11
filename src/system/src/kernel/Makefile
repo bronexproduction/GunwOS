@@ -7,7 +7,8 @@ LFLAGS=-melf_i386 -i
 O_DIR_LISTING=find . -name '*.o' -type f
 EXEC_TERMINATOR=\;
 
-KERNEL_LIBS=
+KERNEL_LIBS=$(LIB_BUILD_DIR)/stdgunw.o \
+			$(LIB_BUILD_DIR)/gunwapi.o
 
 .PHONY: all
 

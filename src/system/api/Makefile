@@ -6,11 +6,13 @@ LFLAGS=-melf_i386 -i
 O_DIR_LISTING=find . -name '*.o' -type f
 EXEC_TERMINATOR=\;
 
+TARGET_O=gunwapi
+
 .PHONY: all
 
-all: api.o clean_o
+all: $(TARGET_O).o clean_o
 
-api.o: build_o
+$(TARGET_O).o: build_o
 	$(L) $(LFLAGS) -o $@ $(shell $(O_DIR_LISTING))
 	
 build_o:
@@ -19,4 +21,4 @@ build_o:
 	$(RS_DIR_LISTING) -exec $(RUSTC) $(RSFLAGS) -o {}.o {} $(EXEC_TERMINATOR)
 
 clean_o:
-	find . -type f -name '*.o' ! -name 'api.o' -delete
+	find . -type f -name '*.o' ! -name '$(TARGET_O).o' -delete

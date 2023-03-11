@@ -24,7 +24,7 @@ export KERNEL_DIR="$(SYSTEM_DIR)/src/kernel"
 export KERNEL_BUILD_DIR="$(BUILD_DIR)/kernel"
 export LIB_BUILD_DIR="$(BUILD_DIR)/lib"
 export LIB_LIB="$(LIB_BUILD_DIR)/lib.o"
-export API_LIB="$(LIB_BUILD_DIR)/api.o"
+export API_LIB="$(LIB_BUILD_DIR)/gunwapi.o"
 export APP_BUILD_DIR="$(BUILD_DIR)/app"
 
 export ASM=nasm
@@ -69,7 +69,7 @@ kernel.gfb: kernel.elf
 # TO BE IMPROVED - no fixed offset, removing debug data
 	dd if="$(KERNEL_BUILD_DIR)/kernel.elf" of="$(KERNEL_BUILD_DIR)/$@" bs=4096 skip=1
 
-kernel.elf: libs api.o
+kernel.elf: libs gunwapi.o
 	make -C $(KERNEL_DIR)
 	mv $(KERNEL_DIR)/$@ $(KERNEL_BUILD_DIR)/$@
 
@@ -77,7 +77,7 @@ libs:
 	make -C $(SRC_DIR)/lib
 	mv $(SRC_DIR)/lib/*.o $(LIB_BUILD_DIR)/
 	
-api.o:
+gunwapi.o:
 	make -C $(API_DIR)
 	mv $(API_DIR)/$@ $(LIB_BUILD_DIR)/$@
 
