@@ -31,6 +31,8 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
         return GCE_NOT_FOUND;
     }
 
+#warning what stage should be queued?
+
     const struct elfHeader32 *headerPtr = (struct elfHeader32 *)data;
     (void)headerPtr;
 
