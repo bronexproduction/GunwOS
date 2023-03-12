@@ -19,6 +19,13 @@ export CXX="$(GCC_DIR)/bin/i386-elf-g++"
 export L="$(GCC_DIR)/bin/i386-elf-ld"
 export RUSTC="$(RUST_DIR)/bin/rustc"
 
+# Output binary params
+
+TARGET_BITS=32
+L_BINFORMAT=elf
+L_ARCH=i386
+export L_OUTFORMAT=$(L_BINFORMAT)_$(L_ARCH)
+
 # Source directories
 
 SPEC_DIR="$(PWD)/spec"
@@ -53,7 +60,7 @@ export API_LIB="$(LIB_BUILD_DIR)/gunwapi.o"
 # Build flags
 
 WARN_PARAMS=-Wall -Wextra -Werror -Wno-error=cpp -Wno-error=unused-parameter
-export CFLAGS_GLOBAL=-fdebug-prefix-map=$(BUILD_DIR)=. $(WARN_PARAMS)
+export CFLAGS_GLOBAL=-m$(TARGET_BITS) -fdebug-prefix-map=$(BUILD_DIR)=. $(WARN_PARAMS)
 export CXXFLAGS_GLOBAL=$(CFLAGS_GLOBAL)
 export RSFLAGS_GLOBAL=--emit=obj --crate-type=lib -g --target=$(SPEC_DIR)/i386-none-none.json
 
@@ -62,10 +69,6 @@ export RSFLAGS_GLOBAL=--emit=obj --crate-type=lib -g --target=$(SPEC_DIR)/i386-n
 export C_DIR_LISTING=find . -name '*.c' -type f
 export CXX_DIR_LISTING=find . -name '*.cpp' -type f
 export RS_DIR_LISTING=find . -name '*.rs' -type f
-
-# Params
-
-export L_ARCH=melf_i386
 
 .PHONY: all libs pre_build img clean test 
 

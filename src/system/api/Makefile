@@ -1,7 +1,7 @@
 CFLAGS=-std=c11 -c -ffreestanding -mno-red-zone -ggdb -I $(STDGUNW_INCLUDE_DIR) -I $(API_INCLUDE_DIR) $(CFLAGS_GLOBAL)
 CXXFLAGS=-std=c++11 -c -ffreestanding -mno-red-zone -ggdb $(CXXFLAGS_GLOBAL)
 RSFLAGS=$(RSFLAGS_GLOBAL)
-LFLAGS=-$(L_ARCH) -i
+LFLAGS=-m$(L_OUTFORMAT) -i
 
 O_DIR_LISTING=find . -name '*.o' -type f
 EXEC_TERMINATOR=\;
