@@ -18,8 +18,14 @@ size_t strlen(const char * const c) {
 }
 
 int_32 strcmp(const char * const l, const char * const r) {
+    size_t ll = strlen(l);
+    size_t rl = strlen(r);
+    return ll < rl ? 1 : ll > rl ? -1 : strcmpl(l, r, ll);
+}
+
+int_32 strcmpl(const char * const l, const char * const r, const size_t len) {
     size_t s = 0;
-    while (*(l + s) == *(r + s) && *(l + s)) ++s;
+    while (*(l + s) == *(r + s) && *(l + s) && *(r + s)) ++s;
 
     if (*(l + s) == *(r + s)) return 0;
 
