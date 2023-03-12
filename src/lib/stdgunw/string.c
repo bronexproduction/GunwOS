@@ -24,8 +24,11 @@ int_32 strcmp(const char * const l, const char * const r) {
 }
 
 int_32 strcmpl(const char * const l, const char * const r, const size_t len) {
+    if (!len) { return 0; }
     size_t s = 0;
-    while (*(l + s) == *(r + s) && *(l + s) && *(r + s)) ++s;
+    while (*(l + s) == *(r + s) /* characters equal */ &&
+           *(l + s) && *(r + s) /* characters not 0 */ &&
+           ((s + 1) < len) /* not last character */) ++s;
 
     if (*(l + s) == *(r + s)) return 0;
 

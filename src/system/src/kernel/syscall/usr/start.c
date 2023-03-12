@@ -24,13 +24,8 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
         return GCE_INVALID_ARGUMENT;
     }
 
-    char * l = "dupa";
-    char * r = "dupka";
-
-    int_32 strcmpRes = strcmp(l, r);
-
     ptr_t data;
-    if (pathLen == 3 && strcmpl("cli", (const char *)absPathPtr, pathLen)) {
+    if (pathLen == 3 && !strcmpl("cli", (const char *)absPathPtr, pathLen)) {
         data = (ptr_t)0x50000;
     } else {
         return GCE_NOT_FOUND;
@@ -38,7 +33,6 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
 
     const struct elfHeader32 *headerPtr = (struct elfHeader32 *)data;
     (void)headerPtr;
-    (void)strcmpRes;
 
     // (void)headerPtr;
 
