@@ -5,14 +5,9 @@
 //  Created by Artur Danielewski on 11.01.2021.
 //
 
-#include <utils.h>
-#include <string.h>
-#include <gunwdev.h>
 #include "func.h"
 #include <error/fug.h>
-#include <error/panic.h>
 #include <hal/proc/proc.h>
-#include <hal/mem/mem.h>
 #include <dev/dev.h>
 
 /*
@@ -51,30 +46,14 @@ SCR(start,
     Return:
         * EAX - number of bytes written
 */
-static size_t debugPrint(uint_32 buffer) {
-    // check buffer bounds
-    // there might be (must be) a better way to do it
-    struct k_mem_zone procZone = k_mem_zoneForProc(k_proc_getCurrentId());
-    if (buffer >= procZone.sizeBytes) {
-        OOPS("Access violation");
-    }
-    buffer += (uint_32)procZone.startPtr;
-    size_t bufLen = strlen((const char * const)buffer);
-    if ((buffer + bufLen) > (size_t)procZone.endPtr) {
-        OOPS("Access violation");   
-    }
-
-    #warning TO BE IMPLEMENTED - MISSING CHARACTER OUTPUT
-    return bufLen;
-}
-
 SCR(debugPrint,
     // Buffer address (relative to process memory)
     REG(32, buffer, ebx)
 
     REG_RET(32, bytesWritten)
 
-    bytesWritten = debugPrint(buffer);
+    extern size_t k_scr_usr_debugPrint(uint_32);
+    bytesWritten = k_scr_usr_debugPrint(buffer);
 )
 
 /*
