@@ -10,7 +10,7 @@
 #include <string.h>
 #include <hal/mem/mem.h>
 #include <hal/proc/proc.h>
-#include <elf.h>
+#include <gunwelf.h>
 
 enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen) {
     if (!path) {
@@ -24,6 +24,12 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
         return GCE_INVALID_ARGUMENT;
     }
 
+#warning what stage should be queued?
+
+    // Load executable file header
+
+    // Verify header
+    
     ptr_t data;
     if (pathLen == 3 && !strcmpl("cli", (const char *)absPathPtr, pathLen)) {
         data = (ptr_t)0x50000;
@@ -31,16 +37,16 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
         return GCE_NOT_FOUND;
     }
 
-#warning what stage should be queued?
+    const struct elfHeader32 * const headerPtr = (struct elfHeader32 *)data;
+    if (!elfValidate(headerPtr)) {
+        return GCE_HEADER_INVALID;
+    }
+    
+    // Allocate process memory
 
-    const struct elfHeader32 *headerPtr = (struct elfHeader32 *)data;
-    (void)headerPtr;
-
-    // (void)headerPtr;
-
-    // int i = 0;
-    // i++;
-    // #warning TO BE IMPLEMENTED
+    // Load executable
+    
+    // Spawn process
 
     #warning TO BE IMPLEMENTED
     return GCE_NONE;

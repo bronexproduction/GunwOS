@@ -1,14 +1,20 @@
+KERNEL_INCLUDE=-I $(STDGUNW_INCLUDE_DIR) \
+               -I $(API_INCLUDE_DIR) \
+			   -I . \
+			   -I "$(LIB_SRC_DIR)/gunwelf"
+
+KERNEL_LIBS=$(LIB_BUILD_DIR)/stdgunw.o \
+			$(LIB_BUILD_DIR)/gunwapi.o \
+			$(LIB_BUILD_DIR)/gunwelf.o
+
 ASMFLAGS=-f elf
-CFLAGS=-std=c11 -c -ffreestanding -mno-red-zone -ggdb -I $(STDGUNW_INCLUDE_DIR) -I $(API_INCLUDE_DIR) -I . $(CFLAGS_GLOBAL)
+CFLAGS=-std=c11 -c -ffreestanding -mno-red-zone -ggdb $(KERNEL_INCLUDE) $(CFLAGS_GLOBAL)
 CXXFLAGS=-std=c++11 -c -ffreestanding -mno-red-zone -ggdb $(CXXFLAGS_GLOBAL)
 RSFLAGS=$(RSFLAGS_GLOBAL)
 LFLAGS=-m$(L_OUTFORMAT) -T linker.ld
 
 O_DIR_LISTING=find . -name '*.o' -type f
 EXEC_TERMINATOR=\;
-
-KERNEL_LIBS=$(LIB_BUILD_DIR)/stdgunw.o \
-			$(LIB_BUILD_DIR)/gunwapi.o
 
 .PHONY: all
 

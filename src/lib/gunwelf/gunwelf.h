@@ -1,12 +1,12 @@
 //
-//  elf.h
+//  gunwelf.h
 //  GunwOS
 //
 //  Created by Artur Danielewski on 11.03.2023.
 //
 
-#ifndef ELF_H
-#define ELF_H
+#ifndef GUNWELF_H
+#define GUNWELF_H
 
 #include <types.h>
 
@@ -62,4 +62,6 @@ struct __attribute__((packed)) elfHeader32 {
 };
 _Static_assert(sizeof(struct elfHeader32) == 52, "Unexpected struct elf32 size");
 
-#endif // ELF_H
+bool elfValidate(const struct elfHeader32 * const headerPtr);
+
+#endif // GUNWELF_H

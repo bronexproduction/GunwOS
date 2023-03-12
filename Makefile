@@ -30,7 +30,7 @@ export L_OUTFORMAT=$(L_BINFORMAT)_$(L_ARCH)
 
 SPEC_DIR="$(PWD)/spec"
 SRC_DIR="$(PWD)/src"
-LIB_SRC_DIR="$(SRC_DIR)/lib"
+export LIB_SRC_DIR="$(SRC_DIR)/lib"
 SYSTEM_SRC_DIR="$(SRC_DIR)/system"
 API_SRC_DIR="$(SYSTEM_SRC_DIR)/api"
 KERNEL_SRC_DIR="$(SYSTEM_SRC_DIR)/src/kernel"
