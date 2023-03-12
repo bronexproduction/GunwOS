@@ -21,13 +21,15 @@
     Code - 0x00
     Function - START
 */
-__attribute__((naked)) enum gnwCtrlError k_scr_start(const char * const path);
+__attribute__((naked)) enum gnwCtrlError k_scr_start(const char * const path,
+                                                     const size_t pathLen);
 
 /*
     Code - 0x01
     Function - DEBUG_PRINT
 */
-__attribute__((naked)) void k_scr_debugPrint(const char * const buffer);
+__attribute__((naked)) void k_scr_debugPrint(const char * const buffer,
+                                             const size_t bufLen);
 
 /*
     Code - 0x02

@@ -6,24 +6,22 @@
 //
 
 #include <types.h>
-#include <string.h>
-#include <error/panic.h>
 #include <hal/mem/mem.h>
 #include <hal/proc/proc.h>
+#include <error/panic.h>
 
-size_t k_scr_usr_debugPrint(uint_32 buffer) {
-    // check buffer bounds
-    // there might be (must be) a better way to do it
-    struct k_mem_zone procZone = k_mem_zoneForProc(k_proc_getCurrentId());
-    if (buffer >= procZone.sizeBytes) {
+size_t k_scr_usr_debugPrint(const char * const buffer, const size_t bufferLen) {
+    if (!buffer) {
+        OOPS("Null pointer refenced");
+    }
+
+    const procId_t procId = k_proc_getCurrentId();
+    const ptr_t absBufferPtr = k_mem_absForProc(procId, (const ptr_t)buffer);
+
+    if (!k_mem_bufInZoneForProc(procId, absBufferPtr, bufferLen)) {
         OOPS("Access violation");
     }
-    buffer += (uint_32)procZone.startPtr;
-    size_t bufLen = strlen((const char * const)buffer);
-    if ((buffer + bufLen) > (size_t)procZone.endPtr) {
-        OOPS("Access violation");   
-    }
-
+    
     #warning TO BE IMPLEMENTED - MISSING CHARACTER OUTPUT
-    return bufLen;
+    return bufferLen;
 }

@@ -16,15 +16,15 @@
 #define MEM_KERNEL_RESERVED_BYTES   MiB(2)
 #define MEM_MMIO_RESERVED_BYTES     MiB(256)
 
-struct k_mem_zone {
-    ptr_t startPtr;
-    ptr_t endPtr;
-    size_t sizeBytes;
-};
+/*
+    Returns absolute memory address 
+    of the pointer relative to process accessible space
+*/
+ptr_t k_mem_absForProc(const procId_t procId, const ptr_t relPtr);
 
 /*
-    Returns accessible memory zone limits for given process id
+    Checks whether the buffer is inside given process' memory zone
 */
-struct k_mem_zone k_mem_zoneForProc(procId_t procId);
+bool k_mem_bufInZoneForProc(const procId_t procId, const ptr_t absPtr, const size_t bufSize);
 
 #endif // MEM_H

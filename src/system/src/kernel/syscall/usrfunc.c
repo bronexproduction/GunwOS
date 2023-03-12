@@ -6,6 +6,7 @@
 //
 
 #include "func.h"
+#include <gunwctrl.h>
 #include <error/fug.h>
 #include <hal/proc/proc.h>
 #include <dev/dev.h>
@@ -20,6 +21,7 @@
 
     Params:
         * EBX - path to executable - null-terminated character array pointer
+        * ECX - path length in bytes
 
     Return:
         * EAX - Start error if any, otherwise GCE_NONE (see enum gnwCtrlError)
@@ -28,12 +30,12 @@
 SCR(start,
     // Executable path buffer pointer (relative to process memory)
     REG(32, path, ebx)
+    REG(32, pathLen, ecx)
 
     REG_RET(32, err)
-
-#warning TO BE IMPLEMENTED
-    (void)path;
-    err = 0;
+    
+    extern enum gnwCtrlError k_scr_usr_start(const char * const, const size_t);
+    err = k_scr_usr_start((const char * const)path, (const size_t)pathLen);
 )
 
 /*
@@ -42,6 +44,7 @@ SCR(start,
 
     Params:
         * EBX - null-terminated character array pointer
+        * ECX - character array buffer length in bytes
 
     Return:
         * EAX - number of bytes written
@@ -49,11 +52,12 @@ SCR(start,
 SCR(debugPrint,
     // Buffer address (relative to process memory)
     REG(32, buffer, ebx)
+    REG(32, bufferLen, ecx)
 
     REG_RET(32, bytesWritten)
 
-    extern size_t k_scr_usr_debugPrint(uint_32);
-    bytesWritten = k_scr_usr_debugPrint(buffer);
+    extern size_t k_scr_usr_debugPrint(const char * const, const size_t);
+    bytesWritten = k_scr_usr_debugPrint((const char * const)buffer, (const size_t)bufferLen);
 )
 
 /*
