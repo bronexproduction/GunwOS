@@ -33,7 +33,7 @@ static void (*driverSyscallReg[DRIVER_SYSCALL_COUNT])() = {
     Array index corresponds to syscall function code
 */
 static void (*userSyscallReg[SYSCALL_COUNT])() = {
-    /* 0x00 */ 0,
+    /* 0x00 */ (void *)k_scr_start,
     /* 0x01 */ (void *)k_scr_debugPrint,
     /* 0x02 */ (void *)k_scr_devCharWrite,
     /* 0x03 */ (void *)k_scr_exit,

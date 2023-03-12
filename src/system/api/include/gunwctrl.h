@@ -8,7 +8,29 @@
 #ifndef GUNWOS_GUNWCTRL_H
 #define GUNWOS_GUNWCTRL_H
 
-#include <scl_def.h>
+#include <gunwfug.h>
+
+enum gnwCtrlError {
+    GCE_NONE = 0,
+    GCE_NOT_FOUND,
+};
+
+/*
+    Starts program
+
+    Params:
+    * path - path to the executable
+*/
+SYSCALL_DECL enum gnwCtrlError start(const char * const path) {
+    CHECKPTR(path);
+
+    SYSCALL_PAR1(path);
+
+    SYSCALL_USER_FUNC(START);
+    SYSCALL_USER_INT;
+
+    SYSCALL_RETVAL(32);
+}
 
 /*
     Ends process execution

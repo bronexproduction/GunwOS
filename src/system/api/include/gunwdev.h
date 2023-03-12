@@ -173,6 +173,8 @@ SYSCALL_DECL enum gnwDeviceError devMemWrite(const size_t identifier,
 */
 SYSCALL_DECL enum gnwDeviceError devListen(const size_t identifier,
                                            const union gnwDeviceEventListener listener) {
+    CHECKPTR(listener._handle);
+    
     SYSCALL_PAR1(identifier);
     SYSCALL_PAR2(listener._handle);
 

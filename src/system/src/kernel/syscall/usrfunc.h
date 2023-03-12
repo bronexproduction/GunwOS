@@ -11,10 +11,17 @@
 #include <driver/gunwdrv.h>
 #include <gunwdev.h>
 #include <gunwfug.h>
+#include <gunwctrl.h>
 
 /*
     User-level system calls
 */
+
+/*
+    Code - 0x00
+    Function - START
+*/
+__attribute__((naked)) enum gnwCtrlError k_scr_start(const char * const path);
 
 /*
     Code - 0x01

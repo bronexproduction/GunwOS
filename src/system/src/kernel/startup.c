@@ -5,16 +5,17 @@
 //  Created by Artur Danielewski on 11.03.2023.
 //
 
-#include <types.h>
+#include <gunwctrl.h>
 
 void k_startup() {
-    ptr_t cliElf = (ptr_t)0x50000;
-    const struct elfHeader32 *headerPtr = (struct elfHeader32 *)cliElf;
+    start("cli");
 
-    (void)headerPtr;
+    // ptr_t cliElf = (ptr_t)0x50000;
+    // const struct elfHeader32 *headerPtr = (struct elfHeader32 *)cliElf;
 
-    int i = 0;
-    i++;
-    #warning TO BE IMPLEMENTED
-    
+    // (void)headerPtr;
+
+    // int i = 0;
+    // i++;
+    // #warning TO BE IMPLEMENTED
 }

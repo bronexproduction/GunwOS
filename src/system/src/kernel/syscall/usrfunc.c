@@ -20,6 +20,28 @@
 */
 
 /*
+    Code - 0x00
+    Function - START
+
+    Params:
+        * EBX - path to executable - null-terminated character array pointer
+
+    Return:
+        * EAX - Start error if any, otherwise GCE_NONE (see enum gnwCtrlError)
+*/
+
+SCR(start,
+    // Executable path buffer pointer (relative to process memory)
+    REG(32, path, ebx)
+
+    REG_RET(32, err)
+
+#warning TO BE IMPLEMENTED
+    (void)path;
+    err = 0;
+)
+
+/*
     Code - 0x01
     Function - DEBUG_PRINT
 
