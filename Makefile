@@ -1,31 +1,17 @@
+# Toolchain versions
+
 GCC_VERSION=9.4.0
 BINUTILS_VERSION=2.39
 NEWLIB_VERSION=4.2.0.20211231
 RUST_VERSION=1.66.0
 
-SRC_DIR="$(PWD)/src"
-LIB_DIR="$(PWD)/src/lib"
+# Toolchain directories
+
 TOOLS_DIR="$(PWD)/tools"
-SPEC_DIR="$(PWD)/spec"
 GCC_DIR="$(TOOLS_DIR)/gunwxcc-$(GCC_VERSION)_binutils-$(BINUTILS_VERSION)_newlib-$(NEWLIB_VERSION)"
 RUST_DIR="$(TOOLS_DIR)/rust-$(RUST_VERSION)"
-UTL_DIR="$(PWD)/utl"
-TESTS_DIR="$(PWD)/tests/modules"
-SYSTEM_DIR="$(SRC_DIR)/system"
-APPS_DIR="$(SYSTEM_DIR)/src/user"
-export SCRIPTS_DIR="$(PWD)/scripts"
-export TEST_FRAMEWORK_DIR="$(PWD)/tests/framework"
-export TEST_SHARED_DIR="$(PWD)/tests/shared"
-export BUILD_DIR="$(PWD)/build"
-export STDGUNW_INCLUDE_DIR="$(LIB_DIR)/stdgunw/include"
-export API_DIR="$(SYSTEM_DIR)/api"
-export API_INCLUDE_DIR="$(API_DIR)/include"
-export KERNEL_DIR="$(SYSTEM_DIR)/src/kernel"
-export KERNEL_BUILD_DIR="$(BUILD_DIR)/kernel"
-export LIB_BUILD_DIR="$(BUILD_DIR)/lib"
-export LIB_LIB="$(LIB_BUILD_DIR)/lib.o"
-export API_LIB="$(LIB_BUILD_DIR)/gunwapi.o"
-export APP_BUILD_DIR="$(BUILD_DIR)/app"
+
+# Toolchain executables paths
 
 export ASM=nasm
 export C="$(GCC_DIR)/bin/i386-elf-gcc"
@@ -33,16 +19,53 @@ export CXX="$(GCC_DIR)/bin/i386-elf-g++"
 export L="$(GCC_DIR)/bin/i386-elf-ld"
 export RUSTC="$(RUST_DIR)/bin/rustc"
 
+# Source directories
+
+SPEC_DIR="$(PWD)/spec"
+SRC_DIR="$(PWD)/src"
+LIB_SRC_DIR="$(SRC_DIR)/lib"
+SYSTEM_SRC_DIR="$(SRC_DIR)/system"
+API_SRC_DIR="$(SYSTEM_SRC_DIR)/api"
+KERNEL_SRC_DIR="$(SYSTEM_SRC_DIR)/src/kernel"
+APPS_SRC_DIR="$(SYSTEM_SRC_DIR)/src/user"
+TESTS_SRC_DIR="$(PWD)/tests/modules"
+export SCRIPTS_DIR="$(PWD)/scripts"
+export TEST_FRAMEWORK_DIR="$(PWD)/tests/framework"
+export TEST_SHARED_DIR="$(PWD)/tests/shared"
+
+# Header include paths
+
+export STDGUNW_INCLUDE_DIR="$(LIB_SRC_DIR)/stdgunw/include"
+export API_INCLUDE_DIR="$(API_SRC_DIR)/include"
+
+# Build directories
+
+export BUILD_DIR="$(PWD)/build"
+export LIB_BUILD_DIR="$(BUILD_DIR)/lib"
+export KERNEL_BUILD_DIR="$(BUILD_DIR)/kernel"
+export APP_BUILD_DIR="$(BUILD_DIR)/app"
+
+# Base library paths
+
+export STDGUNW_LIB="$(LIB_BUILD_DIR)/stdgunw.o"
+export API_LIB="$(LIB_BUILD_DIR)/gunwapi.o"
+
+# Build flags
+
 WARN_PARAMS=-Wall -Wextra -Werror -Wno-error=cpp -Wno-error=unused-parameter
 export CFLAGS_GLOBAL=-fdebug-prefix-map=$(BUILD_DIR)=. $(WARN_PARAMS)
 export CXXFLAGS_GLOBAL=$(CFLAGS_GLOBAL)
 export RSFLAGS_GLOBAL=--emit=obj --crate-type=lib -g --target=$(SPEC_DIR)/i386-none-none.json
 
+# Base listing commands
+
 export C_DIR_LISTING=find . -name '*.c' -type f
 export CXX_DIR_LISTING=find . -name '*.cpp' -type f
 export RS_DIR_LISTING=find . -name '*.rs' -type f
 
-export LFLAGS_KERNEL=-melf_i386 -T $(KERNEL_DIR)/linker.ld
+# Params
+
+export L_ARCH=melf_i386
 
 .PHONY: all libs pre_build img clean test 
 
@@ -70,20 +93,20 @@ kernel.gfb: kernel.elf
 	dd if="$(KERNEL_BUILD_DIR)/kernel.elf" of="$(KERNEL_BUILD_DIR)/$@" bs=4096 skip=1
 
 kernel.elf: libs gunwapi.o
-	make -C $(KERNEL_DIR)
-	mv $(KERNEL_DIR)/$@ $(KERNEL_BUILD_DIR)/$@
+	make -C $(KERNEL_SRC_DIR)
+	mv $(KERNEL_SRC_DIR)/$@ $(KERNEL_BUILD_DIR)/$@
 
 libs:
 	make -C $(SRC_DIR)/lib
 	mv $(SRC_DIR)/lib/*.o $(LIB_BUILD_DIR)/
 	
 gunwapi.o:
-	make -C $(API_DIR)
-	mv $(API_DIR)/$@ $(LIB_BUILD_DIR)/$@
+	make -C $(API_SRC_DIR)
+	mv $(API_SRC_DIR)/$@ $(LIB_BUILD_DIR)/$@
 
 app_pack:
-	make -C $(APPS_DIR)
-	mv $(APPS_DIR)/*.elf $(APP_BUILD_DIR)/
+	make -C $(APPS_SRC_DIR)
+	mv $(APPS_SRC_DIR)/*.elf $(APP_BUILD_DIR)/
 
 img: $(BUILD_DIR)/gunwos.img
 
@@ -95,8 +118,8 @@ clean:
 	find $(SRC_DIR)/ -type f -name '*.o' -delete
 
 test:
-	make -C $(TESTS_DIR)/bootloader/boot clean all run
-	make -C $(TESTS_DIR)/bootloader/preloader clean all run
-	make -C $(TESTS_DIR)/lib clean all run
-	make -C $(TESTS_DIR)/api clean all run
-	make -C $(TESTS_DIR)/system clean all run
+	make -C $(TESTS_SRC_DIR)/bootloader/boot clean all run
+	make -C $(TESTS_SRC_DIR)/bootloader/preloader clean all run
+	make -C $(TESTS_SRC_DIR)/lib clean all run
+	make -C $(TESTS_SRC_DIR)/api clean all run
+	make -C $(TESTS_SRC_DIR)/system clean all run

@@ -1,8 +1,8 @@
 ASMFLAGS=-f elf
-CFLAGS=-std=c11 -c -ffreestanding -mno-red-zone -ggdb -I $(STDGUNW_INCLUDE_DIR) -I $(API_INCLUDE_DIR) -I $(KERNEL_DIR) $(CFLAGS_GLOBAL)
+CFLAGS=-std=c11 -c -ffreestanding -mno-red-zone -ggdb -I $(STDGUNW_INCLUDE_DIR) -I $(API_INCLUDE_DIR) -I . $(CFLAGS_GLOBAL)
 CXXFLAGS=-std=c++11 -c -ffreestanding -mno-red-zone -ggdb $(CXXFLAGS_GLOBAL)
 RSFLAGS=$(RSFLAGS_GLOBAL)
-LFLAGS=-melf_i386 -i
+LFLAGS=-$(L_ARCH) -T linker.ld
 
 O_DIR_LISTING=find . -name '*.o' -type f
 EXEC_TERMINATOR=\;
@@ -15,7 +15,7 @@ KERNEL_LIBS=$(LIB_BUILD_DIR)/stdgunw.o \
 all: kernel.elf clean_o
 
 kernel.elf: kernel_entry.o kernel.o
-	$(L) $(LFLAGS_KERNEL) -o $@ $(KERNEL_LIBS) $(shell $(O_DIR_LISTING))
+	$(L) $(LFLAGS) -o $@ $(KERNEL_LIBS) $(shell $(O_DIR_LISTING))
 
 kernel_entry.o:
 	$(ASM) $(ASMFLAGS) -o $@ kernel_entry.s
