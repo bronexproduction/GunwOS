@@ -28,13 +28,15 @@ _Static_assert(sizeof(uint_32) == 4, "Unexpected uint_32 size");
 _Static_assert(sizeof(int_64) == 8, "Unexpected int_64 size");
 _Static_assert(sizeof(uint_64) == 8, "Unexpected uint_64 size");
 
+typedef uint_32 addr_t;
 typedef uint_8* ptr_t;
 typedef uint_32 size_t;
 // TODO move to 64-bit time
 typedef uint_32 time_t;
 typedef int_32 procId_t;
-_Static_assert(sizeof(ptr_t) == sizeof(uint_32), "sizeof(ptr_t) != sizeof(uint_32)");
-_Static_assert(sizeof(size_t) == sizeof(ptr_t), "sizeof(size_t) != sizeof(ptr_t)");
+_Static_assert(sizeof(addr_t) == sizeof(ptr_t), "sizeof(addr_t) != sizeof(ptr_t)");
+_Static_assert(sizeof(ptr_t) == sizeof(size_t), "sizeof(ptr_t) != sizeof(size_t)");
+_Static_assert(sizeof(size_t) == sizeof(uint_32), "sizeof(size_t) != sizeof(uint_32)");
 
 typedef struct {
     int x, y;

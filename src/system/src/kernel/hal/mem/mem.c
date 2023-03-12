@@ -48,7 +48,7 @@ ptr_t k_mem_absForProc(const procId_t procId, const ptr_t relPtr) {
         OOPS("Invalid pointer");
     }
 
-    return relPtr + k_mem_zoneForProc(procId).startPtr;
+    return relPtr + (addr_t)k_mem_zoneForProc(procId).startPtr;
 }
 
 bool k_mem_bufInZoneForProc(const procId_t procId, const ptr_t absPtr, const size_t bufSize) {
