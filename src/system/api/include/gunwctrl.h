@@ -16,6 +16,7 @@ enum gnwCtrlError {
     GCE_INVALID_ARGUMENT,
     GCE_HEADER_INVALID,
     GCE_NOT_FOUND,
+    GCE_UNKNOWN
 };
 
 /*
