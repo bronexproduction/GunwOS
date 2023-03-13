@@ -12,6 +12,9 @@
 
 #define ELF_MAGIC ("\x7F""ELF")
 #define ELF_VERSION 1
+#define ELF_HEADER_SIZE_32 0x34
+#define ELF_PROGRAM_ENTRY_SIZE_32 0x20
+#define ELF_SECTION_ENTRY_SIZE_32 0x28
 
 enum elfClass {
     ECLASS_32 = 1,
@@ -115,7 +118,7 @@ struct __attribute__((packed)) elfHeader32 {
     const uint_16 sectionHeaderEntries;         /* Number of entries in the section header table */
     const uint_16 sectionNamesEntryIndex; 	    /* Index of the section header table entry that contains the section names */
 };
-_Static_assert(sizeof(struct elfHeader32) == 0x34, "Unexpected struct elfHeader32 size");
+_Static_assert(sizeof(struct elfHeader32) == ELF_HEADER_SIZE_32, "Unexpected struct elfHeader32 size");
 
 struct __attribute__((packed)) elfProgramHeaderEntry32 {
     const enum elfSegmentType type      :8*4;   /* Type of the segment */
@@ -129,7 +132,7 @@ struct __attribute__((packed)) elfProgramHeaderEntry32 {
                                                    Otherwise should be a positive, integral power of 2, 
                                                    with virtualAddr equating offset modulus alignment. */
 };
-_Static_assert(sizeof(struct elfProgramHeaderEntry32) == 0x20, "Unexpected struct elfProgramHeader32 size");
+_Static_assert(sizeof(struct elfProgramHeaderEntry32) == ELF_PROGRAM_ENTRY_SIZE_32, "Unexpected struct elfProgramHeader32 size");
 
 struct __attribute__((packed)) elfSectionHeaderEntry32 {
     const uint_32 nameOffset;                   /* An offset to a string in the .shstrtab section that represents the name of this section */
@@ -147,12 +150,13 @@ struct __attribute__((packed)) elfSectionHeaderEntry32 {
     const uint_32 entrySizeBytes;               /* Contains the size, in bytes, of each entry, for sections that contain fixed-size entries. 
                                                    Otherwise, this field contains zero. */
 };
-_Static_assert(sizeof(struct elfSectionHeaderEntry32) == 0x28, "Unexpected struct elfProgramHeader32 size");
+_Static_assert(sizeof(struct elfSectionHeaderEntry32) == ELF_SECTION_ENTRY_SIZE_32, "Unexpected struct elfProgramHeader32 size");
 
 struct elfExpectation {
     enum elfClass class;
     enum elfEndianess endianess;
     enum elfType type;
+    uint_16 architecture;
 };
 
 bool elfValidate(const ptr_t filePtr, 

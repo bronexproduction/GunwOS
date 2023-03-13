@@ -59,6 +59,8 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
     exp.class = ECLASS_32;
     exp.endianess = EENDIAN_LITTLE;
     exp.type = ETYPE_EXEC;
+    exp.architecture = 0;
+
 
     if (!elfValidate(filePtr, fileSizeBytes, &exp)) {
         return GCE_HEADER_INVALID;

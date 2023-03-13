@@ -38,6 +38,9 @@ static bool validateExpectation(const struct elfHeader32 * const headerPtr,
     if (headerPtr->type != expPtr->type) {
         return false;
     }
+    if (headerPtr->architecture != expPtr->architecture) {
+        return false;
+    }
 
     return true;
 }
@@ -72,10 +75,65 @@ bool elfValidate(const ptr_t filePtr,
     if (!validateIdentifier(&headerPtr->identifier)) {
         return false;
     }
+    if (headerPtr->identifier.version != headerPtr->version) {
+        return false;
+    }
+    if (!headerPtr->programHeaderTable) {
+        return false;
+    }
+    if (!headerPtr->sectionHeaderTable) {
+        return false;
+    }
 
-    #warning how to validate file size
-    #warning validate more fields
-    #warning TO BE IMPLEMENTED
+    size_t headerSizeBytes;
+    size_t programHeaderEntrySize;
+    size_t sectionHeaderEntrySize;
+    switch (headerPtr->identifier.class) {
+        case ECLASS_32:
+            headerSizeBytes = ELF_HEADER_SIZE_32;
+            programHeaderEntrySize = ELF_PROGRAM_ENTRY_SIZE_32;
+            sectionHeaderEntrySize = ELF_SECTION_ENTRY_SIZE_32;
+            break;
+        default:
+            return false;
+    }
+    if (headerPtr->elfHeaderSize != headerSizeBytes) {
+        return false;
+    }
+    if (headerPtr->programHeaderEntrySize != programHeaderEntrySize) {
+        return false;
+    }
+    if (headerPtr->sectionHeaderEntrySize != sectionHeaderEntrySize) {
+        return false;
+    }
+
+    hugeSize_t totalFileAddressedBytes = headerSizeBytes;
+    hugeSize_t totalMemoryAddressedBytes = 0;
+    #warning TO BE CALCULATED
+    for (size_t entry = 0; entry < headerPtr->programHeaderEntries; ++entry) {
+        uint_64 offset = headerPtr->elfHeaderSize + (entry * programHeaderEntrySize);
+        if ((offset + programHeaderEntrySize) > fileSizeBytes) {
+            return false;
+        }
+        const struct elfProgramHeaderEntry32 * const entryPtr = (struct elfProgramHeaderEntry32 *)(filePtr + (uint_32)offset);
+        if (!validateProgramHeaderEntry(entryPtr)) {
+            return false;
+        }
+        totalFileAddressedBytes += programHeaderEntrySize + entryPtr->fileSizeBytes;
+    }
+    for (size_t entry = 0; entry < headerPtr->sectionHeaderEntries; ++entry) {
+        if ((totalFileAddressedBytes + sectionHeaderEntrySize) > fileSizeBytes) {
+            return false;
+        }
+        if (!validateSectionHeaderEntry((struct elfSectionHeaderEntry32 *)(uint_32)totalFileAddressedBytes)) {
+            return false;
+        }
+        totalFileAddressedBytes += sectionHeaderEntrySize;
+    }
+
+    if (totalFileAddressedBytes != fileSizeBytes) {
+        return false;
+    }
 
     if (expectation) {
         return validateExpectation(headerPtr, expectation);
