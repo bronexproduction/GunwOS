@@ -23,7 +23,7 @@ uint_8 user_cli_kbf_currModMask() {
 
 void user_cli_kbf_up(const uint_8 k) {
     if (k >= SCANCODES_MAX) {
-        // OOPS("Key code exceeds limit")
+        // OOPS("Key code exceeds limit");
         fug(FUG_UNDEFINED);
         return;
     }
@@ -38,7 +38,7 @@ void user_cli_kbf_up(const uint_8 k) {
 
 void user_cli_kbf_down(const uint_8 k) {
     if (k >= SCANCODES_MAX) {
-        // OOPS("Key code exceeds limit")
+        // OOPS("Key code exceeds limit");
         fug(FUG_UNDEFINED);
         return;
     }

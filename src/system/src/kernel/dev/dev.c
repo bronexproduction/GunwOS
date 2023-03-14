@@ -75,7 +75,7 @@ static bool validateInstalledId(size_t id) {
 
 static enum gnwDeviceError validateStartedDevice(const procId_t processId, const size_t deviceId) {
     if (!validateInstalledId(deviceId)) {
-        OOPS("Device identifier invalid")
+        OOPS("Device identifier invalid");
         return GDE_UNKNOWN;
     }
 
@@ -154,7 +154,7 @@ enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescr
 
 enum gnwDriverError k_dev_start(size_t id) {
     if (!validateId(id)) {
-        OOPS("Device identifier invalid")
+        OOPS("Device identifier invalid");
         return UNKNOWN;
     }
 
@@ -181,7 +181,7 @@ void k_dev_init() {
 
 enum gnwDeviceError k_dev_getById(const size_t id, struct gnwDeviceUHADesc * const desc) {
     if (!validateInstalledId(id)) {
-        OOPS("Device identifier invalid")
+        OOPS("Device identifier invalid");
         return GDE_UNKNOWN;
     }
     
@@ -211,7 +211,7 @@ enum gnwDeviceError k_dev_getByType(enum gnwDeviceType type, struct gnwDeviceUHA
 
 enum gnwDeviceError k_dev_acquireHold(procId_t processId, size_t deviceId) {
     if (!validateInstalledId(deviceId)) {
-        OOPS("Device identifier invalid")
+        OOPS("Device identifier invalid");
         return GDE_UNKNOWN;
     }
 
@@ -226,7 +226,7 @@ enum gnwDeviceError k_dev_acquireHold(procId_t processId, size_t deviceId) {
 
 void k_dev_releaseHold(procId_t processId, size_t deviceId) {
     if (!validateInstalledId(deviceId)) {
-        OOPS("Device identifier invalid")
+        OOPS("Device identifier invalid");
     }
 
     if (devices[deviceId].holder == processId) {
@@ -338,7 +338,7 @@ static enum gnwDeviceError validateListenerInvocation(const size_t deviceId) {
         return GDE_NOT_FOUND;
     }
     if (dev->holder == NONE_PROC_ID) {
-        OOPS("Inconsistent holder listener state")
+        OOPS("Inconsistent holder listener state");
     }
 
     return GDE_NONE;

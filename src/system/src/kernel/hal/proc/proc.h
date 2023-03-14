@@ -18,6 +18,7 @@
 
 struct k_proc_descriptor {
     ptr_t img;
+    addr_t entry;
     size_t imgBytes;
 };
 

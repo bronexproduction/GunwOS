@@ -6,7 +6,11 @@
 //
 
 #include <gunwctrl.h>
+#include <error/panic.h>
 
 void k_startup() {
-    start("cli");
+    enum gnwCtrlError err = start("cli");
+    if (err != GCE_NONE) {
+        OOPS("Unable to start core modules");
+    }
 }

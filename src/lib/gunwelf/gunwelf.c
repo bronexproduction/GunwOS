@@ -7,6 +7,10 @@
 
 #include "gunwelf.h"
 #include <string.h>
+#include <defs.h>
+
+#define PROGRAM_HEADER_ENTRY_OFFSET_32(INDEX) (ELF_HEADER_SIZE_32 + INDEX * ELF_PROGRAM_ENTRY_SIZE_32)
+#define SECTION_HEADER_ENTRY_OFFSET_32(INDEX, HEADER_PTR, FILE_SIZE_BYTES) (FILE_SIZE_BYTES - ((HEADER_PTR->sectionHeaderEntries - INDEX) * ELF_SECTION_ENTRY_SIZE_32))
 
 static bool validateIdentifier(const struct elfIdentifier * const idPtr) {
     if (!idPtr) {
@@ -50,7 +54,15 @@ static bool validateProgramHeaderEntry(const struct elfProgramHeaderEntry32 * co
         return false;
     }
 
-    #warning TO BE IMPLEMENTED
+    if (entryPtr->alignment > 1) {
+        if (__builtin_popcount(entryPtr->alignment) != 1) {
+            return false;
+        }
+        if ((addr_t)entryPtr->offset % entryPtr->alignment != (addr_t)entryPtr->virtualAddr % entryPtr->alignment) {
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -58,9 +70,53 @@ static bool validateSectionHeaderEntry(const struct elfSectionHeaderEntry32 * co
     if (!entryPtr) {
         return false;
     }
+    
+    if (entryPtr->addressAlignment > 1) {
+        if (__builtin_popcount(entryPtr->addressAlignment) != 1) {
+            return false;
+        }
+        if ((addr_t)entryPtr->virtualAddr % entryPtr->addressAlignment) {
+            return false;
+        }
+        addr_t low = (addr_t)entryPtr->virtualAddr;
+        addr_t high = entryPtr->fileSizeBytes;
+        if (low && (low + high < low)) {
+            return false;
+        }
+    }
 
-    #warning TO BE IMPLEMENTED
     return true;
+}
+
+static size_t totalAllocBytes(const struct elfHeader32 * const headerPtr,
+                              const size_t fileSizeBytes,
+                              addr_t * const virtualMemoryLowAddr) {
+    addr_t lowVAddr = 0;
+    addr_t highVAddr = 0;
+
+    for (int index = 0; index < headerPtr->sectionHeaderEntries; ++index) {
+        const struct elfSectionHeaderEntry32 * const entry = (struct elfSectionHeaderEntry32 *)((ptr_t)headerPtr + SECTION_HEADER_ENTRY_OFFSET_32(index, headerPtr, fileSizeBytes));
+        if (entry->attributes & ESECATTR_ALLOC) {
+            addr_t low = entry->virtualAddr;
+            addr_t high = low + entry->fileSizeBytes;
+            if ((low && low < lowVAddr) || !lowVAddr) {
+                lowVAddr = low;
+            }
+            if (high > highVAddr) {
+                highVAddr = high;
+            }      
+        }
+    }
+
+    if (lowVAddr > highVAddr) {
+        return 0;
+    }
+
+    if (virtualMemoryLowAddr) {
+        *virtualMemoryLowAddr = lowVAddr;
+    }
+
+    return lowVAddr ? (highVAddr - lowVAddr) : 0;
 }
 
 bool elfValidate(const ptr_t filePtr,
@@ -85,54 +141,38 @@ bool elfValidate(const ptr_t filePtr,
         return false;
     }
 
-    size_t headerSizeBytes;
-    size_t programHeaderEntrySize;
-    size_t sectionHeaderEntrySize;
     switch (headerPtr->identifier.class) {
         case ECLASS_32:
-            headerSizeBytes = ELF_HEADER_SIZE_32;
-            programHeaderEntrySize = ELF_PROGRAM_ENTRY_SIZE_32;
-            sectionHeaderEntrySize = ELF_SECTION_ENTRY_SIZE_32;
             break;
         default:
             return false;
     }
-    if (headerPtr->elfHeaderSize != headerSizeBytes) {
+    if (headerPtr->elfHeaderSize != ELF_HEADER_SIZE_32) {
         return false;
     }
-    if (headerPtr->programHeaderEntrySize != programHeaderEntrySize) {
+    if (headerPtr->programHeaderEntrySize != ELF_PROGRAM_ENTRY_SIZE_32) {
         return false;
     }
-    if (headerPtr->sectionHeaderEntrySize != sectionHeaderEntrySize) {
+    if (headerPtr->sectionHeaderEntrySize != ELF_SECTION_ENTRY_SIZE_32) {
         return false;
     }
 
-    hugeSize_t totalFileAddressedBytes = headerSizeBytes;
-    hugeSize_t totalMemoryAddressedBytes = 0;
-    #warning TO BE CALCULATED
-    for (size_t entry = 0; entry < headerPtr->programHeaderEntries; ++entry) {
-        uint_64 offset = headerPtr->elfHeaderSize + (entry * programHeaderEntrySize);
-        if ((offset + programHeaderEntrySize) > fileSizeBytes) {
+    #warning VALIDATE LOCATIONS IN FILE
+
+    if (fileSizeBytes < (ELF_HEADER_SIZE_32 + (headerPtr->programHeaderEntries * ELF_PROGRAM_ENTRY_SIZE_32) + (headerPtr->sectionHeaderEntries * ELF_SECTION_ENTRY_SIZE_32))) {
+        return false;
+    }
+    for (size_t index = 0; index < headerPtr->programHeaderEntries; ++index) {
+        const struct elfProgramHeaderEntry32 * const entry = (struct elfProgramHeaderEntry32 *)((ptr_t)headerPtr + PROGRAM_HEADER_ENTRY_OFFSET_32(index));
+        if (!validateProgramHeaderEntry(entry)) {
             return false;
         }
-        const struct elfProgramHeaderEntry32 * const entryPtr = (struct elfProgramHeaderEntry32 *)(filePtr + (uint_32)offset);
-        if (!validateProgramHeaderEntry(entryPtr)) {
-            return false;
-        }
-        totalFileAddressedBytes += programHeaderEntrySize + entryPtr->fileSizeBytes;
     }
     for (size_t entry = 0; entry < headerPtr->sectionHeaderEntries; ++entry) {
-        if ((totalFileAddressedBytes + sectionHeaderEntrySize) > fileSizeBytes) {
+        const struct elfSectionHeaderEntry32 * const entryPtr = (struct elfSectionHeaderEntry32 *)(filePtr + SECTION_HEADER_ENTRY_OFFSET_32(entry, headerPtr, fileSizeBytes));
+        if (!validateSectionHeaderEntry(entryPtr)) {
             return false;
         }
-        if (!validateSectionHeaderEntry((struct elfSectionHeaderEntry32 *)(uint_32)totalFileAddressedBytes)) {
-            return false;
-        }
-        totalFileAddressedBytes += sectionHeaderEntrySize;
-    }
-
-    if (totalFileAddressedBytes != fileSizeBytes) {
-        return false;
     }
 
     if (expectation) {
@@ -142,7 +182,24 @@ bool elfValidate(const ptr_t filePtr,
     return true;
 }
 
-size_t elfImageBytes(const ptr_t filePtr) {
-    #warning TO BE IMPLEMENTED
-    return 0;
+size_t elfAllocBytes(const ptr_t filePtr, const size_t fileSizeBytes, addr_t * const virtualMemoryLowAddr) {
+    return (size_t)totalAllocBytes((struct elfHeader32 *)filePtr, fileSizeBytes, virtualMemoryLowAddr);
+}
+
+size_t elfGetSectionHeaderEntryCount(const ptr_t filePtr) {
+    const struct elfHeader32 * const headerPtr = (struct elfHeader32 *)filePtr;
+    return headerPtr->sectionHeaderEntries;
+}
+
+struct elfSectionHeaderEntry32 * elfGetSectionHeaderEntry(const ptr_t filePtr, const size_t index, const size_t fileSizeBytes) {
+    const struct elfHeader32 * const headerPtr = (struct elfHeader32 *)filePtr;
+    if (index >= headerPtr->sectionHeaderEntries) {
+        return nullptr;
+    }
+    return (struct elfSectionHeaderEntry32 *)(filePtr + SECTION_HEADER_ENTRY_OFFSET_32(index, headerPtr, fileSizeBytes));
+}
+
+addr_t elfGetEntry(const ptr_t filePtr) {
+    const struct elfHeader32 * const headerPtr = (struct elfHeader32 *)filePtr;
+    return headerPtr->entry;
 }

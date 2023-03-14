@@ -76,19 +76,19 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
     ptr_t dataEndPtr = dataStartPtr + stackBytes - 1;
 
     if (codeStartPtr < GDT_SEGMENT_START(r3code)) {
-        OOPS("Attempted to spawn process below its code segment")
+        OOPS("Attempted to spawn process below its code segment");
     }
     if (codeEndPtr > GDT_SEGMENT_END(r3code)) {
-        OOPS("Attempted to spawn process above its code segment")
+        OOPS("Attempted to spawn process above its code segment");
     }
     if (codeEndPtr <= codeStartPtr) {
         OOPS("Attempted to spawn process outside its code segment");
     }
     if (dataStartPtr < GDT_SEGMENT_START(r3data)) {
-        OOPS("Attempted to spawn process below its data segment")
+        OOPS("Attempted to spawn process below its data segment");
     }
     if (dataEndPtr > GDT_SEGMENT_END(r3data)) {
-        OOPS("Attempted to spawn process above its data segment")
+        OOPS("Attempted to spawn process above its data segment");
     }
     if (dataEndPtr <= dataStartPtr) {
         OOPS("Attempted to spawn process outside its data segment");
@@ -97,11 +97,12 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
         OOPS("Attempted to spawn process outside its segments");
     }
 
-    ptr_t relativeImgPtr = (ptr_t)(codeStartPtr - GDT_SEGMENT_START(r3code));
-    ptr_t relativeStackPtr = (ptr_t)(dataEndPtr - GDT_SEGMENT_START(r3data));
+    addr_t relativeImgPtr = codeStartPtr - GDT_SEGMENT_START(r3code);
+    addr_t relativeEntryPtr = relativeImgPtr + descriptor->entry;
+    addr_t relativeStackPtr = dataEndPtr - GDT_SEGMENT_START(r3data);
 
     pTab[pIndex].cpuState.esp = (uint_32)relativeStackPtr;
-    pTab[pIndex].cpuState.eip = (uint_32)relativeImgPtr;
+    pTab[pIndex].cpuState.eip = (uint_32)relativeEntryPtr;
     pTab[pIndex].cpuState.eflags = FLAGS_INTERRUPT;
 
     pTab[pIndex].cpuState.cs = (uint_16)(GDT_OFFSET(r3code) | pTab[pIndex].info.dpl);

@@ -8,18 +8,76 @@
 #include <gunwctrl.h>
 #include <types.h>
 #include <string.h>
+#include <mem.h>
+#include <gunwelf.h>
 #include <hal/mem/mem.h>
 #include <hal/proc/proc.h>
-#include <gunwelf.h>
+#include <error/panic.h>
 
-enum gnwCtrlError loadElf(const ptr_t filePtr, const size_t fileSizeBytes, ptr_t destPtr, size_t * const imageBytes) {
-    
-    // memcopy(imageStart, img, imageSize);
-
-    *imageBytes = elfImageBytes(filePtr);
-    if (!*imageBytes || *imageBytes >= fileSizeBytes) {
+enum gnwCtrlError loadElf(const ptr_t filePtr, 
+                          const size_t fileSizeBytes, 
+                          ptr_t destPtr, 
+                          size_t * const memBytes, 
+                          addr_t * const entry) {
+    if (!memBytes) {
+        OOPS("Unexpected nullptr");
+    }
+    if (!entry) {
+        OOPS("Unexpected nullptr");
+    }
+    addr_t vMemLow;
+    *memBytes = elfAllocBytes(filePtr, fileSizeBytes, &vMemLow);
+    if (!*memBytes) {
         return GCE_HEADER_INVALID;
     }
+    addr_t vMemHigh = vMemLow + *memBytes - 1;
+    if (vMemHigh <= vMemLow) {
+        return GCE_HEADER_INVALID;
+    }
+
+    #warning allocate if possible
+    #warning check memory limits
+    #warning how to handle section flags?
+
+    memnull(destPtr, *memBytes);
+    for (size_t index = 0; index < elfGetSectionHeaderEntryCount(filePtr); ++index) {
+        const struct elfSectionHeaderEntry32 * const entry = elfGetSectionHeaderEntry(filePtr, index, fileSizeBytes); 
+        if (!entry) {
+            OOPS("Unexpected nullptr");
+        }
+        if (!(entry->attributes & ESECATTR_ALLOC)) {
+            continue;
+        }
+
+        addr_t sectionVMemLow = (addr_t)entry->virtualAddr;
+        addr_t sectionVMemHigh = sectionVMemLow + entry->fileSizeBytes - 1;
+        /*
+            Verify memory constraints
+        */
+        if (sectionVMemHigh <= sectionVMemLow ||
+            sectionVMemLow < vMemLow ||
+            sectionVMemHigh > vMemHigh) {
+            return GCE_HEADER_INVALID;
+        }
+        /*
+            Verify file constraints
+        */
+        if (entry->offset >= fileSizeBytes ||
+            entry->fileSizeBytes > (fileSizeBytes - entry->offset)) {
+            return GCE_HEADER_INVALID;
+        }
+
+        addr_t relVMemAddr = sectionVMemLow - vMemLow;
+        memcopy(filePtr + entry->offset, 
+                destPtr + relVMemAddr, 
+                entry->fileSizeBytes);
+    }
+
+    *entry = elfGetEntry(filePtr);
+    if (*entry < vMemLow || vMemHigh < *entry) {
+        return GCE_HEADER_INVALID;
+    }
+    *entry -= vMemLow;
 
     return GCE_NONE;
 }
@@ -42,7 +100,7 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
     size_t fileSizeBytes;
     if (pathLen == 3 && !strcmpl("cli", (const char *)absPathPtr, pathLen)) {
         filePtr = (ptr_t)0x50000;
-        fileSizeBytes = 0xBEB0;
+        fileSizeBytes = 0xCB50;
     } else {
         return GCE_NOT_FOUND;
     }
@@ -59,8 +117,7 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
     exp.class = ECLASS_32;
     exp.endianess = EENDIAN_LITTLE;
     exp.type = ETYPE_EXEC;
-    exp.architecture = 0;
-
+    exp.architecture = 3;
 
     if (!elfValidate(filePtr, fileSizeBytes, &exp)) {
         return GCE_HEADER_INVALID;
@@ -78,8 +135,9 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
     */
     
     enum gnwCtrlError err;
-    size_t imgBytes;
-    err = loadElf(filePtr, fileSizeBytes, dstPtr, &imgBytes);
+    size_t memBytes;
+    addr_t entry; 
+    err = loadElf(filePtr, fileSizeBytes, dstPtr, &memBytes, &entry);
     if (err != GCE_NONE) {
         return err;
     }
@@ -91,9 +149,13 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
     struct k_proc_descriptor desc;
 
     desc.img = dstPtr;
-    desc.imgBytes = imgBytes;
+    desc.entry = entry;
+    desc.imgBytes = memBytes;
 
-    k_proc_spawn(&desc);
+    enum k_proc_error procErr = k_proc_spawn(&desc);
+    if (procErr != PE_NONE) {
+        return GCE_OPERATION_FAILED;
+    }
 
     return GCE_NONE;
 }

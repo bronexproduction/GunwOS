@@ -12,9 +12,9 @@
 
 #define ELF_MAGIC ("\x7F""ELF")
 #define ELF_VERSION 1
-#define ELF_HEADER_SIZE_32 0x34
-#define ELF_PROGRAM_ENTRY_SIZE_32 0x20
-#define ELF_SECTION_ENTRY_SIZE_32 0x28
+#define ELF_HEADER_SIZE_32 (size_t)0x34
+#define ELF_PROGRAM_ENTRY_SIZE_32 (size_t)0x20
+#define ELF_SECTION_ENTRY_SIZE_32 (size_t)0x28
 
 enum elfClass {
     ECLASS_32 = 1,
@@ -107,9 +107,9 @@ struct __attribute__((packed)) elfHeader32 {
     const enum elfType type             :8*2;   /* Object file type */
     const uint_16 architecture;                 /* Target instruction set architecture */
     const uint_32 version;                      /* ELF version */
-    const ptr_t entry; 	                        /* Address the entry point (0 if no entry point) */
-    const ptr_t programHeaderTable;             /* Start of the program header table */
-    const ptr_t sectionHeaderTable;             /* Start of the section header table */
+    const addr_t entry; 	                    /* Address the entry point (0 if no entry point) */
+    const addr_t programHeaderTable;            /* Start of the program header table */
+    const addr_t sectionHeaderTable;            /* Start of the section header table */
     const uint_32 archFlags; 	                /* Flags for target architecture */
     const uint_16 elfHeaderSize;                /* Size of this header */
     const uint_16 programHeaderEntrySize;       /* Size of a program header table entry */
@@ -123,14 +123,15 @@ _Static_assert(sizeof(struct elfHeader32) == ELF_HEADER_SIZE_32, "Unexpected str
 struct __attribute__((packed)) elfProgramHeaderEntry32 {
     const enum elfSegmentType type      :8*4;   /* Type of the segment */
     const uint_32 offset;                       /* Offset of the segment in the file image */
-    const ptr_t virtualAddr;                    /* Virtual address of the segment in memory */
-    const ptr_t physicalAddr;                   /* Physical address of the segment in memory (where relevant) */
+    const addr_t virtualAddr;                    /* Virtual address of the segment in memory */
+    const addr_t physicalAddr;                   /* Physical address of the segment in memory (where relevant) */
     const uint_32 fileSizeBytes;                /* Size in bytes of the segment in the file image (may be 0) */
     const uint_32 memorySizeBytes;              /* Size in bytes of the segment in memory (may be 0) */
     const uint_32 flags;                        /* Segment-dependent flags */
     const uint_32 alignment;                    /* 0 and 1 specify no alignment. 
                                                    Otherwise should be a positive, integral power of 2, 
-                                                   with virtualAddr equating offset modulus alignment. */
+                                                   with virtualAddr equating offset modulus alignment
+                                                   (offset % alignment == virtualAddr % alignment) */
 };
 _Static_assert(sizeof(struct elfProgramHeaderEntry32) == ELF_PROGRAM_ENTRY_SIZE_32, "Unexpected struct elfProgramHeader32 size");
 
@@ -138,7 +139,7 @@ struct __attribute__((packed)) elfSectionHeaderEntry32 {
     const uint_32 nameOffset;                   /* An offset to a string in the .shstrtab section that represents the name of this section */
     const enum elfSectionType type      :8*4;   /* Type of the section */
     const enum elfSectionAttr attributes:8*4;   /* Attributes of the section */
-    const ptr_t virtualAddr;                    /* Virtual address of the section in memory, for sections that are loaded */
+    const addr_t virtualAddr;                    /* Virtual address of the section in memory, for sections that are loaded */
     const uint_32 offset;	                    /* Offset of the section in the file image */
 	const uint_32 fileSizeBytes;                /* Size in bytes of the section in the file image (may be 0) */
 	const uint_32 sectionIndex;                 /* Contains the section index of an associated section. 
@@ -146,7 +147,8 @@ struct __attribute__((packed)) elfSectionHeaderEntry32 {
     const uint_32 info;                         /* Contains extra information about the section. 
                                                    This field is used for several purposes, depending on the type of section. */
     const uint_32 addressAlignment;             /* Contains the required alignment of the section. 
-                                                   This field must be a power of two. */
+                                                   0 and 1 specify no alignment
+                                                   otherwise this field must be a power of two. */
     const uint_32 entrySizeBytes;               /* Contains the size, in bytes, of each entry, for sections that contain fixed-size entries. 
                                                    Otherwise, this field contains zero. */
 };
@@ -166,6 +168,21 @@ bool elfValidate(const ptr_t filePtr,
 /*
     Returns required memory size to allocate the binary
 */
-size_t elfImageBytes(const ptr_t filePtr);
+size_t elfAllocBytes(const ptr_t filePtr, const size_t fileSizeBytes, addr_t * const virtualMemoryLowAddr);
+
+/*
+    Returns the number of section header entries
+*/
+size_t elfGetSectionHeaderEntryCount(const ptr_t filePtr);
+
+/*
+    Returns the section header entry at given index
+*/
+struct elfSectionHeaderEntry32 * elfGetSectionHeaderEntry(const ptr_t filePtr, const size_t index, const size_t fileSizeBytes);
+
+/*
+    Returns the entry point address
+*/
+addr_t elfGetEntry(const ptr_t filePtr);
 
 #endif // GUNWELF_H

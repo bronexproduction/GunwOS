@@ -91,7 +91,7 @@
 ISR(
     /* Checking output buffer status */
     if (!rdb(KBD_BUS_STATUS) & KBD_STAT_OUTB) {
-        OOPS("Keyboard output buffer empty on keyboard interrupt")
+        OOPS("Keyboard output buffer empty on keyboard interrupt");
         ISR_END
     }
 

@@ -105,7 +105,7 @@ static void onKeyDown(const uint_8 c) {
     uint_8 charCode = *(&(user_cli_kmp_default[c].code) + user_cli_kbf_currModMask());
 
     if (charCode >= CHARSET_CODES_MAX) {
-        // OOPS("Character code over accepted limit")
+        // OOPS("Character code over accepted limit");
         fug(FUG_UNDEFINED);
         return;
     }

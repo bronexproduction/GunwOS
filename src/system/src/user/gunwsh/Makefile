@@ -1,5 +1,6 @@
 CFLAGS=$(APP_CFLAGS) -I $(shell pwd)
 RSFLAGS=$(APP_RSFLAGS)
+LFLAGS=$(APP_LFLAGS) -Ttext=0x00100000
 
 O_DIR_LISTING=find . -name '*.o' -type f
 EXEC_TERMINATOR=\;
@@ -11,7 +12,7 @@ TARGET_O=$(shell basename $(shell pwd))
 all: $(TARGET_O).elf clean_o
 
 $(TARGET_O).elf: build_o
-	$(L) $(APP_LFLAGS) -o $@ $(APP_LINK_LIBS) $(shell $(O_DIR_LISTING))
+	$(L) $(LFLAGS) -o $@ $(APP_LINK_LIBS) $(shell $(O_DIR_LISTING))
 	
 build_o:
 	$(C_DIR_LISTING) -exec $(C) $(CFLAGS) -o {}.o {} $(EXEC_TERMINATOR)
