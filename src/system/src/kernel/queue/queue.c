@@ -13,13 +13,15 @@
 
 #define MAX_QUEUE_LENGTH 64
 
+typedef __attribute__((cdecl)) void (*fPtr_void)();
+typedef __attribute__((cdecl)) void (*fPtr_32_32)(uint_32, uint_32);
+
 union dispatchFuncPtr {
-    __attribute__((cdecl)) void (*f)();
-    __attribute__((cdecl)) void (*f_32_32)(uint_32, uint_32);
+    fPtr_void f;
+    fPtr_32_32 f_32_32;
 };
 
 union dispatchFuncParam {
-    uint_64 p64;
     uint_32 p32;
     uint_16 p16;
     uint_8 p8;
@@ -47,8 +49,11 @@ static struct dispatchEntry queue[MAX_QUEUE_LENGTH];
 struct dispatchEntry *k_que_currentDispatchEntry = 0;
 static bool running = 0;
 
-void k_que_dispatch(void (* const func)()) {
-
+static void dispatch(const ptr_t funcPtr, 
+                     const enum dispatchFuncType type, 
+                     const uint_32 p0, 
+                     const uint_32 p1) {
+    
     #warning how to avoid duplicates?
 
     if (!running) {
@@ -70,8 +75,20 @@ void k_que_dispatch(void (* const func)()) {
         return;
     }
 
-    queue[i].func.type = DFE_VOID;
-    queue[i].func.ptr.f = func;
+    queue[i].func.type = type;
+    switch (type) {
+    case DFE_VOID:
+        queue[i].func.ptr.f = (fPtr_void)funcPtr;
+        break;
+    case DFE_32_32:
+        queue[i].func.ptr.f_32_32 = (fPtr_32_32)funcPtr;
+        queue[i].func.params[0].p32 = (uint_32)p0;
+        queue[i].func.params[1].p32 = (uint_32)p1; 
+        break;
+    default:
+        OOPS("Unexpected dispatched function type");
+        return;
+    }
     queue[i].next = 0;
 
     struct dispatchEntry * last = k_que_currentDispatchEntry;
@@ -84,6 +101,14 @@ void k_que_dispatch(void (* const func)()) {
     else {
         k_que_currentDispatchEntry = (queue + i);
     }
+}
+
+void k_que_dispatch(void (* const func)()) {
+    dispatch((ptr_t)func, DFE_VOID, NULL, NULL);
+}
+
+void k_que_dispatch_32_32(void (* const func)(const uint_32, const uint_32), const uint_32 p0, const uint_32 p1) {
+    dispatch((ptr_t)func, DFE_32_32, p0, p1);
 }
 
 void k_que_start() {
@@ -119,7 +144,6 @@ void k_que_start() {
         default:
             OOPS("Unexpected queued function type");
             return;
-            break;
         }
 
         CRITICAL_SECTION (

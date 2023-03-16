@@ -9,7 +9,7 @@
 #define QUEUE_H
 
 /*
-    Function dedicated for interrupt handlers
+    Functions dedicated for interrupt handlers
     which may require some time to process data
 
     To keep interrupt service routines simple
@@ -17,5 +17,6 @@
     to be executed after ISR returns
 */
 void k_que_dispatch(void (* const func)());
+void k_que_dispatch_32_32(void (* const func)(const uint_32, const uint_32), const uint_32 p0, const uint_32 p1);
 
 #endif // QUEUE_H
