@@ -252,7 +252,7 @@ enum gnwDeviceError k_dev_writeMem(const procId_t processId,
     if (!routine->write) {
         return GDE_INVALID_OPERATION;
     }
-    #warning it's more than dangerous to allow the driver to access the buffer directly, moreover it could be even impossible when driver processes are implemented
+    #warning it is more than dangerous to allow the driver to access the buffer directly, moreover it could be even impossible when driver processes are implemented
     routine->write(buffer);
 
     return GDE_NONE;

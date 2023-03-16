@@ -13,9 +13,33 @@
 
 #define MAX_QUEUE_LENGTH 64
 
+union dispatchFuncPtr {
+    __attribute__((cdecl)) void (*f)();
+    __attribute__((cdecl)) void (*f_32_32)(uint_32, uint_32);
+};
+
+union dispatchFuncParam {
+    uint_64 p64;
+    uint_32 p32;
+    uint_16 p16;
+    uint_8 p8;
+};
+
+enum dispatchFuncType {
+    DFE_NONE = 0,
+    DFE_VOID,
+    DFE_32_32,
+};
+
+struct dispatchFunc {
+    enum dispatchFuncType type;
+    union dispatchFuncPtr ptr;
+    union dispatchFuncParam params[2];
+};
+
 struct dispatchEntry {
     volatile uint_8 reserved;
-    void (*func)();
+    struct dispatchFunc func;
     struct dispatchEntry *next;
 };
 
@@ -46,7 +70,8 @@ void k_que_dispatch(void (* const func)()) {
         return;
     }
 
-    queue[i].func = func;
+    queue[i].func.type = DFE_VOID;
+    queue[i].func.ptr.f = func;
     queue[i].next = 0;
 
     struct dispatchEntry * last = k_que_currentDispatchEntry;
@@ -79,18 +104,29 @@ void k_que_start() {
             OOPS("Enqueued item disabled");
             return;
         }
-        if (!enqueued->func) {
+        if (!enqueued->func.ptr.f) {
             OOPS("Null pointer queued");
             return;
         }
 
-        enqueued->func();
+        switch (enqueued->func.type) {
+        case DFE_VOID:
+            enqueued->func.ptr.f();
+            break;
+        case DFE_32_32:
+            enqueued->func.ptr.f_32_32(enqueued->func.params[0].p32, enqueued->func.params[1].p32);
+            break;
+        default:
+            OOPS("Unexpected queued function type");
+            return;
+            break;
+        }
 
         CRITICAL_SECTION (
             struct dispatchEntry * const next = enqueued->next;
             k_que_currentDispatchEntry = next;
             enqueued->next = 0;
-            enqueued->func = nullptr;
+            enqueued->func.type = DFE_NONE;
             enqueued->reserved = 0;
         )
     }
