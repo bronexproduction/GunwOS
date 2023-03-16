@@ -24,6 +24,18 @@
     or in case of access violation
 
     Params:
+    * procId - process identifler
+    * relPtr - pointer relative to process memory
+    * refSize - size of buffer/datatype referenced by the relPtr in bytes
+*/
+ptr_t k_scl_func_getValidAbsoluteForProc(const procId_t procId, const ptr_t relPtr, const size_t refSize);
+
+/*
+    Returns valid absolute address of relPtr for current process
+    or nullptr if process is invalid 
+    or in case of access violation
+
+    Params:
     * relPtr - pointer relative to process memory
     * refSize - size of buffer/datatype referenced by the relPtr in bytes
 */

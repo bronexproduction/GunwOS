@@ -26,9 +26,7 @@
     Return:
         * EAX - Start error if any, otherwise GCE_NONE (see enum gnwCtrlError)
 */
-
 SCR(start,
-    // Executable path buffer pointer (relative to process memory)
     REG(32, path, ebx)
     REG(32, pathLen, ecx)
 
@@ -198,8 +196,8 @@ SCR(devMemWrite,
 
     REG_RET(32, err)
 
-#warning HANDLE RELATIVE ADDRESS CONVERSION - SEE devGetByType/k_scr_usr_devGetByType
-    err = k_dev_writeMem((const size_t)k_proc_getCurrentId(), (const size_t)devId, (const void * const)buf);                                        
+    enum gnwDeviceError k_scr_usr_devMemWrite(const size_t devId, const void * const buf);
+    err = k_scr_usr_devMemWrite(devId, (void *)buf);
 )
 
 /*
