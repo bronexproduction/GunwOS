@@ -14,6 +14,9 @@
 enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescriptor * const descriptor);
 enum gnwDriverError k_dev_start(size_t id);
 
+enum gnwDeviceError k_dev_getById(const size_t id, struct gnwDeviceUHADesc * const desc);
+enum gnwDeviceError k_dev_getByType(enum gnwDeviceType type, struct gnwDeviceUHADesc * const desc);
+
 enum gnwDeviceError k_dev_acquireHold(procId_t processId, size_t deviceId);
 void k_dev_releaseHold(size_t, size_t);
 

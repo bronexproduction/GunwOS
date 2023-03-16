@@ -20,7 +20,7 @@
     Function - START
 
     Params:
-        * EBX - path to executable - null-terminated character array pointer
+        * EBX - path to executable - null-terminated character array pointer, relative to caller process memory 
         * ECX - path length in bytes
 
     Return:
@@ -43,7 +43,7 @@ SCR(start,
     Function - DEBUG_PRINT
 
     Params:
-        * EBX - null-terminated character array pointer
+        * EBX - null-terminated character array pointer, relative to caller process memory 
         * ECX - character array buffer length in bytes
 
     Return:
@@ -114,7 +114,7 @@ SCR(sleepms,
 
     Params:
         * EBX - device identifier
-        * ECX - device descriptor pointer (struct gnwDeviceUHADesc *)
+        * ECX - device descriptor pointer relative to caller process memory (struct gnwDeviceUHADesc *)
 
     Return:
         * EAX - error code (enum gnwDeviceError)
@@ -125,8 +125,8 @@ SCR(devGetById,
 
     REG_RET(32, err)
 
-    enum gnwDeviceError k_dev_getById(const size_t, struct gnwDeviceUHADesc * const);
-    err = k_dev_getById((const size_t)id, (struct gnwDeviceUHADesc * const)desc);
+    enum gnwDeviceError k_scr_usr_devGetById(const size_t, struct gnwDeviceUHADesc * const);
+    err = k_scr_usr_devGetById((const size_t)id, (struct gnwDeviceUHADesc * const)desc);
 )
 
 /*
@@ -135,7 +135,7 @@ SCR(devGetById,
 
     Params:
         * EBX - device type (enum gnwDeviceType)
-        * ECX - device descriptor pointer (struct gnwDeviceUHADesc *)
+        * ECX - device descriptor pointer relative to caller process memory (struct gnwDeviceUHADesc *)
 
     Return:
         * EAX - error code (enum gnwDeviceError)
@@ -146,8 +146,8 @@ SCR(devGetByType,
 
     REG_RET(32, err)
 
-    enum gnwDeviceError k_dev_getByType(enum gnwDeviceType, struct gnwDeviceUHADesc * const);
-    err = k_dev_getByType((enum gnwDeviceType)type, (struct gnwDeviceUHADesc * const)desc);
+    enum gnwDeviceError k_scr_usr_devGetByType(enum gnwDeviceType, struct gnwDeviceUHADesc * const);
+    err = k_scr_usr_devGetByType((enum gnwDeviceType)type, (struct gnwDeviceUHADesc * const)desc);
 )
 
 /*
@@ -187,7 +187,7 @@ SCR(devRelease,
 
     Params:
         * EBX - device identifier
-        * ECX - data buffer
+        * ECX - data buffer relative to caller process memory 
 
     Return:
         * EAX - error code (enum gnwDeviceError)
@@ -198,6 +198,7 @@ SCR(devMemWrite,
 
     REG_RET(32, err)
 
+#warning HANDLE RELATIVE ADDRESS CONVERSION - SEE devGetByType/k_scr_usr_devGetByType
     err = k_dev_writeMem((const size_t)k_proc_getCurrentId(), (const size_t)devId, (const void * const)buf);                                        
 )
 
