@@ -12,6 +12,7 @@
 #include <gunwfug.h>
 #include <gunwuhadesc.h>
 #include <gunwevent.h>
+#include <gunwrlp.h>
 
 /*
     Device type
@@ -166,8 +167,12 @@ SYSCALL_DECL enum gnwDeviceError devListen(const size_t identifier,
                                            const union gnwEventListener listener) {
     CHECKPTR(listener._handle);
     
+    ptr_t rlpPtr = (ptr_t)runLoopGetMain();
+    CHECKPTR(rlpPtr);
+
     SYSCALL_PAR1(identifier);
     SYSCALL_PAR2(listener._handle);
+    SYSCALL_PAR3(rlpPtr);
 
     SYSCALL_USER_FUNC(DEV_LISTEN);
     SYSCALL_USER_INT;

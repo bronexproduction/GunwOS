@@ -1,5 +1,6 @@
 KERNEL_INCLUDE=-I $(STDGUNW_INCLUDE_DIR) \
                -I $(API_INCLUDE_DIR) \
+			   -I $(API_SRC_DIR) \
 			   -I . \
 			   -I "$(LIB_SRC_DIR)/gunwelf"
 

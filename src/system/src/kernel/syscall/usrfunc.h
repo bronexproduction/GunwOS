@@ -12,6 +12,7 @@
 #include <gunwdev.h>
 #include <gunwfug.h>
 #include <gunwctrl.h>
+#include <src/_gunwrlp.h>
 
 /*
     User-level system calls
@@ -92,6 +93,7 @@ __attribute__((naked)) void k_scr_fug(enum gnwFugCode);
     Function - DEV_LISTEN
 */
 __attribute__((naked)) enum gnwDeviceError k_scr_devListen(const size_t identifier,
-                                                           const union gnwEventListener listener);
+                                                           const union gnwEventListener listener,
+                                                           const struct gnwRunLoop * const runLoop);
 
 #endif // USRFUNC_H

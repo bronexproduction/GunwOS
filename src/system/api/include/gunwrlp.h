@@ -8,6 +8,8 @@
 #ifndef GUNWOS_GUNWRLP_H
 #define GUNWOS_GUNWRLP_H
 
+#include <types.h>
+
 /*
     Starting the async run loop
 
@@ -26,5 +28,10 @@
     }
 */
 void runLoopStart();
+
+/*
+    Returns pointer to the main run loop
+*/
+ptr_t runLoopGetMain();
 
 #endif // GUNWOS_GUNWRLP_H

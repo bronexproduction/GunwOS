@@ -8,6 +8,8 @@
 #ifndef GUNWOS_GUNWEVENT_H
 #define GUNWOS_GUNWEVENT_H
 
+#include <types.h>
+
 enum gnwEventFormat {
     GEF_NONE = 0,
     GEF_VOID,

@@ -5,6 +5,7 @@
 //  Created by Artur Danielewski on 06.03.2020.
 //
 
+#include "dev.h"
 #include <mem.h>
 #include <gunwdev.h>
 #include <hal/hal.h>
@@ -305,13 +306,14 @@ static enum gnwDeviceError validateListener(const procId_t processId,
 
 enum gnwDeviceError k_dev_listen(const procId_t processId, 
                                  const size_t deviceId, 
-                                 const union gnwEventListener listener) {
+                                 const union gnwEventListener listener,
+                                 const struct gnwRunLoop * const runLoopPtr) {
     enum gnwDeviceError err = validateListener(processId, deviceId, listener);
     if (err) {
         return err;
     }
 
-    // Allocate extra space in process for callback invocation
+    #warning Check run loop pointer
 
     devices[deviceId].listener = listener;
     return GDE_NONE;
