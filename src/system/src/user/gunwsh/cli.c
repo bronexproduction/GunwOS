@@ -198,5 +198,5 @@ static void s_cli_init() {
 void _start() {
     s_cli_init();
 
-    while(1);
+    runLoopStart();
 }

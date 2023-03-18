@@ -110,7 +110,9 @@ __attribute__((naked)) void k_scl_driverSyscall() {
     register uint_32 function __asm__ ("eax");
 
     __asm__ volatile ("pushl %ebx");
+    __asm__ volatile ("pushl %edx");
     __asm__ volatile ("cmp %%ebx, %%eax" : : "b" (SYSCALL_COUNT));
+    __asm__ volatile ("popl %edx");
     __asm__ volatile ("popl %ebx");
     __asm__ volatile ("jae k_scl_syscall_functionOverLimitFailure");
 
@@ -134,7 +136,9 @@ __attribute__((naked)) void k_scl_userSyscall() {
     register uint_32 function __asm__ ("eax");
 
     __asm__ volatile ("pushl %ebx");
+    __asm__ volatile ("pushl %edx");
     __asm__ volatile ("cmp %%ebx, %%eax" : : "b" (SYSCALL_COUNT));
+    __asm__ volatile ("popl %edx");
     __asm__ volatile ("popl %ebx");
     __asm__ volatile ("jae k_scl_syscall_functionOverLimitFailure");
 

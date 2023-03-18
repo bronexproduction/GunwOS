@@ -11,6 +11,7 @@
 #include <hal/hal.h>
 #include <hal/int/irq.h>
 #include <hal/proc/proc.h>
+#include <hal/mem/mem.h>
 #include <error/panic.h>
 
 #define MAX_DEVICES 8
@@ -319,7 +320,7 @@ static enum gnwDeviceError validateListener(const procId_t processId,
         return GDE_ALREADY_SET;
     }
 
-    ptr_t absRunLoopPtr = k_mem_absForProc(processId, runLoopPtr);
+    ptr_t absRunLoopPtr = k_mem_absForProc(processId, (ptr_t)runLoopPtr);
     if (!k_mem_bufInZoneForProc(processId, absRunLoopPtr, sizeof(struct gnwRunLoop))) {
         return GDE_INVALID_PARAMETER;
     }
@@ -330,7 +331,7 @@ static enum gnwDeviceError validateListener(const procId_t processId,
 enum gnwDeviceError k_dev_listen(const procId_t processId, 
                                  const size_t deviceId, 
                                  const union gnwEventListener listener,
-                                 const struct gnwRunLoop * const runLoopPtr) {
+                                 struct gnwRunLoop * const runLoopPtr) {
     enum gnwDeviceError err = validateListener(processId, deviceId, listener, runLoopPtr);
     if (err) {
         return err;
@@ -359,11 +360,9 @@ static enum gnwDeviceError validateEmitter(const size_t * const devIdPtr,
     return GDE_NONE;
 }
 
-#warning below functions not updated yet
-
 static enum gnwDeviceError validateListenerInvocation(const size_t deviceId) {
     struct device *dev = &devices[deviceId];
-    if (!dev->listener._handle) {
+    if (!dev->listener.routine._handle) {
         return GDE_NOT_FOUND;
     }
     if (dev->holder == NONE_PROC_ID) {
@@ -386,11 +385,17 @@ enum gnwDeviceError k_dev_emit_void(const int_32 type) {
     }
 
     struct device *dev = &devices[*k_hal_servicedDevIdPtr];
-    gnwEventListener_void listener = dev->listener.onEvent_void;
+    gnwEventListener_void listener = dev->listener.routine.onEvent_void;
 
-    k_proc_callback_invoke_32(dev->holder, (void (*)(uint_32))listener, type);
-
-    return GDE_NONE;
+    enum k_proc_error callbackErr = k_proc_callback_invoke_32(dev->holder, dev->listener.runLoop, (void (*)(uint_32))listener, type);
+    switch (callbackErr) {
+    case PE_NONE:
+        return GDE_NONE;
+    case PE_ACCESS_VIOLATION:
+        return GDE_LISTENER_INVALID;
+    default:
+        return GDE_UNKNOWN;
+    }
 }
 
 enum gnwDeviceError k_dev_emit_u8(const int_32 type,
@@ -407,9 +412,15 @@ enum gnwDeviceError k_dev_emit_u8(const int_32 type,
     }
 
     struct device *dev = &devices[*k_hal_servicedDevIdPtr];
-    gnwEventListener_u8 listener = dev->listener.onEvent_u8;
+    gnwEventListener_u8 listener = dev->listener.routine.onEvent_u8;
 
-    k_proc_callback_invoke_32_8(dev->holder, (void (*)(uint_32, uint_8))listener, type, data);
-
-    return GDE_NONE;
+    enum k_proc_error callbackErr = k_proc_callback_invoke_32_8(dev->holder, dev->listener.runLoop, (void (*)(uint_32, uint_8))listener, type, data);
+    switch (callbackErr) {
+    case PE_NONE:
+        return GDE_NONE;
+    case PE_ACCESS_VIOLATION:
+        return GDE_LISTENER_INVALID;
+    default:
+        return GDE_UNKNOWN;
+    }
 }

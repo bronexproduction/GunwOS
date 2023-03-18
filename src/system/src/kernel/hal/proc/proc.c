@@ -12,6 +12,7 @@
 
 #include <schedule/schedule.h>
 #include <hal/criticalsec/criticalsec.h>
+#include <hal/mem/mem.h>
 #include <timer/timer.h>
 #include <error/panic.h>
 
@@ -312,16 +313,41 @@ void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const procId_t currentP
     STACK_VAL(refEsp, 16, 56) = kernelProc.cpuState.ss;
 }
 
-void k_proc_callback_invoke_32(const procId_t procId, void (*funPtr)(uint_32), uint_32 p1) {
+static bool validateRunLoop(const procId_t procId, 
+                            const struct gnwRunLoop * const runLoop) {
+    ptr_t absRunLoopPtr = k_mem_absForProc(procId, (ptr_t)runLoop);
+    return k_mem_bufInZoneForProc(procId, absRunLoopPtr, sizeof(struct gnwRunLoop));
+}                                
+
+enum k_proc_error k_proc_callback_invoke_32(const procId_t procId, 
+                               const struct gnwRunLoop * const runLoop, 
+                               void (*funPtr)(uint_32), 
+                               uint_32 p1) {
+    if (!validateRunLoop(procId, runLoop)) {
+        return PE_ACCESS_VIOLATION;
+    }
+    
+    #warning consider critical section
     #warning TO BE IMPLEMENTED - DPL OTHER THAN 0 NOT SUPPORTED
     #warning Apps need to implement run loop first
     funPtr(p1);
+    return PE_NONE;
 }
 
-void k_proc_callback_invoke_32_8(const procId_t procId, void (*funPtr)(uint_32, uint_8), uint_32 p1, uint_8 p2) {
+enum k_proc_error k_proc_callback_invoke_32_8(const procId_t procId, 
+                                 const struct gnwRunLoop * const runLoop, 
+                                 void (*funPtr)(uint_32, uint_8), 
+                                 uint_32 p1,
+                                 uint_8 p2) {                                
+    if (!validateRunLoop(procId, runLoop)) {
+        return PE_ACCESS_VIOLATION;
+    }
+
+    #warning consider critical section
     #warning TO BE IMPLEMENTED - DPL OTHER THAN 0 NOT SUPPORTED
     #warning Apps need to implement run loop first
     funPtr(p1, p2);
+    return PE_NONE;
 }
 
 static void k_proc_prepareKernelProc() {
