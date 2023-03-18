@@ -7,7 +7,8 @@
 
 #include <mem.h>
 #include <gunwdisplay.h>
-#include <error/panic.h>
+// #include <error/panic.h>
+#include <gunwfug.h>
 #include <defs.h>
 #include "video.h"
 
@@ -29,17 +30,20 @@ bool k_trm_vid_init() {
 
     if (desc.dimensions.x != k_vid_dimensions.x ||
         desc.dimensions.y != k_vid_dimensions.y) {
-        OOPS("Unsupported display dimensions");
+        fug(FUG_UNDEFINED);
+        // OOPS("Unsupported display dimensions");
         return false;
     }
     if (e) {
-        OOPS("Error retrieving available text display");
+        fug(FUG_UNDEFINED);
+        // OOPS("Error retrieving available text display");
         return false;
     }
 
     e = attachToTextDisplay(desc.identifier, &displayHandle);
     if (e) {
-        OOPS("Unable to attach display");
+        fug(FUG_UNDEFINED);
+        // OOPS("Unable to attach display");
         return false;
     }
 
@@ -53,7 +57,8 @@ static void k_vid_push() {
 
     enum gnwDeviceError e = displayHandle.update(&displayHandle, frameBuffer);
     if (e) {
-        OOPS("Error updating display buffer");
+        fug(FUG_UNDEFINED);
+        // OOPS("Error updating display buffer");
         displayHandle.update = nullptr;
     }
 }

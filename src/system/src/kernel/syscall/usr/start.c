@@ -100,7 +100,7 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
     size_t fileSizeBytes;
     if (pathLen == 3 && !strcmpl("cli", (const char *)absPathPtr, pathLen)) {
         filePtr = (ptr_t)0x50000;
-        fileSizeBytes = 0xCB50;
+        fileSizeBytes = 0xFCD4;
     } else {
         return GCE_NOT_FOUND;
     }

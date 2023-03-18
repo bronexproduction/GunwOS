@@ -13,14 +13,22 @@
 
 #define IO_GENERAL_FAILURE -1
 
-bool user_cli_charOutAttached = false;
-size_t user_cli_charOutIdentifier = 0;
+#warning CHANGED TILL TERMINAL IMPLEMENTED AS DRIVER
+// bool user_cli_charOutAttached = false;
+// size_t user_cli_charOutIdentifier = 0;
 
 static int append(const char c) {
-    if (!user_cli_charOutAttached) {
+    #warning CHANGED TILL TERMINAL IMPLEMENTED AS DRIVER
+    // if (!user_cli_charOutAttached) {
+        // return IO_GENERAL_FAILURE;
+    // }
+    enum gnwDeviceError e = GDE_NONE;
+    #warning CHANGED TILL TERMINAL IMPLEMENTED AS DRIVER
+    extern bool trm_append(const char c);
+    if (!trm_append(c)) {
         return IO_GENERAL_FAILURE;
     }
-    enum gnwDeviceError e = devCharWrite(user_cli_charOutIdentifier, c);
+    // e = devCharWrite(user_cli_charOutIdentifier, c);
     if (e != GDE_NONE) {
         return IO_GENERAL_FAILURE;
     }

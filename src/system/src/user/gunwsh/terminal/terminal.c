@@ -50,7 +50,9 @@ static void newline() {
     }
 }
 
-static bool append(const char c) {
+#warning CHANGED UNTIL TERMINAL IMPLEMENTED AS DRIVER
+bool trm_append(const char c) {
+// static bool append(const char c) {
     if (c == '\n') {
         newline();
     } else if (c == '\b') {
@@ -59,7 +61,7 @@ static bool append(const char c) {
         }
 
         back();
-        append(' ');
+        trm_append(' ');
         back();
     } else {
         const struct gnwDeviceUHA_display_character vChar = {TERMINAL_BG_COLOR_DFLT, TERMINAL_CHAR_COLOR_DFLT, c};
@@ -90,6 +92,12 @@ static bool start() {
     return true;
 }
 
+#warning TEMPORARY UNTIL TERMINAL IMPLEMENTED AS DRIVER
+void trm_workaround_start() {
+    init();
+    start();
+}
+
 static bool isReadyToWrite() {
     return true;
 }
@@ -107,7 +115,8 @@ static struct gnwDeviceUHA uha() {
     struct gnwDeviceUHA uha;
 
     uha.charOut.routine.isReadyToWrite = isReadyToWrite;
-    uha.charOut.routine.write = append;
+    #warning CHANGED UNTIL TERMINAL IMPLEMENTED AS DRIVER
+    // uha.charOut.routine.write = append;
 
     return uha;
 }

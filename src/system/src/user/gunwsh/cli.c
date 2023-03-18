@@ -130,22 +130,26 @@ static void prompt() {
 
 static void s_cli_init() {
 
-    /* 
-        Attach to character output
-    */
-    struct gnwDeviceUHADesc charOutDesc;
-    enum gnwDeviceError e = devGetByType(DEV_TYPE_CHAR_OUT, &charOutDesc);
+#warning TEMPORARY CHANGE UNTIL TERMINAL IMPLEMENTED AS DRIVER
+    extern void trm_workaround_start();
+    trm_workaround_start();
+    // /* 
+    //     Attach to character output
+    // */
+    // struct gnwDeviceUHADesc charOutDesc;
+    enum gnwDeviceError e = GDE_NONE;
+    // e = devGetByType(DEV_TYPE_CHAR_OUT, &charOutDesc);
 
-    if (e) {
-        // OOPS("Error retrieving available character output device");
-        fug(FUG_UNDEFINED);
-    }
+    // if (e) {
+    //     // OOPS("Error retrieving available character output device");
+    //     fug(FUG_UNDEFINED);
+    // }
 
-    e = devAcquire(charOutDesc.identifier);
-    if (e) {
-        // OOPS("Unable to attach to character output");
-        fug(FUG_UNDEFINED);
-    }
+    // e = devAcquire(charOutDesc.identifier);
+    // if (e) {
+    //     // OOPS("Unable to attach to character output");
+    //     fug(FUG_UNDEFINED);
+    // }
     
     /* 
         Attach keyboard listener
@@ -154,14 +158,14 @@ static void s_cli_init() {
     e = devGetByType(DEV_TYPE_KEYBOARD, &keyboardDesc);
 
     if (e) {
-        devRelease(charOutDesc.identifier);
+        // devRelease(charOutDesc.identifier);
         // OOPS("Error retrieving available keyboard");
         fug(FUG_UNDEFINED);
     }
 
     e = devAcquire(keyboardDesc.identifier);
     if (e) {
-        devRelease(charOutDesc.identifier);
+        // devRelease(charOutDesc.identifier);
         // OOPS("Unable to attach to keyboard");
         fug(FUG_UNDEFINED);
     }
@@ -170,7 +174,7 @@ static void s_cli_init() {
     listener.onEvent_u8 = (gnwKeyboardEventListener)onKeyboardEvent;
     e = devListen(keyboardDesc.identifier, listener);
     if (e) {
-        devRelease(charOutDesc.identifier);
+        // devRelease(charOutDesc.identifier);
         devRelease(keyboardDesc.identifier);
         // OOPS("Unable to attach keyboard listener");
         fug(FUG_UNDEFINED);
@@ -179,8 +183,8 @@ static void s_cli_init() {
     /*
         Configure variables
     */
-    user_cli_charOutAttached = true;
-    user_cli_charOutIdentifier = charOutDesc.identifier;
+    // user_cli_charOutAttached = true;
+    // user_cli_charOutIdentifier = charOutDesc.identifier;
 
     user_cli_kbf_register((struct user_cli_kbf_listener){0, onKeyDown});
     
