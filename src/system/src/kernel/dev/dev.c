@@ -311,6 +311,8 @@ enum gnwDeviceError k_dev_listen(const procId_t processId,
         return err;
     }
 
+    // Allocate extra space in process for callback invocation
+
     devices[deviceId].listener = listener;
     return GDE_NONE;
 }

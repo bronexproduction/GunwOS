@@ -128,7 +128,11 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
     */
 
     const size_t index = 0;
-    const ptr_t dstPtr = (ptr_t)(MEM_KERNEL_START + MEM_KERNEL_RESERVED_BYTES + MiB(index * 2 + 1));
+    const size_t processBinBytes = MiB(1);
+    const size_t processStackBytes = KiB(512);
+    const size_t processExtraBytes = KiB(512);
+    const size_t processMemTotalBytes = processBinBytes + processStackBytes + processExtraBytes;
+    const ptr_t dstPtr = (ptr_t)(MEM_KERNEL_START + MEM_KERNEL_RESERVED_BYTES + (index * processMemTotalBytes) + MiB(1));
 
     /* 
         Load executable 
