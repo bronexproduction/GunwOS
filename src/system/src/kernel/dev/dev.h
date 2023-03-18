@@ -29,7 +29,7 @@ enum gnwDeviceError k_dev_writeChar(const procId_t processId,
 
 enum gnwDeviceError k_dev_listen(const procId_t processId, 
                                  const size_t deviceId, 
-                                 const union gnwDeviceEventListener listener);
+                                 const union gnwEventListener listener);
 
 enum gnwDeviceError k_dev_emit_void(const int_32 type);
 enum gnwDeviceError k_dev_emit_u8(const int_32 type,

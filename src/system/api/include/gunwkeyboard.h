@@ -27,6 +27,6 @@ _Static_assert(sizeof(enum gnwKeyboardEventCode) == sizeof(int_32), "Unexpected 
 /*
     Listener callback type definition
 */
-typedef gnwDeviceEventListener_u8 gnwKeyboardEventListener;
+typedef gnwEventListener_u8 gnwKeyboardEventListener;
 
 #endif // GUNWOS_GUNWKEYBOARD_H

@@ -122,7 +122,7 @@ static struct gnwDriverConfig desc() {
 static struct gnwDeviceUHA uha() {
     struct gnwDeviceUHA uha;
 
-    uha.event.desc.eventDataFormat = GDEF_U8;
+    uha.event.desc.eventDataFormat = GEF_U8;
 
     return uha;
 }

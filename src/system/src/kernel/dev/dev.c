@@ -44,7 +44,7 @@ struct device {
 
         Note: Listener can be attached only by holder process
     */
-    union gnwDeviceEventListener listener;
+    union gnwEventListener listener;
 };
 
 static struct device devices[MAX_DEVICES];
@@ -123,7 +123,7 @@ enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescr
         /* initialized */ false, 
         /* started */ false, 
         /* holder */ NONE_PROC_ID, 
-        /* listener */ (union gnwDeviceEventListener) {
+        /* listener */ (union gnwEventListener) {
             /* _handle */ NULL
         }
     };
@@ -286,7 +286,7 @@ enum gnwDeviceError k_dev_writeChar(const procId_t processId,
 
 static enum gnwDeviceError validateListener(const procId_t processId, 
                                             const size_t deviceId, 
-                                            const union gnwDeviceEventListener listener) {
+                                            const union gnwEventListener listener) {
     if (!listener._handle) {
         return GDE_LISTENER_INVALID;
     }
@@ -305,7 +305,7 @@ static enum gnwDeviceError validateListener(const procId_t processId,
 
 enum gnwDeviceError k_dev_listen(const procId_t processId, 
                                  const size_t deviceId, 
-                                 const union gnwDeviceEventListener listener) {
+                                 const union gnwEventListener listener) {
     enum gnwDeviceError err = validateListener(processId, deviceId, listener);
     if (err) {
         return err;
@@ -318,7 +318,7 @@ enum gnwDeviceError k_dev_listen(const procId_t processId,
 }
 
 static enum gnwDeviceError validateEmitter(const size_t * const devIdPtr,
-                                           const enum gnwDeviceEventFormat format) {
+                                           const enum gnwEventFormat format) {
     if (!devIdPtr) {
         return GDE_INVALID_DEVICE_STATE;
     }
@@ -348,7 +348,7 @@ static enum gnwDeviceError validateListenerInvocation(const size_t deviceId) {
 }
 
 enum gnwDeviceError k_dev_emit_void(const int_32 type) {
-    enum gnwDeviceError err = validateEmitter(k_hal_servicedDevIdPtr, GDEF_VOID);
+    enum gnwDeviceError err = validateEmitter(k_hal_servicedDevIdPtr, GEF_VOID);
     if (err) {
         return err;
     }
@@ -360,7 +360,7 @@ enum gnwDeviceError k_dev_emit_void(const int_32 type) {
     }
 
     struct device *dev = &devices[*k_hal_servicedDevIdPtr];
-    gnwDeviceEventListener_void listener = dev->listener.onEvent_void;
+    gnwEventListener_void listener = dev->listener.onEvent_void;
 
     k_proc_callback_invoke_32(dev->holder, (void (*)(uint_32))listener, type);
 
@@ -369,7 +369,7 @@ enum gnwDeviceError k_dev_emit_void(const int_32 type) {
 
 enum gnwDeviceError k_dev_emit_u8(const int_32 type,
                                   const uint_8 data) {
-    enum gnwDeviceError err = validateEmitter(k_hal_servicedDevIdPtr, GDEF_U8);
+    enum gnwDeviceError err = validateEmitter(k_hal_servicedDevIdPtr, GEF_U8);
     if (err) {
         return err;
     }
@@ -381,7 +381,7 @@ enum gnwDeviceError k_dev_emit_u8(const int_32 type,
     }
 
     struct device *dev = &devices[*k_hal_servicedDevIdPtr];
-    gnwDeviceEventListener_u8 listener = dev->listener.onEvent_u8;
+    gnwEventListener_u8 listener = dev->listener.onEvent_u8;
 
     k_proc_callback_invoke_32_8(dev->holder, (void (*)(uint_32, uint_8))listener, type, data);
 

@@ -170,7 +170,7 @@ static void s_cli_init() {
         fug(FUG_UNDEFINED);
     }
 
-    union gnwDeviceEventListener listener;
+    union gnwEventListener listener;
     listener.onEvent_u8 = (gnwKeyboardEventListener)onKeyboardEvent;
     e = devListen(keyboardDesc.identifier, listener);
     if (e) {

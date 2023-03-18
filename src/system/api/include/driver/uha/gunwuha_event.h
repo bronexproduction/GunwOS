@@ -10,7 +10,7 @@
 #define GUNWOS_GUNWUHA_EVENT_H
 
 #include <uha/gunwuha_event_desc.h>
-#include <gunwdevevent.h>
+#include <gunwevent.h>
 
 /*
     Event emitting device routines
