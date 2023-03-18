@@ -362,7 +362,7 @@ enum gnwDeviceError k_dev_emit_void(const int_32 type) {
     struct device *dev = &devices[*k_hal_servicedDevIdPtr];
     gnwDeviceEventListener_void listener = dev->listener.onEvent_void;
 
-    k_proc_invoke_32(dev->holder, (void (*)(uint_32))listener, type);
+    k_proc_callback_invoke_32(dev->holder, (void (*)(uint_32))listener, type);
 
     return GDE_NONE;
 }
@@ -383,7 +383,7 @@ enum gnwDeviceError k_dev_emit_u8(const int_32 type,
     struct device *dev = &devices[*k_hal_servicedDevIdPtr];
     gnwDeviceEventListener_u8 listener = dev->listener.onEvent_u8;
 
-    k_proc_invoke_32_8(dev->holder, (void (*)(uint_32, uint_8))listener, type, data);
+    k_proc_callback_invoke_32_8(dev->holder, (void (*)(uint_32, uint_8))listener, type, data);
 
     return GDE_NONE;
 }

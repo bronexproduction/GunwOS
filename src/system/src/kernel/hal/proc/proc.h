@@ -82,14 +82,14 @@ void k_proc_switch(const procId_t procId);
 void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const procId_t currentProcId);
 
 /*
-    Invoking functions inside process with given ID
+    Invoking callback functions inside process with given ID
 
     Params:
     * procId - identifier of the process funPtr() is going to be executed in
     * funPtr - function pointer relative to procId process memory
     * p* - parameters of various sizes
 */
-void k_proc_invoke_32(const procId_t procId, void (*funPtr)(uint_32), uint_32 p1);
-void k_proc_invoke_32_8(const procId_t procId, void (*funPtr)(uint_32, uint_8), uint_32 p1, uint_8 p2);
+void k_proc_callback_invoke_32(const procId_t procId, void (*funPtr)(uint_32), uint_32 p1);
+void k_proc_callback_invoke_32_8(const procId_t procId, void (*funPtr)(uint_32, uint_8), uint_32 p1, uint_8 p2);
 
 #endif // PROC_H
