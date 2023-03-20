@@ -320,33 +320,52 @@ static bool validateRunLoop(const procId_t procId,
 }                                
 
 enum k_proc_error k_proc_callback_invoke_32(const procId_t procId, 
-                               const struct gnwRunLoop * const runLoop, 
-                               void (*funPtr)(uint_32), 
-                               uint_32 p1) {
+                               struct gnwRunLoop * const runLoop, 
+                               void (*funPtr)(int_32), 
+                               int_32 p0) {
     if (!validateRunLoop(procId, runLoop)) {
         return PE_ACCESS_VIOLATION;
     }
     
-    #warning consider critical section
-    #warning TO BE IMPLEMENTED - DPL OTHER THAN 0 NOT SUPPORTED
-    #warning Apps need to implement run loop first
-    funPtr(p1);
+    struct gnwRunLoopDispatchItem item;
+    item.format = GEF_U32;
+    item.routine._32 = funPtr;
+    item.params[0] = p0;
+    enum gnwRunLoopError err;
+    CRITICAL_SECTION(
+        err = gnwRunLoopDispatch(runLoop, item);
+    )
+    
+    if (err != GRLE_NONE) {
+        return PE_OPERATION_FAILED;
+    }
+
     return PE_NONE;
 }
 
 enum k_proc_error k_proc_callback_invoke_32_8(const procId_t procId, 
-                                 const struct gnwRunLoop * const runLoop, 
-                                 void (*funPtr)(uint_32, uint_8), 
-                                 uint_32 p1,
-                                 uint_8 p2) {                                
+                                 struct gnwRunLoop * const runLoop, 
+                                 void (*funPtr)(int_32, int_8), 
+                                 int_32 p0,
+                                 int_8 p1) {                                
     if (!validateRunLoop(procId, runLoop)) {
         return PE_ACCESS_VIOLATION;
     }
 
-    #warning consider critical section
-    #warning TO BE IMPLEMENTED - DPL OTHER THAN 0 NOT SUPPORTED
-    #warning Apps need to implement run loop first
-    funPtr(p1, p2);
+    struct gnwRunLoopDispatchItem item;
+    item.format = GEF_U32_U8;
+    item.routine._32_8 = funPtr;
+    item.params[0] = p0;
+    item.params[1] = p1;
+    enum gnwRunLoopError err;
+    CRITICAL_SECTION(
+        err = gnwRunLoopDispatch(runLoop, item);
+    )
+    
+    if (err != GRLE_NONE) {
+        return PE_OPERATION_FAILED;
+    }
+    
     return PE_NONE;
 }
 

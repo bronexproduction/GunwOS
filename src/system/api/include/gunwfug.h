@@ -12,8 +12,9 @@
 #define CHECKPTR(PTR) { if (!PTR) { fug(FUG_NULLPTR); __builtin_unreachable(); } }
 
 enum gnwFugCode {
-    FUG_NULLPTR,    /* Requested memory access at invalid address - 0 */
-    FUG_UNDEFINED,  /* Undefined error */
+    FUG_NULLPTR,        /* Requested memory access at invalid address - 0 */
+    FUG_INCONSISTENT,   /* Data consistency error */
+    FUG_UNDEFINED,      /* Undefined error */
 };
 
 /*

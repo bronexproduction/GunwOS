@@ -13,7 +13,7 @@
 /*
     Macro for keyboard event listener signature
 */
-#define GNW_KEYBOARD_EVENT_LISTENER(NAME) void NAME (enum gnwKeyboardEventCode code, uint_8 data)
+#define GNW_KEYBOARD_EVENT_LISTENER(NAME) void NAME (enum gnwKeyboardEventCode code, int_8 data)
 
 /*
     Event type code for keyboard event listener
@@ -27,6 +27,6 @@ _Static_assert(sizeof(enum gnwKeyboardEventCode) == sizeof(int_32), "Unexpected 
 /*
     Listener callback type definition
 */
-typedef gnwEventListener_u8 gnwKeyboardEventListener;
+typedef gnwEventListener_32_8 gnwKeyboardEventListener;
 
 #endif // GUNWOS_GUNWKEYBOARD_H

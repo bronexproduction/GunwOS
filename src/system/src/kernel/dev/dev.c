@@ -373,7 +373,7 @@ static enum gnwDeviceError validateListenerInvocation(const size_t deviceId) {
 }
 
 enum gnwDeviceError k_dev_emit_void(const int_32 type) {
-    enum gnwDeviceError err = validateEmitter(k_hal_servicedDevIdPtr, GEF_VOID);
+    enum gnwDeviceError err = validateEmitter(k_hal_servicedDevIdPtr, GEF_U32);
     if (err) {
         return err;
     }
@@ -385,9 +385,9 @@ enum gnwDeviceError k_dev_emit_void(const int_32 type) {
     }
 
     struct device *dev = &devices[*k_hal_servicedDevIdPtr];
-    gnwEventListener_void listener = dev->listener.routine.onEvent_void;
+    gnwEventListener_32 listener = dev->listener.routine._32;
 
-    enum k_proc_error callbackErr = k_proc_callback_invoke_32(dev->holder, dev->listener.runLoop, (void (*)(uint_32))listener, type);
+    enum k_proc_error callbackErr = k_proc_callback_invoke_32(dev->holder, dev->listener.runLoop, (void (*)(int_32))listener, type);
     switch (callbackErr) {
     case PE_NONE:
         return GDE_NONE;
@@ -399,8 +399,8 @@ enum gnwDeviceError k_dev_emit_void(const int_32 type) {
 }
 
 enum gnwDeviceError k_dev_emit_u8(const int_32 type,
-                                  const uint_8 data) {
-    enum gnwDeviceError err = validateEmitter(k_hal_servicedDevIdPtr, GEF_U8);
+                                  const int_8 data) {
+    enum gnwDeviceError err = validateEmitter(k_hal_servicedDevIdPtr, GEF_U32_U8);
     if (err) {
         return err;
     }
@@ -412,9 +412,9 @@ enum gnwDeviceError k_dev_emit_u8(const int_32 type,
     }
 
     struct device *dev = &devices[*k_hal_servicedDevIdPtr];
-    gnwEventListener_u8 listener = dev->listener.routine.onEvent_u8;
+    gnwEventListener_32_8 listener = dev->listener.routine._32_8;
 
-    enum k_proc_error callbackErr = k_proc_callback_invoke_32_8(dev->holder, dev->listener.runLoop, (void (*)(uint_32, uint_8))listener, type, data);
+    enum k_proc_error callbackErr = k_proc_callback_invoke_32_8(dev->holder, dev->listener.runLoop, (void (*)(int_32, int_8))listener, type, data);
     switch (callbackErr) {
     case PE_NONE:
         return GDE_NONE;

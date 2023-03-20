@@ -12,18 +12,18 @@
 
 enum gnwEventFormat {
     GEF_NONE = 0,
-    GEF_VOID,
-    GEF_U8
+    GEF_U32,
+    GEF_U32_U8
 };
 
-typedef __attribute__((cdecl)) void (*gnwEventListener_void)(int_32 type);
-typedef __attribute__((cdecl)) void (*gnwEventListener_u8)(int_32 type, uint_8 data);
+typedef __attribute__((cdecl)) void (*gnwEventListener_32)(int_32 p0);
+typedef __attribute__((cdecl)) void (*gnwEventListener_32_8)(int_32 p0, int_8 p1);
 
 union gnwEventListener {
     uint_32 _handle;
-    gnwEventListener_void onEvent_void;
-    gnwEventListener_u8 onEvent_u8;
+    gnwEventListener_32 _32;
+    gnwEventListener_32_8 _32_8;
 };
-_Static_assert(sizeof(union gnwEventListener) == sizeof(uint_32), "Unexpected union gnwEventListener size");
+_Static_assert(sizeof(union gnwEventListener) == sizeof(int_32), "Unexpected union gnwEventListener size");
 
 #endif // GUNWOS_GUNWEVENT_H

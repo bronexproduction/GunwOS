@@ -171,7 +171,7 @@ static void s_cli_init() {
     }
 
     union gnwEventListener listener;
-    listener.onEvent_u8 = (gnwKeyboardEventListener)onKeyboardEvent;
+    listener._32_8 = (gnwKeyboardEventListener)onKeyboardEvent;
     e = devListen(keyboardDesc.identifier, listener);
     if (e) {
         // devRelease(charOutDesc.identifier);

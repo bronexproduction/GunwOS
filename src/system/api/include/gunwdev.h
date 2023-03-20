@@ -168,7 +168,7 @@ SYSCALL_DECL enum gnwDeviceError devListen(const size_t identifier,
                                            const union gnwEventListener listener) {
     CHECKPTR(listener._handle);
     
-    ptr_t rlpPtr = (ptr_t)runLoopGetMain();
+    ptr_t rlpPtr = runLoopGetMain();
     CHECKPTR(rlpPtr);
 
     SYSCALL_PAR1(identifier);
