@@ -28,6 +28,12 @@ void runLoopEntryExecute(const struct gnwRunLoopDispatchItem * const item) {
 }
 
 void runLoopStart() {
+    for (int i = 0; i < DISPATCH_QUEUE_SIZE; ++i) {
+        if (rlp_main.queue[i].format != GEF_NONE) {
+            // BSS section not cleared?
+            fug(0x69);
+        }
+    }
     while (1) {
         size_t index = ((rlp_main.finishedIndex + 1) % DISPATCH_QUEUE_SIZE);
         struct gnwRunLoopDispatchItem * item = &rlp_main.queue[index];
