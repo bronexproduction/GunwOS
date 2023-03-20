@@ -14,25 +14,32 @@
 static struct gnwRunLoop rlp_main;
 
 void runLoopEntryExecute(const struct gnwRunLoopDispatchItem * const item) {
-    #warning TO BE IMPLEMENTED
+    switch (item->format) {
+    case GEF_U32:
+        item->routine._32(item->params[0]);
+        break;
+    case GEF_U32_U8:
+        item->routine._32_8(item->params[0], item->params[1]);
+        break;
+    case GEF_NONE:
+        fug(FUG_INCONSISTENT);
+        break;
+    }
 }
 
 void runLoopStart() {
     while (1) {
-        while (rlp_main.finishedIndex != rlp_main.endIndex) {
-            size_t index = ((rlp_main.finishedIndex + 1) % DISPATCH_QUEUE_SIZE);
-            struct gnwRunLoopDispatchItem * item = &rlp_main.queue[index];
-            
-            if (item->format == GEF_NONE) {
-                fug(FUG_INCONSISTENT);
-            }
-            runLoopEntryExecute(item);
-            memnull(item, sizeof(struct gnwRunLoopDispatchItem));
-            rlp_main.finishedIndex = index;
+        size_t index = ((rlp_main.finishedIndex + 1) % DISPATCH_QUEUE_SIZE);
+        struct gnwRunLoopDispatchItem * item = &rlp_main.queue[index];
+        
+        if (item->format == GEF_NONE) {
+            #warning to be implemented - pause the process and mark as blocked
+            continue;
         }
         
-        #warning to be implemented - pause the process and mark as blocked
-        continue;
+        runLoopEntryExecute(item);
+        memnull(item, sizeof(struct gnwRunLoopDispatchItem));
+        rlp_main.finishedIndex = index;
     }
 }
 
@@ -41,9 +48,8 @@ ptr_t runLoopGetMain() {
 }
 
 enum gnwRunLoopError gnwRunLoopDispatch(struct gnwRunLoop * const runLoop, const struct gnwRunLoopDispatchItem dispatchItem) {
-    size_t index = ((runLoop->endIndex + 1) % DISPATCH_QUEUE_SIZE);
-    if (index == runLoop->finishedIndex) {
-        // last empty slot, but let's return error for now
+    size_t index = (runLoop->endIndex + 1) % DISPATCH_QUEUE_SIZE;
+    if (runLoop->queue[index].format != GEF_NONE) {
         return GRLE_FULL;
     }
     
