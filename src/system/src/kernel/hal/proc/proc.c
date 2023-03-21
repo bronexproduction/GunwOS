@@ -313,27 +313,37 @@ void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const procId_t currentP
     STACK_VAL(refEsp, 16, 56) = kernelProc.cpuState.ss;
 }
 
-static bool validateRunLoop(const procId_t procId, 
-                            const struct gnwRunLoop * const runLoop) {
-    ptr_t absRunLoopPtr = k_mem_absForProc(procId, (ptr_t)runLoop);
-    return k_mem_bufInZoneForProc(procId, absRunLoopPtr, sizeof(struct gnwRunLoop));
-}                                
-
-enum k_proc_error k_proc_callback_invoke_32(const procId_t procId, 
-                               struct gnwRunLoop * const runLoop, 
-                               void (*funPtr)(int_32), 
-                               int_32 p0) {
-    if (!validateRunLoop(procId, runLoop)) {
+static enum k_proc_error callbackInvoke(const procId_t procId, 
+                                        const struct gnwRunLoop * const runLoop,
+                                        const enum gnwEventFormat format, 
+                                        const ptr_t funPtr, 
+                                        const int_32 p0,
+                                        const int_32 p1) {
+    struct gnwRunLoop * const absRunLoopPtr = (struct gnwRunLoop *)k_mem_absForProc(procId, (ptr_t)runLoop);
+    if (!k_mem_bufInZoneForProc(procId, (ptr_t)absRunLoopPtr, sizeof(struct gnwRunLoop))) {
         return PE_ACCESS_VIOLATION;
     }
     
     struct gnwRunLoopDispatchItem item;
-    item.format = GEF_U32;
-    item.routine._32 = funPtr;
-    item.params[0] = p0;
+    item.format = format;
+    switch (format) {
+    case GEF_U32:
+        item.routine._32 = (gnwEventListener_32)funPtr;
+        item.params[0] = p0;
+        break;
+    case GEF_U32_U8:
+        item.routine._32_8 = (gnwEventListener_32_8)funPtr;
+        item.params[0] = p0;
+        item.params[1] = p1;
+        break;
+    case GEF_NONE:
+        OOPS("Unexpected event format");
+        return PE_UNKNOWN;
+    }
+    
     enum gnwRunLoopError err;
     CRITICAL_SECTION(
-        err = gnwRunLoopDispatch(runLoop, item);
+        err = gnwRunLoopDispatch(absRunLoopPtr, item);
     )
     
     if (err != GRLE_NONE) {
@@ -343,30 +353,19 @@ enum k_proc_error k_proc_callback_invoke_32(const procId_t procId,
     return PE_NONE;
 }
 
-enum k_proc_error k_proc_callback_invoke_32_8(const procId_t procId, 
-                                 struct gnwRunLoop * const runLoop, 
-                                 void (*funPtr)(int_32, int_8), 
-                                 int_32 p0,
-                                 int_8 p1) {                                
-    if (!validateRunLoop(procId, runLoop)) {
-        return PE_ACCESS_VIOLATION;
-    }
+enum k_proc_error k_proc_callback_invoke_32(const procId_t procId, 
+                               const struct gnwRunLoop * const runLoop, 
+                               void (* const funPtr)(int_32), 
+                               const int_32 p0) {
+    return callbackInvoke(procId, runLoop, GEF_U32, (ptr_t)funPtr, p0, NULL);
+}
 
-    struct gnwRunLoopDispatchItem item;
-    item.format = GEF_U32_U8;
-    item.routine._32_8 = funPtr;
-    item.params[0] = p0;
-    item.params[1] = p1;
-    enum gnwRunLoopError err;
-    CRITICAL_SECTION(
-        err = gnwRunLoopDispatch(runLoop, item);
-    )
-    
-    if (err != GRLE_NONE) {
-        return PE_OPERATION_FAILED;
-    }
-    
-    return PE_NONE;
+enum k_proc_error k_proc_callback_invoke_32_8(const procId_t procId, 
+                                              const struct gnwRunLoop * const runLoop, 
+                                              void (* const funPtr)(int_32, int_8), 
+                                              const int_32 p0,
+                                              const int_8 p1) {
+    return callbackInvoke(procId, runLoop, GEF_U32_U8, (ptr_t)funPtr, p0, p1);
 }
 
 static void k_proc_prepareKernelProc() {

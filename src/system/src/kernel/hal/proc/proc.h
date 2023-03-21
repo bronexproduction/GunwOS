@@ -27,7 +27,8 @@ enum k_proc_error {
     PE_NONE = 0,
     PE_LIMIT_REACHED,
     PE_ACCESS_VIOLATION,
-    PE_OPERATION_FAILED
+    PE_OPERATION_FAILED,
+    PE_UNKNOWN
 };
 
 enum k_proc_state {
@@ -95,7 +96,7 @@ void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const procId_t currentP
     
     Return value: enum k_proc_error - PE_NONE on success
 */
-enum k_proc_error k_proc_callback_invoke_32(const procId_t procId, struct gnwRunLoop * const runLoop, void (*funPtr)(int_32), int_32 p0);
-enum k_proc_error k_proc_callback_invoke_32_8(const procId_t procId, struct gnwRunLoop * const runLoop, void (*funPtr)(int_32, int_8), int_32 p0, int_8 p1);
+enum k_proc_error k_proc_callback_invoke_32(const procId_t procId, const struct gnwRunLoop * const runLoop, void (* const funPtr)(int_32), const int_32 p0);
+enum k_proc_error k_proc_callback_invoke_32_8(const procId_t procId, const struct gnwRunLoop * const runLoop, void (* const funPtr)(int_32, int_8), const int_32 p0, const int_8 p1);
 
 #endif // PROC_H
