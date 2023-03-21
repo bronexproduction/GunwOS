@@ -8,7 +8,7 @@
 #ifndef GUNWOS_GUNWDISPLAY_H
 #define GUNWOS_GUNWDISPLAY_H
 
-#include <stdgunw/types.h>
+#include <types.h>
 #include <uha/gunwuha_display_desc.h>
 #include <gunwdev.h>
 

@@ -5,8 +5,8 @@
 //  Created by Artur Danielewski on 11.01.2021.
 //
 
-#include <stdgunw/types.h>
-#include <stdgunw/mem.h>
+#include <types.h>
+#include <mem.h>
 #include <error/panic.h>
 
 #include "drvfunc.h"
@@ -33,7 +33,7 @@ static void (*driverSyscallReg[DRIVER_SYSCALL_COUNT])() = {
     Array index corresponds to syscall function code
 */
 static void (*userSyscallReg[SYSCALL_COUNT])() = {
-    /* 0x00 */ 0,
+    /* 0x00 */ (void *)k_scr_start,
     /* 0x01 */ (void *)k_scr_debugPrint,
     /* 0x02 */ (void *)k_scr_devCharWrite,
     /* 0x03 */ (void *)k_scr_exit,
@@ -110,7 +110,9 @@ __attribute__((naked)) void k_scl_driverSyscall() {
     register uint_32 function __asm__ ("eax");
 
     __asm__ volatile ("pushl %ebx");
+    __asm__ volatile ("pushl %edx");
     __asm__ volatile ("cmp %%ebx, %%eax" : : "b" (SYSCALL_COUNT));
+    __asm__ volatile ("popl %edx");
     __asm__ volatile ("popl %ebx");
     __asm__ volatile ("jae k_scl_syscall_functionOverLimitFailure");
 
@@ -134,7 +136,9 @@ __attribute__((naked)) void k_scl_userSyscall() {
     register uint_32 function __asm__ ("eax");
 
     __asm__ volatile ("pushl %ebx");
+    __asm__ volatile ("pushl %edx");
     __asm__ volatile ("cmp %%ebx, %%eax" : : "b" (SYSCALL_COUNT));
+    __asm__ volatile ("popl %edx");
     __asm__ volatile ("popl %ebx");
     __asm__ volatile ("jae k_scl_syscall_functionOverLimitFailure");
 

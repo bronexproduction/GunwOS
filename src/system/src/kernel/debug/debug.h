@@ -5,7 +5,7 @@
 //  Created by Artur Danielewski on 07.02.2021.
 //
 
-#include <stdgunw/string.h>
+#include <string.h>
 #warning that's pretty bad
 #include <terminal/video.h>
 

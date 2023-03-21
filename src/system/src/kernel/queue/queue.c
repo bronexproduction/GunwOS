@@ -5,17 +5,43 @@
 //  Created by Artur Danielewski on 02.02.2021.
 //
 
-#include <stdgunw/types.h>
-#include <stdgunw/defs.h>
+#include <types.h>
+#include <defs.h>
 #include <error/panic.h>
 #include <schedule/schedule.h>
 #include <hal/criticalsec/criticalsec.h>
 
 #define MAX_QUEUE_LENGTH 64
 
+typedef __attribute__((cdecl)) void (*fPtr_void)();
+typedef __attribute__((cdecl)) void (*fPtr_32_32)(uint_32, uint_32);
+
+union dispatchFuncPtr {
+    fPtr_void f;
+    fPtr_32_32 f_32_32;
+};
+
+union dispatchFuncParam {
+    uint_32 p32;
+    uint_16 p16;
+    uint_8 p8;
+};
+
+enum dispatchFuncType {
+    DFE_NONE = 0,
+    DFE_VOID,
+    DFE_32_32,
+};
+
+struct dispatchFunc {
+    enum dispatchFuncType type;
+    union dispatchFuncPtr ptr;
+    union dispatchFuncParam params[2];
+};
+
 struct dispatchEntry {
     volatile uint_8 reserved;
-    void (*func)();
+    struct dispatchFunc func;
     struct dispatchEntry *next;
 };
 
@@ -23,8 +49,11 @@ static struct dispatchEntry queue[MAX_QUEUE_LENGTH];
 struct dispatchEntry *k_que_currentDispatchEntry = 0;
 static bool running = 0;
 
-void k_que_dispatch(void (* const func)()) {
-
+static void dispatch(const ptr_t funcPtr, 
+                     const enum dispatchFuncType type, 
+                     const uint_32 p0, 
+                     const uint_32 p1) {
+    
     #warning how to avoid duplicates?
 
     if (!running) {
@@ -46,7 +75,20 @@ void k_que_dispatch(void (* const func)()) {
         return;
     }
 
-    queue[i].func = func;
+    queue[i].func.type = type;
+    switch (type) {
+    case DFE_VOID:
+        queue[i].func.ptr.f = (fPtr_void)funcPtr;
+        break;
+    case DFE_32_32:
+        queue[i].func.ptr.f_32_32 = (fPtr_32_32)funcPtr;
+        queue[i].func.params[0].p32 = (uint_32)p0;
+        queue[i].func.params[1].p32 = (uint_32)p1; 
+        break;
+    default:
+        OOPS("Unexpected dispatched function type");
+        return;
+    }
     queue[i].next = 0;
 
     struct dispatchEntry * last = k_que_currentDispatchEntry;
@@ -59,6 +101,14 @@ void k_que_dispatch(void (* const func)()) {
     else {
         k_que_currentDispatchEntry = (queue + i);
     }
+}
+
+void k_que_dispatch(void (* const func)()) {
+    dispatch((ptr_t)func, DFE_VOID, NULL, NULL);
+}
+
+void k_que_dispatch_32_32(void (* const func)(const uint_32, const uint_32), const uint_32 p0, const uint_32 p1) {
+    dispatch((ptr_t)func, DFE_32_32, p0, p1);
 }
 
 void k_que_start() {
@@ -79,18 +129,28 @@ void k_que_start() {
             OOPS("Enqueued item disabled");
             return;
         }
-        if (!enqueued->func) {
+        if (!enqueued->func.ptr.f) {
             OOPS("Null pointer queued");
             return;
         }
 
-        enqueued->func();
+        switch (enqueued->func.type) {
+        case DFE_VOID:
+            enqueued->func.ptr.f();
+            break;
+        case DFE_32_32:
+            enqueued->func.ptr.f_32_32(enqueued->func.params[0].p32, enqueued->func.params[1].p32);
+            break;
+        default:
+            OOPS("Unexpected queued function type");
+            return;
+        }
 
         CRITICAL_SECTION (
             struct dispatchEntry * const next = enqueued->next;
             k_que_currentDispatchEntry = next;
             enqueued->next = 0;
-            enqueued->func = nullptr;
+            enqueued->func.type = DFE_NONE;
             enqueued->reserved = 0;
         )
     }

@@ -11,16 +11,26 @@
 #include <driver/gunwdrv.h>
 #include <gunwdev.h>
 #include <gunwfug.h>
+#include <gunwctrl.h>
+#include <src/_gunwrlp.h>
 
 /*
     User-level system calls
 */
 
 /*
+    Code - 0x00
+    Function - START
+*/
+__attribute__((naked)) enum gnwCtrlError k_scr_start(const char * const path,
+                                                     const size_t pathLen);
+
+/*
     Code - 0x01
     Function - DEBUG_PRINT
 */
-__attribute__((naked)) void k_scr_debugPrint(const char * const buffer);
+__attribute__((naked)) void k_scr_debugPrint(const char * const buffer,
+                                             const size_t bufLen);
 
 /*
     Code - 0x02
@@ -83,6 +93,7 @@ __attribute__((naked)) void k_scr_fug(enum gnwFugCode);
     Function - DEV_LISTEN
 */
 __attribute__((naked)) enum gnwDeviceError k_scr_devListen(const size_t identifier,
-                                                           const union gnwDeviceEventListener listener);
+                                                           const union gnwEventListener listener,
+                                                           const struct gnwRunLoop * const runLoop);
 
 #endif // USRFUNC_H

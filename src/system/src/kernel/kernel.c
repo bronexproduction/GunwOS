@@ -11,7 +11,7 @@ extern void k_tmr_init();
 extern void k_hal_init();
 extern void k_dev_init();
 extern void k_drv_loadMinimal();
-extern void s_init();
+extern void k_startup();
 extern void k_que_start();
 
 static void bss_clear() {
@@ -38,6 +38,6 @@ void __attribute__((fastcall, section(".start"))) __kernel_start(const struct k_
     k_hal_init();
     k_dev_init();
     k_drv_loadMinimal();
-    s_init();
+    k_startup();
     k_que_start();
 }

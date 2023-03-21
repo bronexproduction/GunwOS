@@ -8,8 +8,8 @@
 #ifndef GUNWOS_GUNWDRV_H
 #define GUNWOS_GUNWDRV_H
 
-#include <stdgunw/types.h>
-#include <stdgunw/defs.h>
+#include <types.h>
+#include <defs.h>
 #include <gunwdev.h>
 #include <driver/gunwuha.h>
 

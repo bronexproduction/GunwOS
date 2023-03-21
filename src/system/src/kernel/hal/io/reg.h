@@ -6,7 +6,7 @@
 //  Mostly copied & pasted from OS-dev wiki
 //
 
-#include <stdgunw/types.h>
+#include <types.h>
 
 static inline uint_64 k_reg_rdmsr(uint_32 msr_id) {
     uint_64 msr_value;

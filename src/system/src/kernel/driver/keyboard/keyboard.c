@@ -91,7 +91,7 @@
 ISR(
     /* Checking output buffer status */
     if (!rdb(KBD_BUS_STATUS) & KBD_STAT_OUTB) {
-        OOPS("Keyboard output buffer empty on keyboard interrupt")
+        OOPS("Keyboard output buffer empty on keyboard interrupt");
         ISR_END
     }
 
@@ -122,7 +122,7 @@ static struct gnwDriverConfig desc() {
 static struct gnwDeviceUHA uha() {
     struct gnwDeviceUHA uha;
 
-    uha.event.desc.eventDataFormat = GDEF_U8;
+    uha.event.desc.eventDataFormat = GEF_U32_U8;
 
     return uha;
 }

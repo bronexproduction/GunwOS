@@ -56,9 +56,10 @@ void k_drv_loadMinimal() {
     extern struct gnwDeviceDescriptor k_drv_keyboard_descriptor();
     loadSingle(k_drv_keyboard_descriptor, MSGS_FAIL(Keyboard));
 
+    #warning POSTPONED UNTIL DRIVERS MOVED TO SEPARATE PROCESSES
     // /*
     //     Default character output - terminal
     // */
-    extern struct gnwDeviceDescriptor k_drv_terminal_descriptor();
-    loadSingle(k_drv_terminal_descriptor, MSGS_FAIL(Terminal));
+    // extern struct gnwDeviceDescriptor k_drv_terminal_descriptor();
+    // loadSingle(k_drv_terminal_descriptor, MSGS_FAIL(Terminal));
 }

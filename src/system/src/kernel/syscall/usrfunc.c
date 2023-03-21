@@ -5,14 +5,10 @@
 //  Created by Artur Danielewski on 11.01.2021.
 //
 
-#include <stdgunw/utils.h>
-#include <stdgunw/string.h>
-#include <gunwdev.h>
 #include "func.h"
+#include <gunwctrl.h>
 #include <error/fug.h>
-#include <error/panic.h>
 #include <hal/proc/proc.h>
-#include <hal/mem/mem.h>
 #include <dev/dev.h>
 
 /*
@@ -20,40 +16,46 @@
 */
 
 /*
+    Code - 0x00
+    Function - START
+
+    Params:
+        * EBX - path to executable - null-terminated character array pointer, relative to caller process memory 
+        * ECX - path length in bytes
+
+    Return:
+        * EAX - Start error if any, otherwise GCE_NONE (see enum gnwCtrlError)
+*/
+SCR(start,
+    REG(32, path, ebx)
+    REG(32, pathLen, ecx)
+
+    REG_RET(32, err)
+    
+    extern enum gnwCtrlError k_scr_usr_start(const char * const, const size_t);
+    err = k_scr_usr_start((const char * const)path, (const size_t)pathLen);
+)
+
+/*
     Code - 0x01
     Function - DEBUG_PRINT
 
     Params:
-        * EBX - null-terminated character array pointer
+        * EBX - null-terminated character array pointer, relative to caller process memory 
+        * ECX - character array buffer length in bytes
 
     Return:
         * EAX - number of bytes written
 */
-static size_t debugPrint(uint_32 buffer) {
-    // check buffer bounds
-    // there might be (must be) a better way to do it
-    struct k_mem_zone procZone = k_mem_zoneForProc(k_proc_getCurrentId());
-    if (buffer >= procZone.sizeBytes) {
-        OOPS("Access violation");
-    }
-    buffer += (uint_32)procZone.startPtr;
-    size_t bufLen = strlen((const char * const)buffer);
-    if ((buffer + bufLen) > (size_t)procZone.endPtr) {
-        OOPS("Access violation");   
-    }
-
-    extern int user_cli_putsl(const char * const s, unsigned int l);
-    user_cli_putsl((const char * const)buffer, bufLen);
-    return bufLen;
-}
-
 SCR(debugPrint,
     // Buffer address (relative to process memory)
     REG(32, buffer, ebx)
+    REG(32, bufferLen, ecx)
 
     REG_RET(32, bytesWritten)
 
-    bytesWritten = debugPrint(buffer);
+    extern size_t k_scr_usr_debugPrint(const char * const, const size_t);
+    bytesWritten = k_scr_usr_debugPrint((const char * const)buffer, (const size_t)bufferLen);
 )
 
 /*
@@ -110,7 +112,7 @@ SCR(sleepms,
 
     Params:
         * EBX - device identifier
-        * ECX - device descriptor pointer (struct gnwDeviceUHADesc *)
+        * ECX - device descriptor pointer relative to caller process memory (struct gnwDeviceUHADesc *)
 
     Return:
         * EAX - error code (enum gnwDeviceError)
@@ -121,8 +123,8 @@ SCR(devGetById,
 
     REG_RET(32, err)
 
-    enum gnwDeviceError k_dev_getById(const size_t, struct gnwDeviceUHADesc * const);
-    err = k_dev_getById((const size_t)id, (struct gnwDeviceUHADesc * const)desc);
+    enum gnwDeviceError k_scr_usr_devGetById(const size_t, struct gnwDeviceUHADesc * const);
+    err = k_scr_usr_devGetById((const size_t)id, (struct gnwDeviceUHADesc * const)desc);
 )
 
 /*
@@ -131,7 +133,7 @@ SCR(devGetById,
 
     Params:
         * EBX - device type (enum gnwDeviceType)
-        * ECX - device descriptor pointer (struct gnwDeviceUHADesc *)
+        * ECX - device descriptor pointer relative to caller process memory (struct gnwDeviceUHADesc *)
 
     Return:
         * EAX - error code (enum gnwDeviceError)
@@ -142,8 +144,8 @@ SCR(devGetByType,
 
     REG_RET(32, err)
 
-    enum gnwDeviceError k_dev_getByType(enum gnwDeviceType, struct gnwDeviceUHADesc * const);
-    err = k_dev_getByType((enum gnwDeviceType)type, (struct gnwDeviceUHADesc * const)desc);
+    enum gnwDeviceError k_scr_usr_devGetByType(enum gnwDeviceType, struct gnwDeviceUHADesc * const);
+    err = k_scr_usr_devGetByType((enum gnwDeviceType)type, (struct gnwDeviceUHADesc * const)desc);
 )
 
 /*
@@ -183,7 +185,7 @@ SCR(devRelease,
 
     Params:
         * EBX - device identifier
-        * ECX - data buffer
+        * ECX - data buffer relative to caller process memory 
 
     Return:
         * EAX - error code (enum gnwDeviceError)
@@ -194,7 +196,8 @@ SCR(devMemWrite,
 
     REG_RET(32, err)
 
-    err = k_dev_writeMem((const size_t)k_proc_getCurrentId(), (const size_t)devId, (const void * const)buf);                                        
+    enum gnwDeviceError k_scr_usr_devMemWrite(const size_t devId, const void * const buf);
+    err = k_scr_usr_devMemWrite(devId, (void *)buf);
 )
 
 /*
@@ -217,7 +220,8 @@ SCR(fug,
 
     Params:
         * EBX - device identifier
-        * ECX - listener (const union gnwDeviceEventListener)
+        * ECX - listener (const union gnwEventListener)
+        * EDX - run loop (const struct gnwRunLoop * const)
     
     Return:
         * EAX - error code (enum gnwDeviceError)
@@ -225,8 +229,9 @@ SCR(fug,
 SCR(devListen,
     REG(32, devId, ebx)
     REG(32, lsnr, ecx)
+    REG(32, rlp, edx)
 
     REG_RET(32, err)
 
-    err = k_dev_listen((const size_t)k_proc_getCurrentId(), (const size_t)devId, (const union gnwDeviceEventListener)lsnr);
+    err = k_dev_listen((const size_t)k_proc_getCurrentId(), (const size_t)devId, (const union gnwEventListener)lsnr, (struct gnwRunLoop *)rlp);
 )

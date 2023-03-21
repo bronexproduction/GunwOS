@@ -7,8 +7,8 @@
 
 #include "hal.h"
 
-#include <stdgunw/defs.h>
-#include <stdgunw/mem.h>
+#include <defs.h>
+#include <mem.h>
 #include "cpu/cpu.h"
 #include "gdt/gdt.h"
 #include "int/irq.h"

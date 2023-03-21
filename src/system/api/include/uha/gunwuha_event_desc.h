@@ -9,8 +9,8 @@
 #ifndef GUNWOS_GUNWUHA_EVENT_DESC_H
 #define GUNWOS_GUNWUHA_EVENT_DESC_H
 
-#include <stdgunw/types.h>
-#include <gunwdevevent.h>
+#include <types.h>
+#include <gunwevent.h>
 
 /*
     Event emitting device descriptor
@@ -21,7 +21,7 @@ struct gnwDeviceUHA_event_desc {
 
         Determines the type of listener data parameter
     */
-    enum gnwDeviceEventFormat eventDataFormat;
+    enum gnwEventFormat eventDataFormat;
 };
 
 #endif // GUNWOS_GUNWUHA_EVENT_DESC_H

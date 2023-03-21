@@ -7,11 +7,12 @@
 
 #include "proc.h"
 
-#include <stdgunw/mem.h>
-#include <stdgunw/defs.h>
+#include <mem.h>
+#include <defs.h>
 
 #include <schedule/schedule.h>
 #include <hal/criticalsec/criticalsec.h>
+#include <hal/mem/mem.h>
 #include <timer/timer.h>
 #include <error/panic.h>
 
@@ -69,26 +70,26 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
 
     pTab[pIndex].info.dpl = DPL_3;
 
-    size_t stackBytes = MiB(1);
+    const size_t stackBytes = KiB(512);
     ptr_t codeStartPtr = descriptor->img;
     ptr_t codeEndPtr = codeStartPtr + descriptor->imgBytes - 1;
     ptr_t dataStartPtr = codeEndPtr + 1;
     ptr_t dataEndPtr = dataStartPtr + stackBytes - 1;
 
     if (codeStartPtr < GDT_SEGMENT_START(r3code)) {
-        OOPS("Attempted to spawn process below its code segment")
+        OOPS("Attempted to spawn process below its code segment");
     }
     if (codeEndPtr > GDT_SEGMENT_END(r3code)) {
-        OOPS("Attempted to spawn process above its code segment")
+        OOPS("Attempted to spawn process above its code segment");
     }
     if (codeEndPtr <= codeStartPtr) {
         OOPS("Attempted to spawn process outside its code segment");
     }
     if (dataStartPtr < GDT_SEGMENT_START(r3data)) {
-        OOPS("Attempted to spawn process below its data segment")
+        OOPS("Attempted to spawn process below its data segment");
     }
     if (dataEndPtr > GDT_SEGMENT_END(r3data)) {
-        OOPS("Attempted to spawn process above its data segment")
+        OOPS("Attempted to spawn process above its data segment");
     }
     if (dataEndPtr <= dataStartPtr) {
         OOPS("Attempted to spawn process outside its data segment");
@@ -97,11 +98,12 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
         OOPS("Attempted to spawn process outside its segments");
     }
 
-    ptr_t relativeImgPtr = (ptr_t)(codeStartPtr - GDT_SEGMENT_START(r3code));
-    ptr_t relativeStackPtr = (ptr_t)(dataEndPtr - GDT_SEGMENT_START(r3data));
+    addr_t relativeImgPtr = codeStartPtr - GDT_SEGMENT_START(r3code);
+    addr_t relativeEntryPtr = relativeImgPtr + descriptor->entry;
+    addr_t relativeStackPtr = dataEndPtr - GDT_SEGMENT_START(r3data);
 
     pTab[pIndex].cpuState.esp = (uint_32)relativeStackPtr;
-    pTab[pIndex].cpuState.eip = (uint_32)relativeImgPtr;
+    pTab[pIndex].cpuState.eip = (uint_32)relativeEntryPtr;
     pTab[pIndex].cpuState.eflags = FLAGS_INTERRUPT;
 
     pTab[pIndex].cpuState.cs = (uint_16)(GDT_OFFSET(r3code) | pTab[pIndex].info.dpl);
@@ -311,14 +313,59 @@ void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const procId_t currentP
     STACK_VAL(refEsp, 16, 56) = kernelProc.cpuState.ss;
 }
 
-void k_proc_invoke_32(const procId_t procId, void (*funPtr)(uint_32), uint_32 p1) {
-    #warning TO BE IMPLEMENTED - DPL OTHER THAN 0 NOT SUPPORTED
-    funPtr(p1);
+static enum k_proc_error callbackInvoke(const procId_t procId, 
+                                        const struct gnwRunLoop * const runLoop,
+                                        const enum gnwEventFormat format, 
+                                        const ptr_t funPtr, 
+                                        const int_32 p0,
+                                        const int_32 p1) {
+    struct gnwRunLoop * const absRunLoopPtr = (struct gnwRunLoop *)k_mem_absForProc(procId, (ptr_t)runLoop);
+    if (!k_mem_bufInZoneForProc(procId, (ptr_t)absRunLoopPtr, sizeof(struct gnwRunLoop))) {
+        return PE_ACCESS_VIOLATION;
+    }
+    
+    struct gnwRunLoopDispatchItem item;
+    item.format = format;
+    switch (format) {
+    case GEF_U32:
+        item.routine._32 = (gnwEventListener_32)funPtr;
+        item.params[0] = p0;
+        break;
+    case GEF_U32_U8:
+        item.routine._32_8 = (gnwEventListener_32_8)funPtr;
+        item.params[0] = p0;
+        item.params[1] = p1;
+        break;
+    case GEF_NONE:
+        OOPS("Unexpected event format");
+        return PE_UNKNOWN;
+    }
+    
+    enum gnwRunLoopError err;
+    CRITICAL_SECTION(
+        err = gnwRunLoopDispatch(absRunLoopPtr, item);
+    )
+    
+    if (err != GRLE_NONE) {
+        return PE_OPERATION_FAILED;
+    }
+
+    return PE_NONE;
 }
 
-void k_proc_invoke_32_8(const procId_t procId, void (*funPtr)(uint_32, uint_8), uint_32 p1, uint_8 p2) {
-    #warning TO BE IMPLEMENTED - DPL OTHER THAN 0 NOT SUPPORTED
-    funPtr(p1, p2);
+enum k_proc_error k_proc_callback_invoke_32(const procId_t procId, 
+                               const struct gnwRunLoop * const runLoop, 
+                               void (* const funPtr)(int_32), 
+                               const int_32 p0) {
+    return callbackInvoke(procId, runLoop, GEF_U32, (ptr_t)funPtr, p0, NULL);
+}
+
+enum k_proc_error k_proc_callback_invoke_32_8(const procId_t procId, 
+                                              const struct gnwRunLoop * const runLoop, 
+                                              void (* const funPtr)(int_32, int_8), 
+                                              const int_32 p0,
+                                              const int_8 p1) {
+    return callbackInvoke(procId, runLoop, GEF_U32_U8, (ptr_t)funPtr, p0, p1);
 }
 
 static void k_proc_prepareKernelProc() {

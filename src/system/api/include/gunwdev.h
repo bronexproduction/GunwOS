@@ -11,6 +11,8 @@
 #include <scl_def.h>
 #include <gunwfug.h>
 #include <gunwuhadesc.h>
+#include <gunwevent.h>
+#include <gunwrlp.h>
 
 /*
     Device type
@@ -36,20 +38,11 @@ enum gnwDeviceError {
     GDE_LISTENER_INVALID,
     GDE_INVALID_DEVICE_STATE,
     GDE_INVALID_OPERATION,
+    GDE_INVALID_PARAMETER,
     GDE_OPERATION_FAILED,
     GDE_UNKNOWN = -1
 };
 _Static_assert(sizeof(enum gnwDeviceError) == sizeof(int_32), "Unexpected enum gnwDeviceError size");
-
-typedef __attribute__((cdecl)) void (*gnwDeviceEventListener_void)(int_32 type);
-typedef __attribute__((cdecl)) void (*gnwDeviceEventListener_u8)(int_32 type, uint_8 data);
-
-union gnwDeviceEventListener {
-    uint_32 _handle;
-    gnwDeviceEventListener_void onEvent_void;
-    gnwDeviceEventListener_u8 onEvent_u8;
-};
-_Static_assert(sizeof(union gnwDeviceEventListener) == sizeof(uint_32), "Unexpected union gnwDeviceEventListener size");
 
 /*
     Requests device information for given id
@@ -172,9 +165,15 @@ SYSCALL_DECL enum gnwDeviceError devMemWrite(const size_t identifier,
         * listener - event listener
 */
 SYSCALL_DECL enum gnwDeviceError devListen(const size_t identifier,
-                                           const union gnwDeviceEventListener listener) {
+                                           const union gnwEventListener listener) {
+    CHECKPTR(listener._handle);
+    
+    ptr_t rlpPtr = runLoopGetMain();
+    CHECKPTR(rlpPtr);
+
     SYSCALL_PAR1(identifier);
     SYSCALL_PAR2(listener._handle);
+    SYSCALL_PAR3(rlpPtr);
 
     SYSCALL_USER_FUNC(DEV_LISTEN);
     SYSCALL_USER_INT;

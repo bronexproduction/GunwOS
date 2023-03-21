@@ -6,7 +6,7 @@
 //
 
 #include "fug.h"
-#include <stdgunw/string.h>
+#include <string.h>
 #include <error/panic.h>
 
 void k_err_fug(enum gnwFugCode code) {

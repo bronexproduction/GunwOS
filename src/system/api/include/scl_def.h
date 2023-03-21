@@ -8,8 +8,8 @@
 #ifndef GUNWOS_SCL_DEF_H
 #define GUNWOS_SCL_DEF_H
 
-#include <stdgunw/types.h>
-#include <stdgunw/utils.h>
+#include <types.h>
+#include <utils.h>
 
 #define SYSCALL_DRIVER_INTERRUPT                0x45
 #define SYSCALL_USER_INTERRUPT                  0x69
@@ -19,6 +19,7 @@
 #define SYSCALL_DRIVER_FUNCTION_EMIT_VOID       0x02
 #define SYSCALL_DRIVER_FUNCTION_EMIT_U8         0x03
 
+#define SYSCALL_USER_FUNCTION_START             0x00
 #define SYSCALL_USER_FUNCTION_DEBUG_PRINT       0x01
 #define SYSCALL_USER_FUNCTION_DEV_CHAR_WRITE    0x02
 #define SYSCALL_USER_FUNCTION_EXIT              0x03
@@ -40,7 +41,7 @@
     as EAX register is used as intermediate register
     and stores the last assigned value
 */
-#define SYSCALL_DECL static inline __attribute__((always_inline))
+#define SYSCALL_DECL static inline
 #define SYSCALL_FUNC(LEVEL, CODE) REG(32, _code, eax); _code = (uint_32) SYSCALL_ ## LEVEL ## _FUNCTION_ ## CODE ;
 #define SYSCALL_DRIVER_FUNC(CODE) SYSCALL_FUNC(DRIVER, CODE)
 #define SYSCALL_USER_FUNC(CODE) SYSCALL_FUNC(USER, CODE)
@@ -53,5 +54,6 @@
 #define SYSCALL_PAR(NAME, VALUE, REG_NAME) REG(32, _param ## NAME , REG_NAME); _param ## NAME = (uint_32) VALUE ;
 #define SYSCALL_PAR1(VALUE) SYSCALL_PAR(1, VALUE, ebx)
 #define SYSCALL_PAR2(VALUE) SYSCALL_PAR(2, VALUE, ecx)
+#define SYSCALL_PAR3(VALUE) SYSCALL_PAR(3, VALUE, edx)
 
 #endif // GUNWOS_SCL_DEF_H
