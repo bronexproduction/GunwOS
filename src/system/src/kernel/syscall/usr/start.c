@@ -45,7 +45,8 @@ enum gnwCtrlError loadElf(const ptr_t filePtr,
         if (!entry) {
             OOPS("Unexpected nullptr");
         }
-        if (!(entry->attributes & ESECATTR_ALLOC)) {
+        if (!(entry->attributes & ESECATTR_ALLOC &&
+              entry->type == ESECTYPE_PROGBITS)) {
             continue;
         }
 
@@ -100,7 +101,7 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
     size_t fileSizeBytes;
     if (pathLen == 3 && !strcmpl("cli", (const char *)absPathPtr, pathLen)) {
         filePtr = (ptr_t)0x50000;
-        fileSizeBytes = 0x105e4;
+        fileSizeBytes = 0x10568;
     } else {
         return GCE_NOT_FOUND;
     }
@@ -132,7 +133,7 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
     const size_t processStackBytes = KiB(512);
     const size_t processExtraBytes = KiB(512);
     const size_t processMemTotalBytes = processBinBytes + processStackBytes + processExtraBytes;
-    const ptr_t dstPtr = (ptr_t)(MEM_KERNEL_START + MEM_KERNEL_RESERVED_BYTES + (index * processMemTotalBytes) + MiB(1));
+    const ptr_t dstPtr = GDT_SEGMENT_START(r3code) + (index * processMemTotalBytes) + MiB(1);
 
     /* 
         Load executable 
