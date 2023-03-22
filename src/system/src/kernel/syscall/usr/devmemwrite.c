@@ -23,7 +23,7 @@ enum gnwDeviceError k_scr_usr_devMemWrite(const size_t devId, const void * const
 
     const ptr_t absBufferPtr = k_scl_func_getValidAbsoluteForProc(procId, (const ptr_t)buf, desc.mem.inputSizeBytes);
     if (!absBufferPtr) {
-        OOPS("Null pointer referenced");
+        OOPS("Invalid pointer referenced");
     }
     
     return k_dev_writeMem((const size_t)k_proc_getCurrentId(), (const size_t)devId, (const void * const)absBufferPtr);
