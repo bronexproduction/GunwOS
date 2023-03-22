@@ -211,7 +211,7 @@ enum gnwDeviceError k_dev_getById(const size_t id, struct gnwDeviceUHADesc * con
     return GDE_NONE;
 }
 
-enum gnwDeviceError k_dev_getByType(enum gnwDeviceType type, struct gnwDeviceUHADesc * const desc) {
+enum gnwDeviceError k_dev_getByType(const enum gnwDeviceType type, struct gnwDeviceUHADesc * const desc) {
     if (!desc) {
         OOPS("Device descriptor descriptor over limit");
         return GDE_UNKNOWN;
@@ -226,7 +226,7 @@ enum gnwDeviceError k_dev_getByType(enum gnwDeviceType type, struct gnwDeviceUHA
     return GDE_NOT_FOUND;
 }
 
-enum gnwDeviceError k_dev_acquireHold(procId_t processId, size_t deviceId) {
+enum gnwDeviceError k_dev_acquireHold(const procId_t processId, const size_t deviceId) {
     if (!validateInstalledId(deviceId)) {
         OOPS("Device identifier invalid");
         return GDE_UNKNOWN;
@@ -241,7 +241,7 @@ enum gnwDeviceError k_dev_acquireHold(procId_t processId, size_t deviceId) {
     return GDE_NONE;
 }
 
-void k_dev_releaseHold(procId_t processId, size_t deviceId) {
+void k_dev_releaseHold(const procId_t processId, const size_t deviceId) {
     if (!validateInstalledId(deviceId)) {
         OOPS("Device identifier invalid");
     }
