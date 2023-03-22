@@ -9,8 +9,8 @@
 #define QUEUE_H
 
 /*
-    Functions dedicated for interrupt handlers
-    which may require some time to process data
+    Functions dedicated for additional time-consuming operations
+    interrupt handlers may require to perform to process data
 
     To keep interrupt service routines simple
     ISR can queue its time-consuming task
