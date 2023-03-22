@@ -49,7 +49,7 @@ __attribute__((naked)) void k_scr_exit();
     Code - 0x05
     Function - SLEEPMS
 */
-__attribute__((naked)) void k_scr_sleepms();
+__attribute__((naked)) void k_scr_sleepms(const size_t ms);
 
 /*
     Code - 0x08

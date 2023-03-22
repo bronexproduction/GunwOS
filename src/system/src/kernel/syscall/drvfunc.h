@@ -25,7 +25,7 @@ __attribute__((naked)) void k_scr_rdb();
     Code - 0x01
     Function - WRB
 */
-__attribute__((naked)) void k_scr_wrb();
+__attribute__((naked)) void k_scr_wrb(const int_8 data);
 
 /*
     Code - 0x02
