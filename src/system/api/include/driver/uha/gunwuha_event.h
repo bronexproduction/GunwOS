@@ -1,6 +1,6 @@
 //
 //  gunwuha_event.h
-//  Universal Hardware Abstraction for events emitting device
+//  Universal Hardware Abstraction for event-emitting device
 //  GunwOS
 //
 //  Created by Artur Danielewski on 08.03.2023.
