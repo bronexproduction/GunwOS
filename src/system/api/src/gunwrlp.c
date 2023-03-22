@@ -8,7 +8,6 @@
 #include "_gunwrlp.h"
 #include <gunwrlp.h>
 #include <gunwfug.h>
-#include <defs.h>
 #include <mem.h>
 
 static struct gnwRunLoop rlp_main;
