@@ -86,7 +86,7 @@ __attribute__((naked)) enum gnwDeviceError k_scr_devMemWrite(const size_t,
     Code - 0x0d
     Function - FUG
 */
-__attribute__((naked)) void k_scr_fug(enum gnwFugCode);
+__attribute__((naked)) void k_scr_fug(const enum gnwFugCode);
 
 /*
     Code - 0x0e
