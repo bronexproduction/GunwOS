@@ -56,7 +56,7 @@ bool k_hal_isIRQRegistered(uint_8 num) {
     return true;
 }
 
-enum gnwDriverError k_hal_install(const size_t devId, struct gnwDriverConfig driver) {
+enum gnwDriverError k_hal_install(const size_t devId, const struct gnwDriverConfig driver) {
     if (!driver.isr) {
         return ISR_MISSING;
     }
