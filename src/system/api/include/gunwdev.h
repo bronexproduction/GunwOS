@@ -123,7 +123,7 @@ SYSCALL_DECL void devRelease(const uint_32 identifier) {
     
     Return value: Device error code or GDE_NONE (see enum gnwDeviceError)
 */
-SYSCALL_DECL enum gnwDeviceError devCharWrite(uint_32 deviceId, 
+SYSCALL_DECL enum gnwDeviceError devCharWrite(const uint_32 deviceId, 
                                               const char character) {
     SYSCALL_PAR1(deviceId);
     SYSCALL_PAR2(character);

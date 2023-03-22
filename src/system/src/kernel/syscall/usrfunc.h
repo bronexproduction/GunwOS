@@ -36,7 +36,7 @@ __attribute__((naked)) void k_scr_debugPrint(const char * const buffer,
     Code - 0x02
     Function - DEV_CHAR_WRITE
 */
-__attribute__((naked)) void k_scr_devCharWrite(uint_32 deviceId, 
+__attribute__((naked)) void k_scr_devCharWrite(const uint_32 deviceId, 
                                                const char character);
 
 /*
