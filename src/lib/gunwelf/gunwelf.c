@@ -61,6 +61,8 @@ static bool validateProgramHeaderEntry(const struct elfProgramHeaderEntry32 * co
         if ((addr_t)entryPtr->offset % entryPtr->alignment != (addr_t)entryPtr->virtualAddr % entryPtr->alignment) {
             return false;
         }
+
+        #warning VALIDATE FILE OFFSET AND SIZE
     }
 
     return true;
@@ -83,6 +85,8 @@ static bool validateSectionHeaderEntry(const struct elfSectionHeaderEntry32 * co
         if (low && (low + high < low)) {
             return false;
         }
+
+        #warning VALIDATE FILE OFFSET AND SIZE
     }
 
     return true;
@@ -156,8 +160,6 @@ bool elfValidate(const ptr_t filePtr,
     if (headerPtr->sectionHeaderEntrySize != ELF_SECTION_ENTRY_SIZE_32) {
         return false;
     }
-
-    #warning VALIDATE LOCATIONS IN FILE
 
     if (fileSizeBytes < (ELF_HEADER_SIZE_32 + (headerPtr->programHeaderEntries * ELF_PROGRAM_ENTRY_SIZE_32) + (headerPtr->sectionHeaderEntries * ELF_SECTION_ENTRY_SIZE_32))) {
         return false;

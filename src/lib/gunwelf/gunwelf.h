@@ -64,21 +64,21 @@ enum elfSectionType {
     ESECTYPE_NOTE	        = 0x07, /* Notes */
     ESECTYPE_NOBITS	        = 0x08, /* Program space with no data (bss) */
     ESECTYPE_REL	        = 0x09, /* Relocation entries, no addends */
-	ESECTYPE_SHLIB	        = 0x0A, /* Reserved */
-	ESECTYPE_DYNSYM	        = 0x0B, /* Dynamic linker symbol table */
-	ESECTYPE_INIT_ARRAY	    = 0x0E, /* Array of constructors */
-	ESECTYPE_FINI_ARRAY	    = 0x0F, /* Array of destructors */
-	ESECTYPE_PREINIT_ARRAY  = 0x10,	/* Array of pre-constructors */
-	ESECTYPE_GROUP	        = 0x11, /* Section group */
-	ESECTYPE_SYMTAB_SHNDX	= 0x12, /* Extended section indices */
-	ESECTYPE_NUM	        = 0x13, /* Number of defined types. */
+    ESECTYPE_SHLIB	        = 0x0A, /* Reserved */
+    ESECTYPE_DYNSYM	        = 0x0B, /* Dynamic linker symbol table */
+    ESECTYPE_INIT_ARRAY	    = 0x0E, /* Array of constructors */
+    ESECTYPE_FINI_ARRAY	    = 0x0F, /* Array of destructors */
+    ESECTYPE_PREINIT_ARRAY  = 0x10,	/* Array of pre-constructors */
+    ESECTYPE_GROUP	        = 0x11, /* Section group */
+    ESECTYPE_SYMTAB_SHNDX	= 0x12, /* Extended section indices */
+    ESECTYPE_NUM	        = 0x13, /* Number of defined types. */
     ESECTYPE_LO_OS	        = 0x60000000, /* OS-specific types start */
 };
 
 enum elfSectionAttr {
     ESECATTR_WRITE              = 0x01,     /* Writable */
-	ESECATTR_ALLOC	            = 0x02,     /* Occupies memory during execution */
-	ESECATTR_EXECINSTR	        = 0x04,     /* Executable */
+    ESECATTR_ALLOC	            = 0x02,     /* Occupies memory during execution */
+    ESECATTR_EXECINSTR	        = 0x04,     /* Executable */
     ESECATTR_MERGE	            = 0x10,     /* Might be merged */
     ESECATTR_STRINGS	        = 0x20,     /* Contains null-terminated strings */
     ESECATTR_INFO_LINK	        = 0x40,     /* 'sh_info' contains SHT index */
@@ -86,10 +86,10 @@ enum elfSectionAttr {
     ESECATTR_OS_NONCONFORMING   = 0x100,    /* Non-standard OS specific handling required */
     ESECATTR_GROUP              = 0x200,	/* Section is member of a group */
     ESECATTR_TLS	            = 0x400,    /* Section hold thread-local data */
-	ESECATTR_ORDERED	        = 0x04000000,   /* Special ordering requirement (Solaris) */
-	ESECATTR_EXCLUDE	        = 0x08000000,   /* Section is excluded unless referenced or allocated (Solaris) */
+    ESECATTR_ORDERED	        = 0x04000000,   /* Special ordering requirement (Solaris) */
+    ESECATTR_EXCLUDE	        = 0x08000000,   /* Section is excluded unless referenced or allocated (Solaris) */
     ESECATTR_MASKOS	            = 0x0FF00000,   /* OS-specific */
-	ESECATTR_MASKPROC	        = 0xF0000000,   /* Processor-specific */
+    ESECATTR_MASKPROC	        = 0xF0000000,   /* Processor-specific */
 };
 
 struct __attribute__((packed)) elfIdentifier {
