@@ -107,7 +107,7 @@ struct __attribute__((packed)) elfHeader32 {
     const enum elfType type             :8*2;   /* Object file type */
     const uint_16 architecture;                 /* Target instruction set architecture */
     const uint_32 version;                      /* ELF version */
-    const addr_t entry; 	                    /* Address the entry point (0 if no entry point) */
+    const addr_t entry;                         /* Address the entry point (0 if no entry point) */
     const addr_t programHeaderTable;            /* Start of the program header table */
     const addr_t sectionHeaderTable;            /* Start of the section header table */
     const uint_32 archFlags; 	                /* Flags for target architecture */
@@ -116,15 +116,15 @@ struct __attribute__((packed)) elfHeader32 {
     const uint_16 programHeaderEntries;         /* Number of entries in the program header table */
     const uint_16 sectionHeaderEntrySize;       /* Size of a section header table entry */
     const uint_16 sectionHeaderEntries;         /* Number of entries in the section header table */
-    const uint_16 sectionNamesEntryIndex; 	    /* Index of the section header table entry that contains the section names */
+    const uint_16 sectionNamesEntryIndex;       /* Index of the section header table entry that contains the section names */
 };
 _Static_assert(sizeof(struct elfHeader32) == ELF_HEADER_SIZE_32, "Unexpected struct elfHeader32 size");
 
 struct __attribute__((packed)) elfProgramHeaderEntry32 {
     const enum elfSegmentType type      :8*4;   /* Type of the segment */
     const uint_32 offset;                       /* Offset of the segment in the file image */
-    const addr_t virtualAddr;                    /* Virtual address of the segment in memory */
-    const addr_t physicalAddr;                   /* Physical address of the segment in memory (where relevant) */
+    const addr_t virtualAddr;                   /* Virtual address of the segment in memory */
+    const addr_t physicalAddr;                  /* Physical address of the segment in memory (where relevant) */
     const uint_32 fileSizeBytes;                /* Size in bytes of the segment in the file image (may be 0) */
     const uint_32 memorySizeBytes;              /* Size in bytes of the segment in memory (may be 0) */
     const uint_32 flags;                        /* Segment-dependent flags */
@@ -139,10 +139,10 @@ struct __attribute__((packed)) elfSectionHeaderEntry32 {
     const uint_32 nameOffset;                   /* An offset to a string in the .shstrtab section that represents the name of this section */
     const enum elfSectionType type      :8*4;   /* Type of the section */
     const enum elfSectionAttr attributes:8*4;   /* Attributes of the section */
-    const addr_t virtualAddr;                    /* Virtual address of the section in memory, for sections that are loaded */
+    const addr_t virtualAddr;                   /* Virtual address of the section in memory, for sections that are loaded */
     const uint_32 offset;	                    /* Offset of the section in the file image */
-	const uint_32 fileSizeBytes;                /* Size in bytes of the section in the file image (may be 0) */
-	const uint_32 sectionIndex;                 /* Contains the section index of an associated section. 
+    const uint_32 fileSizeBytes;                /* Size in bytes of the section in the file image (may be 0) */
+    const uint_32 sectionIndex;                 /* Contains the section index of an associated section. 
                                                    This field is used for several purposes, depending on the type of section. */
     const uint_32 info;                         /* Contains extra information about the section. 
                                                    This field is used for several purposes, depending on the type of section. */
