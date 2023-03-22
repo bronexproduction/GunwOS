@@ -84,7 +84,7 @@ enum elfSectionAttr {
     ESECATTR_INFO_LINK          = 0x40,     /* 'sh_info' contains SHT index */
     ESECATTR_LINK_ORDER         = 0x80,     /* Preserve order after combining */
     ESECATTR_OS_NONCONFORMING   = 0x100,    /* Non-standard OS specific handling required */
-    ESECATTR_GROUP              = 0x200,	/* Section is member of a group */
+    ESECATTR_GROUP              = 0x200,    /* Section is member of a group */
     ESECATTR_TLS                = 0x400,    /* Section hold thread-local data */
     ESECATTR_ORDERED            = 0x04000000,   /* Special ordering requirement (Solaris) */
     ESECATTR_EXCLUDE            = 0x08000000,   /* Section is excluded unless referenced or allocated (Solaris) */
