@@ -32,7 +32,6 @@ void k_hal_init() {
     memnull(isrReg, sizeof(struct isrEntry) * DEV_IRQ_LIMIT);
 
     k_cpu_init();
-    #warning TODO: move GDT configuration from the boot loader
 
     k_gdt_init();
     k_cpu_loadTaskRegister();
