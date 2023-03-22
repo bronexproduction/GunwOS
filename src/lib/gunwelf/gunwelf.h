@@ -68,7 +68,7 @@ enum elfSectionType {
     ESECTYPE_DYNSYM         = 0x0B, /* Dynamic linker symbol table */
     ESECTYPE_INIT_ARRAY     = 0x0E, /* Array of constructors */
     ESECTYPE_FINI_ARRAY     = 0x0F, /* Array of destructors */
-    ESECTYPE_PREINIT_ARRAY  = 0x10,	/* Array of pre-constructors */
+    ESECTYPE_PREINIT_ARRAY  = 0x10, /* Array of pre-constructors */
     ESECTYPE_GROUP          = 0x11, /* Section group */
     ESECTYPE_SYMTAB_SHNDX   = 0x12, /* Extended section indices */
     ESECTYPE_NUM            = 0x13, /* Number of defined types. */
