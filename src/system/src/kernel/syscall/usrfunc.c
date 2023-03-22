@@ -124,7 +124,7 @@ SCR(devGetById,
     REG_RET(32, err)
 
     enum gnwDeviceError k_scr_usr_devGetById(const size_t, struct gnwDeviceUHADesc * const);
-    err = k_scr_usr_devGetById((const size_t)id, (struct gnwDeviceUHADesc * const)desc);
+    err = k_scr_usr_devGetById((size_t)id, (struct gnwDeviceUHADesc *)desc);
 )
 
 /*
@@ -144,7 +144,7 @@ SCR(devGetByType,
 
     REG_RET(32, err)
 
-    enum gnwDeviceError k_scr_usr_devGetByType(enum gnwDeviceType, struct gnwDeviceUHADesc * const);
+    enum gnwDeviceError k_scr_usr_devGetByType(const enum gnwDeviceType, struct gnwDeviceUHADesc * const);
     err = k_scr_usr_devGetByType((enum gnwDeviceType)type, (struct gnwDeviceUHADesc * const)desc);
 )
 

@@ -9,7 +9,7 @@
 #include <dev/dev.h>
 #include <error/panic.h>
 
-enum gnwDeviceError k_scr_usr_devGetByType(enum gnwDeviceType deviceType, struct gnwDeviceUHADesc * const descriptor) {
+enum gnwDeviceError k_scr_usr_devGetByType(const enum gnwDeviceType deviceType, struct gnwDeviceUHADesc * const descriptor) {
     const ptr_t absDescriptorPtr = k_scl_func_getValidAbsoluteForCurrentProc((const ptr_t)descriptor, sizeof(struct gnwDeviceUHADesc));
     if (!absDescriptorPtr) {
         OOPS("Invalid parameter");
