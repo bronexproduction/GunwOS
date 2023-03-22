@@ -15,8 +15,8 @@ struct k_mem_zone {
     size_t sizeBytes;
 };
 
-static struct k_mem_zone k_mem_zoneForProc(const procId_t procId) {
-    struct k_proc_process proc = k_proc_getInfo(k_proc_getCurrentId());
+static struct k_mem_zone zoneForProc(const procId_t procId) {
+    struct k_proc_process proc = k_proc_getInfo(procId);
     
     if (proc.state == PS_NONE) {
         OOPS("Invalid process state");
@@ -48,14 +48,14 @@ ptr_t k_mem_absForProc(const procId_t procId, const ptr_t relPtr) {
         OOPS("Invalid pointer");
     }
 
-    return relPtr + (addr_t)k_mem_zoneForProc(procId).startPtr;
+    return relPtr + (addr_t)zoneForProc(procId).startPtr;
 }
 
 bool k_mem_bufInZoneForProc(const procId_t procId, const ptr_t absPtr, const size_t bufSize) {
     // check buffer bounds
     // there might be a better way to do it
     // but will do, at least until virtual memory gets implemented
-    const struct k_mem_zone procZone = k_mem_zoneForProc(procId);
+    const struct k_mem_zone procZone = zoneForProc(procId);
     if (absPtr < procZone.startPtr || procZone.endPtr < absPtr) {
         return false;
     }
