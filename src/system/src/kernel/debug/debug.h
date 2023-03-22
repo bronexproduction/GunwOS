@@ -6,8 +6,6 @@
 //
 
 #include <string.h>
-#warning that's pretty bad
-#include <terminal/video.h>
 
 #define DBG_PREVIEW_FRAME {\
     uint_32 eax;\
