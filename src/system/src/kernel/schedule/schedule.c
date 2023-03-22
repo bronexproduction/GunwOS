@@ -57,7 +57,7 @@ void k_proc_schedule_onKernelHandlingFinished() {
     lastProcId = nextProcId;
 }
 
-void k_proc_schedule_didSpawn(procId_t procId) {
+void k_proc_schedule_didSpawn(const procId_t procId) {
     if (procId < 0 || procId >= MAX_PROC) {
         OOPS("Invalid spawned process id");
     }
