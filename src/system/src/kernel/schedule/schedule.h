@@ -8,6 +8,8 @@
 #ifndef SCHEDULE_H
 #define SCHEDULE_H
 
+#include <hal/proc/proc.h>
+
 /*
     Called by the ISR
     in case code got dispatched by an interrupt handler
@@ -26,6 +28,14 @@ void k_proc_schedule_onKernelHandlingFinished();
     Called by the k_proc_spawn
     in case a new process got spawned
 */
-void k_proc_schedule_didSpawn(const size_t procId);
+void k_proc_schedule_didSpawn(const procId_t procId);
+
+/*
+    Notifies scheduler about active process state change
+    outside the scheduler
+    
+    New process state may need schedule recalculation
+*/
+void k_proc_schedule_processStateDidChange();
 
 #endif // SCHEDULE_H

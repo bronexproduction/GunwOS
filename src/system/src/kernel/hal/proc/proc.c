@@ -33,10 +33,10 @@ struct process {
 
 static struct process kernelProc;
 static struct process pTab[MAX_PROC];
-static procId_t k_proc_current = KERNEL_PROC_ID;
+static procId_t procCurrent = KERNEL_PROC_ID;
 
 procId_t k_proc_getCurrentId() {
-    return k_proc_current;
+    return procCurrent;
 }
 
 struct k_proc_process k_proc_getInfo(const procId_t procId) {
@@ -119,6 +119,22 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
     return PE_NONE;
 }
 
+void k_proc_lockIfNeeded(const procId_t procId) {
+    if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
+        OOPS("Process id out of range");
+    }
+    if (pTab[procId].info.state == PS_BLOCKED) {
+        return;
+    }
+    if (pTab[procId].info.state != PS_READY &&
+        pTab[procId].info.state != PS_RUNNING) {
+        OOPS("Unexpected process state during lock");
+    }
+
+    pTab[procId].info.state = PS_BLOCKED;
+    k_proc_schedule_processStateDidChange();
+}
+
 /*
     Switching between processes
 
@@ -148,7 +164,7 @@ void k_proc_switch(const procId_t procId) {
     kernelProc.info.state = PS_READY;
     pTab[procId].info.state = PS_RUNNING;
 
-    k_proc_current = procId;
+    procCurrent = procId;
 
     // Save kernel CPU state
     #warning probably a lot of these operations can be removed
@@ -236,7 +252,7 @@ void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const procId_t currentP
     pTab[currentProcId].info.state = PS_READY;
     kernelProc.info.state = PS_RUNNING;
 
-    k_proc_current = KERNEL_PROC_ID;
+    procCurrent = KERNEL_PROC_ID;
 
     struct k_cpu_state * const currentCpuState = &pTab[currentProcId].cpuState;
         
@@ -313,12 +329,24 @@ void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const procId_t currentP
     STACK_VAL(refEsp, 16, 56) = kernelProc.cpuState.ss;
 }
 
+static bool processAlive(const procId_t procId) {
+    return pTab[procId].info.state == PS_READY ||
+           pTab[procId].info.state == PS_RUNNING ||
+           pTab[procId].info.state == PS_BLOCKED;
+}
+
 static enum k_proc_error callbackInvoke(const procId_t procId, 
                                         const struct gnwRunLoop * const runLoop,
                                         const enum gnwEventFormat format, 
                                         const ptr_t funPtr, 
                                         const int_32 p0,
                                         const int_32 p1) {
+    if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
+        OOPS("Process id out of range");
+    }
+    if (!processAlive(procId)) {
+        OOPS("Attempted callback invocation in dead process");
+    }
     struct gnwRunLoop * const absRunLoopPtr = (struct gnwRunLoop *)k_mem_absForProc(procId, (ptr_t)runLoop);
     if (!k_mem_bufInZoneForProc(procId, (ptr_t)absRunLoopPtr, sizeof(struct gnwRunLoop))) {
         return PE_ACCESS_VIOLATION;
@@ -349,6 +377,11 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
     if (err != GRLE_NONE) {
         return PE_OPERATION_FAILED;
     }
+
+    if (pTab[procId].info.state == PS_BLOCKED) {
+        pTab[procId].info.state = PS_READY;
+    }
+    k_proc_schedule_processStateDidChange();
 
     return PE_NONE;
 }

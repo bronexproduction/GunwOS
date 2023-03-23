@@ -31,4 +31,6 @@ struct gnwRunLoop {
 
 enum gnwRunLoopError gnwRunLoopDispatch(struct gnwRunLoop * const runLoop, const struct gnwRunLoopDispatchItem dispatchItem);
 
+bool gnwRunLoopIsEmpty(struct gnwRunLoop * const runLoop);
+
 #endif // GUNWOS__GUNWRLP_H

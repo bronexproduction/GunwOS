@@ -70,6 +70,11 @@ void k_proc_schedule_didSpawn(const procId_t procId) {
     }
 }
 
+void k_proc_schedule_processStateDidChange() {
+    executionTimeCounter = GRANULARITY_MS;
+    k_que_dispatch(schedEvaluate);
+}
+
 /*
     Note: As launched intermediately via hardware interrupt
           its execution time should be as short as possible

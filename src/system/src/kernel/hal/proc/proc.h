@@ -69,6 +69,15 @@ struct k_proc_process k_proc_getInfo(const procId_t procId);
 enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const);
 
 /*
+    Blocking the process
+    e.g. in case the process waits for an event
+
+    Params:
+    * procId - Identifier of the process
+*/
+void k_proc_lockIfNeeded(const procId_t procId);
+
+/*
     Switching from kernel to process
 
     Params:

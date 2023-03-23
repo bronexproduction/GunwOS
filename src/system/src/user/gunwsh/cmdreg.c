@@ -30,10 +30,7 @@ void (*s_cli_cmdSelector(const char *const cmd))(const char *const) {
         user_cli_puts("Available commands:");
     }
     CMD_REG(help)
-    CMD_REG(rdmsr)
-    CMD_REG(uptime)
-    CMD_REG(sysinfo)
-    CMD_REG(spawntest)
+    CMD_REG(start)
 
     return isHalp ? cmd_nop : NULL;
 }

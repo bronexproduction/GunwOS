@@ -8,6 +8,7 @@
 #include "_gunwrlp.h"
 #include <gunwrlp.h>
 #include <gunwfug.h>
+#include <gunwctrl.h>
 #include <mem.h>
 
 static struct gnwRunLoop rlp_main;
@@ -26,13 +27,25 @@ void runLoopEntryExecute(const struct gnwRunLoopDispatchItem * const item) {
     }
 }
 
+static size_t nextIndex(const struct gnwRunLoop * const runLoop) {
+    return (runLoop->finishedIndex + 1) % DISPATCH_QUEUE_SIZE;
+}
+
+static struct gnwRunLoopDispatchItem * nextItem(struct gnwRunLoop * const runLoop) {
+    return &runLoop->queue[nextIndex(runLoop)];
+}
+
+static bool isItemEmpty(const struct gnwRunLoopDispatchItem * const item) {
+    return item->format == GEF_NONE;
+}
+
 void runLoopStart() {
     while (1) {
-        size_t index = ((rlp_main.finishedIndex + 1) % DISPATCH_QUEUE_SIZE);
+        size_t index = nextIndex(&rlp_main);
         struct gnwRunLoopDispatchItem * item = &rlp_main.queue[index];
         
-        if (item->format == GEF_NONE) {
-            #warning to be implemented - pause the process and mark as blocked
+        if (isItemEmpty(item)) {
+            waitForEvent();
             continue;
         }
         
@@ -56,4 +69,8 @@ enum gnwRunLoopError gnwRunLoopDispatch(struct gnwRunLoop * const runLoop, const
     runLoop->endIndex = index;
     
     return GRLE_NONE;
+}
+
+bool gnwRunLoopIsEmpty(struct gnwRunLoop * const runLoop) {
+    return isItemEmpty(nextItem(runLoop));
 }
