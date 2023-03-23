@@ -13,6 +13,7 @@
 #include <hal/proc/proc.h>
 #include <hal/mem/mem.h>
 #include <error/panic.h>
+#include <hal/criticalsec/criticalsec.h>
 
 #define MAX_DEVICES 8
 
@@ -28,7 +29,7 @@ struct deviceEventListener {
     struct gnwRunLoop * runLoop;
 };
 
-struct device {
+static struct device {
     /*
         Driver descriptor
     */
@@ -59,9 +60,8 @@ struct device {
         Note: Listener can be attached only by holder process
     */
     struct deviceEventListener listener;
-};
+} devices[MAX_DEVICES];
 
-static struct device devices[MAX_DEVICES];
 static uint_32 devicesCount;
 
 extern uint_8 k_hal_isIRQRegistered(uint_8 num);
@@ -430,4 +430,12 @@ enum gnwDeviceError k_dev_emit_u8(const int_32 type,
 }
 
 void k_dev_procCleanup(const procId_t procId) {
+    for (size_t devId = 0; devId < MAX_DEVICES; ++devId) {
+        if (devices[devId].holder == procId) {
+            CRITICAL_SECTION(
+                devices[devId].holder = NONE_PROC_ID;
+                memnull(&devices[devId].listener, sizeof(struct deviceEventListener)); 
+            )
+        }
+    }
 }

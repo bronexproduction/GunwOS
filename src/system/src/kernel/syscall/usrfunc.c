@@ -93,7 +93,6 @@ SCR(exit,
     const procId_t procId = k_proc_getCurrentId();
     k_que_dispatch_arch((fPtr_arch)k_dev_procCleanup, procId);
     k_proc_stop(procId);
-    #warning TODO free memory?
 )
 
 /*

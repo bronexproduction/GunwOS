@@ -149,6 +149,7 @@ static void procCleanup(const procId_t procId) {
     }
 
     memnull(&pTab[procId], sizeof(struct process));
+    k_mem_procCleanup(procId);
 }
 
 void k_proc_stop(const procId_t procId) {
