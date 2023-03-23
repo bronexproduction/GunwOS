@@ -391,6 +391,8 @@ enum gnwDeviceError k_dev_emit_void(const int_32 type) {
     switch (callbackErr) {
     case PE_NONE:
         return GDE_NONE;
+    case PE_IGNORED:
+        return GDE_HANDLE_INVALID;
     case PE_ACCESS_VIOLATION:
         return GDE_LISTENER_INVALID;
     default:
@@ -418,9 +420,14 @@ enum gnwDeviceError k_dev_emit_u8(const int_32 type,
     switch (callbackErr) {
     case PE_NONE:
         return GDE_NONE;
+    case PE_IGNORED:
+        return GDE_HANDLE_INVALID;
     case PE_ACCESS_VIOLATION:
         return GDE_LISTENER_INVALID;
     default:
         return GDE_UNKNOWN;
     }
+}
+
+void k_dev_procCleanup(const procId_t procId) {
 }

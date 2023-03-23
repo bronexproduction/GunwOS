@@ -76,7 +76,7 @@ SCR(devCharWrite,
 
     REG_RET(32, err)
 
-    err = k_dev_writeChar((procId_t)k_proc_getCurrentId(), (const size_t)devId, (const char)character);  
+    err = k_dev_writeChar(k_proc_getCurrentId(), (const size_t)devId, (const char)character);  
 )
 
 /*
@@ -84,14 +84,16 @@ SCR(devCharWrite,
     Function - EXIT
 
     Params:
-    
         * EBX - status
 
 */
 SCR(exit,
     REG(32, status, ebx)
     
-    // TODO: wip
+    const procId_t procId = k_proc_getCurrentId();
+    k_que_dispatch_arch((fPtr_arch)k_dev_procCleanup, procId);
+    k_proc_stop(procId);
+    #warning TODO free memory?
 )
 
 /*
@@ -179,7 +181,7 @@ SCR(devAcquire,
 
     REG_RET(32, err)
 
-    err = k_dev_acquireHold((procId_t)k_proc_getCurrentId(), (size_t)devId);
+    err = k_dev_acquireHold(k_proc_getCurrentId(), (size_t)devId);
 )
 
 /*
@@ -192,7 +194,7 @@ SCR(devAcquire,
 SCR(devRelease,
     REG(32, devId, ebx)
 
-    k_dev_releaseHold((procId_t)k_proc_getCurrentId(), (size_t)devId);
+    k_dev_releaseHold(k_proc_getCurrentId(), (size_t)devId);
 )
 
 /*
@@ -248,5 +250,5 @@ SCR(devListen,
 
     REG_RET(32, err)
 
-    err = k_dev_listen((procId_t)k_proc_getCurrentId(), (const size_t)devId, (const union gnwEventListener)lsnr, (struct gnwRunLoop *)rlp);
+    err = k_dev_listen(k_proc_getCurrentId(), (const size_t)devId, (const union gnwEventListener)lsnr, (struct gnwRunLoop *)rlp);
 )

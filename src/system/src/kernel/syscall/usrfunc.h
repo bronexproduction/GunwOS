@@ -43,7 +43,7 @@ __attribute__((naked)) void k_scr_devCharWrite(const uint_32 deviceId,
     Code - 0x03
     Function - EXIT
 */
-__attribute__((naked)) void k_scr_exit();
+__attribute__((naked)) void k_scr_exit(const int_32 status);
 
 /*
     Code - 0x04

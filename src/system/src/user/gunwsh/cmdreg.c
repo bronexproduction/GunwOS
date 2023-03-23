@@ -31,6 +31,7 @@ void (*s_cli_cmdSelector(const char *const cmd))(const char *const) {
     }
     CMD_REG(help)
     CMD_REG(start)
+    CMD_REG(exit)
 
     return isHalp ? cmd_nop : NULL;
 }

@@ -28,6 +28,7 @@ enum k_proc_error {
     PE_LIMIT_REACHED,
     PE_ACCESS_VIOLATION,
     PE_OPERATION_FAILED,
+    PE_IGNORED,
     PE_UNKNOWN
 };
 
@@ -36,7 +37,8 @@ enum k_proc_state {
     PS_NEW,
     PS_READY,
     PS_RUNNING,
-    PS_BLOCKED
+    PS_BLOCKED,
+    PS_FINISHED
 };
 
 struct k_proc_process {
@@ -76,6 +78,14 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const);
     * procId - Identifier of the process
 */
 void k_proc_lockIfNeeded(const procId_t procId);
+
+/*
+    Stopping and cleaning up after running process
+
+    Params:
+    * procId - Identifier of the process
+*/
+void k_proc_stop(const procId_t procId);
 
 /*
     Switching from kernel to process

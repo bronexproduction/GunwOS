@@ -10,6 +10,7 @@
 
 #include <types.h>
 #include <string.h>
+#include "cliio.h"
 
 #define CMD_LEN_MAX 64
 
