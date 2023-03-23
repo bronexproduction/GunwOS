@@ -41,6 +41,17 @@
         } \
     }
 
+#define CMD_PARAM_STRING(INDEX, PAR, PAR_DESC) \
+    struct user_cli_cmd_param desc_##PAR = user_cli_cmd_paramAt(params, INDEX); \
+    if (!desc_##PAR.length) { \
+        user_cli_puts("Error: No "); \
+        user_cli_puts(PAR_DESC); \
+        user_cli_puts(" specified"); \
+        return; \
+    } \
+    char PAR [desc_##PAR.length + 1]; \
+    user_cli_cmd_paramLoad(params, PAR, desc_##PAR);
+
 struct user_cli_cmd_param {
     size_t offset;
     size_t length;

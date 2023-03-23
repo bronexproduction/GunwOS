@@ -46,6 +46,12 @@ __attribute__((naked)) void k_scr_devCharWrite(const uint_32 deviceId,
 __attribute__((naked)) void k_scr_exit();
 
 /*
+    Code - 0x04
+    Function - WAIT_FOR_EVENT
+*/
+__attribute__((naked)) void k_scr_waitForEvent(const struct gnwRunLoop * const runLoop);
+
+/*
     Code - 0x05
     Function - SLEEPMS
 */

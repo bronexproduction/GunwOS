@@ -10,6 +10,7 @@
 #include <error/fug.h>
 #include <hal/proc/proc.h>
 #include <dev/dev.h>
+#include <queue/queue.h>
 
 /*
     User-level system calls
@@ -75,7 +76,7 @@ SCR(devCharWrite,
 
     REG_RET(32, err)
 
-    err = k_dev_writeChar((const size_t)k_proc_getCurrentId(), (const size_t)devId, (const char)character);  
+    err = k_dev_writeChar((procId_t)k_proc_getCurrentId(), (const size_t)devId, (const char)character);  
 )
 
 /*
@@ -87,9 +88,24 @@ SCR(devCharWrite,
         * EBX - status
 
 */
-// TODO: wip
 SCR(exit,
     REG(32, status, ebx)
+    
+    // TODO: wip
+)
+
+/*
+    Code - 0x04
+    Function - WAIT_FOR_EVENT
+
+    Params:
+        * EBX - run loop (const struct gnwRunLoop * const), relative to caller process memory
+*/
+SCR(waitForEvent,
+    REG(32, rlp, ebx)
+
+    extern void k_scr_usr_waitForEvent(addr_t, addr_t);
+    k_que_dispatch_arch_arch(k_scr_usr_waitForEvent, k_proc_getCurrentId(), rlp)
 )
 
 /*
@@ -123,7 +139,7 @@ SCR(devGetById,
 
     REG_RET(32, err)
 
-    enum gnwDeviceError k_scr_usr_devGetById(const size_t, struct gnwDeviceUHADesc * const);
+    extern enum gnwDeviceError k_scr_usr_devGetById(const size_t, struct gnwDeviceUHADesc * const);
     err = k_scr_usr_devGetById((size_t)id, (struct gnwDeviceUHADesc *)desc);
 )
 
@@ -144,7 +160,7 @@ SCR(devGetByType,
 
     REG_RET(32, err)
 
-    enum gnwDeviceError k_scr_usr_devGetByType(const enum gnwDeviceType, struct gnwDeviceUHADesc * const);
+    extern enum gnwDeviceError k_scr_usr_devGetByType(const enum gnwDeviceType, struct gnwDeviceUHADesc * const);
     err = k_scr_usr_devGetByType((enum gnwDeviceType)type, (struct gnwDeviceUHADesc * const)desc);
 )
 
@@ -163,7 +179,7 @@ SCR(devAcquire,
 
     REG_RET(32, err)
 
-    err = k_dev_acquireHold((size_t)k_proc_getCurrentId(), (size_t)devId);
+    err = k_dev_acquireHold((procId_t)k_proc_getCurrentId(), (size_t)devId);
 )
 
 /*
@@ -176,7 +192,7 @@ SCR(devAcquire,
 SCR(devRelease,
     REG(32, devId, ebx)
 
-    k_dev_releaseHold((size_t)k_proc_getCurrentId(), (size_t)devId);
+    k_dev_releaseHold((procId_t)k_proc_getCurrentId(), (size_t)devId);
 )
 
 /*
@@ -196,7 +212,7 @@ SCR(devMemWrite,
 
     REG_RET(32, err)
 
-    enum gnwDeviceError k_scr_usr_devMemWrite(const size_t devId, const void * const buf);
+    extern enum gnwDeviceError k_scr_usr_devMemWrite(const size_t devId, const void * const buf);
     err = k_scr_usr_devMemWrite(devId, (void *)buf);
 )
 
@@ -213,7 +229,6 @@ SCR(fug,
     k_err_fug(code);
 )
 
-
 /*
     Code - 0x0e
     Function - DEV_LISTEN
@@ -221,7 +236,7 @@ SCR(fug,
     Params:
         * EBX - device identifier
         * ECX - listener (const union gnwEventListener)
-        * EDX - run loop (const struct gnwRunLoop * const)
+        * EDX - run loop (const struct gnwRunLoop * const), relative to caller process memory 
     
     Return:
         * EAX - error code (enum gnwDeviceError)
@@ -233,5 +248,5 @@ SCR(devListen,
 
     REG_RET(32, err)
 
-    err = k_dev_listen((const size_t)k_proc_getCurrentId(), (const size_t)devId, (const union gnwEventListener)lsnr, (struct gnwRunLoop *)rlp);
+    err = k_dev_listen((procId_t)k_proc_getCurrentId(), (const size_t)devId, (const union gnwEventListener)lsnr, (struct gnwRunLoop *)rlp);
 )
