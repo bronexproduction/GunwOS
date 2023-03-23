@@ -18,6 +18,7 @@
 
 union dispatchFuncPtr {
     fPtr_void f;
+    fPtr_arch f_arch;
     fPtr_arch_arch f_arch_arch;
 };
 
@@ -31,6 +32,7 @@ union dispatchFuncParam {
 enum dispatchFuncType {
     DFE_NONE = 0,
     DFE_VOID,
+    DFE_ARCH,
     DFE_ARCH_ARCH,
 };
 
@@ -81,6 +83,10 @@ static void dispatch(const ptr_t funcPtr,
     case DFE_VOID:
         queue[i].func.ptr.f = (fPtr_void)funcPtr;
         break;
+    case DFE_ARCH:
+        queue[i].func.ptr.f_arch = (fPtr_arch)funcPtr;
+        queue[i].func.params[0].pArch = p0.pArch;
+        break;
     case DFE_ARCH_ARCH:
         queue[i].func.ptr.f_arch_arch = (fPtr_arch_arch)funcPtr;
         queue[i].func.params[0].pArch = p0.pArch;
@@ -106,6 +112,10 @@ static void dispatch(const ptr_t funcPtr,
 
 void k_que_dispatch(const fPtr_void func) {
     dispatch((ptr_t)func, DFE_VOID, _NOPAR, _NOPAR);
+}
+
+void k_que_dispatch_arch(const fPtr_arch func, const addr_t p0) {
+    dispatch((ptr_t)func, DFE_ARCH, _PAR(p0), _NOPAR);
 }
 
 void k_que_dispatch_arch_arch(const fPtr_arch_arch func, const addr_t p0, const addr_t p1) {
@@ -138,6 +148,9 @@ void k_que_start() {
         switch (enqueued->func.type) {
         case DFE_VOID:
             enqueued->func.ptr.f();
+            break;
+        case DFE_ARCH:
+            enqueued->func.ptr.f_arch(enqueued->func.params[0].pArch);
             break;
         case DFE_ARCH_ARCH:
             enqueued->func.ptr.f_arch_arch(enqueued->func.params[0].pArch, enqueued->func.params[1].pArch);

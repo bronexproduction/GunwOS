@@ -15,11 +15,12 @@
 #include <hal/mem/mem.h>
 #include <timer/timer.h>
 #include <error/panic.h>
+#include <queue/queue.h>
 
 register const uint_32 cur_esp __asm__ ("esp");
 #define STACK_VAL(REFESP, SIZE, OFFSET) (*(uint_ ## SIZE *)(REFESP + OFFSET))
 
-struct process {
+static struct process {
     /*
         Process info
     */
@@ -29,10 +30,8 @@ struct process {
         Process CPU state
     */
     struct k_cpu_state cpuState;
-};
+} kernelProc, pTab[MAX_PROC];
 
-static struct process kernelProc;
-static struct process pTab[MAX_PROC];
 static procId_t procCurrent = KERNEL_PROC_ID;
 
 procId_t k_proc_getCurrentId() {
@@ -132,6 +131,37 @@ void k_proc_lockIfNeeded(const procId_t procId) {
     }
 
     pTab[procId].info.state = PS_BLOCKED;
+    k_proc_schedule_processStateDidChange();
+}
+
+static bool isProcessAlive(const procId_t procId) {
+    return pTab[procId].info.state == PS_READY ||
+           pTab[procId].info.state == PS_RUNNING ||
+           pTab[procId].info.state == PS_BLOCKED;
+}
+
+static void procCleanup(const procId_t procId) {
+    if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
+        OOPS("Process id out of range");
+    }
+    if (isProcessAlive(procId)) {
+        OOPS("Unexpected process state during cleanup");
+    }
+
+    memnull(&pTab[procId], sizeof(struct process));
+    k_mem_procCleanup(procId);
+}
+
+void k_proc_stop(const procId_t procId) {
+    if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
+        OOPS("Process id out of range");
+    }
+    if (!isProcessAlive(procId)) {
+        OOPS("Unexpected process state during stop");
+    }
+    
+    pTab[procId].info.state = PS_FINISHED;
+    k_que_dispatch_arch((fPtr_arch)procCleanup, procId);
     k_proc_schedule_processStateDidChange();
 }
 
@@ -239,7 +269,8 @@ void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const procId_t currentP
     if (currentProcId >= MAX_PROC) {
         OOPS("Current process id over limit during switch");
     }
-    if (pTab[currentProcId].info.state != PS_RUNNING) {
+    if (pTab[currentProcId].info.state != PS_RUNNING &&
+        pTab[currentProcId].info.state != PS_FINISHED) {
         OOPS("Invalid current process state during switch");
     }
     if (kernelProc.info.state != PS_READY) {
@@ -249,65 +280,66 @@ void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const procId_t currentP
         OOPS("Invalid reference stack pointer during switch");
     }
     
-    pTab[currentProcId].info.state = PS_READY;
     kernelProc.info.state = PS_RUNNING;
-
     procCurrent = KERNEL_PROC_ID;
 
-    struct k_cpu_state * const currentCpuState = &pTab[currentProcId].cpuState;
+    if (pTab[currentProcId].info.state == PS_RUNNING) {
+        pTab[currentProcId].info.state = PS_READY;
+        struct k_cpu_state * const currentCpuState = &pTab[currentProcId].cpuState;
         
-    // D       31              0         
-    // I       ╔═══════╦═══════╗◄──┐     
-    // R       ║▒▒▒▒▒▒▒║OLD SS ║   │     
-    // E       ╠═══════╩═══════╣ SS:ESP  
-    // C       ║    OLD ESP    ║ FROM TSS
-    // T       ╠═══════════════╣◄── refEsp + 52    
-    // I       ║  OLD EFLAGS   ║         
-    // O       ╠═══════╦═══════╣◄── refEsp + 48    
-    // N       ║▒▒▒▒▒▒▒║OLD CS ║ 
-    //         ╠═══════╩═══════╣◄── refEsp + 44 
-    // O       ║    OLD EIP    ║        
-    // F       ╠═══════╦═══════╣◄── refEsp + 40
-    //         ║OLD DS ║OLD ES ║
-    // E       ╠═══════╬═══════╣◄── refEsp + 36
-    // X       ║OLD FS ║OLD GS ║
-    // P       ╠═══════╩═══════╣◄── refEsp + 32
-    // A       ║    OLD EAX    ║
-    // N       ╠═══════════════╣◄── refEsp + 28
-    // S       ║    OLD ECX    ║
-    // I       ╠═══════════════╣◄── refEsp + 24
-    // O       ║    OLD EDX    ║
-    // N       ╠═══════════════╣◄── refEsp + 20
-    //         ║    OLD EBX    ║
-    // │       ╠═══════════════╣◄── refEsp + 16
-    // │       ║ ESP (IGNORED) ║
-    // ▼       ╠═══════════════╣◄── refEsp + 12
-    //         ║    OLD EBP    ║
-    //         ╠═══════════════╣◄── refEsp + 8
-    //         ║    OLD ESI    ║ 
-    //         ╠═══════════════╣◄── refEsp + 4   
-    //         ║    OLD EDI    ║   
-    //         ╠═══════════════╣◄── refEsp
-    //         ·               ·
-        
-    // Save current process CPU state
+        // D       31              0         
+        // I       ╔═══════╦═══════╗◄──┐     
+        // R       ║▒▒▒▒▒▒▒║OLD SS ║   │     
+        // E       ╠═══════╩═══════╣ SS:ESP  
+        // C       ║    OLD ESP    ║ FROM TSS
+        // T       ╠═══════════════╣◄── refEsp + 52    
+        // I       ║  OLD EFLAGS   ║         
+        // O       ╠═══════╦═══════╣◄── refEsp + 48    
+        // N       ║▒▒▒▒▒▒▒║OLD CS ║ 
+        //         ╠═══════╩═══════╣◄── refEsp + 44 
+        // O       ║    OLD EIP    ║        
+        // F       ╠═══════╦═══════╣◄── refEsp + 40
+        //         ║OLD DS ║OLD ES ║
+        // E       ╠═══════╬═══════╣◄── refEsp + 36
+        // X       ║OLD FS ║OLD GS ║
+        // P       ╠═══════╩═══════╣◄── refEsp + 32
+        // A       ║    OLD EAX    ║
+        // N       ╠═══════════════╣◄── refEsp + 28
+        // S       ║    OLD ECX    ║
+        // I       ╠═══════════════╣◄── refEsp + 24
+        // O       ║    OLD EDX    ║
+        // N       ╠═══════════════╣◄── refEsp + 20
+        //         ║    OLD EBX    ║
+        // │       ╠═══════════════╣◄── refEsp + 16
+        // │       ║ ESP (IGNORED) ║
+        // ▼       ╠═══════════════╣◄── refEsp + 12
+        //         ║    OLD EBP    ║
+        //         ╠═══════════════╣◄── refEsp + 8
+        //         ║    OLD ESI    ║ 
+        //         ╠═══════════════╣◄── refEsp + 4   
+        //         ║    OLD EDI    ║   
+        //         ╠═══════════════╣◄── refEsp
+        //         ·               ·
 
-    currentCpuState->edi    = STACK_VAL(refEsp, 32, 0);
-    currentCpuState->esi    = STACK_VAL(refEsp, 32, 4);
-    currentCpuState->ebp    = STACK_VAL(refEsp, 32, 8);
-    currentCpuState->ebx    = STACK_VAL(refEsp, 32, 16);
-    currentCpuState->edx    = STACK_VAL(refEsp, 32, 20);
-    currentCpuState->ecx    = STACK_VAL(refEsp, 32, 24);
-    currentCpuState->eax    = STACK_VAL(refEsp, 32, 28);
-    currentCpuState->gs     = STACK_VAL(refEsp, 16, 32);
-    currentCpuState->fs     = STACK_VAL(refEsp, 16, 34);
-    currentCpuState->es     = STACK_VAL(refEsp, 16, 36);
-    currentCpuState->ds     = STACK_VAL(refEsp, 16, 38);
-    currentCpuState->eip    = STACK_VAL(refEsp, 32, 40);
-    currentCpuState->cs     = STACK_VAL(refEsp, 16, 44);
-    currentCpuState->eflags = STACK_VAL(refEsp, 32, 48);
-    currentCpuState->esp    = STACK_VAL(refEsp, 32, 52);
-    currentCpuState->ss     = STACK_VAL(refEsp, 16, 56);
+        // Save current process CPU state
+
+        currentCpuState->edi    = STACK_VAL(refEsp, 32, 0);
+        currentCpuState->esi    = STACK_VAL(refEsp, 32, 4);
+        currentCpuState->ebp    = STACK_VAL(refEsp, 32, 8);
+        currentCpuState->ebx    = STACK_VAL(refEsp, 32, 16);
+        currentCpuState->edx    = STACK_VAL(refEsp, 32, 20);
+        currentCpuState->ecx    = STACK_VAL(refEsp, 32, 24);
+        currentCpuState->eax    = STACK_VAL(refEsp, 32, 28);
+        currentCpuState->gs     = STACK_VAL(refEsp, 16, 32);
+        currentCpuState->fs     = STACK_VAL(refEsp, 16, 34);
+        currentCpuState->es     = STACK_VAL(refEsp, 16, 36);
+        currentCpuState->ds     = STACK_VAL(refEsp, 16, 38);
+        currentCpuState->eip    = STACK_VAL(refEsp, 32, 40);
+        currentCpuState->cs     = STACK_VAL(refEsp, 16, 44);
+        currentCpuState->eflags = STACK_VAL(refEsp, 32, 48);
+        currentCpuState->esp    = STACK_VAL(refEsp, 32, 52);
+        currentCpuState->ss     = STACK_VAL(refEsp, 16, 56);
+    }
 
     // Restore kernel CPU state
 
@@ -329,12 +361,6 @@ void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const procId_t currentP
     STACK_VAL(refEsp, 16, 56) = kernelProc.cpuState.ss;
 }
 
-static bool isProcessAlive(const procId_t procId) {
-    return pTab[procId].info.state == PS_READY ||
-           pTab[procId].info.state == PS_RUNNING ||
-           pTab[procId].info.state == PS_BLOCKED;
-}
-
 static enum k_proc_error callbackInvoke(const procId_t procId, 
                                         const struct gnwRunLoop * const runLoop,
                                         const enum gnwEventFormat format, 
@@ -343,6 +369,9 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
                                         const int_32 p1) {
     if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
         OOPS("Process id out of range");
+    }
+    if (pTab[procId].info.state == PS_FINISHED) {
+        return PE_IGNORED;
     }
     if (!isProcessAlive(procId)) {
         OOPS("Attempted callback invocation in dead process");

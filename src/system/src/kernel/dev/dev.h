@@ -37,4 +37,6 @@ enum gnwDeviceError k_dev_emit_void(const int_32 type);
 enum gnwDeviceError k_dev_emit_u8(const int_32 type,
                                   const int_8 data);
 
+void k_dev_procCleanup(const procId_t procId);
+
 #endif // DEV_H

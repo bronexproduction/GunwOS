@@ -42,7 +42,7 @@ SYSCALL_DECL enum gnwCtrlError start(const char * const path) {
 /*
     Ends process execution
 */
-SYSCALL_DECL void exit(uint_32 const status) {
+SYSCALL_DECL void exit(const int_32 status) {
     SYSCALL_PAR1(status);
 
     SYSCALL_USER_FUNC(EXIT);

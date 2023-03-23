@@ -67,3 +67,7 @@ bool k_mem_bufInZoneForProc(const procId_t procId, const ptr_t absPtr, const siz
 
     return true;
 }
+
+void k_mem_procCleanup(const procId_t procId) {
+    #warning NOTHING TO BE DONE YET
+}
