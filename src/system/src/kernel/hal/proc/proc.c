@@ -329,7 +329,7 @@ void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const procId_t currentP
     STACK_VAL(refEsp, 16, 56) = kernelProc.cpuState.ss;
 }
 
-static bool processAlive(const procId_t procId) {
+static bool isProcessAlive(const procId_t procId) {
     return pTab[procId].info.state == PS_READY ||
            pTab[procId].info.state == PS_RUNNING ||
            pTab[procId].info.state == PS_BLOCKED;
@@ -344,7 +344,7 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
     if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
         OOPS("Process id out of range");
     }
-    if (!processAlive(procId)) {
+    if (!isProcessAlive(procId)) {
         OOPS("Attempted callback invocation in dead process");
     }
     struct gnwRunLoop * const absRunLoopPtr = (struct gnwRunLoop *)k_mem_absForProc(procId, (ptr_t)runLoop);
