@@ -195,7 +195,7 @@ static void s_cli_init() {
     prompt();
 }
 
-void _start() {
+void dupa() {
     s_cli_init();
 
     runLoopStart();

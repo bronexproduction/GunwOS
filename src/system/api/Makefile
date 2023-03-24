@@ -1,24 +1,45 @@
 CFLAGS=-std=c11 -c -ffreestanding -mno-red-zone -ggdb -I $(STDGUNW_INCLUDE_DIR) -I $(API_INCLUDE_DIR) $(CFLAGS_GLOBAL)
 CXXFLAGS=-std=c++11 -c -ffreestanding -mno-red-zone -ggdb $(CXXFLAGS_GLOBAL)
 RSFLAGS=$(RSFLAGS_GLOBAL)
+
+CFLAGS_APP=$(CFLAGS)
+CXXFLAGS_APP=$(CXXFLAGS)
+RSFLAGS_APP=$(RSFLAGS)
+
+CFLAGS_KERNEL=$(CFLAGS) -D_GUNWAPI_KERNEL
+CXXFLAGS_KERNEL=$(CXXFLAGS) -D_GUNWAPI_KERNEL
+RSFLAGS_KERNEL=$(RSFLAGS)
+
 LFLAGS=-m$(L_OUTFORMAT) -i
 
-O_DIR_LISTING=find . -name '*.o' -type f
+O_APP_DIR_LISTING=find . -name '*_app.o' -type f
+O_KERNEL_DIR_LISTING=find . -name '*_kernel.o' -type f
 EXEC_TERMINATOR=\;
 
 TARGET_O=gunwapi
 
-.PHONY: all
+.PHONY: all app kernel
 
-all: $(TARGET_O).o clean_o
+all: app kernel clean_o
 
-$(TARGET_O).o: build_o
-	$(L) $(LFLAGS) -o $@ $(shell $(O_DIR_LISTING))
+app: $(TARGET_O)_app.o
+kernel: $(TARGET_O)_kernel.o
+
+$(TARGET_O)_app.o: build_app_o
+	$(L) $(LFLAGS) -o $@ $(shell $(O_APP_DIR_LISTING))
 	
-build_o:
-	$(C_DIR_LISTING) -exec $(C) $(CFLAGS) -o {}.o {} $(EXEC_TERMINATOR)
-	$(CXX_DIR_LISTING) -exec $(CXX) $(CXXFLAGS) -o {}.o {} $(EXEC_TERMINATOR)
-	$(RS_DIR_LISTING) -exec $(RUSTC) $(RSFLAGS) -o {}.o {} $(EXEC_TERMINATOR)
+$(TARGET_O)_kernel.o: build_kernel_o
+	$(L) $(LFLAGS) -o $@ $(shell $(O_KERNEL_DIR_LISTING))
+
+build_app_o:
+	$(C_DIR_LISTING) -exec $(C) $(CFLAGS_APP) -o {}_app.o {} $(EXEC_TERMINATOR)
+	$(CXX_DIR_LISTING) -exec $(CXX) $(CXXFLAGS_APP) -o {}_app.o {} $(EXEC_TERMINATOR)
+	$(RS_DIR_LISTING) -exec $(RUSTC) $(RSFLAGS_APP) -o {}_app.o {} $(EXEC_TERMINATOR)
+
+build_kernel_o:
+	$(C_DIR_LISTING) -exec $(C) $(CFLAGS_KERNEL) -o {}_kernel.o {} $(EXEC_TERMINATOR)
+	$(CXX_DIR_LISTING) -exec $(CXX) $(CXXFLAGS_KERNEL) -o {}_kernel.o {} $(EXEC_TERMINATOR)
+	$(RS_DIR_LISTING) -exec $(RUSTC) $(RSFLAGS_KERNEL) -o {}_kernel.o {} $(EXEC_TERMINATOR)
 
 clean_o:
-	find . -type f -name '*.o' ! -name '$(TARGET_O).o' -delete
+	find . -type f -name '*.o' ! -name '$(TARGET_O)_app.o' -delete ! -name '$(TARGET_O)_kernel.o' -delete
