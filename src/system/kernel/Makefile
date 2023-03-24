@@ -5,7 +5,7 @@ KERNEL_INCLUDE=-I $(STDGUNW_INCLUDE_DIR) \
 			   -I "$(LIB_SRC_DIR)/gunwelf"
 
 KERNEL_LIBS=$(LIB_BUILD_DIR)/stdgunw.o \
-			$(LIB_BUILD_DIR)/gunwapi.o \
+			$(LIB_BUILD_DIR)/gunwapi_kernel.o \
 			$(LIB_BUILD_DIR)/gunwelf.o
 
 ASMFLAGS=-f elf

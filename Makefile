@@ -33,8 +33,8 @@ SRC_DIR="$(PWD)/src"
 export LIB_SRC_DIR="$(SRC_DIR)/lib"
 SYSTEM_SRC_DIR="$(SRC_DIR)/system"
 export API_SRC_DIR="$(SYSTEM_SRC_DIR)/api"
-KERNEL_SRC_DIR="$(SYSTEM_SRC_DIR)/src/kernel"
-APPS_SRC_DIR="$(SYSTEM_SRC_DIR)/src/user"
+KERNEL_SRC_DIR="$(SYSTEM_SRC_DIR)/kernel"
+APPS_SRC_DIR="$(SYSTEM_SRC_DIR)/user"
 TESTS_SRC_DIR="$(PWD)/tests/modules"
 export SCRIPTS_DIR="$(PWD)/scripts"
 export TEST_FRAMEWORK_DIR="$(PWD)/tests/framework"
@@ -55,7 +55,6 @@ export APP_BUILD_DIR="$(BUILD_DIR)/app"
 # Base library paths
 
 export STDGUNW_LIB="$(LIB_BUILD_DIR)/stdgunw.o"
-export API_LIB="$(LIB_BUILD_DIR)/gunwapi.o"
 
 # Build flags
 
@@ -95,7 +94,7 @@ kernel.gfb: kernel.elf
 # TO BE IMPROVED - no fixed offset, removing debug data
 	dd if="$(KERNEL_BUILD_DIR)/kernel.elf" of="$(KERNEL_BUILD_DIR)/$@" bs=4096 skip=1
 
-kernel.elf: libs gunwapi.o
+kernel.elf: libs gunwapi_kernel.o
 	make -C $(KERNEL_SRC_DIR)
 	mv $(KERNEL_SRC_DIR)/$@ $(KERNEL_BUILD_DIR)/$@
 
@@ -103,11 +102,15 @@ libs:
 	make -C $(SRC_DIR)/lib
 	mv $(SRC_DIR)/lib/*.o $(LIB_BUILD_DIR)/
 	
-gunwapi.o:
-	make -C $(API_SRC_DIR)
+gunwapi_kernel.o:
+	make -C $(API_SRC_DIR) kernel
+	mv $(API_SRC_DIR)/$@ $(LIB_BUILD_DIR)/$@
+	
+gunwapi_app.o:
+	make -C $(API_SRC_DIR) app
 	mv $(API_SRC_DIR)/$@ $(LIB_BUILD_DIR)/$@
 
-app_pack:
+app_pack: gunwapi_app.o
 	make -C $(APPS_SRC_DIR)
 	mv $(APPS_SRC_DIR)/*.elf $(APP_BUILD_DIR)/
 
