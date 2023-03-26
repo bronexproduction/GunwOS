@@ -1,5 +1,5 @@
 //
-//  types.h
+//  fdctypes.h
 //  GunwOS
 //
 //  Created by Artur Danielewski on 04.04.2020.
@@ -8,9 +8,8 @@
 #ifndef FDC_TYPES_H
 #define FDC_TYPES_H
 
-#include "../../storage.h"
-#include "../../../../../../lib/stdgunw/types.h"
-#include "../../../../../include/gunwstor.h"
+#include <types.h>
+#include <gunwstor.h>
 
 enum fdc_bus_regOffset {
     #warning verify pin names
@@ -1204,7 +1203,7 @@ struct fdc_fddConfig {
     Status of performing specific command/procedure
     including errors and success 
 */
-enum k_fdc_opStatus {
+enum fdc_opStatus {
     OPSTATUS_NOT_READY      = -1,
     OPSTATUS_INVPARAM       = -2,
     OPSTATUS_INVCMD         = -3,

@@ -96,12 +96,6 @@ enum k_fdc_opStatus fdc_cmd_configure(const uint_16 base,
     return OPSTATUS_OK;
 }
 
-enum k_fdc_opStatus fdc_cmd_version(const uint_16 base) {
-    TRY(pushData(base, 0x10))
-    
-    return OPSTATUS_OK;
-}
-
 enum k_fdc_opStatus fdc_cmd_dumpreg(const uint_16 base) {
     TRY(pushData(base, 0x0E))
     

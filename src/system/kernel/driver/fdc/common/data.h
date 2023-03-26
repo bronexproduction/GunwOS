@@ -1,17 +1,20 @@
 //
-//  data.c
+//  data.h
 //  GunwOS
 //
-//  Created by Artur Danielewski on 04.04.2020.
+//  Created by Artur Danielewski on 26.03.2023.
 //
 
+#ifndef DATA_H
+#define DATA_H
+
+#include "fdctypes.h"
 #include "defaults.h"
-#include "types.h"
 
 /*
     Floppy controller base bus address
 */
-uint_16 fdc_busBase = 0x3F0;
+#define FDC_BUS_BASE 0x3F0
 
 /*
     Mark controller as present
@@ -19,22 +22,24 @@ uint_16 fdc_busBase = 0x3F0;
     1 - detected
     0 - not detected
 */
-uint_8 fdc_present;
+extern bool present;
 
 /*
     Mask of detected drives
 */
-uint_8 fdc_drives;
+extern uint_8 driveCount;
 
 /*
 
     Performance configuration per FDD
 */
-struct fdc_fddPerf fdc_perf[FDC_FDD_SUPPORT_COUNT];
+extern struct fdc_fddPerf perf[FDC_FDD_SUPPORT_COUNT];
 
 /*
     IRQ reception mark
 
     The generation of INT determines the beginning of the result phase
 */
-volatile uint_8 fdc_irqRecv = 0;
+extern volatile bool irqRecv;
+
+#endif // DATA_H

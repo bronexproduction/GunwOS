@@ -198,7 +198,7 @@ size_t s_stormgr_drvRead(const uint_32 driveID,
 
     if (!drive.format.sectSize) {
         if (error) {
-            error->code = INVALID_FORMAT;
+            error->code = GSEC_INVALID_FORMAT;
             error->internalCode = 0;
         }
         return 0;

@@ -17,34 +17,6 @@
 
 static enum k_fdc_opStatus specify(const struct fdc_fddConfig config);
 
-void fdc_proc_error(const uint_16 base, enum k_fdc_opStatus s, const char * const reason) {
-    #warning not implemented
-    s_trm_puts(reason);
-    s_trm_putc('\n');
-}
-
-enum k_fdc_opStatus fdc_proc_fdcDetect(const uint_16 base, const uint_8 drive, uint_8 * const present) {
-    if (!present) return OPSTATUS_INVPARAM;
-    if (drive >= FDC_FDD_SUPPORT_COUNT) return OPSTATUS_INVPARAM;
-    
-    enum k_fdc_opStatus s;
-    s = fdc_proc_recalibrate(base, drive);
-    if (s == OPSTATUS_NOT_READY) {
-        return OPSTATUS_NOT_READY;
-    }
-    else if (s == OPSTATUS_INVDRIVE) {
-        *present = 0;
-    }
-    else if (s == OPSTATUS_OK) {
-        *present = 1;
-    }
-    else {
-        *present = 0;
-    }
-
-    return OPSTATUS_OK;
-}
-
 enum k_fdc_opStatus fdc_proc_recalibrate(const uint_16 base, const uint_8 drive) {
     
     enum k_fdc_opStatus s = fdc_proc_startMotor(base, drive);
@@ -115,19 +87,6 @@ enum k_fdc_opStatus fdc_proc_senseInterruptStatus(const uint_16 base, uint_8 * c
     if (s != OPSTATUS_OK) {
         return s;
     }
-}
-
-enum k_fdc_opStatus fdc_proc_prepare(const struct fdc_fddConfig config) {
-    enum k_fdc_opStatus s = fdc_proc_startMotor(config.base, config.drive);
-    if (s != OPSTATUS_OK) return s;
-
-    s = specify(config);
-    if (s != OPSTATUS_OK) {
-        fdc_proc_stopMotor(config.base, config.drive);
-        return s;
-    }
-
-    return OPSTATUS_OK;
 }
 
 static enum k_fdc_opStatus specify(const struct fdc_fddConfig config) {

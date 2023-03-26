@@ -103,15 +103,6 @@ uint_8 fdc_inNonDMAExecutionPhase(const uint_16 base) {
     return IS_SET(BIT_MSR_NDMA, msr);
 }
 
-/*
-    Indicates data being ready to read from FIFO in non-DMA mode
-*/
-uint_8 fdc_readyForNonDMARead(const uint_16 base) {
-    uint_8 msr = rdb(base + REG_MSR);
-    
-    return IS_SET(BIT_MSR_RQM, msr) && IS_SET(BIT_MSR_DIO, msr) && IS_SET(BIT_MSR_NDMA, msr);
-}
-
 static uint_8 inCommandPhase(const uint_16 base) {
     uint_8 msr = rdb(base + REG_MSR);
 

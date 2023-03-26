@@ -5,6 +5,9 @@
 //  Created by Artur Danielewski on 04.04.2020.
 //
 
+#ifndef DEFAULTS_H
+#define DEFAULTS_H
+
 /*
     Each FDC can support up to 4 drives
 */
@@ -122,3 +125,5 @@
     Default pre-compensation value
 */
 #define FDC_PRECOMP_DEFAULT 0
+
+#endif // DEFAULTS_H

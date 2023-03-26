@@ -62,4 +62,10 @@ void k_drv_loadMinimal() {
     // */
     // extern struct gnwDeviceDescriptor k_drv_terminal_descriptor();
     // loadSingle(k_drv_terminal_descriptor, MSGS_FAIL(Terminal));
+    
+    /*
+        82077AA Floppy disk controller
+    */
+    extern struct gnwDeviceDescriptor k_drv_fdc_descriptor();
+    loadSingle(k_drv_fdc_descriptor, MSGS_FAIL(Floppy disk controller));
 }
