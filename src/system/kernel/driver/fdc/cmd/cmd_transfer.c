@@ -31,12 +31,11 @@ enum fdc_opStatus cmd_read(const uint_16 base,
     if (drive > 0x03) {
         return OPSTATUS_INVPARAM;
     }
-    extern int s_trm_puts(const char * const s);
     TRY(pushData(base, (mode |
                        ((mode != RM_TRACK) ? (mt & BIT_MT) : 0x00) |
                        (mfm & BIT_MFM) |
                        ((mode != RM_TRACK) ? (sk & BIT_SK) : 0x00))));
-    TRY(pushData(base, (h & BIT_HDS |
+    TRY(pushData(base, ((h & BIT_HDS) |
                        ALIGNED(drive, RANGE_DS))));
     TRY(pushData(base, ALIGNED(c, RANGE_C)));
     TRY(pushData(base, ALIGNED(h, RANGE_H)));

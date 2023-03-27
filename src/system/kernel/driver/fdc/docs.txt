@@ -1,46 +1,15 @@
-//
-//  reset.c
-//  GunwOS
-//
-//  Created by Artur Danielewski on 25.03.2020.
-//  
-//  Docs:
-//  * Intel 82077AA Datasheet
-//  * https://wiki.osdev.org/Floppy_Disk_Controller
-//
 
 
-#include "../shared/defaults.h"
-#include "../shared/strings.h"
-#include "../cmd/cmd.h"
-#include "../proc/proc.h"
-#include "../shared/io.h"
-#include "../../../driver.h"
 
-static uint_8 inPollingMode(const uint_16 base);
-
-
-static uint_8 inPollingMode(const uint_16 base) {
-    uint_8 sr0, pcn;
-    fdc_proc_senseInterruptStatus(base, &sr0, &pcn);
-
-    if ((sr0 & RANGE_SR0_IC) == RANGE_SR0_IC) {
-        return 1;
-    }
-
-    return 0;
-}
-
-/*
 Configure
 
 If you enable implied seeks, then you don't have to send Seek commands (or Sense Interrupt commands for the Seek commands).
 If you leave the FIFO disabled, then it cannot buffer data -- you will get an IRQ6 or DMA request for every single byte (which needs to be serviced quickly, because the very next byte will automatically cause an overflow/underflow and error out your transfer!).
 A big "threshold" such as 15 will wait 15 bytes between interrupts. So there won't be many interrupts, but you only have one byte left in the FIFO before it overflows/underflows and kills the r/w operation. thresh_val = threshold - 1.
 Write precompensation is a technical thing having to do with drive head magnetics. A precomp_val of 0 tells the controller/drive to use the manufacturer default value. Use that unless you have a very good reason for setting another value.
-*/
 
-/*
+
+
 Lock
 Under default circumstances, every Controller Reset will disable the fifo, and set the fifo threshold to 1 (thresh_val = 0). If you change these settings with the Configure command and don't want to have to fix them after every Controller Reset, then you can send a Lock command with the lock bit turned on. You can "unset" the lock, by sending another Lock command with the lock bit turned off. Use the MT option bit as the lock bit.
 
@@ -49,9 +18,9 @@ or Unlock command = 0x14
 No parameter bytes.
 No interrupt.
 First result byte = lock bit << 4
-*/
 
-/*
+
+
 Specify
 This command puts information in the controller about the next disk drive to be accessed.
 
@@ -81,9 +50,9 @@ A reasonable value for this is around 10ms. A very safe amount would be 30ms. To
 
 HUT = "Head Unload Time" = time the controller should wait before deactivating the head. To calculate the value for the HUT setting
 from a given time, use "HUT_value = milliseconds * data_rate / 8000000". For a 1.44 MB floppy and a 240 mS delay this gives "HUT_value = 24 * 500000 / 8000000" or 15. However, it seems likely that the smartest thing to do is just to set the value to 0 (which is the maximum in any mode).
-*/
 
-/*
+
+
 Sense Interrupt
 This command's main function is to return any error code from a Seek or Recalibrate command to your driver. It also clears an internal bitflag in the controller. It is required in three circumstances that produce interrupts.
 
@@ -99,9 +68,9 @@ First result byte = sr0
 Second result byte = controller's idea of the current cylinder
 Note: if you try to read the result bytes without waiting for RQM to set, then you are likely to always get an incorrect result value of 0. This is also likely to get your driver out of sync with the FDC for input/output. The correct value of sr0 after a reset should be 0xC0 | drive number (drive number = 0 to 3). After a Recalibrate/Seek it should be 0x20 | drive number.
 
-*/
 
-/*
+
+
 Recalibrate
 Note: There is an error in the FDC datasheet regarding this command. Some statements say the command will try a maximum of 80 head assembly steps. In other places it says 79 steps. The value 79 is correct.
 
@@ -114,9 +83,9 @@ First parameter byte = drive number = 0 to 3.
 No result bytes.
 The interrupt may take up to 3 seconds to arrive, so use a long timeout.
 It is possible to poll the "disk active" bits in the MSR to find out when the head movement is finished. A Sense Interrupt command is required after this command completes, to clear it from being BUSY. (Multiple Sense Interrupts, if you ran multiple simultaneous Recalibrates.)
-*/
 
-/*
+
+
 Seek
 The motor needs to be on, and the drive needs to be selected. For this particular command, you do not have to wait for the command to complete before selecting a different drive, and sending another Seek command to it. Maximum cylinder number is 255; if the disk has more, you must use the Relative Seek command, instead. There is really no reason to ever use head 1 when seeking.
 
@@ -135,9 +104,9 @@ Relative seek
 The normal Seek command allows you to select an absolute cylinder number from 0 to 255. It is also possible to use a "relative" seek command in all situations, and especially for drives that have more than 255 cylinders (there are none, currently).
 
 To use a relative seek, set the MT bit to 1. To seek to higher cylinder numbers set the MFM bit -- clear MFM to seek backwards to lower cylinder numbers. If you seek past cylinder 255, there are a lot of extra complications. Otherwise, the command behaves identically to regular Seek.
-*/
 
-/*
+
+
 Read/Write
 Note: Remember that this is in CHS format, so the sector number starts at 1.
 
@@ -163,9 +132,9 @@ Note: if you try to read the result bytes without waiting for RQM to set, then y
 Note2: You'll see that there's no sector count parameter. Instead, the FDC figures out when to stop by the DMA signaling to the FDC that it's done, or in PIO mode, by the FDC experiencing a FIFO overrun or underrun.
 
 Note3: Floppy media and electronics are well known for being unreliable. Any read or write command that fails should be retried at least twice, unless it was a write and failed on "write protect".
-*/
 
-/*
+
+
 
 PIO Data Transfers
 PIO data transfers can either be done using polling or interrupts. Using PIO mode can transfer data 10 percent faster than a DMA transfer, but there is an immense cost in CPU cycle requirements. However, if your OS or application is single-tasking, then there is nothing else that the CPU cycles can be used for anyway, so you may as well use PIO mode.
@@ -175,40 +144,40 @@ In general, the controller has a 16 byte buffer, and wants to send an IRQ6 whene
 If you are using PIO mode in a singletasking environment then the IRQ6s just waste CPU cycles, and you should be using polling instead. You can usually shut the IRQs off by setting bit 3 (value = 8) of the Digital Output Register (see below). If you want, you can even toggle that bit on and off for specific commands, so that you receive some types of interrupts but not others.
 
 To do PIO data transfers: init/reset the controller if needed (see below), select the drive if needed (see below), seek to the correct cylinder, issue a sense interrupt command, then issue the standard read/write commands. After you send the command, either poll the RQM bit in the Main Status Register to determine when the controller wants to have data moved in/out of the FIFO buffer -- or wait for an IRQ6 to do the same thing. When the transfer is complete, read the "result" bytes to see if there were any errors. See below for more detail.
-*/
 
-/*
+
+
 There are 3 "Modes"
 There were several generations of floppy controller chips on several generations of 80286 (and prior) computers, before the 82077AA chip existed. The 82077AA was built to emulate all of them, by setting various pins on the chip to 5 volts. The three modes are: PC-AT mode, PS/2 mode, and Model 30 mode. The most likely mode you will see on any hardware that still runs is Model 30 mode. You may find some pre-1996 Pentium machines using PS/2 mode. Sadly, most emulator programs run in PS/2 mode! In the documentation, you can ignore PC-AT mode. Or you can try to handle all three, by only using registers and commands that are identical in all 3 modes.
-*/
 
-/*
+
+
 Most Commands Run "Silently"
 There are only a few commands/conditions that produce interrupts: a reset (in polling mode only), Seek, Recalibrate, or one of the read/write/verify/format commands. Several commands do not produce any result bytes, either. If you want to verify that a silent command actually worked, just about the only thing you can do is use the Dumpreg command to check the current state of the controller.
-*/
 
-/*
+
+
 Timing Issues
 On real hardware, there are definite timing issues. Seek delays and motor delays are just what any programmer would expect. It would be nice if the drive would send an IRQ when the motor was up to speed, but it does not. Two things that you may not expect are that quite new hardware probably still needs artificial delays between outputting "command/parameter" bytes, and that you probably also need artificial delays between inputting "result" bytes. There is a bit in the MSR to test in order to know when the next byte can be sent/retrieved. It is not a good idea to simply hardcode specific delays between output/input bytes. Looping 20 times, and testing the value of the RQM bit in the MSR each time, should always be a sufficient "timeout".
 
 However, using IO Port reads to generate delays (or polling MSR) leads to poor performance in a multitasking environment, and you may want to put the driver to sleep for the shortest possible period (microsleep), instead.
-*/
 
-/*
+
+
 Reliability
 In real hardware, floppy drives are extremely unreliable. On emulators, it doesn't matter -- but for code that is intended for real hardware, make sure to retry every command at least twice more after any error.
-*/
 
 
-/*
+
+
     Since polling is enabled after a reset of the 82077AA,
     four SENSE INTERRUPT STATUS commands need to be issued afterwards
     to clear the status flags for each drive
 
     Perform ONLY if drive polling is enabled
-*/
 
-/*
+
+
 Registers
 The floppy controller is programmed through 9 registers, which can be accessed through IO ports 0x3F0 through 0x3F7 (excluding 0x3F6). As usual on the PC architecture, some of those IO ports access different controller registers depending on whether you read from or write to them. Note that code snippets and datasheets name these registers based on their trigrams (e.g. SRA, MSR, DIR, CCR, etc.). Use standard "outb" and "inb" commands to access the registers.
 
@@ -217,23 +186,23 @@ All commands, parameter information, result codes, and disk data transfers go th
 Note: IO port 0x3F6 is the ATA (hard disk) Alternate Status register, and is not used by any floppy controller.
 
 As said above, the most common controller chip has 3 modes, and many bitflags in the registers are different (or opposite!) depending on the mode. However, all of the important registers and bitflags remain the same between modes. They are the following:
-*/
 
-/*
+
+
 FIFO and Tape Drive Registers
 FIFO: The FIFO register may not have a 16byte buffer in all modes, but this is a minor difference that does not really affect its operation.
 
 TDR: The Tape Drive Register is identical in all modes, but it is useless (you will never find functional equipment that requires it).
-*/
 
-/*
+
+
  FIFO and Tape Drive Registers
 FIFO: The FIFO register may not have a 16byte buffer in all modes, but this is a minor difference that does not really affect its operation.
 
 TDR: The Tape Drive Register is identical in all modes, but it is useless (you will never find functional equipment that requires it).
-*/
 
-/*
+
+
 DOR bitflag definitions
 Mnemonic	bit number	value	meaning/usage
 MOTD	7	0x80	Set to turn drive 3's motor ON
@@ -248,9 +217,9 @@ Note: the IRQ/DMA enable bit (bit 3, value = 8) cannot be cleared in "PS/2 mode"
 Note2: if you want to execute a command that accesses a disk (see the command list below), then that respective disk must have its motor spinning (and up to speed), and its "select" bits must be set in the DOR, first.
 
 Note3: toggling DOR reset state requires a 4 microsecond delay. It may be smarter to use DSR reset mode, because the hardware "untoggles" reset mode automatically after the proper delay.
-*/
 
-/*
+
+
 MSR bitflag definitions
 Mnemonic	bit number	value	meaning/usage
 RQM	7	0x80	Set if it's OK (or mandatory) to exchange bytes with the FIFO IO port
@@ -262,9 +231,9 @@ ACTC	2	4	Drive 2 is seeking
 ACTB	1	2	Drive 1 is seeking
 ACTA	0	1	Drive 0 is seeking
 The two important bits are RQM and DIO. NDMA and BUSY are also useful in polling PIO mode. Most important is RQM, which is set when it is OK (or necessary!) to read/write data from/to the FIFO port. NDMA signals the end of the "execution phase" of a command, and the beginning of "result phase". DIO and BUSY should be checked to verify proper command termination (the end of "result phase" and beginning of "command phase").
-*/
 
-/*
+
+
     CCR and DSR
 The bottom 2 bits of DSR match CCR, and setting one of them sets the other. The upper 6 bits on both DSR and CCR default to 0, and can always be set to zero safely. So, even though they have different bit definitions, you always set them with identical values, and one or the other of DSR and CCR can be ignored in any modern system. Alternately, you can always set both of them, for maximum compatibility with ancient chipsets.
 
@@ -280,9 +249,9 @@ Datarate   value   Drive Type
 1Mbps        3       2.88M
 500Kbps      0       1.44M, 1.2M
 Note: There is also a 300Kbps (value = 1), and a 250Kbps setting (value = 2) but they are only for utterly obsolete drives/media.
-*/
 
-/*
+
+
 DIR register, Disk Change bit
 This bit (bit 7, value = 0x80) is fairly useful. It gets set if the floppy door was opened/closed. Sadly, almost all the emulator programs set and clear this bit completely inappropriately (especially after a reset). Do not trust your handling of this bit until you have tested the functionality on real hardware.
 
@@ -295,9 +264,9 @@ Basically, you want to keep a flag for whether there is media in each drive. If 
 Once the Disk Change bit signals "true" (and you have processed that "event"), you need to try to clear the bit. The main way to clear the bit is with a successful Seek/Recalibrate to a new cylinder on the media. (A reset does not work. If the controller thinks the heads are already on the correct cylinder, it will eat a Seek command without clearing the Disk Change bit. If the heads are already on cylinder 0, a Recalibrate is also a no-op.) If the seek fails, you can be fairly certain that there is no media in the drive anymore. It is important to note that this means you should check the value of Disk Change just prior to every Seek command that you do, because otherwise you will lose any Disk Change information. This is also true for implied seeks, and relative seeks.
 
 Apparently a small number of floppy drives also support one additional way to clear the bit -- something that Linux calls a "twaddle". Simply toggle the drive motor bit on, off, and then on again. When your driver tries to clear the Disk Change bit the first time, it can try a twaddle, and see if it works, and keep a flag if it does.
-*/
 
-/*
+
+
 Programming Details
 Overall, the controller needs to be initialized and reset once (see below for the steps involved). Then drives can be accessed. To access drives:
 
@@ -309,9 +278,9 @@ Get an IRQ6 at the end of the execution phase, but only if the command HAS an ex
 Read any "result bytes" produced by the command (the "result phase"), on the FIFO IO port.
 The commands "Recalibrate", "Seek", and "Seek Relative" do not have a result phase, and require an additional "Sense Interrupt" command to be sent.
 And then you are ready for the next command. See below for more detail on how to issue a command.
-*/
 
-/*
+
+
 Motor Delays
 Note: the Linux floppy driver sourcecode has a comment that claims that turning on the MOTC or MOTD bits in the DOR can completely lock up some systems. This claim seems unlikely?
 
@@ -326,45 +295,45 @@ The suggested delays when turning the motor on are:
 These values should be more than enough for any floppy drive to spin up correctly. 50ms should be sufficient, in fact.
 
 Another functional method is not delaying or waiting at all, but just enter a loop and keep retrying any command until it works. A 3.5 inch disk rotates once every 200ms, so each retry is effectively a delay.
-*/
 
-/*
+
+
 Gap Lengths
 There are two different gap lengths that are controlled by software for specifying the amount of blank space between sectors. The gap lengths are used by the floppy hardware to help find the "start of sector" markers, and to avoid problems caused by speed variations in different floppy drives (for e.g. writing a sector on a slower drive would cause the sector to take up more physical space on the disk, potentially overwriting the next sector). The first gap length (typically called "GPL1") is used when reading or writing data, and sets the length of the gap between sectors that the floppy should expect (but doesn't change this gap). The second (typically called "GPL2") is the gap length for the "format track" command, which specifies the amount of space between sectors to use. The actual gap lengths depend on many factors, but GPL1 is always a bit less than GPL2 so that the floppy hardware starts expecting the next sector near the end of the blank space.
 
 Standard values for these gap lengths can be found in the floppy controller datasheets. However, it is possible to squeeze more sectors on each track by reducing the gap length. For example, by using a gap length of 0x1C when formatting (and 0x0C when reading/writing) instead of 0x54 (and 0x1B when reading/writing) it's possible to format a normal 1440 KB floppy disk with 21 sectors per track to create a 1680Kb floppy disk. These disks may be unreliable on very old computers (where accuracy and speed variation may be worse), but were considered reliable enough for Microsoft to distribute a version of Windows on 1680Kb floppies (Windows 95 on a set of 12 floppies). It is also possible to format 3 extra cylinders on each disk, for a total of 83.
-*/
 
-/*
+
+
 Hardware Control of Bad Cylinders
 The FDC subsystem has a built-in method for handling unreliable media. However, it is probably not a good idea to use it. It involves finding a bad sector on the media, and then marking the entire track or cylinder as being bad, during the formatting process.
 
 If you try to do this, then you cannot simply seek to a cylinder. All of the cylinders get "remapped" with new "TrackID"s. Whenever you seek to a cylinder, then you need to use the ReadID command to verify that the cylinder you seeked to contains the data that you actually want. So this eliminates any possibility of using implied seeks, and adds an extra step to most read/write operations.
-*/
 
-/*
+
+
 Drive Selection
 Each floppy drive on the system may be a different type. When switching between accessing different types of drives, you need to fix the Specify and Datarate settings in the controller. The controller does not remember the settings on a per-drive basis. The only per-drive number that it remembers is the current cylinder.
 
 Send the correct Datarate setting to CCR. Usually this is a 0 (1.44MB floppy drive).
 If the newly selected drive is a different type than the previously selected drive (or changing from PIO to DMA mode), send a new Specify command.
 Set the "drive select" bits (and the other bitflags) in DOR properly, including possibly turning on the Motor bit for the drive (if it will be accessed soon).
-*/
 
-/*
+
+
 Detecting Media
 The user can swap media out of a floppy drive at any moment. If your driver sends a command to the drive, and the command fails -- this may be the reason why.
 
 Turn the drive motor bit on.
 Read DIR. If the "Disk Change" bitflag is set to "true", then the floppy drive door was opened, so the OS needs to test if a new disk is in the drive.
-*/
 
-/*
+
+
 Waiting
 Waiting for the drive can be done in many ways, and it is an OS-specific design decision. You can poll the value of the PIT, waiting for it to count down to a certain value. You can poll a memory location that contains "the current time" in some format, waiting for it to reach a certain value. Your OS can implement a realtime callback, where a particular function in the driver will be called at a particular time. Or you can implement some form of multitasking "blocking", where the driver process is put in a "sleep" state, and is not assigned any timeslices for a certain length of time.
-*/
 
-/*
+
+
 The Proper Way to issue a command
 Read MSR (port 0x3F4).
 Verify that RQM = 1 and DIO = 0 ((Value & 0xc0) == 0x80) -- if not, reset the controller and start all over.
@@ -382,9 +351,9 @@ Loop on reading MSR until RQM = 1, verify that DIO = 1.
 In a loop: read the next result byte from the FIFO, loop on reading MSR until RQM = 1, verify CMD BSY = 1 and DIO = 1 ((Value & 0x50) == 0x50).
 After reading all the expected result bytes: check them for error conditions, verify that RQM = 1, CMD BSY = 0, and DIO = 0. If not retry the entire command again, several times, starting from step 2!
 Note: implementing a failure timeout for each loop and the IRQ is pretty much required -- it is the only way to detect many command errors.
-*/
 
-/*
+
+
 Perpendicular Mode and 2.88M floppies
 If you are using an emulator and you need a floppy disk image that is bigger than 1440Kb, there is a 2880Kb image available. In order to access it in Pmode, you need to modify your driver to handle Perpendicular Mode. Basically, it is an extra configuration command where you enable any of the four drives for perpendicular mode.
 
@@ -395,37 +364,37 @@ First parameter byte = (Drive 3 enable << 5) | (Drive 2 enable << 4) | (Drive 1 
 No result bytes.
 No interrupt.
 You also need to set CCR/DSR for the 1M datarate (value = 3) to access a 2.88M drive.
-*/
 
-/*
+
+
     The drive records the two sides with two "heads" that are bolted together.
     They cannot seek independently.
     The "track" on one side of a disk is always exactly opposite the track on the other side of the disk.
     (There is a misconception about this in many floppy driver code examples.)
     You only need to seek one head to find a particular cylinder, so that both heads may read/write that cylinder.
-*/
 
-/*
+
+
 Additional Programming Notes
 If you are doing a transfer between 2 floppy drives (so that both motors are on), and you are toggling "selection" between the two, there may be a short delay required.
-*/
 
-/*
+
+
 If you don't want to bother having to send another Configure command after every Reset procedure, then:
 Send a better Configure command to the controller. A suggestion would be: drive polling mode off, FIFO on, threshold = 8, implied seek on, precompensation 0.
 send a Lock command.
 Do a Controller Reset procedure.
 Send a Recalibrate command to each of the drives.
-*/
 
-/*
+
+
 Since the 125 ns write precompensation value is optimal
 for the 5,25" and 3,5" disk drive environment,
 most applications will not require the value to be changed
 in the initialization sequence
-*/
 
-/*
+
+
 Related Links
 Articles
 Reference Documents
@@ -437,4 +406,4 @@ http://www.brokenthorn.com/Resources/OSDev20.html
 Forum Posts
 TUTORIAL, with DMA, by Mystran (highly recommended, but has a few tiny errors)
 Floppy programming tutorial (floppy_tutorial.txt) companion thread
-*/
+

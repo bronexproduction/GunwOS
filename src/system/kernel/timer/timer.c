@@ -9,6 +9,9 @@
 
 #include <error/panic.h>
 #include <error/fug.h>
+#include <hal/cpu/cpu.h>
+
+#warning timer to be extended do 64-bit
 
 static time_t ticks = 0;
 static time_t ms = 0;
@@ -67,16 +70,6 @@ time_t k_tmr_getSec() {
 
 time_t k_tmr_getMs() {
     return ms;
-}
-
-void k_tmr_sleepms(const unsigned int milliseconds) {
-    const time_t targetTime = ms + milliseconds;
-
-    while(ms < targetTime);
-}
-
-void k_tmr_sleeps(const unsigned int seconds) {
-    k_tmr_sleepms(seconds * 1000);
 }
 
 void k_tmr_regMsHandler(void (*handler)()) {

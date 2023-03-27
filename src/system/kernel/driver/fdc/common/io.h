@@ -26,6 +26,11 @@
 #define ALIGNED(VALUE, RANGE) (((VALUE) << __builtin_ctz(RANGE)) & (RANGE))
 
 /*
+    Routine for writing data to given register
+*/
+void pushReg(const uint_16 base, const enum fdc_bus_regOffset regOffset, const uint_8 data);
+
+/*
     Routine for sending byte to FIFO
 */
 enum fdc_opStatus pushData(const uint_16 base, const uint_8 data);

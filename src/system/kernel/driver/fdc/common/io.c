@@ -15,15 +15,16 @@
 #include "io.h"
 #include <gunwctrl.h>
 #include <driver/gunwbus.h>
+#include "../utl/utl.h"
 
-static inline void pushReg(const uint_16 base, const enum fdc_bus_regOffset regOffset, const uint_8 data) {
+void pushReg(const uint_16 base, const enum fdc_bus_regOffset regOffset, const uint_8 data) {
     wrb(base + regOffset, data);
-    sleepms(1);
+    extern void fdc_sleepms(const size_t);
+    fdc_sleepms(1);
 }
 
 enum fdc_opStatus pushData(const uint_16 base, const uint_8 data) {
-    extern uint_8 fdc_waitForCommandPhase(const uint_16);
-    uint_8 status = fdc_waitForCommandPhase(base);
+    uint_8 status = waitForCommandPhase(base);
     if (!status) {
         return OPSTATUS_NOT_READY;
     }
@@ -35,8 +36,7 @@ enum fdc_opStatus pushData(const uint_16 base, const uint_8 data) {
 enum fdc_opStatus pullData(const uint_16 base, uint_8 * const data) {
     if (!data) return OPSTATUS_INVPARAM;
 
-    extern uint_8 fdc_waitForResultPhase(const uint_16);
-    if (!fdc_waitForResultPhase(base)) {
+    if (!waitForResultPhase(base)) {
         return OPSTATUS_NOT_READY;
     }
 

@@ -49,7 +49,7 @@ struct gnwStorGeometry {
     /* 
         Sector size (in bytes)
     */
-    uint_16 sectSize;
+    uint_16 sectSizeBytes;
 };
 
 /*
@@ -61,7 +61,8 @@ enum gnwStorErrorCode {
     GSEC_API_UNAVAILABLE,
     GSEC_INVALID_FORMAT,
     GSEC_COMMAND_FAILED,
-    GSEC_BUFFER_OVERFLOW
+    GSEC_BUFFER_OVERFLOW,
+    GSEC_INVALID_ARGUMENT
 };
 
 struct gnwStorError {

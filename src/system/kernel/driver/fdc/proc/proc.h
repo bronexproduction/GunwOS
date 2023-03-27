@@ -16,6 +16,11 @@
 enum fdc_opStatus proc_reset(const uint_16 base);
 
 /*
+    Recalibrating the drive
+*/
+enum fdc_opStatus proc_recalibrate(const uint_16 base, const uint_8 drive);
+
+/*
     Error routine
 
     Disables controller and logs the error
@@ -33,5 +38,16 @@ enum fdc_opStatus proc_fdcDetect(const uint_16 base, const uint_8 drive, uint_8 
     Prepare drive for data command
 */
 enum fdc_opStatus proc_prepare(const struct fdc_fddConfig config);
+
+/*
+    Turning the motor on/off on given drive
+*/
+enum fdc_opStatus proc_startMotor(const uint_16 base, const uint_8 drive);
+enum fdc_opStatus proc_stopMotor(const uint_16 base, const uint_8 drive);
+
+/*
+    Sense interrupt status
+*/
+enum fdc_opStatus proc_senseInterruptStatus(const uint_16 base, uint_8 * const sr0, uint_8 * const pcn);
 
 #endif // PROC_H
