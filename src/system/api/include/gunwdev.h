@@ -18,13 +18,16 @@
     Device type
 */
 enum gnwDeviceType {
-    DEV_TYPE_SYSTEM,
-    DEV_TYPE_KEYBOARD,
-    DEV_TYPE_FDC,
-    DEV_TYPE_CHAR_IN,
-    DEV_TYPE_CHAR_OUT,
-    DEV_TYPE_DISPLAY,
-    DEV_TYPE_UNKNOWN = -1
+    DEV_TYPE_SYSTEM     = (1 << 0),
+    DEV_TYPE_MEM        = (1 << 1),
+    DEV_TYPE_KEYBOARD   = (1 << 2),
+    DEV_TYPE_MOUSE      = (1 << 3),
+    DEV_TYPE_DISPLAY    = (1 << 4),
+    DEV_TYPE_CHAR_IN    = (1 << 5),
+    DEV_TYPE_CHAR_OUT   = (1 << 6),
+    DEV_TYPE_STORAGE    = (1 << 7),
+    DEV_TYPE_FDC        = (1 << 8) | DEV_TYPE_STORAGE,
+    DEV_TYPE_UNKNOWN    = 0
 };
 
 enum gnwDeviceError {

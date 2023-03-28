@@ -24,10 +24,10 @@
 struct gnwDeviceUHADesc {
     uint_32 identifier;
     struct gnwDeviceUHA_system_desc system;       // DEV_TYPE_SYSTEM
-    struct gnwDeviceUHA_mem_desc mem;             // memory-mapped devices
+    struct gnwDeviceUHA_mem_desc mem;             // DEV_TYPE_MEM
     struct gnwDeviceUHA_keyboard_desc keyboard;   // DEV_TYPE_KEYBOARD
     struct gnwDeviceUHA_fdc_desc fdc;             // DEV_TYPE_FDC
-    struct gnwDeviceUHA_driveCtrl_desc storage;   // for storage devices
+    struct gnwDeviceUHA_driveCtrl_desc storage;   // DEV_TYPE_STORAGE
     struct gnwDeviceUHA_char_in_desc charIn;      // DEV_TYPE_CHAR_IN
     struct gnwDeviceUHA_char_out_desc charOut;    // DEV_TYPE_CHAR_OUT
     struct gnwDeviceUHA_display_desc display;     // DEV_TYPE_DISPLAY
