@@ -14,16 +14,6 @@ time_t k_tmr_getSec();
 time_t k_tmr_getMs();
 
 /*
-    Sleep function (in seconds)
-*/
-void k_tmr_sleeps(const unsigned int seconds);
-
-/*
-    Sleep function (in milliseconds)
-*/
-void k_tmr_sleepms(const unsigned int milliseconds);
-
-/*
     Register auxiliary handler for millisecond event
 */
 void k_tmr_regMsHandler(void (*handler)());

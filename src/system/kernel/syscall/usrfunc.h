@@ -53,9 +53,9 @@ __attribute__((naked)) void k_scr_waitForEvent(const struct gnwRunLoop * const r
 
 /*
     Code - 0x05
-    Function - SLEEPMS
+    Function - TIME_MS
 */
-__attribute__((naked)) void k_scr_sleepms(const size_t ms);
+__attribute__((naked)) time_t k_scr_timeMs();
 
 /*
     Code - 0x08

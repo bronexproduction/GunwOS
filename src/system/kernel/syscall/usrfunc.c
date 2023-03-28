@@ -111,16 +111,16 @@ SCR(waitForEvent,
 
 /*
     Code - 0x05
-    Function - SLEEPMS
+    Function - TIME_MS
 
-    Params:
-        * EBX - time in milliseconds
+    Return:
+        * EAX - time in milliseconds
 */
-SCR(sleepms,
-    REG(32, timems, ebx)
+SCR(timeMs,
+    REG_RET(32, time)
 
-    extern void k_tmr_sleepms(const unsigned int);
-    k_tmr_sleepms(timems);
+    extern time_t k_tmr_getMs();
+    time = k_tmr_getMs();
 )
 
 /*

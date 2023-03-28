@@ -38,7 +38,7 @@ static void (*userSyscallReg[SYSCALL_COUNT])() = {
     /* 0x02 */ (void *)k_scr_devCharWrite,
     /* 0x03 */ (void *)k_scr_exit,
     /* 0x04 */ (void *)k_scr_waitForEvent,
-    /* 0x05 */ (void *)k_scr_sleepms,
+    /* 0x05 */ (void *)k_scr_timeMs,
     /* 0x06 */ 0,
     /* 0x07 */ 0,
     /* 0x08 */ (void *)k_scr_devGetById,
