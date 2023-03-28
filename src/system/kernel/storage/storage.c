@@ -11,6 +11,7 @@
 
 #define MAX_DRIVES 8
 #define MAX_VOLUMES 16
+#define MAX_FILESYS 2
 
 static struct drive {
     /*
@@ -45,6 +46,19 @@ static struct volume {
     */
     size_t volumeId;
 } volumes[MAX_VOLUMES];
+
+static struct filesystem {
+    /*
+        Entry status
+    */
+    bool used;
+} fileSys[MAX_VOLUMES];
+
+enum k_stor_error k_stor_fileSysInstall(const struct gnwFileSystemDescriptor * const desc) {
+    (void)desc;
+    (void)fileSys;
+    return SE_NONE;
+}
 
 void k_stor_init() {
     
@@ -89,6 +103,9 @@ void k_stor_init() {
 
     /*
         Detect filesystems
+
+        NOTE: Restriction to single-volume drives
     */
+
     (void)volumes;
 }

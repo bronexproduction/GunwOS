@@ -86,8 +86,7 @@ struct gnwDeviceDriver {
     Device descriptor
 
     In order to register a device in kernel
-    an instance of this type to be prepared
-    and passed to k_dev_install()  
+    drivers must provide an instance of this type
 */
 struct gnwDeviceDescriptor {
     /*
