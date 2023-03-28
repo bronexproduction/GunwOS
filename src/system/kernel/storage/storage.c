@@ -110,7 +110,7 @@ static void detectDrives(const struct gnwDeviceUHADesc desc, bool (* const drive
     }
 }
 
-static void detectFileSystem(const size_t driveIndex) {
+static void detectFileSystem(const struct gnwDeviceUHA_driveCtrl * const uha, const size_t driveIndex) {
     if (driveIndex >= MAX_DRIVES) {
         OOPS("Drive index over limit");
         return;
@@ -126,6 +126,7 @@ static void detectFileSystem(const size_t driveIndex) {
         /*
             Load header bytes
         */
+        
         uint_8 headerBytes[51+0x0B] = {0};
         if (fileSys[fileSysIndex].desc.detect(headerBytes)) {
             
@@ -138,7 +139,7 @@ static void detectFileSystem(const size_t driveIndex) {
     }
 }
 
-static void detectVolumes() {
+static void detectVolumes(const struct gnwDeviceUHA_driveCtrl * const uha) {
     
     /*
         Detect volumes (filesystems)
@@ -148,7 +149,7 @@ static void detectVolumes() {
     
     for (size_t driveIndex = 0; driveIndex < MAX_DRIVES; ++driveIndex) {
         if (drives[driveIndex].used) {
-            detectFileSystem(driveIndex);
+            detectFileSystem(uha, driveIndex);
         }
     }
 }
@@ -174,5 +175,5 @@ void k_stor_init() {
     }
 
     detectDrives(desc, uha.storage.routine.drivePresent);
-    detectVolumes();
+    detectVolumes(&uha.storage);
 }
