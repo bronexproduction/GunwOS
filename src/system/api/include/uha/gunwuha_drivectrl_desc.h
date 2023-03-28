@@ -12,7 +12,10 @@
 #include <types.h>
 
 struct gnwDeviceUHA_driveCtrl_desc {
-    uint_32 _unused;
+    /*
+        Total number of supported drives
+    */
+    uint_8 driveCount;
 };
 
 #endif // GUNWOS_GUNWUHA_DRIVECTRL_DESC_H

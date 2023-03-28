@@ -108,10 +108,10 @@ static struct gnwDriverConfig desc() {
 static struct gnwDeviceUHA uha() {
     struct gnwDeviceUHA uha;
 
-    uha.fdc.routine.drivePresent = uha_drivePresent;
-    uha.fdc.routine.driveGeometry = uha_driveGeometry;
-    
+    uha.storage.routine.drivePresent = uha_drivePresent;
+    uha.storage.routine.driveGeometry = uha_driveGeometry;
     uha.storage.routine.read = uha_read;
+    uha.storage.desc.driveCount = FDC_FDD_PER_CONTROLLER;
 
     return uha;
 }
