@@ -55,8 +55,8 @@ enum fdc_opStatus proc_reset(const uint_16 base) {
     }
 
     enum fdc_opStatus status;
-    if (inPollingMode(base)) {                                                  // IF POLLING MODE ENABLED
-        for (int i = 0; i < FDC_FDD_PER_CONTROLLER-1; ++i) {                    // 3 TIMES (first has been done by inPollingMode):
+    if (inPollingMode(base)) {                                              // IF POLLING MODE ENABLED
+        for (int i = 0; i < FDC_FDD_PER_CONTROLLER-1; ++i) {                // 3 TIMES (first has been done by inPollingMode):
             uint_8 data;
             status = proc_senseInterruptStatus(base, &data, &data);         // ISSUE SENSE INTERRUPT STATUS COMMAND
             if (status != OPSTATUS_OK) {
@@ -66,7 +66,7 @@ enum fdc_opStatus proc_reset(const uint_16 base) {
         }
     }
     
-    pushReg(base, REG_CCR, RATE_500KBPS);                                       // PROGRAM DATA RATE VIA CCR
+    pushReg(base, REG_CCR, RATE_500KBPS);                                   // PROGRAM DATA RATE VIA CCR
 
     status = cmd_configure(base,                                            // ISSUE CONFIGURE COMMAND
                            ISEEK_ENABLE,
@@ -95,12 +95,12 @@ enum fdc_opStatus proc_reset(const uint_16 base) {
         return status;
     }
 
-    for (uint_8 i = 0; i < FDC_FDD_SUPPORT_COUNT; ++i) {                        // FOR EACH DRIVE:
+    for (uint_8 i = 0; i < FDC_FDD_SUPPORT_COUNT; ++i) {                    // FOR EACH DRIVE:
         proc_recalibrate(base, i);                                          // RECALIBRATE (dumb)
         proc_stopMotor(base, i);
     }
 
-    return OPSTATUS_OK;                                                         // CONTROLLER READY
+    return OPSTATUS_OK;                                                     // CONTROLLER READY
 }
 
 enum fdc_opStatus proc_recalibrate(const uint_16 base, const uint_8 drive) {
