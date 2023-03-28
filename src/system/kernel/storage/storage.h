@@ -11,6 +11,7 @@
 #include <driver/gunwfilesys.h>
 
 enum k_stor_error {
+    SE_LIMIT_REACHED,
     SE_NONE = 0
 };
 

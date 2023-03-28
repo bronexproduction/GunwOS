@@ -52,11 +52,27 @@ static struct filesystem {
         Entry status
     */
     bool used;
+
+    /*
+        File system descriptor
+    */
+    struct gnwFileSystemDescriptor desc;
 } fileSys[MAX_VOLUMES];
 
 enum k_stor_error k_stor_fileSysInstall(const struct gnwFileSystemDescriptor * const desc) {
-    (void)desc;
-    (void)fileSys;
+    size_t fileSysIndex = 0;
+    for (; fileSysIndex < MAX_FILESYS; ++fileSysIndex) {
+        if (!fileSys[fileSysIndex].used) {
+            break;
+        }
+    }
+    if (fileSysIndex >= MAX_FILESYS) {
+        OOPS("File system count limit exceeded");
+        return SE_LIMIT_REACHED;
+    }
+            
+    fileSys[fileSysIndex].used = true;
+    fileSys[fileSysIndex].desc = *desc;
     return SE_NONE;
 }
 
@@ -106,6 +122,24 @@ void k_stor_init() {
 
         NOTE: Restriction to single-volume drives
     */
-
+    for (size_t driveIndex = 0; driveIndex < MAX_DRIVES; ++driveIndex) {
+        if (drives[driveIndex].used) {
+            for (size_t fileSysIndex = 0; fileSysIndex < MAX_FILESYS; ++fileSysIndex) {
+                if (!fileSys[fileSysIndex].used) {
+                    continue;
+                }
+                /*
+                    Load header bytes
+                */
+                uint_8 headerBytes[51+0x0B] = {0};
+                if (fileSys[fileSysIndex].desc.detect(headerBytes)) {
+                    /*
+                        Add volume
+                    */
+                    break;
+                }
+            }
+        }
+    }
     (void)volumes;
 }

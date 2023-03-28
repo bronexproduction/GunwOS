@@ -8,6 +8,8 @@
 #ifndef GUNWOS_GUNWFILESYS_H
 #define GUNWOS_GUNWFILESYS_H
 
+#include <types.h>
+
 /*
     File system descriptor
 
@@ -15,25 +17,21 @@
     drivers must provide an instance of this type
 */
 struct gnwFileSystemDescriptor {
-    // /*
-    //     Device type
-    // */
-    // enum gnwDeviceType type;
+    /*
+        Header offset from start of the volume in bytes
+    */
+    size_t headerOffset;
 
-    // /*
-    //     Hardware-specific API
-    // */
-    // struct gnwDeviceUHA api;
+    /*
+        Header size in bytes
+    */
+    size_t headerSize;
 
-    // /*
-    //     Device driver
-    // */
-    // struct gnwDeviceDriver driver;
-
-    // /*
-    //     Device friendly name
-    // */
-    // char *name;
+    /*
+        Checks if header contains valid
+        file system information
+    */
+    bool (*detect)(const uint_8 * const headerBytes);
 };
 
 #endif // GUNWOS_GUNWFILESYS_H
