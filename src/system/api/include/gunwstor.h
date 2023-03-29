@@ -58,6 +58,7 @@ struct gnwStorGeometry {
 enum gnwStorErrorCode {
     GSEC_NONE = 0,
     GSEC_DRIVE_NOT_PRESENT,
+    GSEC_MEDIA_NOT_PRESENT,
     GSEC_API_UNAVAILABLE,
     GSEC_INVALID_FORMAT,
     GSEC_COMMAND_FAILED,
