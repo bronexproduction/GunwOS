@@ -1204,16 +1204,17 @@ struct fdc_fddConfig {
     including errors and success 
 */
 enum fdc_opStatus {
-    OPSTATUS_NOT_READY      = -1,
-    OPSTATUS_INVPARAM       = -2,
-    OPSTATUS_INVCMD         = -3,
-    OPSTATUS_INTEXP         = -4,
-    OPSTATUS_INVDRIVE       = -5,
-    OPSTATUS_MTROFF         = -6,
-    OPSTATUS_NOTFIN         = -7,
-    OPSTATUS_FAIL           = -8,
-    OPSTATUS_ABNORMAL_TERM  = -9,
-    OPSTATUS_OK             = 0
+    OPSTATUS_NOT_READY          = -1,
+    OPSTATUS_INVPARAM           = -2,
+    OPSTATUS_INVCMD             = -3,
+    OPSTATUS_INTEXP             = -4,
+    OPSTATUS_INVDRIVE           = -5,
+    OPSTATUS_MTROFF             = -6,
+    OPSTATUS_NOTFIN             = -7,
+    OPSTATUS_FAIL               = -8,
+    OPSTATUS_ABNORMAL_TERM      = -9,
+    OPSTATUS_END_OF_CYLINDER    = -10,
+    OPSTATUS_OK                 = 0
 };
 
 /*
