@@ -112,6 +112,8 @@ static struct gnwDeviceUHA uha() {
     uha.storage.routine.driveGeometry = uha_driveGeometry;
     uha.storage.routine.read = uha_read;
     uha.storage.desc.driveCount = FDC_FDD_PER_CONTROLLER;
+    uha.storage.desc.removable = false;
+    uha.storage.desc.removableMedia = true;
 
     return uha;
 }

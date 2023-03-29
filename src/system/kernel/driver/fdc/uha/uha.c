@@ -148,11 +148,32 @@ static size_t readSector(const struct fdc_fddConfig config,
         return 0;
     }
 
-    if ((sr0 & RANGE_SR0_IC) == 0x40) {
+    switch (sr0 & RANGE_SR0_IC) {
+    case 0x00:
+        /*
+            Normal termination
+        */
+        break;
+    case 0x40:
+        /*
+            Abnormal termination
+        */
+        switch (sr1) {
+        case BIT_SR1_EN:
+            error->code = GSEC_COMMAND_FAILED;
+            error->internalCode = OPSTATUS_END_OF_CYLINDER;
+            break;
+        default:
+            OOPS("readSector: IC failed");
+            error->code = GSEC_COMMAND_FAILED;
+            error->internalCode = OPSTATUS_ABNORMAL_TERM;
+            break;
+        }
+        return 0;
+    default:
         OOPS("readSector: IC failed");
         error->code = GSEC_COMMAND_FAILED;
         error->internalCode = OPSTATUS_ABNORMAL_TERM;
-
         return 0;
     }
 
