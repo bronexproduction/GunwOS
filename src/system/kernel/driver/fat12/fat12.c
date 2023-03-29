@@ -6,9 +6,15 @@
 //
 
 #include <driver/gunwfilesys.h>
+#include <string.h>
+
+#define FILE_SYSTEM_NAME_HEADER_OFFSET 0x2B
+#define FILE_SYSTEM_NAME "FAT12   "
+#define FILE_SYSTEM_NAME_BYTES 8
 
 static bool detect(const uint_8 * const header) {
-    return false;
+    #warning to be improved?
+    return !strcmpl((char *)header + FILE_SYSTEM_NAME_HEADER_OFFSET, FILE_SYSTEM_NAME, FILE_SYSTEM_NAME_BYTES);
 }
 
 struct gnwFileSystemDescriptor k_drv_fat12_descriptor() {

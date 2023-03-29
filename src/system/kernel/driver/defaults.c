@@ -81,6 +81,9 @@ void k_drv_loadMinimal() {
     extern struct gnwDeviceDescriptor k_drv_fdc_descriptor();
     loadDevice(k_drv_fdc_descriptor, MSGS_FAIL(Floppy disk controller));
 
+    /*
+        FAT12 file system
+    */
     extern struct gnwFileSystemDescriptor k_drv_fat12_descriptor();
     loadFileSystem(k_drv_fat12_descriptor, MSG_INSTALL_FAIL(FAT12 File system));
 }

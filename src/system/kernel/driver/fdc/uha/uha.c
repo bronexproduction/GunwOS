@@ -138,6 +138,15 @@ static size_t readSector(const struct fdc_fddConfig config,
 
         return 0;
     }
+    uint_8 sr1;
+    s = pullData(config.base, &sr1);
+    if (s != OPSTATUS_OK) {
+        OOPS("readSector: pull sr1 failed");
+        error->code = GSEC_COMMAND_FAILED;
+        error->internalCode = s;
+
+        return 0;
+    }
 
     if ((sr0 & RANGE_SR0_IC) == 0x40) {
         OOPS("readSector: IC failed");
@@ -148,9 +157,8 @@ static size_t readSector(const struct fdc_fddConfig config,
     }
 
     uint_8 data;
-    
-    for (int i = 0; i < 6; ++i) {
-        // read ST 1, ST 2, C, H, R, N
+    for (int i = 0; i < 5; ++i) {
+        // read ST 2, C, H, R, N
         s = pullData(config.base, &data);
         if (s != OPSTATUS_OK) {
             OOPS("readSector: pull register failed");
