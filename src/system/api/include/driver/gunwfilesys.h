@@ -18,14 +18,15 @@
 */
 struct gnwFileSystemDescriptor {
     /*
-        Header offset from start of the volume in bytes
+        Header range (values in bytes)
     */
-    size_t headerOffset;
+    range_size_t headerRange;
 
     /*
-        Header size in bytes
+        Returns file directory range (values in bytes)
+        based on header 
     */
-    size_t headerSize;
+    range_size_t (*directoryRange)(const uint_8 * const headerBytes);
 
     /*
         Checks if header contains valid

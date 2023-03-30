@@ -12,6 +12,17 @@
 #define FILE_SYSTEM_NAME "FAT12   "
 #define FILE_SYSTEM_NAME_BYTES 8
 
+static range_size_t directoryRange(const uint_8 * const headerBytes) {
+    range_size_t range;
+
+#warning TO BE IMPLEMENTED
+
+    range.offset = 0;
+    range.length = 0;
+
+    return range;
+}
+
 static bool detect(const uint_8 * const header) {
     #warning to be improved?
     return !strcmpl((char *)header + FILE_SYSTEM_NAME_HEADER_OFFSET, FILE_SYSTEM_NAME, FILE_SYSTEM_NAME_BYTES);
@@ -19,8 +30,11 @@ static bool detect(const uint_8 * const header) {
 
 struct gnwFileSystemDescriptor k_drv_fat12_descriptor() {
     return (struct gnwFileSystemDescriptor) {
-        /* headerOffset */ 0x0B,
-        /* headerSize */ 51,
+        /* headerRange */ (range_size_t) {
+            /* offset */ 0x0B,
+            /* size */ 51,
+        },
+        /* directoryRange */ directoryRange,
         /* detect */ detect
     };
 }
