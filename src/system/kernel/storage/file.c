@@ -6,9 +6,9 @@
 //
 
 #include "file.h"
-#include <storage/storage.h>
-#include <storage/data.h>
-#include <storage/volume.h>
+#include "storage.h"
+#include "volume.h"
+#include "filesys.h"
 #include <error/panic.h>
 
 enum gnwFileErrorCode k_stor_file_getInfo(const char * const path, 
@@ -26,31 +26,13 @@ enum gnwFileErrorCode k_stor_file_getInfo(const char * const path,
     */
 
     size_t volumeId = 0;
-    if (volumeId >= MAX_VOLUMES) {
+    if (!k_stor_volume_validateId(volumeId)) {
         return GFEC_INVALID_PATH;
     }
-    if (!volumes[volumeId].used) {
-        return GFEC_INVALID_PATH;
-    }
-    size_t fileSysId = volumes[volumeId].fileSysId;
-    if (fileSysId >= MAX_FILESYS) {
-        OOPS("Invalid FSID");
-        return GFEC_UNKNOWN;
-    }
-    if (!fileSys[fileSysId].used) {
-        OOPS("Unused FSID");
-        return GFEC_UNKNOWN;
-    }
-
-    struct gnwFileSystemDescriptor fsDesc = fileSys[fileSysId].desc;
-    if (!fsDesc.headerRange.offset ||
-        !fsDesc.directoryRange) {
-        OOPS("Invalid FSDESC");
-        return GFEC_UNKNOWN;
-    }
-
+    size_t fileSysId = k_stor_volumes[volumeId].fileSysId;
+    struct gnwFileSystemDescriptor fsDesc = k_stor_fileSystems[fileSysId].desc;
     uint_8 headerBytes[fsDesc.headerRange.length];
-    enum k_stor_error err = k_stor_vol_readHeader(0, headerBytes);
+    enum k_stor_error err = k_stor_volume_readHeader(0, headerBytes);
     if (err != SE_NONE) {
         return GFEC_UNKNOWN;
     }

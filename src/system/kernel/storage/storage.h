@@ -11,10 +11,9 @@
 #include <driver/gunwfilesys.h>
 
 enum k_stor_error {
+    SE_NONE = 0,
     SE_LIMIT_REACHED,
-    SE_NONE = 0
+    SE_UNKNOWN
 };
-
-enum k_stor_error k_stor_fileSysInstall(const struct gnwFileSystemDescriptor * const);
 
 #endif // STORAGE_H
