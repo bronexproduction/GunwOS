@@ -14,7 +14,7 @@
 #include <gunwdev.h>
 
 #include <dev/dev.h>
-#include <storage/storage.h>
+#include <storage/filesys.h>
 #include <error/panic.h>
 
 #define MSG_INSTALL_FAIL(NAME) "Fatal error: ## NAME ## driver installation failed"
@@ -42,7 +42,7 @@ static void loadFileSystem(struct gnwFileSystemDescriptor (*descProvider)(),
                            const char * const installFailureMsg) {
     enum k_stor_error e;
     const struct gnwFileSystemDescriptor desc = descProvider();
-    e = k_stor_fileSysInstall(&desc);
+    e = k_stor_fileSys_install(&desc);
     if (e != SE_NONE) { 
         OOPS(installFailureMsg);
     }
