@@ -11,6 +11,7 @@
 #include <hal/proc/proc.h>
 #include <dev/dev.h>
 #include <queue/queue.h>
+#include <error/panic.h>
 
 /*
     User-level system calls
@@ -33,6 +34,8 @@ SCR(start,
 
     REG_RET(32, err)
     
+    OOPS("Not supported yet");
+
     extern enum gnwCtrlError k_scr_usr_start(const char * const, const size_t);
     err = k_scr_usr_start((const char * const)path, (const size_t)pathLen);
 )

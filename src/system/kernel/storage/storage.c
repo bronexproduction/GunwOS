@@ -9,78 +9,7 @@
 #include <dev/dev.h>
 #include <error/panic.h>
 #include <mem.h>
-
-#define MAX_DRIVES 8
-#define MAX_VOLUMES 16
-#define MAX_FILESYS 2
-
-static struct drive {
-    /*
-        Entry status
-    */
-    bool used;
-
-    /*
-        Drive controller device identifier
-    */
-    size_t ctrlId;
-
-    /*
-        Drive identifier in controller
-    */
-    size_t driveId;
-} drives[MAX_DRIVES];
-
-static struct volume {
-    /*
-        Entry status
-    */
-    bool used;
-
-    /*
-        Drive identifier
-    */
-    size_t driveId;
-
-    /*
-        Volume identifier/index on drive
-    */
-    size_t volumeId;
-    
-    /*
-        File system identifier
-    */
-    size_t fileSysId;
-} volumes[MAX_VOLUMES];
-
-static struct filesystem {
-    /*
-        Entry status
-    */
-    bool used;
-
-    /*
-        File system descriptor
-    */
-    struct gnwFileSystemDescriptor desc;
-} fileSys[MAX_FILESYS];
-
-enum k_stor_error k_stor_fileSysInstall(const struct gnwFileSystemDescriptor * const desc) {
-    size_t fileSysIndex = 0;
-    for (; fileSysIndex < MAX_FILESYS; ++fileSysIndex) {
-        if (!fileSys[fileSysIndex].used) {
-            break;
-        }
-    }
-    if (fileSysIndex >= MAX_FILESYS) {
-        OOPS("File system count limit exceeded");
-        return SE_LIMIT_REACHED;
-    }
-            
-    fileSys[fileSysIndex].used = true;
-    fileSys[fileSysIndex].desc = *desc;
-    return SE_NONE;
-}
+#include "data.h"
 
 static void addDrive(const size_t ctrlId, const size_t driveId) {
     size_t index = 0;
@@ -160,20 +89,21 @@ static void detectFileSystem(const struct gnwDeviceUHA_driveCtrl * const uha, co
             Load header bytes
         */
         
-        if (!fileSys[fileSysIndex].desc.headerSize) {
+        if (!fileSys[fileSysIndex].desc.headerRange.length) {
             OOPS("Invalid header bytes value");
             return;
         }
-        size_t bytesToBeRead = fileSys[fileSysIndex].desc.headerOffset + fileSys[fileSysIndex].desc.headerSize;
+        size_t bytesToBeRead = fileSys[fileSysIndex].desc.headerRange.offset + fileSys[fileSysIndex].desc.headerRange.length;
         const struct gnwStorGeometry geometry = uha->routine.driveGeometry(drives[driveIndex].driveId);
         if (bytesToBeRead % geometry.sectSizeBytes) {
             bytesToBeRead = bytesToBeRead / geometry.sectSizeBytes + geometry.sectSizeBytes;
         }
 
         uint_8 readBuffer[bytesToBeRead];
-        uint_8 headerBuffer[fileSys[fileSysIndex].desc.headerSize];
+        uint_8 headerBuffer[fileSys[fileSysIndex].desc.headerRange.length];
 
         struct gnwStorError err;
+        #warning If header bytes outside the first sector then LBA can be optimized
         const size_t bytesRead = uha->routine.read(drives[driveIndex].driveId, 
                                                    0,
                                                    bytesToBeRead / geometry.sectSizeBytes, 
@@ -195,9 +125,9 @@ static void detectFileSystem(const struct gnwDeviceUHA_driveCtrl * const uha, co
             return;
         }
 
-        memcopy(readBuffer + fileSys[fileSysIndex].desc.headerOffset, 
+        memcopy(readBuffer + fileSys[fileSysIndex].desc.headerRange.offset, 
                 headerBuffer, 
-                fileSys[fileSysIndex].desc.headerSize);
+                fileSys[fileSysIndex].desc.headerRange.length);
 
         if (fileSys[fileSysIndex].desc.detect(headerBuffer)) {
             addVolume(driveIndex, 0, fileSysIndex);
@@ -219,6 +149,23 @@ static void detectVolumes(const struct gnwDeviceUHA_driveCtrl * const uha) {
             detectFileSystem(uha, driveIndex);
         }
     }
+}
+
+enum k_stor_error k_stor_fileSysInstall(const struct gnwFileSystemDescriptor * const desc) {
+    size_t fileSysIndex = 0;
+    for (; fileSysIndex < MAX_FILESYS; ++fileSysIndex) {
+        if (!fileSys[fileSysIndex].used) {
+            break;
+        }
+    }
+    if (fileSysIndex >= MAX_FILESYS) {
+        OOPS("File system count limit exceeded");
+        return SE_LIMIT_REACHED;
+    }
+            
+    fileSys[fileSysIndex].used = true;
+    fileSys[fileSysIndex].desc = *desc;
+    return SE_NONE;
 }
 
 void k_stor_init() {
