@@ -13,8 +13,8 @@
 
 enum gnwFileErrorCode k_stor_file_getInfo(const char * const path, 
                                           const size_t pathLen, 
-                                          struct gnwStorFileInfo * const fileInfo) {
-    if (!path) {
+                                          struct gnwFileInfo * const fileInfo) {
+    if (!path || !fileInfo) {
         OOPS("Nullptr access");
         return GFEC_UNKNOWN;
     }
@@ -46,7 +46,15 @@ enum gnwFileErrorCode k_stor_file_getInfo(const char * const path,
         }
     }
 
+    #warning TEST
+    char fileName[9] = "gunwsh  ";
+    char fileExtension[4] = "elf";
+    enum gnwFileErrorCode err = fsDesc.fileInfo(headerBytes, directoryBytes, fileName, fileExtension, fileInfo);
+    if (err == GFEC_NOT_FOUND) {
+        return GFEC_NOT_FOUND;
+    } else if (err != GFEC_NONE) {
+        return GFEC_UNKNOWN;
+    }
     
-
     return GFEC_NONE;
 }

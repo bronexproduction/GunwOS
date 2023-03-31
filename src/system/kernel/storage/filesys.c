@@ -25,6 +25,7 @@ enum k_stor_error k_stor_fileSys_install(const struct gnwFileSystemDescriptor * 
             
     k_stor_fileSystems[fileSysIndex].used = true;
     k_stor_fileSystems[fileSysIndex].desc = *desc;
+    
     return SE_NONE;
 }
 
@@ -36,6 +37,12 @@ bool k_stor_fileSys_validateId(const size_t fileSysId) {
         return false;
     }
     if (!k_stor_fileSystems[fileSysId].desc.headerRange.length) {
+        return false;
+    }
+    if (!k_stor_fileSystems[fileSysId].desc.maxFilenameLength) {
+        return false;
+    }
+    if (!k_stor_fileSystems[fileSysId].desc.maxExtensionLength) {
         return false;
     }
     if (!k_stor_fileSystems[fileSysId].desc.directoryRange) {

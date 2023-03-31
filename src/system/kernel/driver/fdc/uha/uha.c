@@ -234,7 +234,7 @@ size_t uha_read(const uint_8 index,
     size_t totalBytes = 0;
     for (size_t currentSector = 0; currentSector < count; ++currentSector) {
         uint_8 localBuffer[config.format.sys.sectSizeBytes];
-        size_t bytes = readSector(config, sectSize, lba, localBuffer, error);
+        size_t bytes = readSector(config, sectSize, lba + currentSector, localBuffer, error);
         if (error->code) {
             proc_stopMotor(config.base, config.drive);
             return 0;
@@ -255,7 +255,9 @@ size_t uha_read(const uint_8 index,
     */
 
     proc_stopMotor(config.base, config.drive);
+    
     error->code = 0;
     error->internalCode = 0;
+
     return totalBytes;
 }
