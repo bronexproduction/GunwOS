@@ -47,8 +47,8 @@ enum gnwFileErrorCode k_stor_file_getInfo(const char * const path,
     }
 
     #warning TEST
-    char fileName[9] = "gunwsh  ";
-    char fileExtension[4] = "elf";
+    char fileName[9] = "GUNWSH  ";
+    char fileExtension[4] = "ELF";
     enum gnwFileErrorCode err = fsDesc.fileInfo(headerBytes, directoryBytes, fileName, fileExtension, fileInfo);
     if (err == GFEC_NOT_FOUND) {
         return GFEC_NOT_FOUND;
