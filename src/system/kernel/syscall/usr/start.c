@@ -113,7 +113,7 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
             /*
                 Get file info
             */
-            struct gnwStorFileInfo fileInfo;
+            struct gnwFileInfo fileInfo;
             const enum gnwFileErrorCode fErr = k_stor_file_getInfo(path, pathLen, &fileInfo);
             if (fErr != GFEC_NONE) {
                 switch (fErr) {
