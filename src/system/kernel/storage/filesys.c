@@ -29,6 +29,24 @@ enum k_stor_error k_stor_fileSys_install(const struct gnwFileSystemDescriptor * 
 }
 
 bool k_stor_fileSys_validateId(const size_t fileSysId) {
-    #warning TO BE IMPLEMENTED
-    return false;
+    if (fileSysId >= MAX_FILESYS) {
+        return false;
+    }
+    if (!k_stor_fileSystems[fileSysId].used) {
+        return false;
+    }
+    if (!k_stor_fileSystems[fileSysId].desc.headerRange.length) {
+        return false;
+    }
+    if (!k_stor_fileSystems[fileSysId].desc.directoryRange) {
+        return false;
+    }
+    if (!k_stor_fileSystems[fileSysId].desc.fileInfo) {
+        return false;
+    }
+    if (!k_stor_fileSystems[fileSysId].desc.detect) {
+        return false;
+    }
+    
+    return true;
 }

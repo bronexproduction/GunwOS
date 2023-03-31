@@ -209,7 +209,7 @@ enum gnwDeviceError k_dev_getById(const size_t id, struct gnwDeviceUHADesc * con
         return GDE_UNKNOWN;
     }
     
-    *desc = uhaGetDesc(id, devices[id].desc.api);
+    *desc = uhaGetDesc(id, devices[id].desc.type, devices[id].desc.api);
     return GDE_NONE;
 }
 

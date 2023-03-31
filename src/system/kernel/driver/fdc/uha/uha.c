@@ -29,7 +29,6 @@ struct gnwStorGeometry uha_driveGeometry(const uint_8 index) {
 static size_t readSector(const struct fdc_fddConfig config,
                          const enum fdc_sectSize sectSize,
                          const size_t lba,
-                         const size_t count,
                          uint_8 * const buffer,
                          struct gnwStorError * const error) {
     
@@ -84,7 +83,7 @@ static size_t readSector(const struct fdc_fddConfig config,
     }
 
     size_t currentBytes = 0;
-    size_t demandedBytes = config.format.sys.sectSizeBytes * count;
+    size_t demandedBytes = config.format.sys.sectSizeBytes;
 
     /*
         Wait for command result
@@ -153,6 +152,8 @@ static size_t readSector(const struct fdc_fddConfig config,
         /*
             Normal termination
         */
+        error->code = GSEC_NONE;
+        error->internalCode = 0;
         break;
     case 0x40:
         /*
@@ -169,12 +170,12 @@ static size_t readSector(const struct fdc_fddConfig config,
             error->internalCode = OPSTATUS_ABNORMAL_TERM;
             break;
         }
-        return 0;
+        break;
     default:
         OOPS("readSector: IC failed");
         error->code = GSEC_COMMAND_FAILED;
         error->internalCode = OPSTATUS_ABNORMAL_TERM;
-        return 0;
+        break;
     }
 
     uint_8 data;
@@ -190,10 +191,7 @@ static size_t readSector(const struct fdc_fddConfig config,
         }
     }
 
-    error->code = 0;
-    error->internalCode = 0;
-
-    return MIN(currentBytes, demandedBytes);
+    return (error->code == GSEC_NONE) ? MIN(currentBytes, demandedBytes) : 0;
 }
 
 size_t uha_read(const uint_8 index,
@@ -236,7 +234,7 @@ size_t uha_read(const uint_8 index,
     size_t totalBytes = 0;
     for (size_t currentSector = 0; currentSector < count; ++currentSector) {
         uint_8 localBuffer[config.format.sys.sectSizeBytes];
-        size_t bytes = readSector(config, sectSize, lba, count, localBuffer, error);
+        size_t bytes = readSector(config, sectSize, lba, localBuffer, error);
         if (error->code) {
             proc_stopMotor(config.base, config.drive);
             return 0;

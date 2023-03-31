@@ -13,6 +13,7 @@
 enum k_stor_error {
     SE_NONE = 0,
     SE_LIMIT_REACHED,
+    SE_INVALID_DEVICE,
     SE_UNKNOWN
 };
 

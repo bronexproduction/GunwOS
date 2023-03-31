@@ -33,3 +33,12 @@ size_t chs2lba(const uint_16 c, const uint_8 h, const uint_8 s, const uint_8 hpc
 
     return ((c * hpc + h) * spt) + (s - 1);
 }
+
+size_t sectorAlignedBytes(const size_t bytes, const struct gnwStorGeometry geometry) {
+    if (bytes % geometry.sectSizeBytes) {
+        return bytes / geometry.sectSizeBytes + geometry.sectSizeBytes;
+    }
+    else {
+        return bytes;
+    }
+}
