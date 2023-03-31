@@ -41,9 +41,12 @@ struct gnwDeviceUHA {
 /*
     Extracts UHA descriptor from UHA structure
 */
-static inline struct gnwDeviceUHADesc uhaGetDesc(const size_t identifier, const struct gnwDeviceUHA api) {
+static inline struct gnwDeviceUHADesc uhaGetDesc(const size_t identifier, 
+                                                 const enum gnwDeviceType type, 
+                                                 const struct gnwDeviceUHA api) {
     return (struct gnwDeviceUHADesc) {
         identifier,
+        type,
         api.system.desc,
         api.mem.desc,
         api.keyboard.desc,

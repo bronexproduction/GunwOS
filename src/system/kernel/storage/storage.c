@@ -94,12 +94,9 @@ static void detectFileSystem(const struct gnwDeviceUHA_driveCtrl * const uha, co
             OOPS("Invalid header bytes value");
             return;
         }
-        size_t bytesToBeRead = k_stor_fileSystems[fileSysIndex].desc.headerRange.offset + k_stor_fileSystems[fileSysIndex].desc.headerRange.length;
         const struct gnwStorGeometry geometry = uha->routine.driveGeometry(k_stor_drives[driveIndex].driveId);
-        if (bytesToBeRead % geometry.sectSizeBytes) {
-            bytesToBeRead = bytesToBeRead / geometry.sectSizeBytes + geometry.sectSizeBytes;
-        }
-
+        size_t bytesToBeRead = sectorAlignedBytes(k_stor_fileSystems[fileSysIndex].desc.headerRange.offset + k_stor_fileSystems[fileSysIndex].desc.headerRange.length,
+                                                  geometry);
         uint_8 readBuffer[bytesToBeRead];
         uint_8 headerBuffer[k_stor_fileSystems[fileSysIndex].desc.headerRange.length];
 

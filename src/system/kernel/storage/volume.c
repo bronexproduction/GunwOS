@@ -9,6 +9,8 @@
 #include "drive.h"
 #include "filesys.h"
 #include <error/panic.h>
+#include <dev/dev.h>
+#include <mem.h>
 
 struct k_stor_volume k_stor_volumes[MAX_VOLUMES];
 
@@ -29,8 +31,60 @@ bool k_stor_volume_validateId(const size_t volumeId) {
     return true;
 }
 
-enum k_stor_error k_stor_volume_readHeader(const size_t volumeId, uint_8 * const header) {
-    if (!header) {
+/*
+    Read bytes from volume
+
+    NOTE: Assumes all the identifiers and buffers validated prior to the call
+*/
+static enum k_stor_error readBytes(const size_t volumeId, const range_size_t range, uint_8 * const buffer) {
+    const struct k_stor_volume volume = k_stor_volumes[volumeId];
+    const struct k_stor_drive drive = k_stor_drives[volume.driveId];
+    struct gnwDeviceUHA uha; {
+        const enum gnwDeviceError err = k_dev_getUHAForId(drive.ctrlId, &uha);
+        if (err != GDE_NONE) {
+            return SE_INVALID_DEVICE;
+        }
+    }
+
+    const struct gnwStorGeometry geometry = uha.storage.routine.driveGeometry(drive.driveId);
+    #warning If header bytes outside the first sector then LBA can be optimized
+    const size_t offsetLBA = 0;
+    const size_t bytesToRead = sectorAlignedBytes(range.offset + range.length, geometry);
+    uint_8 readBuffer[bytesToRead]; {
+        struct gnwStorError err;
+        const size_t bytesRead = uha.storage.routine.read(drive.driveId,
+                                                          offsetLBA,
+                                                          bytesToRead / geometry.sectSizeBytes, 
+                                                          readBuffer, 
+                                                          &err);
+
+        if (err.code != GSEC_NONE) {
+            #warning TO BE IMPLEMENTED
+            // if (uha->desc.removableMedia) {
+            //     /*
+            //         Possibly no media inserted
+            //     */
+            //     #warning this error should use GSEC_MEDIA_NOT_PRESENT
+            //     return;
+            // } else {
+            //     OOPS("Header read error");
+            //     return;
+            // }
+        } else if (bytesRead != bytesToRead) {
+            // OOPS("Header read error");
+            // return;
+        }
+    }
+    
+    memcopy(readBuffer + range.offset,
+            buffer, 
+            range.length);
+
+    return SE_NONE;
+}
+
+enum k_stor_error k_stor_volume_readHeader(const size_t volumeId, uint_8 * const headerBuffer) {
+    if (!headerBuffer) {
         OOPS("Nullptr");
         return SE_UNKNOWN;
     }
@@ -39,40 +93,20 @@ enum k_stor_error k_stor_volume_readHeader(const size_t volumeId, uint_8 * const
         return SE_UNKNOWN;
     }
 
-    // struct gnwFileSystemDescriptor fsDesc = fileSys[fileSysId].desc;
-        
-    // struct gnwDeviceUHA_driveCtrl uha; {
-    //     const struct gnwDeviceError err = k_dev_getUHAForId(desc.identifier, &uha);
-    // }
-    
 
-    // struct gnwStorError err;
-    // #warning If header bytes outside the first sector then LBA can be optimized
-    // const size_t bytesRead = uha->routine.read(drives[driveIndex].driveId, 
-    //                                                0,
-    //                                                bytesToBeRead / geometry.sectSizeBytes, 
-    //                                                readBuffer, 
-    //                                                &err);
-    //     if (err.code != GSEC_NONE) {
-    //         if (uha->desc.removableMedia) {
-    //             /*
-    //                 Possibly no media inserted
-    //             */
-    //             #warning this error should use GSEC_MEDIA_NOT_PRESENT
-    //             return;
-    //         } else {
-    //             OOPS("Header read error");
-    //             return;
-    //         }
-    //     } else if (bytesRead != bytesToBeRead) {
-    //         OOPS("Header read error");
-    //         return;
-    //     }
+    const struct k_stor_fileSystem fileSystem = k_stor_fileSystems[k_stor_volumes[volumeId].fileSysId];
+    return readBytes(volumeId, fileSystem.desc.headerRange, headerBuffer);
+}
 
-    //     memcopy(readBuffer + fileSys[fileSysIndex].desc.headerRange.offset, 
-    //             headerBuffer, 
-    //             fileSys[fileSysIndex].desc.headerRange.length);
+enum k_stor_error k_stor_volume_readBytes(const size_t volumeId, const range_size_t range, uint_8 * const buffer) {
+    if (!buffer) {
+        OOPS("Nullptr");
+        return SE_UNKNOWN;
+    }
+    if (!k_stor_volume_validateId(volumeId)) {
+        OOPS("Invalid volume");
+        return SE_UNKNOWN;
+    }
 
-                return SE_NONE;
-
+    return readBytes(volumeId, range, buffer);
 }

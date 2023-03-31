@@ -8,6 +8,8 @@
 #ifndef GUNWOS_GUNWUHADESC_H
 #define GUNWOS_GUNWUHADESC_H
 
+#include <gunwdevtypes.h>
+
 #include <uha/gunwuha_system_desc.h>
 #include <uha/gunwuha_mem_desc.h>
 #include <uha/gunwuha_keyboard_desc.h>
@@ -23,6 +25,7 @@
 */
 struct gnwDeviceUHADesc {
     uint_32 identifier;
+    enum gnwDeviceType type;
     struct gnwDeviceUHA_system_desc system;       // DEV_TYPE_SYSTEM
     struct gnwDeviceUHA_mem_desc mem;             // DEV_TYPE_MEM
     struct gnwDeviceUHA_keyboard_desc keyboard;   // DEV_TYPE_KEYBOARD

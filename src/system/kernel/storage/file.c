@@ -31,11 +31,22 @@ enum gnwFileErrorCode k_stor_file_getInfo(const char * const path,
     }
     size_t fileSysId = k_stor_volumes[volumeId].fileSysId;
     struct gnwFileSystemDescriptor fsDesc = k_stor_fileSystems[fileSysId].desc;
-    uint_8 headerBytes[fsDesc.headerRange.length];
-    enum k_stor_error err = k_stor_volume_readHeader(0, headerBytes);
-    if (err != SE_NONE) {
-        return GFEC_UNKNOWN;
+    uint_8 headerBytes[fsDesc.headerRange.length]; {
+        enum k_stor_error err = k_stor_volume_readHeader(volumeId, headerBytes);
+        if (err != SE_NONE) {
+            return GFEC_UNKNOWN;
+        }
     }
+    
+    range_size_t directoryRange = fsDesc.directoryRange(headerBytes);
+    uint_8 directoryBytes[directoryRange.length]; {
+        enum k_stor_error err = k_stor_volume_readBytes(volumeId, directoryRange, directoryBytes);
+        if (err != SE_NONE) {
+            return GFEC_UNKNOWN;
+        }
+    }
+
+    
 
     return GFEC_NONE;
 }
