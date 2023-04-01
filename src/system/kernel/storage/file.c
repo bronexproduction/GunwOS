@@ -6,19 +6,21 @@
 //
 
 #include "file.h"
+#include <defs.h>
 #include "storage.h"
 #include "volume.h"
 #include "filesys.h"
 #include <error/panic.h>
 
-enum gnwFileErrorCode k_stor_file_getInfo(const char * const path, 
-                                          const size_t pathLen, 
-                                          struct gnwFileInfo * const fileInfo) {
-    if (!path || !fileInfo) {
-        OOPS("Nullptr access");
-        return GFEC_UNKNOWN;
-    }
+/*
+    Chain of file loading operations
 
+    Note: assumes pre-validated pointers
+*/
+static enum gnwFileErrorCode loadChain(const char * const path, 
+                                       const size_t pathLen, 
+                                       struct gnwFileInfo * fileInfo,
+                                       const ptr_t dst) {
     /*
         Get volume ID from path
 
@@ -49,12 +51,48 @@ enum gnwFileErrorCode k_stor_file_getInfo(const char * const path,
     #warning TEST
     char fileName[9] = "GUNWSH  ";
     char fileExtension[4] = "ELF";
+    struct gnwFileInfo localFileInfo;
+    if (!fileInfo) {
+        fileInfo = &localFileInfo;
+    }
     enum gnwFileErrorCode err = fsDesc.fileInfo(headerBytes, directoryBytes, fileName, fileExtension, fileInfo);
     if (err == GFEC_NOT_FOUND) {
         return GFEC_NOT_FOUND;
     } else if (err != GFEC_NONE) {
         return GFEC_UNKNOWN;
     }
+
+    if (!dst) {
+        return GFEC_NONE;
+    }
+
+    /*
+        Load file
+    */
+
     
+
     return GFEC_NONE;
+}
+
+enum gnwFileErrorCode k_stor_file_getInfo(const char * const path, 
+                                          const size_t pathLen, 
+                                          struct gnwFileInfo * const fileInfo) {
+    if (!path || !fileInfo) {
+        OOPS("Nullptr access");
+        return GFEC_UNKNOWN;
+    }
+
+    return loadChain(path, pathLen, fileInfo, nullptr);
+}
+
+enum gnwFileErrorCode k_stor_file_load(const char * const path,
+                                       const size_t pathLen,
+                                       const ptr_t dst) {
+    if (!path || !dst) {
+        OOPS("Nullptr access");
+        return GFEC_UNKNOWN;
+    }
+
+    return loadChain(path, pathLen, nullptr, dst);
 }

@@ -104,19 +104,15 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
         filePtr = (ptr_t)0x50000;
         fileSizeBytes = 0x10998;
     } else {
-        
+    
         /*
-            Attempt to load file from the filesystem
+            Get file info
         */
-
-        {
-            /*
-                Get file info
-            */
-            struct gnwFileInfo fileInfo;
-            const enum gnwFileErrorCode fErr = k_stor_file_getInfo(path, pathLen, &fileInfo);
-            if (fErr != GFEC_NONE) {
-                switch (fErr) {
+        
+        struct gnwFileInfo fileInfo; {
+            const enum gnwFileErrorCode err = k_stor_file_getInfo(path, pathLen, &fileInfo);
+            if (err != GFEC_NONE) {
+                switch (err) {
                 case GFEC_NOT_FOUND:
                     return GCE_NOT_FOUND;
                 default:
@@ -126,22 +122,24 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
             if (!fileInfo.sizeBytes) {
                 return GCE_OPERATION_FAILED;
             }
-            fileSizeBytes = fileInfo.sizeBytes;
-          
-            /*
-                Allocate memory 
-            */
-           
-            filePtr = (ptr_t)0x50000; /* YOLO */
+        }
+         
+        /*
+            Allocate memory 
+        */
 
+        fileSizeBytes = fileInfo.sizeBytes;
+        filePtr = (ptr_t)0x50000; /* YOLO */ {
+                    
             /*
                 Load file
             */
 
-
+            const enum gnwFileErrorCode err = k_stor_file_load(path, pathLen, filePtr);
+            if (err != GFEC_NONE) {
+                return GCE_UNKNOWN;
+            }
         }
-
-        return GCE_NONE;
     }
 
     /* 
