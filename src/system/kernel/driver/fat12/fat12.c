@@ -51,6 +51,33 @@ static range_size_t fatRange(const uint_8 * const headerBytes) {
     return range;
 }
 
+static size_t firstSector(const uint_8 * const headerBytes,
+                          const struct gnwFileInfo * const fileInfo) {
+    #warning TO BE IMPLEMENTED
+
+    return 0;
+}
+    
+static size_t nextSector(const uint_8 * const headerBytes,
+                         const uint_8 * const fatBytes,
+                         const size_t currentSector) {
+    #warning TO BE IMPLEMENTED
+
+    return 0;
+}
+
+static bool isValidForRead(const size_t sector) {
+    #warning TO BE IMPLEMENTED
+
+    return 0;
+}
+
+static bool isEOF(const size_t sector) {
+    #warning TO BE IMPLEMENTED
+
+    return 0;
+}
+
 static bool validateDirEntry(const struct dos_4_0_ebpb_t * const bpb,
                              const struct fat12_dir_t * const entry) {
     if (entry->firstLogicalCluster < MIN_FILE_CLUSTER) {
@@ -121,6 +148,10 @@ struct gnwFileSystemDescriptor k_drv_fat12_descriptor() {
         /* maxExtensionLength */ FILE_EXTENSION_MAX_LENGTH,
         /* directoryRange */ directoryRange,
         /* fatRange */ fatRange,
+        /* firstSector */ firstSector,
+        /* nextSector */ nextSector,
+        /* isValidForRead */ isValidForRead,
+        /* isEOF */ isEOF,
         /* fileInfo */ fileInfo,
         /* detect */ detect
     };

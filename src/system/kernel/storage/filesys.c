@@ -51,6 +51,18 @@ bool k_stor_fileSys_validateId(const size_t fileSysId) {
     if (!k_stor_fileSystems[fileSysId].desc.fatRange) {
         return false;
     }
+    if (!k_stor_fileSystems[fileSysId].desc.firstSector) {
+        return false;
+    }
+    if (!k_stor_fileSystems[fileSysId].desc.nextSector) {
+        return false;
+    }
+    if (!k_stor_fileSystems[fileSysId].desc.isValidForRead) {
+        return false;
+    }
+    if (!k_stor_fileSystems[fileSysId].desc.isEOF) {
+        return false;
+    }
     if (!k_stor_fileSystems[fileSysId].desc.fileInfo) {
         return false;
     }
