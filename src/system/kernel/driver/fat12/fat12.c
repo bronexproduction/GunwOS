@@ -7,6 +7,7 @@
 
 #include <driver/gunwfilesys.h>
 #include <string.h>
+#include <gunwstor.h>
 #include "model.h"
 
 #define FILE_SYSTEM_NAME_HEADER_OFFSET 0x2B
@@ -33,9 +34,44 @@ static range_size_t directoryRange(const uint_8 * const headerBytes) {
     return range;
 }
 
-static bool validateDirEntry(const struct fat12_dir_t * const entry) {
-    #warning NOT IMPLEMENTED YET
-    return false;
+static range_size_t fatRange(const uint_8 * const headerBytes) {
+    range_size_t range;
+
+    if (!headerBytes) {
+        range.offset = 0;
+        range.length = 0;
+        return range;
+    }
+
+    const struct dos_4_0_ebpb_t * const bpb = (struct dos_4_0_ebpb_t *)headerBytes;
+
+    range.offset = bpb->reservedLogicalSectors * bpb->bytesPerLogicalSector;
+    range.length = bpb->numberOfFATs * bpb->logicalSectorsPerFAT * bpb->bytesPerLogicalSector;
+
+    return range;
+}
+
+static bool validateDirEntry(const struct dos_4_0_ebpb_t * const bpb,
+                             const struct fat12_dir_t * const entry) {
+    if (entry->firstLogicalCluster < MIN_FILE_CLUSTER) {
+        return false;
+    }
+    const size_t fatSectors = bpb->numberOfFATs * bpb->logicalSectorsPerFAT;
+    const size_t dirBytes = bpb->maxRootDirectoryEntries * sizeof(struct fat12_dir_t);
+    if (dirBytes % (bpb->bytesPerLogicalSector * bpb->logicalSectorsPerCluster)) {
+        #warning invalid directory structure - shoule be checked on install
+        return false;
+    }
+    const size_t dirSectors = dirBytes / bpb->bytesPerLogicalSector;
+    const size_t maxFatEntry = bpb->totalLogicalSectors - bpb->reservedLogicalSectors - fatSectors - dirSectors + 1;
+    if (entry->firstLogicalCluster > maxFatEntry) {
+        return false;
+    }
+    if (!entry->fileSizeBytes) {
+        return false;
+    }
+    
+    return true;
 }
 
 static enum gnwFileErrorCode fileInfo(const uint_8 * const headerBytes,
@@ -57,7 +93,7 @@ static enum gnwFileErrorCode fileInfo(const uint_8 * const headerBytes,
         const struct fat12_dir_t * const dirEntry = (struct fat12_dir_t *)(directoryBytes + dirIndex * sizeof(struct fat12_dir_t));
         if (!strcmpl(name, (char *)dirEntry->filename, FILE_NAME_MAX_LENGTH) &&
             !strcmpl(extension, (char *)dirEntry->extension, FILE_EXTENSION_MAX_LENGTH)) {
-            if (!validateDirEntry(dirEntry)) {
+            if (!validateDirEntry(bpb, dirEntry)) {
                 return GFEC_NOT_FOUND;
             }
 
@@ -84,6 +120,7 @@ struct gnwFileSystemDescriptor k_drv_fat12_descriptor() {
         /* maxFilenameLength */ FILE_NAME_MAX_LENGTH,
         /* maxExtensionLength */ FILE_EXTENSION_MAX_LENGTH,
         /* directoryRange */ directoryRange,
+        /* fatRange */ fatRange,
         /* fileInfo */ fileInfo,
         /* detect */ detect
     };

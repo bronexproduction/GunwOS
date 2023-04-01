@@ -13,14 +13,66 @@
 #include <error/panic.h>
 
 /*
+    File loading
+
+    Note: assumes pre-validated pointers
+*/
+static enum gnwFileErrorCode loadFile(const size_t volumeId,
+                                      const uint_8 * const headerBytes,
+                                      const uint_8 * const directoryBytes,
+                                      const struct gnwFileSystemDescriptor fsDesc,
+                                      const ptr_t dst) {
+
+    /*
+        Load FAT
+    */
+    range_size_t fatRange = fsDesc.fatRange(headerBytes);
+    if (!fatRange.length) {
+        return GFEC_UNKNOWN;
+    }
+    uint_8 fatBytes[fatRange.length]; {
+        enum k_stor_error err = k_stor_volume_readBytes(volumeId, fatRange, fatBytes);
+        if (err != SE_NONE) {
+            return GFEC_UNKNOWN;
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // size_t currentSector = //start sector                                        
+    // while (fsDesc.isValidForRead(currentSector = fsDesc.nextSector(currentSector))) {
+    //     // read sector
+    //     // additional guards and checks
+    // }
+    // if (!fsDesc.isEOF(currentSector)) {
+    //     return GFEC_UNKNOWN;
+    // }
+
+    return GFEC_NONE;
+}
+
+/*
     Chain of file loading operations
 
     Note: assumes pre-validated pointers
 */
-static enum gnwFileErrorCode loadChain(const char * const path, 
-                                       const size_t pathLen, 
-                                       struct gnwFileInfo * fileInfo,
-                                       const ptr_t dst) {
+static enum gnwFileErrorCode loadFileChain(const char * const path, 
+                                           const size_t pathLen, 
+                                           struct gnwFileInfo * fileInfo,
+                                           const ptr_t dst) {
     /*
         Get volume ID from path
 
@@ -32,7 +84,7 @@ static enum gnwFileErrorCode loadChain(const char * const path,
         return GFEC_INVALID_PATH;
     }
     size_t fileSysId = k_stor_volumes[volumeId].fileSysId;
-    struct gnwFileSystemDescriptor fsDesc = k_stor_fileSystems[fileSysId].desc;
+    const struct gnwFileSystemDescriptor fsDesc = k_stor_fileSystems[fileSysId].desc;
     uint_8 headerBytes[fsDesc.headerRange.length]; {
         enum k_stor_error err = k_stor_volume_readHeader(volumeId, headerBytes);
         if (err != SE_NONE) {
@@ -66,13 +118,7 @@ static enum gnwFileErrorCode loadChain(const char * const path,
         return GFEC_NONE;
     }
 
-    /*
-        Load file
-    */
-
-    
-
-    return GFEC_NONE;
+    return loadFile(volumeId, headerBytes, directoryBytes, fsDesc, dst);
 }
 
 enum gnwFileErrorCode k_stor_file_getInfo(const char * const path, 
@@ -83,7 +129,7 @@ enum gnwFileErrorCode k_stor_file_getInfo(const char * const path,
         return GFEC_UNKNOWN;
     }
 
-    return loadChain(path, pathLen, fileInfo, nullptr);
+    return loadFileChain(path, pathLen, fileInfo, nullptr);
 }
 
 enum gnwFileErrorCode k_stor_file_load(const char * const path,
@@ -94,5 +140,5 @@ enum gnwFileErrorCode k_stor_file_load(const char * const path,
         return GFEC_UNKNOWN;
     }
 
-    return loadChain(path, pathLen, nullptr, dst);
+    return loadFileChain(path, pathLen, nullptr, dst);
 }

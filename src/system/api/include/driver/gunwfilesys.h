@@ -45,6 +45,17 @@ struct gnwFileSystemDescriptor {
     range_size_t (*directoryRange)(const uint_8 * const headerBytes);
 
     /*
+        Returns file allocation table range (values in bytes)
+        based on header
+
+        Params:
+        * headerBytes - file system header data
+
+        Result: range of file system allocation table in bytes
+    */
+    range_size_t (*fatRange)(const uint_8 * const headerBytes);
+
+    /*
         Returns file information for given filename and directory data
 
         Params:
