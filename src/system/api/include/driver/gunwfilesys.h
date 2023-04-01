@@ -56,6 +56,48 @@ struct gnwFileSystemDescriptor {
     range_size_t (*fatRange)(const uint_8 * const headerBytes);
 
     /*
+        Returns number of the first sector of given file
+
+        Params:
+        * headerBytes - file system header data
+        * fileInfo - information about the related file
+        
+        Result: Number of the first sector (does not have to be a valid sector number)
+    */
+    size_t (*firstSector)(const uint_8 * const headerBytes,
+                          const struct gnwFileInfo * const fileInfo);
+    
+    /*
+        Returns number of the next sector of the file
+
+        Params:
+        * headerBytes - file system header data
+        * fatBytes - file system allocation table data
+        * currentSector - number of the last read sector
+        
+        Result: Number of the next sector (does not have to be a valid sector number)
+    */
+    size_t (*nextSector)(const uint_8 * const headerBytes,
+                         const uint_8 * const fatBytes,
+                         const size_t currentSector);
+
+    /*
+        Returns if the sector number is valid for read operation
+
+        Params:
+        * sector - sector number to be validated
+    */
+    bool (*isValidForRead)(const size_t sector);
+
+    /*
+        Returns if the sector number marks an end of file
+
+        Params:
+        * sector - sector number to be checked
+    */
+    bool (*isEOF)(const size_t sector);
+
+    /*
         Returns file information for given filename and directory data
 
         Params:
