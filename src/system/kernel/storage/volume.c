@@ -110,3 +110,22 @@ enum k_stor_error k_stor_volume_readBytes(const size_t volumeId, const range_siz
 
     return readBytes(volumeId, range, buffer);
 }
+
+enum k_stor_error k_stor_volume_readSector(const size_t volumeId, const size_t sector, uint_8 * const buffer) {
+    const struct k_stor_volume volume = k_stor_volumes[volumeId];
+    const struct k_stor_drive drive = k_stor_drives[volume.driveId];
+    struct gnwDeviceUHA uha; {
+        const enum gnwDeviceError err = k_dev_getUHAForId(drive.ctrlId, &uha);
+        if (err != GDE_NONE) {
+            return SE_INVALID_DEVICE;
+        }
+    }
+
+    const struct gnwStorGeometry geometry = uha.storage.routine.driveGeometry(drive.driveId);
+    range_size_t readRange;
+
+    readRange.offset = sector * geometry.sectSizeBytes;
+    readRange.length = geometry.sectSizeBytes;
+
+    return k_stor_volume_readBytes(volumeId, readRange, buffer);
+}

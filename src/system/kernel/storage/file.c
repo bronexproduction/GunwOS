@@ -7,6 +7,7 @@
 
 #include "file.h"
 #include <defs.h>
+#include <mem.h>
 #include "storage.h"
 #include "volume.h"
 #include "filesys.h"
@@ -26,6 +27,7 @@ static enum gnwFileErrorCode loadFile(const size_t volumeId,
     /*
         Load FAT
     */
+   
     range_size_t fatRange = fsDesc.fatRange(headerBytes);
     if (!fatRange.length) {
         return GFEC_UNKNOWN;
@@ -35,15 +37,32 @@ static enum gnwFileErrorCode loadFile(const size_t volumeId,
         if (err != SE_NONE) {
             return GFEC_UNKNOWN;
         }
+        if (!fsDesc.fatVerify(headerBytes, fatBytes)) {
+            return GFEC_UNKNOWN;
+        }
     }
 
-    size_t currentSector = fsDesc.firstSector(headerBytes, fileInfo);
+    struct gnwFileSystemLocation currentLocation = fsDesc.fileStartLocation(headerBytes, fileInfo);
+    size_t totalBytes = 0;
+    const size_t expectedBytes = fsDesc.allocUnitAlignedBytes(headerBytes, fileInfo->sizeBytes);
     do {
-        // read sector
-        // additional guards and checks
-    } while (fsDesc.isValidForRead(currentSector = fsDesc.nextSector(headerBytes, fatBytes, currentSector))); 
+        uint_8 sectorBuffer[currentLocation.sizeBytes];
+        enum k_stor_error err = k_stor_volume_readSector(volumeId, currentLocation.sector, sectorBuffer);
+        if (err != SE_NONE) {
+            return GFEC_UNKNOWN;
+        }
 
-    if (!fsDesc.isEOF(currentSector)) {
+        memcopy(sectorBuffer,
+                dst + totalBytes,
+                currentLocation.sizeBytes);
+
+        totalBytes += currentLocation.sizeBytes;
+        currentLocation = fsDesc.nextLocation(headerBytes, fatBytes, currentLocation);
+        #warning HANDLE BUFFER OVERFLOW - expected bytes 
+        (void)expectedBytes;
+    } while (fsDesc.isValidForRead(currentLocation)); 
+
+    if (!fsDesc.isEOF(currentLocation)) {
         return GFEC_UNKNOWN;
     }
 

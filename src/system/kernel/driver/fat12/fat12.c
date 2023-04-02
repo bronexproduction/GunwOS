@@ -7,32 +7,15 @@
 
 #include <driver/gunwfilesys.h>
 #include <string.h>
+#include <utils.h>
 #include <gunwstor.h>
 #include "model.h"
 
-#define FILE_SYSTEM_NAME_HEADER_OFFSET 0x2B
 #define FILE_SYSTEM_NAME "FAT12   "
 #define FILE_SYSTEM_NAME_BYTES 8
 #define FILE_NAME_MAX_LENGTH 8
 #define FILE_EXTENSION_MAX_LENGTH 3
 #define MIN_FILE_CLUSTER 2
-
-static range_size_t directoryRange(const uint_8 * const headerBytes) {
-    range_size_t range;
-
-    if (!headerBytes) {
-        range.offset = 0;
-        range.length = 0;
-        return range;
-    }
-
-    const struct dos_4_0_ebpb_t * const bpb = (struct dos_4_0_ebpb_t *)headerBytes;
-
-    range.offset = (bpb->reservedLogicalSectors + (bpb->numberOfFATs * bpb->logicalSectorsPerFAT)) * bpb->bytesPerLogicalSector;
-    range.length = bpb->maxRootDirectoryEntries * sizeof(struct fat12_dir_t);
-
-    return range;
-}
 
 static range_size_t fatRange(const uint_8 * const headerBytes) {
     range_size_t range;
@@ -51,31 +34,95 @@ static range_size_t fatRange(const uint_8 * const headerBytes) {
     return range;
 }
 
-static size_t firstSector(const uint_8 * const headerBytes,
-                          const struct gnwFileInfo * const fileInfo) {
-    #warning TO BE IMPLEMENTED
+static range_size_t directoryRange(const uint_8 * const headerBytes) {
+    range_size_t range;
 
-    return 0;
+    if (!headerBytes) {
+        range.offset = 0;
+        range.length = 0;
+        return range;
+    }
+
+    const struct dos_4_0_ebpb_t * const bpb = (struct dos_4_0_ebpb_t *)headerBytes;
+    const range_size_t fatTablesRange = fatRange(headerBytes);
+
+    range.offset = fatTablesRange.offset + fatTablesRange.length;
+    range.length = bpb->maxRootDirectoryEntries * sizeof(struct fat12_dir_t);
+
+    return range;
+}
+
+static size_t clusterStartSector(const uint_8 * const headerBytes,
+                                 const size_t cluster) {
+    const struct dos_4_0_ebpb_t * const bpb = (struct dos_4_0_ebpb_t *)headerBytes;
+    const range_size_t dirRange = directoryRange(headerBytes);
+    const size_t firstClusterSector = (dirRange.offset + dirRange.length) / bpb->bytesPerLogicalSector;
+
+    return firstClusterSector + (cluster - MIN_FILE_CLUSTER) * bpb->logicalSectorsPerCluster;
+}
+
+static size_t nextCluster(const uint_8 * const fatBytes,
+                          const size_t cluster) {
+    uint_16 lsbIndex = (3 * cluster) / 2;
+    uint_8 lsb = fatBytes[lsbIndex];
+    uint_8 msb = fatBytes[lsbIndex + 1]; 
+
+    return (cluster % 2) ? (msb << 4) | (lsb >> 4) : ((msb & 0xF) << 8) | lsb;
+}
+
+
+static bool fatVerify(const uint_8 * const headerBytes,
+                      const uint_8 * const fatBytes) {
+    const struct dos_4_0_ebpb_t * const bpb = (struct dos_4_0_ebpb_t *)headerBytes;
+    
+    for (size_t fatIndex = 1; fatIndex < bpb->numberOfFATs; ++fatIndex) {
+        return !strcmpl((char *)fatBytes, 
+                        (char *)fatBytes + fatIndex * bpb->logicalSectorsPerFAT * bpb->bytesPerLogicalSector, 
+                        bpb->logicalSectorsPerFAT * bpb->bytesPerLogicalSector);
+    }
+    
+    return false;
+}
+
+static struct gnwFileSystemLocation fileStartLocation(const uint_8 * const headerBytes,
+                                                      const struct gnwFileInfo * const fileInfo) {
+    const struct dos_4_0_ebpb_t * const bpb = (struct dos_4_0_ebpb_t *)headerBytes;
+    struct gnwFileSystemLocation startLocation;
+
+    startLocation.allocUnit = fileInfo->allocUnit;
+    startLocation.sector = clusterStartSector(headerBytes, startLocation.allocUnit);
+    startLocation.sizeBytes = bpb->bytesPerLogicalSector;
+
+    return startLocation;
 }
     
-static size_t nextSector(const uint_8 * const headerBytes,
-                         const uint_8 * const fatBytes,
-                         const size_t currentSector) {
-    #warning TO BE IMPLEMENTED
+static struct gnwFileSystemLocation nextLocation(const uint_8 * const headerBytes,
+                                                 const uint_8 * const fatBytes,
+                                                 const struct gnwFileSystemLocation currentLocation) {
+    const struct dos_4_0_ebpb_t * const bpb = (struct dos_4_0_ebpb_t *)headerBytes;
 
-    return 0;
+    struct gnwFileSystemLocation nextLocation;
+
+    if ((currentLocation.sector + 1) % bpb->logicalSectorsPerCluster) {
+        nextLocation.allocUnit = currentLocation.allocUnit;
+        nextLocation.sector = currentLocation.sector + 1;
+    }
+    else {
+        nextLocation.allocUnit = nextCluster(fatBytes, currentLocation.allocUnit);
+        nextLocation.sector = clusterStartSector(headerBytes, nextLocation.allocUnit);
+    }
+    nextLocation.sizeBytes = bpb->bytesPerLogicalSector;
+
+    return nextLocation;
 }
 
-static bool isValidForRead(const size_t sector) {
-    #warning TO BE IMPLEMENTED
-
-    return 0;
+static bool isValidForRead(const struct gnwFileSystemLocation location) {
+    #warning CHECK IF WITHIN PARTITION BOUNDS!
+    return IN_RANGE(MIN_FILE_CLUSTER, location.allocUnit, 0xFEF);
 }
 
-static bool isEOF(const size_t sector) {
-    #warning TO BE IMPLEMENTED
-
-    return 0;
+static bool isEOF(const struct gnwFileSystemLocation location) {
+    return IN_RANGE(0xFF8, location.allocUnit, 0xFFF);
 }
 
 static bool validateDirEntry(const struct dos_4_0_ebpb_t * const bpb,
@@ -125,6 +172,7 @@ static enum gnwFileErrorCode fileInfo(const uint_8 * const headerBytes,
             }
 
             fileInfo->sizeBytes = dirEntry->fileSizeBytes;
+            fileInfo->allocUnit = dirEntry->firstLogicalCluster;
 
             return GFEC_NONE;
         }
@@ -133,9 +181,32 @@ static enum gnwFileErrorCode fileInfo(const uint_8 * const headerBytes,
     return GFEC_NOT_FOUND;
 }
 
-static bool detect(const uint_8 * const header) {
-    #warning to be improved?
-    return !strcmpl((char *)header + FILE_SYSTEM_NAME_HEADER_OFFSET, FILE_SYSTEM_NAME, FILE_SYSTEM_NAME_BYTES);
+static size_t allocUnitAlignedBytes(const uint_8 * const headerBytes,
+                                    const size_t bytes) {
+    const struct dos_4_0_ebpb_t * const bpb = (struct dos_4_0_ebpb_t *)headerBytes;
+
+    return aligned(bytes, bpb->bytesPerLogicalSector * bpb->logicalSectorsPerCluster);
+}
+
+static bool detect(const uint_8 * const headerBytes) {
+    const struct dos_4_0_ebpb_t * const bpb = (struct dos_4_0_ebpb_t *)headerBytes;
+
+    if (!bpb->numberOfFATs) {
+        return false;
+    }
+    if (!bpb->logicalSectorsPerFAT) {
+        return false;
+    }
+    if (!bpb->bytesPerLogicalSector) {
+        return false;
+    }
+    if (!bpb->maxRootDirectoryEntries) {
+        return false;
+    }
+
+    #warning to be improved
+
+    return !strcmpl((char *)bpb->fileSystemType, FILE_SYSTEM_NAME, FILE_SYSTEM_NAME_BYTES);
 }
 
 struct gnwFileSystemDescriptor k_drv_fat12_descriptor() {
@@ -148,11 +219,13 @@ struct gnwFileSystemDescriptor k_drv_fat12_descriptor() {
         /* maxExtensionLength */ FILE_EXTENSION_MAX_LENGTH,
         /* directoryRange */ directoryRange,
         /* fatRange */ fatRange,
-        /* firstSector */ firstSector,
-        /* nextSector */ nextSector,
+        /* fatVerify */ fatVerify,
+        /* fileStartLocation */ fileStartLocation,
+        /* nextLocation */ nextLocation,
         /* isValidForRead */ isValidForRead,
         /* isEOF */ isEOF,
         /* fileInfo */ fileInfo,
+        /* allocUnitAlignedBytes */ allocUnitAlignedBytes,
         /* detect */ detect
     };
 }
