@@ -18,6 +18,13 @@ struct gnwFileInfo {
         File size in bytes
     */
     size_t sizeBytes;
+
+    /*
+        Identifier/index of the allocation unit
+
+        E.g. first FAT cluster
+    */
+    size_t allocUnit;
 };
 
 /*

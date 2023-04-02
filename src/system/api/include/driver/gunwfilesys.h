@@ -11,6 +11,12 @@
 #include <types.h>
 #include <gunwfile.h>
 
+struct gnwFileSystemLocation {
+    size_t sector;
+    size_t allocUnit;
+    size_t sizeBytes;
+};
+
 /*
     File system descriptor
 
@@ -54,6 +60,18 @@ struct gnwFileSystemDescriptor {
         Result: range of file system allocation table in bytes
     */
     range_size_t (*fatRange)(const uint_8 * const headerBytes);
+    
+    /*
+        Checks if file allocation table is valid
+
+        Params:
+        * headerBytes - file system header data
+        * headerBytes - file allocation table data
+
+        Result: `true` if valid, `false` otherwise
+    */
+    bool (*fatVerify)(const uint_8 * const headerBytes,
+                      const uint_8 * const fatBytes);
 
     /*
         Returns number of the first sector of given file
@@ -62,10 +80,10 @@ struct gnwFileSystemDescriptor {
         * headerBytes - file system header data
         * fileInfo - information about the related file
         
-        Result: Number of the first sector (does not have to be a valid sector number)
+        Result: First sector info (does not have to be a valid sector/allocation unit number)
     */
-    size_t (*firstSector)(const uint_8 * const headerBytes,
-                          const struct gnwFileInfo * const fileInfo);
+    struct gnwFileSystemLocation (*fileStartLocation)(const uint_8 * const headerBytes,
+                                                      const struct gnwFileInfo * const fileInfo);
     
     /*
         Returns number of the next sector of the file
@@ -75,27 +93,27 @@ struct gnwFileSystemDescriptor {
         * fatBytes - file system allocation table data
         * currentSector - number of the last read sector
         
-        Result: Number of the next sector (does not have to be a valid sector number)
+        Result: First sector info (does not have to be a valid sector/allocation unit number)
     */
-    size_t (*nextSector)(const uint_8 * const headerBytes,
-                         const uint_8 * const fatBytes,
-                         const size_t currentSector);
+    struct gnwFileSystemLocation (*nextLocation)(const uint_8 * const headerBytes,
+                                                 const uint_8 * const fatBytes,
+                                                 const struct gnwFileSystemLocation currentLocation);
 
     /*
-        Returns if the sector number is valid for read operation
+        Returns if the location is valid for read operation
 
         Params:
-        * sector - sector number to be validated
+        * location - location to be validated
     */
-    bool (*isValidForRead)(const size_t sector);
+    bool (*isValidForRead)(const struct gnwFileSystemLocation location);
 
     /*
         Returns if the sector number marks an end of file
 
         Params:
-        * sector - sector number to be checked
+        * location - location to be checked
     */
-    bool (*isEOF)(const size_t sector);
+    bool (*isEOF)(const struct gnwFileSystemLocation location);
 
     /*
         Returns file information for given filename and directory data
@@ -114,6 +132,18 @@ struct gnwFileSystemDescriptor {
                                       const char * const name, 
                                       const char * const extension, 
                                       struct gnwFileInfo * const fileInfo);
+
+    /*
+        Returns value of `bytes` aligned to match allocation unit size
+
+        Params:
+        * headerBytes - file system header data
+        * bytes - number of bytes to be aligned
+
+        Result: value of `bytes` with an alignment applied
+    */
+    size_t (*allocUnitAlignedBytes)(const uint_8 * const headerBytes,
+                                    const size_t bytes);
 
     /*
         Checks if header contains valid
