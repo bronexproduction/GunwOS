@@ -47,9 +47,13 @@ static enum k_stor_error readBytes(const size_t volumeId, const range_size_t ran
     }
 
     const struct gnwStorGeometry geometry = uha.storage.routine.driveGeometry(drive.driveId);
-    #warning If header bytes outside the first sector then LBA can be optimized
-    const size_t offsetLBA = 0;
-    const size_t bytesToRead = sectorAlignedBytes(range.offset + range.length, geometry);
+    
+    const size_t offsetLBA = range.offset / geometry.sectSizeBytes;
+    range_size_t adjustedRange;
+    adjustedRange.offset = range.offset % geometry.sectSizeBytes;
+    adjustedRange.length = range.length;
+    
+    const size_t bytesToRead = sectorAlignedBytes(adjustedRange.offset + adjustedRange.length, geometry);
     uint_8 readBuffer[bytesToRead]; {
         struct gnwStorError err;
         const size_t bytesRead = uha.storage.routine.read(drive.driveId,
@@ -76,9 +80,9 @@ static enum k_stor_error readBytes(const size_t volumeId, const range_size_t ran
         }
     }
     
-    memcopy(readBuffer + range.offset,
+    memcopy(readBuffer + adjustedRange.offset,
             buffer, 
-            range.length);
+            adjustedRange.length);
 
     return SE_NONE;
 }

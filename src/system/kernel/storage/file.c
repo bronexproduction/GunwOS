@@ -28,6 +28,9 @@ static enum gnwFileErrorCode loadFile(const size_t volumeId,
         Load FAT
     */
    
+    extern time_t k_tmr_getMs();
+    const size_t startTime = k_tmr_getMs();
+
     range_size_t fatRange = fsDesc.fatRange(headerBytes);
     if (!fatRange.length) {
         return GFEC_UNKNOWN;
@@ -58,9 +61,12 @@ static enum gnwFileErrorCode loadFile(const size_t volumeId,
 
         totalBytes += currentLocation.sizeBytes;
         currentLocation = fsDesc.nextLocation(headerBytes, fatBytes, currentLocation);
-        #warning HANDLE BUFFER OVERFLOW - expected bytes 
+        #warning HANDLE BUFFER OVERFLOW - expected bytes, expected has bad value
         (void)expectedBytes;
     } while (fsDesc.isValidForRead(currentLocation)); 
+
+    const size_t elapsed = k_tmr_getMs() - startTime;
+    (void)elapsed;
 
     if (!fsDesc.isEOF(currentLocation)) {
         return GFEC_UNKNOWN;
