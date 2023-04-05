@@ -1,11 +1,11 @@
 //
-//  mem.h
+//  mem.c
 //  GunwOS
 //
 //  Created by Artur Danielewski on 08.03.2020.
 //
 
-#include "mem.h"
+#include "include/mem.h"
 
 void memset(void *ptr, const uint_8 val, size_t bytes) {
     uint_8 *p = (uint_8 *)ptr;

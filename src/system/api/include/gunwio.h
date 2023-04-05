@@ -8,7 +8,9 @@
 #ifndef GUNWOS_GUNWIO_H
 #define GUNWOS_GUNWIO_H
 
-#include "scl_def.h"
+#include <scl_def.h>
+#include <gunwdev.h>
+#include <string.h>
 
 /*
     Print string to debug output
@@ -19,7 +21,10 @@
     Return value: number of bytes written or -1 on error
 */
 SYSCALL_DECL int_32 debugPrint(const char * const buffer) {
+    CHECKPTR(buffer);
+    
     SYSCALL_PAR1(buffer);
+    SYSCALL_PAR2(strlen(buffer));
 
     SYSCALL_USER_FUNC(DEBUG_PRINT);
     SYSCALL_USER_INT;

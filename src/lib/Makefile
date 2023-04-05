@@ -1,27 +1,19 @@
-LFLAGS=-melf_i386
-LFLAGS_DRY=$(LFLAGS)
-LFLAGS_FINAL=$(LFLAGS) -i
+export LIB_CFLAGS=-std=c11 -c -ffreestanding -Wall -Wextra -ggdb $(CFLAGS_GLOBAL)
+export LIB_CXXFLAGS=-std=c++11 -c -ffreestanding -Wall -Wextra -ggdb $(CXXFLAGS_GLOBAL)
+export LIB_LFLAGS=-m$(L_OUTFORMAT) -i
 
 O_DIR_LISTING=find . -maxdepth 1 -name '*.o' -type f
 
-MODULES=	stdgunw \
-			# cxxabi
+MODULE_DIR_LISTING=find . -mindepth 1 -maxdepth 1 -type d
+MODULES=$(shell $(MODULE_DIR_LISTING))
 
 .PHONY: all $(MODULES)
 
-all: lib.o clean_o
-
-lib.o: $(MODULES) link_dry_run
-	$(L) $(LFLAGS_FINAL) -o lib.o $(shell $(O_DIR_LISTING))
+all: $(MODULES) clean_o
 
 $(MODULES):
 	make -C $@
 	mv $@/$@.o $@.o
 
-# WORKAROUND: Checks if there are any unresolved symbols in the library
-# to make sure there are no external dependencies
-link_dry_run:
-	$(L) $(LFLAGS_DRY) -o lib_dry.o $(shell $(O_DIR_LISTING)) && rm lib_dry.o
-
 clean_o:
-	find . -type f -name '*.o' ! -name 'lib.o' -delete
+	find . -mindepth 2 -type f -name '*.o' -delete

@@ -73,6 +73,11 @@
     "utility": "c",
     "cmath": "c",
     "complex": "c",
-    "*.def": "c"
+    "*.def": "c",
+    "any": "c",
+    "executor": "c",
+    "memory_resource": "c",
+    "scoped_allocator": "c",
+    "rope": "c"
   }
 }
