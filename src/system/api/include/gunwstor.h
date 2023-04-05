@@ -58,6 +58,7 @@ struct gnwStorGeometry {
 enum gnwStorErrorCode {
     GSEC_NONE = 0,
     GSEC_DRIVE_NOT_PRESENT,
+    GSEC_MEDIA_NOT_PRESENT,
     GSEC_API_UNAVAILABLE,
     GSEC_INVALID_FORMAT,
     GSEC_COMMAND_FAILED,
@@ -93,5 +94,14 @@ struct gnwStorCHS lba2chs(const uint_32 lba, const uint_8 hpc, const uint_16 spt
     * spt - Sector-per-track count
 */
 size_t chs2lba(const uint_16 c, const uint_8 h, const uint_8 s, const uint_8 hpc, const uint_16 spt);
+
+/*
+    Returns size in bytes aligned to full sectors for given geometry
+
+    Params:
+    * bytes - number of bytes to be aligned to full sectors
+    * geometry - drive geometry to be aligned with
+*/
+size_t sectorAlignedBytes(const size_t bytes, const struct gnwStorGeometry geometry);
 
 #endif // GUNWOS_GUNWSTOR_H

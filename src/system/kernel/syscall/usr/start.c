@@ -13,6 +13,7 @@
 #include <hal/mem/mem.h>
 #include <hal/proc/proc.h>
 #include <error/panic.h>
+#include <storage/file.h>
 
 enum gnwCtrlError loadElf(const ptr_t filePtr, 
                           const size_t fileSizeBytes, 
@@ -101,9 +102,44 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
     size_t fileSizeBytes;
     if (pathLen == 3 && !strcmpl("cli", (const char *)absPathPtr, pathLen)) {
         filePtr = (ptr_t)0x50000;
-        fileSizeBytes = 0x10814;
+        fileSizeBytes = 0x10998;
     } else {
-        return GCE_NOT_FOUND;
+    
+        /*
+            Get file info
+        */
+        
+        struct gnwFileInfo fileInfo; {
+            const enum gnwFileErrorCode err = k_stor_file_getInfo(path, pathLen, &fileInfo);
+            if (err != GFEC_NONE) {
+                switch (err) {
+                case GFEC_NOT_FOUND:
+                    return GCE_NOT_FOUND;
+                default:
+                    return GCE_UNKNOWN;
+                }
+            }
+            if (!fileInfo.sizeBytes) {
+                return GCE_OPERATION_FAILED;
+            }
+        }
+         
+        /*
+            Allocate memory 
+        */
+
+        fileSizeBytes = fileInfo.sizeBytes;
+        filePtr = (ptr_t)0x50000; /* YOLO */ {
+                    
+            /*
+                Load file
+            */
+
+            const enum gnwFileErrorCode err = k_stor_file_load(path, pathLen, filePtr);
+            if (err != GFEC_NONE) {
+                return GCE_UNKNOWN;
+            }
+        }
     }
 
     /* 

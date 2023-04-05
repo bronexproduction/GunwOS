@@ -76,6 +76,8 @@ static uint_8 validate(const struct gnwDeviceDescriptor * const descriptor) {
         return 0;
     }
 
+    #warning VALIDATE UHA FOR EVERY TYPE (values and routines)
+
     return 1;
 }
 
@@ -206,24 +208,39 @@ enum gnwDeviceError k_dev_getById(const size_t id, struct gnwDeviceUHADesc * con
         OOPS("Device descriptor nullptr");
         return GDE_UNKNOWN;
     }
-
-    *desc = uhaGetDesc(id, devices[id].desc.api);
+    
+    *desc = uhaGetDesc(id, devices[id].desc.type, devices[id].desc.api);
     return GDE_NONE;
 }
 
 enum gnwDeviceError k_dev_getByType(const enum gnwDeviceType type, struct gnwDeviceUHADesc * const desc) {
     if (!desc) {
-        OOPS("Device descriptor descriptor over limit");
+        OOPS("Device descriptor nullptr");
         return GDE_UNKNOWN;
     }
 
     for (size_t index = 0; index < MAX_DEVICES; ++index) {
-        if (devices[index].desc.type == type) {
+        if (devices[index].desc.type & type) {
             return k_dev_getById(index, desc);
         }
     }
 
     return GDE_NOT_FOUND;
+}
+
+enum gnwDeviceError k_dev_getUHAForId(const size_t id, struct gnwDeviceUHA * const uha) {
+    if (!validateInstalledId(id)) {
+        OOPS("Device identifier invalid");
+        return GDE_UNKNOWN;
+    }
+    
+    if (!uha) {
+        OOPS("UHA descriptor nullptr");
+        return GDE_UNKNOWN;
+    }
+
+    *uha = devices[id].desc.api;
+    return GDE_NONE;
 }
 
 enum gnwDeviceError k_dev_acquireHold(const procId_t processId, const size_t deviceId) {

@@ -56,7 +56,7 @@ static struct gnwDeviceUHA uha() {
 
 struct gnwDeviceDescriptor k_drv_display_descriptor() {
     return (struct gnwDeviceDescriptor) {
-        /* type */ DEV_TYPE_DISPLAY,
+        /* type */ DEV_TYPE_DISPLAY | DEV_TYPE_MEM,
         /* api */ uha(),
         /* driver */ (struct gnwDeviceDriver) {
             /* io */ (struct gnwDeviceIO) {

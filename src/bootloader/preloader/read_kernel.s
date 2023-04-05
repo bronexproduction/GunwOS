@@ -14,7 +14,6 @@ BITS 16
 %include "io/fat/fat12err.s"
 
 BOOT_KERNEL_FILENAME                db "KERNEL  GFB"
-BOOT_CLI_FILENAME                   db "GUNWSH  ELF"
 FAT12_READ_FILE_SIZE_LIMIT_BYTES    equ (0xA0000 - KERNEL_ADDR)
 
 ; Read kernel binary
@@ -61,14 +60,6 @@ read_kernel:
     
     mov ax, BOOT_KERNEL_FILENAME
     mov di, KERNEL_SEG
-    call fat12_loadFile
-
-    ; ---------------------------------------
-    ; TEMPORARY: Fetch GunwShell from filesystem 
-    ; ---------------------------------------
-    
-    mov ax, BOOT_CLI_FILENAME
-    mov di, CLI_SEG
     call fat12_loadFile
 
 read_kernel_success:

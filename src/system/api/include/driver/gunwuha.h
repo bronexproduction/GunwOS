@@ -28,10 +28,10 @@
 */
 struct gnwDeviceUHA {
     struct gnwDeviceUHA_system system;      // DEV_TYPE_SYSTEM
-    struct gnwDeviceUHA_mem mem;            // memory-mapped devices
+    struct gnwDeviceUHA_mem mem;            // DEV_TYPE_MEM
     struct gnwDeviceUHA_keyboard keyboard;  // DEV_TYPE_KEYBOARD
     struct gnwDeviceUHA_fdc fdc;            // DEV_TYPE_FDC
-    struct gnwDeviceUHA_driveCtrl storage;  // for storage devices
+    struct gnwDeviceUHA_driveCtrl storage;  // DEV_TYPE_STORAGE
     struct gnwDeviceUHA_char_in charIn;     // DEV_TYPE_CHAR_IN
     struct gnwDeviceUHA_char_out charOut;   // DEV_TYPE_CHAR_OUT
     struct gnwDeviceUHA_display display;    // DEV_TYPE_DISPLAY
@@ -41,9 +41,12 @@ struct gnwDeviceUHA {
 /*
     Extracts UHA descriptor from UHA structure
 */
-static inline struct gnwDeviceUHADesc uhaGetDesc(const size_t identifier, const struct gnwDeviceUHA api) {
+static inline struct gnwDeviceUHADesc uhaGetDesc(const size_t identifier, 
+                                                 const enum gnwDeviceType type, 
+                                                 const struct gnwDeviceUHA api) {
     return (struct gnwDeviceUHADesc) {
         identifier,
+        type,
         api.system.desc,
         api.mem.desc,
         api.keyboard.desc,

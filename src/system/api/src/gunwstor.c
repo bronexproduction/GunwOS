@@ -6,6 +6,7 @@
 //
 
 #include <gunwstor.h>
+#include <utils.h>
 
 struct gnwStorCHS lba2chs(const uint_32 lba, const uint_8 hpc, const uint_16 spt) {
     struct gnwStorCHS chs = {0};
@@ -32,4 +33,8 @@ size_t chs2lba(const uint_16 c, const uint_8 h, const uint_8 s, const uint_8 hpc
     }
 
     return ((c * hpc + h) * spt) + (s - 1);
+}
+
+size_t sectorAlignedBytes(const size_t bytes, const struct gnwStorGeometry geometry) {
+    return aligned(bytes, geometry.sectSizeBytes);
 }

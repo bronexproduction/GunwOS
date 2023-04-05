@@ -29,7 +29,6 @@ struct gnwStorGeometry uha_driveGeometry(const uint_8 index) {
 static size_t readSector(const struct fdc_fddConfig config,
                          const enum fdc_sectSize sectSize,
                          const size_t lba,
-                         const size_t count,
                          uint_8 * const buffer,
                          struct gnwStorError * const error) {
     
@@ -84,7 +83,7 @@ static size_t readSector(const struct fdc_fddConfig config,
     }
 
     size_t currentBytes = 0;
-    size_t demandedBytes = config.format.sys.sectSizeBytes * count;
+    size_t demandedBytes = config.format.sys.sectSizeBytes;
 
     /*
         Wait for command result
@@ -138,19 +137,50 @@ static size_t readSector(const struct fdc_fddConfig config,
 
         return 0;
     }
-
-    if ((sr0 & RANGE_SR0_IC) == 0x40) {
-        OOPS("readSector: IC failed");
+    uint_8 sr1;
+    s = pullData(config.base, &sr1);
+    if (s != OPSTATUS_OK) {
+        OOPS("readSector: pull sr1 failed");
         error->code = GSEC_COMMAND_FAILED;
-        error->internalCode = OPSTATUS_ABNORMAL_TERM;
+        error->internalCode = s;
 
         return 0;
     }
 
+    switch (sr0 & RANGE_SR0_IC) {
+    case 0x00:
+        /*
+            Normal termination
+        */
+        error->code = GSEC_NONE;
+        error->internalCode = 0;
+        break;
+    case 0x40:
+        /*
+            Abnormal termination
+        */
+        switch (sr1) {
+        case BIT_SR1_EN:
+            error->code = GSEC_COMMAND_FAILED;
+            error->internalCode = OPSTATUS_END_OF_CYLINDER;
+            break;
+        default:
+            OOPS("readSector: IC failed");
+            error->code = GSEC_COMMAND_FAILED;
+            error->internalCode = OPSTATUS_ABNORMAL_TERM;
+            break;
+        }
+        break;
+    default:
+        OOPS("readSector: IC failed");
+        error->code = GSEC_COMMAND_FAILED;
+        error->internalCode = OPSTATUS_ABNORMAL_TERM;
+        break;
+    }
+
     uint_8 data;
-    
-    for (int i = 0; i < 6; ++i) {
-        // read ST 1, ST 2, C, H, R, N
+    for (int i = 0; i < 5; ++i) {
+        // read ST 2, C, H, R, N
         s = pullData(config.base, &data);
         if (s != OPSTATUS_OK) {
             OOPS("readSector: pull register failed");
@@ -161,10 +191,7 @@ static size_t readSector(const struct fdc_fddConfig config,
         }
     }
 
-    error->code = 0;
-    error->internalCode = 0;
-
-    return MIN(currentBytes, demandedBytes);
+    return (error->code == GSEC_NONE) ? MIN(currentBytes, demandedBytes) : 0;
 }
 
 size_t uha_read(const uint_8 index,
@@ -207,7 +234,8 @@ size_t uha_read(const uint_8 index,
     size_t totalBytes = 0;
     for (size_t currentSector = 0; currentSector < count; ++currentSector) {
         uint_8 localBuffer[config.format.sys.sectSizeBytes];
-        size_t bytes = readSector(config, sectSize, lba, count, localBuffer, error);
+
+        size_t bytes = readSector(config, sectSize, lba + currentSector, localBuffer, error);
         if (error->code) {
             proc_stopMotor(config.base, config.drive);
             return 0;
@@ -228,7 +256,9 @@ size_t uha_read(const uint_8 index,
     */
 
     proc_stopMotor(config.base, config.drive);
+    
     error->code = 0;
     error->internalCode = 0;
+
     return totalBytes;
 }

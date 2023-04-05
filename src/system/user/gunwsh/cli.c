@@ -125,7 +125,7 @@ static void prompt() {
     memnull(cmdBuf, CMD_LEN_MAX * sizeof(char) + 1);
     cmdBufIndex = 0;
 
-    user_cli_puts("[GunwCLI]: ");
+    user_cli_puts("[GunwSH]: ");
 }
 
 static void s_cli_init() {
@@ -190,7 +190,7 @@ static void s_cli_init() {
     
 #warning IO_GENERAL_FAILURE not handled at all
 
-    user_cli_puts("GunwShell 0.0.4_DEV started. (C) Bronex Production 2023\n\n");
+    user_cli_puts("GunwOS 0.0.5_DEV started. (C) Bronex Production 2023\n\n");
 
     prompt();
 }
