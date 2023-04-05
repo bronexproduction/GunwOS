@@ -16,8 +16,8 @@ extern "C" {
 #[no_mangle]
 fn cmd_help(_params: &[char]) {
     let message = "Command not recognized: help - did you mean \"halp\"?";
-    let message_null_terminated = CStr::new(message).unwrap();
+    let message = CStr::from_bytes_with_nul(message.as_bytes()).expect("Failed to create CStr");
     unsafe {
-        user_cli_puts(message_null_terminated.as_ptr());
+        user_cli_puts(message.as_ptr());
     }
 }
