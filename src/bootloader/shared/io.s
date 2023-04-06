@@ -20,15 +20,7 @@ BITS 16
 io_read_disk:
     pusha
     push ax
-
-    ; --------------------------------------- 
-    ; FDC reset procedure
-    ; --------------------------------------- 
-    mov ah, 0x00
     
-    int 0x13
-    jc io_fdc_reset_failed
-
     ; --------------------------------------- 
     ; BIOS read function
     ; 
