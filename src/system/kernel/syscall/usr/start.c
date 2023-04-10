@@ -98,7 +98,7 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
 
 #warning what stage should be queued?
 
-    ptr_t filePtr;
+    static addr_t fileAddr = (addr_t)0x40000; /* YOLO - assume 64K per binary and ignore wrapping */
     size_t fileSizeBytes;
     
     /*
@@ -125,7 +125,8 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
     */
 
     fileSizeBytes = fileInfo.sizeBytes;
-    filePtr = (ptr_t)0x50000; /* YOLO */ {
+    fileAddr += 0x10000; /* YOLO */
+    ptr_t filePtr = (ptr_t)fileAddr; {
 
         /*
             Load file
