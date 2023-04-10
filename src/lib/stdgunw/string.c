@@ -5,11 +5,11 @@
 //  Created by Artur Danielewski on 27.01.2018.
 //
 
-#include "string.h"
+#include "include/string.h"
 
-#include "char.h"
-#include "math.h"
-#include "mem.h"
+#include "include/char.h"
+#include "include/math.h"
+#include "include/mem.h"
 
 size_t strlen(const char * const c) {
     size_t s = 0;
@@ -18,8 +18,17 @@ size_t strlen(const char * const c) {
 }
 
 int_32 strcmp(const char * const l, const char * const r) {
+    size_t ll = strlen(l);
+    size_t rl = strlen(r);
+    return ll < rl ? 1 : ll > rl ? -1 : strcmpl(l, r, ll);
+}
+
+int_32 strcmpl(const char * const l, const char * const r, const size_t len) {
+    if (!len) { return 0; }
     size_t s = 0;
-    while (*(l + s) == *(r + s) && *(l + s)) ++s;
+    while (*(l + s) == *(r + s) /* characters equal */ &&
+           *(l + s) && *(r + s) /* characters not 0 */ &&
+           ((s + 1) < len) /* not last character */) ++s;
 
     if (*(l + s) == *(r + s)) return 0;
 
