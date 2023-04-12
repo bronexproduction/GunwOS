@@ -137,10 +137,6 @@ static bool validateDirEntry(const struct dos_4_0_ebpb_t * const bpb,
     }
     const size_t fatSectors = bpb->numberOfFATs * bpb->logicalSectorsPerFAT;
     const size_t dirBytes = bpb->maxRootDirectoryEntries * sizeof(struct fat12_dir_t);
-    if (dirBytes % (bpb->bytesPerLogicalSector * bpb->logicalSectorsPerCluster)) {
-        #warning invalid directory structure - shoule be checked on install
-        return false;
-    }
     const size_t dirSectors = dirBytes / bpb->bytesPerLogicalSector;
     const size_t maxFatEntry = bpb->totalLogicalSectors - bpb->reservedLogicalSectors - fatSectors - dirSectors + 1;
     if (entry->firstLogicalCluster > maxFatEntry) {
