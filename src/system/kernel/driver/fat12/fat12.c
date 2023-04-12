@@ -17,6 +17,8 @@
 #define FILE_EXTENSION_MAX_LENGTH 3
 #define MIN_FILE_CLUSTER 2
 #define EXTENDED_BOOT_SIGNATURE 0x29
+#define BYTES_TO_FAT_ENTRIES(BYTES) (BYTES * 2 / 3)
+#define BITS_PER_FAT_ENTRY 12
 
 static range_size_t fatRange(const uint_8 * const headerBytes) {
     range_size_t range;
@@ -232,21 +234,39 @@ static bool detect(const uint_8 * const headerBytes) {
         return false;
     }
 
-    #warning calculate total sector count integrity
-    // if (totalSectors != totalLogicalSectors) {
-        // return false;
-    // }
-    #warning check FAT size and entry count
-    #warning verify geometry 
+    const size_t directoryBytes = bpb->maxRootDirectoryEntries * sizeof(struct fat12_dir_t);
+    if (directoryBytes % bpb->bytesPerLogicalSector) {
+        return false;
+    }
 
-    #warning to be improved
-    #warning validate directory and fat tables
-    {
-        // const size_t fatSectors = bpb->numberOfFATs * bpb->logicalSectorsPerFAT;
-        // const size_t dirBytes = bpb->maxRootDirectoryEntries * sizeof(struct fat12_dir_t);
-        // if (dirBytes % (bpb->bytesPerLogicalSector * bpb->logicalSectorsPerCluster)) {
-            // return false;
-        // }
+    if (bpb->hiddenSectors >= bpb->totalLogicalSectors) {
+        return false;
+    }
+
+    const size_t utilitySectors = bpb->reservedLogicalSectors +
+                                  bpb->numberOfFATs * bpb->logicalSectorsPerFAT +
+                                  directoryBytes / bpb->bytesPerLogicalSector;
+    if (utilitySectors >= (bpb->totalLogicalSectors - bpb->hiddenSectors)) {
+        return false;
+    }
+    
+    const size_t dataSectors = bpb->totalLogicalSectors - utilitySectors - bpb->hiddenSectors;
+    if (dataSectors % bpb->logicalSectorsPerCluster) {
+        return false;
+    }
+
+    const size_t dataClusters = dataSectors / bpb->logicalSectorsPerCluster;
+    if (bpb->maxRootDirectoryEntries > dataClusters) {
+        return false;
+    }
+
+    const size_t fatBytes = bpb->logicalSectorsPerFAT * bpb->bytesPerLogicalSector;
+    if (fatBytes * 8 % BITS_PER_FAT_ENTRY) {
+        return false;
+    }
+    const size_t fatEntries = BYTES_TO_FAT_ENTRIES(fatBytes) - 2;
+    if (fatEntries < dataClusters) {
+        return false;
     }
 
     return !strcmpl((char *)bpb->fileSystemType, FILE_SYSTEM_NAME, FILE_SYSTEM_NAME_BYTES);
