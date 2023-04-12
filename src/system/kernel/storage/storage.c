@@ -59,7 +59,7 @@ static void addVolume(const size_t driveId, const size_t fileSysId) {
     k_stor_volumes[index].fileSysId = fileSysId;
 }
 
-static void detectFileSystem(const struct gnwDeviceUHA_driveCtrl * const uha, const uint_8 driveIndex) {
+static void detectFileSystem(const struct gnwDeviceUHA_storCtrl * const uha, const uint_8 driveIndex) {
     if (!uha) {
         OOPS("Null-pointer parameter");
         return;
@@ -134,7 +134,7 @@ static void detectFileSystem(const struct gnwDeviceUHA_driveCtrl * const uha, co
     }
 }
 
-static void detectVolumes(const struct gnwDeviceUHA_driveCtrl * const uha) {
+static void detectVolumes(const struct gnwDeviceUHA_storCtrl * const uha) {
     
     /*
         Detect volumes (filesystems)
@@ -169,6 +169,6 @@ void k_stor_init() {
         return;
     }
 
-    detectDrives(desc, uha.storage.routine.drivePresent);
-    detectVolumes(&uha.storage);
+    detectDrives(desc, uha.storCtrl.routine.drivePresent);
+    detectVolumes(&uha.storCtrl);
 }

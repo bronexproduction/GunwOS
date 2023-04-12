@@ -11,7 +11,7 @@
 
 #include <types.h>
 
-struct gnwDeviceUHA_driveCtrl_desc {
+struct gnwDeviceUHA_storCtrl_desc {
     /*
         Total number of supported drives
     */

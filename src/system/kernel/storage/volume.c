@@ -46,7 +46,7 @@ static enum k_stor_error readBytes(const size_t volumeId, const range_size_t ran
         }
     }
 
-    const struct gnwStorGeometry geometry = uha.storage.routine.driveGeometry(drive.driveId);
+    const struct gnwStorGeometry geometry = uha.storCtrl.routine.driveGeometry(drive.driveId);
     
     const size_t offsetLBA = range.offset / geometry.sectSizeBytes;
     range_size_t adjustedRange;
@@ -56,7 +56,7 @@ static enum k_stor_error readBytes(const size_t volumeId, const range_size_t ran
     const size_t bytesToRead = sectorAlignedBytes(adjustedRange.offset + adjustedRange.length, geometry);
     uint_8 readBuffer[bytesToRead]; {
         struct gnwStorError err;
-        const size_t bytesRead = uha.storage.routine.read(drive.driveId,
+        const size_t bytesRead = uha.storCtrl.routine.read(drive.driveId,
                                                           offsetLBA,
                                                           bytesToRead / geometry.sectSizeBytes, 
                                                           readBuffer, 
@@ -125,7 +125,7 @@ enum k_stor_error k_stor_volume_readSector(const size_t volumeId, const size_t s
         }
     }
 
-    const struct gnwStorGeometry geometry = uha.storage.routine.driveGeometry(drive.driveId);
+    const struct gnwStorGeometry geometry = uha.storCtrl.routine.driveGeometry(drive.driveId);
     range_size_t readRange;
 
     readRange.offset = sector * geometry.sectSizeBytes;

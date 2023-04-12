@@ -11,11 +11,11 @@
 
 #include <types.h>
 
-struct gnwDeviceUHA_char_in_desc {
+struct gnwDeviceUHA_charIn_desc {
     uint_32 _unused;
 };
 
-struct gnwDeviceUHA_char_out_desc {
+struct gnwDeviceUHA_charOut_desc {
     uint_32 _unused;
 };
 

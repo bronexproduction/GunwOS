@@ -17,8 +17,8 @@
 #include <storage/filesys.h>
 #include <error/panic.h>
 
-#define MSG_INSTALL_FAIL(NAME) "Fatal error: ## NAME ## driver installation failed"
-#define MSG_START_FAIL(NAME) "Fatal error: ## NAME ## driver startup failed"
+#define MSG_INSTALL_FAIL(NAME) "Fatal error: " STR(NAME) " driver installation failed"
+#define MSG_START_FAIL(NAME) "Fatal error: " STR(NAME) " driver startup failed"
 #define MSGS_FAIL(NAME) MSG_INSTALL_FAIL(NAME), MSG_START_FAIL(NAME)
 
 static void loadDevice(struct gnwDeviceDescriptor (*descProvider)(),

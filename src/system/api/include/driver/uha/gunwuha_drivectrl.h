@@ -12,7 +12,7 @@
 #include <uha/gunwuha_drivectrl_desc.h>
 #include <gunwstor.h>
 
-struct gnwDeviceUHA_driveCtrl_routine {
+struct gnwDeviceUHA_storCtrl_routine {
     /*
         Check for drive presence
 
@@ -55,9 +55,9 @@ struct gnwDeviceUHA_driveCtrl_routine {
                    struct gnwStorError *error);
 };
 
-struct gnwDeviceUHA_driveCtrl {
-    struct gnwDeviceUHA_driveCtrl_desc desc;
-    struct gnwDeviceUHA_driveCtrl_routine routine;
+struct gnwDeviceUHA_storCtrl {
+    struct gnwDeviceUHA_storCtrl_desc desc;
+    struct gnwDeviceUHA_storCtrl_routine routine;
 };
 
 #endif // GUNWOS_GUNWUHA_DRIVECTRL_H

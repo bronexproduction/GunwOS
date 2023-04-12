@@ -8,6 +8,7 @@
 #include "dev.h"
 #include <mem.h>
 #include <gunwdev.h>
+#include <src/_gunwdrv.h>
 #include <hal/hal.h>
 #include <hal/int/irq.h>
 #include <hal/proc/proc.h>
@@ -66,21 +67,6 @@ static uint_32 devicesCount;
 
 extern uint_8 k_hal_isIRQRegistered(uint_8 num);
 
-static uint_8 validate(const struct gnwDeviceDescriptor * const descriptor) {
-    if (!descriptor) {
-        OOPS("Driver descriptor pointer invalid"); 
-        return 0;
-    }
-    if (!descriptor->name) {
-        OOPS("Driver descriptor invalid"); 
-        return 0;
-    }
-
-    #warning VALIDATE UHA FOR EVERY TYPE (values and routines)
-
-    return 1;
-}
-
 static bool validateId(size_t id) {
     return id < MAX_DEVICES;
 }
@@ -118,7 +104,7 @@ enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescr
     if (devicesCount >= MAX_DEVICES) {
         return LIMIT_REACHED;
     }
-    if (!validate(descriptor)) {
+    if (!validateDeviceDescriptor(descriptor)) {
         return UNKNOWN;
     }
 
@@ -303,7 +289,7 @@ enum gnwDeviceError k_dev_writeChar(const procId_t processId,
         return e;
     }
 
-    const struct gnwDeviceUHA_char_out_routine * const routine = &devices[deviceId].desc.api.charOut.routine;
+    const struct gnwDeviceUHA_charOut_routine * const routine = &devices[deviceId].desc.api.charOut.routine;
     if (!routine->isReadyToWrite) {
         return GDE_INVALID_OPERATION;
     }
