@@ -10,6 +10,7 @@
 
 #include <types.h>
 #include <gunwfile.h>
+#include <gunwstor.h>
 
 struct gnwFileSystemLocation {
     size_t sector;
@@ -153,10 +154,12 @@ struct gnwFileSystemDescriptor {
 
         Params:
         * headerBytes - file system header data
+        * geometry - associated drive geometry
 
         Result: true if header conforms to the file system requirements
     */
-    bool (*detect)(const uint_8 * const headerBytes);
+    bool (*detect)(const uint_8 * const headerBytes,
+                   const struct gnwStorGeometry * const geometry);
 };
 
 #endif // GUNWOS_GUNWFILESYS_H

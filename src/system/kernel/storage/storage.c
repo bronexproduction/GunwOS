@@ -127,7 +127,7 @@ static void detectFileSystem(const struct gnwDeviceUHA_storCtrl * const uha, con
                 headerBuffer, 
                 k_stor_fileSystems[fileSysIndex].desc.headerRange.length);
 
-        if (k_stor_fileSystems[fileSysIndex].desc.detect(headerBuffer)) {
+        if (k_stor_fileSystems[fileSysIndex].desc.detect(headerBuffer, &geometry)) {
             addVolume(driveIndex, fileSysIndex);
             break;
         }

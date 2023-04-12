@@ -191,7 +191,8 @@ static size_t allocUnitAlignedBytes(const uint_8 * const headerBytes,
     return aligned(bytes, bpb->bytesPerLogicalSector * bpb->logicalSectorsPerCluster);
 }
 
-static bool detect(const uint_8 * const headerBytes) {
+static bool detect(const uint_8 * const headerBytes,
+                   const struct gnwStorGeometry * const geometry) {
     const struct dos_4_0_ebpb_t * const bpb = (struct dos_4_0_ebpb_t *)headerBytes;
 
     if (__builtin_popcount(bpb->bytesPerLogicalSector) != 1) {
@@ -268,6 +269,8 @@ static bool detect(const uint_8 * const headerBytes) {
     if (fatEntries < dataClusters) {
         return false;
     }
+
+    #warning GEOMETRY CHECK
 
     return !strcmpl((char *)bpb->fileSystemType, FILE_SYSTEM_NAME, FILE_SYSTEM_NAME_BYTES);
 }
