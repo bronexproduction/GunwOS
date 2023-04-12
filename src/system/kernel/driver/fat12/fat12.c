@@ -119,8 +119,11 @@ static struct gnwFileSystemLocation nextLocation(const uint_8 * const headerByte
 static bool isValidForRead(const uint_8 * const headerBytes,
                            const struct gnwFileSystemLocation location) {
     const struct dos_4_0_ebpb_t * const bpb = (struct dos_4_0_ebpb_t *)headerBytes;
-    #warning CHECK IF WITHIN PARTITION BOUNDS!
-    return IN_RANGE(MIN_FILE_CLUSTER, location.allocUnit, 0xFEF);
+    const range_size_t dirRange = directoryRange(headerBytes);
+    const size_t dataSectors = bpb->totalLogicalSectors - (dirRange.offset + dirRange.length) / bpb->bytesPerLogicalSector;
+    const size_t lastCluster = dataSectors / bpb->logicalSectorsPerCluster + 1;
+
+    return IN_RANGE(MIN_FILE_CLUSTER, location.allocUnit, MIN(lastCluster, 0xFEF));
 }
 
 static bool isEOF(const struct gnwFileSystemLocation location) {
