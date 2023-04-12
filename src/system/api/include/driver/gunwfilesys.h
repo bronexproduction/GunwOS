@@ -103,6 +103,7 @@ struct gnwFileSystemDescriptor {
         Returns if the location is valid for read operation
 
         Params:
+        * headerBytes - file system header data
         * location - location to be validated
     */
     bool (*isValidForRead)(const uint_8 * const headerBytes,
