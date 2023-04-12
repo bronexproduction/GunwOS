@@ -16,6 +16,7 @@
 #define FILE_NAME_MAX_LENGTH 8
 #define FILE_EXTENSION_MAX_LENGTH 3
 #define MIN_FILE_CLUSTER 2
+#define EXTENDED_BOOT_SIGNATURE 0x29
 
 static range_size_t fatRange(const uint_8 * const headerBytes) {
     range_size_t range;
@@ -191,18 +192,52 @@ static size_t allocUnitAlignedBytes(const uint_8 * const headerBytes,
 static bool detect(const uint_8 * const headerBytes) {
     const struct dos_4_0_ebpb_t * const bpb = (struct dos_4_0_ebpb_t *)headerBytes;
 
+    if (__builtin_popcount(bpb->bytesPerLogicalSector) != 1) {
+        return false;
+    }
+    if (!bpb->logicalSectorsPerCluster) {
+        return false;
+    }
+    if (!bpb->reservedLogicalSectors) {
+        return false;
+    }
     if (!bpb->numberOfFATs) {
-        return false;
-    }
-    if (!bpb->logicalSectorsPerFAT) {
-        return false;
-    }
-    if (!bpb->bytesPerLogicalSector) {
         return false;
     }
     if (!bpb->maxRootDirectoryEntries) {
         return false;
     }
+    if (!bpb->totalLogicalSectors) {
+        return false;
+    }
+    if (bpb->mediaDescriptor._reserved != 0xF) {
+        return false;
+    }
+    if (!bpb->logicalSectorsPerFAT) {
+        return false;
+    }
+    if (!bpb->physicalSectorsPerTrack) {
+        return false;
+    }
+    if (!bpb->numberOfHeads) {
+        return false;
+    }
+    if (!bpb->numberOfHeads) {
+        return false;
+    }
+    if (!bpb->totalLogicalSectors) {
+        return false;
+    }
+    if (bpb->extendedBootSignature != EXTENDED_BOOT_SIGNATURE) {
+        return false;
+    }
+
+    #warning calculate total sector count integrity
+    // if (totalSectors != totalLogicalSectors) {
+        // return false;
+    // }
+    #warning check FAT size and entry count
+    #warning verify geometry 
 
     #warning to be improved
     #warning validate directory and fat tables
