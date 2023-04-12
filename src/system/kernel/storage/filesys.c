@@ -26,15 +26,6 @@ enum k_stor_error k_stor_fileSys_install(const struct gnwFileSystemDescriptor * 
     k_stor_fileSystems[fileSysIndex].used = true;
     k_stor_fileSystems[fileSysIndex].desc = *desc;
     
-    #warning validate directory and fat tables
-    {
-        // const size_t fatSectors = bpb->numberOfFATs * bpb->logicalSectorsPerFAT;
-        // const size_t dirBytes = bpb->maxRootDirectoryEntries * sizeof(struct fat12_dir_t);
-        // if (dirBytes % (bpb->bytesPerLogicalSector * bpb->logicalSectorsPerCluster)) {
-            // return false;
-        // }
-    }
-
     return SE_NONE;
 }
 

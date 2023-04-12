@@ -70,7 +70,6 @@ static size_t nextCluster(const uint_8 * const fatBytes,
     return (cluster % 2) ? (msb << 4) | (lsb >> 4) : ((msb & 0xF) << 8) | lsb;
 }
 
-
 static bool fatVerify(const uint_8 * const headerBytes,
                       const uint_8 * const fatBytes) {
     const struct dos_4_0_ebpb_t * const bpb = (struct dos_4_0_ebpb_t *)headerBytes;
@@ -206,6 +205,14 @@ static bool detect(const uint_8 * const headerBytes) {
     }
 
     #warning to be improved
+    #warning validate directory and fat tables
+    {
+        // const size_t fatSectors = bpb->numberOfFATs * bpb->logicalSectorsPerFAT;
+        // const size_t dirBytes = bpb->maxRootDirectoryEntries * sizeof(struct fat12_dir_t);
+        // if (dirBytes % (bpb->bytesPerLogicalSector * bpb->logicalSectorsPerCluster)) {
+            // return false;
+        // }
+    }
 
     return !strcmpl((char *)bpb->fileSystemType, FILE_SYSTEM_NAME, FILE_SYSTEM_NAME_BYTES);
 }
