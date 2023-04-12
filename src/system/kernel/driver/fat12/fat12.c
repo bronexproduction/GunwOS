@@ -116,7 +116,9 @@ static struct gnwFileSystemLocation nextLocation(const uint_8 * const headerByte
     return nextLocation;
 }
 
-static bool isValidForRead(const struct gnwFileSystemLocation location) {
+static bool isValidForRead(const uint_8 * const headerBytes,
+                           const struct gnwFileSystemLocation location) {
+    const struct dos_4_0_ebpb_t * const bpb = (struct dos_4_0_ebpb_t *)headerBytes;
     #warning CHECK IF WITHIN PARTITION BOUNDS!
     return IN_RANGE(MIN_FILE_CLUSTER, location.allocUnit, 0xFEF);
 }
@@ -189,7 +191,7 @@ static size_t allocUnitAlignedBytes(const uint_8 * const headerBytes,
 }
 
 static bool detect(const uint_8 * const headerBytes) {
-    const struct dos_4_0_ebpb_t * const bpb = (struct dos_4_0_ebpb_t *)headerBytes;
+                   const struct dos_4_0_ebpb_t * const bpb = (struct dos_4_0_ebpb_t *)headerBytes;
 
     if (!bpb->numberOfFATs) {
         return false;

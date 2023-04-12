@@ -105,7 +105,8 @@ struct gnwFileSystemDescriptor {
         Params:
         * location - location to be validated
     */
-    bool (*isValidForRead)(const struct gnwFileSystemLocation location);
+    bool (*isValidForRead)(const uint_8 * const headerBytes,
+                           const struct gnwFileSystemLocation location);
 
     /*
         Returns if the sector number marks an end of file

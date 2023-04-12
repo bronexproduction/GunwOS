@@ -63,7 +63,7 @@ static enum gnwFileErrorCode loadFile(const size_t volumeId,
         currentLocation = fsDesc.nextLocation(headerBytes, fatBytes, currentLocation);
         #warning HANDLE BUFFER OVERFLOW - expected bytes, expected has bad value
         (void)expectedBytes;
-    } while (fsDesc.isValidForRead(currentLocation)); 
+    } while (fsDesc.isValidForRead(headerBytes, currentLocation)); 
 
     const size_t elapsed = k_tmr_getMs() - startTime;
     (void)elapsed;
