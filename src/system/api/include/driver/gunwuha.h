@@ -14,7 +14,7 @@
 #include <driver/uha/gunwuha_keyboard.h>
 #include <driver/uha/gunwuha_mouse.h>
 #include <driver/uha/gunwuha_fdc.h>
-#include <driver/uha/gunwuha_drivectrl.h>
+#include <driver/uha/gunwuha_storctrl.h>
 #include <driver/uha/gunwuha_char.h>
 #include <driver/uha/gunwuha_display.h>
 #include <driver/uha/gunwuha_event.h>

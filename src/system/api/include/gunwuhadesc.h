@@ -15,7 +15,7 @@
 #include <uha/gunwuha_keyboard_desc.h>
 #include <uha/gunwuha_mouse_desc.h>
 #include <uha/gunwuha_fdc_desc.h>
-#include <uha/gunwuha_drivectrl_desc.h>
+#include <uha/gunwuha_storctrl_desc.h>
 #include <uha/gunwuha_char_desc.h>
 #include <uha/gunwuha_display_desc.h>
 #include <uha/gunwuha_event_desc.h>

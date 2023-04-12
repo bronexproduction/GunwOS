@@ -1,15 +1,15 @@
 //
-//  gunwuha_drivectrl.h
+//  gunwuha_storctrl.h
 //  Universal Hardware Abstraction for a storage device
 //  GunwOS
 //
 //  Created by Artur Danielewski on 29.01.2021.
 //
 
-#ifndef GUNWOS_GUNWUHA_DRIVECTRL_H
-#define GUNWOS_GUNWUHA_DRIVECTRL_H
+#ifndef GUNWOS_GUNWUHA_STORCTRL_H
+#define GUNWOS_GUNWUHA_STORCTRL_H
 
-#include <uha/gunwuha_drivectrl_desc.h>
+#include <uha/gunwuha_storctrl_desc.h>
 #include <gunwstor.h>
 
 struct gnwDeviceUHA_storCtrl_routine {
@@ -60,4 +60,4 @@ struct gnwDeviceUHA_storCtrl {
     struct gnwDeviceUHA_storCtrl_routine routine;
 };
 
-#endif // GUNWOS_GUNWUHA_DRIVECTRL_H
+#endif // GUNWOS_GUNWUHA_STORCTRL_H

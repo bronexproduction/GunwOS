@@ -1,13 +1,13 @@
 //
-//  gunwuha_drivectrl_desc.h
+//  gunwuha_storctrl_desc.h
 //  Universal Hardware Abstraction for a storage device
 //  GunwOS
 //
 //  Created by Artur Danielewski on 09.03.2023.
 //
 
-#ifndef GUNWOS_GUNWUHA_DRIVECTRL_DESC_H
-#define GUNWOS_GUNWUHA_DRIVECTRL_DESC_H
+#ifndef GUNWOS_GUNWUHA_STORCTRL_DESC_H
+#define GUNWOS_GUNWUHA_STORCTRL_DESC_H
 
 #include <types.h>
 
@@ -32,4 +32,4 @@ struct gnwDeviceUHA_storCtrl_desc {
     bool removableMedia;
 };
 
-#endif // GUNWOS_GUNWUHA_DRIVECTRL_DESC_H
+#endif // GUNWOS_GUNWUHA_STORCTRL_DESC_H
