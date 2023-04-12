@@ -189,7 +189,7 @@ static size_t allocUnitAlignedBytes(const uint_8 * const headerBytes,
 }
 
 static bool detect(const uint_8 * const headerBytes) {
-                   const struct dos_4_0_ebpb_t * const bpb = (struct dos_4_0_ebpb_t *)headerBytes;
+    const struct dos_4_0_ebpb_t * const bpb = (struct dos_4_0_ebpb_t *)headerBytes;
 
     if (!bpb->numberOfFATs) {
         return false;
