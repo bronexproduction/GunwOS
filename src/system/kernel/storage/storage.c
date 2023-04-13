@@ -31,10 +31,6 @@ static void addDrive(const size_t ctrlId, const size_t driveId) {
 }
 
 static void detectDrives(const struct gnwDeviceUHADesc desc, bool (* const drivePresent)(uint_8)) {
-    if (!drivePresent) {
-        OOPS("Null-pointer parameter");
-        return;
-    }
     for (size_t driveIndex = 0; driveIndex < desc.storage.driveCount; ++driveIndex) {
         if (drivePresent(driveIndex)) {
             addDrive(desc.identifier, driveIndex);
@@ -60,19 +56,6 @@ static void addVolume(const size_t driveId, const size_t fileSysId) {
 }
 
 static void detectFileSystem(const struct gnwDeviceUHA_storCtrl * const uha, const uint_8 driveIndex) {
-    if (!uha) {
-        OOPS("Null-pointer parameter");
-        return;
-    }
-    if (!uha->routine.driveGeometry ||
-        !uha->routine.read) {
-        OOPS("UHA invalid");
-        return;
-    }
-    if (!uha->routine.driveGeometry) {
-        OOPS("UHA invalid");
-        return;
-    }
     if (driveIndex >= MAX_DRIVES) {
         OOPS("Drive index over limit");
         return;
