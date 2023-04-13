@@ -159,7 +159,7 @@ struct gnwFileSystemDescriptor {
         Result: true if header conforms to the file system requirements
     */
     bool (*detect)(const uint_8 * const headerBytes,
-                   const struct gnwStorGeometry * const geometry);
+                   const struct gnwStorGeometry geometry);
 };
 
 #endif // GUNWOS_GUNWFILESYS_H

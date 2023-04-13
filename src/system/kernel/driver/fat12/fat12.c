@@ -192,12 +192,20 @@ static size_t allocUnitAlignedBytes(const uint_8 * const headerBytes,
 }
 
 static bool detect(const uint_8 * const headerBytes,
-                   const struct gnwStorGeometry * const geometry) {
+                   const struct gnwStorGeometry geometry) {
     const struct dos_4_0_ebpb_t * const bpb = (struct dos_4_0_ebpb_t *)headerBytes;
 
     if (__builtin_popcount(bpb->bytesPerLogicalSector) != 1) {
         return false;
     }
+    
+    if (bpb->totalLogicalSectors > geometry.lba) {
+        return false;
+    }
+    if (geometry.sectSizeBytes != bpb->bytesPerLogicalSector) {
+        return false;
+    }
+
     if (!bpb->logicalSectorsPerCluster) {
         return false;
     }
@@ -232,6 +240,10 @@ static bool detect(const uint_8 * const headerBytes,
         return false;
     }
     if (bpb->extendedBootSignature != EXTENDED_BOOT_SIGNATURE) {
+        return false;
+    }
+    
+    if (bpb->totalLogicalSectors % bpb->logicalSectorsPerCluster) {
         return false;
     }
 
@@ -269,8 +281,6 @@ static bool detect(const uint_8 * const headerBytes,
     if (fatEntries < dataClusters) {
         return false;
     }
-
-    #warning GEOMETRY CHECK
 
     return !strcmpl((char *)bpb->fileSystemType, FILE_SYSTEM_NAME, FILE_SYSTEM_NAME_BYTES);
 }
