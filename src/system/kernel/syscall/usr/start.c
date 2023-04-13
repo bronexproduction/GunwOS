@@ -124,7 +124,7 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
     */
 
     fileSizeBytes = fileInfo.sizeBytes;
-    ptr_t filePtr = (ptr_t)0x40000; {
+    ptr_t filePtr = (ptr_t)0x40000; /* YOLO */ {
 
         /*
             Load file
