@@ -10,6 +10,10 @@
 
 #include <types.h>
 
+#define GNW_ROOT_PATH_SEPARATOR ":"
+#define GNW_PATH_COMPONENT_SEPARATOR "/"
+#define GNW_EXTENSION_SEPARATOR "."
+
 /*
     CHS address structure
     (Cylinder - Head - Sector)

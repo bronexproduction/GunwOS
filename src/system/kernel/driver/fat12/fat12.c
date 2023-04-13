@@ -8,6 +8,7 @@
 #include <driver/gunwfilesys.h>
 #include <string.h>
 #include <utils.h>
+#include <mem.h>
 #include <gunwstor.h>
 #include "model.h"
 
@@ -164,12 +165,19 @@ static enum gnwFileErrorCode fileInfo(const uint_8 * const headerBytes,
         return GFEC_INVALID_PARAMETER;
     }
 
+    char fatName[FILE_NAME_MAX_LENGTH];
+    char fatExtension[FILE_EXTENSION_MAX_LENGTH];
+    memcopy(name, fatName, FILE_NAME_MAX_LENGTH);
+    memcopy(extension, fatExtension, FILE_EXTENSION_MAX_LENGTH);
+    strreplacel(fatName, FILE_NAME_MAX_LENGTH, 0, ' ');
+    strreplacel(fatExtension, FILE_EXTENSION_MAX_LENGTH, 0, ' ');
+
     const struct dos_4_0_ebpb_t * const bpb = (struct dos_4_0_ebpb_t *)headerBytes;
 
     for (size_t dirIndex = 0; dirIndex < bpb->maxRootDirectoryEntries; ++dirIndex) {
         const struct fat12_dir_t * const dirEntry = (struct fat12_dir_t *)(directoryBytes + dirIndex * sizeof(struct fat12_dir_t));
-        if (!strcmpl(name, (char *)dirEntry->filename, FILE_NAME_MAX_LENGTH) &&
-            !strcmpl(extension, (char *)dirEntry->extension, FILE_EXTENSION_MAX_LENGTH)) {
+        if (!strcmpl(fatName, (char *)dirEntry->filename, FILE_NAME_MAX_LENGTH) &&
+            !strcmpl(fatExtension, (char *)dirEntry->extension, FILE_EXTENSION_MAX_LENGTH)) {
             if (!validateDirEntry(bpb, dirEntry)) {
                 return GFEC_NOT_FOUND;
             }

@@ -8,6 +8,7 @@
 #include "file.h"
 #include <defs.h>
 #include <mem.h>
+#include <string.h>
 #include "storage.h"
 #include "volume.h"
 #include "filesys.h"
@@ -78,16 +79,56 @@ static enum gnwFileErrorCode loadFileChain(const char * const path,
                                            const ptr_t dst) {
     /*
         Get volume ID from path
-
-        TODO: Not implemented yet
     */
 
-    size_t volumeId = 0;
+    const size_t rootSeparatorLength = strlen(GNW_ROOT_PATH_SEPARATOR);
+    const int_32 idLen = strfindl(path, pathLen, GNW_ROOT_PATH_SEPARATOR, rootSeparatorLength);
+    if (idLen <= 0) {
+        return GFEC_INVALID_PATH;
+    }
+    bool pathErr;
+    size_t volumeId = str2intl(path, idLen, &pathErr);
+    if (pathErr) {
+        return GFEC_INVALID_PATH;
+    }
+    if (pathLen <= (idLen + rootSeparatorLength)) {
+        return GFEC_INVALID_PATH;
+    }
     if (!k_stor_volume_validateId(volumeId)) {
         return GFEC_INVALID_PATH;
     }
+
+    /*
+        Get file name from path
+    */
+
+    const size_t filenameBufLength = pathLen - idLen - rootSeparatorLength;
+    const char * const filenameBuf = path + idLen + rootSeparatorLength;
+
     size_t fileSysId = k_stor_volumes[volumeId].fileSysId;
     const struct gnwFileSystemDescriptor fsDesc = k_stor_fileSystems[fileSysId].desc;
+    
+    char fileName[fsDesc.maxFilenameLength];
+    char fileExtension[fsDesc.maxExtensionLength];
+    memnull(fileName, fsDesc.maxFilenameLength);
+    memnull(fileExtension, fsDesc.maxExtensionLength);
+
+    const size_t extSeparatorLength = strlen(GNW_EXTENSION_SEPARATOR);
+    const int_32 extSepOffset = strfindl(filenameBuf, filenameBufLength, GNW_EXTENSION_SEPARATOR, extSeparatorLength);
+    if (!extSepOffset || extSepOffset < STR_NOT_FOUND) {
+        return GFEC_INVALID_PATH;
+    }
+    if ((size_t)extSepOffset > fsDesc.maxFilenameLength) {
+        return GFEC_INVALID_PATH;
+    }
+    const size_t extensionLength = (extSepOffset == STR_NOT_FOUND) ? 0 : filenameBufLength - extSepOffset - 1;
+    if (extensionLength > fsDesc.maxExtensionLength) {
+        return GFEC_INVALID_PATH;
+    }
+
+    memcopy(filenameBuf, fileName, extSepOffset);
+    memcopy(filenameBuf + extSepOffset + 1, fileExtension, extensionLength);
+
     uint_8 headerBytes[fsDesc.headerRange.length]; {
         enum k_stor_error err = k_stor_volume_readHeader(volumeId, headerBytes);
         if (err != SE_NONE) {
@@ -103,9 +144,6 @@ static enum gnwFileErrorCode loadFileChain(const char * const path,
         }
     }
 
-    #warning TEST
-    char fileName[9] = "GUNWSH  ";
-    char fileExtension[4] = "ELF";
     struct gnwFileInfo localFileInfo;
     if (!fileInfo) {
         fileInfo = &localFileInfo;
