@@ -10,6 +10,7 @@
 
 #include <types.h>
 
+// Example ":gnw/file.ext"
 #define GNW_ROOT_PATH_SEPARATOR ":"
 #define GNW_PATH_COMPONENT_SEPARATOR "/"
 #define GNW_EXTENSION_SEPARATOR "."
