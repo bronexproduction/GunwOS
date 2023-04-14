@@ -63,9 +63,15 @@ static enum k_stor_error readBytes(const size_t volumeId, const range_size_t ran
                                                           &err);
 
         if (err.code != GSEC_NONE) {
-            return err.code;
+            switch (err.code) {
+            case GSEC_MEDIA_NOT_PRESENT:
+            case GSEC_DRIVE_NOT_PRESENT:
+                return SE_INVALID_DEVICE;
+            default:
+                return SE_UNKNOWN;
+            }
         } else if (bytesRead != bytesToRead) {
-            return GSEC_UNKNOWN;
+            return SE_UNKNOWN;
         }
     }
     
