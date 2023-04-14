@@ -92,11 +92,10 @@ static void detectFileSystem(const struct gnwDeviceUHA_storCtrl * const uha, con
                                                    readBuffer, 
                                                    &err);
         if (err.code != GSEC_NONE) {
-            if (uha->desc.removableMedia) {
-                /*
-                    Possibly no media inserted
-                */
-                #warning this error should use GSEC_MEDIA_NOT_PRESENT
+            if (uha->desc.removable && err.code == GSEC_DRIVE_NOT_PRESENT) {
+                return;
+            }
+            if (uha->desc.removableMedia && err.code == GSEC_MEDIA_NOT_PRESENT) {
                 return;
             } else {
                 OOPS("Header read error");

@@ -161,7 +161,7 @@ static size_t readSector(const struct fdc_fddConfig config,
         */
         switch (sr1) {
         case BIT_SR1_EN:
-            error->code = GSEC_COMMAND_FAILED;
+            error->code = GSEC_MEDIA_NOT_PRESENT;
             error->internalCode = OPSTATUS_END_OF_CYLINDER;
             break;
         default:
