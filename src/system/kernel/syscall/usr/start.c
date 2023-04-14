@@ -158,12 +158,12 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
         Allocate process memory 
     */
 
-    const size_t index = 0;
-    const size_t processBinBytes = MiB(1);
-    const size_t processStackBytes = KiB(512);
-    const size_t processExtraBytes = KiB(512);
+    static size_t index = 0;
+    const size_t processBinBytes = KiB(512);
+    const size_t processStackBytes = KiB(256);
+    const size_t processExtraBytes = KiB(256);
     const size_t processMemTotalBytes = processBinBytes + processStackBytes + processExtraBytes;
-    const ptr_t dstPtr = GDT_SEGMENT_START(r3code) + (index * processMemTotalBytes) + MiB(1);
+    const ptr_t dstPtr = GDT_SEGMENT_START(r3code) + (++index * processMemTotalBytes);
 
     /* 
         Load executable 
