@@ -82,55 +82,9 @@ static void clear() {
     k_trm_vid_clear();
 }
 
-static bool init() {
-    return k_trm_vid_init();
-}
-
-static bool start() {
+void dupa() {
+    k_trm_vid_init();
     clear();
 
-    return true;
-}
-
-#warning TEMPORARY UNTIL TERMINAL IMPLEMENTED AS DRIVER
-void trm_workaround_start() {
-    init();
-    start();
-}
-
-static bool isReadyToWrite() {
-    return true;
-}
-
-static struct gnwDriverConfig desc() {
-    return (struct gnwDriverConfig){ 
-        /* init */ init,
-        /* start */ start,
-        /* isr */ nullptr,
-        /* IRQ */ NULL
-    };
-}
-
-static struct gnwDeviceUHA uha() {
-    struct gnwDeviceUHA uha;
-
-    uha.charOut.routine.isReadyToWrite = isReadyToWrite;
-    #warning CHANGED UNTIL TERMINAL IMPLEMENTED AS DRIVER
-    // uha.charOut.routine.write = append;
-
-    return uha;
-}
-
-struct gnwDeviceDescriptor k_drv_terminal_descriptor() {
-    return (struct gnwDeviceDescriptor) {
-        /* type */ DEV_TYPE_CHAR_OUT,
-        /* api */ uha(),
-        /* driver */ (struct gnwDeviceDriver) {
-            /* io */ (struct gnwDeviceIO) {
-                /* busBase */ NULL
-            },
-            /* descriptor */ desc()
-        },
-        /* name */ "Default text mode terminal"
-    };
+    runLoopStart();
 }

@@ -130,9 +130,6 @@ static void prompt() {
 
 static void s_cli_init() {
 
-#warning TEMPORARY CHANGE UNTIL TERMINAL IMPLEMENTED AS DRIVER
-    extern void trm_workaround_start();
-    trm_workaround_start();
     // /* 
     //     Attach to character output
     // */

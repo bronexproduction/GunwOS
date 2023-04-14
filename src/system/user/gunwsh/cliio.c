@@ -23,11 +23,10 @@ static int append(const char c) {
         // return IO_GENERAL_FAILURE;
     // }
     enum gnwDeviceError e = GDE_NONE;
-    #warning CHANGED TILL TERMINAL IMPLEMENTED AS DRIVER
-    extern bool trm_append(const char c);
-    if (!trm_append(c)) {
-        return IO_GENERAL_FAILURE;
-    }
+    #warning IPC_WRITE
+    // if (!trm_append(c)) {
+        // return IO_GENERAL_FAILURE;
+    // }
     // e = devCharWrite(user_cli_charOutIdentifier, c);
     if (e != GDE_NONE) {
         return IO_GENERAL_FAILURE;
