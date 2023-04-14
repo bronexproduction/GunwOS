@@ -14,7 +14,7 @@
 /*
     Character input device
 */
-struct gnwDeviceUHA_char_in_routine {
+struct gnwDeviceUHA_charIn_routine {
     /*
         Determines if the device has data to be read
     
@@ -38,7 +38,7 @@ struct gnwDeviceUHA_char_in_routine {
 /*
     Character output device
 */
-struct gnwDeviceUHA_char_out_routine {
+struct gnwDeviceUHA_charOut_routine {
     /*
         Determines if the device is ready to be written to
 
@@ -59,14 +59,14 @@ struct gnwDeviceUHA_char_out_routine {
     bool (*write)(const char c);
 };
 
-struct gnwDeviceUHA_char_in {
-    struct gnwDeviceUHA_char_in_desc desc;
-    struct gnwDeviceUHA_char_in_routine routine;
+struct gnwDeviceUHA_charIn {
+    struct gnwDeviceUHA_charIn_desc desc;
+    struct gnwDeviceUHA_charIn_routine routine;
 };
 
-struct gnwDeviceUHA_char_out {
-    struct gnwDeviceUHA_char_out_desc desc;
-    struct gnwDeviceUHA_char_out_routine routine;
+struct gnwDeviceUHA_charOut {
+    struct gnwDeviceUHA_charOut_desc desc;
+    struct gnwDeviceUHA_charOut_routine routine;
 };
 
 #endif // GUNWOS_GUNWUHA_CHAR_H

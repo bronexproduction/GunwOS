@@ -15,36 +15,6 @@
 #include <gunwrlp.h>
 
 /*
-    Device type
-*/
-enum gnwDeviceType {
-    DEV_TYPE_SYSTEM,
-    DEV_TYPE_KEYBOARD,
-    DEV_TYPE_FDC,
-    DEV_TYPE_CHAR_IN,
-    DEV_TYPE_CHAR_OUT,
-    DEV_TYPE_DISPLAY,
-    DEV_TYPE_UNKNOWN = -1
-};
-
-enum gnwDeviceError {
-    GDE_NONE = 0,
-    GDE_ID_INVALID,
-    GDE_NOT_FOUND,
-    GDE_CANNOT_BE_HELD,
-    GDE_ALREADY_HELD,
-    GDE_ALREADY_SET,
-    GDE_HANDLE_INVALID,
-    GDE_LISTENER_INVALID,
-    GDE_INVALID_DEVICE_STATE,
-    GDE_INVALID_OPERATION,
-    GDE_INVALID_PARAMETER,
-    GDE_OPERATION_FAILED,
-    GDE_UNKNOWN = -1
-};
-_Static_assert(sizeof(enum gnwDeviceError) == sizeof(int_32), "Unexpected enum gnwDeviceError size");
-
-/*
     Requests device information for given id
 
     Params:

@@ -6,8 +6,8 @@
 //
 
 #include "cmdutil.h"
-
-#include <stdgunw.h>
+#include <types.h>
+#include <mem.h>
 
 struct user_cli_cmd_param user_cli_cmd_paramAt(const char * const params, unsigned int loc) {
     if (!params) return (struct user_cli_cmd_param){ 0, 0 };

@@ -8,6 +8,7 @@
 #include "dev.h"
 #include <mem.h>
 #include <gunwdev.h>
+#include <src/_gunwdrv.h>
 #include <hal/hal.h>
 #include <hal/int/irq.h>
 #include <hal/proc/proc.h>
@@ -66,19 +67,6 @@ static uint_32 devicesCount;
 
 extern uint_8 k_hal_isIRQRegistered(uint_8 num);
 
-static uint_8 validate(const struct gnwDeviceDescriptor * const descriptor) {
-    if (!descriptor) {
-        OOPS("Driver descriptor pointer invalid"); 
-        return 0;
-    }
-    if (!descriptor->name) {
-        OOPS("Driver descriptor invalid"); 
-        return 0;
-    }
-
-    return 1;
-}
-
 static bool validateId(size_t id) {
     return id < MAX_DEVICES;
 }
@@ -116,7 +104,7 @@ enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescr
     if (devicesCount >= MAX_DEVICES) {
         return LIMIT_REACHED;
     }
-    if (!validate(descriptor)) {
+    if (!validateDeviceDescriptor(descriptor)) {
         return UNKNOWN;
     }
 
@@ -206,24 +194,39 @@ enum gnwDeviceError k_dev_getById(const size_t id, struct gnwDeviceUHADesc * con
         OOPS("Device descriptor nullptr");
         return GDE_UNKNOWN;
     }
-
-    *desc = uhaGetDesc(id, devices[id].desc.api);
+    
+    *desc = uhaGetDesc(id, devices[id].desc.type, devices[id].desc.api);
     return GDE_NONE;
 }
 
 enum gnwDeviceError k_dev_getByType(const enum gnwDeviceType type, struct gnwDeviceUHADesc * const desc) {
     if (!desc) {
-        OOPS("Device descriptor descriptor over limit");
+        OOPS("Device descriptor nullptr");
         return GDE_UNKNOWN;
     }
 
     for (size_t index = 0; index < MAX_DEVICES; ++index) {
-        if (devices[index].desc.type == type) {
+        if (devices[index].desc.type & type) {
             return k_dev_getById(index, desc);
         }
     }
 
     return GDE_NOT_FOUND;
+}
+
+enum gnwDeviceError k_dev_getUHAForId(const size_t id, struct gnwDeviceUHA * const uha) {
+    if (!validateInstalledId(id)) {
+        OOPS("Device identifier invalid");
+        return GDE_UNKNOWN;
+    }
+    
+    if (!uha) {
+        OOPS("UHA descriptor nullptr");
+        return GDE_UNKNOWN;
+    }
+
+    *uha = devices[id].desc.api;
+    return GDE_NONE;
 }
 
 enum gnwDeviceError k_dev_acquireHold(const procId_t processId, const size_t deviceId) {
@@ -286,7 +289,7 @@ enum gnwDeviceError k_dev_writeChar(const procId_t processId,
         return e;
     }
 
-    const struct gnwDeviceUHA_char_out_routine * const routine = &devices[deviceId].desc.api.charOut.routine;
+    const struct gnwDeviceUHA_charOut_routine * const routine = &devices[deviceId].desc.api.charOut.routine;
     if (!routine->isReadyToWrite) {
         return GDE_INVALID_OPERATION;
     }

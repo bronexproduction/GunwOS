@@ -13,27 +13,7 @@
 #include <gunwstor.h>
 
 struct gnwDeviceUHA_fdc_routine {
-    /*
-        Check for drive presence
-
-        Params:
-            * index - number of drive in given controller
-    
-        Result:
-            * 1 if drive present, 0 otherwise
-    */
-    bool (*drivePresent)(const uint_8 index);
-
-    /*
-        Check drive geometry
-
-        Params:
-            * index - number of drive in given controller
-             
-        Result:
-            * drive geometry data
-    */
-    struct gnwStorGeometry (*driveGeometry)(const uint_8 index);
+    void (*_unused)();
 };
 
 struct gnwDeviceUHA_fdc {

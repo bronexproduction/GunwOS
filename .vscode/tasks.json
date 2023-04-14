@@ -6,7 +6,7 @@
         {
             "label": "Build and write floppy (rawwritewin)",
             "type": "shell",
-            "command": "/mnt/d/Software/rawwritewin-0.7/rawwritewin.exe build/gunwos.img",
+            "command": "tools/rawwritewin-0.7/rawwritewin.exe build/gunwos.img",
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -92,7 +92,7 @@
             "label": "Install tools",
             "type": "shell",
             "linux": {
-                "command": "sudo apt-get update && sudo apt-get install -y nasm qemu-system-x86 lldb gdb && bash scripts/download_tools.sh",
+                "command": "sudo apt-get update && sudo apt-get install -y unzip nasm qemu-system-x86 lldb gdb && bash scripts/download_tools.sh",
             },
             "osx": {
                 "command": "brew install nasm qemu coreutils && bash scripts/download_tools.sh",
