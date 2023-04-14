@@ -10,7 +10,18 @@
 
 #include <types.h>
 
-// Example ":gnw/file.ext"
+/*
+    Path structure:
+
+        volumeId | GNW_ROOT_PATH_SEPARATOR | fileName | GNW_EXTENSION_SEPARATOR (only if file extension present) | fileExtension (optional)
+
+    Correct path examples:
+
+        * 0:FILENAME.EXT
+        * 1:FILENAME
+
+    Note: Only flat file structures supported at the moment
+*/ 
 #define GNW_ROOT_PATH_SEPARATOR ":"
 #define GNW_PATH_COMPONENT_SEPARATOR "/"
 #define GNW_EXTENSION_SEPARATOR "."
