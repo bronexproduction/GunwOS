@@ -78,15 +78,16 @@ static void detectFileSystem(const struct gnwDeviceUHA_storCtrl * const uha, con
             return;
         }
         const struct gnwStorGeometry geometry = uha->routine.driveGeometry(k_stor_drives[driveIndex].driveId);
-        size_t bytesToBeRead = sectorAlignedBytes(k_stor_fileSystems[fileSysIndex].desc.headerRange.offset + k_stor_fileSystems[fileSysIndex].desc.headerRange.length,
-                                                  geometry);
+        const struct k_stor_fileSystem fs = k_stor_fileSystems[fileSysIndex];
+        const range_size_t headerRange = fs.desc.headerRange;
+        const size_t lba = headerRange.offset / geometry.sectSizeBytes;
+        const size_t bytesToBeRead = sectorAlignedBytes(headerRange.offset + headerRange.length, geometry) - (lba * geometry.sectSizeBytes);
         uint_8 readBuffer[bytesToBeRead];
-        uint_8 headerBuffer[k_stor_fileSystems[fileSysIndex].desc.headerRange.length];
+        uint_8 headerBuffer[headerRange.length];
 
         struct gnwStorError err;
-        #warning If header bytes outside the first sector then LBA can be optimized
         const size_t bytesRead = uha->routine.read(k_stor_drives[driveIndex].driveId, 
-                                                   0,
+                                                   lba,
                                                    bytesToBeRead / geometry.sectSizeBytes, 
                                                    readBuffer, 
                                                    &err);
@@ -106,11 +107,11 @@ static void detectFileSystem(const struct gnwDeviceUHA_storCtrl * const uha, con
             return;
         }
 
-        memcopy(readBuffer + k_stor_fileSystems[fileSysIndex].desc.headerRange.offset, 
+        memcopy(readBuffer + headerRange.offset % geometry.sectSizeBytes, 
                 headerBuffer, 
-                k_stor_fileSystems[fileSysIndex].desc.headerRange.length);
+                headerRange.length);
 
-        if (k_stor_fileSystems[fileSysIndex].desc.detect(headerBuffer, geometry)) {
+        if (fs.desc.detect(headerBuffer, geometry)) {
             addVolume(driveIndex, fileSysIndex);
             break;
         }
