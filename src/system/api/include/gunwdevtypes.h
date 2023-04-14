@@ -23,7 +23,7 @@ enum gnwDeviceType {
     DEV_TYPE_CHAR_OUT   = (1 << 6),
     DEV_TYPE_STORAGE    = (1 << 7),
     DEV_TYPE_FDC        = (1 << 8) | DEV_TYPE_STORAGE,
-    DEV_TYPE_UNKNOWN    = 0
+    DEV_TYPE_NONE       = 0
 };
 
 enum gnwDeviceError {

@@ -32,10 +32,10 @@ struct gnwFileInfo {
 */
 enum gnwFileErrorCode {
     GFEC_NONE               = 0,
-    GFEC_NOT_FOUND          = -1,
     GFEC_INVALID_PATH       = -2,
     GFEC_INVALID_PARAMETER  = -3,
-    GFEC_UNKNOWN            = -4
+    GFEC_NOT_FOUND          = -4,
+    GFEC_UNKNOWN            = -1
 };
 
 #endif // GUNWOS_GUNWFILE_H
