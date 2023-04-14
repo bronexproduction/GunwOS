@@ -63,20 +63,9 @@ static enum k_stor_error readBytes(const size_t volumeId, const range_size_t ran
                                                           &err);
 
         if (err.code != GSEC_NONE) {
-            #warning TO BE IMPLEMENTED
-            // if (uha->desc.removableMedia) {
-            //     /*
-            //         Possibly no media inserted
-            //     */
-            //     #warning this error should use GSEC_MEDIA_NOT_PRESENT
-            //     return;
-            // } else {
-            //     OOPS("Header read error");
-            //     return;
-            // }
+            return err.code;
         } else if (bytesRead != bytesToRead) {
-            // OOPS("Header read error");
-            // return;
+            return GSEC_UNKNOWN;
         }
     }
     

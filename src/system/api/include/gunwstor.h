@@ -67,7 +67,8 @@ enum gnwStorErrorCode {
     GSEC_INVALID_FORMAT,
     GSEC_COMMAND_FAILED,
     GSEC_BUFFER_OVERFLOW,
-    GSEC_INVALID_ARGUMENT
+    GSEC_INVALID_ARGUMENT,
+    GSEC_UNKNOWN = -1
 };
 
 struct gnwStorError {
