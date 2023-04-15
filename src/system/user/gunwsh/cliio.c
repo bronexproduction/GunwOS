@@ -9,26 +9,13 @@
 
 #include <mem.h>
 #include <string.h>
-#include <gunwdev.h>
+#include <gunwipc.h>
 
 #define IO_GENERAL_FAILURE -1
 
-#warning CHANGED TILL TERMINAL IMPLEMENTED AS DRIVER
-// bool user_cli_charOutAttached = false;
-// size_t user_cli_charOutIdentifier = 0;
-
 static int append(const char c) {
-    #warning CHANGED TILL TERMINAL IMPLEMENTED AS DRIVER
-    // if (!user_cli_charOutAttached) {
-        // return IO_GENERAL_FAILURE;
-    // }
-    enum gnwDeviceError e = GDE_NONE;
-    #warning IPC_WRITE
-    // if (!trm_append(c)) {
-        // return IO_GENERAL_FAILURE;
-    // }
-    // e = devCharWrite(user_cli_charOutIdentifier, c);
-    if (e != GDE_NONE) {
+    enum gnwIpcError e = ipcSend("test", c);
+    if (e != GIPCE_NONE) {
         return IO_GENERAL_FAILURE;
     }
 
