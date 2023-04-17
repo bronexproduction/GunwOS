@@ -50,7 +50,7 @@ void runLoopStart() {
         }
         
         runLoopEntryExecute(item);
-        memnull(item, sizeof(struct gnwRunLoopDispatchItem));
+        memzero(item, sizeof(struct gnwRunLoopDispatchItem));
         rlp_main.finishedIndex = index;
     }
 }

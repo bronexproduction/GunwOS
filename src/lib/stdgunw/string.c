@@ -40,7 +40,7 @@ void strprefix(const char * const s, size_t l, char * const out) {
         return;
     }
 
-    memnull(out, (l + 1) * sizeof(char));
+    memzero(out, (l + 1) * sizeof(char));
 
     for (size_t i = 0; i < l; ++i) {
         if (s[i]) {
@@ -100,7 +100,7 @@ int_32 str2intl(const char * const s, const size_t sLen, bool * const err) {
     uint_8 base;            // numeral system base
 
     char prefixBuffer[3];
-    memnull(prefixBuffer, 3);
+    memzero(prefixBuffer, 3);
     if (sLen >= 2) {
         strprefix(s, 2, prefixBuffer);
     }

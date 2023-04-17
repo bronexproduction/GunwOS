@@ -40,7 +40,7 @@ enum gnwCtrlError loadElf(const ptr_t filePtr,
     #warning check memory limits
     #warning how to handle section flags?
 
-    memnull(destPtr, *memBytes);
+    memzero(destPtr, *memBytes);
     for (size_t index = 0; index < elfGetSectionHeaderEntryCount(filePtr); ++index) {
         const struct elfSectionHeaderEntry32 * const entry = elfGetSectionHeaderEntry(filePtr, index, fileSizeBytes); 
         if (!entry) {

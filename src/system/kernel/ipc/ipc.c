@@ -27,7 +27,7 @@ static void clear(const size_t entryId) {
         return;
     }
     
-    memnull(&ipcListenerRegister[entryId], sizeof(struct ipcListener));
+    memzero(&ipcListenerRegister[entryId], sizeof(struct ipcListener));
     ipcListenerRegister[entryId].procId = NONE_PROC_ID;
 }
 

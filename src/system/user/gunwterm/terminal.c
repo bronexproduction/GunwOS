@@ -77,7 +77,7 @@ static bool trm_append(const char c) {
 }
 
 static void clear() {
-    memnull(&termData, sizeof(termData));
+    memzero(&termData, sizeof(termData));
     k_trm_vid_clear();
 }
 

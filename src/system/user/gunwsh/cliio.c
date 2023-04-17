@@ -62,7 +62,7 @@ int user_cli_putsl(const char * const s, unsigned int l) {
 // TODO: 64-bit version
 int user_cli_putun_base(uint_32 i, uint_8 base) {
     char buffer[32];
-    memnull(buffer, 32);
+    memzero(buffer, 32);
     size_t length = uint2str(i, buffer, base);
 
     if (!length) return IO_GENERAL_FAILURE;
@@ -83,7 +83,7 @@ int user_cli_putun_h(uint_32 i) {
 // TODO: 64-bit version
 int user_cli_putin(int_32 i) {
     char buffer[32];
-    memnull(buffer, 32);
+    memzero(buffer, 32);
     size_t length = int2str(i, buffer);
 
     if (!length) return IO_GENERAL_FAILURE;

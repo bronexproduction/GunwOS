@@ -65,7 +65,7 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
         
     } CRITICAL_SECTION_END;
 
-    memnull(&pTab[pIndex].cpuState, sizeof pTab[pIndex].cpuState);
+    memzero(&pTab[pIndex].cpuState, sizeof pTab[pIndex].cpuState);
 
     pTab[pIndex].info.dpl = DPL_3;
 
@@ -148,7 +148,7 @@ static void procCleanup(const procId_t procId) {
         OOPS("Unexpected process state during cleanup");
     }
 
-    memnull(&pTab[procId], sizeof(struct process));
+    memzero(&pTab[procId], sizeof(struct process));
     k_mem_procCleanup(procId);
 }
 
