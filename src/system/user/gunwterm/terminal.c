@@ -52,7 +52,6 @@ static void newline() {
 }
 
 static bool trm_append(const char c) {
-// static bool append(const char c) {
     if (c == '\n') {
         newline();
     } else if (c == '\b') {
