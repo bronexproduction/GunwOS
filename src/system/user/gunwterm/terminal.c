@@ -87,7 +87,7 @@ static void ipcListener(const procId_t procId, const char c) {
 
 void dupa() {
     k_trm_vid_init();
-    ipcRegister("t0", GIA_ALL, (gnwEventListener_32_8)ipcListener);
+    ipcRegister("t0", GIAS_ALL, (gnwEventListener_32_8)ipcListener);
     clear();
 
     runLoopStart();

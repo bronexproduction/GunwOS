@@ -29,5 +29,5 @@ extern enum gnwIpcError k_scr_usr_ipcRegister(const struct gnwIpcHandlerDescript
         OOPS("Invalid pointer referenced");
     }
     
-    return k_ipc_ipcRegister(procId, absPathPtr, absDescPtr->pathLen, absDescPtr->availability, absDescPtr->handlerRoutine, runLoopPtr);
+    return k_ipc_ipcRegister(procId, absPathPtr, absDescPtr->pathLen, absDescPtr->accessScope, absDescPtr->handlerRoutine, runLoopPtr);
 }

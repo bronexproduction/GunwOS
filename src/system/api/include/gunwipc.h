@@ -37,20 +37,21 @@ enum gnwIpcError {
     GIPCE_ALREADY_EXISTS    = -4,
     GIPCE_NOT_FOUND         = -5,
     GIPCE_IGNORED           = -6,
+    GIPCE_FORBIDDEN         = -7,
     GIPCE_UNKNOWN           = -1
 };
 
-enum gnwIpcAvailability {
-    GIA_NONE        = 0,
-    GIA_KERNEL      = (1 << 0),
-    GIA_USER        = (1 << 1),
-    GIA_ALL         = GIA_KERNEL | GIA_USER
+enum gnwIpcAccessScope {
+    GIAS_NONE       = 0,
+    GIAS_KERNEL     = (1 << 0),
+    GIAS_USER       = (1 << 1),
+    GIAS_ALL        = GIAS_KERNEL | GIAS_USER
 };
 
 struct gnwIpcHandlerDescriptor {
     const char * path;
     size_t pathLen;
-    enum gnwIpcAvailability availability;
+    enum gnwIpcAccessScope accessScope;
     gnwEventListener_32_8 handlerRoutine;
 };
 
@@ -59,10 +60,10 @@ struct gnwIpcHandlerDescriptor {
 
     Params:
         * path - IPC path (see line 14)
-        * availability - IPC path availability
+        * accessScope - IPC path access scope
         * handler - IPC message handler
 */
-SYSCALL_DECL enum gnwIpcError ipcRegister(const char * const path, const enum gnwIpcAvailability availability, const gnwEventListener_32_8 handler) {
+SYSCALL_DECL enum gnwIpcError ipcRegister(const char * const path, const enum gnwIpcAccessScope accessScope, const gnwEventListener_32_8 handler) {
     CHECKPTR(path);
     CHECKPTR(handler);
 
@@ -72,7 +73,7 @@ SYSCALL_DECL enum gnwIpcError ipcRegister(const char * const path, const enum gn
     struct gnwIpcHandlerDescriptor desc;
     desc.path = path;
     desc.pathLen = strlen(path);
-    desc.availability = availability;
+    desc.accessScope = accessScope;
     desc.handlerRoutine = handler;
 
     SYSCALL_PAR1(&desc);

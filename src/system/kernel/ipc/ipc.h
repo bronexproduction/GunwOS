@@ -19,7 +19,7 @@ enum gnwIpcError k_ipc_ipcSend(const procId_t procId,
 enum gnwIpcError k_ipc_ipcRegister(const procId_t procId, 
                                    const char * const absPathPtr,
                                    const size_t pathLen,
-                                   const enum gnwIpcAvailability availability,
+                                   const enum gnwIpcAccessScope accessScope,
                                    const gnwEventListener_32_8 handlerRoutine,
                                    struct gnwRunLoop * const runLoopPtr);
 
