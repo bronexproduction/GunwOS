@@ -8,6 +8,8 @@
 #define GUNWOS_GUNWIPC_H
 
 #include <gunwfug.h>
+#include <gunwrlp.h>
+#include <gunwevent.h>
 #include <string.h>
 
 /*
@@ -21,17 +23,73 @@
         * banana/potato/strawberry/pizza
         * 0:banana
         * 2:banana/potato
+    
+    Allowed characters: a-z A-Z 0-9
 */ 
 #define GNW_ROOT_IPC_PATH_SEPARATOR ":"
 #define GNW_PATH_IPC_COMPONENT_SEPARATOR "/"
+#define GNW_PATH_IPC_MAX_LENGTH 64
 
 enum gnwIpcError {
-    GIPCE_NONE      = 0,
-    GIPCE_UNKNOWN   = -1
+    GIPCE_NONE              = 0,
+    GIPCE_INVALID_PATH      = -2,
+    GIPCE_INVALID_PARAMETER = -3,
+    GIPCE_ALREADY_EXISTS    = -4,
+    GIPCE_NOT_FOUND         = -5,
+    GIPCE_IGNORED           = -6,
+    GIPCE_UNKNOWN           = -1
+};
+
+enum gnwIpcAvailability {
+    GIA_NONE        = 0,
+    GIA_KERNEL      = (1 << 0),
+    GIA_USER        = (1 << 1),
+    GIA_ALL         = GIA_KERNEL | GIA_USER
+};
+
+struct gnwIpcHandlerDescriptor {
+    const char * path;
+    size_t pathLen;
+    enum gnwIpcAvailability availability;
+    gnwEventListener_32_8 handlerRoutine;
 };
 
 /*
+    Registers the process as global IPC receiver for given path
+
+    Params:
+        * path - IPC path (see line 14)
+        * availability - IPC path availability
+        * handler - IPC message handler
+*/
+SYSCALL_DECL enum gnwIpcError ipcRegister(const char * const path, const enum gnwIpcAvailability availability, const gnwEventListener_32_8 handler) {
+    CHECKPTR(path);
+    CHECKPTR(handler);
+
+    ptr_t rlpPtr = runLoopGetMain();
+    CHECKPTR(rlpPtr);
+
+    struct gnwIpcHandlerDescriptor desc;
+    desc.path = path;
+    desc.pathLen = strlen(path);
+    desc.availability = availability;
+    desc.handlerRoutine = handler;
+
+    SYSCALL_PAR1(&desc);
+    SYSCALL_PAR2(rlpPtr);
+
+    SYSCALL_USER_FUNC(IPC_REGISTER);
+    SYSCALL_USER_INT;
+
+    SYSCALL_RETVAL(32);
+}
+
+/*
     Sends given character to specified IPC path
+
+    Params:
+        * path - IPC path (see line 14)
+        * c - character to be sent
 */
 SYSCALL_DECL enum gnwIpcError ipcSend(const char * const path, const char c) {
     CHECKPTR(path);

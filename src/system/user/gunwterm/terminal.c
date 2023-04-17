@@ -7,6 +7,7 @@
 
 #include <driver/gunwdrv.h>
 #include <mem.h>
+#include <gunwipc.h>
 
 #include "video.h"
 
@@ -50,8 +51,7 @@ static void newline() {
     }
 }
 
-#warning CHANGED UNTIL TERMINAL IMPLEMENTED AS DRIVER
-bool trm_append(const char c) {
+static bool trm_append(const char c) {
 // static bool append(const char c) {
     if (c == '\n') {
         newline();
@@ -82,8 +82,13 @@ static void clear() {
     k_trm_vid_clear();
 }
 
+static void ipcListener(const procId_t procId, const char c) {
+    trm_append(c);
+}
+
 void dupa() {
     k_trm_vid_init();
+    ipcRegister("t0", GIA_ALL, (gnwEventListener_32_8)ipcListener);
     clear();
 
     runLoopStart();

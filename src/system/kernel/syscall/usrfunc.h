@@ -64,6 +64,13 @@ __attribute__((naked)) time_t k_scr_timeMs();
 __attribute__((naked)) enum gnwIpcError k_scr_ipcSend(const char * const path, const char c);
 
 /*
+    Code - 0x07
+    Function - IPC_REGISTER
+*/
+__attribute__((naked)) enum gnwIpcError k_scr_ipcRegister(const struct gnwIpcHandlerDescriptor * const desc,
+                                                          struct gnwRunLoop * const runLoop);
+
+/*
     Code - 0x08
     Function - DEV_GET_BY_ID
 */

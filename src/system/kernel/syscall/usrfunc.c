@@ -11,6 +11,7 @@
 #include <error/fug.h>
 #include <hal/proc/proc.h>
 #include <dev/dev.h>
+#include <ipc/ipc.h>
 #include <queue/queue.h>
 #include <error/panic.h>
 
@@ -96,6 +97,7 @@ SCR(exit,
     
     const procId_t procId = k_proc_getCurrentId();
     k_que_dispatch_arch((fPtr_arch)k_dev_procCleanup, procId);
+    k_que_dispatch_arch((fPtr_arch)k_ipc_procCleanup, procId);
     k_proc_stop(procId);
 )
 
@@ -132,7 +134,7 @@ SCR(timeMs,
     Function - IPC_SEND
 
     Params: 
-        * EBX - IPC path
+        * EBX - IPC path pointer relative to caller process memory
         * ECX - IPC path length
         * DL - character to be sent
 
@@ -148,6 +150,27 @@ SCR(ipcSend,
 
     extern enum gnwIpcError k_scr_usr_ipcSend(const char * const, const size_t, const char);
     err = k_scr_usr_ipcSend((char *)path, (size_t)pathLen, (char)c);
+)
+
+/*
+    Code - 0x07
+    Function - IPC_REGISTER
+
+    Params:
+        * EBX - IPC handler descriptor pointer (see struct gnwIpcHandlerDescriptor) relative to caller process memory
+        * ECX - run loop pointer (struct gnwRunLoop * const) relative to caller process memory
+
+    Return:
+        * EAX - error code on failure, GIPCE_NONE otherwise
+*/
+SCR(ipcRegister,
+    REG(32, desc, ebx)
+    REG(32, rlp, ecx)
+
+    REG_RET(32, err)
+
+    extern enum gnwIpcError k_scr_usr_ipcRegister(const struct gnwIpcHandlerDescriptor * const, struct gnwRunLoop * const);
+    err = k_scr_usr_ipcRegister((struct gnwIpcHandlerDescriptor *)desc, (struct gnwRunLoop *)rlp);
 )
 
 /*
@@ -264,7 +287,7 @@ SCR(fug,
     Params:
         * EBX - device identifier
         * ECX - listener (const union gnwEventListener)
-        * EDX - run loop (const struct gnwRunLoop * const), relative to caller process memory 
+        * EDX - run loop (struct gnwRunLoop * const), relative to caller process memory 
     
     Return:
         * EAX - error code (enum gnwDeviceError)

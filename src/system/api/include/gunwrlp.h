@@ -15,7 +15,7 @@
 
     Needed to be called if the application is expected to use
     asynchronous event listeners
-    like devListen()
+    like devListen() or IPC messaging
 
     Usually needs to be called at the end of the entry point function
 

@@ -9,6 +9,7 @@
 
 extern void k_tmr_init();
 extern void k_hal_init();
+extern void k_ipc_init();
 extern void k_dev_init();
 extern void k_drv_loadMinimal();
 extern void k_stor_init();
@@ -37,6 +38,7 @@ void __attribute__((fastcall, section(".start"))) __kernel_start(const struct k_
     k_init();
 
     k_hal_init();
+    k_ipc_init();
     k_dev_init();
     k_drv_loadMinimal();
     k_stor_init();

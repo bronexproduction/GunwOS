@@ -14,7 +14,7 @@
 #define IO_GENERAL_FAILURE -1
 
 static int append(const char c) {
-    enum gnwIpcError e = ipcSend("test", c);
+    enum gnwIpcError e = ipcSend("t0", c);
     if (e != GIPCE_NONE) {
         return IO_GENERAL_FAILURE;
     }
