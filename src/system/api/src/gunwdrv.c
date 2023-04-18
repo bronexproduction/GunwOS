@@ -51,23 +51,9 @@ static bool validateDeviceUHA_display(const struct gnwDeviceUHA_display * const 
     if (!uha->desc.supportedFormatCount) {
         return false;
     }
-
-    /*
-        Validate routines
-
-        Note: it checks for function presence, not validity of the function result
-    */
-
-    if (!uha->routine.supportedFormats) {
-        return false;
-    }
-    if (!uha->routine.dimensionsForFormat) {
-        return false;
-    }
-    if (!uha->routine.setFormat) {
-        return false;
-    }
     
+    #warning how to validate getParam protocol?
+
     return true;
 }
 
