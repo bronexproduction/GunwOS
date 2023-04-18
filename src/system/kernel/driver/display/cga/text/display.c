@@ -8,14 +8,18 @@
 #include <defs.h>
 #include <driver/gunwdrv.h>
 #include <error/panic.h>
+#include "../common.h"
 
-static const volatile ptr_t VIDEO_HW_MEM   = (volatile ptr_t)0xb8000;
 #define VIDEO_HW_ROWS           25
 #define VIDEO_HW_COLS           80
 #define VIDEO_BYTES_PER_CHAR    2
 
-#define MEM_CHAR(INDEX) (VIDEO_HW_MEM + (INDEX * VIDEO_BYTES_PER_CHAR))
+#define MEM_CHAR(INDEX) (CGA_VIDEO_HW_MEM + (INDEX * VIDEO_BYTES_PER_CHAR))
 #define MEM_COLOR(INDEX) (MEM_CHAR(INDEX) + 1)
+
+static void enable() {
+
+}
 
 static void update(const struct gnwDeviceUHA_display_character * const buffer) {
     if (!buffer) {
@@ -43,6 +47,7 @@ static struct gnwDeviceUHA uha() {
 
     uha.display.desc.dimensions = (point_t){ 80, 25 };
     uha.display.desc.format = TEXT_H80V25C16;
+    uha.display.routine.enable = enable;
     uha.mem.desc.sizeBytes = uha.display.desc.dimensions.x * 
                              uha.display.desc.dimensions.y * 
                              2;
@@ -54,13 +59,13 @@ static struct gnwDeviceUHA uha() {
     return uha;
 }
 
-struct gnwDeviceDescriptor k_drv_display_descriptor() {
+struct gnwDeviceDescriptor k_drv_display_cga_text_descriptor() {
     return (struct gnwDeviceDescriptor) {
         /* type */ DEV_TYPE_DISPLAY | DEV_TYPE_MEM,
         /* api */ uha(),
         /* driver */ (struct gnwDeviceDriver) {
             /* io */ (struct gnwDeviceIO) {
-                /* busBase */ NULL
+                /* busBase */ CGA_BUS_MODE_CONTROL_REG,
             },
             /* descriptor */ desc()
         },

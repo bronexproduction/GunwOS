@@ -56,6 +56,14 @@ static bool validateDeviceUHA_display(const struct gnwDeviceUHA_display * const 
         !GDD_FMT_ISGRAP(uha->desc.format)) {
         return false;
     }
+
+    /*
+        Validate routines
+    */
+
+    if (!uha->routine.enable) {
+        return false;
+    }
     
     return true;
 }

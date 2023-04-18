@@ -12,7 +12,10 @@
 #include <uha/gunwuha_display_desc.h>
 
 struct gnwDeviceUHA_display_routine {
-    void (*_unused)();
+    /*
+        Enables the display
+    */
+    void (*enable)();
 };
 
 struct gnwDeviceUHA_display {
