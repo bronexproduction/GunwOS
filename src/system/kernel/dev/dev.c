@@ -262,9 +262,6 @@ enum gnwDeviceError k_dev_writeMem(const procId_t processId,
                                    const size_t deviceId,
                                    const void * const buffer,
                                    const range_addr_t devMemRange) {
-    
-                                    #error DEV MEM RANGE NOT VERIFIED AND NOT HANDLED
-
     if (!buffer) {
         OOPS("Buffer cannot be nullptr");
         return GDE_UNKNOWN;
@@ -275,8 +272,17 @@ enum gnwDeviceError k_dev_writeMem(const procId_t processId,
         return e;
     }
 
-    if (!devices[deviceId].desc.api.mem.desc.maxInputSizeBytes) {
+    const size_t maxInputSizeBytes = devices[deviceId].desc.api.mem.desc.maxInputSizeBytes;
+    if (!maxInputSizeBytes) {
         return GDE_INVALID_OPERATION;
+    }
+
+    if (devMemRange.offset >= maxInputSizeBytes) {
+        return GDE_INVALID_PARAMETER;
+    }
+    const size_t devBytesLeft = maxInputSizeBytes - devMemRange.offset;
+    if (devMemRange.sizeBytes > devBytesLeft) {
+        return GDE_INVALID_PARAMETER;
     }
 
     const struct gnwDeviceUHA_mem_routine * const routine = &devices[deviceId].desc.api.mem.routine;
@@ -284,7 +290,7 @@ enum gnwDeviceError k_dev_writeMem(const procId_t processId,
         return GDE_INVALID_OPERATION;
     }
     #warning it is more than dangerous to allow the driver to access the buffer directly, moreover it could be even impossible when driver processes are implemented
-    routine->write(buffer);
+    routine->write(buffer, devMemRange);
 
     return GDE_NONE;
 }

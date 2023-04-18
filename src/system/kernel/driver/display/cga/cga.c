@@ -172,15 +172,17 @@ static bool setFormat(const enum gnwDeviceUHA_display_format format) {
     }
 }
 
-static void update(const struct gnwDeviceUHA_display_character * const buffer) {
+static void update(const void * const buffer, const range_addr_t inputBufferRange) {
     if (!buffer) {
         OOPS("Unexpected nullptr in buffer reference");
         return;
     }
 
+    const struct gnwDeviceUHA_display_character * const charBuffer = (struct gnwDeviceUHA_display_character *)buffer;
+
     for (int index = 0; index < VIDEO_HW_COLS * VIDEO_HW_ROWS; ++index) {
-        *MEM_CHAR(index) = buffer[index].character;
-        *MEM_COLOR(index) = (buffer[index].charColor | buffer[index].bgColor << 4);
+        *MEM_CHAR(index) = charBuffer[index].character;
+        *MEM_COLOR(index) = (charBuffer[index].charColor | charBuffer[index].bgColor << 4);
     }
 }
 
@@ -205,7 +207,7 @@ static struct gnwDeviceUHA uha() {
     uha.mem.desc.maxInputSizeBytes = 320 * 
                                      200 * 
                                      sizeof(struct gnwDeviceUHA_display_pixel);
-    uha.mem.routine.write = (void (*)(const void * const))update;
+    uha.mem.routine.write = update;
 
     return uha;
 }

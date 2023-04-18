@@ -17,8 +17,9 @@ struct gnwDeviceUHA_mem_routine {
     
         Params:
             * Buffer pointer (see struct gnwDeviceUHA_mem_desc for parameters)
+            * Range of the buffer, relative to (0 - desc.maxInputSizeBytes)
     */
-    void (*write)(const void * const buffer);
+    void (*write)(const void * const buffer, const range_addr_t inputBufferRange);
 };
 
 struct gnwDeviceUHA_mem {
