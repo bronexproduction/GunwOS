@@ -53,14 +53,8 @@ void k_drv_loadMinimal() {
     /*
         Default text mode display
     */
-    extern struct gnwDeviceDescriptor k_drv_display_cga_text_descriptor();
-    loadDevice(k_drv_display_cga_text_descriptor, MSGS_FAIL(CGA text display));
-
-    /*
-        Default text mode display
-    */
-    extern struct gnwDeviceDescriptor k_drv_display_cga_graphics_descriptor();
-    loadDevice(k_drv_display_cga_graphics_descriptor, MSGS_FAIL(CGA graphics display));
+    extern struct gnwDeviceDescriptor k_drv_display_cga_descriptor();
+    loadDevice(k_drv_display_cga_descriptor, MSGS_FAIL(CGA display));
     
     /*
         PIT driver for 8253/8254 chip
