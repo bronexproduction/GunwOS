@@ -13,14 +13,14 @@
 
 struct gnwDeviceUHA_mem_desc {
     /*
-        Size of mapped memory in bytes
+        Range of mapped memory in bytes
     */
-    size_t sizeBytes;
+    range_size_t bytesRange;
     
     /*
-        Size of accepted write buffer
+        Maximum size of accepted write buffer
     */
-    size_t inputSizeBytes;
+    size_t maxInputSizeBytes;
 };
 
 #endif // GUNWOS_GUNWUHA_MEM_DESC_H

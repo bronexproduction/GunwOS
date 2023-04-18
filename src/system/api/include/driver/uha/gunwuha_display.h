@@ -26,7 +26,7 @@ struct gnwDeviceUHA_display_routine {
             * X and Y display dimensions, if format supported
             * { -1, -1 } otherwise
     */
-    point_t (*dimensionsForFormat)(const gnwDeviceUHA_display_format);
+    point_t (*dimensionsForFormat)(const enum gnwDeviceUHA_display_format);
 
     /*
         Sets the desired display format
@@ -34,7 +34,7 @@ struct gnwDeviceUHA_display_routine {
         Result:
             * true on success, false otherwise
     */
-    bool (*setFormat)(enum gnwDeviceUHA_display_format);
+    bool (*setFormat)(const enum gnwDeviceUHA_display_format);
 };
 
 struct gnwDeviceUHA_display {

@@ -71,7 +71,7 @@ struct gnwDeviceUHA_display_desc {
     /*
         Number of formats supported by the device
     */
-    enum size_t supportedFormatCount;
+    size_t supportedFormatCount;
 };
 
 #endif // GUNWOS_GUNWUHA_DISPLAY_DESC_H
