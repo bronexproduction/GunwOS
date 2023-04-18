@@ -80,4 +80,44 @@ enum k_drv_display_cga_modeRegBit {
     CGA_MRB_HI_RES_TEXT = 0x01,
 };
 
+enum k_drv_display_cga_colorRegBit {
+    /*
+        Bit 5: Palette
+        
+        This is only used in the 320x200 graphics mode.
+        
+        If it is set, the fixed colours in the palette
+        are magenta, cyan and white. If it is reset,
+        they are red, green and yellow. 
+        Bit 2 in the mode control register (if set) overrides this bit.
+    */
+    CGA_CRB_PALETTE         = 0x20,
+
+    /*
+        Bit 4: Bright foreground
+        
+        This is only used in the 320x200 graphics mode.
+
+        If set, the foreground colours display in high intensity.
+    */
+    CGA_CRB_HIGH_INTENSITY  = 0x10,
+
+    /*
+        Bits 3-0: Border / Background / Foreground
+        
+        These 4 bits select one of the 16 CGA colours
+        (bit 3 = Intensity, Bit 2 = Red, Bit 1 = Green, Bit 0 = Blue).
+        
+        In text modes, this colour is used for the border (overscan).
+        
+        In 320x200 graphics modes, it is used for the background and border.
+        
+        In 640x200 mode, it is used for the foreground colour.
+    */
+    CGA_CRB_INTENSITY       = 0x08,
+    CGA_CRB_RED             = 0x04,
+    CGA_CRB_GREEN           = 0x02,
+    CGA_CRB_BLUE            = 0x01,
+};
+
 #endif // COMMON_H
