@@ -51,20 +51,23 @@ static bool validateDeviceUHA_display(const struct gnwDeviceUHA_display * const 
     /*
         Validate descriptor
     */
-
-    if (!(uha->desc.dimensions.x && uha->desc.dimensions.y)) {
-        return false;
-    }
-    if (!GDD_FMT_ISTEXT(uha->desc.format) &&
-        !GDD_FMT_ISGRAP(uha->desc.format)) {
+    if (!uha->desc.supportedFormatCount) {
         return false;
     }
 
     /*
         Validate routines
+
+        Note: it checks for function presence, not validity of the function result
     */
 
-    if (!uha->routine.enable) {
+    if (!uha->routine.supportedFormats) {
+        return false;
+    }
+    if (!uha->routine.dimensionsForFormat) {
+        return false;
+    }
+    if (!uha->routine.setFormat) {
         return false;
     }
     

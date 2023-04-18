@@ -128,10 +128,6 @@ enum k_drv_display_cga_colorRegBit {
     CGA_CRB_BLUE            = 0x01,
 };
 
-static void enable() {
-
-}
-
 static void update(const struct gnwDeviceUHA_display_character * const buffer) {
     if (!buffer) {
         OOPS("Unexpected nullptr in buffer reference");
@@ -156,15 +152,16 @@ static struct gnwDriverConfig desc() {
 static struct gnwDeviceUHA uha() {
     struct gnwDeviceUHA uha;
 
-    uha.display.desc.dimensions = (point_t){ 80, 25 };
-    uha.display.desc.format = TEXT_H80V25C16;
-    uha.display.routine.enable = enable;
-    uha.mem.desc.sizeBytes = uha.display.desc.dimensions.x * 
-                             uha.display.desc.dimensions.y * 
-                             2;
-    uha.mem.desc.inputSizeBytes = uha.display.desc.dimensions.x * 
-                                  uha.display.desc.dimensions.y * 
-                                  sizeof(struct gnwDeviceUHA_display_character);
+    uha.display.desc.supportedFormatCount = 2;
+    uha.display.routine.supportedFormats = supportedFormats;
+    uha.display.routine.dimensionsForFormat = dimensionsForFormat;
+    uha.display.routine.setFormat = setFormat;
+    uha.mem.desc.bytesRange.offset = CGA_VIDEO_HW_MEM;
+    uha.mem.desc.bytesRange.length = KiB(16);
+    uha.mem.desc.maxInputSizeBytes = 
+    uha.mem.desc.inputSizeBytes = 320 * 
+                                  200 * 
+                                  sizeof(struct gnwDeviceUHA_display_pixel);
     uha.mem.routine.write = (void (*)(const void * const))update;
 
     return uha;
