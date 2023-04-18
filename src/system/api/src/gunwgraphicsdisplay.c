@@ -21,7 +21,9 @@ static void invalidateGraphicsHandle(struct gnwGraphicsDisplayHandle * const han
 static enum gnwDeviceError pushGraphicsFrame(struct gnwGraphicsDisplayHandle * const handle,
                                              const struct gnwDeviceUHA_display_pixel * const buffer) {
     CHECKPTR(handle)
-    enum gnwDeviceError e = pushFrame(handle->descriptor.identifier, (const void * const)buffer);
+
+    const size_t frameSizeBytes = handle->descriptor.dimensions.x * handle->descriptor.dimensions.y * sizeof(struct gnwDeviceUHA_display_pixel);
+    enum gnwDeviceError e = pushFrame(handle->descriptor.identifier, (const void * const)buffer, frameSizeBytes);
 
     if (e == GDE_HANDLE_INVALID) {
         handle->invalidate(handle);
