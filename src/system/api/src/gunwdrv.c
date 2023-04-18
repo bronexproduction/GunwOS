@@ -23,6 +23,9 @@ static bool validateDeviceUHA_mem(const struct gnwDeviceUHA_mem * const uha) {
     if (!uha->desc.bytesRange.length) {
         return false;
     }
+    if (!uha->desc.maxInputSizeBytes) {
+        return false;
+    }
 
     /*
         Validate routines
