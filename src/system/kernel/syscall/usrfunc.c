@@ -260,11 +260,12 @@ SCR(devRelease,
 SCR(devMemWrite,
     REG(32, devId, ebx)
     REG(32, buf, ecx)
+    REG(32, rangePtr, edx)
 
     REG_RET(32, err)
 
-    extern enum gnwDeviceError k_scr_usr_devMemWrite(const size_t devId, const void * const buf);
-    err = k_scr_usr_devMemWrite(devId, (void *)buf);
+    extern enum gnwDeviceError k_scr_usr_devMemWrite(const size_t devId, const void * const buf, const range_addr_t * const);
+    err = k_scr_usr_devMemWrite(devId, (void *)buf, (range_addr_t *)rangePtr);
 )
 
 /*
@@ -300,4 +301,28 @@ SCR(devListen,
     REG_RET(32, err)
 
     err = k_dev_listen(k_proc_getCurrentId(), (const size_t)devId, (const union gnwEventListener)lsnr, (struct gnwRunLoop *)rlp);
+)
+
+/*
+    Code - 0x0f
+    Function - DEV_GET_PARAM
+
+    Params:
+        * EBX - device identifier
+        * ECX upper 16 bits - device-specific parameter
+        * CX - parameter index 
+        * EDX - result; parameter value 
+    
+    Return:
+        * EAX - error code (enum gnwDeviceError)
+*/
+SCR(devGetParam,
+    REG(32, devId, ebx)
+    REG(32, paramData, ecx)
+    REG(32, resultPtr, edx)
+
+    REG_RET(32, err)
+
+    extern enum gnwDeviceError k_scr_usr_devGetParam(const size_t, const size_t, const size_t, size_t * const);
+    err = k_scr_usr_devGetParam((size_t)devId, ((((size_t)paramData) >> 16) & 0xFFFF), (size_t)(paramData & 0xFFFF), (size_t *)resultPtr);
 )

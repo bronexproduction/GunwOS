@@ -20,10 +20,7 @@ static bool validateDeviceUHA_mem(const struct gnwDeviceUHA_mem * const uha) {
     if (!uha->desc.bytesRange.offset) {
         return false;
     }
-    if (!uha->desc.bytesRange.length) {
-        return false;
-    }
-    if (!uha->desc.maxInputSizeBytes) {
+    if (!uha->desc.bytesRange.sizeBytes) {
         return false;
     }
 

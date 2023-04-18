@@ -99,7 +99,8 @@ __attribute__((naked)) void k_scr_devRelease(const uint_32);
     Function - DEV_MEM_WRITE
 */
 __attribute__((naked)) enum gnwDeviceError k_scr_devMemWrite(const size_t,
-                                                             const void * const);
+                                                             const void * const,
+                                                             const range_addr_t * const);
 
 /*
     Code - 0x0d
@@ -114,5 +115,14 @@ __attribute__((naked)) void k_scr_fug(const enum gnwFugCode);
 __attribute__((naked)) enum gnwDeviceError k_scr_devListen(const size_t identifier,
                                                            const union gnwEventListener listener,
                                                            const struct gnwRunLoop * const runLoop);
+
+/*
+    Code - 0x0f
+    Function - DEV_GET_PARAM
+*/
+__attribute__((naked)) enum gnwDeviceError k_scr_devGetParam(const size_t deviceId,
+                                                             const uint_16 param,
+                                                             const uint_16 paramIndex,
+                                                             size_t * const result);
 
 #endif // USRFUNC_H

@@ -260,8 +260,11 @@ void k_dev_releaseHold(const procId_t processId, const size_t deviceId) {
 
 enum gnwDeviceError k_dev_writeMem(const procId_t processId, 
                                    const size_t deviceId,
-                                   const void * const buffer) {
+                                   const void * const buffer,
+                                   const range_addr_t devMemRange) {
     
+                                    #error DEV MEM RANGE NOT VERIFIED AND NOT HANDLED
+
     if (!buffer) {
         OOPS("Buffer cannot be nullptr");
         return GDE_UNKNOWN;
@@ -270,6 +273,10 @@ enum gnwDeviceError k_dev_writeMem(const procId_t processId,
     const enum gnwDeviceError e = validateStartedDevice(processId, deviceId);
     if (e) {
         return e;
+    }
+
+    if (!devices[deviceId].desc.api.mem.desc.maxInputSizeBytes) {
+        return GDE_INVALID_OPERATION;
     }
 
     const struct gnwDeviceUHA_mem_routine * const routine = &devices[deviceId].desc.api.mem.routine;
@@ -344,6 +351,16 @@ enum gnwDeviceError k_dev_listen(const procId_t processId,
 
     devices[deviceId].listener.routine = listener;
     devices[deviceId].listener.runLoop = runLoopPtr;
+    return GDE_NONE;
+}
+
+enum gnwDeviceError k_dev_getParam(const size_t deviceId,
+                                   const size_t param,
+                                   const size_t paramIndex,
+                                   size_t * const result) {
+    
+    #warning TO BE IMPLEMENTED
+
     return GDE_NONE;
 }
 

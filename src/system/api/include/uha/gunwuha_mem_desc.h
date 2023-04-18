@@ -15,7 +15,7 @@ struct gnwDeviceUHA_mem_desc {
     /*
         Range of mapped memory in bytes
     */
-    range_size_t bytesRange;
+    range_addr_t bytesRange;
     
     /*
         Maximum size of accepted write buffer

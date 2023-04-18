@@ -34,6 +34,7 @@
 #define SYSCALL_USER_FUNCTION_DEV_MEM_WRITE     0x0c
 #define SYSCALL_USER_FUNCTION_FUG               0x0d
 #define SYSCALL_USER_FUNCTION_DEV_LISTEN        0x0e
+#define SYSCALL_USER_FUNCTION_DEV_GET_PARAM     0x0f
 
 /*
     Important note:

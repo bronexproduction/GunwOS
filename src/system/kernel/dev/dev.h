@@ -25,7 +25,8 @@ void k_dev_releaseHold(const procId_t processId, const size_t deviceId);
 
 enum gnwDeviceError k_dev_writeMem(const procId_t processId, 
                                    const size_t deviceId,
-                                   const void * const buffer);
+                                   const void * const buffer,
+                                   const range_addr_t devMemRange);
 enum gnwDeviceError k_dev_writeChar(const procId_t processId, 
                                     const size_t deviceId,
                                     const char character);
@@ -34,6 +35,11 @@ enum gnwDeviceError k_dev_listen(const procId_t processId,
                                  const size_t deviceId, 
                                  const union gnwEventListener listener,
                                  struct gnwRunLoop * const runLoopPtr);
+
+enum gnwDeviceError k_dev_getParam(const size_t deviceId,
+                                   const size_t param,
+                                   const size_t paramIndex,
+                                   size_t * const result);
 
 enum gnwDeviceError k_dev_emit_void(const int_32 type);
 enum gnwDeviceError k_dev_emit_u8(const int_32 type,

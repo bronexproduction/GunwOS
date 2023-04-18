@@ -128,6 +128,50 @@ enum k_drv_display_cga_colorRegBit {
     CGA_CRB_BLUE            = 0x01,
 };
 
+static void supportedFormats(enum gnwDeviceUHA_display_format * const result) {
+    if (!result) {
+        OOPS("Nullptr");
+        return;
+    }
+
+    result[0] = TEXT_H80V25C16;
+    result[1] = GRAPHICS_H320V200C16;
+}
+
+static point_t dimensionsForFormat(const enum gnwDeviceUHA_display_format format) {
+    point_t dimensions;
+    
+    switch(format) {
+    case TEXT_H80V25C16:
+        dimensions.x = 80;
+        dimensions.y = 25;
+        break;
+    case GRAPHICS_H320V200C16:
+        dimensions.x = 320;
+        dimensions.y = 200;
+        break;
+    default:
+        dimensions.x = -1;
+        dimensions.y = -1;
+        break;
+    }
+
+    return dimensions;
+}
+
+static bool setFormat(const enum gnwDeviceUHA_display_format format) {
+    #warning TO BE IMPLEMENTED
+
+    switch(format) {
+    case TEXT_H80V25C16:
+        return true;
+    case GRAPHICS_H320V200C16:
+        return true;
+    default:
+        return false;
+    }
+}
+
 static void update(const struct gnwDeviceUHA_display_character * const buffer) {
     if (!buffer) {
         OOPS("Unexpected nullptr in buffer reference");
@@ -156,12 +200,11 @@ static struct gnwDeviceUHA uha() {
     uha.display.routine.supportedFormats = supportedFormats;
     uha.display.routine.dimensionsForFormat = dimensionsForFormat;
     uha.display.routine.setFormat = setFormat;
-    uha.mem.desc.bytesRange.offset = CGA_VIDEO_HW_MEM;
-    uha.mem.desc.bytesRange.length = KiB(16);
-    uha.mem.desc.maxInputSizeBytes = 
-    uha.mem.desc.inputSizeBytes = 320 * 
-                                  200 * 
-                                  sizeof(struct gnwDeviceUHA_display_pixel);
+    uha.mem.desc.bytesRange.offset = (addr_t)CGA_VIDEO_HW_MEM;
+    uha.mem.desc.bytesRange.sizeBytes = KiB(16);
+    uha.mem.desc.maxInputSizeBytes = 320 * 
+                                     200 * 
+                                     sizeof(struct gnwDeviceUHA_display_pixel);
     uha.mem.routine.write = (void (*)(const void * const))update;
 
     return uha;

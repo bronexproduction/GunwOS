@@ -20,6 +20,8 @@
     Params:
         * id - id of the device
         * desc - address of the result description (see gunwdrv.h)
+    
+    Return value: Device error code or GDE_NONE (see enum gnwDeviceError)
 */
 SYSCALL_DECL enum gnwDeviceError devGetById(const size_t deviceId, 
                                             struct gnwDeviceUHADesc * const desc) {
@@ -40,6 +42,8 @@ SYSCALL_DECL enum gnwDeviceError devGetById(const size_t deviceId,
     Params:
         * type - type of the device (see gunwdrv.h)
         * desc - address of the result description (see gunwdrv.h)
+    
+    Return value: Device error code or GDE_NONE (see enum gnwDeviceError)
 */
 SYSCALL_DECL enum gnwDeviceError devGetByType(const enum gnwDeviceType type, 
                                               struct gnwDeviceUHADesc * const desc) {
@@ -55,6 +59,33 @@ SYSCALL_DECL enum gnwDeviceError devGetByType(const enum gnwDeviceType type,
 }
 
 /*
+    Requests parameter value for given device ID, if any
+
+    Params:
+        * id - id of the device
+        * param - device-specific parameter code (see UHA for a specific device)
+        * paramIndex - parameter result index - in case more than one value are available
+        * result - pointer to the result buffer
+    
+    Return value: Device error code or GDE_NONE (see enum gnwDeviceError)
+*/
+SYSCALL_DECL enum gnwDeviceError devGetParam(const size_t deviceId, 
+                                             const uint_16 param,
+                                             const uint_16 paramIndex,
+                                             size_t * const result) {
+    CHECKPTR(result);
+
+    SYSCALL_PAR1(deviceId);
+    SYSCALL_PAR2((((size_t)param) << 16) | paramIndex);
+    SYSCALL_PAR3(result);
+
+    SYSCALL_USER_FUNC(DEV_GET_PARAM);
+    SYSCALL_USER_INT;
+
+    SYSCALL_RETVAL(32);
+}
+
+/*
     Attempts to take hold of the device
 
     Params:
@@ -62,6 +93,8 @@ SYSCALL_DECL enum gnwDeviceError devGetByType(const enum gnwDeviceType type,
 
     Note: In order to use the device
           the process has to be exclusive holder of it
+
+    Return value: Device error code or GDE_NONE (see enum gnwDeviceError)
 */
 SYSCALL_DECL enum gnwDeviceError devAcquire(const uint_32 identifier) {
     SYSCALL_PAR1(identifier);
@@ -115,11 +148,13 @@ SYSCALL_DECL enum gnwDeviceError devCharWrite(const uint_32 deviceId,
     Return value: Device error code or GDE_NONE (see enum gnwDeviceError)
 */
 SYSCALL_DECL enum gnwDeviceError devMemWrite(const size_t identifier,
-                                             const void * const buffer) {
+                                             const void * const buffer,
+                                             const range_addr_t * const devMemRange) {
     CHECKPTR(buffer);
 
     SYSCALL_PAR1(identifier);
     SYSCALL_PAR2(buffer);
+    SYSCALL_PAR3(devMemRange);
 
     SYSCALL_USER_FUNC(DEV_MEM_WRITE);
     SYSCALL_USER_INT;
