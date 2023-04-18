@@ -199,9 +199,6 @@ static struct gnwDeviceUHA uha() {
     struct gnwDeviceUHA uha;
 
     uha.display.desc.supportedFormatCount = 2;
-    uha.display.routine.supportedFormats = supportedFormats;
-    uha.display.routine.dimensionsForFormat = dimensionsForFormat;
-    uha.display.routine.setFormat = setFormat;
     uha.mem.desc.bytesRange.offset = (addr_t)CGA_VIDEO_HW_MEM;
     uha.mem.desc.bytesRange.sizeBytes = KiB(16);
     uha.mem.desc.maxInputSizeBytes = 320 * 
