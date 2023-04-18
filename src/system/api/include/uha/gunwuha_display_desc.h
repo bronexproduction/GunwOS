@@ -69,20 +69,9 @@ struct gnwDeviceUHA_display_pixel {
 
 struct gnwDeviceUHA_display_desc {
     /*
-        Display resolution
-    
-        Result:
-            * X and Y display dimensions
+        Number of formats supported by the device
     */
-    point_t dimensions;
-
-    /*
-        Display format
-    
-        Result:
-            * Display format - enum gnwDeviceUHA_display_format
-    */
-    enum gnwDeviceUHA_display_format format;
+    enum size_t supportedFormatCount;
 };
 
 #endif // GUNWOS_GUNWUHA_DISPLAY_DESC_H

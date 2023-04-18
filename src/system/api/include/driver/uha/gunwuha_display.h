@@ -13,9 +13,28 @@
 
 struct gnwDeviceUHA_display_routine {
     /*
-        Enables the display
+        Loads list of supported formats under given array pointer
+    
+        Note: result array should be of size equal (desc.supportedFormatCount * sizeof(enum gnwDeviceUHA_display_format))
     */
-    void (*enable)();
+    void (*supportedFormats)(enum gnwDeviceUHA_display_format * const result);
+
+    /*
+        Display resolution for given format (if supported)
+    
+        Result:
+            * X and Y display dimensions, if format supported
+            * { -1, -1 } otherwise
+    */
+    point_t (*dimensionsForFormat)(const gnwDeviceUHA_display_format);
+
+    /*
+        Sets the desired display format
+
+        Result:
+            * true on success, false otherwise
+    */
+    bool (*setFormat)(enum gnwDeviceUHA_display_format);
 };
 
 struct gnwDeviceUHA_display {
