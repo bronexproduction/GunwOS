@@ -108,6 +108,8 @@ enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescr
         return UNKNOWN;
     }
 
+    #warning CHECK MEMORY-MAPPED DEVICES FOR OVERLAPS WITH CURRENTLY INSTALLED ONES
+
     const struct gnwDriverConfig *driverDesc = &(descriptor->driver.descriptor);
 
     if (driverDesc->irq >= DEV_IRQ_LIMIT) {

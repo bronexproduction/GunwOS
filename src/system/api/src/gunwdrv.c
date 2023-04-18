@@ -17,10 +17,10 @@ static bool validateDeviceUHA_mem(const struct gnwDeviceUHA_mem * const uha) {
         Validate descriptor
     */
 
-    if (!uha->desc.sizeBytes) {
+    if (!uha->desc.bytesRange.offset) {
         return false;
     }
-    if (!uha->desc.inputSizeBytes) {
+    if (!uha->desc.bytesRange.length) {
         return false;
     }
 
