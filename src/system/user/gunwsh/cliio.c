@@ -9,27 +9,13 @@
 
 #include <mem.h>
 #include <string.h>
-#include <gunwdev.h>
+#include <gunwipc.h>
 
 #define IO_GENERAL_FAILURE -1
 
-#warning CHANGED TILL TERMINAL IMPLEMENTED AS DRIVER
-// bool user_cli_charOutAttached = false;
-// size_t user_cli_charOutIdentifier = 0;
-
 static int append(const char c) {
-    #warning CHANGED TILL TERMINAL IMPLEMENTED AS DRIVER
-    // if (!user_cli_charOutAttached) {
-        // return IO_GENERAL_FAILURE;
-    // }
-    enum gnwDeviceError e = GDE_NONE;
-    #warning CHANGED TILL TERMINAL IMPLEMENTED AS DRIVER
-    extern bool trm_append(const char c);
-    if (!trm_append(c)) {
-        return IO_GENERAL_FAILURE;
-    }
-    // e = devCharWrite(user_cli_charOutIdentifier, c);
-    if (e != GDE_NONE) {
+    enum gnwIpcError e = ipcSend("t0", c);
+    if (e != GIPCE_NONE) {
         return IO_GENERAL_FAILURE;
     }
 
@@ -76,7 +62,7 @@ int user_cli_putsl(const char * const s, unsigned int l) {
 // TODO: 64-bit version
 int user_cli_putun_base(uint_32 i, uint_8 base) {
     char buffer[32];
-    memnull(buffer, 32);
+    memzero(buffer, 32);
     size_t length = uint2str(i, buffer, base);
 
     if (!length) return IO_GENERAL_FAILURE;
@@ -97,7 +83,7 @@ int user_cli_putun_h(uint_32 i) {
 // TODO: 64-bit version
 int user_cli_putin(int_32 i) {
     char buffer[32];
-    memnull(buffer, 32);
+    memzero(buffer, 32);
     size_t length = int2str(i, buffer);
 
     if (!length) return IO_GENERAL_FAILURE;

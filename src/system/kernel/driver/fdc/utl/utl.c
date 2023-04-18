@@ -61,7 +61,7 @@ struct gnwStorGeometry driveGeometry(const uint_8 index) {
     geometry.chs.s = 18;
     geometry.lba = chs2lba(geometry.chs.c, geometry.chs.h, geometry.chs.s, geometry.chs.h, geometry.chs.s);
     if (!geometry.lba) {
-        memnull(&geometry, sizeof(struct gnwStorGeometry));
+        memzero(&geometry, sizeof(struct gnwStorGeometry));
         return geometry;
     }
     geometry.sectSizeBytes = 512;

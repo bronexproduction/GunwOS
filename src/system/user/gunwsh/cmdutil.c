@@ -34,6 +34,6 @@ struct user_cli_cmd_param user_cli_cmd_paramAt(const char * const params, unsign
 }
 
 void user_cli_cmd_paramLoad(const char * const params, char * const loc, const struct user_cli_cmd_param pDesc) {
-    memnull(loc, pDesc.length + 1);
+    memzero(loc, pDesc.length + 1);
     memcopy(params + pDesc.offset, loc, pDesc.length);
 }

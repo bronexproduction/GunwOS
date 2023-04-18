@@ -32,7 +32,7 @@ uint_8 s_cli_command(const char * const cmd) {
     const char * const params = cmd[i] ? cmd + i + 1 : 0;
 
     char cmdOnly[i + 1];
-    memnull(cmdOnly, (i + 1) * sizeof(char));
+    memzero(cmdOnly, (i + 1) * sizeof(char));
     memcopy(cmd, cmdOnly, i * sizeof(char));
 
     void (*sel)(const char * const) = s_cli_cmdSelector(cmdOnly);
@@ -122,7 +122,7 @@ static GNW_KEYBOARD_EVENT_LISTENER(onKeyboardEvent) {
 }
 
 static void prompt() {
-    memnull(cmdBuf, CMD_LEN_MAX * sizeof(char) + 1);
+    memzero(cmdBuf, CMD_LEN_MAX * sizeof(char) + 1);
     cmdBufIndex = 0;
 
     user_cli_puts("[GunwSH]: ");
@@ -130,9 +130,6 @@ static void prompt() {
 
 static void s_cli_init() {
 
-#warning TEMPORARY CHANGE UNTIL TERMINAL IMPLEMENTED AS DRIVER
-    extern void trm_workaround_start();
-    trm_workaround_start();
     // /* 
     //     Attach to character output
     // */

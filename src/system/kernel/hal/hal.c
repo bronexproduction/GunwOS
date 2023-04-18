@@ -29,7 +29,7 @@ static struct isrEntry {
 const size_t *k_hal_servicedDevIdPtr;
 
 void k_hal_init() {
-    memnull(isrReg, sizeof(struct isrEntry) * DEV_IRQ_LIMIT);
+    memzero(isrReg, sizeof(struct isrEntry) * DEV_IRQ_LIMIT);
 
     k_cpu_init();
 

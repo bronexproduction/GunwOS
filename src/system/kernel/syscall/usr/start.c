@@ -40,7 +40,7 @@ enum gnwCtrlError loadElf(const ptr_t filePtr,
     #warning check memory limits
     #warning how to handle section flags?
 
-    memnull(destPtr, *memBytes);
+    memzero(destPtr, *memBytes);
     for (size_t index = 0; index < elfGetSectionHeaderEntryCount(filePtr); ++index) {
         const struct elfSectionHeaderEntry32 * const entry = elfGetSectionHeaderEntry(filePtr, index, fileSizeBytes); 
         if (!entry) {
@@ -158,12 +158,12 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
         Allocate process memory 
     */
 
-    const size_t index = 0;
-    const size_t processBinBytes = MiB(1);
-    const size_t processStackBytes = KiB(512);
-    const size_t processExtraBytes = KiB(512);
+    static size_t index = 0;
+    const size_t processBinBytes = KiB(512);
+    const size_t processStackBytes = KiB(256);
+    const size_t processExtraBytes = KiB(256);
     const size_t processMemTotalBytes = processBinBytes + processStackBytes + processExtraBytes;
-    const ptr_t dstPtr = GDT_SEGMENT_START(r3code) + (index * processMemTotalBytes) + MiB(1);
+    const ptr_t dstPtr = GDT_SEGMENT_START(r3code) + (++index * processMemTotalBytes);
 
     /* 
         Load executable 

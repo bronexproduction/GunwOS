@@ -7,6 +7,7 @@
 
 #include <driver/gunwdrv.h>
 #include <mem.h>
+#include <gunwipc.h>
 
 #include "video.h"
 
@@ -50,9 +51,7 @@ static void newline() {
     }
 }
 
-#warning CHANGED UNTIL TERMINAL IMPLEMENTED AS DRIVER
-bool trm_append(const char c) {
-// static bool append(const char c) {
+static bool trm_append(const char c) {
     if (c == '\n') {
         newline();
     } else if (c == '\b') {
@@ -78,59 +77,18 @@ bool trm_append(const char c) {
 }
 
 static void clear() {
-    memnull(&termData, sizeof(termData));
+    memzero(&termData, sizeof(termData));
     k_trm_vid_clear();
 }
 
-static bool init() {
-    return k_trm_vid_init();
+static void ipcListener(const procId_t procId, const char c) {
+    trm_append(c);
 }
 
-static bool start() {
+void dupa() {
+    k_trm_vid_init();
+    ipcRegister("t0", GIAS_ALL, (gnwEventListener_32_8)ipcListener);
     clear();
 
-    return true;
-}
-
-#warning TEMPORARY UNTIL TERMINAL IMPLEMENTED AS DRIVER
-void trm_workaround_start() {
-    init();
-    start();
-}
-
-static bool isReadyToWrite() {
-    return true;
-}
-
-static struct gnwDriverConfig desc() {
-    return (struct gnwDriverConfig){ 
-        /* init */ init,
-        /* start */ start,
-        /* isr */ nullptr,
-        /* IRQ */ NULL
-    };
-}
-
-static struct gnwDeviceUHA uha() {
-    struct gnwDeviceUHA uha;
-
-    uha.charOut.routine.isReadyToWrite = isReadyToWrite;
-    #warning CHANGED UNTIL TERMINAL IMPLEMENTED AS DRIVER
-    // uha.charOut.routine.write = append;
-
-    return uha;
-}
-
-struct gnwDeviceDescriptor k_drv_terminal_descriptor() {
-    return (struct gnwDeviceDescriptor) {
-        /* type */ DEV_TYPE_CHAR_OUT,
-        /* api */ uha(),
-        /* driver */ (struct gnwDeviceDriver) {
-            /* io */ (struct gnwDeviceIO) {
-                /* busBase */ NULL
-            },
-            /* descriptor */ desc()
-        },
-        /* name */ "Default text mode terminal"
-    };
+    runLoopStart();
 }

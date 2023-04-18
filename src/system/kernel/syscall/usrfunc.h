@@ -10,7 +10,7 @@
 
 #include <driver/gunwdrv.h>
 #include <gunwdev.h>
-#include <gunwfug.h>
+#include <gunwipc.h>
 #include <gunwctrl.h>
 #include <src/_gunwrlp.h>
 
@@ -56,6 +56,19 @@ __attribute__((naked)) void k_scr_waitForEvent(const struct gnwRunLoop * const r
     Function - TIME_MS
 */
 __attribute__((naked)) time_t k_scr_timeMs();
+
+/*
+    Code - 0x06
+    Function - IPC_SEND
+*/
+__attribute__((naked)) enum gnwIpcError k_scr_ipcSend(const char * const path, const char c);
+
+/*
+    Code - 0x07
+    Function - IPC_REGISTER
+*/
+__attribute__((naked)) enum gnwIpcError k_scr_ipcRegister(const struct gnwIpcHandlerDescriptor * const desc,
+                                                          struct gnwRunLoop * const runLoop);
 
 /*
     Code - 0x08

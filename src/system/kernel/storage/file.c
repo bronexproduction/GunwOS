@@ -110,8 +110,8 @@ static enum gnwFileErrorCode loadFileChain(const char * const path,
     
     char fileName[fsDesc.maxFilenameLength];
     char fileExtension[fsDesc.maxExtensionLength];
-    memnull(fileName, fsDesc.maxFilenameLength);
-    memnull(fileExtension, fsDesc.maxExtensionLength);
+    memzero(fileName, fsDesc.maxFilenameLength);
+    memzero(fileExtension, fsDesc.maxExtensionLength);
 
     const size_t extSeparatorLength = strlen(GNW_EXTENSION_SEPARATOR);
     const int_32 extSepOffset = strfindl(filenameBuf, filenameBufLength, GNW_EXTENSION_SEPARATOR, extSeparatorLength);

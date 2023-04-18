@@ -9,8 +9,20 @@
 #include <error/panic.h>
 
 void k_startup() {
+    
     extern enum gnwCtrlError k_scr_usr_start(const char * const, const size_t);
-    enum gnwCtrlError err = k_scr_usr_start("0:GUNWSH.ELF", 12);
+    
+    /*
+        Load terminal
+    */
+    enum gnwCtrlError err = k_scr_usr_start("0:GUNWTERM.ELF", 14);
+
+    /*
+        Load command line
+    */
+    if (!err) {
+        err = k_scr_usr_start("0:GUNWSH.ELF", 12);
+    }
     if (err != GCE_NONE) {
         OOPS("Unable to start core modules");
     }

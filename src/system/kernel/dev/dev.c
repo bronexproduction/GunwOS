@@ -437,7 +437,7 @@ void k_dev_procCleanup(const procId_t procId) {
         if (devices[devId].holder == procId) {
             CRITICAL_SECTION(
                 devices[devId].holder = NONE_PROC_ID;
-                memnull(&devices[devId].listener, sizeof(struct deviceEventListener)); 
+                memzero(&devices[devId].listener, sizeof(struct deviceEventListener)); 
             )
         }
     }
