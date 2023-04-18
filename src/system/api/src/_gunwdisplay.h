@@ -19,15 +19,16 @@ enum DisplayType {
     GRAPHICS
 };
 
-void fillDisplayDescriptorWithUHA(const struct gnwDeviceUHADesc * const uha,
-                                  struct gnwDisplayDescriptor * const desc);
+void fillDisplayDescriptor(const size_t identifier,
+                           const enum gnwDeviceUHA_display_format format,
+                           const point_t dimensions,
+                           struct gnwDisplayDescriptor * const desc);
 
 enum gnwDeviceError getDisplay(enum DisplayType type, 
                                struct gnwDisplayDescriptor * const displayDescriptor);
                                
 enum gnwDeviceError attachToDisplay(const enum DisplayType type, 
-                                    const uint_32 displayId, 
-                                    struct gnwDeviceUHADesc * const uha);
+                                    const struct gnwDisplayDescriptor * const displayDescriptor);
 
 enum gnwDeviceError pushFrame(const size_t deviceId,
                               const void * const buffer,

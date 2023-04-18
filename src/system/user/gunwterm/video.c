@@ -40,7 +40,7 @@ bool k_trm_vid_init() {
         return false;
     }
 
-    e = attachToTextDisplay(desc.identifier, &displayHandle);
+    e = attachToTextDisplay(&desc, &displayHandle);
     if (e) {
         fug(FUG_UNDEFINED);
         // OOPS("Unable to attach display");

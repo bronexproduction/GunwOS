@@ -32,17 +32,18 @@ static enum gnwDeviceError pushGraphicsFrame(struct gnwGraphicsDisplayHandle * c
     return e;
 }
 
-enum gnwDeviceError attachToGraphicsDisplay(uint_32 displayId, struct gnwGraphicsDisplayHandle * const handle) {
+enum gnwDeviceError attachToGraphicsDisplay(const struct gnwDisplayDescriptor * const displayDescriptor,
+                                            struct gnwGraphicsDisplayHandle * const handle) {
     CHECKPTR(handle)
+    CHECKPTR(displayDescriptor)
     
-    struct gnwDeviceUHADesc uha;
-    enum gnwDeviceError e = attachToDisplay(GRAPHICS, displayId, &uha);
+    enum gnwDeviceError e = attachToDisplay(GRAPHICS, displayDescriptor);
     
     if (e) {
         return e;
     }
 
-    fillDisplayDescriptorWithUHA(&uha, &handle->descriptor);
+    fillDisplayDescriptor(displayDescriptor->identifier, displayDescriptor->format, displayDescriptor->dimensions, &handle->descriptor);
     handle->invalidate = invalidateGraphicsHandle;
     handle->update = pushGraphicsFrame;
 

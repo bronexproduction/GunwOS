@@ -7,17 +7,51 @@
 
 #include "_gunwdisplay.h"
 
-void fillDisplayDescriptorWithUHA(const struct gnwDeviceUHADesc * const uha,
-                                  struct gnwDisplayDescriptor * const desc) {
-    CHECKPTR(uha)
-    CHECKPTR(desc)
-
-    desc->identifier = uha->identifier;
-    desc->dimensions = uha->display.dimensions;
-    desc->format = uha->display.format;
+static bool dimensionsValid(const point_t dimensions) {
+    return dimensions.x > 0 && dimensions.y > 0;
 }
 
-enum gnwDeviceError getDisplay(enum DisplayType type, 
+static enum gnwDeviceUHA_display_format getSupportedFormat(const size_t deviceId, const size_t index) {
+    return 0;
+}
+
+static enum gnwDeviceUHA_display_format getSupportedDisplayFormat(const enum DisplayType type,
+                                                                  const struct gnwDeviceUHADesc * const deviceUHA) {
+    for (size_t i = 0; i < deviceUHA->display.supportedFormatCount; ++i) {
+        enum gnwDeviceUHA_display_format supportedFormat = getSupportedFormat(deviceUHA->identifier, i);
+        switch (type) {
+        case TEXT:
+            if (GDD_FMT_ISTEXT(supportedFormat)) {
+                return supportedFormat;
+            }
+            break;
+        case GRAPHICS:
+            if (GDD_FMT_ISGRAP(supportedFormat)) {
+                return supportedFormat;
+            }
+            break;
+        }
+    }
+
+    return 0;
+}
+
+static point_t getDisplayDimensions(const size_t deviceId, const enum gnwDeviceUHA_display_format format) {
+    return (point_t){ 0, 0 };
+}
+
+void fillDisplayDescriptor(const size_t identifier,
+                           const enum gnwDeviceUHA_display_format format,
+                           const point_t dimensions,
+                           struct gnwDisplayDescriptor * const desc) {
+    CHECKPTR(desc)
+
+    desc->identifier = identifier;
+    desc->dimensions = dimensions;
+    desc->format = format;
+}
+
+enum gnwDeviceError getDisplay(const enum DisplayType type, 
                                struct gnwDisplayDescriptor * const displayDescriptor) {
     CHECKPTR(displayDescriptor)
     
@@ -27,30 +61,36 @@ enum gnwDeviceError getDisplay(enum DisplayType type,
     if (e) {
         return e;
     }
-    
-    // select TEXT device from the list
-    // which does not exist yet
 
-    fillDisplayDescriptorWithUHA(&deviceUHA, displayDescriptor);
+    const enum gnwDeviceUHA_display_format format = getSupportedDisplayFormat(type, &deviceUHA);
+    if (!format) {
+        return GDE_NOT_FOUND;
+    }
+    const point_t dimensions = getDisplayDimensions(deviceUHA.identifier, format);
+    if (!dimensionsValid(dimensions)) {
+        return GDE_UNKNOWN;
+    }
+
+    fillDisplayDescriptor(deviceUHA.identifier, format, dimensions, displayDescriptor);
 
     return GDE_NONE;
 }
 
 enum gnwDeviceError attachToDisplay(const enum DisplayType type, 
-                                    const uint_32 displayId, 
-                                    struct gnwDeviceUHADesc * const uha) {
-    CHECKPTR(uha)
+                                    const struct gnwDisplayDescriptor * const displayDescriptor) {
+    CHECKPTR(displayDescriptor)
     
-    enum gnwDeviceError e = devGetById(displayId, uha);
+    struct gnwDeviceUHADesc uha;
+    enum gnwDeviceError e = devGetById(displayDescriptor->identifier, &uha);
     
     if (e) {
         return e;
     }
-    if (GDD_FMT_ISTEXT(uha->display.format) != (type == TEXT)) {
+    if (GDD_FMT_ISTEXT(displayDescriptor->format) != (type == TEXT)) {
         return GDE_ID_INVALID;
     }
 
-    e = devAcquire(displayId);
+    e = devAcquire(displayDescriptor->identifier);
     if (e) {
         return e;
     }

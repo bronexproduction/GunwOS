@@ -86,7 +86,7 @@ enum gnwDeviceError getGraphicsDisplay(struct gnwDisplayDescriptor * const displ
     Functions for attaching to the display
 
     Params:
-        * displayId - Display identifier, found in struct gnwDisplayDescriptor - see getTextDisplay/getGraphicsDisplay
+        * displayDescriptor - Display descriptor - see getTextDisplay/getGraphicsDisplay
         * handle - Display handle location (mandatory) - filled with handle information on success
 
     Result:
@@ -94,7 +94,9 @@ enum gnwDeviceError getGraphicsDisplay(struct gnwDisplayDescriptor * const displ
 
     Note: Only the process attached to the display can access it
 */
-enum gnwDeviceError attachToTextDisplay(uint_32 displayId, struct gnwTextDisplayHandle * const handle);
-enum gnwDeviceError attachToGraphicsDisplay(uint_32 displayId, struct gnwGraphicsDisplayHandle * const handle);
+enum gnwDeviceError attachToTextDisplay(const struct gnwDisplayDescriptor * const displayDescriptor,
+                                        struct gnwTextDisplayHandle * const handle);
+enum gnwDeviceError attachToGraphicsDisplay(const struct gnwDisplayDescriptor * const displayDescriptor,
+                                            struct gnwGraphicsDisplayHandle * const handle);
 
 #endif // GUNWOS_GUNWDISPLAY_H
