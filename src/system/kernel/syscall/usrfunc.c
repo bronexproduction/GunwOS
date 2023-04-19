@@ -309,8 +309,7 @@ SCR(devListen,
 
     Params:
         * EBX - device identifier
-        * ECX upper 16 bits - device-specific parameter
-        * CX - parameter index 
+        * ECX - device parameter descriptor
         * EDX - result; parameter value 
     
     Return:
@@ -318,11 +317,11 @@ SCR(devListen,
 */
 SCR(devGetParam,
     REG(32, devId, ebx)
-    REG(32, paramData, ecx)
+    REG(32, paramDesc, ecx)
     REG(32, resultPtr, edx)
 
     REG_RET(32, err)
 
-    extern enum gnwDeviceError k_scr_usr_devGetParam(const size_t, const size_t, const size_t, size_t * const);
-    err = k_scr_usr_devGetParam((size_t)devId, ((((size_t)paramData) >> 16) & 0xFFFF), (size_t)(paramData & 0xFFFF), (size_t *)resultPtr);
+    extern enum gnwDeviceError k_scr_usr_devGetParam(const size_t, const struct gnwDeviceParamDescriptor * const, size_t * const);
+    err = k_scr_usr_devGetParam((size_t)devId, (struct gnwDeviceParamDescriptor *)paramDesc, (size_t *)resultPtr);
 )

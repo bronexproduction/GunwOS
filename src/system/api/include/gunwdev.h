@@ -63,20 +63,19 @@ SYSCALL_DECL enum gnwDeviceError devGetByType(const enum gnwDeviceType type,
 
     Params:
         * id - id of the device
-        * param - device-specific parameter code (see UHA for a specific device)
-        * paramIndex - parameter result index - in case more than one value are available
+        * paramDescriptor - device-specific parameter info (see UHA for a specific device)
         * result - pointer to the result buffer
     
     Return value: Device error code or GDE_NONE (see enum gnwDeviceError)
 */
-SYSCALL_DECL enum gnwDeviceError devGetParam(const size_t deviceId, 
-                                             const uint_16 param,
-                                             const uint_16 paramIndex,
+SYSCALL_DECL enum gnwDeviceError devGetParam(const size_t deviceId,
+                                             const struct gnwDeviceParamDescriptor * const paramDescriptor,
                                              size_t * const result) {
+    CHECKPTR(paramDescriptor);
     CHECKPTR(result);
 
     SYSCALL_PAR1(deviceId);
-    SYSCALL_PAR2((((size_t)param) << 16) | paramIndex);
+    SYSCALL_PAR2(paramDescriptor);
     SYSCALL_PAR3(result);
 
     SYSCALL_USER_FUNC(DEV_GET_PARAM);

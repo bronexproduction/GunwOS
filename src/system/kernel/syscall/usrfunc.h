@@ -121,8 +121,7 @@ __attribute__((naked)) enum gnwDeviceError k_scr_devListen(const size_t identifi
     Function - DEV_GET_PARAM
 */
 __attribute__((naked)) enum gnwDeviceError k_scr_devGetParam(const size_t deviceId,
-                                                             const uint_16 param,
-                                                             const uint_16 paramIndex,
+                                                             const struct gnwDeviceParamDescriptor * const paramDescriptor,
                                                              size_t * const result);
 
 #endif // USRFUNC_H

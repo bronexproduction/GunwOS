@@ -43,4 +43,9 @@ enum gnwDeviceError {
 };
 _Static_assert(sizeof(enum gnwDeviceError) == sizeof(int_32), "Unexpected enum gnwDeviceError size");
 
+struct gnwDeviceParamDescriptor {
+    size_t param;
+    size_t paramIndex;
+};
+
 #endif // GUNWOS_GUNWDEVTYPES_H

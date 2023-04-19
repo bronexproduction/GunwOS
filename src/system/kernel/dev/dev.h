@@ -37,8 +37,7 @@ enum gnwDeviceError k_dev_listen(const procId_t processId,
                                  struct gnwRunLoop * const runLoopPtr);
 
 enum gnwDeviceError k_dev_getParam(const size_t deviceId,
-                                   const size_t param,
-                                   const size_t paramIndex,
+                                   const struct gnwDeviceParamDescriptor paramDescriptor,
                                    size_t * const result);
 
 enum gnwDeviceError k_dev_emit_void(const int_32 type);

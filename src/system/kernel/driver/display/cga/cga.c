@@ -128,49 +128,49 @@ enum k_drv_display_cga_colorRegBit {
     CGA_CRB_BLUE            = 0x01,
 };
 
-static void supportedFormats(enum gnwDeviceUHA_display_format * const result) {
-    if (!result) {
-        OOPS("Nullptr");
-        return;
-    }
+// static void supportedFormats(enum gnwDeviceUHA_display_format * const result) {
+//     if (!result) {
+//         OOPS("Nullptr");
+//         return;
+//     }
 
-    result[0] = TEXT_H80V25C16;
-    result[1] = GRAPHICS_H320V200C16;
-}
+//     result[0] = TEXT_H80V25C16;
+//     result[1] = GRAPHICS_H320V200C16;
+// }
 
-static point_t dimensionsForFormat(const enum gnwDeviceUHA_display_format format) {
-    point_t dimensions;
+// static point_t dimensionsForFormat(const enum gnwDeviceUHA_display_format format) {
+//     point_t dimensions;
     
-    switch(format) {
-    case TEXT_H80V25C16:
-        dimensions.x = 80;
-        dimensions.y = 25;
-        break;
-    case GRAPHICS_H320V200C16:
-        dimensions.x = 320;
-        dimensions.y = 200;
-        break;
-    default:
-        dimensions.x = -1;
-        dimensions.y = -1;
-        break;
-    }
+//     switch(format) {
+//     case TEXT_H80V25C16:
+//         dimensions.x = 80;
+//         dimensions.y = 25;
+//         break;
+//     case GRAPHICS_H320V200C16:
+//         dimensions.x = 320;
+//         dimensions.y = 200;
+//         break;
+//     default:
+//         dimensions.x = -1;
+//         dimensions.y = -1;
+//         break;
+//     }
 
-    return dimensions;
-}
+//     return dimensions;
+// }
 
-static bool setFormat(const enum gnwDeviceUHA_display_format format) {
-    #warning TO BE IMPLEMENTED
+// static bool setFormat(const enum gnwDeviceUHA_display_format format) {
+//     #warning TO BE IMPLEMENTED
 
-    switch(format) {
-    case TEXT_H80V25C16:
-        return true;
-    case GRAPHICS_H320V200C16:
-        return true;
-    default:
-        return false;
-    }
-}
+//     switch(format) {
+//     case TEXT_H80V25C16:
+//         return true;
+//     case GRAPHICS_H320V200C16:
+//         return true;
+//     default:
+//         return false;
+//     }
+// }
 
 static void update(const void * const buffer, const range_addr_t inputBufferRange) {
     if (!buffer) {
