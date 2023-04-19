@@ -8,7 +8,7 @@
 #ifndef DRVFUNC_H
 #define DRVFUNC_H
 
-#include <driver/gunwdrv.h>
+#include <gunwdrv.h>
 #include <gunwfug.h>
 
 /*

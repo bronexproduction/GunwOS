@@ -6,7 +6,6 @@
 //
 
 #include <mem.h>
-#include <gunwdisplay.h>
 // #include <error/panic.h>
 #include <gunwfug.h>
 #include <defs.h>

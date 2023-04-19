@@ -8,7 +8,7 @@
 #ifndef GUNWOS_GUNWBUS_H
 #define GUNWOS_GUNWBUS_H
 
-#include <scl_def.h>
+#include <scl_driver.h>
 
 /*
     Read byte from system bus

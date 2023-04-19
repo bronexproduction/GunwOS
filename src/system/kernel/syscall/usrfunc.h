@@ -8,7 +8,7 @@
 #ifndef USRFUNC_H
 #define USRFUNC_H
 
-#include <driver/gunwdrv.h>
+#include <gunwdrv.h>
 #include <gunwdev.h>
 #include <gunwipc.h>
 #include <gunwctrl.h>

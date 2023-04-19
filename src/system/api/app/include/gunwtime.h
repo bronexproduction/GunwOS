@@ -8,7 +8,7 @@
 #ifndef GUNWOS_GUNWTIME_H
 #define GUNWOS_GUNWTIME_H
 
-#include "scl_def.h"
+#include "scl_user.h"
 
 /*
     Returns kernel time in milliseconds

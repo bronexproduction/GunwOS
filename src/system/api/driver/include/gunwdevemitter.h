@@ -9,7 +9,7 @@
 #define GUNWOS_GUNWDEVEMITTER_H
 
 #include <types.h>
-#include <scl_def.h>
+#include <scl_driver.h>
 #include <gunwdev.h>
 
 /*

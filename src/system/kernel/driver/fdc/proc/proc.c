@@ -11,7 +11,7 @@
 #include "proc.h"
 #include <error/panic.h>
 #include <gunwctrl.h>
-#include <driver/gunwbus.h>
+#include <gunwbus.h>
 #include "../common/io.h"
 #include "../common/data.h"
 #include "../common/strings.h"

@@ -10,9 +10,9 @@
 //  
 //
 
-#include <driver/gunwbus.h>
-#include <driver/gunwdrv.h>
-#include <driver/gunwdevemitter.h>
+#include <gunwbus.h>
+#include <gunwdrv.h>
+#include <gunwdevemitter.h>
 #include <gunwkeyboard.h>
 
 #include <driver/driver.h>

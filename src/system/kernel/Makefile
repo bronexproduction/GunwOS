@@ -1,11 +1,15 @@
 KERNEL_INCLUDE=-I $(STDGUNW_INCLUDE_DIR) \
                -I $(APP_API_INCLUDE_DIR) \
+               -I $(DRIVER_API_INCLUDE_DIR) \
 			   -I $(APP_API_SRC_DIR) \
+			   -I $(DRIVER_API_SRC_DIR) \
 			   -I . \
 			   -I "$(LIB_SRC_DIR)/gunwelf"
 
 KERNEL_LIBS=$(LIB_BUILD_DIR)/stdgunw.o \
-			$(LIB_BUILD_DIR)/gunwapi_kernel.o \
+			$(LIB_BUILD_DIR)/gunwapi_app_kernel.o \
+			$(LIB_BUILD_DIR)/gunwapi_driver_kernel.o \
+			$(LIB_BUILD_DIR)/gunwapi_driver.o \
 			$(LIB_BUILD_DIR)/gunwelf.o
 
 ASMFLAGS=-f elf

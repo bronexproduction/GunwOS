@@ -8,7 +8,7 @@
 #ifndef GUNWOS_GUNWDISPLAYDRV_H
 #define GUNWOS_GUNWDISPLAYDRV_H
 
-#include <driver/gunwdrv.h>
+#include <gunwdrv.h>
 
 extern bool uhaGetParam(const size_t param,
                         const size_t subParam,

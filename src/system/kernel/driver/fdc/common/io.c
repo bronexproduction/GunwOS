@@ -14,7 +14,7 @@
 
 #include "io.h"
 #include <gunwctrl.h>
-#include <driver/gunwbus.h>
+#include <gunwbus.h>
 #include "../utl/utl.h"
 
 void pushReg(const uint_16 base, const enum fdc_bus_regOffset regOffset, const uint_8 data) {

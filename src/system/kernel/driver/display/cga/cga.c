@@ -6,7 +6,7 @@
 //
 
 #include <defs.h>
-#include <driver/gunwdisplaydrv.h>
+#include <gunwdisplaydrv.h>
 #include <error/panic.h>
 
 #define VIDEO_HW_ROWS           25

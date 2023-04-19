@@ -8,6 +8,7 @@
 #ifndef VIDEO_H
 #define VIDEO_H
 
+#include <gunwdisplay.h>
 #include <utils.h>
 #include <types.h>
 

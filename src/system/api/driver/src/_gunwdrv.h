@@ -8,7 +8,7 @@
 #ifndef GUNWOS__GUNWDRV_H
 #define GUNWOS__GUNWDRV_H
 
-#include <driver/gunwdrv.h>
+#include <gunwdrv.h>
 
 bool validateDeviceDescriptor(const struct gnwDeviceDescriptor * const);
 

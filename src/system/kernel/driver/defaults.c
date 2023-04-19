@@ -9,8 +9,8 @@
     Initialization of default drivers
 */
 
-#include <driver/gunwdrv.h>
-#include <driver/gunwfilesys.h>
+#include <gunwdrv.h>
+#include <gunwfilesys.h>
 #include <gunwdev.h>
 
 #include <dev/dev.h>

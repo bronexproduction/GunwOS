@@ -12,7 +12,6 @@
 #include <gunwdev.h>
 #include <gunwfug.h>
 #include <mem.h>
-#include <scl_def.h>
 
 enum DisplayType {
     TEXT,

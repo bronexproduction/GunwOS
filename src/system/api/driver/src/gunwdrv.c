@@ -5,6 +5,8 @@
 //  Created by Artur Danielewski on 12.04.2023.
 //
 
+#ifdef _GUNWAPI_KERNEL
+
 #include "_gunwdrv.h"
 
 static bool validateDeviceUHA_system(const struct gnwDeviceUHA * const uha) {
@@ -155,3 +157,5 @@ bool validateDeviceDescriptor(const struct gnwDeviceDescriptor * const descripto
 
     return typeDefined;
 }
+
+#endif // _GUNWAPI_KERNEL
