@@ -60,6 +60,9 @@ static bool validateDeviceUHA_display(const struct gnwDeviceUHA * const uha) {
     if (!uha->system.routine.getParam) {
         return false;
     }
+    if (!uha->system.routine.setParam) {
+        return false;
+    }
 
     return true;
 }

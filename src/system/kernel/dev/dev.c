@@ -386,6 +386,29 @@ enum gnwDeviceError k_dev_getParam(const size_t deviceId,
     return GDE_NONE;
 }
 
+enum gnwDeviceError k_dev_setParam(const procId_t procId,
+                                   const size_t deviceId,
+                                   const struct gnwDeviceParamDescriptor paramDescriptor,
+                                   const size_t value) {
+    const enum gnwDeviceError err = validateStartedDevice(procId, deviceId);
+    if (err != GDE_NONE) {
+        return err;
+    }
+
+    if (!devices[deviceId].desc.api.system.routine.setParam) {
+        return GDE_INVALID_OPERATION;
+    }
+
+    if (!devices[deviceId].desc.api.system.routine.setParam(paramDescriptor.param,
+                                                            paramDescriptor.subParam,
+                                                            paramDescriptor.paramIndex,
+                                                            value)) {
+        return GDE_OPERATION_FAILED;
+    }
+
+    return GDE_NONE;
+}
+
 static enum gnwDeviceError validateEmitter(const size_t * const devIdPtr,
                                            const enum gnwEventFormat format) {
     if (!devIdPtr) {

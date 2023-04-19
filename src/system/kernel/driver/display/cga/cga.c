@@ -160,18 +160,18 @@ point_t uhaDimensionsForFormat(const enum gnwDeviceUHA_display_format format) {
     return dimensions;
 }
 
-// static bool setFormat(const enum gnwDeviceUHA_display_format format) {
-//     #warning TO BE IMPLEMENTED
+bool setFormat(const enum gnwDeviceUHA_display_format format) {
+    #warning TO BE IMPLEMENTED
 
-//     switch(format) {
-//     case TEXT_H80V25C16:
-//         return true;
-//     case GRAPHICS_H320V200C16:
-//         return true;
-//     default:
-//         return false;
-//     }
-// }
+    switch(format) {
+    case TEXT_H80V25C16:
+        return true;
+    case GRAPHICS_H320V200C16:
+        return true;
+    default:
+        return false;
+    }
+}
 
 static void update(const void * const buffer, const range_addr_t inputBufferRange) {
     if (!buffer) {
@@ -200,6 +200,7 @@ static struct gnwDeviceUHA uha() {
     struct gnwDeviceUHA uha;
 
     uha.system.routine.getParam = uhaGetParam_display;
+    uha.system.routine.setParam = uhaSetParam_display;
     uha.display.desc.supportedFormatCount = 2;
     uha.mem.desc.bytesRange.offset = (addr_t)CGA_VIDEO_HW_MEM;
     uha.mem.desc.bytesRange.sizeBytes = KiB(16);

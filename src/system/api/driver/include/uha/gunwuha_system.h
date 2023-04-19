@@ -31,6 +31,26 @@ struct gnwDeviceUHA_system_routine {
                      const size_t subParam,
                      const size_t paramIndex,
                      size_t * const result);
+    
+    /*
+        Sets the value of the parameter with given description
+
+        Params:
+            * param - device-specific parameter code
+            * subParam - additional parameter
+            * paramIndex - index of the value
+            * value - value to be set
+
+        Return value: true on success, false otherwise
+
+        The driver can implement custom API using that function.
+        Some drivers are required to implement it.
+        Check UHA for particular device for more details.
+    */
+    bool (*setParam)(const size_t param,
+                     const size_t subParam,
+                     const size_t paramIndex,
+                     const size_t value);
 };
 
 struct gnwDeviceUHA_system {

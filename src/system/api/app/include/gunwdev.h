@@ -85,6 +85,34 @@ SYSCALL_DECL enum gnwDeviceError devGetParam(const size_t deviceId,
 }
 
 /*
+    Sets parameter value for given device ID
+
+    Params:
+        * id - id of the device
+        * paramDescriptor - device-specific parameter info (see UHA for a specific device)
+        * value - value to be set for parameter
+    
+    Return value: Device error code or GDE_NONE (see enum gnwDeviceError)
+
+    Note: In order to set device parameters
+          the process has to be exclusive holder of it
+*/
+SYSCALL_DECL enum gnwDeviceError devSetParam(const size_t deviceId,
+                                             const struct gnwDeviceParamDescriptor * const paramDescriptor,
+                                             const size_t value) {
+    CHECKPTR(paramDescriptor);
+
+    SYSCALL_PAR1(deviceId);
+    SYSCALL_PAR2(paramDescriptor);
+    SYSCALL_PAR3(value);
+
+    SYSCALL_USER_FUNC(DEV_SET_PARAM);
+    SYSCALL_USER_INT;
+
+    SYSCALL_RETVAL(32);
+}
+
+/*
     Attempts to take hold of the device
 
     Params:

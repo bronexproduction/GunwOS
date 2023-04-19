@@ -39,4 +39,22 @@ bool uhaGetParam_display(const size_t paramVal,
     return true;
 }
 
+bool uhaSetParam_display(const size_t paramVal,
+                         const size_t subParamVal,
+                         const size_t paramIndex,
+                         const size_t value) {
+
+    const enum gnwDeviceUHA_display_param param = paramVal;
+
+    switch (param) {
+    case GDU_DISPLAY_PARAM_FORMAT: {
+        const enum gnwDeviceUHA_display_format format = value;
+        extern bool setFormat(const enum gnwDeviceUHA_display_format);
+        return setFormat(format);
+    } break;
+    default:
+        return false;
+    }
+}
+
 #endif // _GUNWAPI_KERNEL

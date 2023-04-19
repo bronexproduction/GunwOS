@@ -325,3 +325,26 @@ SCR(devGetParam,
     extern enum gnwDeviceError k_scr_usr_devGetParam(const size_t, const struct gnwDeviceParamDescriptor * const, size_t * const);
     err = k_scr_usr_devGetParam((size_t)devId, (struct gnwDeviceParamDescriptor *)paramDesc, (size_t *)resultPtr);
 )
+
+/*
+    Code - 0x10
+    Function - DEV_SET_PARAM
+
+    Params:
+        * EBX - device identifier
+        * ECX - device parameter descriptor
+        * EDX - parameter value
+    
+    Return:
+        * EAX - error code (enum gnwDeviceError)
+*/
+SCR(devSetParam,
+    REG(32, devId, ebx)
+    REG(32, paramDesc, ecx)
+    REG(32, paramVal, edx)
+
+    REG_RET(32, err)
+
+    extern enum gnwDeviceError k_scr_usr_devSetParam(const size_t, const struct gnwDeviceParamDescriptor * const, const size_t);
+    err = k_scr_usr_devSetParam((size_t)devId, (struct gnwDeviceParamDescriptor *)paramDesc, (size_t)paramVal);
+)

@@ -73,6 +73,14 @@ static point_t getDisplayDimensions(const size_t deviceId, const enum gnwDeviceU
     return dimensions;
 }
 
+enum gnwDeviceError setDisplayFormat(const size_t deviceId, const enum gnwDeviceUHA_display_format format) {
+    struct gnwDeviceParamDescriptor paramDesc;
+
+    paramDesc.param = GDU_DISPLAY_PARAM_FORMAT;
+    
+    return devSetParam(deviceId, &paramDesc, format);
+}
+
 void fillDisplayDescriptor(const size_t identifier,
                            const enum gnwDeviceUHA_display_format format,
                            const point_t dimensions,
@@ -124,6 +132,11 @@ enum gnwDeviceError attachToDisplay(const enum DisplayType type,
     }
 
     e = devAcquire(displayDescriptor->identifier);
+    if (e) {
+        return e;
+    }
+
+    e = setDisplayFormat(displayDescriptor->identifier, displayDescriptor->format);
     if (e) {
         return e;
     }

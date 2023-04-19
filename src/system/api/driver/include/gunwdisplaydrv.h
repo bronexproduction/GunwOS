@@ -14,5 +14,9 @@ extern bool uhaGetParam_display(const size_t paramVal,
                                 const size_t subParamVal,
                                 const size_t paramIndex,
                                 size_t * const result);
+extern bool uhaSetParam_display(const size_t paramVal,
+                                const size_t subParamVal,
+                                const size_t paramIndex,
+                                const size_t value);
 
 #endif // GUNWOS_GUNWDISPLAYDRV_H
