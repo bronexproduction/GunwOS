@@ -32,7 +32,7 @@ SPEC_DIR="$(PWD)/spec"
 SRC_DIR="$(PWD)/src"
 export LIB_SRC_DIR="$(SRC_DIR)/lib"
 SYSTEM_SRC_DIR="$(SRC_DIR)/system"
-export API_SRC_DIR="$(SYSTEM_SRC_DIR)/api"
+export APP_API_SRC_DIR="$(SYSTEM_SRC_DIR)/api/app"
 KERNEL_SRC_DIR="$(SYSTEM_SRC_DIR)/kernel"
 APPS_SRC_DIR="$(SYSTEM_SRC_DIR)/user"
 TESTS_SRC_DIR="$(PWD)/tests/modules"
@@ -43,7 +43,7 @@ export TEST_SHARED_DIR="$(PWD)/tests/shared"
 # Header include paths
 
 export STDGUNW_INCLUDE_DIR="$(LIB_SRC_DIR)/stdgunw/include"
-export API_INCLUDE_DIR="$(API_SRC_DIR)/include"
+export APP_API_INCLUDE_DIR="$(APP_API_SRC_DIR)/include"
 
 # Build directories
 
@@ -103,12 +103,12 @@ libs:
 	mv $(SRC_DIR)/lib/*.o $(LIB_BUILD_DIR)/
 	
 gunwapi_kernel.o:
-	make -C $(API_SRC_DIR) kernel
-	mv $(API_SRC_DIR)/$@ $(LIB_BUILD_DIR)/$@
+	make -C $(APP_API_SRC_DIR) kernel
+	mv $(APP_API_SRC_DIR)/$@ $(LIB_BUILD_DIR)/$@
 	
 gunwapi_app.o:
-	make -C $(API_SRC_DIR) app
-	mv $(API_SRC_DIR)/$@ $(LIB_BUILD_DIR)/$@
+	make -C $(APP_API_SRC_DIR) app
+	mv $(APP_API_SRC_DIR)/$@ $(LIB_BUILD_DIR)/$@
 
 app_pack: gunwapi_app.o
 	make -C $(APPS_SRC_DIR)

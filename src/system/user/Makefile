@@ -1,4 +1,4 @@
-APP_INCLUDE_PARAMS=-I $(STDGUNW_INCLUDE_DIR) -I $(API_INCLUDE_DIR)
+APP_INCLUDE_PARAMS=-I $(STDGUNW_INCLUDE_DIR) -I $(APP_API_INCLUDE_DIR)
 export APP_CFLAGS=-std=c11 -c -fno-builtin -Wall -Wextra -ggdb $(APP_INCLUDE_PARAMS) $(CFLAGS_GLOBAL)
 export APP_LINK_LIBS=$(STDGUNW_LIB) "$(LIB_BUILD_DIR)/gunwapi_app.o"
 export APP_LFLAGS=-m$(L_OUTFORMAT) --fatal-warnings -z noexecstack

@@ -12,7 +12,20 @@ static bool dimensionsValid(const point_t dimensions) {
 }
 
 static enum gnwDeviceUHA_display_format getSupportedFormat(const size_t deviceId, const size_t index) {
-    return 0;
+    struct gnwDeviceParamDescriptor paramDesc;
+
+    paramDesc.param = GDE_DISPLAY_PARAM_FORMAT;
+    paramDesc.subParam = 0;
+    paramDesc.paramIndex = index;
+
+    enum gnwDeviceUHA_display_format format;
+
+    const enum gnwDeviceError err = devGetParam(deviceId, &paramDesc, (size_t *)&format);
+    if (err != GDE_NONE) {
+        return 0;
+    }
+
+    return format;
 }
 
 static enum gnwDeviceUHA_display_format getSupportedDisplayFormat(const enum DisplayType type,
@@ -37,7 +50,27 @@ static enum gnwDeviceUHA_display_format getSupportedDisplayFormat(const enum Dis
 }
 
 static point_t getDisplayDimensions(const size_t deviceId, const enum gnwDeviceUHA_display_format format) {
-    return (point_t){ 0, 0 };
+    struct gnwDeviceParamDescriptor paramDesc;
+    point_t dimensions;
+
+    paramDesc.param = GDE_DISPLAY_PARAM_DIMENSIONS;
+    paramDesc.subParam = format;
+    
+    paramDesc.paramIndex = 0; {
+        const enum gnwDeviceError err = devGetParam(deviceId, &paramDesc, (size_t *)&dimensions.x);
+        if (err != GDE_NONE) {
+            return (point_t) { -1, -1 };
+        }
+    }
+
+    paramDesc.paramIndex = 1; {
+        const enum gnwDeviceError err = devGetParam(deviceId, &paramDesc, (size_t *)&dimensions.y);
+        if (err != GDE_NONE) {
+            return (point_t) { -1, -1 };
+        }
+    }
+
+    return dimensions;
 }
 
 void fillDisplayDescriptor(const size_t identifier,

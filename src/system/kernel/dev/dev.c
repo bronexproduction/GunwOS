@@ -362,9 +362,27 @@ enum gnwDeviceError k_dev_listen(const procId_t processId,
 
 enum gnwDeviceError k_dev_getParam(const size_t deviceId,
                                    const struct gnwDeviceParamDescriptor paramDescriptor,
-                                   size_t * const result) {
-    
-    #warning TO BE IMPLEMENTED
+                                   size_t * const absResult) {
+    if (!absResult) {
+        OOPS("Nullptr");
+        return GDE_UNKNOWN;
+    }
+
+    enum gnwDeviceError err = validateInstalledId(deviceId);
+    if (err) {
+        return err;
+    }
+
+    if (!devices[deviceId].desc.api.system.routine.getParam) {
+        return GDE_INVALID_OPERATION;
+    }
+
+    if (!devices[deviceId].desc.api.system.routine.getParam(paramDescriptor.param,
+                                                            paramDescriptor.paramIndex,
+                                                            paramDescriptor.paramIndex,
+                                                            absResult)) {
+        return GDE_OPERATION_FAILED;
+    }
 
     return GDE_NONE;
 }

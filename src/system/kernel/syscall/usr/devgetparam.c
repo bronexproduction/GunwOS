@@ -25,5 +25,5 @@ enum gnwDeviceError k_scr_usr_devGetParam(const size_t devId,
         OOPS("Invalid pointer referenced");
     }
     
-    return k_dev_getParam(devId, *absDescPtr, result);
+    return k_dev_getParam(devId, *absDescPtr, absResultPtr);
 }

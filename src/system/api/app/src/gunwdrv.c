@@ -7,20 +7,20 @@
 
 #include "_gunwdrv.h"
 
-static bool validateDeviceUHA_system(const struct gnwDeviceUHA_system * const uha) {
+static bool validateDeviceUHA_system(const struct gnwDeviceUHA * const uha) {
     return true;
 }
 
-static bool validateDeviceUHA_mem(const struct gnwDeviceUHA_mem * const uha) {
+static bool validateDeviceUHA_mem(const struct gnwDeviceUHA * const uha) {
 
     /*
         Validate descriptor
     */
 
-    if (!uha->desc.bytesRange.offset) {
+    if (!uha->mem.desc.bytesRange.offset) {
         return false;
     }
-    if (!uha->desc.bytesRange.sizeBytes) {
+    if (!uha->mem.desc.bytesRange.sizeBytes) {
         return false;
     }
 
@@ -28,74 +28,79 @@ static bool validateDeviceUHA_mem(const struct gnwDeviceUHA_mem * const uha) {
         Validate routines
     */
 
-    if (!uha->routine.write) {
+    if (!uha->mem.routine.write) {
         return false;
     }
     
     return true;
 }
 
-static bool validateDeviceUHA_keyboard(const struct gnwDeviceUHA_keyboard * const uha) {
+static bool validateDeviceUHA_keyboard(const struct gnwDeviceUHA * const uha) {
     return true;
 }
 
-static bool validateDeviceUHA_mouse(const struct gnwDeviceUHA_mouse * const uha) {
+static bool validateDeviceUHA_mouse(const struct gnwDeviceUHA * const uha) {
     return true;
 }
 
-static bool validateDeviceUHA_display(const struct gnwDeviceUHA_display * const uha) {
+static bool validateDeviceUHA_display(const struct gnwDeviceUHA * const uha) {
     
     /*
         Validate descriptor
     */
-    if (!uha->desc.supportedFormatCount) {
+    if (!uha->display.desc.supportedFormatCount) {
         return false;
     }
-    
-    #warning how to validate getParam protocol?
+
+    /*
+        Validate additional routines    
+    */
+    if (!uha->system.routine.getParam) {
+        return false;
+    }
 
     return true;
 }
 
-static bool validateDeviceUHA_charIn(const struct gnwDeviceUHA_charIn * const uha) {
+static bool validateDeviceUHA_charIn(const struct gnwDeviceUHA * const uha) {
 
     /*
         Validate routines
     */
     
-    if (!uha->routine.hasData) {
+    if (!uha->charIn.routine.hasData) {
         return false;
     }
-    if (!uha->routine.read) {
+    if (!uha->charIn.routine.read) {
         return false;
     }
 
     return true;
 }
 
-static bool validateDeviceUHA_charOut(const struct gnwDeviceUHA_charOut * const uha) {
+static bool validateDeviceUHA_charOut(const struct gnwDeviceUHA * const uha) {
 
     /*
         Validate routines
     */
     
-    if (!uha->routine.isReadyToWrite) {
+    if (!uha->charOut.routine.isReadyToWrite) {
         return false;
     }
-    if (!uha->routine.write) {
+    if (!uha->charOut.routine.write) {
         return false;
     }
 
     return true;
 }
 
-static bool validateDeviceUHA_storCtrl(const struct gnwDeviceUHA_storCtrl * const uha) {
+static bool validateDeviceUHA_storCtrl(const struct gnwDeviceUHA * const uha) {
     
     /*
         Validate descriptor
     */
 
-    if (!uha->desc.driveCount) {
+    if (!uha->storCtrl.desc.driveCount) {
         return false;
     }
 
@@ -103,20 +108,20 @@ static bool validateDeviceUHA_storCtrl(const struct gnwDeviceUHA_storCtrl * cons
         Validate routines
     */
     
-    if (!uha->routine.driveGeometry) {
+    if (!uha->storCtrl.routine.driveGeometry) {
         return false;
     }
-    if (!uha->routine.drivePresent) {
+    if (!uha->storCtrl.routine.drivePresent) {
         return false;
     }
-    if (!uha->routine.read) {
+    if (!uha->storCtrl.routine.read) {
         return false;
     }
 
     return true;
 }
 
-static bool validateDeviceUHA_fdc(const struct gnwDeviceUHA_fdc * const uha) {
+static bool validateDeviceUHA_fdc(const struct gnwDeviceUHA * const uha) {
     return true;
 }
 
@@ -133,7 +138,7 @@ bool validateDeviceDescriptor(const struct gnwDeviceDescriptor * const descripto
     #define VALIDATE_UHA(TYPE, NAME) \
         if (descriptor->type & DEV_TYPE_ ## TYPE ) { \
             typeDefined = true; \
-            if (!validateDeviceUHA_ ## NAME (&descriptor->api.NAME)) { \
+            if (!validateDeviceUHA_ ## NAME (&descriptor->api)) { \
                 return false; \
             } \
         }

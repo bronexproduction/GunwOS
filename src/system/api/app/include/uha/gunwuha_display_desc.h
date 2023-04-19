@@ -74,4 +74,9 @@ struct gnwDeviceUHA_display_desc {
     size_t supportedFormatCount;
 };
 
+enum gnwDeviceUHA_display_paramCode {
+    GDE_DISPLAY_PARAM_FORMAT        = 1,
+    GDE_DISPLAY_PARAM_DIMENSIONS    = 2
+};
+
 #endif // GUNWOS_GUNWUHA_DISPLAY_DESC_H

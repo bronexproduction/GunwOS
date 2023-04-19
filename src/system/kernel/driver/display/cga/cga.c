@@ -6,7 +6,7 @@
 //
 
 #include <defs.h>
-#include <driver/gunwdrv.h>
+#include <driver/gunwdisplaydrv.h>
 #include <error/panic.h>
 
 #define VIDEO_HW_ROWS           25
@@ -198,6 +198,7 @@ static struct gnwDriverConfig desc() {
 static struct gnwDeviceUHA uha() {
     struct gnwDeviceUHA uha;
 
+    uha.system.routine.getParam = uhaGetParam;
     uha.display.desc.supportedFormatCount = 2;
     uha.mem.desc.bytesRange.offset = (addr_t)CGA_VIDEO_HW_MEM;
     uha.mem.desc.bytesRange.sizeBytes = KiB(16);

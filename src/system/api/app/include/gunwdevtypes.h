@@ -45,6 +45,7 @@ _Static_assert(sizeof(enum gnwDeviceError) == sizeof(int_32), "Unexpected enum g
 
 struct gnwDeviceParamDescriptor {
     size_t param;
+    size_t subParam;
     size_t paramIndex;
 };
 
