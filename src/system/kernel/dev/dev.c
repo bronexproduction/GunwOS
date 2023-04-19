@@ -368,9 +368,8 @@ enum gnwDeviceError k_dev_getParam(const size_t deviceId,
         return GDE_UNKNOWN;
     }
 
-    enum gnwDeviceError err = validateInstalledId(deviceId);
-    if (err) {
-        return err;
+    if (!validateInstalledId(deviceId)) {
+        return GDE_ID_INVALID;
     }
 
     if (!devices[deviceId].desc.api.system.routine.getParam) {
@@ -378,7 +377,7 @@ enum gnwDeviceError k_dev_getParam(const size_t deviceId,
     }
 
     if (!devices[deviceId].desc.api.system.routine.getParam(paramDescriptor.param,
-                                                            paramDescriptor.paramIndex,
+                                                            paramDescriptor.subParam,
                                                             paramDescriptor.paramIndex,
                                                             absResult)) {
         return GDE_OPERATION_FAILED;

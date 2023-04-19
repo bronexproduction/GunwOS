@@ -7,6 +7,36 @@
 
 #ifndef _GUNWAPI_KERNEL
 
+#include <uha/gunwuha_display_desc.h>
 
+bool uhaGetParam_display(const size_t paramVal,
+                         const size_t subParamVal,
+                         const size_t paramIndex,
+                         size_t * const result) {
+
+    const enum gnwDeviceUHA_display_param param = paramVal;
+
+    switch (param) {
+    case GDU_DISPLAY_PARAM_FORMAT: {
+        extern enum gnwDeviceUHA_display_format uhaSupportedFormat(const size_t index);
+        *result = uhaSupportedFormat(paramIndex);
+    } break;
+    case GDU_DISPLAY_PARAM_DIMENSIONS: {
+        if (paramIndex > 1) {
+            return false;
+        }
+
+        extern point_t uhaDimensionsForFormat(const enum gnwDeviceUHA_display_format format);
+        const enum gnwDeviceUHA_display_format format = subParamVal;
+        const point_t dimensions = uhaDimensionsForFormat(format);
+        
+        *result = paramIndex ? dimensions.y : dimensions.x;
+    } break;
+    default:
+        return false;
+    }
+    
+    return true;
+}
 
 #endif // _GUNWAPI_KERNEL

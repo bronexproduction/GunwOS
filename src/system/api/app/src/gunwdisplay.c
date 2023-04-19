@@ -14,7 +14,7 @@ static bool dimensionsValid(const point_t dimensions) {
 static enum gnwDeviceUHA_display_format getSupportedFormat(const size_t deviceId, const size_t index) {
     struct gnwDeviceParamDescriptor paramDesc;
 
-    paramDesc.param = GDE_DISPLAY_PARAM_FORMAT;
+    paramDesc.param = GDU_DISPLAY_PARAM_FORMAT;
     paramDesc.subParam = 0;
     paramDesc.paramIndex = index;
 
@@ -53,7 +53,7 @@ static point_t getDisplayDimensions(const size_t deviceId, const enum gnwDeviceU
     struct gnwDeviceParamDescriptor paramDesc;
     point_t dimensions;
 
-    paramDesc.param = GDE_DISPLAY_PARAM_DIMENSIONS;
+    paramDesc.param = GDU_DISPLAY_PARAM_DIMENSIONS;
     paramDesc.subParam = format;
     
     paramDesc.paramIndex = 0; {

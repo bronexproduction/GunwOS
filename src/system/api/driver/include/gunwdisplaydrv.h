@@ -10,9 +10,9 @@
 
 #include <gunwdrv.h>
 
-extern bool uhaGetParam(const size_t param,
-                        const size_t subParam,
-                        const size_t paramIndex,
-                        size_t * const result);
+extern bool uhaGetParam_display(const size_t paramVal,
+                                const size_t subParamVal,
+                                const size_t paramIndex,
+                                size_t * const result);
 
 #endif // GUNWOS_GUNWDISPLAYDRV_H

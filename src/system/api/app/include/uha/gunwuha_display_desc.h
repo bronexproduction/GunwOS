@@ -39,6 +39,7 @@
     5 - Number of colors/values on a greyscale
 */
 enum gnwDeviceUHA_display_format {
+    GDF_NONE                = 0,
     TEXT_H80V25C16          = _FMT_TEXT(1),
     GRAPHICS_H320V200C16    = _FMT_GRAP(1)
 };
@@ -74,9 +75,9 @@ struct gnwDeviceUHA_display_desc {
     size_t supportedFormatCount;
 };
 
-enum gnwDeviceUHA_display_paramCode {
-    GDE_DISPLAY_PARAM_FORMAT        = 1,
-    GDE_DISPLAY_PARAM_DIMENSIONS    = 2
+enum gnwDeviceUHA_display_param {
+    GDU_DISPLAY_PARAM_FORMAT        = 1,
+    GDU_DISPLAY_PARAM_DIMENSIONS    = 2
 };
 
 #endif // GUNWOS_GUNWUHA_DISPLAY_DESC_H

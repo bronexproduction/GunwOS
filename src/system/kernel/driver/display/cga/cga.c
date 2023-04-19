@@ -128,36 +128,37 @@ enum k_drv_display_cga_colorRegBit {
     CGA_CRB_BLUE            = 0x01,
 };
 
-// static void supportedFormats(enum gnwDeviceUHA_display_format * const result) {
-//     if (!result) {
-//         OOPS("Nullptr");
-//         return;
-//     }
+enum gnwDeviceUHA_display_format uhaSupportedFormat(const size_t index) {
+    switch (index) {
+    case 0:
+        return TEXT_H80V25C16;
+    case 1:
+        return GRAPHICS_H320V200C16;
+    default:
+        return GDF_NONE;
+    }
+}
 
-//     result[0] = TEXT_H80V25C16;
-//     result[1] = GRAPHICS_H320V200C16;
-// }
-
-// static point_t dimensionsForFormat(const enum gnwDeviceUHA_display_format format) {
-//     point_t dimensions;
+point_t uhaDimensionsForFormat(const enum gnwDeviceUHA_display_format format) {
+    point_t dimensions;
     
-//     switch(format) {
-//     case TEXT_H80V25C16:
-//         dimensions.x = 80;
-//         dimensions.y = 25;
-//         break;
-//     case GRAPHICS_H320V200C16:
-//         dimensions.x = 320;
-//         dimensions.y = 200;
-//         break;
-//     default:
-//         dimensions.x = -1;
-//         dimensions.y = -1;
-//         break;
-//     }
+    switch(format) {
+    case TEXT_H80V25C16:
+        dimensions.x = 80;
+        dimensions.y = 25;
+        break;
+    case GRAPHICS_H320V200C16:
+        dimensions.x = 320;
+        dimensions.y = 200;
+        break;
+    default:
+        dimensions.x = -1;
+        dimensions.y = -1;
+        break;
+    }
 
-//     return dimensions;
-// }
+    return dimensions;
+}
 
 // static bool setFormat(const enum gnwDeviceUHA_display_format format) {
 //     #warning TO BE IMPLEMENTED
@@ -198,7 +199,7 @@ static struct gnwDriverConfig desc() {
 static struct gnwDeviceUHA uha() {
     struct gnwDeviceUHA uha;
 
-    uha.system.routine.getParam = uhaGetParam;
+    uha.system.routine.getParam = uhaGetParam_display;
     uha.display.desc.supportedFormatCount = 2;
     uha.mem.desc.bytesRange.offset = (addr_t)CGA_VIDEO_HW_MEM;
     uha.mem.desc.bytesRange.sizeBytes = KiB(16);
