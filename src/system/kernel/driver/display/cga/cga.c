@@ -8,6 +8,7 @@
 #include <defs.h>
 #include <gunwdisplaydrv.h>
 #include <error/panic.h>
+#include <gunwbus.h>
 
 #define VIDEO_HW_ROWS           25
 #define VIDEO_HW_COLS           80
@@ -161,16 +162,22 @@ point_t uhaDimensionsForFormat(const enum gnwDeviceUHA_display_format format) {
 }
 
 bool setFormat(const enum gnwDeviceUHA_display_format format) {
-    #warning TO BE IMPLEMENTED
+    uint_8 mode;
 
     switch(format) {
     case TEXT_H80V25C16:
-        return true;
+        mode = CGA_MRB_VOUT_ENABLE;
+        break;
     case GRAPHICS_H320V200C16:
-        return true;
+        mode = CGA_MRB_VOUT_ENABLE | CGA_MRB_GRAPHICS;
+        break;
     default:
         return false;
     }
+
+    wrb(CGA_BUS_MODE_CONTROL_REG, mode);
+
+    return true;
 }
 
 static void update(const void * const buffer, const range_addr_t inputBufferRange) {
