@@ -218,7 +218,7 @@ static struct gnwDeviceUHA uha() {
     uha.system.routine.setParam = uhaSetParam_display;
     uha.display.desc.supportedFormatCount = 2;
     uha.mem.desc.bytesRange.offset = (addr_t)EGA_VIDEO_GRAPHICS_HW_MEM;
-    uha.mem.desc.bytesRange.sizeBytes = KiB(128);
+    uha.mem.desc.bytesRange.sizeBytes = KiB(64 + 32 + 16);
     uha.mem.desc.maxInputSizeBytes = 320 * 
                                      200 * 
                                      sizeof(struct gnwDeviceUHA_display_pixel);
