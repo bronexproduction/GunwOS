@@ -225,6 +225,123 @@ enum bus_reg_sequencer_bit_memModeReg {
     BRS_MEMMODEREG_ALPHA = 0x01
 };
 
-#warning CRT REGISTERS AND MORE
+/*
+    CRT Controller Registers
+
+    End Horizontal Blanking Register
+*/
+enum bus_reg_crt_bit_ehbr {
+    BRC_EHBR_DISPLAY_ENABLE_SKEW_CONTROL_RANGE = 0x60,
+    BRC_EHBR_END_BLANKING_RANGE = 0x1F
+};
+
+/*
+    CRT Controller Registers
+
+    End Horizontal Retrace Register
+*/
+enum bus_reg_crt_bit_ehrr {
+    BRC_EHRR_START_ODD_MEMORY_ADDRESS = 0x80,
+    BRC_EHRR_HORIZONTAL_RETRACE_DELAY_RANGE = 0x60,
+    BRC_EHRR_END_HORIZONTAL_RETRACE_RANGE = 0x1F
+};
+
+/*
+    CRT Controller Registers
+
+    CRT Controller Overflow Register
+*/
+enum bus_reg_crt_bit_ccor {
+    BRC_CCOR_CURSOR_LOCATION_BIT_8 = 0x20,
+    BRC_CCOR_LINE_COMPARE_BIT_8 = 0x10,
+    BRC_CCOR_START_VERTICAL_BLANK_BIT_8 = 0x08,
+    BRC_CCOR_VERTICAL_RETRACE_START_BIT_8 = 0x04,
+    BRC_CCOR_VERTICAL_DISPLAY_ENABLE_END_BIT_8 = 0x02,
+    BRC_CCOR_VERTICAL_TOTAL_BIT_8 = 0x01
+};
+
+/*
+    CRT Controller Registers
+
+    Preset Row Scan Register
+*/
+enum bus_reg_crt_bit_prsr {
+    BRC_PRSR_STARTING_ROW_SCAN_COUNT_AFTER_A_VERTICAL_RETRACE_RANGE = 0x1F
+};
+
+/*
+    CRT Controller Registers
+
+    Maximum Scan Line Register
+*/
+enum bus_reg_crt_bit_mslr {
+    BRC_MSLR_MAXIMUM_SCAN_LINE_RANGE = 0x1F
+};
+
+/*
+    CRT Controller Registers
+
+    Cursor Start Register
+*/
+enum bus_reg_crt_bit_csr {
+    BRC_CSR_ROW_SCAN_CURSOR_BEGINS_RANGE = 0x1F
+};
+
+/*
+    CRT Controller Registers
+
+    Cursor End Register
+*/
+enum bus_reg_crt_bit_cer {
+    BRC_CER_CURSOR_SKEW_CONTROL_RANGE = 0x60,
+    BRC_CER_ROW_SCAN_CURSOR_ENDS_RANGE = 0x1F
+};
+
+/*
+    CRT Controller Registers
+
+    Vertical Retrace End Register
+*/
+enum bus_reg_crt_bit_vrer {
+    BRC_VRER_ENABLE_VERTICAL_INTERRUPT = 0x20, /* A logical 0 will enable vertical interrupt.*/
+    BRC_VRER_CLEAR_VERTICAL_INTERRUPT = 0x10, /* A logical 0 will clear vertical interrupt.*/
+    BRC_VRER_VERTICAL_RETRACE_END = 0x0F
+};
+
+/*
+    CRT Controller Registers
+
+    Underline Location Register
+*/
+enum bus_reg_crt_bit_ulr {
+    BRC_ULR_HORIZONTAL_ROW_SCAN_WHERE_UNDERLINE_WILL_OCCUR_RANGE = 0x1F
+};
+
+/*
+    CRT Controller Registers
+
+    End Vertical Blanking Register
+*/
+enum bus_reg_crt_bit_evbr {
+    BRC_EVBR_END_VERTICAL_BLANKING_RANGE = 0x1F
+};
+
+/*
+    CRT Controller Registers
+
+    Mode Control Register
+*/
+enum bus_reg_crt_bit_mcr {
+    BRC_MCR_HARDWARE_RESET = 0x80,
+    BRC_MCR_WORD_BYTE_MODE = 0x40,
+    BRC_MCR_ADDRESS_WRAP = 0x20,
+    BRC_MCR_OUTPUT_CONTROL = 0x10,
+    BRC_MCR_COUNT_BY_TWO = 0x08,
+    BRC_MCR_HORIZONTAL_RETRACE_SELECT = 0x04,
+    BRC_MCR_SELECT_ROW_SCAN_COUNTER = 0x02,
+    BRC_MCR_CMS_0 = 0x01
+};
+
+#warning GRAPHICS CONTROLLER REGISTERS AND MORE
 
 #endif // EGA_BUS_H
