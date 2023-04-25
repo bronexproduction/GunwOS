@@ -15,10 +15,6 @@
 
 #include <uha/gunwuha_display_desc.h>
 
-#define BUS_ADDR_MONOCHROME_MARK 0xB0
-#define BUS_ADDR_MONOCHROME_MARK_MASK 0xF0
-#define BUS_ADDR_COLOR_OFFSET 0x20
-
 enum bus_reg_external {
     BRE_MISC_OUT = 0x3C2,
     BRE_FEATURE_CTRL = 0x3BA, /* MONOCHROME ADDR */
@@ -93,6 +89,13 @@ enum bus_reg_graphics_index {
     BRGI_BIT_MASK = 0x08
 };
 
+struct bus_reg_graphics_position {
+    bool graphics1_pos0 :1;
+    bool graphics1_pos1 :1;
+    bool graphics2_pos0 :1;
+    bool graphics2_pos1 :1;
+};
+
 enum bus_reg_attr {
     BRA_ADDRESS = 0x3C0,
     BRA_DATA = 0x3C0
@@ -105,16 +108,6 @@ enum bus_reg_attr_index {
     BRAI_COLOR_PLANE_ENABLE = 0x12,
     BRAI_HORIZONTAL_PEL_PANNING = 0x13
 };
-
-/*
-    Bus register addresses that matches 0x*B* refer to monochrome display address range.
-    Corresponding bytes for color display are offset by 0x020 (addresses 0x*D*)
-
-    For more information see:
-    IBM Enhanced Graphics Adapter
-    page 12+
-*/
-uint_16 bus_addr(uint_16 baseAddr, enum gnwDeviceUHA_display_format format);
 
 /*
     External Registers
@@ -535,5 +528,12 @@ enum bus_reg_attr_bit_cper {
 enum bus_reg_attr_bit_hppr {
     BRA_HPPR_HORIZONTAL_PEL_PANNING_RANGE = 0x0F
 };
+
+void busWriteExternal(const enum bus_reg_external reg, const uint_8 data, const enum gnwDeviceUHA_display_format format);
+void busWriteSequencer(const enum bus_reg_sequencer_index index, const uint_8 data, const enum gnwDeviceUHA_display_format format);
+void busWriteCRT(const enum bus_reg_crt_index index, const uint_8 data, const enum gnwDeviceUHA_display_format format);
+void busWriteGraphicsPosition(const struct bus_reg_graphics_position position);
+void busWriteGraphics(const enum bus_reg_graphics_index index, const uint_8 data, const enum gnwDeviceUHA_display_format format);
+void busWriteAttribute(const enum bus_reg_attr_index index, const uint_8 data, const enum gnwDeviceUHA_display_format format);
 
 #endif // EGA_BUS_H

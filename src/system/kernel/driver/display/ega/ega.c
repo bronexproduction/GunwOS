@@ -57,7 +57,6 @@ bool setFormat(const enum gnwDeviceUHA_display_format format) {
     uint_8 mode;
 
     (void)mode;
-    (void)bus_addr;
 
     // wrb(EGA_BUS_MODE_CONTROL_REG, 0);
 
