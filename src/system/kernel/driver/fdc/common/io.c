@@ -41,8 +41,5 @@ enum fdc_opStatus pullData(const uint_16 base, uint_8 * const data) {
     }
 
     *data = rdb(base + REG_DATA);
-    #warning does it even work on read?
-    #warning find other way to wait
-    // k_io_wait();
     return OPSTATUS_OK;
 }

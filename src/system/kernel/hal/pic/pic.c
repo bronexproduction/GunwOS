@@ -24,9 +24,7 @@ static uint_8 init() {
         ICW1
     */
 	wrb(BUS_PIC_MASTER_COMMAND, PIC_ICW1_INIT | PIC_ICW1_ICW4);
-	k_io_wait();
     wrb(BUS_PIC_SLAVE_COMMAND, PIC_ICW1_INIT | PIC_ICW1_ICW4);
-	k_io_wait();
 
     /*
         ICW2 
@@ -34,9 +32,7 @@ static uint_8 init() {
         Interrupts are remapped to start from 32 
     */
 	wrb(BUS_PIC_MASTER_DATA, 0x20);
-	k_io_wait();
 	wrb(BUS_PIC_SLAVE_DATA, 0x28);
-	k_io_wait();
 
     /*
         ICW3
@@ -44,17 +40,13 @@ static uint_8 init() {
         For cascade mode
     */
 	wrb(BUS_PIC_MASTER_DATA, PIC_ICW3_MASTER_IRQ2);
-	k_io_wait();
 	wrb(BUS_PIC_SLAVE_DATA, PIC_ICW3_SLAVE_CASCADE);
-	k_io_wait();
 
     /*
         ICW4
     */
 	wrb(BUS_PIC_MASTER_DATA, PIC_ICW4_8086_88);
-	k_io_wait();
 	wrb(BUS_PIC_SLAVE_DATA, PIC_ICW4_8086_88);
-	k_io_wait();
 
     return 1;
 }
@@ -62,9 +54,7 @@ static uint_8 init() {
 static void disableIRQs() {
     
     wrb(BUS_PIC_MASTER_DATA, 0xFF);
-    k_io_wait();
     wrb(BUS_PIC_SLAVE_DATA, 0xFF);
-    k_io_wait();
 }
 
 void k_pic_configure() {
@@ -84,5 +74,4 @@ void k_pic_enableIRQ(const enum k_dev_irq num) {
     uint_8 mask = rdb(port);
     mask = ~(1 << num) & mask;
     wrb(port, mask);
-    k_io_wait();
 }

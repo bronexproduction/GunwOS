@@ -100,11 +100,8 @@ static uint_8 init() {
     
     uint_16 div = divider();
     wrb(PIT_BUS_COMMAND, PIT_CMD_CSB_CH0 | PIT_CMD_ACC_LOHI | PIT_CMD_MOD_3 | PIT_CMD_CRF_BINARY);
-    k_io_wait();
     wrb(PIT_BUS_DATA_CH0, div & 0xFF);
-    k_io_wait();
     wrb(PIT_BUS_DATA_CH0, div >> 8);
-    k_io_wait();
 
     return 1;
 }
