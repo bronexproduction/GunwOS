@@ -7,6 +7,7 @@
 
 #include "ega_bus.h"
 #include <gunwbus.h>
+#include <error/panic.h>
 
 #define BUS_ADDR_MONOCHROME_MARK 0xB0
 #define BUS_ADDR_MONOCHROME_MARK_MASK 0xF0
@@ -42,6 +43,13 @@ static void busWriteLSI(const uint_16 addrAddr,
 }
 
 void busWriteExternal(const enum bus_reg_external reg, const uint_8 data, const enum gnwDeviceUHA_display_format format) {
+    if (reg == BRE_INPUT_STATUS_0 ||
+        reg == BRE_INPUT_STATUS_1) {
+        /* Read-only registers */
+        OOPS("Invalid driver operation");
+        return;
+    }
+
     wrb(busAddr(reg, format), data);
 }
 
@@ -50,6 +58,13 @@ void busWriteSequencer(const enum bus_reg_sequencer_index index, const uint_8 da
 }
 
 void busWriteCRT(const enum bus_reg_crt_index index, const uint_8 data, const enum gnwDeviceUHA_display_format format) {
+    if (index == BRCI_LIGHT_PEN_HIGH ||
+        index == BRCI_LIGHT_PEN_LOW) {
+        /* Read-only registers */
+        OOPS("Invalid driver operation");
+        return;
+    }
+    
     busWriteLSI(BRC_ADDRESS, BRC_DATA, index, data, format);
 }
 
