@@ -15,7 +15,6 @@
 #include "pic.h"
 
 #include <hal/int/irq.h>
-#include <hal/io/io.h>
 #include <error/panic.h>
 
 static uint_8 init() {

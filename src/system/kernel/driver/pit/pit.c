@@ -12,7 +12,6 @@
 #include <gunwdrv.h>
 
 #include <driver/driver.h>
-#include <hal/io/io.h>
 #include <error/panic.h>
 
 #define PIT_BUS_DATA_CH0    0x40    // Channel 0 (read/write)
