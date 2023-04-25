@@ -33,6 +33,14 @@ static uint_16 busAddr(uint_16 baseAddr, enum gnwDeviceUHA_display_format format
     return baseAddr + BUS_ADDR_COLOR_OFFSET;
 }
 
+static uint_8 busReadLSI(const uint_16 addrAddr,
+                         const uint_16 dataAddr,
+                         const uint_8 index,
+                         const enum gnwDeviceUHA_display_format format) {
+    wrb(busAddr(addrAddr, format), index);
+    return rdb(busAddr(dataAddr, format));
+}
+
 static void busWriteLSI(const uint_16 addrAddr, 
                         const uint_16 dataAddr, 
                         const uint_8 index, 
@@ -40,6 +48,32 @@ static void busWriteLSI(const uint_16 addrAddr,
                         const enum gnwDeviceUHA_display_format format) {
     wrb(busAddr(addrAddr, format), index);
     wrb(busAddr(dataAddr, format), data);
+}
+
+uint_8 busReadExternal(const enum bus_reg_external reg, const enum gnwDeviceUHA_display_format format) {
+    if (reg != BRE_INPUT_STATUS_0 &&
+        reg != BRE_INPUT_STATUS_1) {
+        /* Write-only registers */
+        OOPS("Invalid driver operation");
+        return 0;
+    }
+
+    return rdb(busAddr(reg, format));
+}
+
+uint_8 busReadCRT(const enum bus_reg_crt_index index, const enum gnwDeviceUHA_display_format format) {
+    if (index != BRCI_START_ADDRESS_HIGH &&
+        index != BRCI_START_ADDRESS_LOW &&
+        index != BRCI_CURSOR_LOCATION_HIGH &&
+        index != BRCI_CURSOR_LOCATION_LOW &&
+        index != BRCI_LIGHT_PEN_HIGH &&
+        index != BRCI_LIGHT_PEN_LOW) {
+        /* Write-only registers */
+        OOPS("Invalid driver operation");
+        return 0;
+    }
+
+    return busReadLSI(BRC_ADDRESS, BRC_DATA, index, format);
 }
 
 void busWriteExternal(const enum bus_reg_external reg, const uint_8 data, const enum gnwDeviceUHA_display_format format) {

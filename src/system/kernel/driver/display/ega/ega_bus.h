@@ -529,6 +529,9 @@ enum bus_reg_attr_bit_hppr {
     BRA_HPPR_HORIZONTAL_PEL_PANNING_RANGE = 0x0F
 };
 
+uint_8 busReadExternal(const enum bus_reg_external reg, const enum gnwDeviceUHA_display_format format);
+uint_8 busReadCRT(const enum bus_reg_crt_index index, const enum gnwDeviceUHA_display_format format);
+
 void busWriteExternal(const enum bus_reg_external reg, const uint_8 data, const enum gnwDeviceUHA_display_format format);
 void busWriteSequencer(const enum bus_reg_sequencer_index index, const uint_8 data, const enum gnwDeviceUHA_display_format format);
 void busWriteCRT(const enum bus_reg_crt_index index, const uint_8 data, const enum gnwDeviceUHA_display_format format);
