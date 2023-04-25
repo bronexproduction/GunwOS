@@ -342,6 +342,198 @@ enum bus_reg_crt_bit_mcr {
     BRC_MCR_CMS_0 = 0x01
 };
 
-#warning GRAPHICS CONTROLLER REGISTERS AND MORE
+/*
+    Graphics Controller Registers
+
+    Graphics 1 Position Register
+*/
+enum bus_reg_graphics_bit_g1pr {
+    BRG_G1PR_POSITION_1 = 0x02,
+    BRG_G1PR_POSITION_0 = 0x01
+};
+
+/*
+    Graphics Controller Registers
+
+    Graphics 2 Position Register
+*/
+enum bus_reg_graphics_bit_g2pr {
+    BRG_G2PR_POSITION_1 = 0x02,
+    BRG_G2PR_POSITION_0 = 0x01
+};
+
+/*
+    Graphics Controller Registers
+
+    Graphics 1 and 2 Address Register
+*/
+enum bus_reg_graphics_bit_g1a2ar {
+    BRG_G1A2AR_GRAPHICS_ADDRESS_RANGE = 0x0F
+};
+
+/*
+    Graphics Controller Registers
+
+    Set/Reset Register
+*/
+enum bus_reg_graphics_bit_srr {
+    BRG_SRR_SET_RESET_BIT_3 = 0x08,
+    BRG_SRR_SET_RESET_BIT_2 = 0x04,
+    BRG_SRR_SET_RESET_BIT_1 = 0x02,
+    BRG_SRR_SET_RESET_BIT_0 = 0x01
+};
+
+/*
+    Graphics Controller Registers
+
+    Enable Set/Reset Register
+*/
+enum bus_reg_graphics_bit_esrr {
+    BRG_ESRR_ENABLE_SET_RESET_BIT_3 = 0x08,
+    BRG_ESRR_ENABLE_SET_RESET_BIT_2 = 0x04,
+    BRG_ESRR_ENABLE_SET_RESET_BIT_1 = 0x02,
+    BRG_ESRR_ENABLE_SET_RESET_BIT_0 = 0x01
+};
+
+/*
+    Graphics Controller Registers
+
+    Color Compare Register
+*/
+enum bus_reg_graphics_bit_ccr {
+    BRG_CCR_COLOR_COMPARE_3 = 0x08,
+    BRG_CCR_COLOR_COMPARE_2 = 0x04,
+    BRG_CCR_COLOR_COMPARE_1 = 0x02,
+    BRG_CCR_COLOR_COMPARE_0 = 0x01
+};
+
+/*
+    Graphics Controller Registers
+
+    Data Rotate Register
+*/
+enum bus_reg_graphics_bit_drr {
+    BRG_DRR_FUNCTION_SELECT_RANGE = 0x18,
+    BRG_DRR_ROTATE_COUNT_2 = 0x04,
+    BRG_DRR_ROTATE_COUNT_1 = 0x02,
+    BRG_DRR_ROTATE_COUNT = 0x01
+};
+
+/*
+    Graphics Controller Registers
+
+    Read Map Select Register
+*/
+enum bus_reg_graphics_bit_rmsr {
+    BRG_RMSR_MAP_SELECT_2 = 0x04,
+    BRG_RMSR_MAP_SELECT_1 = 0x02,
+    BRG_RMSR_MAP_SELECT_0 = 0x01
+};
+
+/*
+    Graphics Controller Registers
+
+    Mode Register
+*/
+enum bus_reg_graphics_bit_mr {
+    BRG_MR_SHIFT_REGISTER_MODE = 0x20,
+    BRG_MR_ODD_EVEN = 0x10,
+    BRG_MR_READ_MODE = 0x08,
+    BRG_MR_TEST_CONDITION = 0x04,
+    BRG_MR_WRITE_MODE_RANGE = 0x03,
+};
+
+/*
+    Graphics Controller Registers
+
+    Miscellaneous Register
+*/
+enum bus_reg_graphics_bit_miscr {
+    BRG_MISCR_MEMORY_MAP_1 = 0x08,
+    BRG_MISCR_MEMORY_MAP_0 = 0x04,
+    BRG_MISCR_CHAIN_ODD_MAPS_TO_EVEN = 0x02,
+    BRG_MISCR_GRAPHICS_MODE = 0x01
+};
+
+/*
+    Graphics Controller Registers
+
+    Color Don't Care Register
+*/
+enum bus_reg_graphics_bit_cdcr {
+    BRG_CDCR_COLOR_PLANE_3_DONT_CARE = 0x08,
+    BRG_CDCR_COLOR_PLANE_2_DONT_CARE = 0x04,
+    BRG_CDCR_COLOR_PLANE_1_DONT_CARE = 0x02,
+    BRG_CDCR_COLOR_PLANE_0_DONT_CARE = 0x01
+};
+
+/*
+    Attribute Controller Registers
+
+    Atribute Address Register
+*/
+enum bus_reg_attr_bit_aar {
+    BRA_AAR_PALETTE_ADDRESS_SOURCE = 0x20,
+    BRA_AAR_ATTRIBUTE_ADDRESS_RANGE = 0x1F
+};
+
+/*
+    Attribute Controller Registers
+
+    Palette Register Hex 00 through Hex 0F
+*/
+enum bus_reg_attr_bit_pr {
+    BRA_PR_SECONDARY_RED_VIDEO = 0x20,
+    BRA_PR_SECONDARY_GREEN_INTENSITY = 0x10,
+    BRA_PR_SECONDARY_BLUE_MONO_VIDEO = 0x08,
+    BRA_PR_RED_VIDEO = 0x04,
+    BRA_PR_GREEN_VIDEO = 0x02,
+    BRA_PR_BLUE_VIDEO = 0x01
+};
+
+/*
+    Attribute Controller Register
+
+    Mode Control Register
+*/
+enum bus_reg_attr_bit_mcr {
+    BRA_MCR_SELECT_BACKGROUND_INTENSITY_OR_ENABLE_BLINK = 0x08,
+    BRA_MCR_ENABLE_LINE_GRAPHICS_CHARACTER_CODES = 0x04,
+    BRA_MCR_DISPLAY_TYPE = 0x02,
+    BRA_MCR_GRAPHICS_ALPHANUMERIC_MODE = 0x01
+};
+
+/*
+    Attribute Controller Registers
+
+    Overscan Color Register
+*/
+enum bus_reg_attr_bit_ocr {
+    BRA_OCR_SELECTS_SECONDARY_RED_BORDER_COLOR = 0x20,
+    BRA_OCR_SELECTS_INTENSIFIED_OR_SECONDARY_GREEN = 0x10,
+    BRA_OCR_SELECTS_SECONDARY_BLUE_BORDER_COLOR = 0x08,
+    BRA_OCR_SELECTS_RED_BORDER_COLOR = 0x04,
+    BRA_OCR_SELECTS_GREEN_BORDER_COLOR = 0x02,
+    BRA_OCR_SELECTS_BLUE_BORDER_COLOR = 0x01
+};
+
+/*
+    Attribute Controller Registers
+
+    Color Plane Enable Register
+*/
+enum bus_reg_attr_bit_cper {
+    BRA_CPER_VIDEO_STATUS_MUX_RANGE = 0x30,
+    BRA_CPER_ENABLE_COLOR_PLANE_RANGE = 0x0F
+};
+
+/*
+    Attribute Controller Registers
+
+    Horizontal Pel Panning Register
+*/
+enum bus_reg_attr_bit_hppr {
+    BRA_HPPR_HORIZONTAL_PEL_PANNING_RANGE = 0x0F
+};
 
 #endif // EGA_BUS_H
