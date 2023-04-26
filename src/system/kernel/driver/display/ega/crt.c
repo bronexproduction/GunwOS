@@ -45,44 +45,47 @@ struct registers {
     uint_8 modeControl;
 };
 
+#define OFFSET_LOW 0x14
+#define OFFSET_HIGH 0x28
+
 static void configure(const enum resolution res, struct registers * const reg) {
     switch (res) {
-    case RES_320_200: // 0,1,4,5,D
+    case RES_320_200: /* 0, 1, 4, 5, D */
         reg->horizontalTotal = 0x37;
         reg->horizontalDisplayEnd = 0x27;
         reg->verticalTotal = 0x04;
         reg->overflow = 0x11;
         reg->verticalDisplayEnd = 0xC7;
         break;
-    case RES_320_350: // 0*,1*
+    case RES_320_350: /* 0*, 1* */
         reg->horizontalTotal = 0x2D;
         reg->horizontalDisplayEnd = 0x27;
         reg->verticalTotal = 0x6C;
         reg->overflow = 0x1F;
         reg->verticalDisplayEnd = 0x5D;
         break;
-    case RES_640_200: // 2,3,6,E
+    case RES_640_200: /* 2, 3, 6, E */
         reg->horizontalTotal = 0x70;
         reg->horizontalDisplayEnd = 0x4F;
         reg->verticalTotal = 0x04;
         reg->overflow = 0x11;
         reg->verticalDisplayEnd = 0xC7;
         break;
-    case RES_640_350: // 2*,3*,10*
+    case RES_640_350: /* 2*, 3*, 10* */
         reg->horizontalTotal = 0x5B;
         reg->horizontalDisplayEnd = 0x4F;
         reg->verticalTotal = 0x6C;
         reg->overflow = 0x1F;
         reg->verticalDisplayEnd = 0x5D;
         break;
-    case RES_640_350_MONO: // F
+    case RES_640_350_MONO: /* F */
         reg->horizontalTotal = 0x60;
         reg->horizontalDisplayEnd = 0x4F;
         reg->verticalTotal = 0x70;
         reg->overflow = 0x1F;
         reg->verticalDisplayEnd = 0x5D;
         break;
-    case RES_720_350_MONO: // 7
+    case RES_720_350_MONO: /* 7 */
         reg->horizontalTotal = 0x60;
         reg->horizontalDisplayEnd = 0x4F;
         reg->verticalTotal = 0x70;
@@ -133,7 +136,7 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.cursorEnd              = 0x07;
         reg.verticalRetraceStart   = 0xE1;
         reg.verticalRetraceEnd     = 0x24;
-        reg.offset                 = 0x14;
+        reg.offset                 = OFFSET_LOW;
         reg.underlineLocation      = 0x08;
         reg.startVerticalBlank     = 0xE0;
         reg.endVerticalBlank       = 0xF0;
@@ -151,7 +154,7 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.cursorEnd              = 0x07;
         reg.verticalRetraceStart   = 0xE1;
         reg.verticalRetraceEnd     = 0x24;
-        reg.offset                 = 0x28;
+        reg.offset                 = OFFSET_HIGH;
         reg.underlineLocation      = 0x08;
         reg.startVerticalBlank     = 0xE0;
         reg.endVerticalBlank       = 0xF0;
@@ -169,7 +172,7 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.cursorEnd              = 0x00;
         reg.verticalRetraceStart   = 0xE1;
         reg.verticalRetraceEnd     = 0x24;
-        reg.offset                 = 0x14;
+        reg.offset                 = OFFSET_LOW;
         reg.underlineLocation      = 0x00;
         reg.startVerticalBlank     = 0xE0;
         reg.endVerticalBlank       = 0xF0;
@@ -186,7 +189,7 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.cursorEnd              = 0x00;
         reg.verticalRetraceStart   = 0xE0;
         reg.verticalRetraceEnd     = 0x23;
-        reg.offset                 = 0x28;
+        reg.offset                 = OFFSET_HIGH;
         reg.underlineLocation      = 0x00;
         reg.startVerticalBlank     = 0xDF;
         reg.endVerticalBlank       = 0xEF;
@@ -198,16 +201,16 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.endHorizontalBlank     = 0x37;
         reg.startHorizontalRetrace = 0x30;
         reg.endHorizontalRetrace   = 0x14;
-        reg.maxScanLine            = 0x;
-        reg.cursorStart            = 0x;
-        reg.cursorEnd              = 0x;
+        reg.maxScanLine            = 0x00;
+        reg.cursorStart            = 0x00;
+        reg.cursorEnd              = 0x00;
         reg.verticalRetraceStart   = 0xE1;
-        reg.verticalRetraceEnd     = 0x;
-        reg.offset                 = 0x;
-        reg.underlineLocation      = 0x;
-        reg.startVerticalBlank     = 0x;
-        reg.endVerticalBlank       = 0x;
-        reg.modeControl            = 0x;
+        reg.verticalRetraceEnd     = 0x24;
+        reg.offset                 = OFFSET_LOW;
+        reg.underlineLocation      = 0x00;
+        reg.startVerticalBlank     = 0xE0;
+        reg.endVerticalBlank       = 0xF0;
+        reg.modeControl            = 0xE3;
     } break; 
     case CD_OPMODE_E: {
         configure(RES_640_200, &reg);
@@ -215,16 +218,16 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.endHorizontalBlank     = 0x2D;
         reg.startHorizontalRetrace = 0x5E;
         reg.endHorizontalRetrace   = 0x06;
-        reg.maxScanLine            = 0x;
-        reg.cursorStart            = 0x;
-        reg.cursorEnd              = 0x;
-        reg.verticalRetraceStart   = 0x;
-        reg.verticalRetraceEnd     = 0x;
-        reg.offset                 = 0x;
-        reg.underlineLocation      = 0x;
-        reg.startVerticalBlank     = 0x;
-        reg.endVerticalBlank       = 0x;
-        reg.modeControl            = 0x;
+        reg.maxScanLine            = 0x00;
+        reg.cursorStart            = 0x00;
+        reg.cursorEnd              = 0x00;
+        reg.verticalRetraceStart   = 0xE0;
+        reg.verticalRetraceEnd     = 0x23;
+        reg.offset                 = OFFSET_HIGH;
+        reg.underlineLocation      = 0x00;
+        reg.startVerticalBlank     = 0xDF;
+        reg.endVerticalBlank       = 0xEF;
+        reg.modeControl            = 0xE3;
     } break; 
     case MD_OPMODE_7: {
         configure(RES_720_350_MONO, &reg);
@@ -232,34 +235,34 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.endHorizontalBlank     = 0x3A;
         reg.startHorizontalRetrace = 0x51;
         reg.endHorizontalRetrace   = 0x60;
-        reg.maxScanLine            = 0x;
-        reg.cursorStart            = 0x;
-        reg.cursorEnd              = 0x;
-        reg.verticalRetraceStart   = 0x;
-        reg.verticalRetraceEnd     = 0x;
-        reg.offset                 = 0x;
-        reg.underlineLocation      = 0x;
-        reg.startVerticalBlank     = 0x;
-        reg.endVerticalBlank       = 0x;
-        reg.modeControl            = 0x;
+        reg.maxScanLine            = 0x0D;
+        reg.cursorStart            = 0x0B;
+        reg.cursorEnd              = 0x0C;
+        reg.verticalRetraceStart   = 0x5E;
+        reg.verticalRetraceEnd     = 0x2E;
+        reg.offset                 = OFFSET_HIGH;
+        reg.underlineLocation      = 0x0D;
+        reg.startVerticalBlank     = 0x5E;
+        reg.endVerticalBlank       = 0x6E;
+        reg.modeControl            = 0xA3;
     } break; 
     case MD_OPMODE_F: { /* MAY DEPEND ON MEMORY SIZE */
         configure(RES_640_350_MONO, &reg);
         reg.startHorizontalBlank   = 0x56;
         reg.endHorizontalBlank     = memOver64K ? 0x3A : 0x1A;
-        #warning check manual for potential error in CRT register values table
+        #warning shouldn't startHorizontalRetrace be as it is in ECD_OPMODE_10 ?
         reg.startHorizontalRetrace = 0x50;
         reg.endHorizontalRetrace   = memOver64K ? 0x60 : 0xE0;
-        reg.maxScanLine            = 0x;
-        reg.cursorStart            = 0x;
-        reg.cursorEnd              = 0x;
-        reg.verticalRetraceStart   = 0x;
-        reg.verticalRetraceEnd     = 0x;
-        reg.offset                 = 0x;
-        reg.underlineLocation      = 0x;
-        reg.startVerticalBlank     = 0x;
-        reg.endVerticalBlank       = 0x;
-        reg.modeControl            = 0x;
+        reg.maxScanLine            = 0x00;
+        reg.cursorStart            = 0x00;
+        reg.cursorEnd              = 0x00;
+        reg.verticalRetraceStart   = 0x5E;
+        reg.verticalRetraceEnd     = 0x2E;
+        reg.offset                 = memOver64K ? OFFSET_HIGH : OFFSET_LOW;
+        reg.underlineLocation      = 0x0D;
+        reg.startVerticalBlank     = 0x5E;
+        reg.endVerticalBlank       = 0x6E;
+        reg.modeControl            = memOver64K ? 0xE3 : 0x8B;
     } break; 
     case ECD_OPMODE_0: {
         configure(RES_320_350, &reg);
@@ -267,16 +270,16 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.endHorizontalBlank     = 0x2D;
         reg.startHorizontalRetrace = 0x28;
         reg.endHorizontalRetrace   = 0x6D;
-        reg.maxScanLine            = 0x;
-        reg.cursorStart            = 0x;
-        reg.cursorEnd              = 0x;
-        reg.verticalRetraceStart   = 0x;
-        reg.verticalRetraceEnd     = 0x;
-        reg.offset                 = 0x;
-        reg.underlineLocation      = 0x;
-        reg.startVerticalBlank     = 0x;
-        reg.endVerticalBlank       = 0x;
-        reg.modeControl            = 0x;
+        reg.maxScanLine            = 0x0D;
+        reg.cursorStart            = 0x0B;
+        reg.cursorEnd              = 0x0C;
+        reg.verticalRetraceStart   = 0x5E;
+        reg.verticalRetraceEnd     = 0x2B;
+        reg.offset                 = OFFSET_LOW;
+        reg.underlineLocation      = 0x0F;
+        reg.startVerticalBlank     = 0x5E;
+        reg.endVerticalBlank       = 0x0A;
+        reg.modeControl            = 0xA3;
     } break; 
     case ECD_OPMODE_1: {
         configure(RES_320_350, &reg);
@@ -284,16 +287,16 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.endHorizontalBlank     = 0x1D;
         reg.startHorizontalRetrace = 0x28;
         reg.endHorizontalRetrace   = 0x6D;
-        reg.maxScanLine            = 0x;
-        reg.cursorStart            = 0x;
-        reg.cursorEnd              = 0x;
-        reg.verticalRetraceStart   = 0x;
-        reg.verticalRetraceEnd     = 0x;
-        reg.offset                 = 0x;
-        reg.underlineLocation      = 0x;
-        reg.startVerticalBlank     = 0x;
-        reg.endVerticalBlank       = 0x;
-        reg.modeControl            = 0x;
+        reg.maxScanLine            = 0x0D;
+        reg.cursorStart            = 0x0B;
+        reg.cursorEnd              = 0x0C;
+        reg.verticalRetraceStart   = 0x5E;
+        reg.verticalRetraceEnd     = 0x2B;
+        reg.offset                 = OFFSET_LOW;
+        reg.underlineLocation      = 0x0F;
+        reg.startVerticalBlank     = 0x5E;
+        reg.endVerticalBlank       = 0x0A;
+        reg.modeControl            = 0xA3;
     } break; 
     case ECD_OPMODE_2: {
         configure(RES_640_350, &reg);
@@ -301,16 +304,16 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.endHorizontalBlank     = 0x37;
         reg.startHorizontalRetrace = 0x51;
         reg.endHorizontalRetrace   = 0x5B;
-        reg.maxScanLine            = 0x;
-        reg.cursorStart            = 0x;
-        reg.cursorEnd              = 0x;
-        reg.verticalRetraceStart   = 0x;
-        reg.verticalRetraceEnd     = 0x;
-        reg.offset                 = 0x;
-        reg.underlineLocation      = 0x;
-        reg.startVerticalBlank     = 0x;
-        reg.endVerticalBlank       = 0x;
-        reg.modeControl            = 0x;
+        reg.maxScanLine            = 0x0D;
+        reg.cursorStart            = 0x0B;
+        reg.cursorEnd              = 0x0C;
+        reg.verticalRetraceStart   = 0x5E;
+        reg.verticalRetraceEnd     = 0x2B;
+        reg.offset                 = OFFSET_HIGH;
+        reg.underlineLocation      = 0x0F;
+        reg.startVerticalBlank     = 0x5E;
+        reg.endVerticalBlank       = 0x0A;
+        reg.modeControl            = 0xA3;
     } break; 
     case ECD_OPMODE_3: {
         configure(RES_640_350, &reg);
@@ -318,16 +321,16 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.endHorizontalBlank     = 0x37;
         reg.startHorizontalRetrace = 0x51;
         reg.endHorizontalRetrace   = 0x5B;
-        reg.maxScanLine            = 0x;
-        reg.cursorStart            = 0x;
-        reg.cursorEnd              = 0x;
-        reg.verticalRetraceStart   = 0x;
-        reg.verticalRetraceEnd     = 0x;
-        reg.offset                 = 0x;
-        reg.underlineLocation      = 0x;
-        reg.startVerticalBlank     = 0x;
-        reg.endVerticalBlank       = 0x;
-        reg.modeControl            = 0x;
+        reg.maxScanLine            = 0x0D;
+        reg.cursorStart            = 0x0B;
+        reg.cursorEnd              = 0x0C;
+        reg.verticalRetraceStart   = 0x5E;
+        reg.verticalRetraceEnd     = 0x2B;
+        reg.offset                 = OFFSET_HIGH;
+        reg.underlineLocation      = 0x0F;
+        reg.startVerticalBlank     = 0x5E;
+        reg.endVerticalBlank       = 0x0A;
+        reg.modeControl            = 0xA3;
     } break; 
     case ECD_OPMODE_10: { /* MAY DEPEND ON INSTALLED MEMORY */
         configure(RES_640_350, &reg);
@@ -335,16 +338,16 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.endHorizontalBlank     = memOver64K ? 0x37 : 0x17;
         reg.startHorizontalRetrace = memOver64K ? 0x52 : 0x50;
         reg.endHorizontalRetrace   = memOver64K ? 0x00 : 0xBA;
-        reg.maxScanLine            = 0x;
-        reg.cursorStart            = 0x;
-        reg.cursorEnd              = 0x;
-        reg.verticalRetraceStart   = 0x;
-        reg.verticalRetraceEnd     = 0x;
-        reg.offset                 = 0x;
-        reg.underlineLocation      = 0x;
-        reg.startVerticalBlank     = 0x;
-        reg.endVerticalBlank       = 0x;
-        reg.modeControl            = 0x;
+        reg.maxScanLine            = 0x00;
+        reg.cursorStart            = 0x00;
+        reg.cursorEnd              = 0x00;
+        reg.verticalRetraceStart   = 0x5E;
+        reg.verticalRetraceEnd     = 0x2B;
+        reg.offset                 = memOver64K ? OFFSET_HIGH : OFFSET_LOW;
+        reg.underlineLocation      = 0x0F;
+        reg.startVerticalBlank     = 0x5F;
+        reg.endVerticalBlank       = 0x0A;
+        reg.modeControl            = memOver64K ? 0xE3 : 0x8B;
     } break; 
     }
 
