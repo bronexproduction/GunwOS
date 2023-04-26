@@ -11,8 +11,7 @@
 //
 
 #include "crt.h"
-#include <types.h>
-#include "ega_bus.h"
+#include "../ega_bus.h"
 
 enum resolution {
     RES_320_200,
@@ -32,6 +31,7 @@ struct registers {
     uint_8 endHorizontalRetrace;
     uint_8 verticalTotal;
     uint_8 overflow;
+    uint_8 presetRowScan;
     uint_8 maxScanLine;
     uint_8 cursorStart;
     uint_8 cursorEnd;
@@ -43,6 +43,7 @@ struct registers {
     uint_8 startVerticalBlank;
     uint_8 endVerticalBlank;
     uint_8 modeControl;
+    uint_8 lineCompare;
 };
 
 #define OFFSET_LOW 0x14
@@ -104,7 +105,7 @@ static void push(const struct registers * const reg, const enum modeOfOperation 
     busWriteCRT(BRCI_END_HORIZONTAL_RETRACE, reg->endHorizontalRetrace, mode);
     busWriteCRT(BRCI_VERTICAL_TOTAL, reg->verticalTotal, mode);
     busWriteCRT(BRCI_OVERFLOW, reg->overflow, mode);
-    busWriteCRT(BRCI_PRESET_ROW_SCAN, 0x00, mode);
+    busWriteCRT(BRCI_PRESET_ROW_SCAN, reg->presetRowScan, mode);
     busWriteCRT(BRCI_MAX_SCAN_LINE, reg->maxScanLine, mode);
     busWriteCRT(BRCI_CURSOR_START, reg->cursorStart, mode);
     busWriteCRT(BRCI_CURSOR_END, reg->cursorEnd, mode);
@@ -116,12 +117,15 @@ static void push(const struct registers * const reg, const enum modeOfOperation 
     busWriteCRT(BRCI_START_VERTICAL_BLANK, reg->startVerticalBlank, mode);
     busWriteCRT(BRCI_END_VERTICAL_BLANK, reg->endVerticalBlank, mode);
     busWriteCRT(BRCI_MODE_CONTROL, reg->modeControl, mode);
-    busWriteCRT(BRCI_LINE_COMPARE, 0xFF, mode);
+    busWriteCRT(BRCI_LINE_COMPARE, reg->lineCompare, mode);
 }
 
 void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
 
     struct registers reg;
+
+    reg.presetRowScan = 0x00;
+    reg.lineCompare = 0xFF;
 
     switch (mode) {
     case CD_OPMODE_0:
@@ -250,7 +254,7 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         configure(RES_640_350_MONO, &reg);
         reg.startHorizontalBlank   = 0x56;
         reg.endHorizontalBlank     = memOver64K ? 0x3A : 0x1A;
-        #warning shouldn't startHorizontalRetrace be as it is in ECD_OPMODE_10 ?
+        #warning should not startHorizontalRetrace be as it is in ECD_OPMODE_10 ?
         reg.startHorizontalRetrace = 0x50;
         reg.endHorizontalRetrace   = memOver64K ? 0x60 : 0xE0;
         reg.maxScanLine            = 0x00;

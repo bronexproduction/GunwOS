@@ -11,7 +11,8 @@
 #ifndef CRT_H
 #define CRT_H
 
-#include "opmode.h"
+#include "../opmode.h"
+#include <types.h>
 
 void crtSetMode(const enum modeOfOperation mode, const bool memOver64K);
 
