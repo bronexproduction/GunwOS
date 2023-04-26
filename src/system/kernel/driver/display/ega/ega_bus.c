@@ -13,6 +13,8 @@
 #define BUS_ADDR_MONOCHROME_MARK_MASK 0xF0
 #define BUS_ADDR_COLOR_OFFSET 0x20
 
+#define IS_GRAPHICS_MODE(MODE) (mode & OPMODE_GRAP)
+
 /*
     Bus register addresses that matches 0x*B* refer to monochrome display address range.
     Corresponding bytes for color display are offset by 0x020 (addresses 0x*D*)
@@ -21,8 +23,8 @@
     IBM Enhanced Graphics Adapter
     page 12+
 */
-static uint_16 busAddr(uint_16 baseAddr, enum gnwDeviceUHA_display_format format) {
-    if (!GDD_FMT_ISGRAP(format)) {
+static uint_16 busAddr(uint_16 baseAddr, const enum modeOfOperation mode) {
+    if (!IS_GRAPHICS_MODE(mode)) {
         return baseAddr;
     }
 
@@ -36,21 +38,21 @@ static uint_16 busAddr(uint_16 baseAddr, enum gnwDeviceUHA_display_format format
 static uint_8 busReadLSI(const uint_16 addrAddr,
                          const uint_16 dataAddr,
                          const uint_8 index,
-                         const enum gnwDeviceUHA_display_format format) {
-    wrb(busAddr(addrAddr, format), index);
-    return rdb(busAddr(dataAddr, format));
+                         const enum modeOfOperation mode) {
+    wrb(busAddr(addrAddr, mode), index);
+    return rdb(busAddr(dataAddr, mode));
 }
 
 static void busWriteLSI(const uint_16 addrAddr, 
                         const uint_16 dataAddr, 
                         const uint_8 index, 
                         const uint_8 data, 
-                        const enum gnwDeviceUHA_display_format format) {
-    wrb(busAddr(addrAddr, format), index);
-    wrb(busAddr(dataAddr, format), data);
+                        const enum modeOfOperation mode) {
+    wrb(busAddr(addrAddr, mode), index);
+    wrb(busAddr(dataAddr, mode), data);
 }
 
-uint_8 busReadExternal(const enum bus_reg_external reg, const enum gnwDeviceUHA_display_format format) {
+uint_8 busReadExternal(const enum bus_reg_external reg, const enum modeOfOperation mode) {
     if (reg != BRE_INPUT_STATUS_0 &&
         reg != BRE_INPUT_STATUS_1) {
         /* Write-only registers */
@@ -58,10 +60,10 @@ uint_8 busReadExternal(const enum bus_reg_external reg, const enum gnwDeviceUHA_
         return 0;
     }
 
-    return rdb(busAddr(reg, format));
+    return rdb(busAddr(reg, mode));
 }
 
-uint_8 busReadCRT(const enum bus_reg_crt_index index, const enum gnwDeviceUHA_display_format format) {
+uint_8 busReadCRT(const enum bus_reg_crt_index index, const enum modeOfOperation mode) {
     if (index != BRCI_START_ADDRESS_HIGH &&
         index != BRCI_START_ADDRESS_LOW &&
         index != BRCI_CURSOR_LOCATION_HIGH &&
@@ -73,33 +75,25 @@ uint_8 busReadCRT(const enum bus_reg_crt_index index, const enum gnwDeviceUHA_di
         return 0;
     }
 
-    return busReadLSI(BRC_ADDRESS, BRC_DATA, index, format);
+    return busReadLSI(BRC_ADDRESS, BRC_DATA, index, mode);
 }
 
-void busWriteExternal(const enum bus_reg_external reg, const uint_8 data, const enum gnwDeviceUHA_display_format format) {
-    if (reg == BRE_INPUT_STATUS_0 ||
-        reg == BRE_INPUT_STATUS_1) {
-        /* Read-only registers */
+void busWriteExternal(const enum bus_reg_external reg, const uint_8 data, const enum modeOfOperation mode) {
+    if (reg == BRE_INPUT_STATUS_1) {
+        /* Read-only register addresses */
         OOPS("Invalid driver operation");
         return;
     }
 
-    wrb(busAddr(reg, format), data);
+    wrb(busAddr(reg, mode), data);
 }
 
-void busWriteSequencer(const enum bus_reg_sequencer_index index, const uint_8 data, const enum gnwDeviceUHA_display_format format) {
-    busWriteLSI(BRS_ADDRESS, BRS_DATA, index, data, format);
+void busWriteSequencer(const enum bus_reg_sequencer_index index, const uint_8 data, const enum modeOfOperation mode) {
+    busWriteLSI(BRS_ADDRESS, BRS_DATA, index, data, mode);
 }
 
-void busWriteCRT(const enum bus_reg_crt_index index, const uint_8 data, const enum gnwDeviceUHA_display_format format) {
-    if (index == BRCI_LIGHT_PEN_HIGH ||
-        index == BRCI_LIGHT_PEN_LOW) {
-        /* Read-only registers */
-        OOPS("Invalid driver operation");
-        return;
-    }
-    
-    busWriteLSI(BRC_ADDRESS, BRC_DATA, index, data, format);
+void busWriteCRT(const enum bus_reg_crt_index index, const uint_8 data, const enum modeOfOperation mode) {
+    busWriteLSI(BRC_ADDRESS, BRC_DATA, index, data, mode);
 }
 
 void busWriteGraphicsPosition(const struct bus_reg_graphics_position position) {
@@ -107,10 +101,10 @@ void busWriteGraphicsPosition(const struct bus_reg_graphics_position position) {
     wrb(BRG_GRAPHICS_2_POSITION, (position.graphics2_pos1 ? BRG_G2PR_POSITION_1 : 0) | (position.graphics2_pos0 ? BRG_G2PR_POSITION_0 : 0));
 }
 
-void busWriteGraphics(const enum bus_reg_graphics_index index, const uint_8 data, const enum gnwDeviceUHA_display_format format) {
-    busWriteLSI(BRG_GRAPHICS_1_AND_2_ADDRESS, BRG_DATA, index, data, format);
+void busWriteGraphics(const enum bus_reg_graphics_index index, const uint_8 data, const enum modeOfOperation mode) {
+    busWriteLSI(BRG_GRAPHICS_1_AND_2_ADDRESS, BRG_DATA, index, data, mode);
 }
 
-void busWriteAttribute(const enum bus_reg_attr_index index, const uint_8 data, const enum gnwDeviceUHA_display_format format) {
-    busWriteLSI(BRA_ADDRESS, BRA_DATA, index, data, format);
+void busWriteAttribute(const enum bus_reg_attr_index index, const uint_8 data, const enum modeOfOperation mode) {
+    busWriteLSI(BRA_ADDRESS, BRA_DATA, index, data, mode);
 }

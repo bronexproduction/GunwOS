@@ -78,6 +78,8 @@
     "executor": "c",
     "memory_resource": "c",
     "scoped_allocator": "c",
-    "rope": "c"
+    "rope": "c",
+    "filesystem": "c",
+    "fstream": "c"
   }
 }

@@ -13,7 +13,8 @@
 #ifndef EGA_BUS_H
 #define EGA_BUS_H
 
-#include <uha/gunwuha_display_desc.h>
+#include <types.h>
+#include "opmode.h"
 
 enum bus_reg_external {
     BRE_MISC_OUT = 0x3C2,
@@ -103,6 +104,7 @@ enum bus_reg_attr {
 
 enum bus_reg_attr_index {
     BRAI_PALETTE_START = 0x00, /* 0x00 - 0x0F range for 16 palettes */
+    BRAI_PALETTE_END = 0x0F,
     BRAI_MODE_CONTROL = 0x10,
     BRAI_OVERSCAN_COLOR = 0x11,
     BRAI_COLOR_PLANE_ENABLE = 0x12,
@@ -529,14 +531,14 @@ enum bus_reg_attr_bit_hppr {
     BRA_HPPR_HORIZONTAL_PEL_PANNING_RANGE = 0x0F
 };
 
-uint_8 busReadExternal(const enum bus_reg_external reg, const enum gnwDeviceUHA_display_format format);
-uint_8 busReadCRT(const enum bus_reg_crt_index index, const enum gnwDeviceUHA_display_format format);
+uint_8 busReadExternal(const enum bus_reg_external reg, const enum modeOfOperation mode);
+uint_8 busReadCRT(const enum bus_reg_crt_index index, const enum modeOfOperation mode);
 
-void busWriteExternal(const enum bus_reg_external reg, const uint_8 data, const enum gnwDeviceUHA_display_format format);
-void busWriteSequencer(const enum bus_reg_sequencer_index index, const uint_8 data, const enum gnwDeviceUHA_display_format format);
-void busWriteCRT(const enum bus_reg_crt_index index, const uint_8 data, const enum gnwDeviceUHA_display_format format);
+void busWriteExternal(const enum bus_reg_external reg, const uint_8 data, const enum modeOfOperation mode);
+void busWriteSequencer(const enum bus_reg_sequencer_index index, const uint_8 data, const enum modeOfOperation mode);
+void busWriteCRT(const enum bus_reg_crt_index index, const uint_8 data, const enum modeOfOperation mode);
 void busWriteGraphicsPosition(const struct bus_reg_graphics_position position);
-void busWriteGraphics(const enum bus_reg_graphics_index index, const uint_8 data, const enum gnwDeviceUHA_display_format format);
-void busWriteAttribute(const enum bus_reg_attr_index index, const uint_8 data, const enum gnwDeviceUHA_display_format format);
+void busWriteGraphics(const enum bus_reg_graphics_index index, const uint_8 data, const enum modeOfOperation mode);
+void busWriteAttribute(const enum bus_reg_attr_index index, const uint_8 data, const enum modeOfOperation mode);
 
 #endif // EGA_BUS_H
