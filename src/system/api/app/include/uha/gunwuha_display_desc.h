@@ -41,7 +41,7 @@
 enum gnwDeviceUHA_display_format {
     GDF_NONE                = 0,
     TEXT_H80V25C16          = _FMT_TEXT(1),
-    GRAPHICS_H320V200C16    = _FMT_GRAP(1)
+    GRAPHICS_H320V200C4     = _FMT_GRAP(1)
 };
 
 /*

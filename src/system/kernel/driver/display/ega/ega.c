@@ -26,7 +26,7 @@ enum gnwDeviceUHA_display_format uhaSupportedFormat(const size_t index) {
     case 0:
         return TEXT_H80V25C16;
     case 1:
-        return GRAPHICS_H320V200C16;
+        return GRAPHICS_H320V200C4;
     default:
         return GDF_NONE;
     }
@@ -40,7 +40,7 @@ point_t uhaDimensionsForFormat(const enum gnwDeviceUHA_display_format format) {
         dimensions.x = 80;
         dimensions.y = 25;
         break;
-    case GRAPHICS_H320V200C16:
+    case GRAPHICS_H320V200C4:
         dimensions.x = 320;
         dimensions.y = 200;
         break;
@@ -54,31 +54,64 @@ point_t uhaDimensionsForFormat(const enum gnwDeviceUHA_display_format format) {
 }
 
 bool setFormat(const enum gnwDeviceUHA_display_format format) {
-    uint_8 mode;
-
-    (void)mode;
-
-    // wrb(EGA_BUS_MODE_CONTROL_REG, 0);
-
     switch(format) {
-    case TEXT_H80V25C16:
-    #warning TEST       
-        // mode = rdb(0x3cf);
-        // wrb(0x3cf, mode | 1);
-        // mode = rdb(0x3c0);
-        // wrb(0x3c0, mode | 1);
-        // mode = EGA_MRB_VOUT_ENABLE | EGA_MRB_GRAPHICS;
-        break;
-    case GRAPHICS_H320V200C16:
-        // mode = EGA_MRB_VOUT_ENABLE | EGA_MRB_GRAPHICS;
-        break;
+    case TEXT_H80V25C16: {
+        /*
+            Alphanumeric Modes
+
+            The data format for alphanumeric modes on the Enhanced Graphics Adapter
+            is the same as the data format on the IBM Color/Graphics Monitor Adapter
+            and the IBM Monochrome Display Adapter.
+            As an added function, bit three of the attribute byte
+            may be redefined by the Character Map Select register
+            to act as a switch between character sets.
+            This gives the programmer access to 512 characters at one time.
+            This function is valid only when memory has been expanded to 128K bytes or more.
+            When an alphanumeric mode is selected, the BIOS transfers character patterns
+            from the ROM to bit plane 2. The processor stores the character data in bit plane 0,
+            and the attribute data in bit plane 1. The programmer can view bit planes 0 and 1
+            as a single buffer in alphanumeric modes.
+            The CRTC generates sequential addresses, and fetches one character code byte
+            and one attribute byte at a time. The character code and row scan count
+            address bit plane 2, which contains the character generators.
+            The appropriate dot patterns are then sent to the palette in the attribute chip,
+            where color is assigned according to the attribute data.
+        */
+
+        busWriteAttribute(BRAI_MODE_CONTROL, BRA_MCR_GRAPHICS_ALPHANUMERIC_MODE, GRAPHICS_H320V200C4);
+    } break;
+    case GRAPHICS_H320V200C4: {
+        /*
+            320x200 Two and Four Color Graphics (Modes 4 and 5)
+    
+            Addressing, mapping and data format are the same
+            as the 320x200 pel mode of the Color/Graphics Monitor Adapter.
+            The display buffer is configured at hex B8000.
+            Bit image data is stored in bit planes 0 and 1.
+        */
+
+        #warning TEST
+        /*
+            External registers
+        */
+        /*
+            Sequencer registers
+        */
+        /*
+            CRT registers
+        */
+        /*
+            Graphics registers
+        */
+        /*
+            Attribute registers
+        */
+    } break;
     default:
         return false;
     }
 
     dimensions = uhaDimensionsForFormat(format);
-
-    // wrb(EGA_BUS_MODE_CONTROL_REG, mode);
 
     return true;
 }
