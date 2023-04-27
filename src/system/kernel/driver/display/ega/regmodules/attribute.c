@@ -125,7 +125,7 @@ void attributeSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.palette[0xD]     = BRA_PR_SECONDARY_GREEN_INTENSITY | BRA_PR_RED_VIDEO | BRA_PR_BLUE_VIDEO; /* 0x15 */
         reg.palette[0xE]     = BRA_PR_SECONDARY_GREEN_INTENSITY | BRA_PR_RED_VIDEO | BRA_PR_GREEN_VIDEO; /* 0x16 */
         reg.palette[0xF]     = BRA_PR_SECONDARY_GREEN_INTENSITY | BRA_PR_RED_VIDEO | BRA_PR_GREEN_VIDEO | BRA_PR_BLUE_VIDEO; /* 0x17 */
-        reg.modeControl      = 0x08;
+        reg.modeControl      = BRA_MCR_SELECT_BACKGROUND_INTENSITY_OR_ENABLE_BLINK; /* 0x08 */
         reg.colorPlaneEnable = 0x0F;
     } break; 
     case CD_OPMODE_4:
@@ -145,7 +145,7 @@ void attributeSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.palette[0xD]     = BRA_PR_SECONDARY_GREEN_INTENSITY | BRA_PR_RED_VIDEO | BRA_PR_BLUE_VIDEO; /* 0x15 */
         reg.palette[0xE]     = BRA_PR_SECONDARY_GREEN_INTENSITY | BRA_PR_RED_VIDEO | BRA_PR_GREEN_VIDEO; /* 0x16 */
         reg.palette[0xF]     = BRA_PR_SECONDARY_GREEN_INTENSITY | BRA_PR_RED_VIDEO | BRA_PR_GREEN_VIDEO | BRA_PR_BLUE_VIDEO; /* 0x17 */
-        reg.modeControl      = 0x01;
+        reg.modeControl      = BRA_MCR_GRAPHICS_ALPHANUMERIC_MODE; /* 0x01 */
         reg.colorPlaneEnable = 0x03;
     } break;
     case CD_OPMODE_6: {
@@ -164,7 +164,7 @@ void attributeSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.palette[0xD]     = BRA_PR_SECONDARY_GREEN_INTENSITY | BRA_PR_RED_VIDEO | BRA_PR_GREEN_VIDEO | BRA_PR_BLUE_VIDEO; /* 0x17 */
         reg.palette[0xE]     = BRA_PR_SECONDARY_GREEN_INTENSITY | BRA_PR_RED_VIDEO | BRA_PR_GREEN_VIDEO | BRA_PR_BLUE_VIDEO; /* 0x17 */
         reg.palette[0xF]     = BRA_PR_SECONDARY_GREEN_INTENSITY | BRA_PR_SECONDARY_BLUE_MONO_VIDEO; /* 0x18 */
-        reg.modeControl      = 0x01;
+        reg.modeControl      = BRA_MCR_GRAPHICS_ALPHANUMERIC_MODE; /* 0x01 */
         reg.colorPlaneEnable = 0x01;
     } break;
     case CD_OPMODE_D: {
@@ -183,7 +183,7 @@ void attributeSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.palette[0xD]     = BRA_PR_SECONDARY_GREEN_INTENSITY | BRA_PR_RED_VIDEO | BRA_PR_BLUE_VIDEO; /* 0x15 */
         reg.palette[0xE]     = BRA_PR_SECONDARY_GREEN_INTENSITY | BRA_PR_RED_VIDEO | BRA_PR_GREEN_VIDEO; /* 0x16 */
         reg.palette[0xF]     = BRA_PR_SECONDARY_GREEN_INTENSITY | BRA_PR_RED_VIDEO | BRA_PR_GREEN_VIDEO | BRA_PR_BLUE_VIDEO; /* 0x17 */
-        reg.modeControl      = 0x01;
+        reg.modeControl      = BRA_MCR_GRAPHICS_ALPHANUMERIC_MODE; /* 0x01 */
         reg.colorPlaneEnable = 0x0F;
     } break;
     case CD_OPMODE_E: {
@@ -202,7 +202,7 @@ void attributeSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.palette[0xD]     = BRA_PR_SECONDARY_GREEN_INTENSITY | BRA_PR_RED_VIDEO | BRA_PR_BLUE_VIDEO; /* 0x15 */
         reg.palette[0xE]     = BRA_PR_SECONDARY_GREEN_INTENSITY | BRA_PR_RED_VIDEO | BRA_PR_GREEN_VIDEO; /* 0x16 */
         reg.palette[0xF]     = 0x00;
-        reg.modeControl      = 0x01;
+        reg.modeControl      = BRA_MCR_GRAPHICS_ALPHANUMERIC_MODE; /* 0x01 */
         reg.colorPlaneEnable = 0x0F;
     } break;
     case MD_OPMODE_7: {
@@ -221,7 +221,7 @@ void attributeSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.palette[0xD]     = BRA_PR_SECONDARY_GREEN_INTENSITY | BRA_PR_SECONDARY_BLUE_MONO_VIDEO; /* 0x18 */
         reg.palette[0xE]     = BRA_PR_SECONDARY_GREEN_INTENSITY | BRA_PR_SECONDARY_BLUE_MONO_VIDEO; /* 0x18 */
         reg.palette[0xF]     = BRA_PR_SECONDARY_GREEN_INTENSITY | BRA_PR_RED_VIDEO | BRA_PR_GREEN_VIDEO | BRA_PR_BLUE_VIDEO; /* 0x17 */
-        reg.modeControl      = 0x0E;
+        reg.modeControl      = BRA_MCR_SELECT_BACKGROUND_INTENSITY_OR_ENABLE_BLINK | BRA_MCR_ENABLE_LINE_GRAPHICS_CHARACTER_CODES | BRA_MCR_DISPLAY_TYPE; /* 0x0E */
         reg.colorPlaneEnable = 0x0F;
     } break;
     case MD_OPMODE_F: {
@@ -241,7 +241,7 @@ void attributeSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.palette[0xE]     = 0x00;
         reg.palette[0xF]     = memOver64K ? BRA_PR_SECONDARY_RED_VIDEO | BRA_PR_SECONDARY_GREEN_INTENSITY | BRA_PR_SECONDARY_BLUE_MONO_VIDEO | BRA_PR_RED_VIDEO | BRA_PR_GREEN_VIDEO | BRA_PR_BLUE_VIDEO /* 0x3F */ 
                                           : 0x00;
-        reg.modeControl      = 0x0B;
+        reg.modeControl      = BRA_MCR_SELECT_BACKGROUND_INTENSITY_OR_ENABLE_BLINK | BRA_MCR_DISPLAY_TYPE | BRA_MCR_GRAPHICS_ALPHANUMERIC_MODE; /* 0x0B */
         reg.colorPlaneEnable = 0x05;
     } break;
     case ECD_OPMODE_0:
@@ -263,7 +263,7 @@ void attributeSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.palette[0xD]     = BRA_PR_SECONDARY_RED_VIDEO | BRA_PR_SECONDARY_GREEN_INTENSITY | BRA_PR_SECONDARY_BLUE_MONO_VIDEO | BRA_PR_RED_VIDEO | BRA_PR_BLUE_VIDEO; /* 0x3D */
         reg.palette[0xE]     = BRA_PR_SECONDARY_RED_VIDEO | BRA_PR_SECONDARY_GREEN_INTENSITY | BRA_PR_SECONDARY_BLUE_MONO_VIDEO | BRA_PR_RED_VIDEO | BRA_PR_GREEN_VIDEO; /* 0x3E */
         reg.palette[0xF]     = BRA_PR_SECONDARY_RED_VIDEO | BRA_PR_SECONDARY_GREEN_INTENSITY | BRA_PR_SECONDARY_BLUE_MONO_VIDEO | BRA_PR_RED_VIDEO | BRA_PR_GREEN_VIDEO | BRA_PR_BLUE_VIDEO; /* 0x3F */
-        reg.modeControl      = 0x08;
+        reg.modeControl      = BRA_MCR_SELECT_BACKGROUND_INTENSITY_OR_ENABLE_BLINK; /* 0x08 */
         reg.colorPlaneEnable = 0x0F;
     } break;
     case ECD_OPMODE_10: {
@@ -295,7 +295,8 @@ void attributeSetMode(const enum modeOfOperation mode, const bool memOver64K) {
                                           : 0x00;
         reg.palette[0xF]     = memOver64K ? BRA_PR_SECONDARY_RED_VIDEO | BRA_PR_SECONDARY_GREEN_INTENSITY | BRA_PR_SECONDARY_BLUE_MONO_VIDEO | BRA_PR_RED_VIDEO | BRA_PR_GREEN_VIDEO | BRA_PR_BLUE_VIDEO /* 0x3F */
                                           : 0x00;
-        reg.modeControl      = memOver64K ? 0x01 : 0x0B;
+        reg.modeControl      = memOver64K ? BRA_MCR_GRAPHICS_ALPHANUMERIC_MODE /* 0x01 */
+                                          : BRA_MCR_SELECT_BACKGROUND_INTENSITY_OR_ENABLE_BLINK | BRA_MCR_DISPLAY_TYPE | BRA_MCR_GRAPHICS_ALPHANUMERIC_MODE; /* 0x0B */
         reg.colorPlaneEnable = memOver64K ? 0x0F : 0x05;
     } break;
     }
