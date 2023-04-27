@@ -33,69 +33,61 @@ void sequencerSetMode(const enum modeOfOperation mode, const bool memOver64K) {
 
     struct registers reg;
 
-    reg.reset = 0x03;
+    reg.reset = BRS_RR_SYNCHRONOUS_RESET | BRS_RR_ASYNCHRONOUS_RESET; /* 0x03 */;
     reg.charMapSelect = 0x00;
 
     switch (mode) {
     case CD_OPMODE_0:
-    case CD_OPMODE_1: {
-        reg.clockingMode = 0x0B;
-        reg.mapMask      = 0x03;
-        reg.memoryMode   = 0x03;
+    case CD_OPMODE_1:
+    case ECD_OPMODE_0:
+    case ECD_OPMODE_1: {
+        reg.clockingMode = BRS_CMR_DOT_CLOCK | BRS_CMR_BANDWIDTH | BRS_CMR_8_9_DOT_CLOCKS; /* 0x0B */
+        reg.mapMask      = BRS_MAPMASKREG_ENABLE_MAP_1 | BRS_MAPMASKREG_ENABLE_MAP_0; /* 0x03 */
+        reg.memoryMode   = BRS_MEMMODEREG_EXTENDED_MEMORY | BRS_MEMMODEREG_ALPHA /* 0x03 */;
     } break;
     case CD_OPMODE_2:
-    case CD_OPMODE_3: {
-        reg.clockingMode = 0x01;
-        reg.mapMask      = 0x03;
-        reg.memoryMode   = 0x03;
-    } break; 
+    case CD_OPMODE_3:
+    case ECD_OPMODE_2:
+    case ECD_OPMODE_3: {
+        reg.clockingMode = BRS_CMR_8_9_DOT_CLOCKS; /* 0x01 */
+        reg.mapMask      = BRS_MAPMASKREG_ENABLE_MAP_1 | BRS_MAPMASKREG_ENABLE_MAP_0; /* 0x03 */
+        reg.memoryMode   = BRS_MEMMODEREG_EXTENDED_MEMORY | BRS_MEMMODEREG_ALPHA; /* 0x03 */
+    } break;
     case CD_OPMODE_4:
     case CD_OPMODE_5: {
-        reg.clockingMode = 0x0B;
-        reg.mapMask      = 0x03;
-        reg.memoryMode   = 0x02;
+        reg.clockingMode = BRS_CMR_DOT_CLOCK | BRS_CMR_BANDWIDTH | BRS_CMR_8_9_DOT_CLOCKS; /* 0x0B */
+        reg.mapMask      = BRS_MAPMASKREG_ENABLE_MAP_1 | BRS_MAPMASKREG_ENABLE_MAP_0; /* 0x03 */
+        reg.memoryMode   = BRS_MEMMODEREG_EXTENDED_MEMORY; /* 0x02 */
     } break;
     case CD_OPMODE_6: {
-        reg.clockingMode = 0x01;
-        reg.mapMask      = 0x01;
-        reg.memoryMode   = 0x06;
+        reg.clockingMode = BRS_CMR_8_9_DOT_CLOCKS; /* 0x01 */
+        reg.mapMask      = BRS_MAPMASKREG_ENABLE_MAP_0; /* 0x01 */
+        reg.memoryMode   = BRS_MEMMODEREG_ODD_EVEN | BRS_MEMMODEREG_EXTENDED_MEMORY; /* 0x06 */
     } break;
     case CD_OPMODE_D: {
-        reg.clockingMode = 0x0B;
-        reg.mapMask      = 0x0F;
-        reg.memoryMode   = 0x06;
+        reg.clockingMode = BRS_CMR_DOT_CLOCK | BRS_CMR_BANDWIDTH | BRS_CMR_8_9_DOT_CLOCKS; /* 0x0B */
+        reg.mapMask      = BRS_MAPMASKREG_ENABLE_MAP_3 | BRS_MAPMASKREG_ENABLE_MAP_2 | BRS_MAPMASKREG_ENABLE_MAP_1 | BRS_MAPMASKREG_ENABLE_MAP_0; /* 0x0F */
+        reg.memoryMode   = BRS_MEMMODEREG_ODD_EVEN | BRS_MEMMODEREG_EXTENDED_MEMORY; /* 0x06 */
     } break;
     case CD_OPMODE_E: {
-        reg.clockingMode = 0x01;
-        reg.mapMask      = 0x0F;
-        reg.memoryMode   = 0x06;
+        reg.clockingMode = BRS_CMR_8_9_DOT_CLOCKS; /* 0x01 */
+        reg.mapMask      = BRS_MAPMASKREG_ENABLE_MAP_3 | BRS_MAPMASKREG_ENABLE_MAP_2 | BRS_MAPMASKREG_ENABLE_MAP_1 | BRS_MAPMASKREG_ENABLE_MAP_0; /* 0x0F */
+        reg.memoryMode   = BRS_MEMMODEREG_ODD_EVEN | BRS_MEMMODEREG_EXTENDED_MEMORY; /* 0x06 */
     } break;
     case MD_OPMODE_7: {
         reg.clockingMode = 0x00;
-        reg.mapMask      = 0x03;
-        reg.memoryMode   = 0x03;
+        reg.mapMask      = BRS_MAPMASKREG_ENABLE_MAP_1 | BRS_MAPMASKREG_ENABLE_MAP_0; /* 0x03 */
+        reg.memoryMode   = BRS_MEMMODEREG_EXTENDED_MEMORY | BRS_MEMMODEREG_ALPHA; /* 0x03 */
     } break;
-    case MD_OPMODE_F: {
-        reg.clockingMode = memOver64K ? 0x01 : 0x05;
-        reg.mapMask      = 0x0F;
-        reg.memoryMode   = memOver64K ? 0x06 : 0x00;
-    } break;
-    case ECD_OPMODE_0:
-    case ECD_OPMODE_1: {
-        reg.clockingMode = 0x0B;
-        reg.mapMask      = 0x03;
-        reg.memoryMode   = 0x03;
-    } break;
-    case ECD_OPMODE_2:
-    case ECD_OPMODE_3: {
-        reg.clockingMode = 0x01;
-        reg.mapMask      = 0x03;
-        reg.memoryMode   = 0x03;
-    } break;
+    case MD_OPMODE_F:
     case ECD_OPMODE_10: {
-        reg.clockingMode = memOver64K ? 0x01 : 0x05;
-        reg.mapMask      = 0x0F;
-        reg.memoryMode   = memOver64K ? 0x06 : 0x00;
+        reg.clockingMode = memOver64K ? 
+                           BRS_CMR_8_9_DOT_CLOCKS /* 0x01 */ : 
+                           BRS_CMR_SHIFT_LOAD | BRS_CMR_8_9_DOT_CLOCKS /* 0x05 */;
+        reg.mapMask      = BRS_MAPMASKREG_ENABLE_MAP_3 | BRS_MAPMASKREG_ENABLE_MAP_2 | BRS_MAPMASKREG_ENABLE_MAP_1 | BRS_MAPMASKREG_ENABLE_MAP_0; /* 0x0F */
+        reg.memoryMode   = memOver64K ? 
+                           BRS_MEMMODEREG_ODD_EVEN | BRS_MEMMODEREG_EXTENDED_MEMORY /* 0x06 */ : 
+                           0x00;
     } break;
     }
 
