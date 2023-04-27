@@ -167,7 +167,7 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.underlineLocation      = 0x08;
         reg.startVerticalBlank     = 0xE0;
         reg.endVerticalBlank       = 0xF0;
-        reg.modeControl            = 0xA3;
+        reg.modeControl            = BRC_MCR_HARDWARE_RESET | BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0xA3 */
     } break;
     case CD_OPMODE_2:
     case CD_OPMODE_3: {
@@ -191,7 +191,7 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.underlineLocation      = 0x08;
         reg.startVerticalBlank     = 0xE0;
         reg.endVerticalBlank       = 0xF0;
-        reg.modeControl            = 0xA3;
+        reg.modeControl            = BRC_MCR_HARDWARE_RESET | BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0xA3 */
     } break; 
     case CD_OPMODE_4:
     case CD_OPMODE_5: {
@@ -214,7 +214,7 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.underlineLocation      = 0x00;
         reg.startVerticalBlank     = 0xE0;
         reg.endVerticalBlank       = 0xF0;
-        reg.modeControl            = 0xA2;
+        reg.modeControl            = BRC_MCR_HARDWARE_RESET | BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER; /* 0xA2 */
     } break;
     case CD_OPMODE_6: {
         configure(RES_640_200, &reg);
@@ -236,7 +236,7 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.underlineLocation      = 0x00;
         reg.startVerticalBlank     = 0xDF;
         reg.endVerticalBlank       = 0xEF;
-        reg.modeControl            = 0xC2;
+        reg.modeControl            = BRC_MCR_HARDWARE_RESET | BRC_MCR_WORD_BYTE_MODE | BRC_MCR_SELECT_ROW_SCAN_COUNTER; /* 0xC2 */
     } break; 
     case CD_OPMODE_D: {
         configure(RES_320_200, &reg);
@@ -258,7 +258,7 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.underlineLocation      = 0x00;
         reg.startVerticalBlank     = 0xE0;
         reg.endVerticalBlank       = 0xF0;
-        reg.modeControl            = 0xE3;
+        reg.modeControl            = BRC_MCR_HARDWARE_RESET | BRC_MCR_WORD_BYTE_MODE | BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0xE3 */
     } break; 
     case CD_OPMODE_E: {
         configure(RES_640_200, &reg);
@@ -280,7 +280,7 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.underlineLocation      = 0x00;
         reg.startVerticalBlank     = 0xDF;
         reg.endVerticalBlank       = 0xEF;
-        reg.modeControl            = 0xE3;
+        reg.modeControl            = BRC_MCR_HARDWARE_RESET | BRC_MCR_WORD_BYTE_MODE | BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0xE3 */
     } break; 
     case MD_OPMODE_7: {
         configure(RES_720_350_MONO, &reg);
@@ -303,7 +303,7 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.underlineLocation      = 0x0D;
         reg.startVerticalBlank     = 0x5E;
         reg.endVerticalBlank       = 0x6E;
-        reg.modeControl            = 0xA3;
+        reg.modeControl            = BRC_MCR_HARDWARE_RESET | BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0xA3 */
     } break; 
     case MD_OPMODE_F: {
         configure(RES_640_350_MONO, &reg);
@@ -326,7 +326,8 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.underlineLocation      = 0x0D;
         reg.startVerticalBlank     = 0x5E;
         reg.endVerticalBlank       = 0x6E;
-        reg.modeControl            = memOver64K ? 0xE3 : 0x8B;
+        reg.modeControl            = memOver64K ? BRC_MCR_HARDWARE_RESET | BRC_MCR_WORD_BYTE_MODE | BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0 /* 0xE3 */ 
+                                                : BRC_MCR_HARDWARE_RESET | BRC_MCR_COUNT_BY_TWO | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0x8B */
     } break; 
     case ECD_OPMODE_0:
     case ECD_OPMODE_1: {
@@ -350,7 +351,7 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.underlineLocation      = 0x0F;
         reg.startVerticalBlank     = 0x5E;
         reg.endVerticalBlank       = 0x0A;
-        reg.modeControl            = 0xA3;
+        reg.modeControl            = BRC_MCR_HARDWARE_RESET | BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0xA3 */
     } break; 
     case ECD_OPMODE_2:
     case ECD_OPMODE_3: {
@@ -374,7 +375,7 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.underlineLocation      = 0x0F;
         reg.startVerticalBlank     = 0x5E;
         reg.endVerticalBlank       = 0x0A;
-        reg.modeControl            = 0xA3;
+        reg.modeControl            = BRC_MCR_HARDWARE_RESET | BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0xA3 */
     } break; 
     case ECD_OPMODE_10: {
         configure(RES_640_350, &reg);
@@ -399,7 +400,8 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.underlineLocation      = 0x0F;
         reg.startVerticalBlank     = 0x5F;
         reg.endVerticalBlank       = 0x0A;
-        reg.modeControl            = memOver64K ? 0xE3 : 0x8B;
+        reg.modeControl            = memOver64K ? BRC_MCR_HARDWARE_RESET | BRC_MCR_WORD_BYTE_MODE | BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0 /* 0xE3 */ 
+                                                : BRC_MCR_HARDWARE_RESET | BRC_MCR_COUNT_BY_TWO | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0x8B */
     } break; 
     }
 
