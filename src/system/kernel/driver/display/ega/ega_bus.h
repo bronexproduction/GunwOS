@@ -300,7 +300,7 @@ enum bus_reg_crt_bit_cer {
 enum bus_reg_crt_bit_vrer {
     BRC_VRER_ENABLE_VERTICAL_INTERRUPT = 0x20, /* A logical 0 will enable vertical interrupt.*/
     BRC_VRER_CLEAR_VERTICAL_INTERRUPT = 0x10, /* A logical 0 will clear vertical interrupt.*/
-    BRC_VRER_VERTICAL_RETRACE_END = 0x0F
+    BRC_VRER_VERTICAL_RETRACE_END_RANGE = 0x0F
 };
 
 /*

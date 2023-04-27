@@ -160,7 +160,9 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.cursorEnd              = BIT_RANGE_ALIGNED(0x00, BRC_CER_CURSOR_SKEW_CONTROL_RANGE) |
                                      BIT_RANGE_ALIGNED(0x07, BRC_CER_ROW_SCAN_CURSOR_ENDS_RANGE); /* 0x07 */
         reg.verticalRetraceStart   = 0xE1;
-        reg.verticalRetraceEnd     = 0x24;
+        reg.verticalRetraceEnd     = SET(BRC_VRER_ENABLE_VERTICAL_INTERRUPT)  |
+                                     CLEAR(BRC_VRER_CLEAR_VERTICAL_INTERRUPT) |
+                                     BIT_RANGE_ALIGNED(0x04, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x24 */
         reg.offset                 = OFFSET_LOW;
         reg.underlineLocation      = 0x08;
         reg.startVerticalBlank     = 0xE0;
@@ -182,7 +184,9 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.cursorEnd              = BIT_RANGE_ALIGNED(0x00, BRC_CER_CURSOR_SKEW_CONTROL_RANGE) |
                                      BIT_RANGE_ALIGNED(0x07, BRC_CER_ROW_SCAN_CURSOR_ENDS_RANGE); /* 0x07 */
         reg.verticalRetraceStart   = 0xE1;
-        reg.verticalRetraceEnd     = 0x24;
+        reg.verticalRetraceEnd     = SET(BRC_VRER_ENABLE_VERTICAL_INTERRUPT)  |
+                                     CLEAR(BRC_VRER_CLEAR_VERTICAL_INTERRUPT) |
+                                     BIT_RANGE_ALIGNED(0x04, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x24 */
         reg.offset                 = OFFSET_HIGH;
         reg.underlineLocation      = 0x08;
         reg.startVerticalBlank     = 0xE0;
@@ -203,7 +207,9 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.cursorStart            = 0x00;
         reg.cursorEnd              = 0x00;
         reg.verticalRetraceStart   = 0xE1;
-        reg.verticalRetraceEnd     = 0x24;
+        reg.verticalRetraceEnd     = SET(BRC_VRER_ENABLE_VERTICAL_INTERRUPT)  |
+                                     CLEAR(BRC_VRER_CLEAR_VERTICAL_INTERRUPT) |
+                                     BIT_RANGE_ALIGNED(0x04, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x24 */
         reg.offset                 = OFFSET_LOW;
         reg.underlineLocation      = 0x00;
         reg.startVerticalBlank     = 0xE0;
@@ -223,7 +229,9 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.cursorStart            = 0x00;
         reg.cursorEnd              = 0x00;
         reg.verticalRetraceStart   = 0xE0;
-        reg.verticalRetraceEnd     = 0x23;
+        reg.verticalRetraceEnd     = SET(BRC_VRER_ENABLE_VERTICAL_INTERRUPT)  |
+                                     CLEAR(BRC_VRER_CLEAR_VERTICAL_INTERRUPT) |
+                                     BIT_RANGE_ALIGNED(0x03, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x23 */
         reg.offset                 = OFFSET_HIGH;
         reg.underlineLocation      = 0x00;
         reg.startVerticalBlank     = 0xDF;
@@ -243,7 +251,9 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.cursorStart            = 0x00;
         reg.cursorEnd              = 0x00;
         reg.verticalRetraceStart   = 0xE1;
-        reg.verticalRetraceEnd     = 0x24;
+        reg.verticalRetraceEnd     = SET(BRC_VRER_ENABLE_VERTICAL_INTERRUPT)  |
+                                     CLEAR(BRC_VRER_CLEAR_VERTICAL_INTERRUPT) |
+                                     BIT_RANGE_ALIGNED(0x04, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x24 */
         reg.offset                 = OFFSET_LOW;
         reg.underlineLocation      = 0x00;
         reg.startVerticalBlank     = 0xE0;
@@ -263,7 +273,9 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.cursorStart            = 0x00;
         reg.cursorEnd              = 0x00;
         reg.verticalRetraceStart   = 0xE0;
-        reg.verticalRetraceEnd     = 0x23;
+        reg.verticalRetraceEnd     = SET(BRC_VRER_ENABLE_VERTICAL_INTERRUPT)  |
+                                     CLEAR(BRC_VRER_CLEAR_VERTICAL_INTERRUPT) |
+                                     BIT_RANGE_ALIGNED(0x03, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x23 */
         reg.offset                 = OFFSET_HIGH;
         reg.underlineLocation      = 0x00;
         reg.startVerticalBlank     = 0xDF;
@@ -284,7 +296,9 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.cursorEnd              = BIT_RANGE_ALIGNED(0x00, BRC_CER_CURSOR_SKEW_CONTROL_RANGE) |
                                      BIT_RANGE_ALIGNED(0x0C, BRC_CER_ROW_SCAN_CURSOR_ENDS_RANGE); /* 0x0C */
         reg.verticalRetraceStart   = 0x5E;
-        reg.verticalRetraceEnd     = 0x2E;
+        reg.verticalRetraceEnd     = SET(BRC_VRER_ENABLE_VERTICAL_INTERRUPT)  |
+                                     CLEAR(BRC_VRER_CLEAR_VERTICAL_INTERRUPT) |
+                                     BIT_RANGE_ALIGNED(0x0E, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x2E */
         reg.offset                 = OFFSET_HIGH;
         reg.underlineLocation      = 0x0D;
         reg.startVerticalBlank     = 0x5E;
@@ -305,7 +319,9 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.cursorStart            = 0x00;
         reg.cursorEnd              = 0x00;
         reg.verticalRetraceStart   = 0x5E;
-        reg.verticalRetraceEnd     = 0x2E;
+        reg.verticalRetraceEnd     = SET(BRC_VRER_ENABLE_VERTICAL_INTERRUPT)  |
+                                     CLEAR(BRC_VRER_CLEAR_VERTICAL_INTERRUPT) |
+                                     BIT_RANGE_ALIGNED(0x0E, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x2E */
         reg.offset                 = memOver64K ? OFFSET_HIGH : OFFSET_LOW;
         reg.underlineLocation      = 0x0D;
         reg.startVerticalBlank     = 0x5E;
@@ -327,7 +343,9 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.cursorEnd              = BIT_RANGE_ALIGNED(0x00, BRC_CER_CURSOR_SKEW_CONTROL_RANGE) |
                                      BIT_RANGE_ALIGNED(0x0C, BRC_CER_ROW_SCAN_CURSOR_ENDS_RANGE); /* 0x0C */
         reg.verticalRetraceStart   = 0x5E;
-        reg.verticalRetraceEnd     = 0x2B;
+        reg.verticalRetraceEnd     = SET(BRC_VRER_ENABLE_VERTICAL_INTERRUPT)  |
+                                     CLEAR(BRC_VRER_CLEAR_VERTICAL_INTERRUPT) |
+                                     BIT_RANGE_ALIGNED(0x0B, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x2B */
         reg.offset                 = OFFSET_LOW;
         reg.underlineLocation      = 0x0F;
         reg.startVerticalBlank     = 0x5E;
@@ -349,7 +367,9 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.cursorEnd              = BIT_RANGE_ALIGNED(0x00, BRC_CER_CURSOR_SKEW_CONTROL_RANGE) |
                                      BIT_RANGE_ALIGNED(0x0C, BRC_CER_ROW_SCAN_CURSOR_ENDS_RANGE); /* 0x0C */
         reg.verticalRetraceStart   = 0x5E;
-        reg.verticalRetraceEnd     = 0x2B;
+        reg.verticalRetraceEnd     = SET(BRC_VRER_ENABLE_VERTICAL_INTERRUPT)  |
+                                     CLEAR(BRC_VRER_CLEAR_VERTICAL_INTERRUPT) |
+                                     BIT_RANGE_ALIGNED(0x0B, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x2B */
         reg.offset                 = OFFSET_HIGH;
         reg.underlineLocation      = 0x0F;
         reg.startVerticalBlank     = 0x5E;
@@ -372,7 +392,9 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.cursorStart            = 0x00;
         reg.cursorEnd              = 0x00;
         reg.verticalRetraceStart   = 0x5E;
-        reg.verticalRetraceEnd     = 0x2B;
+        reg.verticalRetraceEnd     = SET(BRC_VRER_ENABLE_VERTICAL_INTERRUPT)  |
+                                     CLEAR(BRC_VRER_CLEAR_VERTICAL_INTERRUPT) |
+                                     BIT_RANGE_ALIGNED(0x0B, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x2B */
         reg.offset                 = memOver64K ? OFFSET_HIGH : OFFSET_LOW;
         reg.underlineLocation      = 0x0F;
         reg.startVerticalBlank     = 0x5F;
