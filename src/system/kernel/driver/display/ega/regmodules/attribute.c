@@ -36,6 +36,70 @@ static void push(const struct registers * const reg, const enum modeOfOperation 
 void attributeSetMode(const enum modeOfOperation mode, const bool memOver64K) {
 
     struct registers reg;
+
+
+// /*
+//     Attribute Controller Registers
+
+//     Palette Register Hex 00 through Hex 0F
+// */
+// enum bus_reg_attr_bit_pr {
+//     BRA_PR_SECONDARY_RED_VIDEO = 0x20,
+//     BRA_PR_SECONDARY_GREEN_INTENSITY = 0x10,
+//     BRA_PR_SECONDARY_BLUE_MONO_VIDEO = 0x08,
+//     BRA_PR_RED_VIDEO = 0x04,
+//     BRA_PR_GREEN_VIDEO = 0x02,
+//     BRA_PR_BLUE_VIDEO = 0x01
+// };
+
+// /*
+//     Attribute Controller Register
+
+//     Mode Control Register
+// */
+// enum bus_reg_attr_bit_mcr {
+//     BRA_MCR_SELECT_BACKGROUND_INTENSITY_OR_ENABLE_BLINK = 0x08,
+//     BRA_MCR_ENABLE_LINE_GRAPHICS_CHARACTER_CODES = 0x04,
+//     BRA_MCR_DISPLAY_TYPE = 0x02,
+//     BRA_MCR_GRAPHICS_ALPHANUMERIC_MODE = 0x01
+// };
+
+// /*
+//     Attribute Controller Registers
+
+//     Overscan Color Register
+// */
+// enum bus_reg_attr_bit_ocr {
+//     BRA_OCR_SELECTS_SECONDARY_RED_BORDER_COLOR = 0x20,
+//     BRA_OCR_SELECTS_INTENSIFIED_OR_SECONDARY_GREEN = 0x10,
+//     BRA_OCR_SELECTS_SECONDARY_BLUE_BORDER_COLOR = 0x08,
+//     BRA_OCR_SELECTS_RED_BORDER_COLOR = 0x04,
+//     BRA_OCR_SELECTS_GREEN_BORDER_COLOR = 0x02,
+//     BRA_OCR_SELECTS_BLUE_BORDER_COLOR = 0x01
+// };
+
+// /*
+//     Attribute Controller Registers
+
+//     Color Plane Enable Register
+// */
+// enum bus_reg_attr_bit_cper {
+//     BRA_CPER_VIDEO_STATUS_MUX_RANGE = 0x30,
+//     BRA_CPER_ENABLE_COLOR_PLANE_RANGE = 0x0F
+// };
+
+// /*
+//     Attribute Controller Registers
+
+//     Horizontal Pel Panning Register
+// */
+// enum bus_reg_attr_bit_hppr {
+//     BRA_HPPR_HORIZONTAL_PEL_PANNING_RANGE = 0x0F
+// };
+
+
+
+
     
     reg.palette[0x0] = 0x00;
     reg.overscanColor = 0x00;
@@ -203,21 +267,34 @@ void attributeSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.colorPlaneEnable = 0x0F;
     } break;
     case ECD_OPMODE_10: {
-        reg.palette[0x1]     = 0x01;
-        reg.palette[0x2]     = memOver64K ? 0x02 : 0x00;
-        reg.palette[0x3]     = memOver64K ? 0x03 : 0x00;
-        reg.palette[0x4]     = 0x04;
-        reg.palette[0x5]     = memOver64K ? 0x05 : 0x07;
-        reg.palette[0x6]     = memOver64K ? 0x06 : 0x00;
-        reg.palette[0x7]     = memOver64K ? 0x07 : 0x00;
-        reg.palette[0x8]     = memOver64K ? 0x38 : 0x00;
-        reg.palette[0x9]     = memOver64K ? 0x39 : 0x01;
-        reg.palette[0xA]     = memOver64K ? 0x3A : 0x00;
-        reg.palette[0xB]     = memOver64K ? 0x3B : 0x00;
-        reg.palette[0xC]     = memOver64K ? 0x3C : 0x04;
-        reg.palette[0xD]     = memOver64K ? 0x3D : 0x07;
-        reg.palette[0xE]     = memOver64K ? 0x3E : 0x00;
-        reg.palette[0xF]     = memOver64K ? 0x3F : 0x00;
+        reg.palette[0x1]     = BRA_PR_BLUE_VIDEO; /* 0x01 */
+        reg.palette[0x2]     = memOver64K ? BRA_PR_GREEN_VIDEO /* 0x02 */
+                                          : 0x00;
+        reg.palette[0x3]     = memOver64K ? BRA_PR_GREEN_VIDEO | BRA_PR_BLUE_VIDEO /* 0x03 */
+                                          : 0x00;
+        reg.palette[0x4]     = BRA_PR_RED_VIDEO; /* 0x04 */
+        reg.palette[0x5]     = memOver64K ? BRA_PR_RED_VIDEO | BRA_PR_BLUE_VIDEO /* 0x05 */
+                                          : BRA_PR_RED_VIDEO | BRA_PR_GREEN_VIDEO | BRA_PR_BLUE_VIDEO; /* 0x07 */
+        reg.palette[0x6]     = memOver64K ? BRA_PR_RED_VIDEO | BRA_PR_GREEN_VIDEO /* 0x06 */
+                                          : 0x00;
+        reg.palette[0x7]     = memOver64K ? BRA_PR_RED_VIDEO | BRA_PR_GREEN_VIDEO | BRA_PR_BLUE_VIDEO /* 0x07 */
+                                          : 0x00;
+        reg.palette[0x8]     = memOver64K ? BRA_PR_SECONDARY_RED_VIDEO | BRA_PR_SECONDARY_GREEN_INTENSITY | BRA_PR_SECONDARY_BLUE_MONO_VIDEO /* 0x38 */
+                                          : 0x00;
+        reg.palette[0x9]     = memOver64K ? BRA_PR_SECONDARY_RED_VIDEO | BRA_PR_SECONDARY_GREEN_INTENSITY | BRA_PR_SECONDARY_BLUE_MONO_VIDEO | BRA_PR_BLUE_VIDEO /* 0x39 */
+                                          : BRA_PR_BLUE_VIDEO; /* 0x01 */
+        reg.palette[0xA]     = memOver64K ? BRA_PR_SECONDARY_RED_VIDEO | BRA_PR_SECONDARY_GREEN_INTENSITY | BRA_PR_SECONDARY_BLUE_MONO_VIDEO | BRA_PR_GREEN_VIDEO /* 0x3A */
+                                          : 0x00;
+        reg.palette[0xB]     = memOver64K ? BRA_PR_SECONDARY_RED_VIDEO | BRA_PR_SECONDARY_GREEN_INTENSITY | BRA_PR_SECONDARY_BLUE_MONO_VIDEO | BRA_PR_GREEN_VIDEO | BRA_PR_BLUE_VIDEO /* 0x3B */
+                                          : 0x00;
+        reg.palette[0xC]     = memOver64K ? BRA_PR_SECONDARY_RED_VIDEO | BRA_PR_SECONDARY_GREEN_INTENSITY | BRA_PR_SECONDARY_BLUE_MONO_VIDEO | BRA_PR_RED_VIDEO /* 0x3C */
+                                          : BRA_PR_RED_VIDEO; /* 0x04 */
+        reg.palette[0xD]     = memOver64K ? BRA_PR_SECONDARY_RED_VIDEO | BRA_PR_SECONDARY_GREEN_INTENSITY | BRA_PR_SECONDARY_BLUE_MONO_VIDEO | BRA_PR_RED_VIDEO | BRA_PR_BLUE_VIDEO /* 0x3D */
+                                          : BRA_PR_RED_VIDEO | BRA_PR_GREEN_VIDEO | BRA_PR_BLUE_VIDEO; /* 0x07 */
+        reg.palette[0xE]     = memOver64K ? BRA_PR_SECONDARY_RED_VIDEO | BRA_PR_SECONDARY_GREEN_INTENSITY | BRA_PR_SECONDARY_BLUE_MONO_VIDEO | BRA_PR_RED_VIDEO | BRA_PR_GREEN_VIDEO /* 0x3E */
+                                          : 0x00;
+        reg.palette[0xF]     = memOver64K ? BRA_PR_SECONDARY_RED_VIDEO | BRA_PR_SECONDARY_GREEN_INTENSITY | BRA_PR_SECONDARY_BLUE_MONO_VIDEO | BRA_PR_RED_VIDEO | BRA_PR_GREEN_VIDEO | BRA_PR_BLUE_VIDEO /* 0x3F */
+                                          : 0x00;
         reg.modeControl      = memOver64K ? 0x01 : 0x0B;
         reg.colorPlaneEnable = memOver64K ? 0x0F : 0x05;
     } break;
