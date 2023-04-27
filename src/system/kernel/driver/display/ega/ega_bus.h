@@ -124,7 +124,7 @@ enum bus_reg_external_bit_mor {
     BRE_MOR_CLOCK_SELECT_1 = 0x08,
     BRE_MOR_CLOCK_SELECT_0 = 0x04,
     BRE_MOR_ENABLE_RAM = 0x02,
-    BRE_MOR_IO_ADRESS_SELECT = 0x01
+    BRE_MOR_IO_ADDRESS_SELECT = 0x01
 };
 
 /*
