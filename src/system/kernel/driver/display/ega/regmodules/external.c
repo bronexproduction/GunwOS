@@ -39,20 +39,31 @@ void externalSetMode(const enum modeOfOperation mode) {
     case CD_OPMODE_6:
     case CD_OPMODE_D:
     case CD_OPMODE_E: {
-        reg.miscOutput = 0x23;
+        reg.miscOutput = BRE_MOR_PAGE_BIT_FOR_ODD_EVEN  |
+                         BRE_MOR_ENABLE_RAM             |
+                         BRE_MOR_IO_ADDRESS_SELECT; /* 0x23 */
     } break;
     case MD_OPMODE_7: {
-        reg.miscOutput = 0xA6;
+        reg.miscOutput = BRE_MOR_VERTICAL_RETRACE_POLARITY  |
+                         BRE_MOR_PAGE_BIT_FOR_ODD_EVEN      |
+                         BRE_MOR_CLOCK_SELECT_0             |
+                         BRE_MOR_ENABLE_RAM; /* 0xA6 */
     } break;
     case MD_OPMODE_F: {
-        reg.miscOutput = 0xA2;
+        reg.miscOutput = BRE_MOR_VERTICAL_RETRACE_POLARITY  |
+                         BRE_MOR_PAGE_BIT_FOR_ODD_EVEN      |
+                         BRE_MOR_ENABLE_RAM; /* 0xA2 */
     } break;
     case ECD_OPMODE_0:
     case ECD_OPMODE_1:
     case ECD_OPMODE_2:
     case ECD_OPMODE_3:
     case ECD_OPMODE_10: {
-        reg.miscOutput = 0xA7;
+        reg.miscOutput = BRE_MOR_VERTICAL_RETRACE_POLARITY  |
+                         BRE_MOR_PAGE_BIT_FOR_ODD_EVEN      |
+                         BRE_MOR_CLOCK_SELECT_0             |
+                         BRE_MOR_ENABLE_RAM                 |
+                         BRE_MOR_IO_ADDRESS_SELECT; /* 0xA7 */
     } break;
     }
 
