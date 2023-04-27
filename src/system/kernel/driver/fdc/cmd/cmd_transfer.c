@@ -10,6 +10,7 @@
 //
 
 #include "cmd.h"
+#include <utils.h>
 #include "../common/io.h"
 
 enum fdc_opStatus cmd_read(const uint_16 base, 
@@ -36,14 +37,14 @@ enum fdc_opStatus cmd_read(const uint_16 base,
                        (mfm & BIT_MFM) |
                        ((mode != RM_TRACK) ? (sk & BIT_SK) : 0x00))));
     TRY(pushData(base, ((h & BIT_HDS) |
-                       ALIGNED(drive, RANGE_DS))));
-    TRY(pushData(base, ALIGNED(c, RANGE_C)));
-    TRY(pushData(base, ALIGNED(h, RANGE_H)));
-    TRY(pushData(base, ALIGNED(r, RANGE_R)));
-    TRY(pushData(base, ALIGNED(n, RANGE_N)));
-    TRY(pushData(base, ALIGNED(eot, RANGE_EOT)));
-    TRY(pushData(base, ALIGNED(gpl, RANGE_GPL)));
-    TRY(pushData(base, ALIGNED(dtl, RANGE_DTL)));
+                       BIT_RANGE_ALIGNED(drive, RANGE_DS))));
+    TRY(pushData(base, BIT_RANGE_ALIGNED(c, RANGE_C)));
+    TRY(pushData(base, BIT_RANGE_ALIGNED(h, RANGE_H)));
+    TRY(pushData(base, BIT_RANGE_ALIGNED(r, RANGE_R)));
+    TRY(pushData(base, BIT_RANGE_ALIGNED(n, RANGE_N)));
+    TRY(pushData(base, BIT_RANGE_ALIGNED(eot, RANGE_EOT)));
+    TRY(pushData(base, BIT_RANGE_ALIGNED(gpl, RANGE_GPL)));
+    TRY(pushData(base, BIT_RANGE_ALIGNED(dtl, RANGE_DTL)));
     
     return OPSTATUS_OK;
 }
