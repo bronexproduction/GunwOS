@@ -14,6 +14,8 @@
 #include "../opmode.h"
 #include <types.h>
 
+void crtDisable(const enum modeOfOperation mode, const bool memOver64K);
 void crtSetMode(const enum modeOfOperation mode, const bool memOver64K);
+void crtEnable(const enum modeOfOperation mode, const bool memOver64K);
 
 #endif // OPMODE_H

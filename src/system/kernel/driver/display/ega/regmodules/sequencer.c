@@ -29,6 +29,10 @@ static void push(const struct registers * const reg, const enum modeOfOperation 
     busWriteSequencer(BRSI_MEMORY_MODE, reg->memoryMode, mode);
 }
 
+void sequencerDisable(const enum modeOfOperation mode, const bool memOver64K) {
+    #warning TO BE IMPLEMENTED
+}
+
 void sequencerSetMode(const enum modeOfOperation mode, const bool memOver64K) {
 
     struct registers reg;
@@ -92,4 +96,8 @@ void sequencerSetMode(const enum modeOfOperation mode, const bool memOver64K) {
     }
 
     push(&reg, mode);
+}
+
+void sequencerEnable(const enum modeOfOperation mode, const bool memOver64K) {
+    #warning TO BE IMPLEMENTED
 }

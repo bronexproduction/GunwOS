@@ -137,6 +137,10 @@ static void push(const struct registers * const reg, const enum modeOfOperation 
     busWriteCRT(BRCI_LINE_COMPARE, reg->lineCompare, mode);
 }
 
+void crtDisable(const enum modeOfOperation mode, const bool memOver64K) {
+    #warning TO BE IMPLEMENTED
+}
+
 void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
 
     struct registers reg;
@@ -406,4 +410,8 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
     }
 
     push(&reg, mode);
+}
+
+void crtEnable(const enum modeOfOperation mode, const bool memOver64K) {
+    #warning TO BE IMPLEMENTED
 }

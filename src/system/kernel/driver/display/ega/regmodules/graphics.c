@@ -37,6 +37,10 @@ static void push(const struct registers * const reg, const enum modeOfOperation 
     busWriteGraphics(BRGI_BIT_MASK, reg->bitMask, mode);
 }
 
+void graphicsDisable(const enum modeOfOperation mode, const bool memOver64K) {
+    #warning TO BE IMPLEMENTED
+}
+
 void graphicsSetMode(const enum modeOfOperation mode, const bool memOver64K) {
 
     struct registers reg;
@@ -94,4 +98,8 @@ void graphicsSetMode(const enum modeOfOperation mode, const bool memOver64K) {
     }
 
     push(&reg, mode);
+}
+
+void graphicsEnable(const enum modeOfOperation mode, const bool memOver64K) {
+    #warning TO BE IMPLEMENTED
 }

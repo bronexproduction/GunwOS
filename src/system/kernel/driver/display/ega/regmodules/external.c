@@ -23,6 +23,10 @@ static void push(const struct registers * const reg, const enum modeOfOperation 
     busWriteExternal(BRE_FEATURE_CTRL, reg->featureControl, mode);
 }
 
+void externalDisable(const enum modeOfOperation mode) {
+    #warning TO BE IMPLEMENTED
+}
+
 void externalSetMode(const enum modeOfOperation mode) {
 
     struct registers reg;
@@ -68,4 +72,8 @@ void externalSetMode(const enum modeOfOperation mode) {
     }
 
     push(&reg, mode);
+}
+
+void externalEnable(const enum modeOfOperation mode) {
+    #warning TO BE IMPLEMENTED
 }

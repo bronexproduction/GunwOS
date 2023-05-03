@@ -14,6 +14,8 @@
 #include "../opmode.h"
 #include <types.h>
 
+void graphicsDisable(const enum modeOfOperation mode, const bool memOver64K);
 void graphicsSetMode(const enum modeOfOperation mode, const bool memOver64K);
+void graphicsEnable(const enum modeOfOperation mode, const bool memOver64K);
 
 #endif // GRAPHICS_H
