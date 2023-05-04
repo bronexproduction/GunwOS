@@ -398,5 +398,4 @@ void crtEnable(const enum modeOfOperation mode, const bool memOver64K, uint_8 re
 
     busWriteCRT(BRCI_VERTICAL_RETRACE_END, regContextMCR, mode);
     busWriteCRT(BRCI_MODE_CONTROL, regContextMCR, mode);
-    
 }

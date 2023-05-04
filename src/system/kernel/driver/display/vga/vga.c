@@ -53,9 +53,9 @@ point_t uhaDimensionsForFormat(const enum gnwDeviceUHA_display_format format) {
     return dimensions;
 }
 
-bool setFormat(const enum gnwDeviceUHA_display_format fmt) {
+bool setFormat(const enum gnwDeviceUHA_display_format format) {
 
-    const enum gnwDeviceUHA_display_format format = GRAPHICS_H320V200C4;
+    #warning partial EGA support only at the moment
 
     switch(format) {
     case TEXT_H80V25C16:
@@ -67,14 +67,7 @@ bool setFormat(const enum gnwDeviceUHA_display_format fmt) {
     default:
         return false;
     }
-
-    #warning TEST
-    for (int i = 0; i < 0x20000; ++i) {
-        *(DISPLAY_BUFFER_ADDR_ENHANCED + i) = i;
-    }
-
-    while(1);
-
+    
     dimensions = uhaDimensionsForFormat(format);
 
     return true;

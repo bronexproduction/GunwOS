@@ -35,9 +35,11 @@ static void pushConfig(const struct registers * const reg, const enum modeOfOper
 }
 
 void attributeSetMode(const enum modeOfOperation mode, const bool memOver64K) {
+    
+    #warning WRONG PALETTE SETUP - Palette Address Source set to 0 causes the screen to be black
 
     struct registers reg;
-    
+
     reg.palette[0x0] = 0x00;
     reg.overscanColor = 0x00;
     reg.horizontalPelPanning = 0x00;
