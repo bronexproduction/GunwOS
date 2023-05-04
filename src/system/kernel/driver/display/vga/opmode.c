@@ -54,6 +54,7 @@ void setMode(const enum modeOfOperation mode) {
         */
         externalEnable(mode, externalContext);
         sequencerEnable(mode, memOver64K);
+        attributeEnable(mode);
         crtEnable(mode, memOver64K, crtContextMCR, crtContextVRE);
     } break;
     default:

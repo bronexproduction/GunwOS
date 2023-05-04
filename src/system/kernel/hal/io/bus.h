@@ -14,6 +14,8 @@ static inline void k_bus_outb(uint_16 port, uint_8 val) {
      * Wider immediate constants would be truncated at assemble-time (e.g. "i" constraint).
      * The  outb  %al, %dx  encoding is the only option for all other cases.
      * %1 expands to %dx because  port  is a uint_16.  %w1 could be used if we had the port number a wider C type */
+
+    for(int i = 0; i < 100000; ++i); // wait a lot
 }
 
 static inline uint_8 k_bus_inb(uint_16 port) {

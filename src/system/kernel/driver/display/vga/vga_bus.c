@@ -108,3 +108,7 @@ void busWriteGraphics(const enum bus_reg_graphics_index index, const uint_8 data
 void busWriteAttribute(const enum bus_reg_attr_index index, const uint_8 data, const enum modeOfOperation mode) {
     busWriteLSI(BRA_ADDRESS, BRA_DATA, index, data, mode);
 }
+
+void busWriteAttributeAddr(const uint_8 data, const enum modeOfOperation mode) {
+    wrb(busAddr(BRA_ADDRESS, mode), data);
+}

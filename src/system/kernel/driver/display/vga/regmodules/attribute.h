@@ -15,5 +15,6 @@
 #include <types.h>
 
 void attributeSetMode(const enum modeOfOperation mode, const bool memOver64K);
+void attributeEnable(const enum modeOfOperation mode);
 
 #endif // ATTRIBUTE_H

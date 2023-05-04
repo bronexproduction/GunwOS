@@ -540,5 +540,6 @@ void busWriteCRT(const enum bus_reg_crt_index index, const uint_8 data, const en
 void busWriteGraphicsPosition(const struct bus_reg_graphics_position position);
 void busWriteGraphics(const enum bus_reg_graphics_index index, const uint_8 data, const enum modeOfOperation mode);
 void busWriteAttribute(const enum bus_reg_attr_index index, const uint_8 data, const enum modeOfOperation mode);
+void busWriteAttributeAddr(const uint_8 data, const enum modeOfOperation mode);
 
 #endif // VGA_BUS_H

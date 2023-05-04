@@ -35,8 +35,6 @@ static void pushConfig(const struct registers * const reg, const enum modeOfOper
 }
 
 void attributeSetMode(const enum modeOfOperation mode, const bool memOver64K) {
-    
-    #warning WRONG PALETTE SETUP - Palette Address Source set to 0 causes the screen to be black
 
     struct registers reg;
 
@@ -250,4 +248,8 @@ void attributeSetMode(const enum modeOfOperation mode, const bool memOver64K) {
     }
 
     pushConfig(&reg, mode);
+}
+
+void attributeEnable(const enum modeOfOperation mode) {
+	busWriteAttributeAddr(BRA_AAR_PALETTE_ADDRESS_SOURCE, mode);
 }
