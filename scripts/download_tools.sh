@@ -18,6 +18,8 @@ else
     	TOOLS_ID=1-e8cyz_aMVlYcX5I7LyHgV2JNmd7Wu65
     elif [[ "$ARCH" == "i686" ]]; then
         TOOLS_ID=1ymPFp3nLYnFQ0Zp9lFYrNhS2oVWCp_EQ
+    elif [[ "$ARCH" == "aarch64" ]]; then
+        TOOLS_ID=
     else 
         TOOLS_ID=
     fi
