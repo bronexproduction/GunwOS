@@ -59,10 +59,10 @@ bool setFormat(const enum gnwDeviceUHA_display_format format) {
 
     switch(format) {
     case TEXT_H80V25C16:
-        setMode(CD_OPMODE_2);
+        setMode(CD_OPMODE_3);
         break;
     case GRAPHICS_H320V200C4:
-        setMode(CD_OPMODE_4);
+        setMode(CD_OPMODE_5);
         break;
     default:
         return false;

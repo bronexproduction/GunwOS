@@ -80,6 +80,9 @@
     "scoped_allocator": "c",
     "rope": "c",
     "filesystem": "c",
-    "fstream": "c"
+    "fstream": "c",
+    "deque": "c",
+    "map": "c",
+    "unordered_map": "c"
   }
 }
