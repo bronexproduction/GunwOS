@@ -251,5 +251,6 @@ void attributeSetMode(const enum modeOfOperation mode, const bool memOver64K) {
 }
 
 void attributeEnable(const enum modeOfOperation mode) {
+    #warning why do I need it
 	busWriteAttributeAddr(BRA_AAR_PALETTE_ADDRESS_SOURCE, mode);
 }
