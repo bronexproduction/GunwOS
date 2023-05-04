@@ -1,5 +1,5 @@
 //
-//  ega_bus.h
+//  vga_bus.h
 //  GunwOS
 //
 //  Created by Artur Danielewski on 24.03.2023.
@@ -10,8 +10,8 @@
 //  page 12+
 //
 
-#ifndef EGA_BUS_H
-#define EGA_BUS_H
+#ifndef VGA_BUS_H
+#define VGA_BUS_H
 
 #include <types.h>
 #include "opmode.h"
@@ -541,4 +541,4 @@ void busWriteGraphicsPosition(const struct bus_reg_graphics_position position);
 void busWriteGraphics(const enum bus_reg_graphics_index index, const uint_8 data, const enum modeOfOperation mode);
 void busWriteAttribute(const enum bus_reg_attr_index index, const uint_8 data, const enum modeOfOperation mode);
 
-#endif // EGA_BUS_H
+#endif // VGA_BUS_H

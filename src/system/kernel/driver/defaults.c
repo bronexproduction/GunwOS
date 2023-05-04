@@ -51,10 +51,10 @@ static void loadFileSystem(struct gnwFileSystemDescriptor (*descProvider)(),
 void k_drv_loadMinimal() {
 
     /*
-        Default text mode display
+        Default display
     */
-    extern struct gnwDeviceDescriptor k_drv_display_ega_descriptor();
-    loadDevice(k_drv_display_ega_descriptor, MSGS_FAIL(EGA display));
+    extern struct gnwDeviceDescriptor k_drv_display_vga_descriptor();
+    loadDevice(k_drv_display_vga_descriptor, MSGS_FAIL(VGA display));
     
     /*
         PIT driver for 8253/8254 chip

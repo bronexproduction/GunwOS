@@ -12,7 +12,7 @@
 
 #include "attribute.h"
 #include <utils.h>
-#include "../ega_bus.h"
+#include "../vga_bus.h"
 
 #define PALETTE_COUNT 16
 
@@ -24,7 +24,7 @@ struct registers {
     uint_8 horizontalPelPanning;
 };
 
-static void push(const struct registers * const reg, const enum modeOfOperation mode) {
+static void pushConfig(const struct registers * const reg, const enum modeOfOperation mode) {
     for (int i = 0; i < PALETTE_COUNT; ++i) {
         busWriteAttribute(BRAI_PALETTE_START + i, reg->palette[i], mode);
     }
@@ -247,5 +247,5 @@ void attributeSetMode(const enum modeOfOperation mode, const bool memOver64K) {
     } break;
     }
 
-    push(&reg, mode);
+    pushConfig(&reg, mode);
 }

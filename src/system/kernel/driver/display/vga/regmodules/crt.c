@@ -12,7 +12,7 @@
 
 #include "crt.h"
 #include <utils.h>
-#include "../ega_bus.h"
+#include "../vga_bus.h"
 
 enum resolution {
     RES_320_200,
@@ -37,13 +37,11 @@ struct registers {
     uint_8 cursorStart;
     uint_8 cursorEnd;
     uint_8 verticalRetraceStart;
-    uint_8 verticalRetraceEnd;
     uint_8 verticalDisplayEnd;
     uint_8 offset;
     uint_8 underlineLocation;
     uint_8 startVerticalBlank;
     uint_8 endVerticalBlank;
-    uint_8 modeControl;
     uint_8 lineCompare;
 };
 
@@ -113,7 +111,7 @@ static void configure(const enum resolution res, struct registers * const reg) {
     }
 }
 
-static void push(const struct registers * const reg, const enum modeOfOperation mode) {
+static void pushConfig(const struct registers * const reg, const enum modeOfOperation mode) {
     busWriteCRT(BRCI_HORIZONTAL_TOTAL, reg->horizontalTotal, mode);
     busWriteCRT(BRCI_HORIZONTAL_DISPLAY_END, reg->horizontalDisplayEnd, mode);
     busWriteCRT(BRCI_START_HORIZONTAL_BLANK, reg->startHorizontalBlank, mode);
@@ -127,21 +125,23 @@ static void push(const struct registers * const reg, const enum modeOfOperation 
     busWriteCRT(BRCI_CURSOR_START, reg->cursorStart, mode);
     busWriteCRT(BRCI_CURSOR_END, reg->cursorEnd, mode);
     busWriteCRT(BRCI_VERTICAL_RETRACE_START, reg->verticalRetraceStart, mode);
-    busWriteCRT(BRCI_VERTICAL_RETRACE_END, reg->verticalRetraceEnd, mode);
     busWriteCRT(BRCI_VERTICAL_DISPLAY_END, reg->verticalDisplayEnd, mode);
     busWriteCRT(BRCI_OFFSET, reg->offset, mode);
     busWriteCRT(BRCI_UNDERLINE_LOCATION, reg->underlineLocation, mode);
     busWriteCRT(BRCI_START_VERTICAL_BLANK, reg->startVerticalBlank, mode);
     busWriteCRT(BRCI_END_VERTICAL_BLANK, reg->endVerticalBlank, mode);
-    busWriteCRT(BRCI_MODE_CONTROL, reg->modeControl, mode);
     busWriteCRT(BRCI_LINE_COMPARE, reg->lineCompare, mode);
 }
 
-void crtDisable(const enum modeOfOperation mode, const bool memOver64K) {
-    #warning TO BE IMPLEMENTED
+void crtDisable(const enum modeOfOperation mode, const bool memOver64K, uint_8 * const regContextMCR, uint_8 * const regContextVRE) {
+    *regContextMCR = BRC_MCR_OUTPUT_CONTROL;
+    *regContextVRE = BRC_VRER_ENABLE_VERTICAL_INTERRUPT;
+
+    busWriteCRT(BRCI_MODE_CONTROL, *regContextMCR, mode);
+    busWriteCRT(BRCI_VERTICAL_RETRACE_END, *regContextVRE, mode);
 }
 
-void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
+void crtSetMode(const enum modeOfOperation mode, const bool memOver64K, uint_8 * const regContextMCR, uint_8 * const regContextVRE) {
 
     struct registers reg;
 
@@ -164,14 +164,12 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.cursorEnd              = BIT_RANGE_ALIGNED(0x00, BRC_CER_CURSOR_SKEW_CONTROL_RANGE) |
                                      BIT_RANGE_ALIGNED(0x07, BRC_CER_ROW_SCAN_CURSOR_ENDS_RANGE); /* 0x07 */
         reg.verticalRetraceStart   = 0xE1;
-        reg.verticalRetraceEnd     = SET(BRC_VRER_ENABLE_VERTICAL_INTERRUPT)  |
-                                     CLEAR(BRC_VRER_CLEAR_VERTICAL_INTERRUPT) |
-                                     BIT_RANGE_ALIGNED(0x04, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x24 */
+        *regContextVRE            |= BIT_RANGE_ALIGNED(0x04, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x24 (with interrupt flags) */
         reg.offset                 = OFFSET_LOW;
         reg.underlineLocation      = 0x08;
         reg.startVerticalBlank     = 0xE0;
         reg.endVerticalBlank       = 0xF0;
-        reg.modeControl            = BRC_MCR_HARDWARE_RESET | BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0xA3 */
+        *regContextMCR            |= BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0xA3 (with HARDWARE_RESET) */
     } break;
     case CD_OPMODE_2:
     case CD_OPMODE_3: {
@@ -188,14 +186,12 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.cursorEnd              = BIT_RANGE_ALIGNED(0x00, BRC_CER_CURSOR_SKEW_CONTROL_RANGE) |
                                      BIT_RANGE_ALIGNED(0x07, BRC_CER_ROW_SCAN_CURSOR_ENDS_RANGE); /* 0x07 */
         reg.verticalRetraceStart   = 0xE1;
-        reg.verticalRetraceEnd     = SET(BRC_VRER_ENABLE_VERTICAL_INTERRUPT)  |
-                                     CLEAR(BRC_VRER_CLEAR_VERTICAL_INTERRUPT) |
-                                     BIT_RANGE_ALIGNED(0x04, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x24 */
+        *regContextVRE            |= BIT_RANGE_ALIGNED(0x04, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x24 (with interrupt flags) */
         reg.offset                 = OFFSET_HIGH;
         reg.underlineLocation      = 0x08;
         reg.startVerticalBlank     = 0xE0;
         reg.endVerticalBlank       = 0xF0;
-        reg.modeControl            = BRC_MCR_HARDWARE_RESET | BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0xA3 */
+        *regContextMCR            |= BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0xA3 (with HARDWARE_RESET) */
     } break; 
     case CD_OPMODE_4:
     case CD_OPMODE_5: {
@@ -211,14 +207,12 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.cursorStart            = 0x00;
         reg.cursorEnd              = 0x00;
         reg.verticalRetraceStart   = 0xE1;
-        reg.verticalRetraceEnd     = SET(BRC_VRER_ENABLE_VERTICAL_INTERRUPT)  |
-                                     CLEAR(BRC_VRER_CLEAR_VERTICAL_INTERRUPT) |
-                                     BIT_RANGE_ALIGNED(0x04, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x24 */
+        *regContextVRE            |= BIT_RANGE_ALIGNED(0x04, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x24 (with interrupt flags) */
         reg.offset                 = OFFSET_LOW;
         reg.underlineLocation      = 0x00;
         reg.startVerticalBlank     = 0xE0;
         reg.endVerticalBlank       = 0xF0;
-        reg.modeControl            = BRC_MCR_HARDWARE_RESET | BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER; /* 0xA2 */
+        *regContextMCR            |= BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER; /* 0xA2 (with HARDWARE_RESET) */
     } break;
     case CD_OPMODE_6: {
         configure(RES_640_200, &reg);
@@ -233,14 +227,12 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.cursorStart            = 0x00;
         reg.cursorEnd              = 0x00;
         reg.verticalRetraceStart   = 0xE0;
-        reg.verticalRetraceEnd     = SET(BRC_VRER_ENABLE_VERTICAL_INTERRUPT)  |
-                                     CLEAR(BRC_VRER_CLEAR_VERTICAL_INTERRUPT) |
-                                     BIT_RANGE_ALIGNED(0x03, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x23 */
+        *regContextVRE            |= BIT_RANGE_ALIGNED(0x03, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x23 (with interrupt flags) */
         reg.offset                 = OFFSET_HIGH;
         reg.underlineLocation      = 0x00;
         reg.startVerticalBlank     = 0xDF;
         reg.endVerticalBlank       = 0xEF;
-        reg.modeControl            = BRC_MCR_HARDWARE_RESET | BRC_MCR_WORD_BYTE_MODE | BRC_MCR_SELECT_ROW_SCAN_COUNTER; /* 0xC2 */
+        *regContextMCR            |= BRC_MCR_WORD_BYTE_MODE | BRC_MCR_SELECT_ROW_SCAN_COUNTER; /* 0xC2 (with HARDWARE_RESET) */
     } break; 
     case CD_OPMODE_D: {
         configure(RES_320_200, &reg);
@@ -255,14 +247,12 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.cursorStart            = 0x00;
         reg.cursorEnd              = 0x00;
         reg.verticalRetraceStart   = 0xE1;
-        reg.verticalRetraceEnd     = SET(BRC_VRER_ENABLE_VERTICAL_INTERRUPT)  |
-                                     CLEAR(BRC_VRER_CLEAR_VERTICAL_INTERRUPT) |
-                                     BIT_RANGE_ALIGNED(0x04, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x24 */
+        *regContextVRE            |= BIT_RANGE_ALIGNED(0x04, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x24 (with interrupt flags) */
         reg.offset                 = OFFSET_LOW;
         reg.underlineLocation      = 0x00;
         reg.startVerticalBlank     = 0xE0;
         reg.endVerticalBlank       = 0xF0;
-        reg.modeControl            = BRC_MCR_HARDWARE_RESET | BRC_MCR_WORD_BYTE_MODE | BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0xE3 */
+        *regContextMCR            |= BRC_MCR_WORD_BYTE_MODE | BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0xE3 (with HARDWARE_RESET) */
     } break; 
     case CD_OPMODE_E: {
         configure(RES_640_200, &reg);
@@ -277,14 +267,12 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.cursorStart            = 0x00;
         reg.cursorEnd              = 0x00;
         reg.verticalRetraceStart   = 0xE0;
-        reg.verticalRetraceEnd     = SET(BRC_VRER_ENABLE_VERTICAL_INTERRUPT)  |
-                                     CLEAR(BRC_VRER_CLEAR_VERTICAL_INTERRUPT) |
-                                     BIT_RANGE_ALIGNED(0x03, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x23 */
+        *regContextVRE            |= BIT_RANGE_ALIGNED(0x03, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x23 (with interrupt flags) */
         reg.offset                 = OFFSET_HIGH;
         reg.underlineLocation      = 0x00;
         reg.startVerticalBlank     = 0xDF;
         reg.endVerticalBlank       = 0xEF;
-        reg.modeControl            = BRC_MCR_HARDWARE_RESET | BRC_MCR_WORD_BYTE_MODE | BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0xE3 */
+        *regContextMCR            |= BRC_MCR_WORD_BYTE_MODE | BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0xE3 (with HARDWARE_RESET) */
     } break; 
     case MD_OPMODE_7: {
         configure(RES_720_350_MONO, &reg);
@@ -300,14 +288,12 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.cursorEnd              = BIT_RANGE_ALIGNED(0x00, BRC_CER_CURSOR_SKEW_CONTROL_RANGE) |
                                      BIT_RANGE_ALIGNED(0x0C, BRC_CER_ROW_SCAN_CURSOR_ENDS_RANGE); /* 0x0C */
         reg.verticalRetraceStart   = 0x5E;
-        reg.verticalRetraceEnd     = SET(BRC_VRER_ENABLE_VERTICAL_INTERRUPT)  |
-                                     CLEAR(BRC_VRER_CLEAR_VERTICAL_INTERRUPT) |
-                                     BIT_RANGE_ALIGNED(0x0E, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x2E */
+        *regContextVRE            |= BIT_RANGE_ALIGNED(0x0E, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x2E (with interrupt flags) */
         reg.offset                 = OFFSET_HIGH;
         reg.underlineLocation      = 0x0D;
         reg.startVerticalBlank     = 0x5E;
         reg.endVerticalBlank       = 0x6E;
-        reg.modeControl            = BRC_MCR_HARDWARE_RESET | BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0xA3 */
+        *regContextMCR            |= BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0xA3 (with HARDWARE_RESET) */
     } break; 
     case MD_OPMODE_F: {
         configure(RES_640_350_MONO, &reg);
@@ -323,15 +309,13 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.cursorStart            = 0x00;
         reg.cursorEnd              = 0x00;
         reg.verticalRetraceStart   = 0x5E;
-        reg.verticalRetraceEnd     = SET(BRC_VRER_ENABLE_VERTICAL_INTERRUPT)  |
-                                     CLEAR(BRC_VRER_CLEAR_VERTICAL_INTERRUPT) |
-                                     BIT_RANGE_ALIGNED(0x0E, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x2E */
+        *regContextVRE            |= BIT_RANGE_ALIGNED(0x0E, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x2E (with interrupt flags) */
         reg.offset                 = memOver64K ? OFFSET_HIGH : OFFSET_LOW;
         reg.underlineLocation      = 0x0D;
         reg.startVerticalBlank     = 0x5E;
         reg.endVerticalBlank       = 0x6E;
-        reg.modeControl            = memOver64K ? BRC_MCR_HARDWARE_RESET | BRC_MCR_WORD_BYTE_MODE | BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0 /* 0xE3 */ 
-                                                : BRC_MCR_HARDWARE_RESET | BRC_MCR_COUNT_BY_TWO | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0x8B */
+        *regContextMCR            |= memOver64K ? BRC_MCR_WORD_BYTE_MODE | BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0 /* 0xE3 (with HARDWARE_RESET) */ 
+                                                : BRC_MCR_COUNT_BY_TWO | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0x8B (with HARDWARE_RESET) */
     } break; 
     case ECD_OPMODE_0:
     case ECD_OPMODE_1: {
@@ -348,14 +332,12 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.cursorEnd              = BIT_RANGE_ALIGNED(0x00, BRC_CER_CURSOR_SKEW_CONTROL_RANGE) |
                                      BIT_RANGE_ALIGNED(0x0C, BRC_CER_ROW_SCAN_CURSOR_ENDS_RANGE); /* 0x0C */
         reg.verticalRetraceStart   = 0x5E;
-        reg.verticalRetraceEnd     = SET(BRC_VRER_ENABLE_VERTICAL_INTERRUPT)  |
-                                     CLEAR(BRC_VRER_CLEAR_VERTICAL_INTERRUPT) |
-                                     BIT_RANGE_ALIGNED(0x0B, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x2B */
+        *regContextVRE            |= BIT_RANGE_ALIGNED(0x0B, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x2B (with interrupt flags) */
         reg.offset                 = OFFSET_LOW;
         reg.underlineLocation      = 0x0F;
         reg.startVerticalBlank     = 0x5E;
         reg.endVerticalBlank       = 0x0A;
-        reg.modeControl            = BRC_MCR_HARDWARE_RESET | BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0xA3 */
+        *regContextMCR            |= BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0xA3 (with HARDWARE_RESET) */
     } break; 
     case ECD_OPMODE_2:
     case ECD_OPMODE_3: {
@@ -372,14 +354,12 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.cursorEnd              = BIT_RANGE_ALIGNED(0x00, BRC_CER_CURSOR_SKEW_CONTROL_RANGE) |
                                      BIT_RANGE_ALIGNED(0x0C, BRC_CER_ROW_SCAN_CURSOR_ENDS_RANGE); /* 0x0C */
         reg.verticalRetraceStart   = 0x5E;
-        reg.verticalRetraceEnd     = SET(BRC_VRER_ENABLE_VERTICAL_INTERRUPT)  |
-                                     CLEAR(BRC_VRER_CLEAR_VERTICAL_INTERRUPT) |
-                                     BIT_RANGE_ALIGNED(0x0B, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x2B */
+        *regContextVRE            |= BIT_RANGE_ALIGNED(0x0B, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x2B (with interrupt flags) */
         reg.offset                 = OFFSET_HIGH;
         reg.underlineLocation      = 0x0F;
         reg.startVerticalBlank     = 0x5E;
         reg.endVerticalBlank       = 0x0A;
-        reg.modeControl            = BRC_MCR_HARDWARE_RESET | BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0xA3 */
+        *regContextMCR            |= BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0xA3 (with HARDWARE_RESET) */
     } break; 
     case ECD_OPMODE_10: {
         configure(RES_640_350, &reg);
@@ -397,21 +377,26 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K) {
         reg.cursorStart            = 0x00;
         reg.cursorEnd              = 0x00;
         reg.verticalRetraceStart   = 0x5E;
-        reg.verticalRetraceEnd     = SET(BRC_VRER_ENABLE_VERTICAL_INTERRUPT)  |
-                                     CLEAR(BRC_VRER_CLEAR_VERTICAL_INTERRUPT) |
-                                     BIT_RANGE_ALIGNED(0x0B, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x2B */
+        *regContextVRE            |= BIT_RANGE_ALIGNED(0x0B, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x2B (with interrupt flags) */
         reg.offset                 = memOver64K ? OFFSET_HIGH : OFFSET_LOW;
         reg.underlineLocation      = 0x0F;
         reg.startVerticalBlank     = 0x5F;
         reg.endVerticalBlank       = 0x0A;
-        reg.modeControl            = memOver64K ? BRC_MCR_HARDWARE_RESET | BRC_MCR_WORD_BYTE_MODE | BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0 /* 0xE3 */ 
-                                                : BRC_MCR_HARDWARE_RESET | BRC_MCR_COUNT_BY_TWO | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0x8B */
+        *regContextMCR            |= memOver64K ? BRC_MCR_WORD_BYTE_MODE | BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0 /* 0xE3 (with HARDWARE_RESET) */ 
+                                                : BRC_MCR_COUNT_BY_TWO | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0x8B (with HARDWARE_RESET) */
     } break; 
     }
 
-    push(&reg, mode);
+    pushConfig(&reg, mode);
 }
 
-void crtEnable(const enum modeOfOperation mode, const bool memOver64K) {
-    #warning TO BE IMPLEMENTED
+void crtEnable(const enum modeOfOperation mode, const bool memOver64K, uint_8 regContextMCR, uint_8 regContextVRE) {
+    regContextVRE |= BRC_VRER_CLEAR_VERTICAL_INTERRUPT;
+    regContextVRE &= ~BRC_VRER_ENABLE_VERTICAL_INTERRUPT;
+    regContextMCR |= BRC_MCR_HARDWARE_RESET;
+    regContextMCR &= ~BRC_MCR_OUTPUT_CONTROL;
+
+    busWriteCRT(BRCI_VERTICAL_RETRACE_END, regContextMCR, mode);
+    busWriteCRT(BRCI_MODE_CONTROL, regContextMCR, mode);
+    
 }

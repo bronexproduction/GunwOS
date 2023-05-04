@@ -1,5 +1,5 @@
 //
-//  ega.c
+//  vga.c
 //  GunwOS
 //
 //  Created by Artur Danielewski on 15.01.2023.  
@@ -119,7 +119,7 @@ static struct gnwDeviceUHA uha() {
     return uha;
 }
 
-struct gnwDeviceDescriptor k_drv_display_ega_descriptor() {
+struct gnwDeviceDescriptor k_drv_display_vga_descriptor() {
     return (struct gnwDeviceDescriptor) {
         /* type */ DEV_TYPE_DISPLAY | DEV_TYPE_MEM,
         /* api */ uha(),
@@ -129,6 +129,6 @@ struct gnwDeviceDescriptor k_drv_display_ega_descriptor() {
             },
             /* descriptor */ desc()
         },
-        /* name */ "Default EGA display"
+        /* name */ "Default VGA display"
     };
 }

@@ -11,7 +11,7 @@
 //
 
 #include "graphics.h"
-#include "../ega_bus.h"
+#include "../vga_bus.h"
 
 struct registers {
     uint_8 setReset;
@@ -25,7 +25,7 @@ struct registers {
     uint_8 bitMask;
 };
 
-static void push(const struct registers * const reg, const enum modeOfOperation mode) {
+static void pushConfig(const struct registers * const reg, const enum modeOfOperation mode) {
     busWriteGraphics(BRGI_SET_RESET, reg->setReset, mode);
     busWriteGraphics(BRGI_ENABLE_SET_RESET, reg->enableSetReset, mode);
     busWriteGraphics(BRGI_COLOR_COMPARE, reg->colorCompare, mode);
@@ -35,10 +35,6 @@ static void push(const struct registers * const reg, const enum modeOfOperation 
     busWriteGraphics(BRGI_MISC, reg->misc, mode);
     busWriteGraphics(BRGI_COLOR_DONT_CARE, reg->colorDontCare, mode);
     busWriteGraphics(BRGI_BIT_MASK, reg->bitMask, mode);
-}
-
-void graphicsDisable(const enum modeOfOperation mode, const bool memOver64K) {
-    #warning TO BE IMPLEMENTED
 }
 
 void graphicsSetMode(const enum modeOfOperation mode, const bool memOver64K) {
@@ -97,9 +93,5 @@ void graphicsSetMode(const enum modeOfOperation mode, const bool memOver64K) {
     } break;
     }
 
-    push(&reg, mode);
-}
-
-void graphicsEnable(const enum modeOfOperation mode, const bool memOver64K) {
-    #warning TO BE IMPLEMENTED
+    pushConfig(&reg, mode);
 }

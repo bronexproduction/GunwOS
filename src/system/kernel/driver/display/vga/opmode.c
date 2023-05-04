@@ -27,21 +27,24 @@ void setMode(const enum modeOfOperation mode) {
         #warning how to detect memory extensions?
         const bool memOver64K = false;
 
+        uint_8 externalContext;
+        uint_8 crtContextMCR;
+        uint_8 crtContextVRE;
+
         /*
             #warning disable display
             #warning unlock registers (CRTC)
         */
-        externalDisable(mode);
+        crtDisable(mode, memOver64K, &crtContextMCR, &crtContextVRE);
         sequencerDisable(mode, memOver64K);
-        crtDisable(mode, memOver64K);
-        graphicsDisable(mode, memOver64K);
+        externalDisable(mode);
 
         /*
             Loading registers
         */
-        externalSetMode(mode);
+        externalSetMode(mode, &externalContext);
         sequencerSetMode(mode, memOver64K);
-        crtSetMode(mode, memOver64K);
+        crtSetMode(mode, memOver64K, &crtContextMCR, &crtContextVRE);
         graphicsSetMode(mode, memOver64K);
         attributeSetMode(mode, memOver64K);
         
@@ -49,10 +52,9 @@ void setMode(const enum modeOfOperation mode) {
             #warning lock CRTC registers
             #warning enable display
         */
-        externalEnable(mode);
+        externalEnable(mode, externalContext);
         sequencerEnable(mode, memOver64K);
-        crtEnable(mode, memOver64K);
-        graphicsEnable(mode, memOver64K);
+        crtEnable(mode, memOver64K, crtContextMCR, crtContextVRE);
     } break;
     default:
         OOPS("Unsupported display mode");

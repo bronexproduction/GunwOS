@@ -1,11 +1,11 @@
 //
-//  ega_bus.c
+//  vga_bus.c
 //  GunwOS
 //
 //  Created by Artur Danielewski on 24.03.2023.
 //
 
-#include "ega_bus.h"
+#include "vga_bus.h"
 #include <gunwbus.h>
 #include <error/panic.h>
 

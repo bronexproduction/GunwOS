@@ -11,18 +11,16 @@
 //
 
 #include "sequencer.h"
-#include "../ega_bus.h"
+#include "../vga_bus.h"
 
 struct registers {
-    uint_8 reset;
     uint_8 clockingMode;
     uint_8 mapMask;
     uint_8 charMapSelect;
     uint_8 memoryMode;
 };
 
-static void push(const struct registers * const reg, const enum modeOfOperation mode) {
-    busWriteSequencer(BRSI_RESET, reg->reset, mode);
+static void pushConfig(const struct registers * const reg, const enum modeOfOperation mode) {
     busWriteSequencer(BRSI_CLOCKING_MODE, reg->clockingMode, mode);
     busWriteSequencer(BRSI_MAP_MASK, reg->mapMask, mode);
     busWriteSequencer(BRSI_CHAR_MAP_SELECT, reg->charMapSelect, mode);
@@ -30,14 +28,13 @@ static void push(const struct registers * const reg, const enum modeOfOperation 
 }
 
 void sequencerDisable(const enum modeOfOperation mode, const bool memOver64K) {
-    #warning TO BE IMPLEMENTED
+    busWriteSequencer(BRSI_RESET, 0x00, mode);
 }
 
 void sequencerSetMode(const enum modeOfOperation mode, const bool memOver64K) {
 
     struct registers reg;
 
-    reg.reset = BRS_RR_SYNCHRONOUS_RESET | BRS_RR_ASYNCHRONOUS_RESET; /* 0x03 */;
     reg.charMapSelect = 0x00;
 
     switch (mode) {
@@ -95,9 +92,9 @@ void sequencerSetMode(const enum modeOfOperation mode, const bool memOver64K) {
     } break;
     }
 
-    push(&reg, mode);
+    pushConfig(&reg, mode);
 }
 
 void sequencerEnable(const enum modeOfOperation mode, const bool memOver64K) {
-    #warning TO BE IMPLEMENTED
+    busWriteSequencer(BRSI_RESET, BRS_RR_SYNCHRONOUS_RESET | BRS_RR_ASYNCHRONOUS_RESET /* 0x03 */, mode);
 }
