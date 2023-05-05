@@ -38,6 +38,7 @@ void externalSetMode(const enum modeOfOperation mode, uint_8 * const regContext)
     }
 
     busWriteExternal(BRE_FEATURE_CTRL, 0x00, mode);
+    busWriteExternal(BRE_MISC_OUT, *regContext, mode);
 }
 
 void externalEnable(const enum modeOfOperation mode, uint_8 regContext) {
