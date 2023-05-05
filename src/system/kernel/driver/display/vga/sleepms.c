@@ -7,11 +7,8 @@
 //  Temporary solution
 //
 
-#include <gunwtime.h>
-
 #warning to be removed if moved to process
 
-void vga_sleepms(const size_t ms) {
-    const time_t startTime = timeMs();
-    while(timeMs() < startTime + ms);
+void vga_sleepms() {
+    for (int i = 0; i < 1000000; ++i);
 }

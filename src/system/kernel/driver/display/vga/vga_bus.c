@@ -37,8 +37,8 @@ static uint_16 busAddr(uint_16 baseAddr, const enum modeOfOperation mode) {
 
 static void vga_wrb(uint_16 const port, uint_8 const val, const enum modeOfOperation mode) {
     wrb(busAddr(port, mode), val);
-    extern void vga_sleepms(const size_t);
-    vga_sleepms(1);
+    extern void vga_sleepms();
+    vga_sleepms();
 }
 
 static uint_8 busReadLSI(const uint_16 addrAddr,
