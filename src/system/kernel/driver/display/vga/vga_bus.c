@@ -16,8 +16,8 @@
 #define IS_GRAPHICS_MODE(MODE) (mode & OPMODE_GRAP)
 
 /*
-    Bus register addresses that matches 0x*B* refer to monochrome display address range.
-    Corresponding bytes for color display are offset by 0x020 (addresses 0x*D*)
+    Bus register addresses that matches 0x*B* refer to text display address range.
+    Corresponding bytes for graphics display are offset by 0x020 (addresses 0x*D*)
 
     For more information see:
     IBM Enhanced Graphics Adapter
