@@ -108,9 +108,9 @@ enum bus_reg_attr_index {
     BRAI_PALETTE_START = 0x00, /* 0x00 - 0x0F range for 16 palettes */
     BRAI_PALETTE_END = 0x0F,
     BRAI_MODE_CONTROL = 0x10,
-    BRAI_OVERSCAN_COLOR = 0x11,
-    BRAI_COLOR_PLANE_ENABLE = 0x12,
-    BRAI_HORIZONTAL_PEL_PANNING = 0x13
+    BRAI_MEMORY_PLANE_ENABLE = 0x12,
+    BRAI_HORIZONTAL_PEL_PANNING = 0x13,
+    BRAI_COLOR_SELECT = 0x14
 };
 
 /*
@@ -515,6 +515,9 @@ enum bus_reg_attr_bit_pr {
     Mode Control Register
 */
 enum bus_reg_attr_bit_mcr {
+    BRA_MCR_PALETTE_BITS_P5_P4_SELECT = 0x80,
+    BRA_MCR_PIXEL_WIDTH_CLOCK_SELECT = 0x40,
+    BRA_MCR_PIXEL_PANNING_COMPATIBILITY = 0x20,
     BRA_MCR_SELECT_BACKGROUND_INTENSITY_OR_ENABLE_BLINK = 0x08,
     BRA_MCR_ENABLE_LINE_GRAPHICS_CHARACTER_CODES = 0x04,
     BRA_MCR_DISPLAY_TYPE = 0x02,
@@ -524,25 +527,11 @@ enum bus_reg_attr_bit_mcr {
 /*
     Attribute Controller Registers
 
-    Overscan Color Register
+    Memory Plane Enable Register
 */
-enum bus_reg_attr_bit_ocr {
-    BRA_OCR_SELECTS_SECONDARY_RED_BORDER_COLOR = 0x20,
-    BRA_OCR_SELECTS_INTENSIFIED_OR_SECONDARY_GREEN = 0x10,
-    BRA_OCR_SELECTS_SECONDARY_BLUE_BORDER_COLOR = 0x08,
-    BRA_OCR_SELECTS_RED_BORDER_COLOR = 0x04,
-    BRA_OCR_SELECTS_GREEN_BORDER_COLOR = 0x02,
-    BRA_OCR_SELECTS_BLUE_BORDER_COLOR = 0x01
-};
-
-/*
-    Attribute Controller Registers
-
-    Color Plane Enable Register
-*/
-enum bus_reg_attr_bit_cper {
-    BRA_CPER_VIDEO_STATUS_MUX_RANGE = 0x30,
-    BRA_CPER_ENABLE_COLOR_PLANE_RANGE = 0x0F
+enum bus_reg_attr_bit_mper {
+    BRA_MPER_VIDEO_STATUS_MUX_RANGE = 0x30,
+    BRA_MPER_ENABLE_COLOR_PLANE_RANGE = 0x0F
 };
 
 /*
@@ -552,6 +541,18 @@ enum bus_reg_attr_bit_cper {
 */
 enum bus_reg_attr_bit_hppr {
     BRA_HPPR_HORIZONTAL_PEL_PANNING_RANGE = 0x0F
+};
+
+/*
+    Attribute Controller Registers
+
+    Color Select Register
+*/
+enum bus_reg_attr_csr {
+    BRA_CSR_PALETTE_BITS_P7 = 0x08,
+    BRA_CSR_PALETTE_BITS_P6 = 0x04,
+    BRA_CSR_ALTERNATE_PALETTE_BITS_P5 = 0x02,
+    BRA_CSR_ALTERNATE_PALETTE_BITS_P4 = 0x01,
 };
 
 uint_8 busReadExternal(const enum bus_reg_external reg, const enum modeOfOperation mode);
