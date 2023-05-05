@@ -23,10 +23,14 @@ void externalDisable(const enum modeOfOperation mode) {
 
 void externalSetMode(const enum modeOfOperation mode, uint_8 * const regContext) {
     switch (mode) {
-    case VGA_OPMODE_3:
-    case VGA_OPMODE_4: {
-        *regContext |= BRE_MOR_PAGE_BIT_FOR_ODD_EVEN    |
+    case VGA_OPMODE_3: {
+        *regContext |= BRE_MOR_CLOCK_SELECT_0        |
+                       BRE_MOR_PAGE_BIT_FOR_ODD_EVEN |
                        BRE_MOR_IO_ADDRESS_SELECT; /* 0x23 (with ENABLE_RAM) */
+    } break;
+    case VGA_OPMODE_4: {
+        // *regContext |= BRE_MOR_PAGE_BIT_FOR_ODD_EVEN    |
+        //                BRE_MOR_IO_ADDRESS_SELECT; /* 0x23 (with ENABLE_RAM) */
     } break;
     default: {
         OOPS("Unsupported video mode");
@@ -38,7 +42,6 @@ void externalSetMode(const enum modeOfOperation mode, uint_8 * const regContext)
 
 void externalEnable(const enum modeOfOperation mode, uint_8 regContext) {
     regContext |= BRE_MOR_ENABLE_RAM;
-    regContext &= ~BRE_MOR_DISABLE_INTERNAL_VIDEO_DRIVERS;
-    
+
     busWriteExternal(BRE_MISC_OUT, regContext, mode);
 }
