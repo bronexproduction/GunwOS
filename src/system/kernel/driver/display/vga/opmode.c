@@ -25,6 +25,7 @@ void setMode(const enum modeOfOperation mode) {
     case VGA_OPMODE_3: 
     case VGA_OPMODE_4: {
         uint_8 externalContext;
+        uint_8 sequencerContextCMR;
         uint_8 crtContextMCR;
         uint_8 crtContextVSE;
 
@@ -33,14 +34,14 @@ void setMode(const enum modeOfOperation mode) {
             #warning unlock registers (CRTC)
         */
         crtDisable(mode, &crtContextMCR, &crtContextVSE);
-        sequencerDisable(mode);
+        sequencerDisable(mode, &sequencerContextCMR);
         externalDisable(mode);
 
         /*
             Loading registers
         */
         externalSetMode(mode, &externalContext);
-        sequencerSetMode(mode);
+        sequencerSetMode(mode, &sequencerContextCMR);
         crtSetMode(mode, &crtContextMCR, &crtContextVSE);
         graphicsSetMode(mode);
         attributeSetMode(mode);
@@ -50,7 +51,7 @@ void setMode(const enum modeOfOperation mode) {
             #warning enable display
         */
         externalEnable(mode, externalContext);
-        sequencerEnable(mode);
+        sequencerEnable(mode, sequencerContextCMR);
         attributeEnable(mode);
         crtEnable(mode, crtContextMCR, crtContextVSE);
     } break;

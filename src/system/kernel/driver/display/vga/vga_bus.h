@@ -182,9 +182,10 @@ enum bus_reg_sequencer_bit_rr {
     Clocking Mode Register
 */
 enum bus_reg_sequencer_bit_cmr {
+    BRS_CMR_SCREEN_OFF = 0x20,
+    BRS_CMR_SHIFT_4 = 0x10,
     BRS_CMR_DOT_CLOCK = 0x08,
     BRS_CMR_SHIFT_LOAD = 0x04,
-    BRS_CMR_BANDWIDTH = 0x02,
     BRS_CMR_8_9_DOT_CLOCKS = 0x01
 };
 
@@ -216,9 +217,9 @@ enum bus_reg_sequencer_bit_cmsr {
     Memory Mode Register
 */
 enum bus_reg_sequencer_bit_memModeReg {
+    BRS_MEMMODEREG_CHAIN_4 = 0x08,
     BRS_MEMMODEREG_ODD_EVEN = 0x04,
-    BRS_MEMMODEREG_EXTENDED_MEMORY = 0x02,
-    BRS_MEMMODEREG_ALPHA = 0x01
+    BRS_MEMMODEREG_EXTENDED_MEMORY = 0x02
 };
 
 /*
