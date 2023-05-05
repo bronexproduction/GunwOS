@@ -34,7 +34,7 @@ void setMode(const enum modeOfOperation mode) {
             #warning unlock registers (CRTC)
         */
         crtDisable(mode, &crtContextMCR, &crtContextVSE);
-        sequencerDisable(mode, &sequencerContextCMR);
+        sequencerDisable(&sequencerContextCMR);
         externalDisable(mode);
 
         /*
@@ -45,15 +45,15 @@ void setMode(const enum modeOfOperation mode) {
         crtSetMode(mode, &crtContextMCR, &crtContextVSE);
         graphicsSetMode(mode);
         attributeSetMode(mode);
-        
+
         /*
             #warning lock CRTC registers
             #warning enable display
         */
         externalEnable(mode, externalContext);
-        sequencerEnable(mode, sequencerContextCMR);
-        attributeEnable(mode);
+        sequencerEnable(sequencerContextCMR);
         crtEnable(mode, crtContextMCR, crtContextVSE);
+        attributeEnable();
     } break;
     default:
         OOPS("Unsupported display mode");

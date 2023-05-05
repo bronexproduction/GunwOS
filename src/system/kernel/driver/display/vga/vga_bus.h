@@ -560,11 +560,11 @@ uint_8 busReadExternal(const enum bus_reg_external reg, const enum modeOfOperati
 uint_8 busReadCRT(const enum bus_reg_crt_index index, const enum modeOfOperation mode);
 
 void busWriteExternal(const enum bus_reg_external reg, const uint_8 data, const enum modeOfOperation mode);
-void busWriteSequencer(const enum bus_reg_sequencer_index index, const uint_8 data, const enum modeOfOperation mode);
+void busWriteSequencer(const enum bus_reg_sequencer_index index, const uint_8 data);
 void busWriteCRT(const enum bus_reg_crt_index index, const uint_8 data, const enum modeOfOperation mode);
 void busWriteGraphicsPosition(const struct bus_reg_graphics_position position);
-void busWriteGraphics(const enum bus_reg_graphics_index index, const uint_8 data, const enum modeOfOperation mode);
-void busWriteAttribute(const enum bus_reg_attr_index index, const uint_8 data, const enum modeOfOperation mode);
-void busWriteAttributeAddr(const uint_8 data, const enum modeOfOperation mode);
+void busWriteGraphics(const enum bus_reg_graphics_index index, const uint_8 data);
+void busWriteAttribute(const enum bus_reg_attr_index index, const uint_8 data);
+void busWriteAttributeAddr(const uint_8 data);
 
 #endif // VGA_BUS_H

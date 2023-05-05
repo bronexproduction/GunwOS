@@ -17,6 +17,6 @@
 #include <types.h>
 
 void attributeSetMode(const enum modeOfOperation mode);
-void attributeEnable(const enum modeOfOperation mode);
+void attributeEnable();
 
 #endif // ATTRIBUTE_H

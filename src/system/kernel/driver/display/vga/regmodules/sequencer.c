@@ -22,17 +22,17 @@ struct registers {
     uint_8 memoryMode;
 };
 
-static void pushConfig(const struct registers * const reg, const enum modeOfOperation mode) {
-    busWriteSequencer(BRSI_MAP_MASK, reg->mapMask, mode);
-    busWriteSequencer(BRSI_CHAR_MAP_SELECT, reg->charMapSelect, mode);
-    busWriteSequencer(BRSI_MEMORY_MODE, reg->memoryMode, mode);
+static void pushConfig(const struct registers * const reg) {
+    busWriteSequencer(BRSI_MAP_MASK, reg->mapMask);
+    busWriteSequencer(BRSI_CHAR_MAP_SELECT, reg->charMapSelect);
+    busWriteSequencer(BRSI_MEMORY_MODE, reg->memoryMode);
 }
 
-void sequencerDisable(const enum modeOfOperation mode, uint_8 * const regContextCMR) {
+void sequencerDisable(uint_8 * const regContextCMR) {
     *regContextCMR = BRS_CMR_SCREEN_OFF;
 
-    busWriteSequencer(BRSI_RESET, 0x00, mode);
-    busWriteSequencer(BRSI_CLOCKING_MODE, *regContextCMR, mode);
+    busWriteSequencer(BRSI_RESET, 0x00);
+    busWriteSequencer(BRSI_CLOCKING_MODE, *regContextCMR);
 }
 
 void sequencerSetMode(const enum modeOfOperation mode, uint_8 * const regContextCMR) {
@@ -57,12 +57,12 @@ void sequencerSetMode(const enum modeOfOperation mode, uint_8 * const regContext
     } break;
     }
 
-    pushConfig(&reg, mode);
+    pushConfig(&reg);
 }
 
-void sequencerEnable(const enum modeOfOperation mode, uint_8 regContextCMR) {
+void sequencerEnable(uint_8 regContextCMR) {
     regContextCMR &= ~BRS_CMR_SCREEN_OFF;
 
-    busWriteSequencer(BRSI_CLOCKING_MODE, regContextCMR, mode);
-    busWriteSequencer(BRSI_RESET, BRS_RR_SYNCHRONOUS_RESET | BRS_RR_ASYNCHRONOUS_RESET /* 0x03 */, mode);
+    busWriteSequencer(BRSI_CLOCKING_MODE, regContextCMR);
+    busWriteSequencer(BRSI_RESET, BRS_RR_SYNCHRONOUS_RESET | BRS_RR_ASYNCHRONOUS_RESET /* 0x03 */);
 }

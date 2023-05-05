@@ -28,16 +28,16 @@ struct registers {
     uint_8 bitMask;
 };
 
-static void pushConfig(const struct registers * const reg, const enum modeOfOperation mode) {
-    busWriteGraphics(BRGI_SET_RESET, reg->setReset, mode);
-    busWriteGraphics(BRGI_ENABLE_SET_RESET, reg->enableSetReset, mode);
-    busWriteGraphics(BRGI_COLOR_COMPARE, reg->colorCompare, mode);
-    busWriteGraphics(BRGI_DATA_ROTATE, reg->dataRotate, mode);
-    busWriteGraphics(BRGI_READ_MAP_SELECT, reg->readMapSelect, mode);
-    busWriteGraphics(BRGI_MODE_REGISTER, reg->modeRegister, mode);
-    busWriteGraphics(BRGI_MISC, reg->misc, mode);
-    busWriteGraphics(BRGI_COLOR_DONT_CARE, reg->colorDontCare, mode);
-    busWriteGraphics(BRGI_BIT_MASK, reg->bitMask, mode);
+static void pushConfig(const struct registers * const reg) {
+    busWriteGraphics(BRGI_SET_RESET, reg->setReset);
+    busWriteGraphics(BRGI_ENABLE_SET_RESET, reg->enableSetReset);
+    busWriteGraphics(BRGI_COLOR_COMPARE, reg->colorCompare);
+    busWriteGraphics(BRGI_DATA_ROTATE, reg->dataRotate);
+    busWriteGraphics(BRGI_READ_MAP_SELECT, reg->readMapSelect);
+    busWriteGraphics(BRGI_MODE_REGISTER, reg->modeRegister);
+    busWriteGraphics(BRGI_MISC, reg->misc);
+    busWriteGraphics(BRGI_COLOR_DONT_CARE, reg->colorDontCare);
+    busWriteGraphics(BRGI_BIT_MASK, reg->bitMask);
 }
 
 void graphicsSetMode(const enum modeOfOperation mode) {
@@ -67,5 +67,5 @@ void graphicsSetMode(const enum modeOfOperation mode) {
     } break;
     }
 
-    pushConfig(&reg, mode);
+    pushConfig(&reg);
 }

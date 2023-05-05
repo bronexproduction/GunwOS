@@ -27,14 +27,14 @@ struct registers {
     uint_8 colorSelect;
 };
 
-static void pushConfig(const struct registers * const reg, const enum modeOfOperation mode) {
+static void pushConfig(const struct registers * const reg) {
     for (int i = 0; i < PALETTE_COUNT; ++i) {
-        busWriteAttribute(BRAI_PALETTE_START + i, reg->palette[i], mode);
+        busWriteAttribute(BRAI_PALETTE_START + i, reg->palette[i]);
     }
-    busWriteAttribute(BRAI_MODE_CONTROL, reg->modeControl, mode);
-    busWriteAttribute(BRAI_MEMORY_PLANE_ENABLE, reg->memoryPlaneEnable, mode);
-    busWriteAttribute(BRAI_HORIZONTAL_PEL_PANNING, reg->horizontalPelPanning, mode);
-    busWriteAttribute(BRAI_COLOR_SELECT, reg->colorSelect, mode);
+    busWriteAttribute(BRAI_MODE_CONTROL, reg->modeControl);
+    busWriteAttribute(BRAI_MEMORY_PLANE_ENABLE, reg->memoryPlaneEnable);
+    busWriteAttribute(BRAI_HORIZONTAL_PEL_PANNING, reg->horizontalPelPanning);
+    busWriteAttribute(BRAI_COLOR_SELECT, reg->colorSelect);
 }
 
 void attributeSetMode(const enum modeOfOperation mode) {
@@ -92,10 +92,10 @@ void attributeSetMode(const enum modeOfOperation mode) {
     } break;
     }
 
-    pushConfig(&reg, mode);
+    pushConfig(&reg);
 }
 
-void attributeEnable(const enum modeOfOperation mode) {
+void attributeEnable() {
     #warning why do I need it
-	busWriteAttributeAddr(BRA_AAR_PALETTE_ADDRESS_SOURCE, mode);
+	busWriteAttributeAddr(BRA_AAR_PALETTE_ADDRESS_SOURCE);
 }

@@ -94,8 +94,8 @@ void busWriteExternal(const enum bus_reg_external reg, const uint_8 data, const 
     vga_wrb(reg, data, mode);
 }
 
-void busWriteSequencer(const enum bus_reg_sequencer_index index, const uint_8 data, const enum modeOfOperation mode) {
-    busWriteLSI(BRS_ADDRESS, BRS_DATA, index, data, mode);
+void busWriteSequencer(const enum bus_reg_sequencer_index index, const uint_8 data) {
+    busWriteLSI(BRS_ADDRESS, BRS_DATA, index, data, 0);
 }
 
 void busWriteCRT(const enum bus_reg_crt_index index, const uint_8 data, const enum modeOfOperation mode) {
@@ -103,18 +103,18 @@ void busWriteCRT(const enum bus_reg_crt_index index, const uint_8 data, const en
 }
 
 void busWriteGraphicsPosition(const struct bus_reg_graphics_position position) {
-    vga_wrb(BRG_GRAPHICS_1_POSITION, (position.graphics1_pos1 ? BRG_G1PR_POSITION_1 : 0) | (position.graphics1_pos0 ? BRG_G1PR_POSITION_0 : 0), VGA_OPMODE_0);
-    vga_wrb(BRG_GRAPHICS_2_POSITION, (position.graphics2_pos1 ? BRG_G2PR_POSITION_1 : 0) | (position.graphics2_pos0 ? BRG_G2PR_POSITION_0 : 0), VGA_OPMODE_0);
+    vga_wrb(BRG_GRAPHICS_1_POSITION, (position.graphics1_pos1 ? BRG_G1PR_POSITION_1 : 0) | (position.graphics1_pos0 ? BRG_G1PR_POSITION_0 : 0), 0);
+    vga_wrb(BRG_GRAPHICS_2_POSITION, (position.graphics2_pos1 ? BRG_G2PR_POSITION_1 : 0) | (position.graphics2_pos0 ? BRG_G2PR_POSITION_0 : 0), 0);
 }
 
-void busWriteGraphics(const enum bus_reg_graphics_index index, const uint_8 data, const enum modeOfOperation mode) {
-    busWriteLSI(BRG_GRAPHICS_1_AND_2_ADDRESS, BRG_DATA, index, data, mode);
+void busWriteGraphics(const enum bus_reg_graphics_index index, const uint_8 data) {
+    busWriteLSI(BRG_GRAPHICS_1_AND_2_ADDRESS, BRG_DATA, index, data, 0);
 }
 
-void busWriteAttribute(const enum bus_reg_attr_index index, const uint_8 data, const enum modeOfOperation mode) {
-    busWriteLSI(BRA_ADDRESS, BRA_DATA, index, data, mode);
+void busWriteAttribute(const enum bus_reg_attr_index index, const uint_8 data) {
+    busWriteLSI(BRA_ADDRESS, BRA_DATA, index, data, 0);
 }
 
-void busWriteAttributeAddr(const uint_8 data, const enum modeOfOperation mode) {
-    vga_wrb(BRA_ADDRESS, data, mode);
+void busWriteAttributeAddr(const uint_8 data) {
+    vga_wrb(BRA_ADDRESS, data, 0);
 }

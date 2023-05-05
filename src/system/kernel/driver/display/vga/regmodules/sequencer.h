@@ -16,8 +16,8 @@
 #include "../opmode.h"
 #include <types.h>
 
-void sequencerDisable(const enum modeOfOperation mode, uint_8 * const regContextCMR);
+void sequencerDisable(uint_8 * const regContextCMR);
 void sequencerSetMode(const enum modeOfOperation mode, uint_8 * const regContextCMR);
-void sequencerEnable(const enum modeOfOperation mode, uint_8 regContextCMR);
+void sequencerEnable(uint_8 regContextCMR);
 
 #endif // SEQUENCER_H
