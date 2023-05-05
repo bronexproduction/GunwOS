@@ -178,7 +178,8 @@ static void pushConfig(const struct registers * const reg, const enum modeOfOper
 
 void crtDisable(const enum modeOfOperation mode, uint_8 * const regContextMCR, uint_8 * const regContextVSE) {
     *regContextMCR = BRC_MCR_OUTPUT_CONTROL;
-    *regContextVSE = BRC_VSER_ENABLE_VERTICAL_INTERRUPT;
+    *regContextVSE = SET(BRC_VSER_ENABLE_VERTICAL_INTERRUPT) |
+                     CLEAR(BRC_VSER_PROTECT_REGISTERS);
 
     busWriteCRT(BRCI_MODE_CONTROL, *regContextMCR, mode);
     busWriteCRT(BRCI_VERTICAL_SYNC_END, *regContextVSE, mode);
@@ -217,7 +218,7 @@ void crtSetMode(const enum modeOfOperation mode, uint_8 * const regContextMCR, u
 }
 
 void crtEnable(const enum modeOfOperation mode, uint_8 regContextMCR, uint_8 regContextVSE) {
-    regContextVSE |= BRC_VSER_CLEAR_VERTICAL_INTERRUPT;
+    regContextVSE |= BRC_VSER_CLEAR_VERTICAL_INTERRUPT | BRC_VSER_PROTECT_REGISTERS;
     regContextVSE &= ~BRC_VSER_ENABLE_VERTICAL_INTERRUPT;
     regContextMCR |= BRC_MCR_HARDWARE_RESET;
     regContextMCR &= ~BRC_MCR_OUTPUT_CONTROL;

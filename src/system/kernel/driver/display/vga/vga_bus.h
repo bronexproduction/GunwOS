@@ -321,6 +321,7 @@ enum bus_reg_crt_bit_cer {
     Vertical Sync End Register
 */
 enum bus_reg_crt_bit_vser {
+    BRC_VSER_PROTECT_REGISTERS = 0x80,
     BRC_VSER_ENABLE_VERTICAL_INTERRUPT = 0x20, /* A logical 0 will enable vertical interrupt.*/
     BRC_VSER_CLEAR_VERTICAL_INTERRUPT = 0x10, /* A logical 0 will clear vertical interrupt.*/
     BRC_VSER_VERTICAL_SYNC_END_RANGE = 0x0F
