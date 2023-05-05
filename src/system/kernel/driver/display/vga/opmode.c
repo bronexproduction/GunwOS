@@ -26,13 +26,13 @@ void setMode(const enum modeOfOperation mode) {
     case VGA_OPMODE_4: {
         uint_8 externalContext;
         uint_8 crtContextMCR;
-        uint_8 crtContextVRE;
+        uint_8 crtContextVSE;
 
         /*
             #warning disable display
             #warning unlock registers (CRTC)
         */
-        crtDisable(mode, &crtContextMCR, &crtContextVRE);
+        crtDisable(mode, &crtContextMCR, &crtContextVSE);
         sequencerDisable(mode);
         externalDisable(mode);
 
@@ -41,7 +41,7 @@ void setMode(const enum modeOfOperation mode) {
         */
         externalSetMode(mode, &externalContext);
         sequencerSetMode(mode);
-        crtSetMode(mode, &crtContextMCR, &crtContextVRE);
+        crtSetMode(mode, &crtContextMCR, &crtContextVSE);
         graphicsSetMode(mode);
         attributeSetMode(mode);
         
@@ -52,7 +52,7 @@ void setMode(const enum modeOfOperation mode) {
         externalEnable(mode, externalContext);
         sequencerEnable(mode);
         attributeEnable(mode);
-        crtEnable(mode, crtContextMCR, crtContextVRE);
+        crtEnable(mode, crtContextMCR, crtContextVSE);
     } break;
     default:
         OOPS("Unsupported display mode");

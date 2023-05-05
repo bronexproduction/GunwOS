@@ -16,8 +16,8 @@
 #include "../opmode.h"
 #include <types.h>
 
-void crtDisable(const enum modeOfOperation mode, uint_8 * const regContextMCR, uint_8 * const regContextVRE);
-void crtSetMode(const enum modeOfOperation mode, uint_8 * const regContextMCR, uint_8 * const regContextVRE);
-void crtEnable(const enum modeOfOperation mode, uint_8 regContextMCR, uint_8 regContextVRE);
+void crtDisable(const enum modeOfOperation mode, uint_8 * const regContextMCR, uint_8 * const regContextVSE);
+void crtSetMode(const enum modeOfOperation mode, uint_8 * const regContextMCR, uint_8 * const regContextVSE);
+void crtEnable(const enum modeOfOperation mode, uint_8 regContextMCR, uint_8 regContextVSE);
 
 #endif // OPMODE_H

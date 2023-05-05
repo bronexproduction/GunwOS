@@ -48,8 +48,8 @@ enum bus_reg_crt_index {
     BRCI_HORIZONTAL_DISPLAY_END = 0x01,
     BRCI_START_HORIZONTAL_BLANK = 0x02,
     BRCI_END_HORIZONTAL_BLANK = 0x03,
-    BRCI_START_HORIZONTAL_RETRACE = 0x04,
-    BRCI_END_HORIZONTAL_RETRACE = 0x05,
+    BRCI_START_HORIZONTAL_SYNC = 0x04,
+    BRCI_END_HORIZONTAL_SYNC = 0x05,
     BRCI_VERTICAL_TOTAL = 0x06,
     BRCI_OVERFLOW = 0x07,
     BRCI_PRESET_ROW_SCAN = 0x08,
@@ -60,9 +60,9 @@ enum bus_reg_crt_index {
     BRCI_START_ADDRESS_LOW = 0x0D,
     BRCI_CURSOR_LOCATION_HIGH = 0x0E,
     BRCI_CURSOR_LOCATION_LOW = 0x0F,
-    BRCI_VERTICAL_RETRACE_START = 0x10,
+    BRCI_VERTICAL_SYNC_START = 0x10,
     BRCI_LIGHT_PEN_HIGH = 0x10,
-    BRCI_VERTICAL_RETRACE_END = 0x11,
+    BRCI_VERTICAL_SYNC_END = 0x11,
     BRCI_LIGHT_PEN_LOW = 0x11,
     BRCI_VERTICAL_DISPLAY_END = 0x12,
     BRCI_OFFSET = 0x13,
@@ -228,6 +228,7 @@ enum bus_reg_sequencer_bit_memModeReg {
     End Horizontal Blanking Register
 */
 enum bus_reg_crt_bit_ehbr {
+    BRC_EHBR_LIGHT_PEN_ACCESS = 0x80,
     BRC_EHBR_DISPLAY_ENABLE_SKEW_CONTROL_RANGE = 0x60,
     BRC_EHBR_END_BLANKING_RANGE = 0x1F
 };
@@ -235,12 +236,32 @@ enum bus_reg_crt_bit_ehbr {
 /*
     CRT Controller Registers
 
-    End Horizontal Retrace Register
+    End Horizontal Sync Register
 */
-enum bus_reg_crt_bit_ehrr {
-    BRC_EHRR_START_ODD_MEMORY_ADDRESS = 0x80,
-    BRC_EHRR_HORIZONTAL_RETRACE_DELAY_RANGE = 0x60,
-    BRC_EHRR_END_HORIZONTAL_RETRACE_RANGE = 0x1F
+enum bus_reg_crt_bit_ehsr {
+    BRC_EHSR_HORIZONTAL_BLANK_END_BIT_5 = 0x80,
+    BRC_EHSR_HORIZONTAL_SYNC_DELAY_RANGE = 0x60,
+    BRC_EHSR_END_HORIZONTAL_SYNC_RANGE = 0x1F
+};
+
+/*
+    CRT Controller Registers
+    
+    Text Cursor Start Register
+*/
+enum bus_reg_crt_bit_tcsr {
+    BRC_TCSR_TEXT_CURSOR_OFF = 0x20,
+    BRC_TCSR_TEXT_CURSOR_START_RANGE = 0x1F
+};
+
+/*
+    CRT Controller Registers
+    
+    Text Cursor End Register
+*/
+enum bus_reg_crt_bit_tcer {
+    BRC_TCER_TEXT_CURSOR_SKEW_RANGE = 0x60,
+    BRC_TCER_TEXT_CURSOR_END_RANGE = 0x1F
 };
 
 /*
@@ -297,12 +318,12 @@ enum bus_reg_crt_bit_cer {
 /*
     CRT Controller Registers
 
-    Vertical Retrace End Register
+    Vertical Sync End Register
 */
-enum bus_reg_crt_bit_vrer {
-    BRC_VRER_ENABLE_VERTICAL_INTERRUPT = 0x20, /* A logical 0 will enable vertical interrupt.*/
-    BRC_VRER_CLEAR_VERTICAL_INTERRUPT = 0x10, /* A logical 0 will clear vertical interrupt.*/
-    BRC_VRER_VERTICAL_RETRACE_END_RANGE = 0x0F
+enum bus_reg_crt_bit_vser {
+    BRC_VSER_ENABLE_VERTICAL_INTERRUPT = 0x20, /* A logical 0 will enable vertical interrupt.*/
+    BRC_VSER_CLEAR_VERTICAL_INTERRUPT = 0x10, /* A logical 0 will clear vertical interrupt.*/
+    BRC_VSER_VERTICAL_SYNC_END_RANGE = 0x0F
 };
 
 /*
