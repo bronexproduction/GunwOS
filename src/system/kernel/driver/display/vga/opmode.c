@@ -30,15 +30,14 @@ void setMode(const enum modeOfOperation mode) {
         uint_8 crtContextVSE;
 
         /*
-            #warning disable display
-            #warning unlock registers (CRTC)
+            Disable display and unlock CRT registers
         */
         crtDisable(mode, &crtContextMCR, &crtContextVSE);
         sequencerDisable(&sequencerContextCMR);
         externalDisable(mode);
 
         /*
-            Loading registers
+            Load registers
         */
         externalSetMode(mode, &externalContext);
         sequencerSetMode(mode, &sequencerContextCMR);
@@ -47,8 +46,7 @@ void setMode(const enum modeOfOperation mode) {
         attributeSetMode(mode);
 
         /*
-            #warning lock CRTC registers
-            #warning enable display
+            Enable display and lock CRT registers
         */
         externalEnable(mode, externalContext);
         sequencerEnable(sequencerContextCMR);
