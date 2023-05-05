@@ -112,6 +112,8 @@ void busWriteGraphics(const enum bus_reg_graphics_index index, const uint_8 data
 }
 
 void busWriteAttribute(const enum bus_reg_attr_index index, const uint_8 data) {
+    (void)rdb(0x3DA); 
+    #warning the hell is that read for
     busWriteLSI(BRA_ADDRESS, BRA_DATA, index, data, 0);
 }
 
