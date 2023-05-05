@@ -54,15 +54,12 @@ point_t uhaDimensionsForFormat(const enum gnwDeviceUHA_display_format format) {
 }
 
 bool setFormat(const enum gnwDeviceUHA_display_format format) {
-
-    #warning partial EGA support only at the moment
-
     switch(format) {
     case TEXT_H80V25C16:
-        setMode(CD_OPMODE_3);
+        setMode(VGA_OPMODE_3);
         break;
     case GRAPHICS_H320V200C4:
-        setMode(CD_OPMODE_5);
+        setMode(VGA_OPMODE_4);
         break;
     default:
         return false;

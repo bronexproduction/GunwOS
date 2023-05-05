@@ -8,6 +8,8 @@
 //  IBM Enhanced Graphics Adapter
 //  Section "Registers"
 //  page 12+
+//  and
+//  Intel® OpenSource HD Graphics Programmer’s Reference Manual (PRM)
 //
 
 #ifndef VGA_BUS_H

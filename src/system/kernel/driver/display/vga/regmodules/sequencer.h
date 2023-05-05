@@ -6,6 +6,8 @@
 //
 //  For more information see:
 //  IBM Enhanced Graphics Adapter
+//  and
+//  Intel® OpenSource HD Graphics Programmer’s Reference Manual (PRM)
 //
 
 #ifndef SEQUENCER_H
@@ -14,8 +16,8 @@
 #include "../opmode.h"
 #include <types.h>
 
-void sequencerDisable(const enum modeOfOperation mode, const bool memOver64K);
-void sequencerSetMode(const enum modeOfOperation mode, const bool memOver64K);
-void sequencerEnable(const enum modeOfOperation mode, const bool memOver64K);
+void sequencerDisable(const enum modeOfOperation mode);
+void sequencerSetMode(const enum modeOfOperation mode);
+void sequencerEnable(const enum modeOfOperation mode);
 
 #endif // SEQUENCER_H

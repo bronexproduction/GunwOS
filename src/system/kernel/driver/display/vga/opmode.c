@@ -8,6 +8,8 @@
 //  IBM Enhanced Graphics Adapter
 //  Section "Modes of operation"
 //  page 5+
+//  and
+//  Intel® OpenSource HD Graphics Programmer’s Reference Manual (PRM)
 //
 
 #include "opmode.h"
@@ -20,13 +22,8 @@
 
 void setMode(const enum modeOfOperation mode) {
     switch(mode) {
-    case CD_OPMODE_2: 
-    case CD_OPMODE_3: 
-    case CD_OPMODE_4: 
-    case CD_OPMODE_5: {
-        #warning how to detect memory extensions?
-        const bool memOver64K = false;
-
+    case VGA_OPMODE_3: 
+    case VGA_OPMODE_4: {
         uint_8 externalContext;
         uint_8 crtContextMCR;
         uint_8 crtContextVRE;
@@ -35,27 +32,27 @@ void setMode(const enum modeOfOperation mode) {
             #warning disable display
             #warning unlock registers (CRTC)
         */
-        crtDisable(mode, memOver64K, &crtContextMCR, &crtContextVRE);
-        sequencerDisable(mode, memOver64K);
+        crtDisable(mode, &crtContextMCR, &crtContextVRE);
+        sequencerDisable(mode);
         externalDisable(mode);
 
         /*
             Loading registers
         */
         externalSetMode(mode, &externalContext);
-        sequencerSetMode(mode, memOver64K);
-        crtSetMode(mode, memOver64K, &crtContextMCR, &crtContextVRE);
-        graphicsSetMode(mode, memOver64K);
-        attributeSetMode(mode, memOver64K);
+        sequencerSetMode(mode);
+        crtSetMode(mode, &crtContextMCR, &crtContextVRE);
+        graphicsSetMode(mode);
+        attributeSetMode(mode);
         
         /*
             #warning lock CRTC registers
             #warning enable display
         */
         externalEnable(mode, externalContext);
-        sequencerEnable(mode, memOver64K);
+        sequencerEnable(mode);
         attributeEnable(mode);
-        crtEnable(mode, memOver64K, crtContextMCR, crtContextVRE);
+        crtEnable(mode, crtContextMCR, crtContextVRE);
     } break;
     default:
         OOPS("Unsupported display mode");

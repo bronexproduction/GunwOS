@@ -8,19 +8,22 @@
 //  IBM Enhanced Graphics Adapter
 //  Section "CRT Controller Registers" - page 24
 //  Section "Programming the Registers" - page 64, 65
+//  and
+//  Intel® OpenSource HD Graphics Programmer’s Reference Manual (PRM)
 //
 
 #include "crt.h"
 #include <utils.h>
 #include "../vga_bus.h"
+#include <error/panic.h>
 
 enum resolution {
     RES_320_200,
-    RES_320_350,
+    RES_360_400,
     RES_640_200,
     RES_640_350,
-    RES_640_350_MONO,
-    RES_720_350_MONO
+    RES_640_480,
+    RES_720_400
 };
 
 struct registers {
@@ -54,63 +57,94 @@ struct registers {
 
 static void configure(const enum resolution res, struct registers * const reg) {
     switch (res) {
-    case RES_320_200: /* 0, 1, 4, 5, D */
-        reg->horizontalTotal = 0x37;
-        reg->horizontalDisplayEnd = 0x27;
-        reg->verticalTotal = 0x04;
-        reg->overflow = BRC_CCOR_LINE_COMPARE_BIT_8 | BRC_CCOR_VERTICAL_TOTAL_BIT_8; /* 0x11 */
-        reg->verticalDisplayEnd = 0xC7;
+    case RES_320_200:
+        reg->horizontalTotal        = 0x37;
+        reg->horizontalDisplayEnd   = 0x27;
+        reg->verticalTotal          = 0x04;
+        reg->overflow               = BRC_CCOR_LINE_COMPARE_BIT_8 | BRC_CCOR_VERTICAL_TOTAL_BIT_8;
+        reg->verticalDisplayEnd     = 0xC7;
+        reg->startHorizontalBlank   = 0x2D;
+        reg->endHorizontalBlank     = BIT_RANGE_ALIGNED(0x01, BRC_EHBR_DISPLAY_ENABLE_SKEW_CONTROL_RANGE) |
+                                      BIT_RANGE_ALIGNED(0x17, BRC_EHBR_END_BLANKING_RANGE);
+        reg->startHorizontalRetrace = 0x30;
+        reg->endHorizontalRetrace   = CLEAR(BRC_EHRR_START_ODD_MEMORY_ADDRESS)                         |
+                                      BIT_RANGE_ALIGNED(0x00, BRC_EHRR_HORIZONTAL_RETRACE_DELAY_RANGE) |
+                                      BIT_RANGE_ALIGNED(0x14, BRC_EHRR_END_HORIZONTAL_RETRACE_RANGE);
+        reg->maxScanLine            = 0x01;
+        reg->cursorStart            = 0x00;
+        reg->cursorEnd              = 0x00;
+        reg->verticalRetraceStart   = 0xE1;
+        reg->offset                 = OFFSET_LOW;
+        reg->underlineLocation      = 0x00;
+        reg->startVerticalBlank     = 0xE0;
+        reg->endVerticalBlank       = 0xF0;
         break;
-    case RES_320_350: /* 0*, 1* */
-        reg->horizontalTotal = 0x2D;
-        reg->horizontalDisplayEnd = 0x27;
-        reg->verticalTotal = 0x6C;
-        reg->overflow = BRC_CCOR_LINE_COMPARE_BIT_8                 |
-                        BRC_CCOR_START_VERTICAL_BLANK_BIT_8         |
-                        BRC_CCOR_VERTICAL_RETRACE_START_BIT_8       |
-                        BRC_CCOR_VERTICAL_DISPLAY_ENABLE_END_BIT_8  |
-                        BRC_CCOR_VERTICAL_TOTAL_BIT_8; /* 0x1F */
-        reg->verticalDisplayEnd = 0x5D;
+    case RES_360_400:
+        // reg->horizontalTotal = 0x2D;
+        // reg->horizontalDisplayEnd = 0x27;
+        // reg->verticalTotal = 0x6C;
+        // reg->overflow = BRC_CCOR_LINE_COMPARE_BIT_8                 |
+        //                 BRC_CCOR_START_VERTICAL_BLANK_BIT_8         |
+        //                 BRC_CCOR_VERTICAL_RETRACE_START_BIT_8       |
+        //                 BRC_CCOR_VERTICAL_DISPLAY_ENABLE_END_BIT_8  |
+        //                 BRC_CCOR_VERTICAL_TOTAL_BIT_8; /* 0x1F */
+        // reg->verticalDisplayEnd = 0x5D;
         break;
-    case RES_640_200: /* 2, 3, 6, E */
-        reg->horizontalTotal = 0x70;
-        reg->horizontalDisplayEnd = 0x4F;
-        reg->verticalTotal = 0x04;
-        reg->overflow = BRC_CCOR_LINE_COMPARE_BIT_8 | BRC_CCOR_VERTICAL_TOTAL_BIT_8; /* 0x11 */
-        reg->verticalDisplayEnd = 0xC7;
+    case RES_640_200:
+        // reg->horizontalTotal = 0x70;
+        // reg->horizontalDisplayEnd = 0x4F;
+        // reg->verticalTotal = 0x04;
+        // reg->overflow = BRC_CCOR_LINE_COMPARE_BIT_8 | BRC_CCOR_VERTICAL_TOTAL_BIT_8; /* 0x11 */
+        // reg->verticalDisplayEnd = 0xC7;
         break;
-    case RES_640_350: /* 2*, 3*, 10* */
-        reg->horizontalTotal = 0x5B;
-        reg->horizontalDisplayEnd = 0x4F;
-        reg->verticalTotal = 0x6C;
-        reg->overflow = BRC_CCOR_LINE_COMPARE_BIT_8                 |
-                        BRC_CCOR_START_VERTICAL_BLANK_BIT_8         |
-                        BRC_CCOR_VERTICAL_RETRACE_START_BIT_8       |
-                        BRC_CCOR_VERTICAL_DISPLAY_ENABLE_END_BIT_8  |
-                        BRC_CCOR_VERTICAL_TOTAL_BIT_8; /* 0x1F */
-        reg->verticalDisplayEnd = 0x5D;
+    case RES_640_350:
+        // reg->horizontalTotal = 0x5B;
+        // reg->horizontalDisplayEnd = 0x4F;
+        // reg->verticalTotal = 0x6C;
+        // reg->overflow = BRC_CCOR_LINE_COMPARE_BIT_8                 |
+        //                 BRC_CCOR_START_VERTICAL_BLANK_BIT_8         |
+        //                 BRC_CCOR_VERTICAL_RETRACE_START_BIT_8       |
+        //                 BRC_CCOR_VERTICAL_DISPLAY_ENABLE_END_BIT_8  |
+        //                 BRC_CCOR_VERTICAL_TOTAL_BIT_8; /* 0x1F */
+        // reg->verticalDisplayEnd = 0x5D;
         break;
-    case RES_640_350_MONO: /* F */
-        reg->horizontalTotal = 0x60;
-        reg->horizontalDisplayEnd = 0x4F;
-        reg->verticalTotal = 0x70;
-        reg->overflow = BRC_CCOR_LINE_COMPARE_BIT_8                 |
-                        BRC_CCOR_START_VERTICAL_BLANK_BIT_8         |
-                        BRC_CCOR_VERTICAL_RETRACE_START_BIT_8       |
-                        BRC_CCOR_VERTICAL_DISPLAY_ENABLE_END_BIT_8  |
-                        BRC_CCOR_VERTICAL_TOTAL_BIT_8; /* 0x1F */
-        reg->verticalDisplayEnd = 0x5D;
+    case RES_640_480:
+        // reg->horizontalTotal = 0x60;
+        // reg->horizontalDisplayEnd = 0x4F;
+        // reg->verticalTotal = 0x70;
+        // reg->overflow = BRC_CCOR_LINE_COMPARE_BIT_8                 |
+        //                 BRC_CCOR_START_VERTICAL_BLANK_BIT_8         |
+        //                 BRC_CCOR_VERTICAL_RETRACE_START_BIT_8       |
+        //                 BRC_CCOR_VERTICAL_DISPLAY_ENABLE_END_BIT_8  |
+        //                 BRC_CCOR_VERTICAL_TOTAL_BIT_8; /* 0x1F */
+        // reg->verticalDisplayEnd = 0x5D;
         break;
-    case RES_720_350_MONO: /* 7 */
-        reg->horizontalTotal = 0x60;
-        reg->horizontalDisplayEnd = 0x4F;
-        reg->verticalTotal = 0x70;
-        reg->overflow = BRC_CCOR_LINE_COMPARE_BIT_8                 |
-                        BRC_CCOR_START_VERTICAL_BLANK_BIT_8         |
-                        BRC_CCOR_VERTICAL_RETRACE_START_BIT_8       |
-                        BRC_CCOR_VERTICAL_DISPLAY_ENABLE_END_BIT_8  |
-                        BRC_CCOR_VERTICAL_TOTAL_BIT_8; /* 0x1F */
-        reg->verticalDisplayEnd = 0x5D;
+    case RES_720_400:
+        reg->horizontalTotal         = 0x5F;
+        reg->horizontalDisplayEnd    = 0x4F;
+        reg->verticalTotal           = 0x70;
+        reg->overflow                = BRC_CCOR_LINE_COMPARE_BIT_8                 |
+                                       BRC_CCOR_START_VERTICAL_BLANK_BIT_8         |
+                                       BRC_CCOR_VERTICAL_RETRACE_START_BIT_8       |
+                                       BRC_CCOR_VERTICAL_DISPLAY_ENABLE_END_BIT_8  |
+                                       BRC_CCOR_VERTICAL_TOTAL_BIT_8;
+        reg->verticalDisplayEnd      = 0x5D;
+        reg->startHorizontalBlank    = 0x5C;
+        reg->endHorizontalBlank      = BIT_RANGE_ALIGNED(0x01, BRC_EHBR_DISPLAY_ENABLE_SKEW_CONTROL_RANGE) |
+                                       BIT_RANGE_ALIGNED(0x0F, BRC_EHBR_END_BLANKING_RANGE);
+        reg->startHorizontalRetrace  = 0x5F;
+        reg->endHorizontalRetrace    = CLEAR(BRC_EHRR_START_ODD_MEMORY_ADDRESS)                         |
+                                       BIT_RANGE_ALIGNED(0x00, BRC_EHRR_HORIZONTAL_RETRACE_DELAY_RANGE) |
+                                       BIT_RANGE_ALIGNED(0x07, BRC_EHRR_END_HORIZONTAL_RETRACE_RANGE);
+        reg->maxScanLine             = 0x07;
+        reg->cursorStart             = 0x06;
+        reg->cursorEnd               = BIT_RANGE_ALIGNED(0x00, BRC_CER_CURSOR_SKEW_CONTROL_RANGE) |
+                                       BIT_RANGE_ALIGNED(0x07, BRC_CER_ROW_SCAN_CURSOR_ENDS_RANGE);
+        reg->verticalRetraceStart    = 0xE1;
+        reg->offset                  = OFFSET_HIGH;
+        reg->underlineLocation       = 0x08;
+        reg->startVerticalBlank      = 0xE0;
+        reg->endVerticalBlank        = 0xF0;
         break;
     }
 }
@@ -141,7 +175,7 @@ static void pushConfig(const struct registers * const reg, const enum modeOfOper
     busWriteCRT(BRCI_LINE_COMPARE, reg->lineCompare, mode);
 }
 
-void crtDisable(const enum modeOfOperation mode, const bool memOver64K, uint_8 * const regContextMCR, uint_8 * const regContextVRE) {
+void crtDisable(const enum modeOfOperation mode, uint_8 * const regContextMCR, uint_8 * const regContextVRE) {
     *regContextMCR = BRC_MCR_OUTPUT_CONTROL;
     *regContextVRE = BRC_VRER_ENABLE_VERTICAL_INTERRUPT;
 
@@ -149,7 +183,7 @@ void crtDisable(const enum modeOfOperation mode, const bool memOver64K, uint_8 *
     busWriteCRT(BRCI_VERTICAL_RETRACE_END, *regContextVRE, mode);
 }
 
-void crtSetMode(const enum modeOfOperation mode, const bool memOver64K, uint_8 * const regContextMCR, uint_8 * const regContextVRE) {
+void crtSetMode(const enum modeOfOperation mode, uint_8 * const regContextMCR, uint_8 * const regContextVRE) {
 
     struct registers reg;
 
@@ -161,270 +195,56 @@ void crtSetMode(const enum modeOfOperation mode, const bool memOver64K, uint_8 *
     reg.cursorLocationLow = 0x00;
 
     switch (mode) {
-    case CD_OPMODE_0:
-    case CD_OPMODE_1: {
+    case VGA_OPMODE_3: {
+        configure(RES_720_400, &reg);
+        *regContextVRE |= BIT_RANGE_ALIGNED(0x04, BRC_CER_CURSOR_SKEW_CONTROL_RANGE);
+        *regContextMCR |= BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0;
+    } break; 
+    case VGA_OPMODE_4: {
         configure(RES_320_200, &reg);
-        reg.startHorizontalBlank   = 0x2D;
-        reg.endHorizontalBlank     = BIT_RANGE_ALIGNED(0x01, BRC_EHBR_DISPLAY_ENABLE_SKEW_CONTROL_RANGE) |
-                                     BIT_RANGE_ALIGNED(0x17, BRC_EHBR_END_BLANKING_RANGE); /* 0x37 */
-        reg.startHorizontalRetrace = 0x31;
-        reg.endHorizontalRetrace   = CLEAR(BRC_EHRR_START_ODD_MEMORY_ADDRESS)                         |
-                                     BIT_RANGE_ALIGNED(0x00, BRC_EHRR_HORIZONTAL_RETRACE_DELAY_RANGE) |
-                                     BIT_RANGE_ALIGNED(0x15, BRC_EHRR_END_HORIZONTAL_RETRACE_RANGE); /* 0x15 */
-        reg.maxScanLine            = 0x07;
-        reg.cursorStart            = 0x06;
-        reg.cursorEnd              = BIT_RANGE_ALIGNED(0x00, BRC_CER_CURSOR_SKEW_CONTROL_RANGE) |
-                                     BIT_RANGE_ALIGNED(0x07, BRC_CER_ROW_SCAN_CURSOR_ENDS_RANGE); /* 0x07 */
-        reg.verticalRetraceStart   = 0xE1;
-        *regContextVRE            |= BIT_RANGE_ALIGNED(0x04, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x24 (with interrupt flags) */
-        reg.offset                 = OFFSET_LOW;
-        reg.underlineLocation      = 0x08;
-        reg.startVerticalBlank     = 0xE0;
-        reg.endVerticalBlank       = 0xF0;
-        *regContextMCR            |= BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0xA3 (with HARDWARE_RESET) */
+        *regContextVRE |= BIT_RANGE_ALIGNED(0x04, BRC_CER_CURSOR_SKEW_CONTROL_RANGE);
+        *regContextMCR |= BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER;
     } break;
-    case CD_OPMODE_2:
-    case CD_OPMODE_3: {
-        configure(RES_640_200, &reg);
-        reg.startHorizontalBlank   = 0x5C;
-        reg.endHorizontalBlank     = BIT_RANGE_ALIGNED(0x01, BRC_EHBR_DISPLAY_ENABLE_SKEW_CONTROL_RANGE) |
-                                     BIT_RANGE_ALIGNED(0x0F, BRC_EHBR_END_BLANKING_RANGE); /* 0x2F */
-        reg.startHorizontalRetrace = 0x5F;
-        reg.endHorizontalRetrace   = CLEAR(BRC_EHRR_START_ODD_MEMORY_ADDRESS)                         |
-                                     BIT_RANGE_ALIGNED(0x00, BRC_EHRR_HORIZONTAL_RETRACE_DELAY_RANGE) |
-                                     BIT_RANGE_ALIGNED(0x07, BRC_EHRR_END_HORIZONTAL_RETRACE_RANGE); /* 0x07 */
-        reg.maxScanLine            = 0x07;
-        reg.cursorStart            = 0x06;
-        reg.cursorEnd              = BIT_RANGE_ALIGNED(0x00, BRC_CER_CURSOR_SKEW_CONTROL_RANGE) |
-                                     BIT_RANGE_ALIGNED(0x07, BRC_CER_ROW_SCAN_CURSOR_ENDS_RANGE); /* 0x07 */
-        reg.verticalRetraceStart   = 0xE1;
-        *regContextVRE            |= BIT_RANGE_ALIGNED(0x04, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x24 (with interrupt flags) */
-        reg.offset                 = OFFSET_HIGH;
-        reg.underlineLocation      = 0x08;
-        reg.startVerticalBlank     = 0xE0;
-        reg.endVerticalBlank       = 0xF0;
-        *regContextMCR            |= BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0xA3 (with HARDWARE_RESET) */
-    } break; 
-    case CD_OPMODE_4:
-    case CD_OPMODE_5: {
-        configure(RES_320_200, &reg);
-        reg.startHorizontalBlank   = 0x2D;
-        reg.endHorizontalBlank     = BIT_RANGE_ALIGNED(0x01, BRC_EHBR_DISPLAY_ENABLE_SKEW_CONTROL_RANGE) |
-                                     BIT_RANGE_ALIGNED(0x17, BRC_EHBR_END_BLANKING_RANGE); /* 0x37 */
-        reg.startHorizontalRetrace = 0x30;
-        reg.endHorizontalRetrace   = CLEAR(BRC_EHRR_START_ODD_MEMORY_ADDRESS)                         |
-                                     BIT_RANGE_ALIGNED(0x00, BRC_EHRR_HORIZONTAL_RETRACE_DELAY_RANGE) |
-                                     BIT_RANGE_ALIGNED(0x14, BRC_EHRR_END_HORIZONTAL_RETRACE_RANGE); /* 0x14 */
-        reg.maxScanLine            = 0x01;
-        reg.cursorStart            = 0x00;
-        reg.cursorEnd              = 0x00;
-        reg.verticalRetraceStart   = 0xE1;
-        *regContextVRE            |= BIT_RANGE_ALIGNED(0x04, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x24 (with interrupt flags) */
-        reg.offset                 = OFFSET_LOW;
-        reg.underlineLocation      = 0x00;
-        reg.startVerticalBlank     = 0xE0;
-        reg.endVerticalBlank       = 0xF0;
-        *regContextMCR            |= BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER; /* 0xA2 (with HARDWARE_RESET) */
+    default: {
+        OOPS("Unsupported video mode");
     } break;
-    case CD_OPMODE_6: {
-        configure(RES_640_200, &reg);
-        reg.startHorizontalBlank   = 0x59;
-        reg.endHorizontalBlank     = BIT_RANGE_ALIGNED(0x01, BRC_EHBR_DISPLAY_ENABLE_SKEW_CONTROL_RANGE) |
-                                     BIT_RANGE_ALIGNED(0x0D, BRC_EHBR_END_BLANKING_RANGE); /* 0x2D */
-        reg.startHorizontalRetrace = 0x5E;
-        reg.endHorizontalRetrace   = CLEAR(BRC_EHRR_START_ODD_MEMORY_ADDRESS)                         |
-                                     BIT_RANGE_ALIGNED(0x00, BRC_EHRR_HORIZONTAL_RETRACE_DELAY_RANGE) |
-                                     BIT_RANGE_ALIGNED(0x06, BRC_EHRR_END_HORIZONTAL_RETRACE_RANGE); /* 0x06 */
-        reg.maxScanLine            = 0x01;
-        reg.cursorStart            = 0x00;
-        reg.cursorEnd              = 0x00;
-        reg.verticalRetraceStart   = 0xE0;
-        *regContextVRE            |= BIT_RANGE_ALIGNED(0x03, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x23 (with interrupt flags) */
-        reg.offset                 = OFFSET_HIGH;
-        reg.underlineLocation      = 0x00;
-        reg.startVerticalBlank     = 0xDF;
-        reg.endVerticalBlank       = 0xEF;
-        *regContextMCR            |= BRC_MCR_WORD_BYTE_MODE | BRC_MCR_SELECT_ROW_SCAN_COUNTER; /* 0xC2 (with HARDWARE_RESET) */
-    } break; 
-    case CD_OPMODE_D: {
-        configure(RES_320_200, &reg);
-        reg.startHorizontalBlank   = 0x2D;
-        reg.endHorizontalBlank     = BIT_RANGE_ALIGNED(0x01, BRC_EHBR_DISPLAY_ENABLE_SKEW_CONTROL_RANGE) |
-                                     BIT_RANGE_ALIGNED(0x17, BRC_EHBR_END_BLANKING_RANGE); /* 0x37 */
-        reg.startHorizontalRetrace = 0x30;
-        reg.endHorizontalRetrace   = CLEAR(BRC_EHRR_START_ODD_MEMORY_ADDRESS)                         |
-                                     BIT_RANGE_ALIGNED(0x00, BRC_EHRR_HORIZONTAL_RETRACE_DELAY_RANGE) |
-                                     BIT_RANGE_ALIGNED(0x14, BRC_EHRR_END_HORIZONTAL_RETRACE_RANGE); /* 0x14 */
-        reg.maxScanLine            = 0x00;
-        reg.cursorStart            = 0x00;
-        reg.cursorEnd              = 0x00;
-        reg.verticalRetraceStart   = 0xE1;
-        *regContextVRE            |= BIT_RANGE_ALIGNED(0x04, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x24 (with interrupt flags) */
-        reg.offset                 = OFFSET_LOW;
-        reg.underlineLocation      = 0x00;
-        reg.startVerticalBlank     = 0xE0;
-        reg.endVerticalBlank       = 0xF0;
-        *regContextMCR            |= BRC_MCR_WORD_BYTE_MODE | BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0xE3 (with HARDWARE_RESET) */
-    } break; 
-    case CD_OPMODE_E: {
-        configure(RES_640_200, &reg);
-        reg.startHorizontalBlank   = 0x56;
-        reg.endHorizontalBlank     = BIT_RANGE_ALIGNED(0x01, BRC_EHBR_DISPLAY_ENABLE_SKEW_CONTROL_RANGE) |
-                                     BIT_RANGE_ALIGNED(0x0D, BRC_EHBR_END_BLANKING_RANGE); /* 0x2D */
-        reg.startHorizontalRetrace = 0x5E;
-        reg.endHorizontalRetrace   = CLEAR(BRC_EHRR_START_ODD_MEMORY_ADDRESS)                         |
-                                     BIT_RANGE_ALIGNED(0x00, BRC_EHRR_HORIZONTAL_RETRACE_DELAY_RANGE) |
-                                     BIT_RANGE_ALIGNED(0x06, BRC_EHRR_END_HORIZONTAL_RETRACE_RANGE); /* 0x06 */
-        reg.maxScanLine            = 0x00;
-        reg.cursorStart            = 0x00;
-        reg.cursorEnd              = 0x00;
-        reg.verticalRetraceStart   = 0xE0;
-        *regContextVRE            |= BIT_RANGE_ALIGNED(0x03, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x23 (with interrupt flags) */
-        reg.offset                 = OFFSET_HIGH;
-        reg.underlineLocation      = 0x00;
-        reg.startVerticalBlank     = 0xDF;
-        reg.endVerticalBlank       = 0xEF;
-        *regContextMCR            |= BRC_MCR_WORD_BYTE_MODE | BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0xE3 (with HARDWARE_RESET) */
-    } break; 
-    case MD_OPMODE_7: {
-        configure(RES_720_350_MONO, &reg);
-        reg.startHorizontalBlank   = 0x56;
-        reg.endHorizontalBlank     = BIT_RANGE_ALIGNED(0x01, BRC_EHBR_DISPLAY_ENABLE_SKEW_CONTROL_RANGE) |
-                                     BIT_RANGE_ALIGNED(0x1A, BRC_EHBR_END_BLANKING_RANGE); /* 0x3A */
-        reg.startHorizontalRetrace = 0x51;
-        reg.endHorizontalRetrace   = CLEAR(BRC_EHRR_START_ODD_MEMORY_ADDRESS)                         |
-                                     BIT_RANGE_ALIGNED(0x03, BRC_EHRR_HORIZONTAL_RETRACE_DELAY_RANGE) |
-                                     BIT_RANGE_ALIGNED(0x00, BRC_EHRR_END_HORIZONTAL_RETRACE_RANGE); /* 0x60 */
-        reg.maxScanLine            = 0x0D;
-        reg.cursorStart            = 0x0B;
-        reg.cursorEnd              = BIT_RANGE_ALIGNED(0x00, BRC_CER_CURSOR_SKEW_CONTROL_RANGE) |
-                                     BIT_RANGE_ALIGNED(0x0C, BRC_CER_ROW_SCAN_CURSOR_ENDS_RANGE); /* 0x0C */
-        reg.verticalRetraceStart   = 0x5E;
-        *regContextVRE            |= BIT_RANGE_ALIGNED(0x0E, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x2E (with interrupt flags) */
-        reg.offset                 = OFFSET_HIGH;
-        reg.underlineLocation      = 0x0D;
-        reg.startVerticalBlank     = 0x5E;
-        reg.endVerticalBlank       = 0x6E;
-        *regContextMCR            |= BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0xA3 (with HARDWARE_RESET) */
-    } break; 
-    case MD_OPMODE_F: {
-        configure(RES_640_350_MONO, &reg);
-        reg.startHorizontalBlank   = 0x56;
-        reg.endHorizontalBlank     = BIT_RANGE_ALIGNED(memOver64K ? 0x01 : 0x00, BRC_EHBR_DISPLAY_ENABLE_SKEW_CONTROL_RANGE) |
-                                     BIT_RANGE_ALIGNED(0x1A, BRC_EHBR_END_BLANKING_RANGE); /* 0x3A or 0x1A */
-        #warning should not startHorizontalRetrace be as it is in ECD_OPMODE_10 ?
-        reg.startHorizontalRetrace = 0x50;
-        reg.endHorizontalRetrace   = memOver64K ? CLEAR(BRC_EHRR_START_ODD_MEMORY_ADDRESS) : SET(BRC_EHRR_START_ODD_MEMORY_ADDRESS) |
-                                     BIT_RANGE_ALIGNED(0x03, BRC_EHRR_HORIZONTAL_RETRACE_DELAY_RANGE) |
-                                     BIT_RANGE_ALIGNED(0x00, BRC_EHRR_END_HORIZONTAL_RETRACE_RANGE); /* 0x60 or 0xE0 */
-        reg.maxScanLine            = 0x00;
-        reg.cursorStart            = 0x00;
-        reg.cursorEnd              = 0x00;
-        reg.verticalRetraceStart   = 0x5E;
-        *regContextVRE            |= BIT_RANGE_ALIGNED(0x0E, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x2E (with interrupt flags) */
-        reg.offset                 = memOver64K ? OFFSET_HIGH : OFFSET_LOW;
-        reg.underlineLocation      = 0x0D;
-        reg.startVerticalBlank     = 0x5E;
-        reg.endVerticalBlank       = 0x6E;
-        *regContextMCR            |= memOver64K ? BRC_MCR_WORD_BYTE_MODE | BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0 /* 0xE3 (with HARDWARE_RESET) */ 
-                                                : BRC_MCR_COUNT_BY_TWO | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0x8B (with HARDWARE_RESET) */
-    } break; 
-    case ECD_OPMODE_0:
-    case ECD_OPMODE_1: {
-        configure(RES_320_350, &reg);
-        reg.startHorizontalBlank   = 0x2B;
-        reg.endHorizontalBlank     = BIT_RANGE_ALIGNED(0x01, BRC_EHBR_DISPLAY_ENABLE_SKEW_CONTROL_RANGE) |
-                                     BIT_RANGE_ALIGNED(0x0D, BRC_EHBR_END_BLANKING_RANGE); /* 0x2D */
-        reg.startHorizontalRetrace = 0x28;
-        reg.endHorizontalRetrace   = CLEAR(BRC_EHRR_START_ODD_MEMORY_ADDRESS)                         |
-                                     BIT_RANGE_ALIGNED(0x03, BRC_EHRR_HORIZONTAL_RETRACE_DELAY_RANGE) |
-                                     BIT_RANGE_ALIGNED(0x0D, BRC_EHRR_END_HORIZONTAL_RETRACE_RANGE); /* 0x6D */
-        reg.maxScanLine            = 0x0D;
-        reg.cursorStart            = 0x0B;
-        reg.cursorEnd              = BIT_RANGE_ALIGNED(0x00, BRC_CER_CURSOR_SKEW_CONTROL_RANGE) |
-                                     BIT_RANGE_ALIGNED(0x0C, BRC_CER_ROW_SCAN_CURSOR_ENDS_RANGE); /* 0x0C */
-        reg.verticalRetraceStart   = 0x5E;
-        *regContextVRE            |= BIT_RANGE_ALIGNED(0x0B, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x2B (with interrupt flags) */
-        reg.offset                 = OFFSET_LOW;
-        reg.underlineLocation      = 0x0F;
-        reg.startVerticalBlank     = 0x5E;
-        reg.endVerticalBlank       = 0x0A;
-        *regContextMCR            |= BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0xA3 (with HARDWARE_RESET) */
-    } break; 
-    case ECD_OPMODE_2:
-    case ECD_OPMODE_3: {
-        configure(RES_640_350, &reg);
-        reg.startHorizontalBlank   = 0x53;
-        reg.endHorizontalBlank     = BIT_RANGE_ALIGNED(0x01, BRC_EHBR_DISPLAY_ENABLE_SKEW_CONTROL_RANGE) |
-                                     BIT_RANGE_ALIGNED(0x17, BRC_EHBR_END_BLANKING_RANGE); /* 0x37 */
-        reg.startHorizontalRetrace = 0x51;
-        reg.endHorizontalRetrace   = CLEAR(BRC_EHRR_START_ODD_MEMORY_ADDRESS)                         |
-                                     BIT_RANGE_ALIGNED(0x02, BRC_EHRR_HORIZONTAL_RETRACE_DELAY_RANGE) |
-                                     BIT_RANGE_ALIGNED(0x1B, BRC_EHRR_END_HORIZONTAL_RETRACE_RANGE); /* 0x5B */
-        reg.maxScanLine            = 0x0D;
-        reg.cursorStart            = 0x0B;
-        reg.cursorEnd              = BIT_RANGE_ALIGNED(0x00, BRC_CER_CURSOR_SKEW_CONTROL_RANGE) |
-                                     BIT_RANGE_ALIGNED(0x0C, BRC_CER_ROW_SCAN_CURSOR_ENDS_RANGE); /* 0x0C */
-        reg.verticalRetraceStart   = 0x5E;
-        *regContextVRE            |= BIT_RANGE_ALIGNED(0x0B, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x2B (with interrupt flags) */
-        reg.offset                 = OFFSET_HIGH;
-        reg.underlineLocation      = 0x0F;
-        reg.startVerticalBlank     = 0x5E;
-        reg.endVerticalBlank       = 0x0A;
-        *regContextMCR            |= BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0xA3 (with HARDWARE_RESET) */
-    } break; 
-    case ECD_OPMODE_10: {
-        configure(RES_640_350, &reg);
-        reg.startHorizontalBlank   = 0x53;
-        reg.endHorizontalBlank     = BIT_RANGE_ALIGNED(memOver64K ? 0x01 : 0x00, BRC_EHBR_DISPLAY_ENABLE_SKEW_CONTROL_RANGE) |
-                                     BIT_RANGE_ALIGNED(0x17, BRC_EHBR_END_BLANKING_RANGE); /* 0x37 or 0x17 */
-        reg.startHorizontalRetrace = memOver64K ? 0x52 : 0x50;
-        reg.endHorizontalRetrace   = memOver64K ? CLEAR(BRC_EHRR_START_ODD_MEMORY_ADDRESS)                         |
-                                                  BIT_RANGE_ALIGNED(0x00, BRC_EHRR_HORIZONTAL_RETRACE_DELAY_RANGE) |
-                                                  BIT_RANGE_ALIGNED(0x00, BRC_EHRR_END_HORIZONTAL_RETRACE_RANGE) /* 0x00 */
-                                                : SET(BRC_EHRR_START_ODD_MEMORY_ADDRESS)                           |
-                                                  BIT_RANGE_ALIGNED(0x01, BRC_EHRR_HORIZONTAL_RETRACE_DELAY_RANGE) |
-                                                  BIT_RANGE_ALIGNED(0x1A, BRC_EHRR_END_HORIZONTAL_RETRACE_RANGE); /* 0xBA */
-        reg.maxScanLine            = 0x00;
-        reg.cursorStart            = 0x00;
-        reg.cursorEnd              = 0x00;
-        reg.verticalRetraceStart   = 0x5E;
-        *regContextVRE            |= BIT_RANGE_ALIGNED(0x0B, BRC_CER_CURSOR_SKEW_CONTROL_RANGE); /* 0x2B (with interrupt flags) */
-        reg.offset                 = memOver64K ? OFFSET_HIGH : OFFSET_LOW;
-        reg.underlineLocation      = 0x0F;
-        reg.startVerticalBlank     = 0x5F;
-        reg.endVerticalBlank       = 0x0A;
-        *regContextMCR            |= memOver64K ? BRC_MCR_WORD_BYTE_MODE | BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0 /* 0xE3 (with HARDWARE_RESET) */ 
-                                                : BRC_MCR_COUNT_BY_TWO | BRC_MCR_SELECT_ROW_SCAN_COUNTER | BRC_MCR_CMS_0; /* 0x8B (with HARDWARE_RESET) */
-    } break; 
     }
 
-// /* CRTC */
-// horizontal total - 0x5F, 
-// start horizontal blank - 0x50, 
-// end horizontal blank - 0x82,
-// start horizontal retrace - 0x55,
-// end horizontal retrace - 0x81, 
-// vertical total - 0xBF, 
-// overflow - 0x1F,
-// max scan line - 0x4F, 
-// cursor start - 0x0D, 
-// cursor end - 0x0E,
-// vertical retrace start - 0x9C, 
-// vertical display end - 0x8F,
-// underline location - 0x1F, 
-// start vertical blank - 0x96, 
-// end vertical blank - 0xB9, 
+ /* CRTC mode 3 */
+        // horizontalTotal = 0x5F, 
+        // horizontalDisplayEnd = 0x4F, 
+        // startHorizontalBlank = 0x50, 
+        // endHorizontalBlank = 0x82, 
+        // startHorizontalRetrace = 0x55, 
+        // endHorizontalRetrace = 0x81, 
+        // verticalTotal = 0xBF, 
+        // overflow = 0x1F,
+        // presetRowScan = 0x00, 
+        // maxScanLine = 0x4F, 
+        // cursorStart = 0x0D, 
+        // cursorEnd = 0x0E, 
+        // startAddressHigh = 0x00, 
+        // startAddressLow = 0x00, 
+        // cursorLocationHigh = 0x00, 
+        // cursorLocationLow = 0x50,
+        // verticalRetraceStart = 0x9C,
+        // verticalDisplayEnd = 0x8F, 
+        // offset = 0x28, 
+        // underlineLocation = 0x1F, 
+        // startVerticalBlank = 0x96, 
+        // endVerticalBlank = 0xB9, 
+        // lineCompare = 0xFF,
 
     pushConfig(&reg, mode);
 }
 
-void crtEnable(const enum modeOfOperation mode, const bool memOver64K, uint_8 regContextMCR, uint_8 regContextVRE) {
+void crtEnable(const enum modeOfOperation mode, uint_8 regContextMCR, uint_8 regContextVRE) {
     regContextVRE |= BRC_VRER_CLEAR_VERTICAL_INTERRUPT;
     regContextVRE &= ~BRC_VRER_ENABLE_VERTICAL_INTERRUPT;
     regContextMCR |= BRC_MCR_HARDWARE_RESET;
     regContextMCR &= ~BRC_MCR_OUTPUT_CONTROL;
 
+    // modeControl = 0xA3
     // vertical retrace end - 0x0E
 
     busWriteCRT(BRCI_VERTICAL_RETRACE_END, regContextMCR, mode);

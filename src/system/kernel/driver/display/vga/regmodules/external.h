@@ -6,6 +6,8 @@
 //
 //  For more information see:
 //  IBM Enhanced Graphics Adapter
+//  and
+//  Intel® OpenSource HD Graphics Programmer’s Reference Manual (PRM)
 //
 
 #ifndef EXTERNAL_H
