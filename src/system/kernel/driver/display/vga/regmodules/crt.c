@@ -150,39 +150,39 @@ static void configure(const enum resolution res, struct registers * const reg) {
     }
 }
 
-static void pushConfig(const struct registers * const reg, const enum modeOfOperation mode) {
-    busWriteCRT(BRCI_HORIZONTAL_TOTAL, reg->horizontalTotal, mode);
-    busWriteCRT(BRCI_HORIZONTAL_DISPLAY_END, reg->horizontalDisplayEnd, mode);
-    busWriteCRT(BRCI_START_HORIZONTAL_BLANK, reg->startHorizontalBlank, mode);
-    busWriteCRT(BRCI_END_HORIZONTAL_BLANK, reg->endHorizontalBlank, mode);
-    busWriteCRT(BRCI_START_HORIZONTAL_SYNC, reg->startHorizontalSync, mode);
-    busWriteCRT(BRCI_END_HORIZONTAL_SYNC, reg->endHorizontalSync, mode);
-    busWriteCRT(BRCI_VERTICAL_TOTAL, reg->verticalTotal, mode);
-    busWriteCRT(BRCI_OVERFLOW, reg->overflow, mode);
-    busWriteCRT(BRCI_PRESET_ROW_SCAN, reg->presetRowScan, mode);
-    busWriteCRT(BRCI_MAX_SCAN_LINE, reg->maxScanLine, mode);
-    busWriteCRT(BRCI_CURSOR_START, reg->cursorStart, mode);
-    busWriteCRT(BRCI_CURSOR_END, reg->cursorEnd, mode);
-    busWriteCRT(BRCI_START_ADDRESS_HIGH, reg->startAddressHigh, mode);
-    busWriteCRT(BRCI_START_ADDRESS_LOW, reg->startAddressLow, mode);
-    busWriteCRT(BRCI_CURSOR_LOCATION_HIGH, reg->cursorLocationHigh, mode);
-    busWriteCRT(BRCI_CURSOR_LOCATION_LOW, reg->cursorLocationLow, mode);
-    busWriteCRT(BRCI_VERTICAL_SYNC_START, reg->verticalSyncStart, mode);
-    busWriteCRT(BRCI_VERTICAL_DISPLAY_END, reg->verticalDisplayEnd, mode);
-    busWriteCRT(BRCI_OFFSET, reg->offset, mode);
-    busWriteCRT(BRCI_UNDERLINE_LOCATION, reg->underlineLocation, mode);
-    busWriteCRT(BRCI_START_VERTICAL_BLANK, reg->startVerticalBlank, mode);
-    busWriteCRT(BRCI_END_VERTICAL_BLANK, reg->endVerticalBlank, mode);
-    busWriteCRT(BRCI_LINE_COMPARE, reg->lineCompare, mode);
+static void pushConfig(const struct registers * const reg) {
+    busWriteCRT(BRCI_HORIZONTAL_TOTAL, reg->horizontalTotal);
+    busWriteCRT(BRCI_HORIZONTAL_DISPLAY_END, reg->horizontalDisplayEnd);
+    busWriteCRT(BRCI_START_HORIZONTAL_BLANK, reg->startHorizontalBlank);
+    busWriteCRT(BRCI_END_HORIZONTAL_BLANK, reg->endHorizontalBlank);
+    busWriteCRT(BRCI_START_HORIZONTAL_SYNC, reg->startHorizontalSync);
+    busWriteCRT(BRCI_END_HORIZONTAL_SYNC, reg->endHorizontalSync);
+    busWriteCRT(BRCI_VERTICAL_TOTAL, reg->verticalTotal);
+    busWriteCRT(BRCI_OVERFLOW, reg->overflow);
+    busWriteCRT(BRCI_PRESET_ROW_SCAN, reg->presetRowScan);
+    busWriteCRT(BRCI_MAX_SCAN_LINE, reg->maxScanLine);
+    busWriteCRT(BRCI_CURSOR_START, reg->cursorStart);
+    busWriteCRT(BRCI_CURSOR_END, reg->cursorEnd);
+    busWriteCRT(BRCI_START_ADDRESS_HIGH, reg->startAddressHigh);
+    busWriteCRT(BRCI_START_ADDRESS_LOW, reg->startAddressLow);
+    busWriteCRT(BRCI_CURSOR_LOCATION_HIGH, reg->cursorLocationHigh);
+    busWriteCRT(BRCI_CURSOR_LOCATION_LOW, reg->cursorLocationLow);
+    busWriteCRT(BRCI_VERTICAL_SYNC_START, reg->verticalSyncStart);
+    busWriteCRT(BRCI_VERTICAL_DISPLAY_END, reg->verticalDisplayEnd);
+    busWriteCRT(BRCI_OFFSET, reg->offset);
+    busWriteCRT(BRCI_UNDERLINE_LOCATION, reg->underlineLocation);
+    busWriteCRT(BRCI_START_VERTICAL_BLANK, reg->startVerticalBlank);
+    busWriteCRT(BRCI_END_VERTICAL_BLANK, reg->endVerticalBlank);
+    busWriteCRT(BRCI_LINE_COMPARE, reg->lineCompare);
 }
 
-void crtDisable(const enum modeOfOperation mode, uint_8 * const regContextMCR, uint_8 * const regContextVSE) {
+void crtDisable(uint_8 * const regContextMCR, uint_8 * const regContextVSE) {
     *regContextMCR = BRC_MCR_OUTPUT_CONTROL;
     *regContextVSE = SET(BRC_VSER_ENABLE_VERTICAL_INTERRUPT) |
                      CLEAR(BRC_VSER_PROTECT_REGISTERS);
 
-    busWriteCRT(BRCI_MODE_CONTROL, *regContextMCR, mode);
-    busWriteCRT(BRCI_VERTICAL_SYNC_END, *regContextVSE, mode);
+    busWriteCRT(BRCI_MODE_CONTROL, *regContextMCR);
+    busWriteCRT(BRCI_VERTICAL_SYNC_END, *regContextVSE);
 }
 
 void crtSetMode(const enum modeOfOperation mode, uint_8 * const regContextMCR, uint_8 * const regContextVSE) {
@@ -214,17 +214,15 @@ void crtSetMode(const enum modeOfOperation mode, uint_8 * const regContextMCR, u
     } break;
     }
 
-    pushConfig(&reg, mode);
+    pushConfig(&reg);
 }
 
-void crtEnable(const enum modeOfOperation mode, uint_8 regContextMCR, uint_8 regContextVSE) {
+void crtEnable(uint_8 regContextMCR, uint_8 regContextVSE) {
     regContextVSE |= BRC_VSER_CLEAR_VERTICAL_INTERRUPT | BRC_VSER_PROTECT_REGISTERS;
     regContextVSE &= ~BRC_VSER_ENABLE_VERTICAL_INTERRUPT;
     regContextMCR |= BRC_MCR_HARDWARE_RESET;
     regContextMCR &= ~BRC_MCR_OUTPUT_CONTROL;
 
-    busWriteCRT(BRCI_VERTICAL_SYNC_END, regContextVSE, mode);
-    busWriteCRT(BRCI_MODE_CONTROL, regContextMCR, mode);
+    busWriteCRT(BRCI_VERTICAL_SYNC_END, regContextVSE);
+    busWriteCRT(BRCI_MODE_CONTROL, regContextMCR);
 }
-
-#warning Lock/unlock CRT registers?

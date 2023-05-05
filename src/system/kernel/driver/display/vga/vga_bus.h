@@ -20,9 +20,9 @@
 
 enum bus_reg_external {
     BRE_MISC_OUT = 0x3C2,
-    BRE_FEATURE_CTRL = 0x3BA, /* MONOCHROME ADDR */
+    BRE_FEATURE_CTRL = 0x3DA,
     BRE_INPUT_STATUS_0 = 0x3C2,
-    BRE_INPUT_STATUS_1 = 0x3B2, /* MONOCHROME ADDR */
+    BRE_INPUT_STATUS_1 = 0x3D2,
 };
 
 enum bus_reg_sequencer {
@@ -39,8 +39,8 @@ enum bus_reg_sequencer_index {
 };
 
 enum bus_reg_crt {
-    BRC_ADDRESS = 0x3B4, /* MONOCHROME ADDR */
-    BRC_DATA = 0x3B5 /* MONOCHROME ADDR */
+    BRC_ADDRESS = 0x3D4,
+    BRC_DATA = 0x3D5
 };
 
 enum bus_reg_crt_index {
@@ -556,12 +556,12 @@ enum bus_reg_attr_csr {
     BRA_CSR_ALTERNATE_PALETTE_BITS_P4 = 0x01,
 };
 
-uint_8 busReadExternal(const enum bus_reg_external reg, const enum modeOfOperation mode);
-uint_8 busReadCRT(const enum bus_reg_crt_index index, const enum modeOfOperation mode);
+uint_8 busReadExternal(const enum bus_reg_external reg);
+uint_8 busReadCRT(const enum bus_reg_crt_index index);
 
-void busWriteExternal(const enum bus_reg_external reg, const uint_8 data, const enum modeOfOperation mode);
+void busWriteExternal(const enum bus_reg_external reg, const uint_8 data);
 void busWriteSequencer(const enum bus_reg_sequencer_index index, const uint_8 data);
-void busWriteCRT(const enum bus_reg_crt_index index, const uint_8 data, const enum modeOfOperation mode);
+void busWriteCRT(const enum bus_reg_crt_index index, const uint_8 data);
 void busWriteGraphicsPosition(const struct bus_reg_graphics_position position);
 void busWriteGraphics(const enum bus_reg_graphics_index index, const uint_8 data);
 void busWriteAttribute(const enum bus_reg_attr_index index, const uint_8 data);

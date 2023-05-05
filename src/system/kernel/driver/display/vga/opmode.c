@@ -32,9 +32,9 @@ void setMode(const enum modeOfOperation mode) {
         /*
             Disable display and unlock CRT registers
         */
-        crtDisable(mode, &crtContextMCR, &crtContextVSE);
+        crtDisable(&crtContextMCR, &crtContextVSE);
         sequencerDisable(&sequencerContextCMR);
-        externalDisable(mode);
+        externalDisable();
 
         /*
             Load registers
@@ -48,9 +48,9 @@ void setMode(const enum modeOfOperation mode) {
         /*
             Enable display and lock CRT registers
         */
-        externalEnable(mode, externalContext);
+        externalEnable(externalContext);
         sequencerEnable(sequencerContextCMR);
-        crtEnable(mode, crtContextMCR, crtContextVSE);
+        crtEnable(crtContextMCR, crtContextVSE);
         attributeEnable();
     } break;
     default:

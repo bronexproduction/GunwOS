@@ -16,9 +16,9 @@
 #include "../vga_bus.h"
 #include <error/panic.h>
 
-void externalDisable(const enum modeOfOperation mode) {
+void externalDisable() {
     #warning verify
-    busWriteExternal(BRE_MISC_OUT, 0x00, mode);
+    busWriteExternal(BRE_MISC_OUT, 0x00);
 }
 
 void externalSetMode(const enum modeOfOperation mode, uint_8 * const regContext) {
@@ -37,12 +37,12 @@ void externalSetMode(const enum modeOfOperation mode, uint_8 * const regContext)
     } break;
     }
 
-    busWriteExternal(BRE_FEATURE_CTRL, 0x00, mode);
-    busWriteExternal(BRE_MISC_OUT, *regContext, mode);
+    busWriteExternal(BRE_FEATURE_CTRL, 0x00);
+    busWriteExternal(BRE_MISC_OUT, *regContext);
 }
 
-void externalEnable(const enum modeOfOperation mode, uint_8 regContext) {
+void externalEnable(uint_8 regContext) {
     regContext |= BRE_MOR_ENABLE_RAM;
 
-    busWriteExternal(BRE_MISC_OUT, regContext, mode);
+    busWriteExternal(BRE_MISC_OUT, regContext);
 }

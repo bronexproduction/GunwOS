@@ -16,8 +16,8 @@
 #include "../opmode.h"
 #include <types.h>
 
-void externalDisable(const enum modeOfOperation mode);
+void externalDisable();
 void externalSetMode(const enum modeOfOperation mode, uint_8 * const regContext);
-void externalEnable(const enum modeOfOperation mode, uint_8 regContext);
+void externalEnable(uint_8 regContext);
 
 #endif // EXTERNAL_H
