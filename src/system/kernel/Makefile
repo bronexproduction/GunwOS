@@ -1,15 +1,19 @@
 KERNEL_INCLUDE=-I $(STDGUNW_INCLUDE_DIR) \
-               -I $(API_INCLUDE_DIR) \
-			   -I $(API_SRC_DIR) \
+               -I $(APP_API_INCLUDE_DIR) \
+               -I $(DRIVER_API_INCLUDE_DIR) \
+			   -I $(APP_API_SRC_DIR) \
+			   -I $(DRIVER_API_SRC_DIR) \
 			   -I . \
 			   -I "$(LIB_SRC_DIR)/gunwelf"
 
 KERNEL_LIBS=$(LIB_BUILD_DIR)/stdgunw.o \
-			$(LIB_BUILD_DIR)/gunwapi_kernel.o \
+			$(LIB_BUILD_DIR)/gunwapi_app_kernel.o \
+			$(LIB_BUILD_DIR)/gunwapi_driver_kernel.o \
+			$(LIB_BUILD_DIR)/gunwapi_driver.o \
 			$(LIB_BUILD_DIR)/gunwelf.o
 
 ASMFLAGS=-f elf
-CFLAGS=-std=c11 -c -ffreestanding -mno-red-zone -ggdb $(KERNEL_INCLUDE) $(CFLAGS_GLOBAL)
+CFLAGS=-std=c11 -c -ffreestanding -mno-red-zone -ggdb $(KERNEL_INCLUDE) -D_GUNWAPI_KERNEL $(CFLAGS_GLOBAL)
 CXXFLAGS=-std=c++11 -c -ffreestanding -mno-red-zone -ggdb $(CXXFLAGS_GLOBAL)
 RSFLAGS=$(RSFLAGS_GLOBAL)
 LFLAGS=-m$(L_OUTFORMAT) -T linker.ld

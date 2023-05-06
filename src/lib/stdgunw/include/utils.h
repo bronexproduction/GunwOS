@@ -19,6 +19,14 @@
 
 #define REG(BITS, NAME, REG_NAME) register uint_ ## BITS NAME __asm__ ( STR(REG_NAME) ); (void)(NAME);
 
+#define SET(BIT) (BIT)
+#define CLEAR(BIT) ((BIT) & 0)
+
+#define IS_SET(BIT, REG) ((BIT) & (REG))
+#define IS_NOT_SET(BIT, REG) (!IS_SET((BIT), (REG)))
+
+#define BIT_RANGE_ALIGNED(VALUE, RANGE) (((VALUE) << __builtin_ctz(RANGE)) & (RANGE))
+
 size_t aligned(const size_t value, const size_t alignment);
 
 #endif // UTILS_H

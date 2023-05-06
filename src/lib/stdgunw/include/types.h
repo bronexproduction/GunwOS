@@ -48,6 +48,11 @@ typedef struct {
     size_t length;
 } range_size_t;
 
+typedef struct {
+    addr_t offset;
+    size_t sizeBytes;
+} range_addr_t;
+
 #ifndef __cplusplus
     #define true  1
     #define false 0

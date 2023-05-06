@@ -6,10 +6,10 @@
 //  
 
 #include "utl.h"
-#include <driver/gunwbus.h>
+#include <gunwbus.h>
 #include <gunwctrl.h>
 #include <mem.h>
-#include <driver/gunwbus.h>
+#include <gunwbus.h>
 #include <error/panic.h>
 #include "../common/data.h"
 #include "../common/io.h"

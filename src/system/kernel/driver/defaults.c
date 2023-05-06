@@ -9,8 +9,8 @@
     Initialization of default drivers
 */
 
-#include <driver/gunwdrv.h>
-#include <driver/gunwfilesys.h>
+#include <gunwdrv.h>
+#include <gunwfilesys.h>
 #include <gunwdev.h>
 
 #include <dev/dev.h>
@@ -51,10 +51,10 @@ static void loadFileSystem(struct gnwFileSystemDescriptor (*descProvider)(),
 void k_drv_loadMinimal() {
 
     /*
-        Default text mode display
+        Default display
     */
-    extern struct gnwDeviceDescriptor k_drv_display_descriptor();
-    loadDevice(k_drv_display_descriptor, MSGS_FAIL(Display));
+    extern struct gnwDeviceDescriptor k_drv_display_vga_descriptor();
+    loadDevice(k_drv_display_vga_descriptor, MSGS_FAIL(VGA display));
     
     /*
         PIT driver for 8253/8254 chip

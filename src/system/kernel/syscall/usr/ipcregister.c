@@ -11,7 +11,7 @@
 #include <hal/proc/proc.h>
 #include <error/panic.h>
 
-extern enum gnwIpcError k_scr_usr_ipcRegister(const struct gnwIpcHandlerDescriptor * desc,
+enum gnwIpcError k_scr_usr_ipcRegister(const struct gnwIpcHandlerDescriptor * desc,
                                               struct gnwRunLoop * const runLoopPtr) {
 
     const procId_t procId = k_proc_getCurrentId();

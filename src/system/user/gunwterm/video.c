@@ -6,7 +6,6 @@
 //
 
 #include <mem.h>
-#include <gunwdisplay.h>
 // #include <error/panic.h>
 #include <gunwfug.h>
 #include <defs.h>
@@ -40,7 +39,7 @@ bool k_trm_vid_init() {
         return false;
     }
 
-    e = attachToTextDisplay(desc.identifier, &displayHandle);
+    e = attachToTextDisplay(&desc, &displayHandle);
     if (e) {
         fug(FUG_UNDEFINED);
         // OOPS("Unable to attach display");

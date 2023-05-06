@@ -17,14 +17,6 @@
 
 #include "fdctypes.h"
 
-#define SET(BIT) (BIT)
-#define CLEAR(BIT) ((BIT) & 0)
-
-#define IS_SET(BIT, REG) ((BIT) & (REG))
-#define IS_NOT_SET(BIT, REG) (!IS_SET((BIT), (REG)))
-
-#define ALIGNED(VALUE, RANGE) (((VALUE) << __builtin_ctz(RANGE)) & (RANGE))
-
 /*
     Routine for writing data to given register
 */

@@ -10,7 +10,7 @@
 //
 
 #include <gunwdev.h>
-#include <driver/gunwdrv.h>
+#include <gunwdrv.h>
 #include "common/data.h"
 #include "common/io.h"
 #include "cmd/cmd.h"

@@ -11,7 +11,7 @@
 #include "proc.h"
 #include <error/panic.h>
 #include <gunwctrl.h>
-#include <driver/gunwbus.h>
+#include <gunwbus.h>
 #include "../common/io.h"
 #include "../common/data.h"
 #include "../common/strings.h"
@@ -197,9 +197,9 @@ enum fdc_opStatus proc_startMotor(const uint_16 base, const uint_8 drive) {
         return OPSTATUS_INVPARAM;
     }
 
-    pushReg(base, REG_DOR, ALIGNED(1 << drive, RANGE_DOR_MC) |
-                           ALIGNED(drive, RANGE_DS)          |
-                           SET(BIT_DOR_RESET)                |
+    pushReg(base, REG_DOR, BIT_RANGE_ALIGNED(1 << drive, RANGE_DOR_MC)  |
+                           BIT_RANGE_ALIGNED(drive, RANGE_DS)           |
+                           SET(BIT_DOR_RESET)                           |
                            CLEAR(BIT_DOR_DACK));
 
     extern void fdc_sleepms(const size_t);
@@ -213,7 +213,7 @@ enum fdc_opStatus proc_stopMotor(const uint_16 base, const uint_8 drive) {
         return OPSTATUS_INVPARAM;
     }
 
-    uint_8 dor = rdb(base + REG_DOR) & ~ALIGNED(1 << drive, RANGE_DOR_MC);
+    uint_8 dor = rdb(base + REG_DOR) & ~BIT_RANGE_ALIGNED(1 << drive, RANGE_DOR_MC);
     pushReg(base, REG_DOR, dor);
 
     return OPSTATUS_OK;

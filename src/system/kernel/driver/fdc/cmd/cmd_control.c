@@ -10,6 +10,7 @@
 //
 
 #include "cmd.h"
+#include <utils.h>
 #include "../common/defaults.h"
 #include "../common/io.h"
 
@@ -19,9 +20,9 @@ enum fdc_opStatus cmd_specify(const uint_16 base,
                               const uint_8 hlt,
                               const enum fdc_dmaMode dmaMode) {
     TRY(pushData(base, 0x03));
-    TRY(pushData(base, ALIGNED(srt, RANGE_SRT) |
-                       ALIGNED(hut, RANGE_HUT)));
-    TRY(pushData(base, ALIGNED(hlt, RANGE_HLT) |
+    TRY(pushData(base, BIT_RANGE_ALIGNED(srt, RANGE_SRT) |
+                       BIT_RANGE_ALIGNED(hut, RANGE_HUT)));
+    TRY(pushData(base, BIT_RANGE_ALIGNED(hlt, RANGE_HLT) |
                        (dmaMode & BIT_ND)));
     
     return OPSTATUS_OK;
@@ -33,7 +34,7 @@ enum fdc_opStatus cmd_recalibrate(const uint_16 base,
         return OPSTATUS_INVPARAM;
     }
     TRY(pushData(base, 0x07));
-    TRY(pushData(base, ALIGNED(drive, RANGE_DS)));
+    TRY(pushData(base, BIT_RANGE_ALIGNED(drive, RANGE_DS)));
 
     return OPSTATUS_OK;
 }

@@ -9,7 +9,7 @@
 #define HAL_H
 
 #include <types.h>
-#include <driver/gunwdrv.h>
+#include <gunwdrv.h>
 
 enum gnwDriverError k_hal_install(const size_t devId, const struct gnwDriverConfig driver);
 

@@ -108,6 +108,8 @@ enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescr
         return UNKNOWN;
     }
 
+    #warning CHECK MEMORY-MAPPED DEVICES FOR OVERLAPS WITH CURRENTLY INSTALLED ONES
+
     const struct gnwDriverConfig *driverDesc = &(descriptor->driver.descriptor);
 
     if (driverDesc->irq >= DEV_IRQ_LIMIT) {
@@ -258,8 +260,8 @@ void k_dev_releaseHold(const procId_t processId, const size_t deviceId) {
 
 enum gnwDeviceError k_dev_writeMem(const procId_t processId, 
                                    const size_t deviceId,
-                                   const void * const buffer) {
-    
+                                   const void * const buffer,
+                                   const range_addr_t devMemRange) {
     if (!buffer) {
         OOPS("Buffer cannot be nullptr");
         return GDE_UNKNOWN;
@@ -270,12 +272,25 @@ enum gnwDeviceError k_dev_writeMem(const procId_t processId,
         return e;
     }
 
+    const size_t maxInputSizeBytes = devices[deviceId].desc.api.mem.desc.maxInputSizeBytes;
+    if (!maxInputSizeBytes) {
+        return GDE_INVALID_OPERATION;
+    }
+
+    if (devMemRange.offset >= maxInputSizeBytes) {
+        return GDE_INVALID_PARAMETER;
+    }
+    const size_t devBytesLeft = maxInputSizeBytes - devMemRange.offset;
+    if (devMemRange.sizeBytes > devBytesLeft) {
+        return GDE_INVALID_PARAMETER;
+    }
+
     const struct gnwDeviceUHA_mem_routine * const routine = &devices[deviceId].desc.api.mem.routine;
     if (!routine->write) {
         return GDE_INVALID_OPERATION;
     }
     #warning it is more than dangerous to allow the driver to access the buffer directly, moreover it could be even impossible when driver processes are implemented
-    routine->write(buffer);
+    routine->write(buffer, devMemRange);
 
     return GDE_NONE;
 }
@@ -342,6 +357,55 @@ enum gnwDeviceError k_dev_listen(const procId_t processId,
 
     devices[deviceId].listener.routine = listener;
     devices[deviceId].listener.runLoop = runLoopPtr;
+    return GDE_NONE;
+}
+
+enum gnwDeviceError k_dev_getParam(const size_t deviceId,
+                                   const struct gnwDeviceParamDescriptor paramDescriptor,
+                                   size_t * const absResult) {
+    if (!absResult) {
+        OOPS("Nullptr");
+        return GDE_UNKNOWN;
+    }
+
+    if (!validateInstalledId(deviceId)) {
+        return GDE_ID_INVALID;
+    }
+
+    if (!devices[deviceId].desc.api.system.routine.getParam) {
+        return GDE_INVALID_OPERATION;
+    }
+
+    if (!devices[deviceId].desc.api.system.routine.getParam(paramDescriptor.param,
+                                                            paramDescriptor.subParam,
+                                                            paramDescriptor.paramIndex,
+                                                            absResult)) {
+        return GDE_OPERATION_FAILED;
+    }
+
+    return GDE_NONE;
+}
+
+enum gnwDeviceError k_dev_setParam(const procId_t procId,
+                                   const size_t deviceId,
+                                   const struct gnwDeviceParamDescriptor paramDescriptor,
+                                   const size_t value) {
+    const enum gnwDeviceError err = validateStartedDevice(procId, deviceId);
+    if (err != GDE_NONE) {
+        return err;
+    }
+
+    if (!devices[deviceId].desc.api.system.routine.setParam) {
+        return GDE_INVALID_OPERATION;
+    }
+
+    if (!devices[deviceId].desc.api.system.routine.setParam(paramDescriptor.param,
+                                                            paramDescriptor.subParam,
+                                                            paramDescriptor.paramIndex,
+                                                            value)) {
+        return GDE_OPERATION_FAILED;
+    }
+
     return GDE_NONE;
 }
 
