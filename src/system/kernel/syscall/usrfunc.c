@@ -134,22 +134,18 @@ SCR(timeMs,
     Function - IPC_SEND
 
     Params: 
-        * EBX - IPC path pointer relative to caller process memory
-        * ECX - IPC path length
-        * DL - character to be sent
+        * EBX - IPC sender query pointer relative to caller process memory
 
     Return:
         * EAX - error code on failure, GIPCE_NONE otherwise
 */
 SCR(ipcSend,
-    REG(32, path, ebx)
-    REG(32, pathLen, ecx)
-    REG(8, c, dl)
+    REG(32, queryPtr, ebx)
 
     REG_RET(32, err)
 
-    extern enum gnwIpcError k_scr_usr_ipcSend(const char * const, const size_t, const char);
-    err = k_scr_usr_ipcSend((char *)path, (size_t)pathLen, (char)c);
+    extern enum gnwIpcError k_scr_usr_ipcSend(const struct gnwIpcSenderQuery * const);
+    err = k_scr_usr_ipcSend((struct gnwIpcSenderQuery *)queryPtr);
 )
 
 /*

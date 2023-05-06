@@ -48,11 +48,31 @@ enum gnwIpcAccessScope {
     GIAS_ALL        = GIAS_KERNEL | GIAS_USER
 };
 
+struct gnwIpcQueryParams {
+    ptr_t dataPtr;
+    size_t dataBytes;
+    ptr_t resultPtr;
+    size_t resultBytes;
+};
+
+struct gnwIpcSenderQuery {
+    const char * path;
+    size_t pathLen;
+    struct gnwIpcQueryParams params;
+};
+
+struct gnwIpcEndpointQuery {
+    procId_t sourceProcId;
+    struct gnwIpcQueryParams params;
+};
+
+typedef void (*gnwIpcListener)(const struct gnwIpcEndpointQuery * const);
+
 struct gnwIpcHandlerDescriptor {
     const char * path;
     size_t pathLen;
     enum gnwIpcAccessScope accessScope;
-    gnwEventListener_32_8 handlerRoutine;
+    gnwIpcListener handlerRoutine;
 };
 
 /*
@@ -63,7 +83,7 @@ struct gnwIpcHandlerDescriptor {
         * accessScope - IPC path access scope
         * handler - IPC message handler
 */
-SYSCALL_DECL enum gnwIpcError ipcRegister(const char * const path, const enum gnwIpcAccessScope accessScope, const gnwEventListener_32_8 handler) {
+SYSCALL_DECL enum gnwIpcError ipcRegister(const char * const path, const enum gnwIpcAccessScope accessScope, const gnwIpcListener handler) {
     CHECKPTR(path);
     CHECKPTR(handler);
 
@@ -73,6 +93,9 @@ SYSCALL_DECL enum gnwIpcError ipcRegister(const char * const path, const enum gn
     struct gnwIpcHandlerDescriptor desc;
     desc.path = path;
     desc.pathLen = strlen(path);
+    if (desc.pathLen > GNW_PATH_IPC_MAX_LENGTH) {
+        return GIPCE_INVALID_PATH;
+    }
     desc.accessScope = accessScope;
     desc.handlerRoutine = handler;
 
@@ -86,18 +109,21 @@ SYSCALL_DECL enum gnwIpcError ipcRegister(const char * const path, const enum gn
 }
 
 /*
-    Sends given character to specified IPC path
+    Sends query to specified IPC path
 
     Params:
         * path - IPC path (see line 14)
-        * c - character to be sent
+        * params - query parameters
 */
-SYSCALL_DECL enum gnwIpcError ipcSend(const char * const path, const char c) {
+SYSCALL_DECL enum gnwIpcError ipcSend(const char * const path, const struct gnwIpcQueryParams queryParams) {
     CHECKPTR(path);
 
-    SYSCALL_PAR1(path);
-    SYSCALL_PAR2(strlen(path));
-    SYSCALL_PAR3(c);
+    struct gnwIpcSenderQuery query;
+    query.path = path;
+    query.pathLen = strlen(path);
+    query.params = queryParams;
+
+    SYSCALL_PAR1(&query);
 
     SYSCALL_USER_FUNC(IPC_SEND);
     SYSCALL_USER_INT;

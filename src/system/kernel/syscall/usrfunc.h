@@ -61,7 +61,7 @@ __attribute__((naked)) time_t k_scr_timeMs();
     Code - 0x06
     Function - IPC_SEND
 */
-__attribute__((naked)) enum gnwIpcError k_scr_ipcSend(const char * const path, const char c);
+__attribute__((naked)) enum gnwIpcError k_scr_ipcSend(const struct gnwIpcSenderQuery * const queryPtr);
 
 /*
     Code - 0x07

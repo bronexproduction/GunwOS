@@ -18,7 +18,7 @@ static struct ipcListener {
     char path[GNW_PATH_IPC_MAX_LENGTH];
     enum gnwIpcAccessScope accessScope;
     struct gnwRunLoop * runLoop;
-    gnwEventListener_32_8 listener;
+    gnwIpcListener listener;
 } ipcListenerRegister[MAX_IPC_LISTENER];
 
 static void clear(const size_t entryId) {
@@ -78,19 +78,17 @@ static bool processPermitted(const procId_t procId,
 }
 
 enum gnwIpcError k_ipc_ipcSend(const procId_t procId,
-                               const char * const absPathPtr,
-                               const size_t pathLen,
-                               const char c) {
-    if (!absPathPtr) {
+                               const struct gnwIpcSenderQuery absQuery) {
+    if (!absQuery.path || !absQuery.params.dataPtr) {
         OOPS("Nullptr");
         return GIPCE_UNKNOWN;
     }
-    if (!pathLen || pathLen > GNW_PATH_IPC_MAX_LENGTH) {
+    if (!absQuery.pathLen || absQuery.pathLen > GNW_PATH_IPC_MAX_LENGTH) {
         return GIPCE_INVALID_PATH;
     }
 
     bool found;
-    size_t index = listenerIndexForPath(absPathPtr, pathLen, &found);
+    size_t index = listenerIndexForPath(absQuery.path, absQuery.pathLen, &found);
     if (!found) {
         return GIPCE_NOT_FOUND;
     }
@@ -102,11 +100,17 @@ enum gnwIpcError k_ipc_ipcSend(const procId_t procId,
         return GIPCE_FORBIDDEN;
     }
 
-    const enum k_proc_error err = k_proc_callback_invoke_32_8(ipcListenerRegister[index].procId, 
-                                                              ipcListenerRegister[index].runLoop, 
-                                                              ipcListenerRegister[index].listener, 
-                                                              procId, 
-                                                              c);
+    #warning STRUCTURE BELOW WILL BE DEALLOCATED BEFORE HANDLING OCCUR
+    #warning CODE BELOW WILL NOT WORK
+
+    struct gnwIpcEndpointQuery endpointQuery;
+    endpointQuery.sourceProcId = procId;
+    endpointQuery.params = absQuery.params;
+
+    const enum k_proc_error err = k_proc_callback_invoke_32(ipcListenerRegister[index].procId,
+                                                            ipcListenerRegister[index].runLoop,
+                                                            (gnwEventListener_32)(ptr_t)ipcListenerRegister[index].listener,
+                                                            (int_32)&endpointQuery);
     if (err == PE_IGNORED) {
         return GIPCE_IGNORED;
     }
@@ -121,7 +125,7 @@ enum gnwIpcError k_ipc_ipcRegister(const procId_t procId,
                                    const char * const absPathPtr,
                                    const size_t pathLen,
                                    const enum gnwIpcAccessScope accessScope,
-                                   const gnwEventListener_32_8 handlerRoutine,
+                                   const gnwIpcListener handlerRoutine,
                                    struct gnwRunLoop * const runLoopPtr) {                                
     if (!absPathPtr) {
         OOPS("Nullptr");

@@ -9,13 +9,38 @@
 #include <ipc/ipc.h>
 #include <hal/proc/proc.h>
 #include <error/panic.h>
+#include <defs.h>
 
-enum gnwIpcError k_scr_usr_ipcSend(const char * const path, const size_t pathLen, const char c) {
+enum gnwIpcError k_scr_usr_ipcSend(const struct gnwIpcSenderQuery * const queryPtr) {
+
     const procId_t procId = k_proc_getCurrentId();
-    const ptr_t absPathPtr = k_scl_func_getValidAbsoluteForProc(procId, (const ptr_t)path, pathLen);
+    const struct gnwIpcSenderQuery * const absQueryPtr = (struct gnwIpcSenderQuery *)k_scl_func_getValidAbsoluteForProc(procId, (const ptr_t)queryPtr, sizeof(struct gnwIpcSenderQuery));
+    if (!absQueryPtr) {
+        OOPS("Invalid pointer referenced");
+    }
+    const char * const absPathPtr = (char *)k_scl_func_getValidAbsoluteForProc(procId, (const ptr_t)(absQueryPtr->path), absQueryPtr->pathLen);
     if (!absPathPtr) {
         OOPS("Invalid pointer referenced");
     }
-    
-    return k_ipc_ipcSend(procId, (char *)absPathPtr, pathLen, c);
+    const ptr_t absDataPtr = k_scl_func_getValidAbsoluteForProc(procId, (const ptr_t)(absQueryPtr->params.dataPtr), absQueryPtr->params.dataBytes);
+    if (!absDataPtr) {
+        OOPS("Invalid pointer referenced");
+    }
+    ptr_t absResultPtr = nullptr;
+    if (absQueryPtr->params.resultPtr) {
+        absResultPtr = k_scl_func_getValidAbsoluteForProc(procId, (const ptr_t)(absQueryPtr->params.resultPtr), absQueryPtr->params.resultBytes);
+        if (!absResultPtr) {
+            OOPS("Invalid pointer referenced");
+        }
+    }
+
+    struct gnwIpcSenderQuery absoluteQuery;
+    absoluteQuery.path = absPathPtr;
+    absoluteQuery.pathLen = absQueryPtr->pathLen;
+    absoluteQuery.params.dataPtr = absDataPtr;
+    absoluteQuery.params.dataBytes = absQueryPtr->params.dataBytes;
+    absoluteQuery.params.resultPtr = absResultPtr;
+    absoluteQuery.params.resultBytes = absQueryPtr->params.resultBytes;
+
+    return k_ipc_ipcSend(procId, absoluteQuery);
 }

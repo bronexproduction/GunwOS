@@ -80,13 +80,26 @@ static void clear() {
     k_trm_vid_clear();
 }
 
-static void ipcListener(const procId_t procId, const char c) {
-    trm_append(c);
+static void ipcListener(const struct gnwIpcEndpointQuery * const query) {
+    if (!query) {
+        fug(FUG_NULLPTR);
+        return;
+    } 
+    if (!query->params.dataPtr) {
+        fug(FUG_INCONSISTENT);
+        return;
+    }
+    if (query->params.dataBytes != 1) {
+        fug(FUG_INCONSISTENT);
+        return;
+    }
+
+    trm_append(*query->params.dataPtr);
 }
 
 void dupa() {
     k_trm_vid_init();
-    ipcRegister("t0", GIAS_ALL, (gnwEventListener_32_8)ipcListener);
+    ipcRegister("t0", GIAS_ALL, ipcListener);
     clear();
 
     runLoopStart();
