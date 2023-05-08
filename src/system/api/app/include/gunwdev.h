@@ -8,11 +8,11 @@
 #ifndef GUNWOS_GUNWDEV_H
 #define GUNWOS_GUNWDEV_H
 
-#include <scl_user.h>
-#include <gunwfug.h>
-#include <gunwuhadesc.h>
-#include <gunwevent.h>
-#include <gunwrlp.h>
+#include "scl_user.h"
+#include "gunwfug.h"
+#include "gunwuhadesc.h"
+#include "gunwevent.h"
+#include "gunwrlp.h"
 
 /*
     Requests device information for given id

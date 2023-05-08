@@ -8,9 +8,9 @@
 #ifndef GUNWOS_GUNWCTRL_H
 #define GUNWOS_GUNWCTRL_H
 
-#include <gunwfug.h>
 #include <string.h>
-#include <gunwrlp.h>
+#include "gunwfug.h"
+#include "gunwrlp.h"
 
 enum gnwCtrlError {
     GCE_NONE = 0,

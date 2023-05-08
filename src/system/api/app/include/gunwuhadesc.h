@@ -8,17 +8,17 @@
 #ifndef GUNWOS_GUNWUHADESC_H
 #define GUNWOS_GUNWUHADESC_H
 
-#include <gunwdevtypes.h>
+#include "gunwdevtypes.h"
 
-#include <uha/gunwuha_system_desc.h>
-#include <uha/gunwuha_mem_desc.h>
-#include <uha/gunwuha_keyboard_desc.h>
-#include <uha/gunwuha_mouse_desc.h>
-#include <uha/gunwuha_fdc_desc.h>
-#include <uha/gunwuha_storctrl_desc.h>
-#include <uha/gunwuha_char_desc.h>
-#include <uha/gunwuha_display_desc.h>
-#include <uha/gunwuha_event_desc.h>
+#include "uha/gunwuha_system_desc.h"
+#include "uha/gunwuha_mem_desc.h"
+#include "uha/gunwuha_keyboard_desc.h"
+#include "uha/gunwuha_mouse_desc.h"
+#include "uha/gunwuha_fdc_desc.h"
+#include "uha/gunwuha_storctrl_desc.h"
+#include "uha/gunwuha_char_desc.h"
+#include "uha/gunwuha_display_desc.h"
+#include "uha/gunwuha_event_desc.h"
 
 /*
     Hardware-specific descriptor

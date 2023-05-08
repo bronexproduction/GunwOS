@@ -7,10 +7,10 @@
 #ifndef GUNWOS_GUNWIPC_H
 #define GUNWOS_GUNWIPC_H
 
-#include <gunwfug.h>
-#include <gunwrlp.h>
-#include <gunwevent.h>
 #include <string.h>
+#include "gunwfug.h"
+#include "gunwrlp.h"
+#include "gunwevent.h"
 
 /*
     IPC path structure:

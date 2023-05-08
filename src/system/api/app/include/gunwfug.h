@@ -7,7 +7,7 @@
 #ifndef GUNWOS_GUNWFUG_H
 #define GUNWOS_GUNWFUG_H
 
-#include <scl_user.h>
+#include "scl_user.h"
 
 #define CHECKPTR(PTR) { if (!PTR) { fug(FUG_NULLPTR); __builtin_unreachable(); } }
 
