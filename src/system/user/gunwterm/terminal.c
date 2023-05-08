@@ -7,6 +7,7 @@
 
 #include <mem.h>
 #include <gunwipc.h>
+#include <gunwrlp.h>
 
 #include "video.h"
 
@@ -89,7 +90,7 @@ static void ipcListener(const struct gnwIpcEndpointQuery * const query) {
         fug(FUG_INCONSISTENT);
         return;
     }
-    if (query->params.dataBytes != 1) {
+    if (query->params.dataSizeBytes != 1) {
         fug(FUG_INCONSISTENT);
         return;
     }

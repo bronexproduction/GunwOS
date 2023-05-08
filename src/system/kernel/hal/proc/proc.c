@@ -16,6 +16,7 @@
 #include <timer/timer.h>
 #include <error/panic.h>
 #include <queue/queue.h>
+#include <runloop/runloop.h>
 
 register const uint_32 cur_esp __asm__ ("esp");
 #define STACK_VAL(REFESP, SIZE, OFFSET) (*(uint_ ## SIZE *)(REFESP + OFFSET))
@@ -366,8 +367,8 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
                                         const ptr_t funPtr, 
                                         const ptr_t p,
                                         const size_t pSizeBytes,
-                                        const k_proc_callbackDataSerializationRoutine serialize,
-                                        const k_proc_callbackDataSerializationRoutine deserialize) {
+                                        const gnwRunLoopDataSerializationRoutine serialize,
+                                        const gnwRunLoopDataSerializationRoutine deserialize) {
     if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
         OOPS("Process id out of range");
     }
@@ -391,20 +392,20 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
         OOPS("Unexpected event format");
         return PE_UNKNOWN;
     }
-
-    #warning COPY DATA TO QUQUQUQUQUUEUEUEUEUUUEUEUEU
-    
-    struct gnwRunLoop * const absRunLoopPtr = (struct gnwRunLoop *)k_mem_absForProc(procId, (ptr_t)runLoop);
-    if (!k_mem_bufInZoneForProc(procId, (ptr_t)absRunLoopPtr, sizeof(struct gnwRunLoop))) {
-        return PE_ACCESS_VIOLATION;
-    }
-    #warning runLoopDispatch(procId, item, p)
+    item.dataSizeBytes = pSizeBytes;
+    item.serialize = serialize;
+    item.deserialize = deserialize;
 
     enum gnwRunLoopError err;
+    size_t runloopToken;
     CRITICAL_SECTION(
-        err = gnwRunLoopDispatch(absRunLoopPtr, item);
+        err = k_runloop_reserve(procId, &runloopToken);
     )
+    if (err != GRLE_NONE) {
+        return PE_OPERATION_FAILED;
+    }
     
+    err = k_runloop_dispatch(runloopToken, item, p);
     if (err != GRLE_NONE) {
         return PE_OPERATION_FAILED;
     }
@@ -421,8 +422,8 @@ enum k_proc_error k_proc_callback_invoke_ptr(const procId_t procId,
                                              void (* const funPtr)(ptr_t),
                                              const ptr_t p,
                                              const size_t pSizeBytes,
-                                             const k_proc_callbackDataSerializationRoutine serialize,
-                                             const k_proc_callbackDataSerializationRoutine deserialize) {
+                                             const gnwRunLoopDataSerializationRoutine serialize,
+                                             const gnwRunLoopDataSerializationRoutine deserialize) {
     return callbackInvoke(procId, GEF_PTR, (ptr_t)funPtr, p, pSizeBytes, serialize, deserialize);
 }
 

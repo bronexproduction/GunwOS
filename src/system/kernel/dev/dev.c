@@ -433,8 +433,8 @@ enum gnwDeviceError k_dev_emit(const struct gnwDeviceEvent * const eventPtr) {
                                                                (gnwEventListener_ptr)dev->listener,
                                                                (ptr_t)eventPtr,
                                                                eventPtr->dataSizeBytes + sizeof(struct gnwDeviceEvent),
-                                                               (k_proc_callbackDataSerializationRoutine)gnwDeviceEvent_serialize,
-                                                               (k_proc_callbackDataSerializationRoutine)gnwDeviceEvent_deserialize);
+                                                               (gnwRunLoopDataSerializationRoutine)gnwDeviceEvent_serialize,
+                                                               (gnwRunLoopDataSerializationRoutine)gnwDeviceEvent_deserialize);
     switch (callbackErr) {
     case PE_NONE:
         return GDE_NONE;

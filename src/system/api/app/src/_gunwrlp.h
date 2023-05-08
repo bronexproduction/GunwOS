@@ -17,10 +17,14 @@ enum gnwRunLoopError {
     GRLE_UNKNOWN
 };
 
+typedef void (*gnwRunLoopDataSerializationRoutine)(ptr_t, ptr_t);
+
 struct gnwRunLoopDispatchItem {
     enum gnwEventFormat format;
     union gnwEventListener routine;
     size_t dataSizeBytes;
+    gnwRunLoopDataSerializationRoutine serialize;
+    gnwRunLoopDataSerializationRoutine deserialize;
 };
 
 #endif // GUNWOS__GUNWRLP_H

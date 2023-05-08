@@ -7,6 +7,16 @@
 
 #include "runloop.h"
 
+enum gnwRunLoopError k_runloop_reserve(const procId_t procId, size_t * const token) {
+    #warning TO BE IMPLEMENTED
+    return GRLE_UNKNOWN;
+}
+
+enum gnwRunLoopError k_runloop_dispatch(const size_t token, const struct gnwRunLoopDispatchItem item, const ptr_t data) {
+    #warning TO BE IMPLEMENTED
+    return GRLE_UNKNOWN;
+}
+
 enum gnwRunLoopError k_runloop_getPendingItem(const procId_t procId, struct gnwRunLoopDispatchItem * const absItemPtr) {
     #warning TO BE IMPLEMENTED
     return GRLE_UNKNOWN;

@@ -17,8 +17,6 @@
 #define NONE_PROC_ID -2
 #define KERNEL_PROC_ID -1
 
-typedef void (*k_proc_callbackDataSerializationRoutine)(ptr_t, ptr_t);
-
 struct k_proc_descriptor {
     ptr_t img;
     addr_t entry;
@@ -30,6 +28,7 @@ enum k_proc_error {
     PE_LIMIT_REACHED,
     PE_ACCESS_VIOLATION,
     PE_OPERATION_FAILED,
+    PE_INVALID_PARAMETER,
     PE_IGNORED,
     PE_UNKNOWN
 };
@@ -125,7 +124,7 @@ enum k_proc_error k_proc_callback_invoke_ptr(const procId_t procId,
                                              void (* const funPtr)(ptr_t),
                                              const ptr_t p,
                                              const size_t pSizeBytes,
-                                             const k_proc_callbackDataSerializationRoutine serialize,
-                                             const k_proc_callbackDataSerializationRoutine deserialize);
+                                             const gnwRunLoopDataSerializationRoutine serialize,
+                                             const gnwRunLoopDataSerializationRoutine deserialize);
 
 #endif // PROC_H

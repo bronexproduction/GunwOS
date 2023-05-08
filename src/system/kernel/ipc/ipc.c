@@ -109,8 +109,8 @@ enum gnwIpcError k_ipc_ipcSend(const procId_t procId,
                                                              (gnwEventListener_ptr)ipcListenerRegister[index].listener,
                                                              (ptr_t)&endpointQuery,
                                                              sizeof(struct gnwIpcEndpointQuery) + endpointQuery.params.dataSizeBytes,
-                                                             (k_proc_callbackDataSerializationRoutine)gnwIpcEndpointQuery_serialize,
-                                                             (k_proc_callbackDataSerializationRoutine)gnwIpcEndpointQuery_deserialize);
+                                                             (gnwRunLoopDataSerializationRoutine)gnwIpcEndpointQuery_serialize,
+                                                             (gnwRunLoopDataSerializationRoutine)gnwIpcEndpointQuery_deserialize);
     if (err == PE_IGNORED) {
         return GIPCE_IGNORED;
     }

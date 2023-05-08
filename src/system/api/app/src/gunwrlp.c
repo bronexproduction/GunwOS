@@ -9,6 +9,7 @@
 
 #include "_gunwrlp.h"
 #include <defs.h>
+#include <gunwctrl.h>
 #include <gunwfug.h>
 
 /*

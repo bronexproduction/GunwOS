@@ -13,6 +13,7 @@
 #include <gunwdev.h>
 #include <gunwkeyboard.h>
 #include <gunwfug.h>
+#include <gunwrlp.h>
 
 #include "cliio.h"
 #include "cmdutil.h"
@@ -167,7 +168,7 @@ static void s_cli_init() {
         fug(FUG_UNDEFINED);
     }
 
-    e = devListen(keyboardDesc.identifier, onKeyboardEvent);
+    e = devListen(keyboardDesc.identifier, (gnwDeviceEventListener)onKeyboardEvent);
     if (e) {
         // devRelease(charOutDesc.identifier);
         devRelease(keyboardDesc.identifier);

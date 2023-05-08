@@ -16,7 +16,7 @@
 static int append(char c) {
     struct gnwIpcQueryParams params;
     params.dataPtr = (ptr_t)&c;
-    params.dataBytes = sizeof(char);
+    params.dataSizeBytes = sizeof(char);
 
     enum gnwIpcError e = ipcSend("t0", params);
     if (e != GIPCE_NONE) {
