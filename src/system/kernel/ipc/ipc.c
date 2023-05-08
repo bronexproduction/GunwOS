@@ -10,6 +10,7 @@
 #include <utils.h>
 #include <hal/proc/proc.h>
 #include <error/panic.h>
+#include <src/_gunwipc.h>
 
 #define MAX_IPC_LISTENER 16
 
@@ -99,18 +100,17 @@ enum gnwIpcError k_ipc_ipcSend(const procId_t procId,
         return GIPCE_FORBIDDEN;
     }
 
-    #warning STRUCTURE BELOW WILL BE DEALLOCATED BEFORE HANDLING OCCUR
-    #warning CODE BELOW WILL NOT WORK
-
     struct gnwIpcEndpointQuery endpointQuery;
     endpointQuery.sourceProcId = procId;
     endpointQuery.params = absQuery.params;
 
-    const enum k_proc_error err = k_proc_callback_invoke_32(ipcListenerRegister[index].procId,
-                                                            ipcListenerRegister[index].runLoop,
-                                                            (gnwEventListener_32)(ptr_t)ipcListenerRegister[index].listener,
-                                                            (int_32)&endpointQuery,
-                                                            sizeof(gnwIpcEndpointQuery));
+    #warning endpoint query - how to handle response? response bytes not counted
+    const enum k_proc_error err = k_proc_callback_invoke_ptr(ipcListenerRegister[index].procId,
+                                                             (gnwEventListener_ptr)ipcListenerRegister[index].listener,
+                                                             (ptr_t)&endpointQuery,
+                                                             sizeof(struct gnwIpcEndpointQuery) + endpointQuery.params.dataBytes,
+                                                             (k_proc_callbackDataSerializationRoutine)gnwIpcEndpointQuery_serialize,
+                                                             (k_proc_callbackDataSerializationRoutine)gnwIpcEndpointQuery_deserialize);
     if (err == PE_IGNORED) {
         return GIPCE_IGNORED;
     }
