@@ -9,8 +9,6 @@
 
 #include <string.h>
 #include "gunwfug.h"
-#include "gunwrlp.h"
-#include "gunwevent.h"
 
 /*
     IPC path structure:
@@ -87,9 +85,6 @@ SYSCALL_DECL enum gnwIpcError ipcRegister(const char * const path, const enum gn
     CHECKPTR(path);
     CHECKPTR(handler);
 
-    ptr_t rlpPtr = runLoopGetMain();
-    CHECKPTR(rlpPtr);
-
     struct gnwIpcHandlerDescriptor desc;
     desc.path = path;
     desc.pathLen = strlen(path);
@@ -100,7 +95,6 @@ SYSCALL_DECL enum gnwIpcError ipcRegister(const char * const path, const enum gn
     desc.handlerRoutine = handler;
 
     SYSCALL_PAR1(&desc);
-    SYSCALL_PAR2(rlpPtr);
 
     SYSCALL_USER_FUNC(IPC_REGISTER);
     SYSCALL_USER_INT;

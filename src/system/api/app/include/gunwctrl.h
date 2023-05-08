@@ -9,8 +9,8 @@
 #define GUNWOS_GUNWCTRL_H
 
 #include <string.h>
+
 #include "gunwfug.h"
-#include "gunwrlp.h"
 
 enum gnwCtrlError {
     GCE_NONE = 0,
@@ -53,11 +53,6 @@ SYSCALL_DECL void exit(const int_32 status) {
     Suspends process execution until an event is received
 */
 SYSCALL_DECL void waitForEvent() {
-    ptr_t rlpPtr = runLoopGetMain();
-    CHECKPTR(rlpPtr);
-
-    SYSCALL_PAR1(rlpPtr);
-
     SYSCALL_USER_FUNC(WAIT_FOR_EVENT);
     SYSCALL_USER_INT;
 }
