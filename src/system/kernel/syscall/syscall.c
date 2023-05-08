@@ -12,7 +12,7 @@
 #include "drvfunc.h"
 #include "usrfunc.h"
 
-#define DRIVER_SYSCALL_COUNT 4
+#define DRIVER_SYSCALL_COUNT 3
 #define SYSCALL_COUNT 19
 
 /*
@@ -23,8 +23,7 @@
 static void (*driverSyscallReg[DRIVER_SYSCALL_COUNT])() = {
     /* 0x00 */ (void *)k_scr_rdb,
     /* 0x01 */ (void *)k_scr_wrb,
-    /* 0x02 */ (void *)k_scr_emit_void,
-    /* 0x03 */ (void *)k_scr_emit_u8,
+    /* 0x02 */ (void *)k_scr_emit
 };
 
 /*

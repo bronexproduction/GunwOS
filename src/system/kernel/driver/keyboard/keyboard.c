@@ -104,12 +104,21 @@ ISR(
         MSB contains information whether key was pressed or released
     */
     enum gnwDeviceError err;
+    struct gnwDeviceEvent event;
+    char eventData;
     if (c & 0b10000000) {
-        err = emit_u8(GKEC_KEY_UP, c & 0b01111111);
+        event.type = GKEC_KEY_UP;
+        eventData = c & 0b01111111;
     }
     else {
-        err = emit_u8(GKEC_KEY_DOWN, c);
+        event.type = GKEC_KEY_DOWN;
+        eventData = c;
     }
+
+    event.data = &eventData;
+    event.dataSizeBytes = sizeof(char);
+
+    err = emit(&event);
     if (err != GDE_NONE) {
         OOPS("Error emitting keyboard event");
     }
@@ -121,8 +130,6 @@ static struct gnwDriverConfig desc() {
 
 static struct gnwDeviceUHA uha() {
     struct gnwDeviceUHA uha;
-
-    uha.event.desc.eventDataFormat = GEF_U32_U8;
 
     return uha;
 }

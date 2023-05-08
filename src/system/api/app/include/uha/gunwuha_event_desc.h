@@ -16,12 +16,7 @@
     Event emitting device descriptor
 */
 struct gnwDeviceUHA_event_desc {
-    /*
-        Event data format
-
-        Determines the type of listener data parameter
-    */
-    enum gnwEventFormat eventDataFormat;
+    uint_32 _unused;
 };
 
 #endif // GUNWOS_GUNWUHA_EVENT_DESC_H

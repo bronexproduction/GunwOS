@@ -22,7 +22,7 @@ struct deviceEventListener {
     /*
         Event listener routine
     */
-    union gnwEventListener routine;
+    gnwDeviceEventListener routine;
 
     /*
         Process' run loop for event dispatch
@@ -128,7 +128,7 @@ enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescr
         /* started */ false, 
         /* holder */ NONE_PROC_ID, 
         /* listener */ (struct deviceEventListener) {
-            /* routine */ (union gnwEventListener) {
+            /* routine */ (gnwDeviceEventListener) {
                 /* _handle */ NULL
             },
             /* runLoop */ nullptr
@@ -323,7 +323,7 @@ enum gnwDeviceError k_dev_writeChar(const procId_t processId,
 
 static enum gnwDeviceError validateListener(const procId_t processId, 
                                             const size_t deviceId, 
-                                            const union gnwEventListener listener,
+                                            const gnwDeviceEventListener listener,
                                             const struct gnwRunLoop * const runLoopPtr) {
     if (!listener._handle) {
         return GDE_LISTENER_INVALID;
@@ -348,7 +348,7 @@ static enum gnwDeviceError validateListener(const procId_t processId,
 
 enum gnwDeviceError k_dev_listen(const procId_t processId, 
                                  const size_t deviceId, 
-                                 const union gnwEventListener listener,
+                                 const gnwDeviceEventListener listener,
                                  struct gnwRunLoop * const runLoopPtr) {
     enum gnwDeviceError err = validateListener(processId, deviceId, listener, runLoopPtr);
     if (err) {
@@ -409,8 +409,7 @@ enum gnwDeviceError k_dev_setParam(const procId_t procId,
     return GDE_NONE;
 }
 
-static enum gnwDeviceError validateEmitter(const size_t * const devIdPtr,
-                                           const enum gnwEventFormat format) {
+static enum gnwDeviceError validateEmitter(const size_t * const devIdPtr) {
     if (!devIdPtr) {
         return GDE_INVALID_DEVICE_STATE;
     }
@@ -419,9 +418,6 @@ static enum gnwDeviceError validateEmitter(const size_t * const devIdPtr,
     }
     if (!devices[*devIdPtr].started) {
         return GDE_INVALID_DEVICE_STATE;
-    }
-    if (devices[*devIdPtr].desc.api.event.desc.eventDataFormat != format) {
-        return GDE_INVALID_OPERATION;
     }
 
     return GDE_NONE;
@@ -439,37 +435,8 @@ static enum gnwDeviceError validateListenerInvocation(const size_t deviceId) {
     return GDE_NONE;
 }
 
-enum gnwDeviceError k_dev_emit_void(const int_32 type) {
-    enum gnwDeviceError err = validateEmitter(k_hal_servicedDevIdPtr, GEF_U32);
-    if (err) {
-        return err;
-    }
-    err = validateListenerInvocation(*k_hal_servicedDevIdPtr);
-    if (err == GDE_NOT_FOUND) {
-        return GDE_NONE;
-    } else if (err) {
-        return err;
-    }
-
-    struct device *dev = &devices[*k_hal_servicedDevIdPtr];
-    gnwEventListener_32 listener = dev->listener.routine._32;
-
-    enum k_proc_error callbackErr = k_proc_callback_invoke_32(dev->holder, dev->listener.runLoop, (void (*)(int_32))listener, type);
-    switch (callbackErr) {
-    case PE_NONE:
-        return GDE_NONE;
-    case PE_IGNORED:
-        return GDE_HANDLE_INVALID;
-    case PE_ACCESS_VIOLATION:
-        return GDE_LISTENER_INVALID;
-    default:
-        return GDE_UNKNOWN;
-    }
-}
-
-enum gnwDeviceError k_dev_emit_u8(const int_32 type,
-                                  const int_8 data) {
-    enum gnwDeviceError err = validateEmitter(k_hal_servicedDevIdPtr, GEF_U32_U8);
+enum gnwDeviceError k_dev_emit(const struct gnwDeviceEvent * const eventPtr) {
+    enum gnwDeviceError err = validateEmitter(k_hal_servicedDevIdPtr);
     if (err) {
         return err;
     }

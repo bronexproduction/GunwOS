@@ -13,6 +13,25 @@
 #include "gunwuhadesc.h"
 #include "gunwevent.h"
 
+struct gnwDeviceEvent {
+    /*
+        Event type (device specific)
+    */
+    int_32 type;
+
+    /*
+        Event data pointer
+    */
+    ptr_t data;
+
+    /*
+        Event data size in bytes
+    */
+    size_t dataSizeBytes;
+};
+
+typedef __attribute__((cdecl)) void (*gnwDeviceEventListener)(const struct gnwDeviceEvent * const);
+
 /*
     Requests device information for given id
 
@@ -197,11 +216,11 @@ SYSCALL_DECL enum gnwDeviceError devMemWrite(const size_t identifier,
         * listener - event listener
 */
 SYSCALL_DECL enum gnwDeviceError devListen(const size_t identifier,
-                                           const union gnwEventListener listener) {
-    CHECKPTR(listener._handle);
+                                           const gnwDeviceEventListener listener) {
+    CHECKPTR(listener);
 
     SYSCALL_PAR1(identifier);
-    SYSCALL_PAR2(listener._handle);
+    SYSCALL_PAR2(listener);
 
     SYSCALL_USER_FUNC(DEV_LISTEN);
     SYSCALL_USER_INT;
