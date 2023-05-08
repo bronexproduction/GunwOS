@@ -365,8 +365,7 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
                                         const struct gnwRunLoop * const runLoop,
                                         const enum gnwEventFormat format, 
                                         const ptr_t funPtr, 
-                                        const int_32 p0,
-                                        const int_32 p1) {
+                                        const int_32 p0) {
     if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
         OOPS("Process id out of range");
     }
@@ -390,11 +389,6 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
     case GEF_U32:
         item.routine._32 = (gnwEventListener_32)funPtr;
         item.params[0] = p0;
-        break;
-    case GEF_U32_U8:
-        item.routine._32_8 = (gnwEventListener_32_8)funPtr;
-        item.params[0] = p0;
-        item.params[1] = p1;
         break;
     case GEF_NONE:
         OOPS("Unexpected event format");
