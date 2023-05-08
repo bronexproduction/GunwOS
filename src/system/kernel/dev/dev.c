@@ -348,8 +348,7 @@ static enum gnwDeviceError validateListener(const procId_t processId,
 
 enum gnwDeviceError k_dev_listen(const procId_t processId, 
                                  const size_t deviceId, 
-                                 const gnwDeviceEventListener listener,
-                                 struct gnwRunLoop * const runLoopPtr) {
+                                 const gnwDeviceEventListener listener) {
     enum gnwDeviceError err = validateListener(processId, deviceId, listener, runLoopPtr);
     if (err) {
         return err;
