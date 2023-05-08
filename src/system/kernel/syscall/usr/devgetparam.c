@@ -18,11 +18,13 @@ enum gnwDeviceError k_scr_usr_devGetParam(const size_t devId,
     const struct gnwDeviceParamDescriptor * const absDescPtr = (struct gnwDeviceParamDescriptor *)k_scl_func_getValidAbsoluteForProc(procId, (const ptr_t)paramDescriptor, sizeof(struct gnwDeviceParamDescriptor));
     if (!absDescPtr) {
         OOPS("Invalid pointer referenced");
+        return GDE_UNKNOWN;
     }
 
     size_t * absResultPtr = (size_t *)k_scl_func_getValidAbsoluteForProc(procId, (const ptr_t)result, sizeof(size_t));
     if (!absResultPtr) {
         OOPS("Invalid pointer referenced");
+        return GDE_UNKNOWN;
     }
     
     return k_dev_getParam(devId, *absDescPtr, absResultPtr);

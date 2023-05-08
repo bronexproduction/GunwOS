@@ -14,7 +14,7 @@
 /*
     Asks system for the current run loop entry
 */
-SYSCALL_DECL bool runLoopGetItem(struct gnwRunLoopDispatchItem * const itemPtr) {
+SYSCALL_DECL enum gnwRunLoopError runLoopGetItem(struct gnwRunLoopDispatchItem * const itemPtr) {
     CHECKPTR(itemPtr);
 
     SYSCALL_PAR1(itemPtr);
@@ -22,7 +22,7 @@ SYSCALL_DECL bool runLoopGetItem(struct gnwRunLoopDispatchItem * const itemPtr) 
     SYSCALL_USER_FUNC(RUNLOOP_GET_ITEM);
     SYSCALL_USER_INT;
 
-    SYSCALL_RETVAL(8);
+    SYSCALL_RETVAL(32);
 }
 
 /*
@@ -46,10 +46,15 @@ static void execute(const union gnwEventListener routine, const ptr_t data) {
 void runLoopStart() {
     struct gnwRunLoopDispatchItem currentItem;
     while (1) {
-        if (!runLoopGetItem(&currentItem)) {
+        const enum gnwRunLoopError err = runLoopGetItem(&currentItem);
+        if (err == GRLE_EMPTY) {
             waitForEvent();
             continue;
+        } else if (err != GRLE_NONE) {
+            fug(FUG_INCONSISTENT);
+            return;
         }
+
         if (currentItem.format == GEF_PTR) {
             uint_8 data[currentItem.dataSizeBytes];
             enum gnwRunLoopError err = runLoopGetData(data);

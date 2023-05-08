@@ -12,7 +12,9 @@
 
 enum gnwRunLoopError {
     GRLE_NONE = 0,
-    GRLE_FULL
+    GRLE_EMPTY,
+    GRLE_FULL,
+    GRLE_UNKNOWN
 };
 
 struct gnwRunLoopDispatchItem {

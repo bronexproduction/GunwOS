@@ -13,6 +13,7 @@ enum gnwDeviceError k_scr_usr_devGetByType(const enum gnwDeviceType deviceType, 
     const ptr_t absDescriptorPtr = k_scl_func_getValidAbsoluteForCurrentProc((const ptr_t)descriptor, sizeof(struct gnwDeviceUHADesc));
     if (!absDescriptorPtr) {
         OOPS("Invalid parameter");
+        return GDE_UNKNOWN;
     }
 
     return k_dev_getByType(deviceType, (struct gnwDeviceUHADesc * const)absDescriptorPtr);

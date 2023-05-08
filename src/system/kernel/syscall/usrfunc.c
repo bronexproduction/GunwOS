@@ -354,15 +354,15 @@ SCR(devSetParam,
                 (to be filled with unhandled entry)
     
     Return:
-        * EAX - true if entry returned, false otherwise
+        * EAX - enum gnwRunLoopError value on failure, GRLE_NONE otherwise
 */
 SCR(runLoopGetItem,
     REG(32, itemPtr, ebx)
 
-    REG_RET(8, success)
+    REG_RET(32, err)
 
-    extern bool k_scr_usr_runLoopGetItem(struct gnwRunLoopDispatchItem * const);
-    success = k_scr_usr_runLoopGetItem((struct gnwRunLoopDispatchItem *)itemPtr);
+    extern enum gnwRunLoopError k_scr_usr_runLoopGetItem(struct gnwRunLoopDispatchItem * const);
+    err = k_scr_usr_runLoopGetItem((struct gnwRunLoopDispatchItem *)itemPtr);
 )
 
 /*

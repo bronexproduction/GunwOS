@@ -136,7 +136,7 @@ __attribute__((naked)) enum gnwDeviceError k_scr_devSetParam(const size_t device
     Code - 0x11
     Function - RUNLOOP_GET_ITEM
 */
-__attribute__((naked)) bool k_scr_runLoopGetItem(struct gnwRunLoopDispatchItem * const itemPtr);
+__attribute__((naked)) enum gnwRunLoopError k_scr_runLoopGetItem(struct gnwRunLoopDispatchItem * const itemPtr);
 
 /*
     Code - 0x12

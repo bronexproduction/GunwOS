@@ -21,11 +21,13 @@ enum gnwDeviceError k_scr_usr_devMemWrite(const size_t devId, const void * const
     const range_addr_t * const absDevInputRangePtr = (range_addr_t *)k_scl_func_getValidAbsoluteForProc(procId, (const ptr_t)devInputRange, sizeof(range_addr_t));
     if (!absDevInputRangePtr) {
         OOPS("Invalid pointer referenced");
+        return GDE_UNKNOWN;
     }
 
     const ptr_t absBufferPtr = k_scl_func_getValidAbsoluteForProc(procId, (const ptr_t)buf, absDevInputRangePtr->sizeBytes);
     if (!absBufferPtr) {
         OOPS("Invalid pointer referenced");
+        return GDE_UNKNOWN;
     }
     
     return k_dev_writeMem(k_proc_getCurrentId(), devId, (const void * const)absBufferPtr, *absDevInputRangePtr);
