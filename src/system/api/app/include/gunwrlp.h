@@ -29,9 +29,4 @@
 */
 void runLoopStart();
 
-/*
-    Returns pointer to the main run loop
-*/
-ptr_t runLoopGetMain();
-
 #endif // GUNWOS_GUNWRLP_H
