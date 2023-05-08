@@ -384,6 +384,9 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
     struct gnwRunLoopDispatchItem item;
     item.format = format;
     switch (format) {
+    case GEF_VOID:
+        item.routine._void = (gnwEventListener_void)funPtr;
+        break;
     case GEF_U32:
         item.routine._32 = (gnwEventListener_32)funPtr;
         item.params[0] = p0;
