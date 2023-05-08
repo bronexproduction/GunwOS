@@ -88,6 +88,20 @@
 #define KBD_STAT_TIM        0x40    /* Timeout bit (TIM) */
 #define KBD_STAT_PARERR     0x80    /* Parity error bit (PARE) */
 
+static void emitEvent(const int_32 type, const char data) {
+    enum gnwDeviceError err;
+    struct gnwDeviceEvent event;
+    event.type = type;
+    event.data = (ptr_t)&data;
+    event.dataSizeBytes = sizeof(char);
+
+    err = emit(&event);
+    if (err != GDE_NONE) {
+        OOPS("Error emitting keyboard event");
+        return;
+    }
+}
+
 ISR(
     /* Checking output buffer status */
     if (!rdb(KBD_BUS_STATUS) & KBD_STAT_OUTB) {
@@ -103,24 +117,11 @@ ISR(
 
         MSB contains information whether key was pressed or released
     */
-    enum gnwDeviceError err;
-    struct gnwDeviceEvent event;
-    char eventData;
     if (c & 0b10000000) {
-        event.type = GKEC_KEY_UP;
-        eventData = c & 0b01111111;
+        emitEvent(GKEC_KEY_UP, c & 0b01111111);
     }
     else {
-        event.type = GKEC_KEY_DOWN;
-        eventData = c;
-    }
-
-    event.data = &eventData;
-    event.dataSizeBytes = sizeof(char);
-
-    err = emit(&event);
-    if (err != GDE_NONE) {
-        OOPS("Error emitting keyboard event");
+        emitEvent(GKEC_KEY_DOWN, c);
     }
 )
 
@@ -129,7 +130,7 @@ static struct gnwDriverConfig desc() {
 }
 
 static struct gnwDeviceUHA uha() {
-    struct gnwDeviceUHA uha;
+    struct gnwDeviceUHA uha = { 0 };
 
     return uha;
 }

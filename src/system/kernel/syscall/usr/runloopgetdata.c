@@ -5,14 +5,17 @@
 //  Created by Artur Danielewski on 08.05.2023.
 //
 
+#include <hal/proc/proc.h>
 #include <runloop/runloop.h>
+#include <syscall/func.h>
+#include <error/panic.h>
 
 enum gnwRunLoopError k_scr_usr_runLoopGetData(ptr_t dataBufferPtr) {
 
     const procId_t procId = k_proc_getCurrentId();
-    const size_t dataSizeBytes;
+    size_t dataSizeBytes;
 
-    enum gnwRunLoopError err = k_runloop_getPendingItemDataBytes(procId, &dataSizeBytes);
+    enum gnwRunLoopError err = k_runloop_getPendingItemDataSizeBytes(procId, &dataSizeBytes);
     if (err != GRLE_NONE) {
         return err;
     }

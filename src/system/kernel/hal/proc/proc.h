@@ -17,6 +17,8 @@
 #define NONE_PROC_ID -2
 #define KERNEL_PROC_ID -1
 
+typedef void (*k_proc_callbackDataSerializationRoutine)(ptr_t, ptr_t);
+
 struct k_proc_descriptor {
     ptr_t img;
     addr_t entry;
@@ -112,9 +114,18 @@ void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const procId_t currentP
     * funPtr - function pointer relative to procId process memory
     * p* - parameters of various sizes
     * pSizeBytes - buffer size in bytes (in case p is a pointer)
+    * serializer - function converting object pointed by 'p' to a bytes array of 'pSizeBytes' bytes
+    * deserializer - function converting array of bytes of 'pSizeBytes' bytes to an object (reverse serializer)
+    
+    Note: Serializer/deserializer has to align object pointers after copying data to the new location
     
     Return value: enum k_proc_error - PE_NONE on success
 */
-enum k_proc_error k_proc_callback_invoke_ptr(const procId_t procId, void (* const funPtr)(ptr_t), const ptr_t p, const size_t pSizeBytes);
+enum k_proc_error k_proc_callback_invoke_ptr(const procId_t procId,
+                                             void (* const funPtr)(ptr_t),
+                                             const ptr_t p,
+                                             const size_t pSizeBytes,
+                                             const k_proc_callbackDataSerializationRoutine serialize,
+                                             const k_proc_callbackDataSerializationRoutine deserialize);
 
 #endif // PROC_H

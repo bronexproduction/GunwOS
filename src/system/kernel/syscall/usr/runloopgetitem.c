@@ -5,7 +5,10 @@
 //  Created by Artur Danielewski on 08.05.2023.
 //
 
+#include <syscall/func.h>
+#include <hal/proc/proc.h>
 #include <runloop/runloop.h>
+#include <error/panic.h>
 
 enum gnwRunLoopError k_scr_usr_runLoopGetItem(struct gnwRunLoopDispatchItem * const itemPtr) {
 

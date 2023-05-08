@@ -365,7 +365,9 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
                                         const enum gnwEventFormat format, 
                                         const ptr_t funPtr, 
                                         const ptr_t p,
-                                        const size_t pSizeBytes) {
+                                        const size_t pSizeBytes,
+                                        const k_proc_callbackDataSerializationRoutine serialize,
+                                        const k_proc_callbackDataSerializationRoutine deserialize) {
     if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
         OOPS("Process id out of range");
     }
@@ -418,8 +420,10 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
 enum k_proc_error k_proc_callback_invoke_ptr(const procId_t procId,
                                              void (* const funPtr)(ptr_t),
                                              const ptr_t p,
-                                             const size_t pSizeBytes) {
-    return callbackInvoke(procId, GEF_PTR, (ptr_t)funPtr, p, pSizeBytes);
+                                             const size_t pSizeBytes,
+                                             const k_proc_callbackDataSerializationRoutine serialize,
+                                             const k_proc_callbackDataSerializationRoutine deserialize) {
+    return callbackInvoke(procId, GEF_PTR, (ptr_t)funPtr, p, pSizeBytes, serialize, deserialize);
 }
 
 static void k_proc_prepareKernelProc() {

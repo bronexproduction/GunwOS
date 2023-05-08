@@ -9,7 +9,6 @@
 #define IPC_H
 
 #include <gunwipc.h>
-#include <src/_gunwrlp.h>
 
 enum gnwIpcError k_ipc_ipcSend(const procId_t procId,
                                const struct gnwIpcSenderQuery absQuery);
@@ -17,8 +16,7 @@ enum gnwIpcError k_ipc_ipcRegister(const procId_t procId,
                                    const char * const absPathPtr,
                                    const size_t pathLen,
                                    const enum gnwIpcAccessScope accessScope,
-                                   const gnwIpcListener handlerRoutine,
-                                   struct gnwRunLoop * const runLoopPtr);
+                                   const gnwIpcListener handlerRoutine);
 
 void k_ipc_procCleanup(const procId_t procId);
 

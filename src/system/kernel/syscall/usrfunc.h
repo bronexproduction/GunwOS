@@ -12,6 +12,7 @@
 #include <gunwdev.h>
 #include <gunwipc.h>
 #include <gunwctrl.h>
+#include <src/_gunwrlp.h>
 
 /*
     User-level system calls

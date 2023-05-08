@@ -14,6 +14,7 @@
 #include <ipc/ipc.h>
 #include <queue/queue.h>
 #include <error/panic.h>
+#include <runloop/runloop.h>
 
 /*
     User-level system calls
@@ -108,7 +109,7 @@ SCR(exit,
 */
 SCR(waitForEvent,
     extern void k_scr_usr_waitForEvent(procId_t);
-    k_que_dispatch_arch(k_scr_usr_waitForEvent, k_proc_getCurrentId())
+    k_que_dispatch_arch((fPtr_arch)k_scr_usr_waitForEvent, k_proc_getCurrentId())
 )
 
 /*
@@ -374,5 +375,5 @@ SCR(runLoopGetData,
     REG_RET(32, err)
 
     extern enum gnwRunLoopError k_scr_usr_runLoopGetData(ptr_t);
-    err = k_scr_usr_runLoopGetData(dataBufferPtr);
+    err = k_scr_usr_runLoopGetData((ptr_t)dataBufferPtr);
 )

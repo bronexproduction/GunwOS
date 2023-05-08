@@ -17,7 +17,6 @@ static struct ipcListener {
     procId_t procId;
     char path[GNW_PATH_IPC_MAX_LENGTH];
     enum gnwIpcAccessScope accessScope;
-    struct gnwRunLoop * runLoop;
     gnwIpcListener listener;
 } ipcListenerRegister[MAX_IPC_LISTENER];
 
@@ -126,8 +125,7 @@ enum gnwIpcError k_ipc_ipcRegister(const procId_t procId,
                                    const char * const absPathPtr,
                                    const size_t pathLen,
                                    const enum gnwIpcAccessScope accessScope,
-                                   const gnwIpcListener handlerRoutine,
-                                   struct gnwRunLoop * const runLoopPtr) {                                
+                                   const gnwIpcListener handlerRoutine) {
     if (!absPathPtr) {
         OOPS("Nullptr");
         return GIPCE_UNKNOWN;
@@ -140,10 +138,6 @@ enum gnwIpcError k_ipc_ipcRegister(const procId_t procId,
     }
     if (!handlerRoutine) {
         return GIPCE_INVALID_PARAMETER;
-    }
-    if (!runLoopPtr) {
-        OOPS("Nullptr");
-        return GIPCE_UNKNOWN;
     }
     if (!pathGlobalValidate(absPathPtr, pathLen)) {
         return GIPCE_INVALID_PATH;
@@ -163,7 +157,6 @@ enum gnwIpcError k_ipc_ipcRegister(const procId_t procId,
     ipcListenerRegister[index].procId = procId;
     memcopy(absPathPtr, ipcListenerRegister[index].path, pathLen);
     ipcListenerRegister[index].accessScope = accessScope;
-    ipcListenerRegister[index].runLoop = runLoopPtr;
     ipcListenerRegister[index].listener = handlerRoutine;
 
     return GIPCE_NONE;

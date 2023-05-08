@@ -84,6 +84,8 @@
     "deque": "c",
     "map": "c",
     "unordered_map": "c",
-    "future": "c"
+    "future": "c",
+    "queue": "c",
+    "stack": "c"
   }
 }
