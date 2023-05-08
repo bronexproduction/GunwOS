@@ -109,13 +109,11 @@ void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const procId_t currentP
 
     Params:
     * procId - identifier of the process funPtr() is going to be executed in
-    * runLoop - pointer to the process' run loop relative to procId process memory
     * funPtr - function pointer relative to procId process memory
     * p* - parameters of various sizes
     
     Return value: enum k_proc_error - PE_NONE on success
 */
-enum k_proc_error k_proc_callback_invoke_32(const procId_t procId, const struct gnwRunLoop * const runLoop, void (* const funPtr)(int_32), const int_32 p0);
-enum k_proc_error k_proc_callback_invoke_32_8(const procId_t procId, const struct gnwRunLoop * const runLoop, void (* const funPtr)(int_32, int_8), const int_32 p0, const int_8 p1);
+enum k_proc_error k_proc_callback_invoke_ptr(const procId_t procId, void (* const funPtr)(ptr_t), const ptr_t p0);
 
 #endif // PROC_H

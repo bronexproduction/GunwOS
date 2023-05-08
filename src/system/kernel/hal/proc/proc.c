@@ -418,19 +418,10 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
     return PE_NONE;
 }
 
-enum k_proc_error k_proc_callback_invoke_32(const procId_t procId, 
-                               const struct gnwRunLoop * const runLoop, 
-                               void (* const funPtr)(int_32), 
-                               const int_32 p0) {
-    return callbackInvoke(procId, runLoop, GEF_U32, (ptr_t)funPtr, p0, NULL);
-}
-
-enum k_proc_error k_proc_callback_invoke_32_8(const procId_t procId, 
-                                              const struct gnwRunLoop * const runLoop, 
-                                              void (* const funPtr)(int_32, int_8), 
-                                              const int_32 p0,
-                                              const int_8 p1) {
-    return callbackInvoke(procId, runLoop, GEF_U32_U8, (ptr_t)funPtr, p0, p1);
+enum k_proc_error k_proc_callback_invoke_ptr(const procId_t procId,
+                                             void (* const funPtr)(ptr_t),
+                                             const ptr_t p0) {
+    return callbackInvoke(procId, runLoop, GEF_PTR, (ptr_t)funPtr, p0, NULL);
 }
 
 static void k_proc_prepareKernelProc() {
