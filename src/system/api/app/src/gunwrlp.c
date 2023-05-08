@@ -14,12 +14,12 @@
 /*
     Asks system for the current run loop entry
 */
-SYSCALL_DECL bool runLoopGet(struct gnwRunLoopDispatchItem * const itemPtr) {
+SYSCALL_DECL bool runLoopGetItem(struct gnwRunLoopDispatchItem * const itemPtr) {
     CHECKPTR(itemPtr);
 
     SYSCALL_PAR1(itemPtr);
 
-    SYSCALL_USER_FUNC(RUNLOOP_GET);
+    SYSCALL_USER_FUNC(RUNLOOP_GET_ITEM);
     SYSCALL_USER_INT;
 
     SYSCALL_RETVAL(8);
@@ -46,7 +46,7 @@ static void execute(const union gnwEventListener routine, const ptr_t data) {
 void runLoopStart() {
     struct gnwRunLoopDispatchItem currentItem;
     while (1) {
-        if (!runLoopGet(&currentItem)) {
+        if (!runLoopGetItem(&currentItem)) {
             waitForEvent();
             continue;
         }

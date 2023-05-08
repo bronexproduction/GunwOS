@@ -344,3 +344,43 @@ SCR(devSetParam,
     extern enum gnwDeviceError k_scr_usr_devSetParam(const size_t, const struct gnwDeviceParamDescriptor * const, const size_t);
     err = k_scr_usr_devSetParam((size_t)devId, (struct gnwDeviceParamDescriptor *)paramDesc, (size_t)paramVal);
 )
+
+/*
+    Code - 0x11
+    Function - RUNLOOP_GET_ITEM
+
+    Params:
+        * EBX - struct gnwRunLoopDispatchItem pointer relative to caller process memory
+                (to be filled with unhandled entry)
+    
+    Return:
+        * EAX - true if entry returned, false otherwise
+*/
+SCR(runLoopGetItem,
+    REG(32, itemPtr, ebx)
+
+    REG_RET(8, success)
+
+    extern bool k_scr_usr_runLoopGetItem(struct gnwRunLoopDispatchItem * const);
+    success = k_scr_usr_runLoopGetItem((struct gnwRunLoopDispatchItem *)itemPtr);
+)
+
+/*
+    Code - 0x12
+    Function - RUNLOOP_GET_DATA
+
+    Params:
+        * EBX - pointer to entry buffer data relative to caller process memory
+                (to be filled with unhandled entry data)
+    
+    Return:
+        * EAX - enum gnwRunLoopError code if any, GRLE_NONE otherwise
+*/
+SCR(runLoopGetData,
+    REG(32, dataBufferPtr, ebx)
+
+    REG_RET(32, err)
+
+    extern enum gnwRunLoopError k_scr_usr_runLoopGetData(ptr_t);
+    err = k_scr_usr_runLoopGetData(dataBufferPtr);
+)
