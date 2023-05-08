@@ -361,11 +361,11 @@ void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const procId_t currentP
     STACK_VAL(refEsp, 16, 56) = kernelProc.cpuState.ss;
 }
 
-static enum k_proc_error callbackInvoke(const procId_t procId, 
-                                        const struct gnwRunLoop * const runLoop,
+static enum k_proc_error callbackInvoke(const procId_t procId,
                                         const enum gnwEventFormat format, 
                                         const ptr_t funPtr, 
-                                        const int_32 p0) {
+                                        const ptr_t p,
+                                        const size_t pSizeBytes) {
     if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
         OOPS("Process id out of range");
     }
@@ -375,10 +375,6 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
     if (!isProcessAlive(procId)) {
         OOPS("Attempted callback invocation in dead process");
     }
-    struct gnwRunLoop * const absRunLoopPtr = (struct gnwRunLoop *)k_mem_absForProc(procId, (ptr_t)runLoop);
-    if (!k_mem_bufInZoneForProc(procId, (ptr_t)absRunLoopPtr, sizeof(struct gnwRunLoop))) {
-        return PE_ACCESS_VIOLATION;
-    }
     
     struct gnwRunLoopDispatchItem item;
     item.format = format;
@@ -386,15 +382,22 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
     case GEF_VOID:
         item.routine._void = (gnwEventListener_void)funPtr;
         break;
-    case GEF_U32:
-        item.routine._32 = (gnwEventListener_32)funPtr;
-        item.params[0] = p0;
+    case GEF_PTR:
+        item.routine._ptr = (gnwEventListener_ptr)funPtr;
         break;
     case GEF_NONE:
         OOPS("Unexpected event format");
         return PE_UNKNOWN;
     }
+
+    #warning COPY DATA TO QUQUQUQUQUUEUEUEUEUUUEUEUEU
     
+    struct gnwRunLoop * const absRunLoopPtr = (struct gnwRunLoop *)k_mem_absForProc(procId, (ptr_t)runLoop);
+    if (!k_mem_bufInZoneForProc(procId, (ptr_t)absRunLoopPtr, sizeof(struct gnwRunLoop))) {
+        return PE_ACCESS_VIOLATION;
+    }
+    #warning runLoopDispatch(procId, item, p)
+
     enum gnwRunLoopError err;
     CRITICAL_SECTION(
         err = gnwRunLoopDispatch(absRunLoopPtr, item);
@@ -414,8 +417,9 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
 
 enum k_proc_error k_proc_callback_invoke_ptr(const procId_t procId,
                                              void (* const funPtr)(ptr_t),
-                                             const ptr_t p0) {
-    return callbackInvoke(procId, runLoop, GEF_PTR, (ptr_t)funPtr, p0, NULL);
+                                             const ptr_t p,
+                                             const size_t pSizeBytes) {
+    return callbackInvoke(procId, GEF_PTR, (ptr_t)funPtr, p, pSizeBytes);
 }
 
 static void k_proc_prepareKernelProc() {

@@ -110,7 +110,8 @@ enum gnwIpcError k_ipc_ipcSend(const procId_t procId,
     const enum k_proc_error err = k_proc_callback_invoke_32(ipcListenerRegister[index].procId,
                                                             ipcListenerRegister[index].runLoop,
                                                             (gnwEventListener_32)(ptr_t)ipcListenerRegister[index].listener,
-                                                            (int_32)&endpointQuery);
+                                                            (int_32)&endpointQuery,
+                                                            sizeof(gnwIpcEndpointQuery));
     if (err == PE_IGNORED) {
         return GIPCE_IGNORED;
     }
