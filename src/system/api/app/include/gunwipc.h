@@ -48,9 +48,9 @@ enum gnwIpcAccessScope {
 
 struct gnwIpcQueryParams {
     ptr_t dataPtr;
-    size_t dataBytes;
+    size_t dataSizeBytes;
     ptr_t resultPtr;
-    size_t resultBytes;
+    size_t resultSizeBytes;
 };
 
 struct gnwIpcSenderQuery {

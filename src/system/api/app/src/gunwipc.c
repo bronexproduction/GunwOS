@@ -7,16 +7,23 @@
 
 #ifdef _GUNWAPI_KERNEL
 
-void gnwIpcEndpointQuery_serialize(const struct gnwIpcEndpointQuery * const absEventPtr, ptr_t absDataPtr) {
-    #warning TO BE IMPLEMENTED
-    // memcopy(absEventPtr, absDataPtr, sizeof(struct gnwDeviceEvent));
-    // memcopy(absEventPtr->data, absDataPtr + sizeof(struct gnwDeviceEvent), absDataPtr->dataSizeBytes);
+#include "_gunwipc.h"
+#include <mem.h>
+
+void gnwIpcEndpointQuery_serialize(const struct gnwIpcEndpointQuery * const absQueryPtr, ptr_t absDataPtr) {
+    memcopy(absQueryPtr, absDataPtr, sizeof(struct gnwIpcEndpointQuery));
+    size_t offset = sizeof(struct gnwIpcEndpointQuery);
+    memcopy(absQueryPtr->params.dataPtr, absDataPtr + offset, absQueryPtr->params.dataSizeBytes);
+    offset += absQueryPtr->params.dataSizeBytes;
+
+    #warning result not handled
 }
 
-void gnwIpcEndpointQuery_deserialize(const ptr_t absDataPtr, struct gnwIpcEndpointQuery * const absEventPtr) {
-    #warning TO BE IMPLEMENTED
-    // memcopy(absDataPtr, absEventPtr, sizeof(struct gnwDeviceEvent));
-    // absEventPtr.data = absDataPtr + sizeof(struct gnwDeviceEvent);
+void gnwIpcEndpointQuery_deserialize(const ptr_t absDataPtr, struct gnwIpcEndpointQuery * const absQueryPtr) {
+    memcopy(absDataPtr, absQueryPtr, sizeof(struct gnwIpcEndpointQuery));
+    absQueryPtr->params.dataPtr = absDataPtr + sizeof(struct gnwIpcEndpointQuery);
+
+    #warning result not handled
 }
 
 #endif // _GUNWAPI_KERNEL

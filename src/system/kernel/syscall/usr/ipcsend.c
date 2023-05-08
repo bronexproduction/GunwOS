@@ -24,14 +24,14 @@ enum gnwIpcError k_scr_usr_ipcSend(const struct gnwIpcSenderQuery * const queryP
         OOPS("Invalid pointer referenced");
         return GIPCE_UNKNOWN;
     }
-    const ptr_t absDataPtr = k_scl_func_getValidAbsoluteForProc(procId, (const ptr_t)(absQueryPtr->params.dataPtr), absQueryPtr->params.dataBytes);
+    const ptr_t absDataPtr = k_scl_func_getValidAbsoluteForProc(procId, (const ptr_t)(absQueryPtr->params.dataPtr), absQueryPtr->params.dataSizeBytes);
     if (!absDataPtr) {
         OOPS("Invalid pointer referenced");
         return GIPCE_UNKNOWN;
     }
     ptr_t absResultPtr = nullptr;
     if (absQueryPtr->params.resultPtr) {
-        absResultPtr = k_scl_func_getValidAbsoluteForProc(procId, (const ptr_t)(absQueryPtr->params.resultPtr), absQueryPtr->params.resultBytes);
+        absResultPtr = k_scl_func_getValidAbsoluteForProc(procId, (const ptr_t)(absQueryPtr->params.resultPtr), absQueryPtr->params.resultSizeBytes);
         if (!absResultPtr) {
             OOPS("Invalid pointer referenced");
             return GIPCE_UNKNOWN;
@@ -42,9 +42,9 @@ enum gnwIpcError k_scr_usr_ipcSend(const struct gnwIpcSenderQuery * const queryP
     absoluteQuery.path = absPathPtr;
     absoluteQuery.pathLen = absQueryPtr->pathLen;
     absoluteQuery.params.dataPtr = absDataPtr;
-    absoluteQuery.params.dataBytes = absQueryPtr->params.dataBytes;
+    absoluteQuery.params.dataSizeBytes = absQueryPtr->params.dataSizeBytes;
     absoluteQuery.params.resultPtr = absResultPtr;
-    absoluteQuery.params.resultBytes = absQueryPtr->params.resultBytes;
+    absoluteQuery.params.resultSizeBytes = absQueryPtr->params.resultSizeBytes;
 
     return k_ipc_ipcSend(procId, absoluteQuery);
 }
