@@ -104,15 +104,10 @@ SCR(exit,
 /*
     Code - 0x04
     Function - WAIT_FOR_EVENT
-
-    Params:
-        * EBX - run loop (const struct gnwRunLoop * const), relative to caller process memory
 */
 SCR(waitForEvent,
-    REG(32, rlp, ebx)
-
-    extern void k_scr_usr_waitForEvent(addr_t, addr_t);
-    k_que_dispatch_arch_arch(k_scr_usr_waitForEvent, k_proc_getCurrentId(), rlp)
+    extern void k_scr_usr_waitForEvent(procId_t);
+    k_que_dispatch_arch(k_scr_usr_waitForEvent, k_proc_getCurrentId())
 )
 
 /*
@@ -154,19 +149,17 @@ SCR(ipcSend,
 
     Params:
         * EBX - IPC handler descriptor pointer (see struct gnwIpcHandlerDescriptor) relative to caller process memory
-        * ECX - run loop pointer (struct gnwRunLoop * const) relative to caller process memory
 
     Return:
         * EAX - error code on failure, GIPCE_NONE otherwise
 */
 SCR(ipcRegister,
     REG(32, desc, ebx)
-    REG(32, rlp, ecx)
 
     REG_RET(32, err)
 
-    extern enum gnwIpcError k_scr_usr_ipcRegister(const struct gnwIpcHandlerDescriptor * const, struct gnwRunLoop * const);
-    err = k_scr_usr_ipcRegister((struct gnwIpcHandlerDescriptor *)desc, (struct gnwRunLoop *)rlp);
+    extern enum gnwIpcError k_scr_usr_ipcRegister(const struct gnwIpcHandlerDescriptor * const);
+    err = k_scr_usr_ipcRegister((struct gnwIpcHandlerDescriptor *)desc);
 )
 
 /*
@@ -284,7 +277,6 @@ SCR(fug,
     Params:
         * EBX - device identifier
         * ECX - listener (const union gnwEventListener)
-        * EDX - run loop (struct gnwRunLoop * const), relative to caller process memory 
     
     Return:
         * EAX - error code (enum gnwDeviceError)
@@ -292,11 +284,10 @@ SCR(fug,
 SCR(devListen,
     REG(32, devId, ebx)
     REG(32, lsnr, ecx)
-    REG(32, rlp, edx)
 
     REG_RET(32, err)
 
-    err = k_dev_listen(k_proc_getCurrentId(), (const size_t)devId, (const union gnwEventListener)lsnr, (struct gnwRunLoop *)rlp);
+    err = k_dev_listen(k_proc_getCurrentId(), (const size_t)devId, (const union gnwEventListener)lsnr);
 )
 
 /*

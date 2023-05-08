@@ -11,7 +11,7 @@
 #include <src/_gunwrlp.h>
 #include <hal/criticalsec/criticalsec.h>
 
-extern void k_scr_usr_waitForEvent(const procId_t procId, const struct gnwRunLoop * const runLoop) {
+extern void k_scr_usr_waitForEvent(const procId_t procId) {
     const ptr_t absRunLoopPtr = k_scl_func_getValidAbsoluteForProc(procId, (const ptr_t)runLoop, sizeof(struct gnwRunLoop));
     if (!absRunLoopPtr) {
         OOPS("Invalid parameter");

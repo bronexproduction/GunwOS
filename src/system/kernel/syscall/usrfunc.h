@@ -12,7 +12,6 @@
 #include <gunwdev.h>
 #include <gunwipc.h>
 #include <gunwctrl.h>
-#include <src/_gunwrlp.h>
 
 /*
     User-level system calls
@@ -49,7 +48,7 @@ __attribute__((naked)) void k_scr_exit(const int_32 status);
     Code - 0x04
     Function - WAIT_FOR_EVENT
 */
-__attribute__((naked)) void k_scr_waitForEvent(const struct gnwRunLoop * const runLoop);
+__attribute__((naked)) void k_scr_waitForEvent();
 
 /*
     Code - 0x05
@@ -67,8 +66,7 @@ __attribute__((naked)) enum gnwIpcError k_scr_ipcSend(const struct gnwIpcSenderQ
     Code - 0x07
     Function - IPC_REGISTER
 */
-__attribute__((naked)) enum gnwIpcError k_scr_ipcRegister(const struct gnwIpcHandlerDescriptor * const desc,
-                                                          struct gnwRunLoop * const runLoop);
+__attribute__((naked)) enum gnwIpcError k_scr_ipcRegister(const struct gnwIpcHandlerDescriptor * const desc);
 
 /*
     Code - 0x08
@@ -113,8 +111,7 @@ __attribute__((naked)) void k_scr_fug(const enum gnwFugCode);
     Function - DEV_LISTEN
 */
 __attribute__((naked)) enum gnwDeviceError k_scr_devListen(const size_t identifier,
-                                                           const union gnwEventListener listener,
-                                                           const struct gnwRunLoop * const runLoop);
+                                                           const union gnwEventListener listener);
 
 /*
     Code - 0x0f
