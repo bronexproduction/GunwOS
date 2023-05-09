@@ -145,7 +145,7 @@ enum gnwDeviceError attachToDisplay(const enum DisplayType type,
 }
 
 enum gnwDeviceError pushFrame(const size_t deviceId,
-                              const void * const buffer,
+                              const ptr_t buffer,
                               const size_t bufferSizeBytes) {
     CHECKPTR(buffer)
 

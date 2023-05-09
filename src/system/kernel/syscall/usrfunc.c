@@ -255,8 +255,8 @@ SCR(devMemWrite,
 
     REG_RET(32, err)
 
-    extern enum gnwDeviceError k_scr_usr_devMemWrite(const size_t devId, const void * const buf, const range_addr_t * const);
-    err = k_scr_usr_devMemWrite(devId, (void *)buf, (range_addr_t *)rangePtr);
+    extern enum gnwDeviceError k_scr_usr_devMemWrite(const size_t devId, const ptr_t buf, const range_addr_t * const);
+    err = k_scr_usr_devMemWrite(devId, (ptr_t)buf, (range_addr_t *)rangePtr);
 )
 
 /*

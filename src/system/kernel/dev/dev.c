@@ -243,7 +243,7 @@ void k_dev_releaseHold(const procId_t processId, const size_t deviceId) {
 
 enum gnwDeviceError k_dev_writeMem(const procId_t processId, 
                                    const size_t deviceId,
-                                   const void * const buffer,
+                                   const ptr_t buffer,
                                    const range_addr_t devMemRange) {
     if (!buffer) {
         OOPS("Buffer cannot be nullptr");

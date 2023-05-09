@@ -30,7 +30,7 @@ enum gnwDeviceError attachToDisplay(const enum DisplayType type,
                                     const struct gnwDisplayDescriptor * const displayDescriptor);
 
 enum gnwDeviceError pushFrame(const size_t deviceId,
-                              const void * const buffer,
+                              const ptr_t buffer,
                               const size_t bufferSizeBytes);
                               
 #endif // GUNWOS__GUNWDISPLAY_H

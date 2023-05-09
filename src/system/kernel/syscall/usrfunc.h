@@ -98,7 +98,7 @@ __attribute__((naked)) void k_scr_devRelease(const uint_32);
     Function - DEV_MEM_WRITE
 */
 __attribute__((naked)) enum gnwDeviceError k_scr_devMemWrite(const size_t,
-                                                             const void * const,
+                                                             const ptr_t,
                                                              const range_addr_t * const);
 
 /*

@@ -194,7 +194,7 @@ SYSCALL_DECL enum gnwDeviceError devCharWrite(const uint_32 deviceId,
     Return value: Device error code or GDE_NONE (see enum gnwDeviceError)
 */
 SYSCALL_DECL enum gnwDeviceError devMemWrite(const size_t identifier,
-                                             const ptr_t const buffer,
+                                             const ptr_t buffer,
                                              const range_addr_t * const devInputBufferRange) {
     CHECKPTR(buffer);
 

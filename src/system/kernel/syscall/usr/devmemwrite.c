@@ -10,7 +10,7 @@
 #include <dev/dev.h>
 #include <error/panic.h>
 
-enum gnwDeviceError k_scr_usr_devMemWrite(const size_t devId, const void * const buf, const range_addr_t * const devInputRange) {
+enum gnwDeviceError k_scr_usr_devMemWrite(const size_t devId, const ptr_t buf, const range_addr_t * const devInputRange) {
     const procId_t procId = k_proc_getCurrentId();
     struct gnwDeviceUHADesc desc;
     const enum gnwDeviceError err = k_dev_getById(devId, &desc);
@@ -30,5 +30,5 @@ enum gnwDeviceError k_scr_usr_devMemWrite(const size_t devId, const void * const
         return GDE_UNKNOWN;
     }
     
-    return k_dev_writeMem(k_proc_getCurrentId(), devId, (const void * const)absBufferPtr, *absDevInputRangePtr);
+    return k_dev_writeMem(k_proc_getCurrentId(), devId, (ptr_t)absBufferPtr, *absDevInputRangePtr);
 }
