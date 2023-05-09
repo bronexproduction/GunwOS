@@ -12,8 +12,8 @@
 
 #include <gunwdev.h>
 
-void gnwDeviceEvent_serialize(const struct gnwDeviceEvent * const, ptr_t);
-void gnwDeviceEvent_deserialize(const ptr_t, struct gnwDeviceEvent * const);
+void gnwDeviceEvent_encode(const struct gnwDeviceEvent * const, ptr_t);
+void gnwDeviceEvent_decode(const ptr_t, struct gnwDeviceEvent * const);
 
 #endif // GUNWOS__GUNWDISPLAY_H
 

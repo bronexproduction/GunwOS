@@ -56,8 +56,15 @@ static struct dispatchItem * reservedEmptyItemOrNull(const procId_t procId, cons
     return (isItemEmpty(&item->item) && item->reserved) ? item : nullptr;
 }
 
-static void releaseIfNeeded(const procId_t procId, const size_t token) {
-    #warning to be implemented
+static void finishIfNeeded(const procId_t procId, const size_t index) {
+    struct runLoop * const loop = &rlp_main[procId];
+    struct dispatchItem * const item = nextDispatchItem(loop, nullptr);
+    if (!item->handled || !item->dataHandled) {
+        return;
+    }
+
+    memzero(item, sizeof(struct dispatchItem));
+    loop->finishedIndex = index;
 }
 
 static enum gnwRunLoopError getPendingDispatchItem(const procId_t procId, struct dispatchItem * * const itemPtr, size_t * const index) {
@@ -130,17 +137,19 @@ enum gnwRunLoopError k_runloop_dispatch(const procId_t procId,
             OOPS("Nullptr");
             return GRLE_INVALID_PARAMETER;
         }
-        if (!item.serialize || !item.deserialize) {
-            OOPS("No serialize/deserialize present");
+        if (!item.encode || !item.decode) {
+            OOPS("No encode/decode present");
             return GRLE_INVALID_PARAMETER;
         }
     } else if (data) {
         OOPS("No data expected");
         return GRLE_INVALID_PARAMETER;
+    } else {
+        queueItem->dataHandled = true;
     }
 
     queueItem->item = item;
-    queueItem->item.serialize(data, queueItem->data);
+    queueItem->item.encode(data, queueItem->data);
     
     return GRLE_NONE;
 }
@@ -158,7 +167,7 @@ enum gnwRunLoopError k_runloop_getPendingItem(const procId_t procId, struct gnwR
 
     *absItemPtr = item->item;
     item->handled = true;
-    releaseIfNeeded(procId, index);
+    finishIfNeeded(procId, index);
 
     return GRLE_NONE;
 }
@@ -197,7 +206,7 @@ enum gnwRunLoopError k_runloop_getPendingItemData(const procId_t procId, ptr_t a
 
     memcopy(item->data, absDataBufferPtr, item->item.dataSizeBytes);
     item->dataHandled = true;
-    releaseIfNeeded(procId, index);
+    finishIfNeeded(procId, index);
     return GRLE_NONE;
 }
 

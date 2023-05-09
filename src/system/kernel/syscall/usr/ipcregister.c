@@ -16,5 +16,5 @@ enum gnwIpcError k_scr_usr_ipcRegister(const struct gnwIpcHandlerDescriptor * de
     SCLF_GET_VALID_ABS(const struct gnwIpcHandlerDescriptor *, descPtr, sizeof(struct gnwIpcHandlerDescriptor), GIPCE_UNKNOWN);
     SCLF_GET_VALID_ABS_NAMED(const char * const, pathPtr, abs_descPtr->path, abs_descPtr->pathLen, GIPCE_UNKNOWN);
     
-    return k_ipc_ipcRegister(procId, abs_pathPtr, abs_descPtr->pathLen, abs_descPtr->accessScope, abs_descPtr->handlerRoutine);
+    return k_ipc_ipcRegister(procId, abs_pathPtr, abs_descPtr->pathLen, abs_descPtr->accessScope, abs_descPtr->handlerRoutine, abs_descPtr->decoder);
 }

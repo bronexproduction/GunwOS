@@ -19,6 +19,7 @@ static struct ipcListener {
     char path[GNW_PATH_IPC_MAX_LENGTH];
     enum gnwIpcAccessScope accessScope;
     gnwIpcListener listener;
+    gnwIpcEndpointQueryDecoder decoder;
 } ipcListenerRegister[MAX_IPC_LISTENER];
 
 static void clear(const size_t entryId) {
@@ -113,8 +114,9 @@ enum gnwIpcError k_ipc_ipcSend(const procId_t procId,
                                                              (gnwEventListener_ptr)ipcListenerRegister[index].listener,
                                                              (ptr_t)&endpointQuery,
                                                              sizeof(struct gnwIpcEndpointQuery) + endpointQuery.params.dataSizeBytes,
-                                                             (gnwRunLoopDataSerializationRoutine)gnwIpcEndpointQuery_serialize,
-                                                             (gnwRunLoopDataSerializationRoutine)gnwIpcEndpointQuery_deserialize);
+                                                             sizeof(struct gnwIpcEndpointQuery),
+                                                             (gnwRunLoopDataEncodingRoutine)gnwIpcEndpointQuery_encode,
+                                                             (gnwRunLoopDataEncodingRoutine)ipcListenerRegister[index].decoder);
     if (err == PE_IGNORED) {
         return GIPCE_IGNORED;
     }
@@ -129,7 +131,8 @@ enum gnwIpcError k_ipc_ipcRegister(const procId_t procId,
                                    const char * const absPathPtr,
                                    const size_t pathLen,
                                    const enum gnwIpcAccessScope accessScope,
-                                   const gnwIpcListener handlerRoutine) {
+                                   const gnwIpcListener handlerRoutine,
+                                   const gnwIpcEndpointQueryDecoder decoder) {
     if (!absPathPtr) {
         OOPS("Nullptr");
         return GIPCE_UNKNOWN;
@@ -162,6 +165,7 @@ enum gnwIpcError k_ipc_ipcRegister(const procId_t procId,
     memcopy(absPathPtr, ipcListenerRegister[index].path, pathLen);
     ipcListenerRegister[index].accessScope = accessScope;
     ipcListenerRegister[index].listener = handlerRoutine;
+    ipcListenerRegister[index].decoder = decoder;
 
     return GIPCE_NONE;
 }

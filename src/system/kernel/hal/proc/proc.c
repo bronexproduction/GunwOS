@@ -367,8 +367,9 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
                                         const ptr_t funPtr, 
                                         const ptr_t p,
                                         const size_t pSizeBytes,
-                                        const gnwRunLoopDataSerializationRoutine serialize,
-                                        const gnwRunLoopDataSerializationRoutine deserialize) {
+                                        const size_t pDecodedSizeBytes,
+                                        const gnwRunLoopDataEncodingRoutine encode,
+                                        const gnwRunLoopDataEncodingRoutine decode) {
     if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
         OOPS("Process id out of range");
     }
@@ -393,8 +394,9 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
         return PE_UNKNOWN;
     }
     item.dataSizeBytes = pSizeBytes;
-    item.serialize = serialize;
-    item.deserialize = deserialize;
+    item.decodedDataSizeBytes = pDecodedSizeBytes;
+    item.encode = encode;
+    item.decode = decode;
 
     enum gnwRunLoopError err;
     size_t runloopToken;
@@ -422,9 +424,10 @@ enum k_proc_error k_proc_callback_invoke_ptr(const procId_t procId,
                                              void (* const funPtr)(ptr_t),
                                              const ptr_t p,
                                              const size_t pSizeBytes,
-                                             const gnwRunLoopDataSerializationRoutine serialize,
-                                             const gnwRunLoopDataSerializationRoutine deserialize) {
-    return callbackInvoke(procId, GEF_PTR, (ptr_t)funPtr, p, pSizeBytes, serialize, deserialize);
+                                             const size_t pDecodedSizeBytes,
+                                             const gnwRunLoopDataEncodingRoutine encode,
+                                             const gnwRunLoopDataEncodingRoutine decode) {
+    return callbackInvoke(procId, GEF_PTR, (ptr_t)funPtr, p, pSizeBytes, pDecodedSizeBytes, encode, decode);
 }
 
 static void k_proc_prepareKernelProc() {

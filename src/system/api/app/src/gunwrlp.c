@@ -62,7 +62,9 @@ void runLoopStart() {
             if (err != GRLE_NONE) {
                 fug(FUG_INCONSISTENT);
             }
-            execute(currentItem.routine, data);
+            uint_8 decodedData[currentItem.decodedDataSizeBytes];
+            currentItem.decode(data, decodedData);
+            execute(currentItem.routine, decodedData);
         } else {
             execute(currentItem.routine, nullptr);
         }

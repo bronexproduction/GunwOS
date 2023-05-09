@@ -66,11 +66,14 @@ struct gnwIpcEndpointQuery {
 
 typedef void (*gnwIpcListener)(const struct gnwIpcEndpointQuery * const);
 
+typedef void (*gnwIpcEndpointQueryDecoder)(const ptr_t, struct gnwIpcEndpointQuery * const);
+
 struct gnwIpcHandlerDescriptor {
     const char * path;
     size_t pathLen;
     enum gnwIpcAccessScope accessScope;
     gnwIpcListener handlerRoutine;
+    gnwIpcEndpointQueryDecoder decoder;
 };
 
 /*
@@ -93,6 +96,8 @@ SYSCALL_DECL enum gnwIpcError ipcRegister(const char * const path, const enum gn
     }
     desc.accessScope = accessScope;
     desc.handlerRoutine = handler;
+    extern void gnwIpcEndpointQuery_decode(const ptr_t, struct gnwIpcEndpointQuery * const);
+    desc.decoder = gnwIpcEndpointQuery_decode;
 
     SYSCALL_PAR1(&desc);
 

@@ -10,12 +10,12 @@
 #include "_gunwdev.h"
 #include <mem.h>
 
-void gnwDeviceEvent_serialize(const struct gnwDeviceEvent * const absEventPtr, ptr_t absDataPtr) {
+void gnwDeviceEvent_encode(const struct gnwDeviceEvent * const absEventPtr, ptr_t absDataPtr) {
     memcopy(absEventPtr, absDataPtr, sizeof(struct gnwDeviceEvent));
     memcopy(absEventPtr->data, absDataPtr + sizeof(struct gnwDeviceEvent), absEventPtr->dataSizeBytes);
 }
 
-void gnwDeviceEvent_deserialize(const ptr_t absDataPtr, struct gnwDeviceEvent * const absEventPtr) {
+void gnwDeviceEvent_decode(const ptr_t absDataPtr, struct gnwDeviceEvent * const absEventPtr) {
     memcopy(absDataPtr, absEventPtr, sizeof(struct gnwDeviceEvent));
     absEventPtr->data = absDataPtr + sizeof(struct gnwDeviceEvent);
 }
