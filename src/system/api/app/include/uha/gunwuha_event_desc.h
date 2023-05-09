@@ -10,7 +10,7 @@
 #define GUNWOS_GUNWUHA_EVENT_DESC_H
 
 #include <types.h>
-#include <gunwevent.h>
+#include "../gunwevent.h"
 
 /*
     Event emitting device descriptor

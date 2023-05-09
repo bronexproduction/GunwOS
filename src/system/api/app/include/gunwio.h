@@ -8,9 +8,9 @@
 #ifndef GUNWOS_GUNWIO_H
 #define GUNWOS_GUNWIO_H
 
-#include <scl_user.h>
-#include <gunwdev.h>
 #include <string.h>
+#include "scl_user.h"
+#include "gunwdev.h"
 
 /*
     Print string to debug output

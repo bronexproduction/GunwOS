@@ -8,7 +8,7 @@
 #ifndef GUNWOS_SCL_USER_H
 #define GUNWOS_SCL_USER_H
 
-#include <scl_def.h>
+#include "scl_def.h"
 
 #define SYSCALL_USER_INTERRUPT                  0x69
 
