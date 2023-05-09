@@ -8,7 +8,6 @@
 #include <hal/proc/proc.h>
 #include <runloop/runloop.h>
 #include <syscall/func.h>
-#include <error/panic.h>
 
 enum gnwRunLoopError k_scr_usr_runLoopGetData(ptr_t dataBufferPtr) {
 
@@ -20,11 +19,7 @@ enum gnwRunLoopError k_scr_usr_runLoopGetData(ptr_t dataBufferPtr) {
         return err;
     }
 
-    ptr_t absDataBufferPtr = k_scl_func_getValidAbsoluteForProc(procId, dataBufferPtr, dataSizeBytes);
-    if (!absDataBufferPtr) {
-        OOPS("Invalid pointer referenced");
-        return GRLE_UNKNOWN;
-    }
+    SCLF_GET_VALID_ABS(ptr_t, dataBufferPtr, dataSizeBytes, GRLE_UNKNOWN);
     
-    return k_runloop_getPendingItemData(procId, absDataBufferPtr);
+    return k_runloop_getPendingItemData(procId, abs_dataBufferPtr);
 }

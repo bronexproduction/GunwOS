@@ -23,7 +23,3 @@ ptr_t k_scl_func_getValidAbsoluteForProc(const procId_t procId, const ptr_t relP
 
     return absPtr;
 }
-
-ptr_t k_scl_func_getValidAbsoluteForCurrentProc(const ptr_t relPtr, const size_t refSize) {
-    return k_scl_func_getValidAbsoluteForProc(k_proc_getCurrentId(), relPtr, refSize);
-}

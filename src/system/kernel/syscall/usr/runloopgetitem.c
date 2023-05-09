@@ -8,16 +8,11 @@
 #include <syscall/func.h>
 #include <hal/proc/proc.h>
 #include <runloop/runloop.h>
-#include <error/panic.h>
 
 enum gnwRunLoopError k_scr_usr_runLoopGetItem(struct gnwRunLoopDispatchItem * const itemPtr) {
 
     const procId_t procId = k_proc_getCurrentId();
-    struct gnwRunLoopDispatchItem * const absItemPtr = (struct gnwRunLoopDispatchItem *)k_scl_func_getValidAbsoluteForProc(procId, (const ptr_t)itemPtr, sizeof(struct gnwRunLoopDispatchItem));
-    if (!absItemPtr) {
-        OOPS("Invalid pointer referenced");
-        return GRLE_UNKNOWN;
-    }
+    SCLF_GET_VALID_ABS(struct gnwRunLoopDispatchItem * const, itemPtr, sizeof(struct gnwRunLoopDispatchItem), GRLE_UNKNOWN);
     
-    return k_runloop_getPendingItem(procId, absItemPtr);
+    return k_runloop_getPendingItem(procId, abs_itemPtr);
 }

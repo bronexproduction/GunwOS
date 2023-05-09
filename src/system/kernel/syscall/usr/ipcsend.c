@@ -8,43 +8,31 @@
 #include <syscall/func.h>
 #include <ipc/ipc.h>
 #include <hal/proc/proc.h>
-#include <error/panic.h>
 #include <defs.h>
 
 enum gnwIpcError k_scr_usr_ipcSend(const struct gnwIpcSenderQuery * const queryPtr) {
 
     const procId_t procId = k_proc_getCurrentId();
-    const struct gnwIpcSenderQuery * const absQueryPtr = (struct gnwIpcSenderQuery *)k_scl_func_getValidAbsoluteForProc(procId, (const ptr_t)queryPtr, sizeof(struct gnwIpcSenderQuery));
-    if (!absQueryPtr) {
-        OOPS("Invalid pointer referenced");
-        return GIPCE_UNKNOWN;
-    }
-    const char * const absPathPtr = (char *)k_scl_func_getValidAbsoluteForProc(procId, (const ptr_t)(absQueryPtr->path), absQueryPtr->pathLen);
-    if (!absPathPtr) {
-        OOPS("Invalid pointer referenced");
-        return GIPCE_UNKNOWN;
-    }
-    const ptr_t absDataPtr = k_scl_func_getValidAbsoluteForProc(procId, (const ptr_t)(absQueryPtr->params.dataPtr), absQueryPtr->params.dataSizeBytes);
-    if (!absDataPtr) {
-        OOPS("Invalid pointer referenced");
-        return GIPCE_UNKNOWN;
-    }
-    ptr_t absResultPtr = nullptr;
-    if (absQueryPtr->params.resultPtr) {
-        absResultPtr = k_scl_func_getValidAbsoluteForProc(procId, (const ptr_t)(absQueryPtr->params.resultPtr), absQueryPtr->params.resultSizeBytes);
-        if (!absResultPtr) {
+    SCLF_GET_VALID_ABS(const struct gnwIpcSenderQuery * const, queryPtr, sizeof(struct gnwIpcSenderQuery), GIPCE_UNKNOWN);
+    SCLF_GET_VALID_ABS_NAMED(const char * const, pathPtr, abs_queryPtr->path, abs_queryPtr->pathLen, GIPCE_UNKNOWN);
+    SCLF_GET_VALID_ABS_NAMED(const ptr_t, dataPtr, abs_queryPtr->params.dataPtr, abs_queryPtr->params.dataSizeBytes, GIPCE_UNKNOWN);
+
+    ptr_t abs_resultPtr = nullptr;
+    if (abs_queryPtr->params.resultPtr) {
+        abs_resultPtr = k_scl_func_getValidAbsoluteForProc(procId, (const ptr_t)(abs_queryPtr->params.resultPtr), abs_queryPtr->params.resultSizeBytes);
+        if (!abs_resultPtr) {
             OOPS("Invalid pointer referenced");
             return GIPCE_UNKNOWN;
         }
     }
 
     struct gnwIpcSenderQuery absoluteQuery;
-    absoluteQuery.path = absPathPtr;
-    absoluteQuery.pathLen = absQueryPtr->pathLen;
-    absoluteQuery.params.dataPtr = absDataPtr;
-    absoluteQuery.params.dataSizeBytes = absQueryPtr->params.dataSizeBytes;
-    absoluteQuery.params.resultPtr = absResultPtr;
-    absoluteQuery.params.resultSizeBytes = absQueryPtr->params.resultSizeBytes;
+    absoluteQuery.path = abs_pathPtr;
+    absoluteQuery.pathLen = abs_queryPtr->pathLen;
+    absoluteQuery.params.dataPtr = abs_dataPtr;
+    absoluteQuery.params.dataSizeBytes = abs_queryPtr->params.dataSizeBytes;
+    absoluteQuery.params.resultPtr = abs_resultPtr;
+    absoluteQuery.params.resultSizeBytes = abs_queryPtr->params.resultSizeBytes;
 
     return k_ipc_ipcSend(procId, absoluteQuery);
 }

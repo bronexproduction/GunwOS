@@ -9,22 +9,12 @@
 #include <gunwevent.h>
 #include <ipc/ipc.h>
 #include <hal/proc/proc.h>
-#include <error/panic.h>
 
-enum gnwIpcError k_scr_usr_ipcRegister(const struct gnwIpcHandlerDescriptor * desc) {
+enum gnwIpcError k_scr_usr_ipcRegister(const struct gnwIpcHandlerDescriptor * descPtr) {
 
     const procId_t procId = k_proc_getCurrentId();
-    const struct gnwIpcHandlerDescriptor * absDescPtr = (struct gnwIpcHandlerDescriptor *)k_scl_func_getValidAbsoluteForProc(procId, (const ptr_t)desc, sizeof(struct gnwIpcHandlerDescriptor));
-    if (!absDescPtr) {
-        OOPS("Invalid pointer referenced");
-        return GIPCE_UNKNOWN;
-    }
-
-    const char * const absPathPtr = (char *)k_scl_func_getValidAbsoluteForProc(procId, (const ptr_t)absDescPtr->path, absDescPtr->pathLen);
-    if (!absPathPtr) {
-        OOPS("Invalid pointer referenced");
-        return GIPCE_UNKNOWN;
-    }
+    SCLF_GET_VALID_ABS(const struct gnwIpcHandlerDescriptor *, descPtr, sizeof(struct gnwIpcHandlerDescriptor), GIPCE_UNKNOWN);
+    SCLF_GET_VALID_ABS_NAMED(const char * const, pathPtr, abs_descPtr->path, abs_descPtr->pathLen, GIPCE_UNKNOWN);
     
-    return k_ipc_ipcRegister(procId, absPathPtr, absDescPtr->pathLen, absDescPtr->accessScope, absDescPtr->handlerRoutine);
+    return k_ipc_ipcRegister(procId, abs_pathPtr, abs_descPtr->pathLen, abs_descPtr->accessScope, abs_descPtr->handlerRoutine);
 }
