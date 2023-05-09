@@ -14,10 +14,12 @@ enum gnwRunLoopError {
     GRLE_NONE = 0,
     GRLE_EMPTY,
     GRLE_FULL,
+    GRLE_INVALID_STATE,
+    GRLE_INVALID_PARAMETER,
     GRLE_UNKNOWN
 };
 
-typedef void (*gnwRunLoopDataSerializationRoutine)(ptr_t, ptr_t);
+typedef void (*gnwRunLoopDataSerializationRoutine)(ptr_t source, ptr_t destination);
 
 struct gnwRunLoopDispatchItem {
     enum gnwEventFormat format;

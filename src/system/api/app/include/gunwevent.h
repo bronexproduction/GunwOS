@@ -16,6 +16,8 @@ enum gnwEventFormat {
     GEF_PTR
 };
 
+#define GNWEVENT_ACCEPTS_DATA(FORMAT) (FORMAT == GEF_PTR)
+
 typedef __attribute__((cdecl)) void (*gnwEventListener_void)();
 typedef __attribute__((cdecl)) void (*gnwEventListener_ptr)(ptr_t p0);
 
