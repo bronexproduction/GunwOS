@@ -16,4 +16,4 @@ void gnwDeviceEvent_encode(const struct gnwDeviceEvent * const, ptr_t);
 
 #endif // _GUNWAPI_KERNEL
 
-#endif // GUNWOS__GUNWDISPLAY_H
+#endif // GUNWOS__GUNWDEV_H
