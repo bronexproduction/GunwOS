@@ -83,6 +83,10 @@ enum gnwIpcError k_ipc_ipcSend(const procId_t procId,
         OOPS("Nullptr");
         return GIPCE_UNKNOWN;
     }
+    if (!absQuery.params.dataSizeBytes) {
+        OOPS("No data");
+        return GIPCE_UNKNOWN;
+    }
     if (!absQuery.pathLen || absQuery.pathLen > GNW_PATH_IPC_MAX_LENGTH) {
         return GIPCE_INVALID_PATH;
     }
