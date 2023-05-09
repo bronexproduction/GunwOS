@@ -368,8 +368,8 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
                                         const ptr_t p,
                                         const size_t pSizeBytes,
                                         const size_t pDecodedSizeBytes,
-                                        const gnwRunLoopDataEncodingRoutine encode,
-                                        const gnwRunLoopDataEncodingRoutine decode) {
+                                        const gnwRunLoopDataEncodingRoutine encoder,
+                                        const gnwRunLoopDataEncodingRoutine decoder) {
     if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
         OOPS("Process id out of range");
     }
@@ -395,8 +395,7 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
     }
     item.dataSizeBytes = pSizeBytes;
     item.decodedDataSizeBytes = pDecodedSizeBytes;
-    item.encode = encode;
-    item.decode = decode;
+    item.decode = decoder;
 
     enum gnwRunLoopError err;
     size_t runloopToken;
@@ -407,7 +406,7 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
         return PE_OPERATION_FAILED;
     }
     
-    err = k_runloop_dispatch(procId, runloopToken, item, p);
+    err = k_runloop_dispatch(procId, runloopToken, item, p, encoder);
     if (err != GRLE_NONE) {
         return PE_OPERATION_FAILED;
     }
@@ -425,9 +424,9 @@ enum k_proc_error k_proc_callback_invoke_ptr(const procId_t procId,
                                              const ptr_t p,
                                              const size_t pSizeBytes,
                                              const size_t pDecodedSizeBytes,
-                                             const gnwRunLoopDataEncodingRoutine encode,
-                                             const gnwRunLoopDataEncodingRoutine decode) {
-    return callbackInvoke(procId, GEF_PTR, (ptr_t)funPtr, p, pSizeBytes, pDecodedSizeBytes, encode, decode);
+                                             const gnwRunLoopDataEncodingRoutine encoder,
+                                             const gnwRunLoopDataEncodingRoutine decoder) {
+    return callbackInvoke(procId, GEF_PTR, (ptr_t)funPtr, p, pSizeBytes, pDecodedSizeBytes, encoder, decoder);
 }
 
 static void k_proc_prepareKernelProc() {

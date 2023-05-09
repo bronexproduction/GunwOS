@@ -15,7 +15,8 @@ enum gnwRunLoopError k_runloop_reserve(const procId_t procId,
 enum gnwRunLoopError k_runloop_dispatch(const procId_t procId,
                                         const size_t token,
                                         const struct gnwRunLoopDispatchItem item,
-                                        const ptr_t data);
+                                        const ptr_t data,
+                                        const gnwRunLoopDataEncodingRoutine dataEncoder);
 enum gnwRunLoopError k_runloop_getPendingItem(const procId_t procId,
                                               struct gnwRunLoopDispatchItem * const absItemPtr);
 enum gnwRunLoopError k_runloop_getPendingItemDataSizeBytes(const procId_t procId,

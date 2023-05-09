@@ -110,7 +110,8 @@ enum gnwRunLoopError k_runloop_reserve(const procId_t procId, size_t * const tok
 enum gnwRunLoopError k_runloop_dispatch(const procId_t procId,
                                         const size_t token,
                                         const struct gnwRunLoopDispatchItem item,
-                                        const ptr_t data) {
+                                        const ptr_t data,
+                                        const gnwRunLoopDataEncodingRoutine dataEncoder) {
     if (!IN_RANGE(0, procId, MAX_PROC)) {
         OOPS("Unexpected process ID");
         return GRLE_UNKNOWN;
@@ -137,7 +138,7 @@ enum gnwRunLoopError k_runloop_dispatch(const procId_t procId,
             OOPS("Nullptr");
             return GRLE_INVALID_PARAMETER;
         }
-        if (!item.encode || !item.decode) {
+        if (!dataEncoder || !item.decode) {
             OOPS("No encode/decode present");
             return GRLE_INVALID_PARAMETER;
         }
@@ -149,7 +150,7 @@ enum gnwRunLoopError k_runloop_dispatch(const procId_t procId,
     }
 
     queueItem->item = item;
-    queueItem->item.encode(data, queueItem->data);
+    dataEncoder(data, queueItem->data);
     
     return GRLE_NONE;
 }

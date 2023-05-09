@@ -127,7 +127,7 @@ enum k_proc_error k_proc_callback_invoke_ptr(const procId_t procId,
                                              const ptr_t p,
                                              const size_t pSizeBytes,
                                              const size_t pDecodedSizeBytes,
-                                             const gnwRunLoopDataEncodingRoutine encode,
-                                             const gnwRunLoopDataEncodingRoutine decode);
+                                             const gnwRunLoopDataEncodingRoutine encoder,
+                                             const gnwRunLoopDataEncodingRoutine decoder);
 
 #endif // PROC_H

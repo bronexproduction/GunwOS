@@ -26,7 +26,6 @@ struct gnwRunLoopDispatchItem {
     union gnwEventListener routine;
     size_t dataSizeBytes;
     size_t decodedDataSizeBytes;
-    gnwRunLoopDataEncodingRoutine encode;
     gnwRunLoopDataEncodingRoutine decode;
 };
 
