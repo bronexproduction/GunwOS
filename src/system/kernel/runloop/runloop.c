@@ -156,7 +156,7 @@ enum gnwRunLoopError k_runloop_getPendingItem(const procId_t procId, struct gnwR
         return GRLE_INVALID_STATE;
     }
 
-    memcopy(&item->item, absItemPtr, sizeof(struct gnwRunLoopDispatchItem));
+    *absItemPtr = item->item;
     item->handled = true;
     releaseIfNeeded(procId, index);
 
