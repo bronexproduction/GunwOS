@@ -15,4 +15,4 @@ void gnwIpcEndpointQuery_encode(const struct gnwIpcEndpointQuery * const, ptr_t)
 
 #endif // _GUNWAPI_KERNEL
 
-#endif // GUNWOS_GUNWIPC_H
+#endif // GUNWOS__GUNWIPC_H
