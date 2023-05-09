@@ -279,6 +279,7 @@ SCR(fug,
     Params:
         * EBX - device identifier
         * ECX - listener (gnwDeviceEventListener)
+        * EDX - decoder (gnwDeviceEventDecoder)
     
     Return:
         * EAX - error code (enum gnwDeviceError)
@@ -286,10 +287,11 @@ SCR(fug,
 SCR(devListen,
     REG(32, devId, ebx)
     REG(32, lsnr, ecx)
+    REG(32, decoder, edx)
 
     REG_RET(32, err)
 
-    err = k_dev_listen(k_proc_getCurrentId(), (const size_t)devId, (gnwDeviceEventListener)lsnr);
+    err = k_dev_listen(k_proc_getCurrentId(), (const size_t)devId, (gnwDeviceEventListener)lsnr, (gnwDeviceEventDecoder)decoder);
 )
 
 /*

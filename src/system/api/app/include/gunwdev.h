@@ -32,6 +32,8 @@ struct gnwDeviceEvent {
 
 typedef __attribute__((cdecl)) void (*gnwDeviceEventListener)(const struct gnwDeviceEvent * const);
 
+typedef void (*gnwDeviceEventDecoder)(const ptr_t, struct gnwDeviceEvent * const);
+
 /*
     Requests device information for given id
 
@@ -208,6 +210,10 @@ SYSCALL_DECL enum gnwDeviceError devMemWrite(const size_t identifier,
     SYSCALL_RETVAL(32);
 }
 
+#ifndef _GUNWAPI_KERNEL
+
+void gnwDeviceEvent_decode(const ptr_t, struct gnwDeviceEvent * const);
+
 /*
     Register a listener to device events
 
@@ -221,11 +227,14 @@ SYSCALL_DECL enum gnwDeviceError devListen(const size_t identifier,
 
     SYSCALL_PAR1(identifier);
     SYSCALL_PAR2(listener);
+    SYSCALL_PAR3(gnwDeviceEvent_decode);
 
     SYSCALL_USER_FUNC(DEV_LISTEN);
     SYSCALL_USER_INT;
 
     SYSCALL_RETVAL(32);
 }
+
+#endif // _GUNWAPI_KERNEL
 
 #endif // GUNWOS_GUNWDEV_H

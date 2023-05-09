@@ -50,6 +50,13 @@ static struct device {
         Note: Listener can be attached only by holder process
     */
     gnwDeviceEventListener listener;
+
+    /*
+        Device event decoder routine
+
+        Note: Set by the listening process
+    */
+    gnwDeviceEventDecoder decoder;
 } devices[MAX_DEVICES];
 
 static uint_32 devicesCount;
@@ -116,7 +123,8 @@ enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescr
         /* initialized */ false, 
         /* started */ false, 
         /* holder */ NONE_PROC_ID, 
-        /* listener */ nullptr
+        /* listener */ nullptr,
+        /* decoder */ nullptr
     };
 
     dev.initialized = (driverDesc->init ? driverDesc->init() : 1);
@@ -237,7 +245,8 @@ void k_dev_releaseHold(const procId_t processId, const size_t deviceId) {
 
     if (devices[deviceId].holder == processId) {
         devices[deviceId].holder = NONE_PROC_ID;
-        devices[deviceId].listener = NULL;
+        devices[deviceId].listener = nullptr;
+        devices[deviceId].decoder = nullptr;
     }
 }
 
@@ -306,9 +315,13 @@ enum gnwDeviceError k_dev_writeChar(const procId_t processId,
 
 static enum gnwDeviceError validateListener(const procId_t processId, 
                                             const size_t deviceId, 
-                                            const gnwDeviceEventListener listener) {
+                                            const gnwDeviceEventListener listener,
+                                            const gnwDeviceEventDecoder decoder) {
     if (!listener) {
         return GDE_LISTENER_INVALID;
+    }
+    if (!decoder) {
+        return GDE_DECODER_INVALID;
     }
 
     enum gnwDeviceError err = validateStartedDevice(processId, deviceId);
@@ -325,13 +338,15 @@ static enum gnwDeviceError validateListener(const procId_t processId,
 
 enum gnwDeviceError k_dev_listen(const procId_t processId, 
                                  const size_t deviceId, 
-                                 const gnwDeviceEventListener listener) {
-    enum gnwDeviceError err = validateListener(processId, deviceId, listener);
+                                 const gnwDeviceEventListener listener,
+                                 const gnwDeviceEventDecoder decoder) {
+    enum gnwDeviceError err = validateListener(processId, deviceId, listener, decoder);
     if (err) {
         return err;
     }
 
     devices[deviceId].listener = listener;
+    devices[deviceId].decoder = decoder;
     return GDE_NONE;
 }
 
@@ -404,6 +419,9 @@ static enum gnwDeviceError validateListenerInvocation(const size_t deviceId) {
     if (!dev->listener) {
         return GDE_NOT_FOUND;
     }
+    if (!dev->decoder) {
+        return GDE_UNKNOWN;
+    } 
     if (dev->holder == NONE_PROC_ID) {
         OOPS("Inconsistent holder listener state");
         return GDE_UNKNOWN;
@@ -435,7 +453,7 @@ enum gnwDeviceError k_dev_emit(const struct gnwDeviceEvent * const eventPtr) {
                                                                eventPtr->dataSizeBytes + sizeof(struct gnwDeviceEvent),
                                                                sizeof(struct gnwDeviceEvent),
                                                                (gnwRunLoopDataEncodingRoutine)gnwDeviceEvent_encode,
-                                                               (gnwRunLoopDataEncodingRoutine)gnwDeviceEvent_decode);
+                                                               (gnwRunLoopDataEncodingRoutine)dev->decoder);
     switch (callbackErr) {
     case PE_NONE:
         return GDE_NONE;
@@ -454,6 +472,7 @@ void k_dev_procCleanup(const procId_t procId) {
             CRITICAL_SECTION(
                 devices[devId].holder = NONE_PROC_ID;
                 devices[devId].listener = nullptr;
+                devices[devId].decoder = nullptr;
             )
         }
     }

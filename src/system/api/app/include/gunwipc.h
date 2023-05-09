@@ -76,6 +76,10 @@ struct gnwIpcHandlerDescriptor {
     gnwIpcEndpointQueryDecoder decoder;
 };
 
+#ifndef _GUNWAPI_KERNEL
+
+extern void gnwIpcEndpointQuery_decode(const ptr_t, struct gnwIpcEndpointQuery * const);
+
 /*
     Registers the process as global IPC receiver for given path
 
@@ -96,7 +100,6 @@ SYSCALL_DECL enum gnwIpcError ipcRegister(const char * const path, const enum gn
     }
     desc.accessScope = accessScope;
     desc.handlerRoutine = handler;
-    extern void gnwIpcEndpointQuery_decode(const ptr_t, struct gnwIpcEndpointQuery * const);
     desc.decoder = gnwIpcEndpointQuery_decode;
 
     SYSCALL_PAR1(&desc);
@@ -129,5 +132,7 @@ SYSCALL_DECL enum gnwIpcError ipcSend(const char * const path, const struct gnwI
 
     SYSCALL_RETVAL(32);
 }
+
+#endif // _GUNWAPI_KERNEL
 
 #endif // GUNWOS_GUNWIPC_H

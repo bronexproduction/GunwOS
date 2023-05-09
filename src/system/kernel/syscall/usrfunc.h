@@ -112,7 +112,8 @@ __attribute__((naked)) void k_scr_fug(const enum gnwFugCode);
     Function - DEV_LISTEN
 */
 __attribute__((naked)) enum gnwDeviceError k_scr_devListen(const size_t identifier,
-                                                           const union gnwEventListener listener);
+                                                           const gnwDeviceEventListener listener,
+                                                           const gnwDeviceEventDecoder decoder);
 
 /*
     Code - 0x0f
