@@ -118,7 +118,7 @@ static void onKeyDown(const uint_8 c) {
 
 static GNW_KEYBOARD_EVENT_LISTENER(onKeyboardEvent) {
     if (event->code == GKEC_KEY_DOWN) {
-        onKeyDown(event->key[0]);
+        onKeyDown(*event->key);
     }
 }
 
