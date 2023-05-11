@@ -10,7 +10,7 @@
 
 #ifndef _GUNWAPI_KERNEL
 
-#include "../../shared/scl_def.h"
+#include <scl_def.h>
 
 #define SYSCALL_USER_INTERRUPT                  0x69
 

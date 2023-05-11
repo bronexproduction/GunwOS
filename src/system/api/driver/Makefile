@@ -1,4 +1,4 @@
-CFLAGS=-std=c11 -c -ffreestanding -mno-red-zone -ggdb -I $(STDGUNW_INCLUDE_DIR) -I $(APP_API_INCLUDE_DIR) $(CFLAGS_GLOBAL)
+CFLAGS=-std=c11 -c -ffreestanding -mno-red-zone -ggdb -I $(STDGUNW_INCLUDE_DIR) -I $(APP_API_INCLUDE_DIR) -I $(API_SHARED_INCLUDE_DIR) $(CFLAGS_GLOBAL)
 CXXFLAGS=-std=c++11 -c -ffreestanding -mno-red-zone -ggdb $(CXXFLAGS_GLOBAL)
 RSFLAGS=$(RSFLAGS_GLOBAL)
 
