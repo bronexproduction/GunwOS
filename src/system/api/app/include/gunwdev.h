@@ -8,8 +8,6 @@
 #ifndef GUNWOS_GUNWDEV_H
 #define GUNWOS_GUNWDEV_H
 
-#include "scl_user.h"
-#include "gunwfug.h"
 #include "gunwuhadesc.h"
 #include "gunwevent.h"
 
@@ -34,6 +32,10 @@ typedef __attribute__((cdecl)) void (*gnwDeviceEventListener)(const struct gnwDe
 
 typedef void (*gnwDeviceEventDecoder)(const ptr_t, struct gnwDeviceEvent * const);
 
+#ifndef _GUNWAPI_KERNEL
+
+void gnwDeviceEvent_decode(const ptr_t, struct gnwDeviceEvent * const);
+
 /*
     Requests device information for given id
 
@@ -43,18 +45,8 @@ typedef void (*gnwDeviceEventDecoder)(const ptr_t, struct gnwDeviceEvent * const
     
     Return value: Device error code or GDE_NONE (see enum gnwDeviceError)
 */
-SYSCALL_DECL enum gnwDeviceError devGetById(const size_t deviceId, 
-                                            struct gnwDeviceUHADesc * const desc) {
-    CHECKPTR(desc);
-
-    SYSCALL_PAR1(deviceId);
-    SYSCALL_PAR2(desc);
-
-    SYSCALL_USER_FUNC(DEV_GET_BY_ID);
-    SYSCALL_USER_INT;
-
-    SYSCALL_RETVAL(32);
-}
+extern enum gnwDeviceError devGetById(const size_t deviceId,
+                                      struct gnwDeviceUHADesc * const desc);
 
 /*
     Requests device information for given type
@@ -65,18 +57,8 @@ SYSCALL_DECL enum gnwDeviceError devGetById(const size_t deviceId,
     
     Return value: Device error code or GDE_NONE (see enum gnwDeviceError)
 */
-SYSCALL_DECL enum gnwDeviceError devGetByType(const enum gnwDeviceType type, 
-                                              struct gnwDeviceUHADesc * const desc) {
-    CHECKPTR(desc);
-
-    SYSCALL_PAR1(type);
-    SYSCALL_PAR2(desc);
-
-    SYSCALL_USER_FUNC(DEV_GET_BY_TYPE);
-    SYSCALL_USER_INT;
-
-    SYSCALL_RETVAL(32);
-}
+extern enum gnwDeviceError devGetByType(const enum gnwDeviceType type, 
+                                        struct gnwDeviceUHADesc * const desc);
 
 /*
     Requests parameter value for given device ID, if any
@@ -88,21 +70,9 @@ SYSCALL_DECL enum gnwDeviceError devGetByType(const enum gnwDeviceType type,
     
     Return value: Device error code or GDE_NONE (see enum gnwDeviceError)
 */
-SYSCALL_DECL enum gnwDeviceError devGetParam(const size_t deviceId,
-                                             const struct gnwDeviceParamDescriptor * const paramDescriptor,
-                                             size_t * const result) {
-    CHECKPTR(paramDescriptor);
-    CHECKPTR(result);
-
-    SYSCALL_PAR1(deviceId);
-    SYSCALL_PAR2(paramDescriptor);
-    SYSCALL_PAR3(result);
-
-    SYSCALL_USER_FUNC(DEV_GET_PARAM);
-    SYSCALL_USER_INT;
-
-    SYSCALL_RETVAL(32);
-}
+extern enum gnwDeviceError devGetParam(const size_t deviceId, 
+                                       const struct gnwDeviceParamDescriptor * const paramDescriptor,
+                                       size_t * const result);
 
 /*
     Sets parameter value for given device ID
@@ -117,20 +87,9 @@ SYSCALL_DECL enum gnwDeviceError devGetParam(const size_t deviceId,
     Note: In order to set device parameters
           the process has to be exclusive holder of it
 */
-SYSCALL_DECL enum gnwDeviceError devSetParam(const size_t deviceId,
-                                             const struct gnwDeviceParamDescriptor * const paramDescriptor,
-                                             const size_t value) {
-    CHECKPTR(paramDescriptor);
-
-    SYSCALL_PAR1(deviceId);
-    SYSCALL_PAR2(paramDescriptor);
-    SYSCALL_PAR3(value);
-
-    SYSCALL_USER_FUNC(DEV_SET_PARAM);
-    SYSCALL_USER_INT;
-
-    SYSCALL_RETVAL(32);
-}
+extern enum gnwDeviceError devSetParam(const size_t deviceId,
+                                       const struct gnwDeviceParamDescriptor * const paramDescriptor,
+                                       const size_t value);
 
 /*
     Attempts to take hold of the device
@@ -143,14 +102,7 @@ SYSCALL_DECL enum gnwDeviceError devSetParam(const size_t deviceId,
 
     Return value: Device error code or GDE_NONE (see enum gnwDeviceError)
 */
-SYSCALL_DECL enum gnwDeviceError devAcquire(const uint_32 identifier) {
-    SYSCALL_PAR1(identifier);
-
-    SYSCALL_USER_FUNC(DEV_ACQUIRE);
-    SYSCALL_USER_INT;
-
-    SYSCALL_RETVAL(32);
-}
+extern enum gnwDeviceError devAcquire(const uint_32 identifier);
 
 /*
     Releases the hold taken on the device (if any)
@@ -158,12 +110,7 @@ SYSCALL_DECL enum gnwDeviceError devAcquire(const uint_32 identifier) {
     Params:
         * identifier - device identifier
 */
-SYSCALL_DECL void devRelease(const uint_32 identifier) {
-    SYSCALL_PAR1(identifier);
-
-    SYSCALL_USER_FUNC(DEV_RELEASE);
-    SYSCALL_USER_INT;
-}
+extern void devRelease(const uint_32 identifier);
 
 /*
     Write character to character output device
@@ -173,17 +120,8 @@ SYSCALL_DECL void devRelease(const uint_32 identifier) {
     
     Return value: Device error code or GDE_NONE (see enum gnwDeviceError)
 */
-SYSCALL_DECL enum gnwDeviceError devCharWrite(const uint_32 deviceId, 
-                                              const char character) {
-    SYSCALL_PAR1(deviceId);
-    SYSCALL_PAR2(character);
-
-    SYSCALL_USER_FUNC(DEV_CHAR_WRITE);
-    SYSCALL_USER_INT;
-    
-    register enum gnwDeviceError ret __asm__ ("eax");
-    return ret;
-}
+extern enum gnwDeviceError devCharWrite(const uint_32 deviceId, 
+                                        const char character);
 
 /*
     Write to the device
@@ -195,24 +133,9 @@ SYSCALL_DECL enum gnwDeviceError devCharWrite(const uint_32 deviceId,
     
     Return value: Device error code or GDE_NONE (see enum gnwDeviceError)
 */
-SYSCALL_DECL enum gnwDeviceError devMemWrite(const size_t identifier,
-                                             const ptr_t buffer,
-                                             const range_addr_t * const devInputBufferRange) {
-    CHECKPTR(buffer);
-
-    SYSCALL_PAR1(identifier);
-    SYSCALL_PAR2(buffer);
-    SYSCALL_PAR3(devInputBufferRange);
-
-    SYSCALL_USER_FUNC(DEV_MEM_WRITE);
-    SYSCALL_USER_INT;
-
-    SYSCALL_RETVAL(32);
-}
-
-#ifndef _GUNWAPI_KERNEL
-
-void gnwDeviceEvent_decode(const ptr_t, struct gnwDeviceEvent * const);
+extern enum gnwDeviceError devMemWrite(const size_t identifier,
+                                       const ptr_t buffer,
+                                       const range_addr_t * const devInputBufferRange);
 
 /*
     Register a listener to device events
@@ -221,19 +144,8 @@ void gnwDeviceEvent_decode(const ptr_t, struct gnwDeviceEvent * const);
         * identifier - device identifier
         * listener - event listener
 */
-SYSCALL_DECL enum gnwDeviceError devListen(const size_t identifier,
-                                           const gnwDeviceEventListener listener) {
-    CHECKPTR(listener);
-
-    SYSCALL_PAR1(identifier);
-    SYSCALL_PAR2(listener);
-    SYSCALL_PAR3(gnwDeviceEvent_decode);
-
-    SYSCALL_USER_FUNC(DEV_LISTEN);
-    SYSCALL_USER_INT;
-
-    SYSCALL_RETVAL(32);
-}
+extern enum gnwDeviceError devListen(const size_t identifier,
+                                     const gnwDeviceEventListener listener);
 
 #endif // _GUNWAPI_KERNEL
 
