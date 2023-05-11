@@ -9,15 +9,15 @@
 #define GUNWOS_GUNWUHA_H
 
 #include <gunwuhadesc.h>
-#include <uha/gunwuha_system.h>
-#include <uha/gunwuha_mem.h>
-#include <uha/gunwuha_keyboard.h>
-#include <uha/gunwuha_mouse.h>
-#include <uha/gunwuha_fdc.h>
-#include <uha/gunwuha_storctrl.h>
-#include <uha/gunwuha_char.h>
-#include <uha/gunwuha_display.h>
-#include <uha/gunwuha_event.h>
+#include "uha/gunwuha_system.h"
+#include "uha/gunwuha_mem.h"
+#include "uha/gunwuha_keyboard.h"
+#include "uha/gunwuha_mouse.h"
+#include "uha/gunwuha_fdc.h"
+#include "uha/gunwuha_storctrl.h"
+#include "uha/gunwuha_char.h"
+#include "uha/gunwuha_display.h"
+#include "uha/gunwuha_event.h"
 
 /*
     Hardware-specific API

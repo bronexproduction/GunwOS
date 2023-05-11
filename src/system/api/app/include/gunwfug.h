@@ -7,7 +7,8 @@
 #ifndef GUNWOS_GUNWFUG_H
 #define GUNWOS_GUNWFUG_H
 
-#ifndef _GUNWAPI_KERNEL
+#warning commented until drivers running in separate processes
+// #ifndef _GUNWAPI_KERNEL
 
 #define CHECKPTR(PTR) { if (!PTR) { fug(FUG_NULLPTR); __builtin_unreachable(); } }
 
@@ -26,6 +27,7 @@ enum gnwFugCode {
 */
 extern void fug(enum gnwFugCode code);
 
-#endif // _GUNWAPI_KERNEL
+#warning commented until drivers running in separate processes
+// #endif // _GUNWAPI_KERNEL
 
 #endif // GUNWOS_GUNWFUG_H

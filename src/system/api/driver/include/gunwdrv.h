@@ -11,7 +11,7 @@
 #include <types.h>
 #include <defs.h>
 #include <gunwdev.h>
-#include <gunwuha.h>
+#include "../include/gunwuha.h"
 
 /*
     Device driver error codes

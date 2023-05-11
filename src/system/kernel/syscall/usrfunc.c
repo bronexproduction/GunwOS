@@ -15,6 +15,7 @@
 #include <queue/queue.h>
 #include <error/panic.h>
 #include <runloop/runloop.h>
+#include <scl_def.h>
 
 /*
     User-level system calls

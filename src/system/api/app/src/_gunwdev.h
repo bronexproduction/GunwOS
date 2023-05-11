@@ -8,7 +8,7 @@
 #ifndef GUNWOS__GUNWDEV_H
 #define GUNWOS__GUNWDEV_H
 
-#include <gunwdev.h>
+#include "../include/gunwdev.h"
 
 #ifdef _GUNWAPI_KERNEL
 

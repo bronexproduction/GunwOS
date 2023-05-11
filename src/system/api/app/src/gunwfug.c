@@ -5,7 +5,8 @@
 //  Created by Artur Danielewski on 11.05.2023.
 //
 
-#ifndef _GUNWAPI_KERNEL
+#warning commented until drivers running in separate processes
+// #ifndef _GUNWAPI_KERNEL
 
 #include "../include/gunwfug.h"
 #include "scl_user.h"
@@ -17,4 +18,5 @@ void fug(enum gnwFugCode code) {
     SYSCALL_USER_INT;
 }
 
-#endif // _GUNWAPI_KERNEL
+#warning commented until drivers running in separate processes
+// #endif // _GUNWAPI_KERNEL

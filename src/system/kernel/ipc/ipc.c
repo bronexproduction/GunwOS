@@ -8,6 +8,7 @@
 #include "ipc.h"
 #include <mem.h>
 #include <utils.h>
+#include <string.h>
 #include <hal/proc/proc.h>
 #include <error/panic.h>
 #include <src/_gunwipc.h>

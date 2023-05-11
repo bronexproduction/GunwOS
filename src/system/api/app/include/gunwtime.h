@@ -8,7 +8,8 @@
 #ifndef GUNWOS_GUNWTIME_H
 #define GUNWOS_GUNWTIME_H
 
-#ifndef _GUNWAPI_KERNEL
+#warning commented until drivers running in separate processes
+// #ifndef _GUNWAPI_KERNEL
 
 #include <types.h>
 
@@ -17,6 +18,7 @@
 */
 extern time_t timeMs();
 
-#endif // _GUNWAPI_KERNEL
+#warning commented until drivers running in separate processes
+// #endif // _GUNWAPI_KERNEL
 
 #endif // GUNWOS_GUNWTIME_H
