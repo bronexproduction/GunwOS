@@ -10,6 +10,7 @@
 #include <utils.h>
 #include <hal/proc/proc.h>
 #include <error/panic.h>
+#include <src/_gunwipc.h>
 
 #define MAX_IPC_LISTENER 16
 
@@ -17,8 +18,8 @@ static struct ipcListener {
     procId_t procId;
     char path[GNW_PATH_IPC_MAX_LENGTH];
     enum gnwIpcAccessScope accessScope;
-    struct gnwRunLoop * runLoop;
-    gnwEventListener_32_8 listener;
+    gnwIpcListener listener;
+    gnwIpcEndpointQueryDecoder decoder;
 } ipcListenerRegister[MAX_IPC_LISTENER];
 
 static void clear(const size_t entryId) {
@@ -78,19 +79,21 @@ static bool processPermitted(const procId_t procId,
 }
 
 enum gnwIpcError k_ipc_ipcSend(const procId_t procId,
-                               const char * const absPathPtr,
-                               const size_t pathLen,
-                               const char c) {
-    if (!absPathPtr) {
+                               const struct gnwIpcSenderQuery absQuery) {
+    if (!absQuery.path || !absQuery.params.dataPtr) {
         OOPS("Nullptr");
         return GIPCE_UNKNOWN;
     }
-    if (!pathLen || pathLen > GNW_PATH_IPC_MAX_LENGTH) {
+    if (!absQuery.params.dataSizeBytes) {
+        OOPS("No data");
+        return GIPCE_UNKNOWN;
+    }
+    if (!absQuery.pathLen || absQuery.pathLen > GNW_PATH_IPC_MAX_LENGTH) {
         return GIPCE_INVALID_PATH;
     }
 
     bool found;
-    size_t index = listenerIndexForPath(absPathPtr, pathLen, &found);
+    size_t index = listenerIndexForPath(absQuery.path, absQuery.pathLen, &found);
     if (!found) {
         return GIPCE_NOT_FOUND;
     }
@@ -102,11 +105,18 @@ enum gnwIpcError k_ipc_ipcSend(const procId_t procId,
         return GIPCE_FORBIDDEN;
     }
 
-    const enum k_proc_error err = k_proc_callback_invoke_32_8(ipcListenerRegister[index].procId, 
-                                                              ipcListenerRegister[index].runLoop, 
-                                                              ipcListenerRegister[index].listener, 
-                                                              procId, 
-                                                              c);
+    struct gnwIpcEndpointQuery endpointQuery;
+    endpointQuery.sourceProcId = procId;
+    endpointQuery.params = absQuery.params;
+
+    #warning endpoint query - how to handle response? response bytes not counted
+    const enum k_proc_error err = k_proc_callback_invoke_ptr(ipcListenerRegister[index].procId,
+                                                             (gnwEventListener_ptr)ipcListenerRegister[index].listener,
+                                                             (ptr_t)&endpointQuery,
+                                                             sizeof(struct gnwIpcEndpointQuery) + endpointQuery.params.dataSizeBytes,
+                                                             sizeof(struct gnwIpcEndpointQuery),
+                                                             (gnwRunLoopDataEncodingRoutine)gnwIpcEndpointQuery_encode,
+                                                             (gnwRunLoopDataEncodingRoutine)ipcListenerRegister[index].decoder);
     if (err == PE_IGNORED) {
         return GIPCE_IGNORED;
     }
@@ -121,8 +131,8 @@ enum gnwIpcError k_ipc_ipcRegister(const procId_t procId,
                                    const char * const absPathPtr,
                                    const size_t pathLen,
                                    const enum gnwIpcAccessScope accessScope,
-                                   const gnwEventListener_32_8 handlerRoutine,
-                                   struct gnwRunLoop * const runLoopPtr) {                                
+                                   const gnwIpcListener handlerRoutine,
+                                   const gnwIpcEndpointQueryDecoder decoder) {
     if (!absPathPtr) {
         OOPS("Nullptr");
         return GIPCE_UNKNOWN;
@@ -135,10 +145,6 @@ enum gnwIpcError k_ipc_ipcRegister(const procId_t procId,
     }
     if (!handlerRoutine) {
         return GIPCE_INVALID_PARAMETER;
-    }
-    if (!runLoopPtr) {
-        OOPS("Nullptr");
-        return GIPCE_UNKNOWN;
     }
     if (!pathGlobalValidate(absPathPtr, pathLen)) {
         return GIPCE_INVALID_PATH;
@@ -158,8 +164,8 @@ enum gnwIpcError k_ipc_ipcRegister(const procId_t procId,
     ipcListenerRegister[index].procId = procId;
     memcopy(absPathPtr, ipcListenerRegister[index].path, pathLen);
     ipcListenerRegister[index].accessScope = accessScope;
-    ipcListenerRegister[index].runLoop = runLoopPtr;
     ipcListenerRegister[index].listener = handlerRoutine;
+    ipcListenerRegister[index].decoder = decoder;
 
     return GIPCE_NONE;
 }

@@ -13,6 +13,7 @@
 #include <gunwdev.h>
 #include <gunwkeyboard.h>
 #include <gunwfug.h>
+#include <gunwrlp.h>
 
 #include "cliio.h"
 #include "cmdutil.h"
@@ -116,8 +117,8 @@ static void onKeyDown(const uint_8 c) {
 }
 
 static GNW_KEYBOARD_EVENT_LISTENER(onKeyboardEvent) {
-    if (code == GKEC_KEY_DOWN) {
-        onKeyDown(data);
+    if (event->code == GKEC_KEY_DOWN) {
+        onKeyDown(*event->key);
     }
 }
 
@@ -167,9 +168,7 @@ static void s_cli_init() {
         fug(FUG_UNDEFINED);
     }
 
-    union gnwEventListener listener;
-    listener._32_8 = (gnwKeyboardEventListener)onKeyboardEvent;
-    e = devListen(keyboardDesc.identifier, listener);
+    e = devListen(keyboardDesc.identifier, (gnwDeviceEventListener)onKeyboardEvent);
     if (e) {
         // devRelease(charOutDesc.identifier);
         devRelease(keyboardDesc.identifier);

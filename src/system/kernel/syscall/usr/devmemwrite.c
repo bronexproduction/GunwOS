@@ -8,9 +8,8 @@
 #include <syscall/func.h>
 #include <hal/proc/proc.h>
 #include <dev/dev.h>
-#include <error/panic.h>
 
-enum gnwDeviceError k_scr_usr_devMemWrite(const size_t devId, const void * const buf, const range_addr_t * const devInputRange) {
+enum gnwDeviceError k_scr_usr_devMemWrite(const size_t devId, const ptr_t bufferPtr, const range_addr_t * const devInputRange) {
     const procId_t procId = k_proc_getCurrentId();
     struct gnwDeviceUHADesc desc;
     const enum gnwDeviceError err = k_dev_getById(devId, &desc);
@@ -18,15 +17,8 @@ enum gnwDeviceError k_scr_usr_devMemWrite(const size_t devId, const void * const
         return err;
     }
 
-    const range_addr_t * const absDevInputRangePtr = (range_addr_t *)k_scl_func_getValidAbsoluteForProc(procId, (const ptr_t)devInputRange, sizeof(range_addr_t));
-    if (!absDevInputRangePtr) {
-        OOPS("Invalid pointer referenced");
-    }
-
-    const ptr_t absBufferPtr = k_scl_func_getValidAbsoluteForProc(procId, (const ptr_t)buf, absDevInputRangePtr->sizeBytes);
-    if (!absBufferPtr) {
-        OOPS("Invalid pointer referenced");
-    }
+    SCLF_GET_VALID_ABS(const range_addr_t *, devInputRange, sizeof(range_addr_t), GDE_UNKNOWN);
+    SCLF_GET_VALID_ABS(const ptr_t, bufferPtr, abs_devInputRange->sizeBytes, GDE_UNKNOWN);
     
-    return k_dev_writeMem(k_proc_getCurrentId(), devId, (const void * const)absBufferPtr, *absDevInputRangePtr);
+    return k_dev_writeMem(procId, devId, (ptr_t)abs_bufferPtr, *abs_devInputRange);
 }

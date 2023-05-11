@@ -22,9 +22,11 @@ enum gnwCtrlError loadElf(const ptr_t filePtr,
                           addr_t * const entry) {
     if (!memBytes) {
         OOPS("Unexpected nullptr");
+        return GCE_UNKNOWN;
     }
     if (!entry) {
         OOPS("Unexpected nullptr");
+        return GCE_UNKNOWN;
     }
     addr_t vMemLow;
     *memBytes = elfAllocBytes(filePtr, fileSizeBytes, &vMemLow);
@@ -45,6 +47,7 @@ enum gnwCtrlError loadElf(const ptr_t filePtr,
         const struct elfSectionHeaderEntry32 * const entry = elfGetSectionHeaderEntry(filePtr, index, fileSizeBytes); 
         if (!entry) {
             OOPS("Unexpected nullptr");
+            return GCE_UNKNOWN;
         }
         if (!(entry->attributes & ESECATTR_ALLOC &&
               entry->type == ESECTYPE_PROGBITS)) {

@@ -23,7 +23,7 @@ static enum gnwDeviceError pushGraphicsFrame(struct gnwGraphicsDisplayHandle * c
     CHECKPTR(handle)
 
     const size_t frameSizeBytes = handle->descriptor.dimensions.x * handle->descriptor.dimensions.y * sizeof(struct gnwDeviceUHA_display_pixel);
-    enum gnwDeviceError e = pushFrame(handle->descriptor.identifier, (const void * const)buffer, frameSizeBytes);
+    enum gnwDeviceError e = pushFrame(handle->descriptor.identifier, (const ptr_t)buffer, frameSizeBytes);
 
     if (e == GDE_HANDLE_INVALID) {
         handle->invalidate(handle);

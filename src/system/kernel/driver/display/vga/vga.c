@@ -70,7 +70,7 @@ bool setFormat(const enum gnwDeviceUHA_display_format format) {
     return true;
 }
 
-static void update(const void * const buffer, const range_addr_t inputBufferRange) {
+static void update(const ptr_t buffer, const range_addr_t inputBufferRange) {
     if (!buffer) {
         OOPS("Unexpected nullptr in buffer reference");
         return;

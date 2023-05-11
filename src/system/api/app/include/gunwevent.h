@@ -12,17 +12,19 @@
 
 enum gnwEventFormat {
     GEF_NONE = 0,
-    GEF_U32,
-    GEF_U32_U8
+    GEF_VOID,
+    GEF_PTR
 };
 
-typedef __attribute__((cdecl)) void (*gnwEventListener_32)(int_32 p0);
-typedef __attribute__((cdecl)) void (*gnwEventListener_32_8)(int_32 p0, int_8 p1);
+#define GNWEVENT_ACCEPTS_DATA(FORMAT) (FORMAT == GEF_PTR)
+
+typedef __attribute__((cdecl)) void (*gnwEventListener_void)();
+typedef __attribute__((cdecl)) void (*gnwEventListener_ptr)(ptr_t p0);
 
 union gnwEventListener {
     uint_32 _handle;
-    gnwEventListener_32 _32;
-    gnwEventListener_32_8 _32_8;
+    gnwEventListener_void _void;
+    gnwEventListener_ptr _ptr;
 };
 _Static_assert(sizeof(union gnwEventListener) == sizeof(int_32), "Unexpected union gnwEventListener size");
 

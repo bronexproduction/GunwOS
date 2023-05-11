@@ -16,6 +16,7 @@
 #include <timer/timer.h>
 #include <error/panic.h>
 #include <queue/queue.h>
+#include <runloop/runloop.h>
 
 register const uint_32 cur_esp __asm__ ("esp");
 #define STACK_VAL(REFESP, SIZE, OFFSET) (*(uint_ ## SIZE *)(REFESP + OFFSET))
@@ -361,12 +362,14 @@ void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const procId_t currentP
     STACK_VAL(refEsp, 16, 56) = kernelProc.cpuState.ss;
 }
 
-static enum k_proc_error callbackInvoke(const procId_t procId, 
-                                        const struct gnwRunLoop * const runLoop,
+static enum k_proc_error callbackInvoke(const procId_t procId,
                                         const enum gnwEventFormat format, 
                                         const ptr_t funPtr, 
-                                        const int_32 p0,
-                                        const int_32 p1) {
+                                        const ptr_t p,
+                                        const size_t pSizeBytes,
+                                        const size_t pDecodedSizeBytes,
+                                        const gnwRunLoopDataEncodingRoutine encoder,
+                                        const gnwRunLoopDataEncodingRoutine decoder) {
     if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
         OOPS("Process id out of range");
     }
@@ -376,33 +379,34 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
     if (!isProcessAlive(procId)) {
         OOPS("Attempted callback invocation in dead process");
     }
-    struct gnwRunLoop * const absRunLoopPtr = (struct gnwRunLoop *)k_mem_absForProc(procId, (ptr_t)runLoop);
-    if (!k_mem_bufInZoneForProc(procId, (ptr_t)absRunLoopPtr, sizeof(struct gnwRunLoop))) {
-        return PE_ACCESS_VIOLATION;
-    }
     
     struct gnwRunLoopDispatchItem item;
     item.format = format;
     switch (format) {
-    case GEF_U32:
-        item.routine._32 = (gnwEventListener_32)funPtr;
-        item.params[0] = p0;
+    case GEF_VOID:
+        item.routine._void = (gnwEventListener_void)funPtr;
         break;
-    case GEF_U32_U8:
-        item.routine._32_8 = (gnwEventListener_32_8)funPtr;
-        item.params[0] = p0;
-        item.params[1] = p1;
+    case GEF_PTR:
+        item.routine._ptr = (gnwEventListener_ptr)funPtr;
         break;
     case GEF_NONE:
         OOPS("Unexpected event format");
         return PE_UNKNOWN;
     }
-    
+    item.dataSizeBytes = pSizeBytes;
+    item.decodedDataSizeBytes = pDecodedSizeBytes;
+    item.decode = decoder;
+
     enum gnwRunLoopError err;
+    size_t runloopToken;
     CRITICAL_SECTION(
-        err = gnwRunLoopDispatch(absRunLoopPtr, item);
+        err = k_runloop_reserve(procId, &runloopToken);
     )
+    if (err != GRLE_NONE) {
+        return PE_OPERATION_FAILED;
+    }
     
+    err = k_runloop_dispatch(procId, runloopToken, item, p, encoder);
     if (err != GRLE_NONE) {
         return PE_OPERATION_FAILED;
     }
@@ -415,19 +419,14 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
     return PE_NONE;
 }
 
-enum k_proc_error k_proc_callback_invoke_32(const procId_t procId, 
-                               const struct gnwRunLoop * const runLoop, 
-                               void (* const funPtr)(int_32), 
-                               const int_32 p0) {
-    return callbackInvoke(procId, runLoop, GEF_U32, (ptr_t)funPtr, p0, NULL);
-}
-
-enum k_proc_error k_proc_callback_invoke_32_8(const procId_t procId, 
-                                              const struct gnwRunLoop * const runLoop, 
-                                              void (* const funPtr)(int_32, int_8), 
-                                              const int_32 p0,
-                                              const int_8 p1) {
-    return callbackInvoke(procId, runLoop, GEF_U32_U8, (ptr_t)funPtr, p0, p1);
+enum k_proc_error k_proc_callback_invoke_ptr(const procId_t procId,
+                                             void (* const funPtr)(ptr_t),
+                                             const ptr_t p,
+                                             const size_t pSizeBytes,
+                                             const size_t pDecodedSizeBytes,
+                                             const gnwRunLoopDataEncodingRoutine encoder,
+                                             const gnwRunLoopDataEncodingRoutine decoder) {
+    return callbackInvoke(procId, GEF_PTR, (ptr_t)funPtr, p, pSizeBytes, pDecodedSizeBytes, encoder, decoder);
 }
 
 static void k_proc_prepareKernelProc() {

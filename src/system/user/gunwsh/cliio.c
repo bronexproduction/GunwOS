@@ -10,11 +10,18 @@
 #include <mem.h>
 #include <string.h>
 #include <gunwipc.h>
+#include <defs.h>
 
 #define IO_GENERAL_FAILURE -1
 
-static int append(const char c) {
-    enum gnwIpcError e = ipcSend("t0", c);
+static int append(char c) {
+    struct gnwIpcQueryParams params;
+    params.dataPtr = (ptr_t)&c;
+    params.dataSizeBytes = sizeof(char);
+    params.resultPtr = nullptr;
+    params.resultSizeBytes = 0;
+
+    enum gnwIpcError e = ipcSend("t0", params);
     if (e != GIPCE_NONE) {
         return IO_GENERAL_FAILURE;
     }

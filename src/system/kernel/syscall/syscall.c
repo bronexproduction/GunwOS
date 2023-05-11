@@ -12,8 +12,8 @@
 #include "drvfunc.h"
 #include "usrfunc.h"
 
-#define DRIVER_SYSCALL_COUNT 4
-#define SYSCALL_COUNT 17
+#define DRIVER_SYSCALL_COUNT 3
+#define SYSCALL_COUNT 19
 
 /*
     Array of pointers to driver syscall handlers
@@ -23,8 +23,7 @@
 static void (*driverSyscallReg[DRIVER_SYSCALL_COUNT])() = {
     /* 0x00 */ (void *)k_scr_rdb,
     /* 0x01 */ (void *)k_scr_wrb,
-    /* 0x02 */ (void *)k_scr_emit_void,
-    /* 0x03 */ (void *)k_scr_emit_u8,
+    /* 0x02 */ (void *)k_scr_emit
 };
 
 /*
@@ -34,7 +33,7 @@ static void (*driverSyscallReg[DRIVER_SYSCALL_COUNT])() = {
 */
 static void (*userSyscallReg[SYSCALL_COUNT])() = {
     /* 0x00 */ (void *)k_scr_start,
-    /* 0x01 */ (void *)k_scr_debugPrint,
+    /* 0x01 */ nullptr,
     /* 0x02 */ (void *)k_scr_devCharWrite,
     /* 0x03 */ (void *)k_scr_exit,
     /* 0x04 */ (void *)k_scr_waitForEvent,
@@ -50,6 +49,8 @@ static void (*userSyscallReg[SYSCALL_COUNT])() = {
     /* 0x0e */ (void *)k_scr_devListen,
     /* 0x0f */ (void *)k_scr_devGetParam,
     /* 0x10 */ (void *)k_scr_devSetParam,
+    /* 0x11 */ (void *)k_scr_runLoopGetItem,
+    /* 0x12 */ (void *)k_scr_runLoopGetData,
 };
 
 __attribute__((naked, unused)) static void k_scl_syscall() {

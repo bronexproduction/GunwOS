@@ -15,20 +15,9 @@
 #include <hal/mem/mem.h>
 #include <error/panic.h>
 #include <hal/criticalsec/criticalsec.h>
+#include <src/_gunwdev.h>
 
 #define MAX_DEVICES 8
-
-struct deviceEventListener {
-    /*
-        Event listener routine
-    */
-    union gnwEventListener routine;
-
-    /*
-        Process' run loop for event dispatch
-    */
-    struct gnwRunLoop * runLoop;
-};
 
 static struct device {
     /*
@@ -56,11 +45,18 @@ static struct device {
     procId_t holder;
 
     /*
-        Device events listener
+        Device events listener routine
 
         Note: Listener can be attached only by holder process
     */
-    struct deviceEventListener listener;
+    gnwDeviceEventListener listener;
+
+    /*
+        Device event decoder routine
+
+        Note: Set by the listening process
+    */
+    gnwDeviceEventDecoder decoder;
 } devices[MAX_DEVICES];
 
 static uint_32 devicesCount;
@@ -127,12 +123,8 @@ enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescr
         /* initialized */ false, 
         /* started */ false, 
         /* holder */ NONE_PROC_ID, 
-        /* listener */ (struct deviceEventListener) {
-            /* routine */ (union gnwEventListener) {
-                /* _handle */ NULL
-            },
-            /* runLoop */ nullptr
-        }
+        /* listener */ nullptr,
+        /* decoder */ nullptr
     };
 
     dev.initialized = (driverDesc->init ? driverDesc->init() : 1);
@@ -253,14 +245,14 @@ void k_dev_releaseHold(const procId_t processId, const size_t deviceId) {
 
     if (devices[deviceId].holder == processId) {
         devices[deviceId].holder = NONE_PROC_ID;
-        devices[deviceId].listener.routine._handle = NULL;
-        devices[deviceId].listener.runLoop = nullptr;
+        devices[deviceId].listener = nullptr;
+        devices[deviceId].decoder = nullptr;
     }
 }
 
 enum gnwDeviceError k_dev_writeMem(const procId_t processId, 
                                    const size_t deviceId,
-                                   const void * const buffer,
+                                   const ptr_t buffer,
                                    const range_addr_t devMemRange) {
     if (!buffer) {
         OOPS("Buffer cannot be nullptr");
@@ -323,10 +315,13 @@ enum gnwDeviceError k_dev_writeChar(const procId_t processId,
 
 static enum gnwDeviceError validateListener(const procId_t processId, 
                                             const size_t deviceId, 
-                                            const union gnwEventListener listener,
-                                            const struct gnwRunLoop * const runLoopPtr) {
-    if (!listener._handle) {
+                                            const gnwDeviceEventListener listener,
+                                            const gnwDeviceEventDecoder decoder) {
+    if (!listener) {
         return GDE_LISTENER_INVALID;
+    }
+    if (!decoder) {
+        return GDE_DECODER_INVALID;
     }
 
     enum gnwDeviceError err = validateStartedDevice(processId, deviceId);
@@ -334,13 +329,8 @@ static enum gnwDeviceError validateListener(const procId_t processId,
         return err;
     }
 
-    if (devices[deviceId].listener.routine._handle) {
+    if (devices[deviceId].listener) {
         return GDE_ALREADY_SET;
-    }
-
-    ptr_t absRunLoopPtr = k_mem_absForProc(processId, (ptr_t)runLoopPtr);
-    if (!k_mem_bufInZoneForProc(processId, absRunLoopPtr, sizeof(struct gnwRunLoop))) {
-        return GDE_INVALID_PARAMETER;
     }
 
     return GDE_NONE;
@@ -348,15 +338,15 @@ static enum gnwDeviceError validateListener(const procId_t processId,
 
 enum gnwDeviceError k_dev_listen(const procId_t processId, 
                                  const size_t deviceId, 
-                                 const union gnwEventListener listener,
-                                 struct gnwRunLoop * const runLoopPtr) {
-    enum gnwDeviceError err = validateListener(processId, deviceId, listener, runLoopPtr);
+                                 const gnwDeviceEventListener listener,
+                                 const gnwDeviceEventDecoder decoder) {
+    enum gnwDeviceError err = validateListener(processId, deviceId, listener, decoder);
     if (err) {
         return err;
     }
 
-    devices[deviceId].listener.routine = listener;
-    devices[deviceId].listener.runLoop = runLoopPtr;
+    devices[deviceId].listener = listener;
+    devices[deviceId].decoder = decoder;
     return GDE_NONE;
 }
 
@@ -409,19 +399,16 @@ enum gnwDeviceError k_dev_setParam(const procId_t procId,
     return GDE_NONE;
 }
 
-static enum gnwDeviceError validateEmitter(const size_t * const devIdPtr,
-                                           const enum gnwEventFormat format) {
+static enum gnwDeviceError validateEmitter(const size_t * const devIdPtr) {
     if (!devIdPtr) {
         return GDE_INVALID_DEVICE_STATE;
     }
     if (!validateInstalledId(*devIdPtr)) {
         OOPS("Unexpected serviced device ID");
+        return GDE_UNKNOWN;
     }
     if (!devices[*devIdPtr].started) {
         return GDE_INVALID_DEVICE_STATE;
-    }
-    if (devices[*devIdPtr].desc.api.event.desc.eventDataFormat != format) {
-        return GDE_INVALID_OPERATION;
     }
 
     return GDE_NONE;
@@ -429,47 +416,26 @@ static enum gnwDeviceError validateEmitter(const size_t * const devIdPtr,
 
 static enum gnwDeviceError validateListenerInvocation(const size_t deviceId) {
     struct device *dev = &devices[deviceId];
-    if (!dev->listener.routine._handle) {
+    if (!dev->listener) {
         return GDE_NOT_FOUND;
     }
+    if (!dev->decoder) {
+        return GDE_UNKNOWN;
+    } 
     if (dev->holder == NONE_PROC_ID) {
         OOPS("Inconsistent holder listener state");
+        return GDE_UNKNOWN;
     }
 
     return GDE_NONE;
 }
 
-enum gnwDeviceError k_dev_emit_void(const int_32 type) {
-    enum gnwDeviceError err = validateEmitter(k_hal_servicedDevIdPtr, GEF_U32);
-    if (err) {
-        return err;
-    }
-    err = validateListenerInvocation(*k_hal_servicedDevIdPtr);
-    if (err == GDE_NOT_FOUND) {
-        return GDE_NONE;
-    } else if (err) {
-        return err;
-    }
-
-    struct device *dev = &devices[*k_hal_servicedDevIdPtr];
-    gnwEventListener_32 listener = dev->listener.routine._32;
-
-    enum k_proc_error callbackErr = k_proc_callback_invoke_32(dev->holder, dev->listener.runLoop, (void (*)(int_32))listener, type);
-    switch (callbackErr) {
-    case PE_NONE:
-        return GDE_NONE;
-    case PE_IGNORED:
-        return GDE_HANDLE_INVALID;
-    case PE_ACCESS_VIOLATION:
-        return GDE_LISTENER_INVALID;
-    default:
+enum gnwDeviceError k_dev_emit(const struct gnwDeviceEvent * const eventPtr) {
+    if (!eventPtr) {
+        OOPS("Nullptr");
         return GDE_UNKNOWN;
     }
-}
-
-enum gnwDeviceError k_dev_emit_u8(const int_32 type,
-                                  const int_8 data) {
-    enum gnwDeviceError err = validateEmitter(k_hal_servicedDevIdPtr, GEF_U32_U8);
+    enum gnwDeviceError err = validateEmitter(k_hal_servicedDevIdPtr);
     if (err) {
         return err;
     }
@@ -481,9 +447,13 @@ enum gnwDeviceError k_dev_emit_u8(const int_32 type,
     }
 
     struct device *dev = &devices[*k_hal_servicedDevIdPtr];
-    gnwEventListener_32_8 listener = dev->listener.routine._32_8;
-
-    enum k_proc_error callbackErr = k_proc_callback_invoke_32_8(dev->holder, dev->listener.runLoop, (void (*)(int_32, int_8))listener, type, data);
+    enum k_proc_error callbackErr = k_proc_callback_invoke_ptr(dev->holder, 
+                                                               (gnwEventListener_ptr)dev->listener,
+                                                               (ptr_t)eventPtr,
+                                                               eventPtr->dataSizeBytes + sizeof(struct gnwDeviceEvent),
+                                                               sizeof(struct gnwDeviceEvent),
+                                                               (gnwRunLoopDataEncodingRoutine)gnwDeviceEvent_encode,
+                                                               (gnwRunLoopDataEncodingRoutine)dev->decoder);
     switch (callbackErr) {
     case PE_NONE:
         return GDE_NONE;
@@ -501,7 +471,8 @@ void k_dev_procCleanup(const procId_t procId) {
         if (devices[devId].holder == procId) {
             CRITICAL_SECTION(
                 devices[devId].holder = NONE_PROC_ID;
-                memzero(&devices[devId].listener, sizeof(struct deviceEventListener)); 
+                devices[devId].listener = nullptr;
+                devices[devId].decoder = nullptr;
             )
         }
     }

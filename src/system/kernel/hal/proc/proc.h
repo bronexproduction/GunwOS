@@ -13,7 +13,7 @@
 #include <hal/gdt/gdt.h>
 #include <src/_gunwrlp.h>
 
-#define MAX_PROC 16
+#define MAX_PROC 8
 #define NONE_PROC_ID -2
 #define KERNEL_PROC_ID -1
 
@@ -28,6 +28,7 @@ enum k_proc_error {
     PE_LIMIT_REACHED,
     PE_ACCESS_VIOLATION,
     PE_OPERATION_FAILED,
+    PE_INVALID_PARAMETER,
     PE_IGNORED,
     PE_UNKNOWN
 };
@@ -109,13 +110,24 @@ void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const procId_t currentP
 
     Params:
     * procId - identifier of the process funPtr() is going to be executed in
-    * runLoop - pointer to the process' run loop relative to procId process memory
     * funPtr - function pointer relative to procId process memory
     * p* - parameters of various sizes
+    * pSizeBytes - buffer size in bytes (in case p is a pointer)
+    * pDecodedSizeBytes - size in bytes of the decoded object 
+                          (can be smaller than pSizeBytes, as decoded object fields may point directly to buffer offsets)
+    * encoder - function converting object pointed by 'p' to a bytes array of 'pSizeBytes' bytes
+    * decoder - function converting array of bytes of 'pSizeBytes' bytes to an object (reverse encoder)
+    
+    Note: encoder/decoder has to align object pointers after copying data to the new location
     
     Return value: enum k_proc_error - PE_NONE on success
 */
-enum k_proc_error k_proc_callback_invoke_32(const procId_t procId, const struct gnwRunLoop * const runLoop, void (* const funPtr)(int_32), const int_32 p0);
-enum k_proc_error k_proc_callback_invoke_32_8(const procId_t procId, const struct gnwRunLoop * const runLoop, void (* const funPtr)(int_32, int_8), const int_32 p0, const int_8 p1);
+enum k_proc_error k_proc_callback_invoke_ptr(const procId_t procId,
+                                             void (* const funPtr)(ptr_t),
+                                             const ptr_t p,
+                                             const size_t pSizeBytes,
+                                             const size_t pDecodedSizeBytes,
+                                             const gnwRunLoopDataEncodingRoutine encoder,
+                                             const gnwRunLoopDataEncodingRoutine decoder);
 
 #endif // PROC_H

@@ -12,7 +12,27 @@
 #include "gunwfug.h"
 #include "gunwuhadesc.h"
 #include "gunwevent.h"
-#include "gunwrlp.h"
+
+struct gnwDeviceEvent {
+    /*
+        Event type (device specific)
+    */
+    int_32 type;
+
+    /*
+        Event data pointer
+    */
+    ptr_t data;
+
+    /*
+        Event data size in bytes
+    */
+    size_t dataSizeBytes;
+};
+
+typedef __attribute__((cdecl)) void (*gnwDeviceEventListener)(const struct gnwDeviceEvent * const);
+
+typedef void (*gnwDeviceEventDecoder)(const ptr_t, struct gnwDeviceEvent * const);
 
 /*
     Requests device information for given id
@@ -176,7 +196,7 @@ SYSCALL_DECL enum gnwDeviceError devCharWrite(const uint_32 deviceId,
     Return value: Device error code or GDE_NONE (see enum gnwDeviceError)
 */
 SYSCALL_DECL enum gnwDeviceError devMemWrite(const size_t identifier,
-                                             const ptr_t const buffer,
+                                             const ptr_t buffer,
                                              const range_addr_t * const devInputBufferRange) {
     CHECKPTR(buffer);
 
@@ -190,6 +210,10 @@ SYSCALL_DECL enum gnwDeviceError devMemWrite(const size_t identifier,
     SYSCALL_RETVAL(32);
 }
 
+#ifndef _GUNWAPI_KERNEL
+
+void gnwDeviceEvent_decode(const ptr_t, struct gnwDeviceEvent * const);
+
 /*
     Register a listener to device events
 
@@ -198,20 +222,19 @@ SYSCALL_DECL enum gnwDeviceError devMemWrite(const size_t identifier,
         * listener - event listener
 */
 SYSCALL_DECL enum gnwDeviceError devListen(const size_t identifier,
-                                           const union gnwEventListener listener) {
-    CHECKPTR(listener._handle);
-    
-    ptr_t rlpPtr = runLoopGetMain();
-    CHECKPTR(rlpPtr);
+                                           const gnwDeviceEventListener listener) {
+    CHECKPTR(listener);
 
     SYSCALL_PAR1(identifier);
-    SYSCALL_PAR2(listener._handle);
-    SYSCALL_PAR3(rlpPtr);
+    SYSCALL_PAR2(listener);
+    SYSCALL_PAR3(gnwDeviceEvent_decode);
 
     SYSCALL_USER_FUNC(DEV_LISTEN);
     SYSCALL_USER_INT;
 
     SYSCALL_RETVAL(32);
 }
+
+#endif // _GUNWAPI_KERNEL
 
 #endif // GUNWOS_GUNWDEV_H

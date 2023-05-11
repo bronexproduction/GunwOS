@@ -14,6 +14,7 @@
 #include <ipc/ipc.h>
 #include <queue/queue.h>
 #include <error/panic.h>
+#include <runloop/runloop.h>
 
 /*
     User-level system calls
@@ -44,25 +45,8 @@ SCR(start,
 
 /*
     Code - 0x01
-    Function - DEBUG_PRINT
-
-    Params:
-        * EBX - null-terminated character array pointer, relative to caller process memory 
-        * ECX - character array buffer length in bytes
-
-    Return:
-        * EAX - number of bytes written
+    Function - none
 */
-SCR(debugPrint,
-    // Buffer address (relative to process memory)
-    REG(32, buffer, ebx)
-    REG(32, bufferLen, ecx)
-
-    REG_RET(32, bytesWritten)
-
-    extern size_t k_scr_usr_debugPrint(const char * const, const size_t);
-    bytesWritten = k_scr_usr_debugPrint((const char * const)buffer, (const size_t)bufferLen);
-)
 
 /*
     Code - 0x02
@@ -98,21 +82,17 @@ SCR(exit,
     const procId_t procId = k_proc_getCurrentId();
     k_que_dispatch_arch((fPtr_arch)k_dev_procCleanup, procId);
     k_que_dispatch_arch((fPtr_arch)k_ipc_procCleanup, procId);
+    k_que_dispatch_arch((fPtr_arch)k_runloop_procCleanup, procId);
     k_proc_stop(procId);
 )
 
 /*
     Code - 0x04
     Function - WAIT_FOR_EVENT
-
-    Params:
-        * EBX - run loop (const struct gnwRunLoop * const), relative to caller process memory
 */
 SCR(waitForEvent,
-    REG(32, rlp, ebx)
-
-    extern void k_scr_usr_waitForEvent(addr_t, addr_t);
-    k_que_dispatch_arch_arch(k_scr_usr_waitForEvent, k_proc_getCurrentId(), rlp)
+    extern void k_scr_usr_waitForEvent(procId_t);
+    k_que_dispatch_arch((fPtr_arch)k_scr_usr_waitForEvent, k_proc_getCurrentId())
 )
 
 /*
@@ -134,22 +114,18 @@ SCR(timeMs,
     Function - IPC_SEND
 
     Params: 
-        * EBX - IPC path pointer relative to caller process memory
-        * ECX - IPC path length
-        * DL - character to be sent
+        * EBX - IPC sender query pointer relative to caller process memory
 
     Return:
         * EAX - error code on failure, GIPCE_NONE otherwise
 */
 SCR(ipcSend,
-    REG(32, path, ebx)
-    REG(32, pathLen, ecx)
-    REG(8, c, dl)
+    REG(32, queryPtr, ebx)
 
     REG_RET(32, err)
 
-    extern enum gnwIpcError k_scr_usr_ipcSend(const char * const, const size_t, const char);
-    err = k_scr_usr_ipcSend((char *)path, (size_t)pathLen, (char)c);
+    extern enum gnwIpcError k_scr_usr_ipcSend(const struct gnwIpcSenderQuery * const);
+    err = k_scr_usr_ipcSend((struct gnwIpcSenderQuery *)queryPtr);
 )
 
 /*
@@ -158,19 +134,17 @@ SCR(ipcSend,
 
     Params:
         * EBX - IPC handler descriptor pointer (see struct gnwIpcHandlerDescriptor) relative to caller process memory
-        * ECX - run loop pointer (struct gnwRunLoop * const) relative to caller process memory
 
     Return:
         * EAX - error code on failure, GIPCE_NONE otherwise
 */
 SCR(ipcRegister,
     REG(32, desc, ebx)
-    REG(32, rlp, ecx)
 
     REG_RET(32, err)
 
-    extern enum gnwIpcError k_scr_usr_ipcRegister(const struct gnwIpcHandlerDescriptor * const, struct gnwRunLoop * const);
-    err = k_scr_usr_ipcRegister((struct gnwIpcHandlerDescriptor *)desc, (struct gnwRunLoop *)rlp);
+    extern enum gnwIpcError k_scr_usr_ipcRegister(const struct gnwIpcHandlerDescriptor * const);
+    err = k_scr_usr_ipcRegister((struct gnwIpcHandlerDescriptor *)desc);
 )
 
 /*
@@ -264,8 +238,8 @@ SCR(devMemWrite,
 
     REG_RET(32, err)
 
-    extern enum gnwDeviceError k_scr_usr_devMemWrite(const size_t devId, const void * const buf, const range_addr_t * const);
-    err = k_scr_usr_devMemWrite(devId, (void *)buf, (range_addr_t *)rangePtr);
+    extern enum gnwDeviceError k_scr_usr_devMemWrite(const size_t devId, const ptr_t buf, const range_addr_t * const);
+    err = k_scr_usr_devMemWrite(devId, (ptr_t)buf, (range_addr_t *)rangePtr);
 )
 
 /*
@@ -287,8 +261,8 @@ SCR(fug,
 
     Params:
         * EBX - device identifier
-        * ECX - listener (const union gnwEventListener)
-        * EDX - run loop (struct gnwRunLoop * const), relative to caller process memory 
+        * ECX - listener (gnwDeviceEventListener)
+        * EDX - decoder (gnwDeviceEventDecoder)
     
     Return:
         * EAX - error code (enum gnwDeviceError)
@@ -296,11 +270,11 @@ SCR(fug,
 SCR(devListen,
     REG(32, devId, ebx)
     REG(32, lsnr, ecx)
-    REG(32, rlp, edx)
+    REG(32, decoder, edx)
 
     REG_RET(32, err)
 
-    err = k_dev_listen(k_proc_getCurrentId(), (const size_t)devId, (const union gnwEventListener)lsnr, (struct gnwRunLoop *)rlp);
+    err = k_dev_listen(k_proc_getCurrentId(), (const size_t)devId, (gnwDeviceEventListener)lsnr, (gnwDeviceEventDecoder)decoder);
 )
 
 /*
@@ -310,7 +284,7 @@ SCR(devListen,
     Params:
         * EBX - device identifier
         * ECX - device parameter descriptor
-        * EDX - result; parameter value 
+        * EDX - result pointer relative to caller process memory
     
     Return:
         * EAX - error code (enum gnwDeviceError)
@@ -347,4 +321,44 @@ SCR(devSetParam,
 
     extern enum gnwDeviceError k_scr_usr_devSetParam(const size_t, const struct gnwDeviceParamDescriptor * const, const size_t);
     err = k_scr_usr_devSetParam((size_t)devId, (struct gnwDeviceParamDescriptor *)paramDesc, (size_t)paramVal);
+)
+
+/*
+    Code - 0x11
+    Function - RUNLOOP_GET_ITEM
+
+    Params:
+        * EBX - struct gnwRunLoopDispatchItem pointer relative to caller process memory
+                (to be filled with unhandled entry)
+    
+    Return:
+        * EAX - enum gnwRunLoopError value on failure, GRLE_NONE otherwise
+*/
+SCR(runLoopGetItem,
+    REG(32, itemPtr, ebx)
+
+    REG_RET(32, err)
+
+    extern enum gnwRunLoopError k_scr_usr_runLoopGetItem(struct gnwRunLoopDispatchItem * const);
+    err = k_scr_usr_runLoopGetItem((struct gnwRunLoopDispatchItem *)itemPtr);
+)
+
+/*
+    Code - 0x12
+    Function - RUNLOOP_GET_DATA
+
+    Params:
+        * EBX - pointer to entry buffer data relative to caller process memory
+                (to be filled with unhandled entry data)
+    
+    Return:
+        * EAX - enum gnwRunLoopError code if any, GRLE_NONE otherwise
+*/
+SCR(runLoopGetData,
+    REG(32, dataBufferPtr, ebx)
+
+    REG_RET(32, err)
+
+    extern enum gnwRunLoopError k_scr_usr_runLoopGetData(ptr_t);
+    err = k_scr_usr_runLoopGetData((ptr_t)dataBufferPtr);
 )
