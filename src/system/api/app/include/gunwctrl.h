@@ -39,6 +39,6 @@ extern void exit(const int_32 status);
 */
 extern void waitForEvent();
 
-#endif _GUNWAPI_KERNEL
+#endif // _GUNWAPI_KERNEL
 
 #endif // GUNWOS_GUNWCTRL_H

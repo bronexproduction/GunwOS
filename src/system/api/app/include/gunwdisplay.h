@@ -8,11 +8,11 @@
 #ifndef GUNWOS_GUNWDISPLAY_H
 #define GUNWOS_GUNWDISPLAY_H
 
+#ifndef _GUNWAPI_KERNEL
+
 #include <types.h>
 #include "uha/gunwuha_display_desc.h"
 #include "gunwdev.h"
-
-#warning may not work from DPL_3 yet
 
 struct gnwDisplayDescriptor { 
     /*
@@ -98,5 +98,7 @@ enum gnwDeviceError attachToTextDisplay(const struct gnwDisplayDescriptor * cons
                                         struct gnwTextDisplayHandle * const handle);
 enum gnwDeviceError attachToGraphicsDisplay(const struct gnwDisplayDescriptor * const displayDescriptor,
                                             struct gnwGraphicsDisplayHandle * const handle);
+
+#endif // _GUNWAPI_KERNEL
 
 #endif // GUNWOS_GUNWDISPLAY_H
