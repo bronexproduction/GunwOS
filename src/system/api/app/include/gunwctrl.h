@@ -19,6 +19,8 @@ enum gnwCtrlError {
     GCE_UNKNOWN
 };
 
+#ifndef _GUNWAPI_KERNEL
+
 /*
     Starts program
 
@@ -36,5 +38,7 @@ extern void exit(const int_32 status);
     Suspends process execution until an event is received
 */
 extern void waitForEvent();
+
+#endif _GUNWAPI_KERNEL
 
 #endif // GUNWOS_GUNWCTRL_H
