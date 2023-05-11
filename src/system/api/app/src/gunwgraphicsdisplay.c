@@ -8,6 +8,8 @@
 #ifndef _GUNWAPI_KERNEL
 
 #include "_gunwdisplay.h"
+#include <mem.h>
+#include "../include/gunwfug.h"
 
 enum gnwDeviceError getGraphicsDisplay(struct gnwDisplayDescriptor * const displayDescriptor) {
     return getDisplay(GRAPHICS, displayDescriptor);

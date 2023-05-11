@@ -5,8 +5,9 @@
 //  Created by Artur Danielewski on 11.05.2023.
 //
 
-#warning commented until drivers running in separate processes
+#warning swapped until drivers running in separate processes
 // #ifndef _GUNWAPI_KERNEL
+#ifdef _GUNWAPI_KERNEL
 
 #include "../include/gunwdevemitter.h"
 #include <gunwfug.h>
@@ -24,5 +25,4 @@ enum gnwDeviceError emit(const struct gnwDeviceEvent * const event) {
     SYSCALL_RETVAL(32);
 }
 
-#warning commented until drivers running in separate processes
-// #endif // _GUNWAPI_KERNEL
+#endif // _GUNWAPI_KERNEL

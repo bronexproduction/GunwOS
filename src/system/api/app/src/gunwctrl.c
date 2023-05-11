@@ -8,6 +8,7 @@
 #ifndef _GUNWAPI_KERNEL
 
 #include "../include/gunwctrl.h"
+#include "../include/gunwfug.h"
 #include <string.h>
 #include "scl_user.h"
 
@@ -33,13 +34,6 @@ void exit(const int_32 status) {
 void waitForEvent() {
     SYSCALL_USER_FUNC(WAIT_FOR_EVENT);
     SYSCALL_USER_INT;
-}
-
-extern void dupa();
-
-void _start() {
-    dupa();
-    exit(0);
 }
 
 #endif // _GUNWAPI_KERNEL

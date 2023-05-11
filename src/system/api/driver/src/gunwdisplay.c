@@ -5,8 +5,9 @@
 //  Created by Artur Danielewski on 19.04.2023.
 //
 
-#warning commented until drivers running in separate processes
-// #ifndef // _GUNWAPI_KERNEL
+#warning swapped until drivers running in separate processes
+// #ifndef _GUNWAPI_KERNEL
+#ifdef _GUNWAPI_KERNEL
 
 #include <uha/gunwuha_display_desc.h>
 
@@ -58,5 +59,4 @@ bool uhaSetParam_display(const size_t paramVal,
     }
 }
 
-#warning commented until drivers running in separate processes
-// #endif // _GUNWAPI_KERNEL
+#endif // _GUNWAPI_KERNEL

@@ -6,11 +6,13 @@
 //
 
 #include "_gunwipc.h"
-#include "scl_user.h"
-#include "../include/gunwfug.h"
 #include <mem.h>
 
 #ifndef _GUNWAPI_KERNEL
+
+#include "scl_user.h"
+#include "../include/gunwfug.h"
+#include <string.h>
 
 enum gnwIpcError ipcRegister(const char * const path, const enum gnwIpcAccessScope accessScope, const gnwIpcListener handler) {
     CHECKPTR(path);

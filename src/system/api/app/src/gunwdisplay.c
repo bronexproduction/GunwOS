@@ -8,6 +8,7 @@
 #ifndef _GUNWAPI_KERNEL
 
 #include "_gunwdisplay.h"
+#include "../include/gunwfug.h"
 
 static bool dimensionsValid(const point_t dimensions) {
     return dimensions.x > 0 && dimensions.y > 0;

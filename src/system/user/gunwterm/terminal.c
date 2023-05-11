@@ -8,6 +8,7 @@
 #include <mem.h>
 #include <gunwipc.h>
 #include <gunwrlp.h>
+#include <gunwfug.h>
 
 #include "video.h"
 

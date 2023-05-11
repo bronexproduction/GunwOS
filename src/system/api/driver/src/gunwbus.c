@@ -5,8 +5,9 @@
 //  Created by Artur Danielewski on 11.05.2023.
 //
 
-#warning commented until drivers running in separate processes
+#warning swapped until drivers running in separate processes
 // #ifndef _GUNWAPI_KERNEL
+#ifdef _GUNWAPI_KERNEL
 
 #include "../include/gunwbus.h"
 #include "scl_driver.h"
@@ -45,5 +46,4 @@ void wrb(uint_16 const port, uint_8 const val) {
     SYSCALL_DRIVER_INT;
 }
 
-#warning commented until drivers running in separate processes
-// #endif // _GUNWAPI_KERNEL
+#endif // _GUNWAPI_KERNEL
