@@ -14,3 +14,5 @@ struct user_cli_kbf_listener {
 
 void user_cli_kbf_register(const struct user_cli_kbf_listener);
 uint_8 user_cli_kbf_currModMask();
+void user_cli_kbf_up(const uint_8 k);
+void user_cli_kbf_down(const uint_8 k);
