@@ -8,10 +8,10 @@
 #ifndef GUNWOS_GUNWDEVEMITTER_H
 #define GUNWOS_GUNWDEVEMITTER_H
 
-#include <gunwdev.h>
-
 #warning commented until drivers running in separate processes
 // #ifndef _GUNWAPI_KERNEL
+
+#include <gunwdev.h>
 
 /*
     Emit device event

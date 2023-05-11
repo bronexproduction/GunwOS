@@ -8,6 +8,9 @@
 #ifndef GUNWOS_SCL_DRIVER_H
 #define GUNWOS_SCL_DRIVER_H
 
+#warning commented until drivers running in separate processes
+// #ifndef _GUNWAPI_KERNEL
+
 #include <scl_def.h>
 
 #define SYSCALL_DRIVER_INTERRUPT                0x45
@@ -18,5 +21,8 @@
 
 #define SYSCALL_DRIVER_FUNC(CODE) SYSCALL_FUNC(DRIVER, CODE)
 #define SYSCALL_DRIVER_INT SYSCALL_INT(SYSCALL_DRIVER_INTERRUPT)
+
+#warning commented until drivers running in separate processes
+// #endif // _GUNWAPI_KERNEL
 
 #endif // GUNWOS_SCL_DRIVER_H
