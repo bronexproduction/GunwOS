@@ -7,8 +7,7 @@
 #ifndef GUNWOS_GUNWIPC_H
 #define GUNWOS_GUNWIPC_H
 
-#include <string.h>
-#include "gunwfug.h"
+#include <types.h>
 
 /*
     IPC path structure:
@@ -88,27 +87,9 @@ extern void gnwIpcEndpointQuery_decode(const ptr_t, struct gnwIpcEndpointQuery *
         * accessScope - IPC path access scope
         * handler - IPC message handler
 */
-SYSCALL_DECL enum gnwIpcError ipcRegister(const char * const path, const enum gnwIpcAccessScope accessScope, const gnwIpcListener handler) {
-    CHECKPTR(path);
-    CHECKPTR(handler);
-
-    struct gnwIpcHandlerDescriptor desc;
-    desc.path = path;
-    desc.pathLen = strlen(path);
-    if (desc.pathLen > GNW_PATH_IPC_MAX_LENGTH) {
-        return GIPCE_INVALID_PATH;
-    }
-    desc.accessScope = accessScope;
-    desc.handlerRoutine = handler;
-    desc.decoder = gnwIpcEndpointQuery_decode;
-
-    SYSCALL_PAR1(&desc);
-
-    SYSCALL_USER_FUNC(IPC_REGISTER);
-    SYSCALL_USER_INT;
-
-    SYSCALL_RETVAL(32);
-}
+extern enum gnwIpcError ipcRegister(const char * const path,
+                                    const enum gnwIpcAccessScope accessScope,
+                                    const gnwIpcListener handler);
 
 /*
     Sends query to specified IPC path
@@ -117,21 +98,8 @@ SYSCALL_DECL enum gnwIpcError ipcRegister(const char * const path, const enum gn
         * path - IPC path (see line 14)
         * params - query parameters
 */
-SYSCALL_DECL enum gnwIpcError ipcSend(const char * const path, const struct gnwIpcQueryParams queryParams) {
-    CHECKPTR(path);
-
-    struct gnwIpcSenderQuery query;
-    query.path = path;
-    query.pathLen = strlen(path);
-    query.params = queryParams;
-
-    SYSCALL_PAR1(&query);
-
-    SYSCALL_USER_FUNC(IPC_SEND);
-    SYSCALL_USER_INT;
-
-    SYSCALL_RETVAL(32);
-}
+extern enum gnwIpcError ipcSend(const char * const path,
+                                const struct gnwIpcQueryParams queryParams);
 
 #endif // _GUNWAPI_KERNEL
 
