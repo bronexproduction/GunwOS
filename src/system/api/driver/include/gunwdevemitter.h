@@ -8,9 +8,10 @@
 #ifndef GUNWOS_GUNWDEVEMITTER_H
 #define GUNWOS_GUNWDEVEMITTER_H
 
-#include <types.h>
-#include <scl_driver.h>
 #include <gunwdev.h>
+
+#warning commented until drivers running in separate processes
+// #ifndef _GUNWAPI_KERNEL
 
 /*
     Emit device event
@@ -21,16 +22,9 @@
     Note:
         * Not allowed from user-level
 */
-SYSCALL_DECL enum gnwDeviceError emit(const struct gnwDeviceEvent * const event) {
-    CHECKPTR(event);
-    CHECKPTR(event->data);
+extern enum gnwDeviceError emit(const struct gnwDeviceEvent * const event);
 
-    SYSCALL_PAR1(event);
-
-    SYSCALL_DRIVER_FUNC(EMIT);
-    SYSCALL_DRIVER_INT;
-    
-    SYSCALL_RETVAL(32);
-}
+#warning commented until drivers running in separate processes
+// #endif // _GUNWAPI_KERNEL
 
 #endif // GUNWOS_GUNWDEVEMITTER_H
