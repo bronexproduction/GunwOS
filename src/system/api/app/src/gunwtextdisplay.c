@@ -5,6 +5,8 @@
 //  Created by Artur Danielewski on 20.01.2023.
 //
 
+#ifndef _GUNWAPI_KERNEL
+
 #include "_gunwdisplay.h"
 
 enum gnwDeviceError getTextDisplay(struct gnwDisplayDescriptor * const displayDescriptor) {
@@ -49,3 +51,5 @@ enum gnwDeviceError attachToTextDisplay(const struct gnwDisplayDescriptor * cons
 
     return GDE_NONE;
 }
+
+#endif // _GUNWAPI_KERNEL

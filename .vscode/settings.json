@@ -86,6 +86,10 @@
     "unordered_map": "c",
     "future": "c",
     "queue": "c",
-    "stack": "c"
+    "stack": "c",
+    "__hash_table": "c",
+    "__tree": "c",
+    "charconv": "c",
+    "forward_list": "c"
   }
 }

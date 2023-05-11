@@ -5,6 +5,8 @@
 //  Created by Artur Danielewski on 17.01.2023.
 //
 
+#ifndef _GUNWAPI_KERNEL
+
 #include "_gunwdisplay.h"
 
 static bool dimensionsValid(const point_t dimensions) {
@@ -156,3 +158,5 @@ enum gnwDeviceError pushFrame(const size_t deviceId,
 
     return devMemWrite(deviceId, buffer, &inputRange);
 }
+
+#endif // _GUNWAPI_KERNEL
