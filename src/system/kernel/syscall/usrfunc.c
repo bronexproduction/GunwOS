@@ -45,25 +45,8 @@ SCR(start,
 
 /*
     Code - 0x01
-    Function - DEBUG_PRINT
-
-    Params:
-        * EBX - null-terminated character array pointer, relative to caller process memory 
-        * ECX - character array buffer length in bytes
-
-    Return:
-        * EAX - number of bytes written
+    Function - none
 */
-SCR(debugPrint,
-    // Buffer address (relative to process memory)
-    REG(32, buffer, ebx)
-    REG(32, bufferLen, ecx)
-
-    REG_RET(32, bytesWritten)
-
-    extern size_t k_scr_usr_debugPrint(const char * const, const size_t);
-    bytesWritten = k_scr_usr_debugPrint((const char * const)buffer, (const size_t)bufferLen);
-)
 
 /*
     Code - 0x02

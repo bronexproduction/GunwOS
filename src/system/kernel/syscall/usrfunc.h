@@ -27,10 +27,8 @@ __attribute__((naked)) enum gnwCtrlError k_scr_start(const char * const path,
 
 /*
     Code - 0x01
-    Function - DEBUG_PRINT
+    Function - none
 */
-__attribute__((naked)) void k_scr_debugPrint(const char * const buffer,
-                                             const size_t bufLen);
 
 /*
     Code - 0x02
