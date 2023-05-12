@@ -9,11 +9,13 @@ MODULES=$(shell $(MODULE_DIR_LISTING))
 
 .PHONY: all $(MODULES)
 
-all: $(MODULES) clean_o
+all: $(MODULES) clean
 
 $(MODULES):
 	make -C $@
-	mv $@/$@.o $@.o
+	mv $@/$@.o $(LIB_BUILD_DIR)/
+	mv $@/lib$@.a $(LIB_BUILD_DIR)/
 
-clean_o:
+clean:
 	find . -mindepth 2 -type f -name '*.o' -delete
+	find . -mindepth 2 -type f -name '*.a' -delete

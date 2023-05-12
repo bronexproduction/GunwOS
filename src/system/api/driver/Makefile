@@ -20,16 +20,17 @@ TARGET_O=gunwapi
 
 .PHONY: all driver kernel
 
-all: driver kernel clean_o
+all: driver kernel clean
 
-driver: $(TARGET_O)_driver.o
-kernel: $(TARGET_O)_driver_kernel.o
+driver: $(TARGET_O)_driver
+kernel: $(TARGET_O)_driver_kernel
 
-$(TARGET_O)_driver.o: build_driver_o
-	$(L) $(LFLAGS) -o $@ $(shell $(O_DRIVER_DIR_LISTING))
+$(TARGET_O)_driver: build_driver_o
+	$(L) $(LFLAGS) -o $@.o $(shell $(O_DRIVER_DIR_LISTING))
+	$(AR) $(ARFLAGS) lib$@.a $@.o
 	
-$(TARGET_O)_driver_kernel.o: build_kernel_o
-	$(L) $(LFLAGS) -o $@ $(shell $(O_KERNEL_DIR_LISTING))
+$(TARGET_O)_driver_kernel: build_kernel_o
+	$(L) $(LFLAGS) -o $@.o $(shell $(O_KERNEL_DIR_LISTING))
 
 build_driver_o:
 	$(C_DIR_LISTING) -exec $(C) $(CFLAGS_DRIVER) -o {}_driver.o {} $(EXEC_TERMINATOR)
@@ -43,3 +44,4 @@ build_kernel_o:
 
 clean_o:
 	find . -type f -name '*.o' ! -name '$(TARGET_O)_driver.o' -delete ! -name '$(TARGET_O)_driver_kernel.o' -delete
+	find . -type f -name '*.a' -delete

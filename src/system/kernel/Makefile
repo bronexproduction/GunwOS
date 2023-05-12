@@ -8,10 +8,10 @@ KERNEL_INCLUDE=-I $(STDGUNW_INCLUDE_DIR) \
 			   -I "$(LIB_SRC_DIR)/gunwelf"
 
 KERNEL_LIBS=$(LIB_BUILD_DIR)/stdgunw.o \
-			$(LIB_BUILD_DIR)/gunwapi_app_kernel.o \
+		    $(LIB_BUILD_DIR)/gunwelf.o \
+	     	$(LIB_BUILD_DIR)/gunwapi_app_kernel.o \
 			$(LIB_BUILD_DIR)/gunwapi_driver_kernel.o \
-			$(LIB_BUILD_DIR)/gunwapi_driver.o \
-			$(LIB_BUILD_DIR)/gunwelf.o
+			$(LIB_BUILD_DIR)/gunwapi_driver.o
 
 ASMFLAGS=-f elf
 CFLAGS=-std=c11 -c -ffreestanding -mno-red-zone -ggdb $(KERNEL_INCLUDE) -D_GUNWAPI_KERNEL $(CFLAGS_GLOBAL)
@@ -28,6 +28,7 @@ all: kernel.elf clean_o
 
 kernel.elf: kernel_entry.o kernel.o
 	$(L) $(LFLAGS) -o $@ $(KERNEL_LIBS) $(shell $(O_DIR_LISTING))
+	mv $@ $(KERNEL_BUILD_DIR)/$@
 
 kernel_entry.o:
 	$(ASM) $(ASMFLAGS) -o $@ kernel_entry.s
