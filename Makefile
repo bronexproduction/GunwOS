@@ -79,9 +79,9 @@ all: pre_build boot.bin boot.gfb kernel.gfb app_pack
 
 pre_build:
 	mkdir -p $(BUILD_DIR)
-	mkdir $(KERNEL_BUILD_DIR)
-	mkdir $(LIB_BUILD_DIR)
-	mkdir $(APP_BUILD_DIR)
+	mkdir -p $(KERNEL_BUILD_DIR)
+	mkdir -p $(LIB_BUILD_DIR)
+	mkdir -p $(APP_BUILD_DIR)
 
 boot.bin:
 	make -C $(SRC_DIR)/bootloader/boot
@@ -122,9 +122,10 @@ gunwapi_app.o:
 	make -C $(APP_API_SRC_DIR) app
 	mv $(APP_API_SRC_DIR)/$@ $(LIB_BUILD_DIR)/$@
 
-libgunwapi_app.a: pre_build
-	make -C $(APP_API_SRC_DIR) app_shared_library
-	mv $(APP_API_SRC_DIR)/$@ $(LIB_BUILD_DIR)/$@
+libgunwapi_app.a: pre_build libs gunwapi_app.o
+	ar rcs $(LIB_BUILD_DIR)/$@ $(LIB_BUILD_DIR)/stdgunw.o $(LIB_BUILD_DIR)/gunwapi_app.o
+#	make -C $(APP_API_SRC_DIR) app_shared_library
+#	mv $(APP_API_SRC_DIR)/$@ $(LIB_BUILD_DIR)/$@
 
 app_pack: gunwapi_app.o
 	make -C $(APPS_SRC_DIR)
