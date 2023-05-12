@@ -28,6 +28,7 @@
     Params:
         * EBX - path to executable relative to caller process memory 
         * ECX - path length in bytes
+        * EDX - error pointer relative to caller process memory
 
     Return:
         * EAX - Start error if any, otherwise GCE_NONE (see enum gnwCtrlError)
@@ -35,11 +36,10 @@
 SCR(start,
     REG(32, path, ebx)
     REG(32, pathLen, ecx)
+    REG(32, err, edx)
 
-    REG_RET(32, err)
-
-    extern enum gnwCtrlError k_scr_usr_start(const char * const, const size_t);
-    err = k_scr_usr_start((const char * const)path, (const size_t)pathLen);
+    extern enum gnwCtrlError k_scr_usr_start(const procId_t, const char * const, const size_t, enum gnwCtrlError * const);
+    k_scr_usr_start(k_proc_getCurrentId(), (char *)path, (size_t)pathLen, (enum gnwCtrlError *)err);
 )
 
 /*

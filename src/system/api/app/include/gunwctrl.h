@@ -26,8 +26,9 @@ enum gnwCtrlError {
 
     Params:
     * path - path to the executable
+    * error - result error pointer
 */
-extern enum gnwCtrlError start(const char * const path);
+extern void start(const char * const path, enum gnwCtrlError * const error);
 
 /*
     Ends process execution

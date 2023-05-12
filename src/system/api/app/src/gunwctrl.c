@@ -12,16 +12,16 @@
 #include <string.h>
 #include "scl_user.h"
 
-enum gnwCtrlError start(const char * const path) {
+void start(const char * const path, enum gnwCtrlError * const error) {
     CHECKPTR(path);
+    CHECKPTR(error);
 
     SYSCALL_PAR1(path);
     SYSCALL_PAR2(strlen(path));
+    SYSCALL_PAR3(error);
 
     SYSCALL_USER_FUNC(START);
     SYSCALL_USER_INT;
-
-    SYSCALL_RETVAL(32);
 }
 
 void exit(const int_32 status) {

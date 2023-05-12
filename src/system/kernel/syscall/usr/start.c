@@ -88,15 +88,14 @@ enum gnwCtrlError loadElf(const ptr_t filePtr,
     return GCE_NONE;
 }
 
-enum gnwCtrlError k_scr_usr_start(const char * const pathPtr, const size_t pathLen) {
-    if (!pathPtr) {
-        return GCE_INVALID_ARGUMENT;
-    }
-
-    procId_t procId = k_proc_getCurrentId();
-    SCLF_GET_VALID_ABS(const char * const, pathPtr, pathLen, GCE_INVALID_ARGUMENT);
-
-#warning what stage should be queued?
+void k_scr_usr_start(const procId_t procId, const char * const pathPtr, const size_t pathLen, enum gnwCtrlError * const errPtr) {
+    SCLF_GET_VALID_ABS(enum gnwCtrlError * const, errPtr, sizeof(enum gnwCtrlError), {
+        return;
+    });
+    SCLF_GET_VALID_ABS(const char * const, pathPtr, pathLen, {
+        *abs_errPtr = GCE_INVALID_ARGUMENT;
+        return;
+    });
 
     size_t fileSizeBytes;
     
@@ -109,13 +108,16 @@ enum gnwCtrlError k_scr_usr_start(const char * const pathPtr, const size_t pathL
         if (err != GFEC_NONE) {
             switch (err) {
             case GFEC_NOT_FOUND:
-                return GCE_NOT_FOUND;
+                *abs_errPtr = GCE_NOT_FOUND;
+                return;
             default:
-                return GCE_UNKNOWN;
+                *abs_errPtr = GCE_UNKNOWN;
+                return;
             }
         }
         if (!fileInfo.sizeBytes) {
-            return GCE_OPERATION_FAILED;
+            *abs_errPtr = GCE_OPERATION_FAILED;
+            return;
         }
     }
          
@@ -132,7 +134,8 @@ enum gnwCtrlError k_scr_usr_start(const char * const pathPtr, const size_t pathL
 
         const enum gnwFileErrorCode err = k_stor_file_load(abs_pathPtr, pathLen, filePtr);
         if (err != GFEC_NONE) {
-            return GCE_UNKNOWN;
+            *abs_errPtr = GCE_UNKNOWN;
+            return;
         }
     }
 
@@ -151,7 +154,8 @@ enum gnwCtrlError k_scr_usr_start(const char * const pathPtr, const size_t pathL
     exp.architecture = 3;
 
     if (!elfValidate(filePtr, fileSizeBytes, &exp)) {
-        return GCE_HEADER_INVALID;
+        *abs_errPtr = GCE_HEADER_INVALID;
+        return;
     }
     
     /* 
@@ -174,7 +178,8 @@ enum gnwCtrlError k_scr_usr_start(const char * const pathPtr, const size_t pathL
     addr_t entry; 
     err = loadElf(filePtr, fileSizeBytes, dstPtr, &memBytes, &entry);
     if (err != GCE_NONE) {
-        return err;
+        *abs_errPtr = err;
+        return;
     }
 
     /* 
@@ -189,8 +194,10 @@ enum gnwCtrlError k_scr_usr_start(const char * const pathPtr, const size_t pathL
 
     enum k_proc_error procErr = k_proc_spawn(&desc);
     if (procErr != PE_NONE) {
-        return GCE_OPERATION_FAILED;
+        *abs_errPtr = GCE_OPERATION_FAILED;
+        return;
     }
 
-    return GCE_NONE;
+    *abs_errPtr = GCE_NONE;
+    return;
 }

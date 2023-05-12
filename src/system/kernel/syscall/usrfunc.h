@@ -22,8 +22,9 @@
     Code - 0x00
     Function - START
 */
-__attribute__((naked)) enum gnwCtrlError k_scr_start(const char * const path,
-                                                     const size_t pathLen);
+__attribute__((naked)) void k_scr_start(const char * const pathPtr,
+                                        const size_t pathLen,
+                                        enum gnwCtrlError * const errorPtr);
 
 /*
     Code - 0x01
