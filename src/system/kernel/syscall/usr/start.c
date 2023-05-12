@@ -60,7 +60,7 @@ enum gnwCtrlError loadElf(const ptr_t filePtr,
         /*
             Verify memory constraints
         */
-        if (sectionVMemHigh <= sectionVMemLow ||
+        if (sectionVMemHigh < sectionVMemLow ||
             sectionVMemLow < vMemLow ||
             sectionVMemHigh > vMemHigh) {
             return GCE_HEADER_INVALID;
