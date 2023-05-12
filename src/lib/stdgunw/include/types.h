@@ -30,7 +30,6 @@ _Static_assert(sizeof(uint_64) == 8, "Unexpected uint_64 size");
 
 typedef uint_32 addr_t;
 typedef uint_8* ptr_t;
-typedef const uint_8* cptr_t;
 typedef uint_32 size_t;
 typedef uint_64 hugeSize_t;
 // TODO move to 64-bit time

@@ -46,14 +46,14 @@ enum gnwIpcAccessScope {
 };
 
 struct gnwIpcQueryParams {
-    cptr_t dataPtr;
+    ptr_t dataPtr;
     size_t dataSizeBytes;
     ptr_t resultPtr;
     size_t resultSizeBytes;
 };
 
 struct gnwIpcSenderQuery {
-    cptr_t path;
+    const char * path;
     size_t pathLen;
     struct gnwIpcQueryParams params;
 };

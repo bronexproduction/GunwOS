@@ -124,8 +124,6 @@ gunwapi_app.o:
 
 libgunwapi_app.a: pre_build libs gunwapi_app.o
 	ar rcs $(LIB_BUILD_DIR)/$@ $(LIB_BUILD_DIR)/stdgunw.o $(LIB_BUILD_DIR)/gunwapi_app.o
-#	make -C $(APP_API_SRC_DIR) app_shared_library
-#	mv $(APP_API_SRC_DIR)/$@ $(LIB_BUILD_DIR)/$@
 
 app_pack: gunwapi_app.o
 	make -C $(APPS_SRC_DIR)
