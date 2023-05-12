@@ -26,7 +26,7 @@
     Function - START
 
     Params:
-        * EBX - path to executable - null-terminated character array pointer, relative to caller process memory 
+        * EBX - path to executable relative to caller process memory 
         * ECX - path length in bytes
 
     Return:
@@ -37,8 +37,6 @@ SCR(start,
     REG(32, pathLen, ecx)
 
     REG_RET(32, err)
-    
-    OOPS("Not supported yet");
 
     extern enum gnwCtrlError k_scr_usr_start(const char * const, const size_t);
     err = k_scr_usr_start((const char * const)path, (const size_t)pathLen);
