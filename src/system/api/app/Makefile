@@ -23,11 +23,15 @@ TARGET_O=gunwapi
 all: app kernel clean_o
 
 app: $(TARGET_O)_app.o
+app_shared_library: $(TARGET_O)_app.a
 kernel: $(TARGET_O)_app_kernel.o
 
 $(TARGET_O)_app.o: build_app_o
 	$(L) $(LFLAGS) -o $@ $(shell $(O_APP_DIR_LISTING))
-	
+
+$(TARGET_O)_app.a: build_app_o
+	ar rcs $@ $(shell $(O_APP_DIR_LISTING))
+
 $(TARGET_O)_app_kernel.o: build_kernel_o
 	$(L) $(LFLAGS) -o $@ $(shell $(O_KERNEL_DIR_LISTING))
 
