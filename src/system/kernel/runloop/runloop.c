@@ -13,7 +13,7 @@
 #include <error/panic.h>
 
 #define DISPATCH_QUEUE_SIZE 8
-#define DISPATCH_MAX_DATA_SIZE_BYTES 22 //KiB(4) overlaps with non-kernel memory
+#define DISPATCH_MAX_DATA_SIZE_BYTES 64 // KiB(4) overlaps with non-kernel memory or kernel stack
 
 #warning critical sections might be useful here instead of in the other layers
 
