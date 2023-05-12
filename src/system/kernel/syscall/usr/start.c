@@ -14,6 +14,7 @@
 #include <hal/proc/proc.h>
 #include <error/panic.h>
 #include <storage/file.h>
+#include "../func.h"
 
 enum gnwCtrlError loadElf(const ptr_t filePtr, 
                           const size_t fileSizeBytes, 
@@ -87,17 +88,13 @@ enum gnwCtrlError loadElf(const ptr_t filePtr,
     return GCE_NONE;
 }
 
-enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen) {
-    if (!path) {
+enum gnwCtrlError k_scr_usr_start(const char * const pathPtr, const size_t pathLen) {
+    if (!pathPtr) {
         return GCE_INVALID_ARGUMENT;
     }
 
     procId_t procId = k_proc_getCurrentId();
-    ptr_t absPathPtr = k_mem_absForProc(procId, (const ptr_t)path);
-
-    if (!k_mem_bufInZoneForProc(procId, absPathPtr, pathLen)) {
-        return GCE_INVALID_ARGUMENT;
-    }
+    SCLF_GET_VALID_ABS(const char * const, pathPtr, pathLen, GCE_INVALID_ARGUMENT);
 
 #warning what stage should be queued?
 
@@ -108,7 +105,7 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
     */
         
     struct gnwFileInfo fileInfo; {
-        const enum gnwFileErrorCode err = k_stor_file_getInfo(path, pathLen, &fileInfo);
+        const enum gnwFileErrorCode err = k_stor_file_getInfo(abs_pathPtr, pathLen, &fileInfo);
         if (err != GFEC_NONE) {
             switch (err) {
             case GFEC_NOT_FOUND:
@@ -133,7 +130,7 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
             Load file
         */
 
-        const enum gnwFileErrorCode err = k_stor_file_load(path, pathLen, filePtr);
+        const enum gnwFileErrorCode err = k_stor_file_load(abs_pathPtr, pathLen, filePtr);
         if (err != GFEC_NONE) {
             return GCE_UNKNOWN;
         }
