@@ -5,7 +5,7 @@
 //  Created by Artur Danielewski on 12.03.2023.
 //
 
-#include <gunwctrl.h>
+#include <src/_gunwctrl.h>
 #include <types.h>
 #include <string.h>
 #include <mem.h>
@@ -88,12 +88,15 @@ enum gnwCtrlError loadElf(const ptr_t filePtr,
     return GCE_NONE;
 }
 
-void k_scr_usr_start(const procId_t procId, const char * const pathPtr, const size_t pathLen, enum gnwCtrlError * const errPtr) {
-    SCLF_GET_VALID_ABS(enum gnwCtrlError * const, errPtr, sizeof(enum gnwCtrlError), {
+void k_scr_usr_start(const procId_t procId, const struct gnwCtrlStartDescriptor * const descPtr) {
+    SCLF_GET_VALID_ABS(const struct gnwCtrlStartDescriptor * const, descPtr, sizeof(struct gnwCtrlStartDescriptor), {
         return;
     });
-    SCLF_GET_VALID_ABS(const char * const, pathPtr, pathLen, {
-        *abs_errPtr = GCE_INVALID_ARGUMENT;
+    SCLF_GET_VALID_ABS_NAMED(enum gnwCtrlError * const, errorPtr, abs_descPtr->errorPtr, sizeof(enum gnwCtrlError), {
+        return;
+    });
+    SCLF_GET_VALID_ABS_NAMED(const char * const, pathPtr, abs_descPtr->pathPtr, abs_descPtr->pathLen, {
+        *abs_errorPtr = GCE_INVALID_ARGUMENT;
         return;
     });
 
@@ -104,19 +107,19 @@ void k_scr_usr_start(const procId_t procId, const char * const pathPtr, const si
     */
         
     struct gnwFileInfo fileInfo; {
-        const enum gnwFileErrorCode err = k_stor_file_getInfo(abs_pathPtr, pathLen, &fileInfo);
+        const enum gnwFileErrorCode err = k_stor_file_getInfo(abs_pathPtr, abs_descPtr->pathLen, &fileInfo);
         if (err != GFEC_NONE) {
             switch (err) {
             case GFEC_NOT_FOUND:
-                *abs_errPtr = GCE_NOT_FOUND;
+                *abs_errorPtr = GCE_NOT_FOUND;
                 return;
             default:
-                *abs_errPtr = GCE_UNKNOWN;
+                *abs_errorPtr = GCE_UNKNOWN;
                 return;
             }
         }
         if (!fileInfo.sizeBytes) {
-            *abs_errPtr = GCE_OPERATION_FAILED;
+            *abs_errorPtr = GCE_OPERATION_FAILED;
             return;
         }
     }
@@ -132,9 +135,9 @@ void k_scr_usr_start(const procId_t procId, const char * const pathPtr, const si
             Load file
         */
 
-        const enum gnwFileErrorCode err = k_stor_file_load(abs_pathPtr, pathLen, filePtr);
+        const enum gnwFileErrorCode err = k_stor_file_load(abs_pathPtr, abs_descPtr->pathLen, filePtr);
         if (err != GFEC_NONE) {
-            *abs_errPtr = GCE_UNKNOWN;
+            *abs_errorPtr = GCE_UNKNOWN;
             return;
         }
     }
@@ -154,7 +157,7 @@ void k_scr_usr_start(const procId_t procId, const char * const pathPtr, const si
     exp.architecture = 3;
 
     if (!elfValidate(filePtr, fileSizeBytes, &exp)) {
-        *abs_errPtr = GCE_HEADER_INVALID;
+        *abs_errorPtr = GCE_HEADER_INVALID;
         return;
     }
     
@@ -178,7 +181,7 @@ void k_scr_usr_start(const procId_t procId, const char * const pathPtr, const si
     addr_t entry; 
     err = loadElf(filePtr, fileSizeBytes, dstPtr, &memBytes, &entry);
     if (err != GCE_NONE) {
-        *abs_errPtr = err;
+        *abs_errorPtr = err;
         return;
     }
 
@@ -194,10 +197,10 @@ void k_scr_usr_start(const procId_t procId, const char * const pathPtr, const si
 
     enum k_proc_error procErr = k_proc_spawn(&desc);
     if (procErr != PE_NONE) {
-        *abs_errPtr = GCE_OPERATION_FAILED;
+        *abs_errorPtr = GCE_OPERATION_FAILED;
         return;
     }
 
-    *abs_errPtr = GCE_NONE;
+    *abs_errorPtr = GCE_NONE;
     return;
 }

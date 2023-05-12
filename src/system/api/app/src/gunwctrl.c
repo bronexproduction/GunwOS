@@ -8,6 +8,7 @@
 #ifndef _GUNWAPI_KERNEL
 
 #include "../include/gunwctrl.h"
+#include "_gunwctrl.h"
 #include "../include/gunwfug.h"
 #include <string.h>
 #include "scl_user.h"
@@ -16,9 +17,12 @@ void start(const char * const path, enum gnwCtrlError * const error) {
     CHECKPTR(path);
     CHECKPTR(error);
 
-    SYSCALL_PAR1(path);
-    SYSCALL_PAR2(strlen(path));
-    SYSCALL_PAR3(error);
+    struct gnwCtrlStartDescriptor desc;
+    desc.pathPtr = path;
+    desc.pathLen = strlen(path);
+    desc.errorPtr = error;
+
+    SYSCALL_PAR1(&desc);
 
     SYSCALL_USER_FUNC(START);
     SYSCALL_USER_INT;
