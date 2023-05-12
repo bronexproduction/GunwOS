@@ -122,8 +122,9 @@ gunwapi_app.o:
 	make -C $(APP_API_SRC_DIR) app
 	mv $(APP_API_SRC_DIR)/$@ $(LIB_BUILD_DIR)/$@
 
-gunwapi_app.a:
+libgunwapi_app.a: pre_build
 	make -C $(APP_API_SRC_DIR) app_shared_library
+	mv $(APP_API_SRC_DIR)/$@ $(LIB_BUILD_DIR)/$@
 
 app_pack: gunwapi_app.o
 	make -C $(APPS_SRC_DIR)
