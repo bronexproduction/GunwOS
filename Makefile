@@ -17,6 +17,7 @@ export ASM=nasm
 export C="$(GCC_DIR)/bin/i386-elf-gcc"
 export CXX="$(GCC_DIR)/bin/i386-elf-g++"
 export L="$(GCC_DIR)/bin/i386-elf-ld"
+export AR="$(GCC_DIR)/bin/i386-elf-ar"
 export RUSTC="$(RUST_DIR)/bin/rustc"
 
 # Output binary params
@@ -32,8 +33,9 @@ SPEC_DIR="$(PWD)/spec"
 SRC_DIR="$(PWD)/src"
 export LIB_SRC_DIR="$(SRC_DIR)/lib"
 SYSTEM_SRC_DIR="$(SRC_DIR)/system"
-export APP_API_SRC_DIR="$(SYSTEM_SRC_DIR)/api/app"
-export DRIVER_API_SRC_DIR="$(SYSTEM_SRC_DIR)/api/driver"
+API_DIR="$(SYSTEM_SRC_DIR)/api"
+export APP_API_SRC_DIR="$(API_DIR)/app"
+export DRIVER_API_SRC_DIR="$(API_DIR)/driver"
 KERNEL_SRC_DIR="$(SYSTEM_SRC_DIR)/kernel"
 APPS_SRC_DIR="$(SYSTEM_SRC_DIR)/user"
 TESTS_SRC_DIR="$(PWD)/tests/modules"
@@ -46,6 +48,7 @@ export TEST_SHARED_DIR="$(PWD)/tests/shared"
 export STDGUNW_INCLUDE_DIR="$(LIB_SRC_DIR)/stdgunw/include"
 export APP_API_INCLUDE_DIR="$(APP_API_SRC_DIR)/include"
 export DRIVER_API_INCLUDE_DIR="$(DRIVER_API_SRC_DIR)/include"
+export API_SHARED_INCLUDE_DIR="$(API_DIR)/shared"
 
 # Build directories
 
@@ -65,6 +68,10 @@ export CFLAGS_GLOBAL=-m$(TARGET_BITS) -fdebug-prefix-map=$(BUILD_DIR)=. $(WARN_P
 export CXXFLAGS_GLOBAL=$(CFLAGS_GLOBAL)
 export RSFLAGS_GLOBAL=--emit=obj --crate-type=lib -g --target=$(SPEC_DIR)/i386-none-none.json
 
+# Archiver flags
+
+export ARFLAGS=rvs
+
 # Base listing commands
 
 export C_DIR_LISTING=find . -name '*.c' -type f
@@ -76,53 +83,30 @@ export RS_DIR_LISTING=find . -name '*.rs' -type f
 all: pre_build boot.bin boot.gfb kernel.gfb app_pack
 
 pre_build:
-	mkdir -p $(BUILD_DIR)
-	mkdir $(KERNEL_BUILD_DIR)
-	mkdir $(LIB_BUILD_DIR)
-	mkdir $(APP_BUILD_DIR)
+	mkdir -p $(BUILD_DIR) $(KERNEL_BUILD_DIR) $(LIB_BUILD_DIR) $(APP_BUILD_DIR)
 
 boot.bin:
 	make -C $(SRC_DIR)/bootloader/boot
-	mv $(SRC_DIR)/bootloader/boot/boot.bin $(KERNEL_BUILD_DIR)/$@
-	mv $(SRC_DIR)/bootloader/boot/boot.lst $(KERNEL_BUILD_DIR)/$@.lst
 
 boot.gfb:
 	make -C $(SRC_DIR)/bootloader/preloader
-	mv $(SRC_DIR)/bootloader/preloader/boot.gfb $(KERNEL_BUILD_DIR)/$@
-	mv $(SRC_DIR)/bootloader/preloader/boot.lst $(KERNEL_BUILD_DIR)/$@.lst
 
 kernel.gfb: kernel.elf
 # Remove bytes before .text section
 # TO BE IMPROVED - no fixed offset, removing debug data
 	dd if="$(KERNEL_BUILD_DIR)/kernel.elf" of="$(KERNEL_BUILD_DIR)/$@" bs=4096 skip=1
 
-kernel.elf: libs gunwapi_app_kernel.o gunwapi_driver_kernel.o gunwapi_driver.o
+kernel.elf: libs api
 	make -C $(KERNEL_SRC_DIR)
-	mv $(KERNEL_SRC_DIR)/$@ $(KERNEL_BUILD_DIR)/$@
 
-libs:
-	make -C $(SRC_DIR)/lib
-	mv $(SRC_DIR)/lib/*.o $(LIB_BUILD_DIR)/
-	
-gunwapi_app_kernel.o:
-	make -C $(APP_API_SRC_DIR) kernel
-	mv $(APP_API_SRC_DIR)/$@ $(LIB_BUILD_DIR)/$@
+libs: 
+	make -C $(LIB_SRC_DIR)
 
-gunwapi_driver.o:
-	make -C $(DRIVER_API_SRC_DIR) driver
-	mv $(DRIVER_API_SRC_DIR)/$@ $(LIB_BUILD_DIR)/$@
-	
-gunwapi_driver_kernel.o:
-	make -C $(DRIVER_API_SRC_DIR) kernel
-	mv $(DRIVER_API_SRC_DIR)/$@ $(LIB_BUILD_DIR)/$@
-	
-gunwapi_app.o:
-	make -C $(APP_API_SRC_DIR) app
-	mv $(APP_API_SRC_DIR)/$@ $(LIB_BUILD_DIR)/$@
+api: libs
+	make -C $(API_DIR)
 
-app_pack: gunwapi_app.o
+app_pack: libs api
 	make -C $(APPS_SRC_DIR)
-	mv $(APPS_SRC_DIR)/*.elf $(APP_BUILD_DIR)/
 
 img: $(BUILD_DIR)/gunwos.img
 
@@ -132,6 +116,7 @@ $(BUILD_DIR)/gunwos.img:
 clean:
 	rm -rf $(BUILD_DIR)
 	find $(SRC_DIR)/ -type f -name '*.o' -delete
+	find $(SRC_DIR)/ -type f -name '*.a' -delete
 
 test:
 	make -C $(TESTS_SRC_DIR)/bootloader/boot clean all run

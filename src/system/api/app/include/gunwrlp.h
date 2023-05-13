@@ -8,6 +8,8 @@
 #ifndef GUNWOS_GUNWRLP_H
 #define GUNWOS_GUNWRLP_H
 
+#ifndef _GUNWAPI_KERNEL
+
 #include <types.h>
 
 /*
@@ -28,5 +30,7 @@
     }
 */
 void runLoopStart();
+
+#endif // _GUNWAPI_KERNEL
 
 #endif // GUNWOS_GUNWRLP_H

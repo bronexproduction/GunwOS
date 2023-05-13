@@ -20,7 +20,6 @@
     as EAX register is used as intermediate register
     and stores the last assigned value
 */
-#define SYSCALL_DECL static inline
 #define SYSCALL_FUNC(LEVEL, CODE) REG(32, _code, eax); _code = (uint_32) SYSCALL_ ## LEVEL ## _FUNCTION_ ## CODE ;
 #define SYSCALL_INT(CODE) { __asm__ volatile ("int $" STR(CODE) ); }
 #define REG_RET(BITS, NAME) REG(BITS, NAME, eax)

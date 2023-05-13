@@ -18,10 +18,10 @@
 */
 #define SCR(NAME, CODE) __attribute__((naked)) void k_scr_ ## NAME () { CODE; __asm__ volatile ("ret"); }
 
-#define SCLF_GET_VALID_ABS_NAMED(TYPE, NAME, VALUE, SIZEBYTES, RETURN) \
+#define SCLF_GET_VALID_ABS_NAMED(TYPE, NAME, VALUE, SIZEBYTES, ERR_HANDLE) \
     TYPE abs_ ## NAME = (TYPE)k_scl_func_getValidAbsoluteForProc(procId, (const ptr_t)(VALUE), SIZEBYTES); \
-    if (!abs_ ## NAME) { OOPS("Invalid pointer referenced"); return RETURN; }
-#define SCLF_GET_VALID_ABS(TYPE, VALUE, SIZEBYTES, RETURN) SCLF_GET_VALID_ABS_NAMED(TYPE, VALUE, VALUE, SIZEBYTES, RETURN)
+    if (!abs_ ## NAME) { OOPS("Invalid pointer referenced"); {ERR_HANDLE;} }
+#define SCLF_GET_VALID_ABS(TYPE, VALUE, SIZEBYTES, ERR_HANDLE) SCLF_GET_VALID_ABS_NAMED(TYPE, VALUE, VALUE, SIZEBYTES, ERR_HANDLE)
 
 /*
     Returns valid absolute address of relPtr for given process

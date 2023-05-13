@@ -7,7 +7,7 @@
 
 #ifndef _GUNWAPI_KERNEL
 
-#include <gunwctrl.h>
+#include "../include/gunwctrl.h"
 
 extern void dupa();
 

@@ -8,16 +8,17 @@
 #ifndef GUNWOS_GUNWTIME_H
 #define GUNWOS_GUNWTIME_H
 
-#include "scl_user.h"
+#warning commented until drivers running in separate processes
+// #ifndef _GUNWAPI_KERNEL
+
+#include <types.h>
 
 /*
     Returns kernel time in milliseconds
 */
-SYSCALL_DECL time_t timeMs() {
-    SYSCALL_USER_FUNC(TIME_MS);
-    SYSCALL_USER_INT;
-    
-    SYSCALL_RETVAL(32);
-}
+extern time_t timeMs();
+
+#warning commented until drivers running in separate processes
+// #endif // _GUNWAPI_KERNEL
 
 #endif // GUNWOS_GUNWTIME_H

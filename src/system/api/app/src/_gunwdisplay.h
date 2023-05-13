@@ -8,10 +8,7 @@
 #ifndef GUNWOS__GUNWDISPLAY_H
 #define GUNWOS__GUNWDISPLAY_H
 
-#include <gunwdisplay.h>
-#include <gunwdev.h>
-#include <gunwfug.h>
-#include <mem.h>
+#include "../include/gunwdisplay.h"
 
 enum DisplayType {
     TEXT,

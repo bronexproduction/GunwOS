@@ -8,7 +8,7 @@
 #ifndef GUNWOS__GUNWRLP_H
 #define GUNWOS__GUNWRLP_H
 
-#include <gunwevent.h>
+#include "../include/gunwevent.h"
 
 enum gnwRunLoopError {
     GRLE_NONE = 0,

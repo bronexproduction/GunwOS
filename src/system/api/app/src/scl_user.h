@@ -8,7 +8,10 @@
 #ifndef GUNWOS_SCL_USER_H
 #define GUNWOS_SCL_USER_H
 
-#include "scl_def.h"
+#warning commented until drivers running in separate processes
+// #ifndef _GUNWAPI_KERNEL
+
+#include <scl_def.h>
 
 #define SYSCALL_USER_INTERRUPT                  0x69
 
@@ -34,5 +37,8 @@
 
 #define SYSCALL_USER_FUNC(CODE) SYSCALL_FUNC(USER, CODE)
 #define SYSCALL_USER_INT SYSCALL_INT(SYSCALL_USER_INTERRUPT)
+
+#warning commented until drivers running in separate processes
+// #endif // _GUNWAPI_KERNEL
 
 #endif // GUNWOS_SCL_USER_H

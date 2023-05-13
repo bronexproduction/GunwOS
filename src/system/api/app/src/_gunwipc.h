@@ -7,7 +7,7 @@
 #ifndef GUNWOS__GUNWIPC_H
 #define GUNWOS__GUNWIPC_H
 
-#include <gunwipc.h>
+#include "../include/gunwipc.h"
 
 #ifdef _GUNWAPI_KERNEL
 

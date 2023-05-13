@@ -11,8 +11,9 @@
 #include <gunwdrv.h>
 #include <gunwdev.h>
 #include <gunwipc.h>
-#include <gunwctrl.h>
+#include <src/_gunwctrl.h>
 #include <src/_gunwrlp.h>
+#include <gunwfug.h>
 
 /*
     User-level system calls
@@ -22,8 +23,7 @@
     Code - 0x00
     Function - START
 */
-__attribute__((naked)) enum gnwCtrlError k_scr_start(const char * const path,
-                                                     const size_t pathLen);
+__attribute__((naked)) void k_scr_start(const struct gnwCtrlStartDescriptor * const);
 
 /*
     Code - 0x01

@@ -8,6 +8,7 @@
 #include <mem.h>
 #include <gunwipc.h>
 #include <gunwrlp.h>
+#include <gunwfug.h>
 
 #include "video.h"
 
@@ -90,12 +91,14 @@ static void ipcListener(const struct gnwIpcEndpointQuery * const query) {
         fug(FUG_INCONSISTENT);
         return;
     }
-    if (query->params.dataSizeBytes != 1) {
+    if (query->params.dataSizeBytes < 1) {
         fug(FUG_INCONSISTENT);
         return;
     }
 
-    trm_append(*query->params.dataPtr);
+    for (size_t i = 0; i < query->params.dataSizeBytes; ++i) {
+        trm_append(query->params.dataPtr[i]);
+    }
 }
 
 void dupa() {

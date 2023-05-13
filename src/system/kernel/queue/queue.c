@@ -19,6 +19,7 @@
 union dispatchFuncPtr {
     fPtr_void f;
     fPtr_arch f_arch;
+    fPtr_arch_arch f_arch_arch;
 };
 
 union dispatchFuncParam {
@@ -32,12 +33,13 @@ enum dispatchFuncType {
     DFE_NONE = 0,
     DFE_VOID,
     DFE_ARCH,
+    DFE_ARCH_ARCH,
 };
 
 struct dispatchFunc {
     enum dispatchFuncType type;
     union dispatchFuncPtr ptr;
-    union dispatchFuncParam params[1];
+    union dispatchFuncParam params[2];
 };
 
 struct dispatchEntry {
@@ -50,9 +52,10 @@ static struct dispatchEntry queue[MAX_QUEUE_LENGTH];
 struct dispatchEntry *k_que_currentDispatchEntry = 0;
 static bool running = 0;
 
-static void dispatch(const ptr_t funcPtr, 
+static void dispatch(const ptr_t funcPtr,
                      const enum dispatchFuncType type, 
-                     const union dispatchFuncParam p0) {
+                     const union dispatchFuncParam p0, 
+                     const union dispatchFuncParam p1) {
     
     #warning how to avoid duplicates?
 
@@ -84,6 +87,11 @@ static void dispatch(const ptr_t funcPtr,
         queue[i].func.ptr.f_arch = (fPtr_arch)funcPtr;
         queue[i].func.params[0].pArch = p0.pArch;
         break;
+    case DFE_ARCH_ARCH:
+        queue[i].func.ptr.f_arch_arch = (fPtr_arch_arch)funcPtr;
+        queue[i].func.params[0].pArch = p0.pArch;
+        queue[i].func.params[1].pArch = p1.pArch;
+        break;
     default:
         OOPS("Unexpected dispatched function type");
         return;
@@ -103,11 +111,15 @@ static void dispatch(const ptr_t funcPtr,
 }
 
 void k_que_dispatch(const fPtr_void func) {
-    dispatch((ptr_t)func, DFE_VOID, _NOPAR);
+    dispatch((ptr_t)func, DFE_VOID, _NOPAR, _NOPAR);
 }
 
 void k_que_dispatch_arch(const fPtr_arch func, const addr_t p0) {
-    dispatch((ptr_t)func, DFE_ARCH, _PAR(p0));
+    dispatch((ptr_t)func, DFE_ARCH, _PAR(p0), _NOPAR);
+}
+
+void k_que_dispatch_arch_arch(const fPtr_arch_arch func, const addr_t p0, const addr_t p1) {
+    dispatch((ptr_t)func, DFE_ARCH_ARCH, _PAR(p0), _PAR(p1));
 }
 
 void k_que_start() {
@@ -139,6 +151,10 @@ void k_que_start() {
             break;
         case DFE_ARCH:
             enqueued->func.ptr.f_arch(enqueued->func.params[0].pArch);
+            break;
+        case DFE_ARCH_ARCH:
+            enqueued->func.ptr.f_arch_arch(enqueued->func.params[0].pArch,
+                                           enqueued->func.params[1].pArch);
             break;
         default:
             OOPS("Unexpected queued function type");

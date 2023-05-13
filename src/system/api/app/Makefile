@@ -1,4 +1,4 @@
-CFLAGS=-std=c11 -c -ffreestanding -mno-red-zone -ggdb -I $(STDGUNW_INCLUDE_DIR) -I $(APP_API_INCLUDE_DIR) $(CFLAGS_GLOBAL)
+CFLAGS=-std=c11 -c -ffreestanding -mno-red-zone -ggdb -I $(STDGUNW_INCLUDE_DIR) -I $(API_SHARED_INCLUDE_DIR) $(CFLAGS_GLOBAL)
 CXXFLAGS=-std=c++11 -c -ffreestanding -mno-red-zone -ggdb $(CXXFLAGS_GLOBAL)
 RSFLAGS=$(RSFLAGS_GLOBAL)
 
@@ -22,14 +22,15 @@ TARGET_O=gunwapi
 
 all: app kernel clean_o
 
-app: $(TARGET_O)_app.o
-kernel: $(TARGET_O)_app_kernel.o
+app: $(TARGET_O)_app
+kernel: $(TARGET_O)_app_kernel
 
-$(TARGET_O)_app.o: build_app_o
-	$(L) $(LFLAGS) -o $@ $(shell $(O_APP_DIR_LISTING))
-	
-$(TARGET_O)_app_kernel.o: build_kernel_o
-	$(L) $(LFLAGS) -o $@ $(shell $(O_KERNEL_DIR_LISTING))
+$(TARGET_O)_app: build_app_o
+	$(L) $(LFLAGS) -o $@.o $(shell $(O_APP_DIR_LISTING))
+	$(AR) $(ARFLAGS) lib$@.a $@.o
+
+$(TARGET_O)_app_kernel: build_kernel_o
+	$(L) $(LFLAGS) -o $@.o $(shell $(O_KERNEL_DIR_LISTING))
 
 build_app_o:
 	$(C_DIR_LISTING) -exec $(C) $(CFLAGS_APP) -o {}_app.o {} $(EXEC_TERMINATOR)
@@ -43,3 +44,4 @@ build_kernel_o:
 
 clean_o:
 	find . -type f -name '*.o' ! -name '$(TARGET_O)_app.o' -delete ! -name '$(TARGET_O)_app_kernel.o' -delete
+	find . -type f -name '*.a' -delete

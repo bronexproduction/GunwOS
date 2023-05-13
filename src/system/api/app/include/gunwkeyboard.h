@@ -8,6 +8,9 @@
 #ifndef GUNWOS_GUNWKEYBOARD_H
 #define GUNWOS_GUNWKEYBOARD_H
 
+#warning commented until drivers running in separate processes
+// #ifndef _GUNWAPI_KERNEL
+
 #include <types.h>
 
 /*
@@ -36,5 +39,8 @@ struct gnwKeyboardEvent {
     Listener callback type definition
 */
 typedef __attribute__((cdecl)) void (*gnwKeyboardEventListener)(const struct gnwKeyboardEvent * const);
+
+#warning commented until drivers running in separate processes
+// #endif // _GUNWAPI_KERNEL
 
 #endif // GUNWOS_GUNWKEYBOARD_H

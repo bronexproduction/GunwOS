@@ -7,7 +7,8 @@
 #ifndef GUNWOS_GUNWFUG_H
 #define GUNWOS_GUNWFUG_H
 
-#include "scl_user.h"
+#warning commented until drivers running in separate processes
+// #ifndef _GUNWAPI_KERNEL
 
 #define CHECKPTR(PTR) { if (!PTR) { fug(FUG_NULLPTR); __builtin_unreachable(); } }
 
@@ -24,11 +25,9 @@ enum gnwFugCode {
     happened inside the caller process
     and it should be terminated
 */
-SYSCALL_DECL void fug(enum gnwFugCode code) {
-    SYSCALL_PAR1(code);
+extern void fug(enum gnwFugCode code);
 
-    SYSCALL_USER_FUNC(FUG);
-    SYSCALL_USER_INT;
-}
+#warning commented until drivers running in separate processes
+// #endif // _GUNWAPI_KERNEL
 
 #endif // GUNWOS_GUNWFUG_H

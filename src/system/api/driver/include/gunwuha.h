@@ -9,15 +9,15 @@
 #define GUNWOS_GUNWUHA_H
 
 #include <gunwuhadesc.h>
-#include <uha/gunwuha_system.h>
-#include <uha/gunwuha_mem.h>
-#include <uha/gunwuha_keyboard.h>
-#include <uha/gunwuha_mouse.h>
-#include <uha/gunwuha_fdc.h>
-#include <uha/gunwuha_storctrl.h>
-#include <uha/gunwuha_char.h>
-#include <uha/gunwuha_display.h>
-#include <uha/gunwuha_event.h>
+#include "uha/gunwuha_system.h"
+#include "uha/gunwuha_mem.h"
+#include "uha/gunwuha_keyboard.h"
+#include "uha/gunwuha_mouse.h"
+#include "uha/gunwuha_fdc.h"
+#include "uha/gunwuha_storctrl.h"
+#include "uha/gunwuha_char.h"
+#include "uha/gunwuha_display.h"
+#include "uha/gunwuha_event.h"
 
 /*
     Hardware-specific API
@@ -40,26 +40,15 @@ struct gnwDeviceUHA {
     struct gnwDeviceUHA_event event;        // event emitting devices
 };
 
+#ifdef _GUNWAPI_KERNEL
+
 /*
     Extracts UHA descriptor from UHA structure
 */
-static inline struct gnwDeviceUHADesc uhaGetDesc(const size_t identifier, 
-                                                 const enum gnwDeviceType type, 
-                                                 const struct gnwDeviceUHA api) {
-    return (struct gnwDeviceUHADesc) {
-        identifier,
-        type,
-        api.system.desc,
-        api.mem.desc,
-        api.keyboard.desc,
-        api.mouse.desc,
-        api.fdc.desc,
-        api.storCtrl.desc,
-        api.charIn.desc,
-        api.charOut.desc,
-        api.display.desc,
-        api.event.desc
-    };
-}
+extern struct gnwDeviceUHADesc uhaGetDesc(const size_t identifier,
+                                          const enum gnwDeviceType type,
+                                          const struct gnwDeviceUHA api);
+
+#endif // _GUNWAPI_KERNEL
 
 #endif // GUNWOS_GUNWUHA_H

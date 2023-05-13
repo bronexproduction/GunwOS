@@ -13,9 +13,15 @@
 enum gnwIpcError k_scr_usr_ipcSend(const struct gnwIpcSenderQuery * const queryPtr) {
 
     const procId_t procId = k_proc_getCurrentId();
-    SCLF_GET_VALID_ABS(const struct gnwIpcSenderQuery * const, queryPtr, sizeof(struct gnwIpcSenderQuery), GIPCE_UNKNOWN);
-    SCLF_GET_VALID_ABS_NAMED(const char * const, pathPtr, abs_queryPtr->path, abs_queryPtr->pathLen, GIPCE_UNKNOWN);
-    SCLF_GET_VALID_ABS_NAMED(const ptr_t, dataPtr, abs_queryPtr->params.dataPtr, abs_queryPtr->params.dataSizeBytes, GIPCE_UNKNOWN);
+    SCLF_GET_VALID_ABS(const struct gnwIpcSenderQuery * const, queryPtr, sizeof(struct gnwIpcSenderQuery), {
+        return GIPCE_UNKNOWN;
+    });
+    SCLF_GET_VALID_ABS_NAMED(const char * const, pathPtr, abs_queryPtr->path, abs_queryPtr->pathLen, {
+        return GIPCE_UNKNOWN;
+    });
+    SCLF_GET_VALID_ABS_NAMED(const ptr_t, dataPtr, abs_queryPtr->params.dataPtr, abs_queryPtr->params.dataSizeBytes, {
+        return GIPCE_UNKNOWN;
+    });
 
     ptr_t abs_resultPtr = nullptr;
     if (abs_queryPtr->params.resultPtr) {

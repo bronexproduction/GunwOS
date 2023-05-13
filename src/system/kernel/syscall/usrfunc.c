@@ -6,8 +6,7 @@
 //
 
 #include "func.h"
-#include <gunwctrl.h>
-#include <gunwipc.h>
+#include <src/_gunwctrl.h>
 #include <error/fug.h>
 #include <hal/proc/proc.h>
 #include <dev/dev.h>
@@ -15,6 +14,7 @@
 #include <queue/queue.h>
 #include <error/panic.h>
 #include <runloop/runloop.h>
+#include <scl_def.h>
 
 /*
     User-level system calls
@@ -25,22 +25,13 @@
     Function - START
 
     Params:
-        * EBX - path to executable - null-terminated character array pointer, relative to caller process memory 
-        * ECX - path length in bytes
-
-    Return:
-        * EAX - Start error if any, otherwise GCE_NONE (see enum gnwCtrlError)
+        * EBX - path to start descriptor pointer (struct gnwCtrlStartDescriptor) relative to caller process memory
 */
 SCR(start,
-    REG(32, path, ebx)
-    REG(32, pathLen, ecx)
+    REG(32, descPtr, ebx)
 
-    REG_RET(32, err)
-    
-    OOPS("Not supported yet");
-
-    extern enum gnwCtrlError k_scr_usr_start(const char * const, const size_t);
-    err = k_scr_usr_start((const char * const)path, (const size_t)pathLen);
+    extern void k_scr_usr_start(const procId_t, const struct gnwCtrlStartDescriptor * const);
+    k_que_dispatch_arch_arch((fPtr_arch_arch)(ptr_t)k_scr_usr_start, k_proc_getCurrentId(), descPtr);
 )
 
 /*

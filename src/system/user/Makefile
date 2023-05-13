@@ -10,6 +10,7 @@ APPS=$(shell $(APP_DIR_LISTING))
 .PHONY: all $(APPS)
 
 all: $(APPS)
+	mv *.elf $(APP_BUILD_DIR)/
 
 $(APPS):
 	make -C $@

@@ -17,8 +17,12 @@ enum gnwDeviceError k_scr_usr_devMemWrite(const size_t devId, const ptr_t buffer
         return err;
     }
 
-    SCLF_GET_VALID_ABS(const range_addr_t *, devInputRange, sizeof(range_addr_t), GDE_UNKNOWN);
-    SCLF_GET_VALID_ABS(const ptr_t, bufferPtr, abs_devInputRange->sizeBytes, GDE_UNKNOWN);
+    SCLF_GET_VALID_ABS(const range_addr_t *, devInputRange, sizeof(range_addr_t), {
+        return GDE_UNKNOWN;
+    });
+    SCLF_GET_VALID_ABS(const ptr_t, bufferPtr, abs_devInputRange->sizeBytes, {
+        return GDE_UNKNOWN;
+    });
     
     return k_dev_writeMem(procId, devId, (ptr_t)abs_bufferPtr, *abs_devInputRange);
 }

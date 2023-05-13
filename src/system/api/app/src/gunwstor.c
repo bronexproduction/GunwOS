@@ -5,7 +5,7 @@
 //  Created by Artur Danielewski on 26.03.2023.
 //
 
-#include <gunwstor.h>
+#include "../include/gunwstor.h"
 #include <utils.h>
 
 struct gnwStorCHS lba2chs(const uint_32 lba, const uint_8 hpc, const uint_16 spt) {

@@ -14,8 +14,12 @@ enum gnwDeviceError k_scr_usr_devGetParam(const size_t devId,
                                           size_t * const resultPtr) {
     const procId_t procId = k_proc_getCurrentId();
 
-    SCLF_GET_VALID_ABS(const struct gnwDeviceParamDescriptor *, paramDescriptorPtr, sizeof(struct gnwDeviceParamDescriptor), GDE_UNKNOWN);
-    SCLF_GET_VALID_ABS(size_t *, resultPtr, sizeof(size_t), GDE_UNKNOWN);
+    SCLF_GET_VALID_ABS(const struct gnwDeviceParamDescriptor *, paramDescriptorPtr, sizeof(struct gnwDeviceParamDescriptor), {
+        return GDE_UNKNOWN;
+    });
+    SCLF_GET_VALID_ABS(size_t *, resultPtr, sizeof(size_t), {
+        return GDE_UNKNOWN;
+    });
     
     return k_dev_getParam(devId, *abs_paramDescriptorPtr, abs_resultPtr);
 }

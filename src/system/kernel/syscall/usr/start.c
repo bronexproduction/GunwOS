@@ -5,7 +5,7 @@
 //  Created by Artur Danielewski on 12.03.2023.
 //
 
-#include <gunwctrl.h>
+#include <src/_gunwctrl.h>
 #include <types.h>
 #include <string.h>
 #include <mem.h>
@@ -14,6 +14,7 @@
 #include <hal/proc/proc.h>
 #include <error/panic.h>
 #include <storage/file.h>
+#include "../func.h"
 
 enum gnwCtrlError loadElf(const ptr_t filePtr, 
                           const size_t fileSizeBytes, 
@@ -59,7 +60,7 @@ enum gnwCtrlError loadElf(const ptr_t filePtr,
         /*
             Verify memory constraints
         */
-        if (sectionVMemHigh <= sectionVMemLow ||
+        if (sectionVMemHigh < sectionVMemLow ||
             sectionVMemLow < vMemLow ||
             sectionVMemHigh > vMemHigh) {
             return GCE_HEADER_INVALID;
@@ -87,19 +88,17 @@ enum gnwCtrlError loadElf(const ptr_t filePtr,
     return GCE_NONE;
 }
 
-enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen) {
-    if (!path) {
-        return GCE_INVALID_ARGUMENT;
-    }
-
-    procId_t procId = k_proc_getCurrentId();
-    ptr_t absPathPtr = k_mem_absForProc(procId, (const ptr_t)path);
-
-    if (!k_mem_bufInZoneForProc(procId, absPathPtr, pathLen)) {
-        return GCE_INVALID_ARGUMENT;
-    }
-
-#warning what stage should be queued?
+void k_scr_usr_start(const procId_t procId, const struct gnwCtrlStartDescriptor * const descPtr) {
+    SCLF_GET_VALID_ABS(const struct gnwCtrlStartDescriptor * const, descPtr, sizeof(struct gnwCtrlStartDescriptor), {
+        return;
+    });
+    SCLF_GET_VALID_ABS_NAMED(enum gnwCtrlError * const, errorPtr, abs_descPtr->errorPtr, sizeof(enum gnwCtrlError), {
+        return;
+    });
+    SCLF_GET_VALID_ABS_NAMED(const char * const, pathPtr, abs_descPtr->pathPtr, abs_descPtr->pathLen, {
+        *abs_errorPtr = GCE_INVALID_ARGUMENT;
+        return;
+    });
 
     size_t fileSizeBytes;
     
@@ -108,17 +107,20 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
     */
         
     struct gnwFileInfo fileInfo; {
-        const enum gnwFileErrorCode err = k_stor_file_getInfo(path, pathLen, &fileInfo);
+        const enum gnwFileErrorCode err = k_stor_file_getInfo(abs_pathPtr, abs_descPtr->pathLen, &fileInfo);
         if (err != GFEC_NONE) {
             switch (err) {
             case GFEC_NOT_FOUND:
-                return GCE_NOT_FOUND;
+                *abs_errorPtr = GCE_NOT_FOUND;
+                return;
             default:
-                return GCE_UNKNOWN;
+                *abs_errorPtr = GCE_UNKNOWN;
+                return;
             }
         }
         if (!fileInfo.sizeBytes) {
-            return GCE_OPERATION_FAILED;
+            *abs_errorPtr = GCE_OPERATION_FAILED;
+            return;
         }
     }
          
@@ -133,9 +135,10 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
             Load file
         */
 
-        const enum gnwFileErrorCode err = k_stor_file_load(path, pathLen, filePtr);
+        const enum gnwFileErrorCode err = k_stor_file_load(abs_pathPtr, abs_descPtr->pathLen, filePtr);
         if (err != GFEC_NONE) {
-            return GCE_UNKNOWN;
+            *abs_errorPtr = GCE_UNKNOWN;
+            return;
         }
     }
 
@@ -154,7 +157,8 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
     exp.architecture = 3;
 
     if (!elfValidate(filePtr, fileSizeBytes, &exp)) {
-        return GCE_HEADER_INVALID;
+        *abs_errorPtr = GCE_HEADER_INVALID;
+        return;
     }
     
     /* 
@@ -177,7 +181,8 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
     addr_t entry; 
     err = loadElf(filePtr, fileSizeBytes, dstPtr, &memBytes, &entry);
     if (err != GCE_NONE) {
-        return err;
+        *abs_errorPtr = err;
+        return;
     }
 
     /* 
@@ -192,8 +197,10 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
 
     enum k_proc_error procErr = k_proc_spawn(&desc);
     if (procErr != PE_NONE) {
-        return GCE_OPERATION_FAILED;
+        *abs_errorPtr = GCE_OPERATION_FAILED;
+        return;
     }
 
-    return GCE_NONE;
+    *abs_errorPtr = GCE_NONE;
+    return;
 }

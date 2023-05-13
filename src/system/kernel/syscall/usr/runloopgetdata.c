@@ -19,7 +19,9 @@ enum gnwRunLoopError k_scr_usr_runLoopGetData(ptr_t dataBufferPtr) {
         return err;
     }
 
-    SCLF_GET_VALID_ABS(ptr_t, dataBufferPtr, dataSizeBytes, GRLE_UNKNOWN);
+    SCLF_GET_VALID_ABS(ptr_t, dataBufferPtr, dataSizeBytes, {
+        return GRLE_UNKNOWN;
+    });
     
     return k_runloop_getPendingItemData(procId, abs_dataBufferPtr);
 }

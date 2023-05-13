@@ -9,13 +9,14 @@
 
 #include "_gunwrlp.h"
 #include <defs.h>
-#include <gunwctrl.h>
-#include <gunwfug.h>
+#include "../include/gunwfug.h"
+#include "../include/gunwctrl.h"
+#include "scl_user.h"
 
 /*
     Asks system for the current run loop entry
 */
-SYSCALL_DECL enum gnwRunLoopError runLoopGetItem(struct gnwRunLoopDispatchItem * const itemPtr) {
+static enum gnwRunLoopError runLoopGetItem(struct gnwRunLoopDispatchItem * const itemPtr) {
     CHECKPTR(itemPtr);
 
     SYSCALL_PAR1(itemPtr);
@@ -29,7 +30,7 @@ SYSCALL_DECL enum gnwRunLoopError runLoopGetItem(struct gnwRunLoopDispatchItem *
 /*
     Asks system for the data associated with the current run loop entry
 */
-SYSCALL_DECL enum gnwRunLoopError runLoopGetData(ptr_t dataBufferPtr) {
+static enum gnwRunLoopError runLoopGetData(ptr_t dataBufferPtr) {
     CHECKPTR(dataBufferPtr);
 
     SYSCALL_PAR1(dataBufferPtr);
