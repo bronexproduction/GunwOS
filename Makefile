@@ -7,6 +7,7 @@ RUST_VERSION=1.66.0
 
 # Toolchain directories
 
+PWD=$(shell pwd) # Running via `wsl -e` doesn't set PWD variable
 TOOLS_DIR="$(PWD)/tools"
 GCC_DIR="$(TOOLS_DIR)/gunwxcc-$(GCC_VERSION)_binutils-$(BINUTILS_VERSION)_newlib-$(NEWLIB_VERSION)"
 RUST_DIR="$(TOOLS_DIR)/rust-$(RUST_VERSION)"
