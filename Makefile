@@ -82,15 +82,15 @@ export RS_DIR_LISTING=find . -name '*.rs' -type f
 
 .PHONY: all libs pre_build img clean test 
 
-all: pre_build boot.bin boot.gfb kernel.gfb app_pack
+all: boot.bin boot.gfb kernel.gfb app_pack
 
 pre_build:
 	mkdir -p $(BUILD_DIR) $(KERNEL_BUILD_DIR) $(LIB_BUILD_DIR) $(APP_BUILD_DIR)
 
-boot.bin:
+boot.bin: pre_build
 	make -C $(SRC_DIR)/bootloader/boot
 
-boot.gfb:
+boot.gfb: pre_build
 	make -C $(SRC_DIR)/bootloader/preloader
 
 kernel.gfb: kernel.elf
@@ -101,7 +101,7 @@ kernel.gfb: kernel.elf
 kernel.elf: libs api
 	make -C $(KERNEL_SRC_DIR)
 
-libs: 
+libs: pre_build
 	make -C $(LIB_SRC_DIR)
 
 api: libs
