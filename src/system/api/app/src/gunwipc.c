@@ -36,13 +36,20 @@ enum gnwIpcError ipcRegister(const char * const path, const enum gnwIpcAccessSco
     SYSCALL_RETVAL(32);
 }
 
-enum gnwIpcError ipcSend(const char * const path, const struct gnwIpcQueryParams queryParams) {
+enum gnwIpcError ipcSend(const char * const path,
+                         const ptr_t dataPtr,
+                         const size_t dataSizeBytes,
+                         const ptr_t resultPtr,
+                         const size_t resultSizeBytes) {
     CHECKPTR(path);
 
     struct gnwIpcSenderQuery query;
     query.path = path;
     query.pathLen = strlen(path);
-    query.params = queryParams;
+    query.dataPtr = dataPtr;
+    query.dataSizeBytes = dataSizeBytes;
+    query.resultPtr = resultPtr;
+    query.resultSizeBytes = resultSizeBytes;
 
     SYSCALL_PAR1(&query);
 
@@ -54,7 +61,7 @@ enum gnwIpcError ipcSend(const char * const path, const struct gnwIpcQueryParams
 
 void gnwIpcEndpointQuery_decode(const ptr_t absDataPtr, struct gnwIpcEndpointQuery * const absQueryPtr) {
     memcopy(absDataPtr, absQueryPtr, sizeof(struct gnwIpcEndpointQuery));
-    absQueryPtr->params.dataPtr = absDataPtr + sizeof(struct gnwIpcEndpointQuery);
+    absQueryPtr->dataPtr = absDataPtr + sizeof(struct gnwIpcEndpointQuery);
 
     #warning result not handled
 }
@@ -64,8 +71,8 @@ void gnwIpcEndpointQuery_decode(const ptr_t absDataPtr, struct gnwIpcEndpointQue
 void gnwIpcEndpointQuery_encode(const struct gnwIpcEndpointQuery * const absQueryPtr, ptr_t absDataPtr) {
     memcopy(absQueryPtr, absDataPtr, sizeof(struct gnwIpcEndpointQuery));
     size_t offset = sizeof(struct gnwIpcEndpointQuery);
-    memcopy(absQueryPtr->params.dataPtr, absDataPtr + offset, absQueryPtr->params.dataSizeBytes);
-    offset += absQueryPtr->params.dataSizeBytes;
+    memcopy(absQueryPtr->dataPtr, absDataPtr + offset, absQueryPtr->dataSizeBytes);
+    offset += absQueryPtr->dataSizeBytes;
 
     #warning result not handled
 }

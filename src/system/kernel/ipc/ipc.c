@@ -81,11 +81,11 @@ static bool processPermitted(const procId_t procId,
 
 enum gnwIpcError k_ipc_ipcSend(const procId_t procId,
                                const struct gnwIpcSenderQuery absQuery) {
-    if (!absQuery.path || !absQuery.params.dataPtr) {
+    if (!absQuery.path || !absQuery.dataPtr) {
         OOPS("Nullptr");
         return GIPCE_UNKNOWN;
     }
-    if (!absQuery.params.dataSizeBytes) {
+    if (!absQuery.dataSizeBytes) {
         OOPS("No data");
         return GIPCE_UNKNOWN;
     }
@@ -108,13 +108,15 @@ enum gnwIpcError k_ipc_ipcSend(const procId_t procId,
 
     struct gnwIpcEndpointQuery endpointQuery;
     endpointQuery.sourceProcId = procId;
-    endpointQuery.params = absQuery.params;
+    endpointQuery.dataPtr = absQuery.dataPtr;
+    endpointQuery.dataSizeBytes = absQuery.dataSizeBytes;
+    endpointQuery.resultSizeBytes = absQuery.resultSizeBytes;
 
     #warning endpoint query - how to handle response? response bytes not counted
     const enum k_proc_error err = k_proc_callback_invoke_ptr(ipcListenerRegister[index].procId,
                                                              (gnwEventListener_ptr)ipcListenerRegister[index].listener,
                                                              (ptr_t)&endpointQuery,
-                                                             sizeof(struct gnwIpcEndpointQuery) + endpointQuery.params.dataSizeBytes,
+                                                             sizeof(struct gnwIpcEndpointQuery) + endpointQuery.dataSizeBytes,
                                                              sizeof(struct gnwIpcEndpointQuery),
                                                              (gnwRunLoopDataEncodingRoutine)gnwIpcEndpointQuery_encode,
                                                              (gnwRunLoopDataEncodingRoutine)ipcListenerRegister[index].decoder);

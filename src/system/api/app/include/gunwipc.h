@@ -45,22 +45,20 @@ enum gnwIpcAccessScope {
     GIAS_ALL        = GIAS_KERNEL | GIAS_USER
 };
 
-struct gnwIpcQueryParams {
+struct gnwIpcSenderQuery {
+    const char * path;
+    size_t pathLen;
     ptr_t dataPtr;
     size_t dataSizeBytes;
     ptr_t resultPtr;
     size_t resultSizeBytes;
 };
 
-struct gnwIpcSenderQuery {
-    const char * path;
-    size_t pathLen;
-    struct gnwIpcQueryParams params;
-};
-
 struct gnwIpcEndpointQuery {
     procId_t sourceProcId;
-    struct gnwIpcQueryParams params;
+    ptr_t dataPtr;
+    size_t dataSizeBytes;
+    size_t resultSizeBytes;
 };
 
 typedef void (*gnwIpcListener)(const struct gnwIpcEndpointQuery * const);
@@ -96,10 +94,16 @@ extern enum gnwIpcError ipcRegister(const char * const path,
 
     Params:
         * path - IPC path (see line 14)
-        * params - query parameters
+        * dataPtr - pointer to message data
+        * dataSizeBytes - size of the message in bytes
+        * resultPtr - address of the buffer for result data
+        * resultSizeBytes - size of the result in bytes
 */
 extern enum gnwIpcError ipcSend(const char * const path,
-                                const struct gnwIpcQueryParams queryParams);
+                                const ptr_t dataPtr,
+                                const size_t dataSizeBytes,
+                                const ptr_t resultPtr,
+                                const size_t resultSizeBytes);
 
 #endif // _GUNWAPI_KERNEL
 

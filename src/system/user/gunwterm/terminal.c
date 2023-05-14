@@ -87,17 +87,17 @@ static void ipcListener(const struct gnwIpcEndpointQuery * const query) {
         fug(FUG_NULLPTR);
         return;
     } 
-    if (!query->params.dataPtr) {
+    if (!query->dataPtr) {
         fug(FUG_INCONSISTENT);
         return;
     }
-    if (query->params.dataSizeBytes < 1) {
+    if (query->dataSizeBytes < 1) {
         fug(FUG_INCONSISTENT);
         return;
     }
 
-    for (size_t i = 0; i < query->params.dataSizeBytes; ++i) {
-        trm_append(query->params.dataPtr[i]);
+    for (size_t i = 0; i < query->dataSizeBytes; ++i) {
+        trm_append(query->dataPtr[i]);
     }
 }
 
