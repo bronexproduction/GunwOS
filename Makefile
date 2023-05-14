@@ -7,8 +7,9 @@ RUST_VERSION=1.66.0
 
 # Toolchain directories
 
-PWD=$(shell pwd) # Running via `wsl -e` doesn't set PWD variable
-TOOLS_DIR="$(PWD)/tools"
+# Running via `wsl -e` doesn't set PWD variable
+CUR_DIR=$(shell pwd)
+TOOLS_DIR="$(CUR_DIR)/tools"
 GCC_DIR="$(TOOLS_DIR)/gunwxcc-$(GCC_VERSION)_binutils-$(BINUTILS_VERSION)_newlib-$(NEWLIB_VERSION)"
 RUST_DIR="$(TOOLS_DIR)/rust-$(RUST_VERSION)"
 
@@ -30,8 +31,8 @@ export L_OUTFORMAT=$(L_BINFORMAT)_$(L_ARCH)
 
 # Source directories
 
-SPEC_DIR="$(PWD)/spec"
-SRC_DIR="$(PWD)/src"
+SPEC_DIR="$(CUR_DIR)/spec"
+SRC_DIR="$(CUR_DIR)/src"
 export LIB_SRC_DIR="$(SRC_DIR)/lib"
 SYSTEM_SRC_DIR="$(SRC_DIR)/system"
 API_DIR="$(SYSTEM_SRC_DIR)/api"
@@ -39,10 +40,10 @@ export APP_API_SRC_DIR="$(API_DIR)/app"
 export DRIVER_API_SRC_DIR="$(API_DIR)/driver"
 KERNEL_SRC_DIR="$(SYSTEM_SRC_DIR)/kernel"
 APPS_SRC_DIR="$(SYSTEM_SRC_DIR)/user"
-TESTS_SRC_DIR="$(PWD)/tests/modules"
-export SCRIPTS_DIR="$(PWD)/scripts"
-export TEST_FRAMEWORK_DIR="$(PWD)/tests/framework"
-export TEST_SHARED_DIR="$(PWD)/tests/shared"
+TESTS_SRC_DIR="$(CUR_DIR)/tests/modules"
+export SCRIPTS_DIR="$(CUR_DIR)/scripts"
+export TEST_FRAMEWORK_DIR="$(CUR_DIR)/tests/framework"
+export TEST_SHARED_DIR="$(CUR_DIR)/tests/shared"
 
 # Header include paths
 
@@ -53,7 +54,7 @@ export API_SHARED_INCLUDE_DIR="$(API_DIR)/shared"
 
 # Build directories
 
-export BUILD_DIR="$(PWD)/build"
+export BUILD_DIR="$(CUR_DIR)/build"
 export LIB_BUILD_DIR="$(BUILD_DIR)/lib"
 export KERNEL_BUILD_DIR="$(BUILD_DIR)/kernel"
 export APP_BUILD_DIR="$(BUILD_DIR)/app"
