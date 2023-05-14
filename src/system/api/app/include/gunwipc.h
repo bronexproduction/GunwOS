@@ -50,15 +50,15 @@ struct gnwIpcSenderQuery {
     size_t pathLen;
     ptr_t dataPtr;
     size_t dataSizeBytes;
-    ptr_t resultPtr;
-    size_t resultSizeBytes;
+    ptr_t replyPtr;
+    size_t replySizeBytes;
 };
 
 struct gnwIpcEndpointQuery {
     procId_t sourceProcId;
     ptr_t dataPtr;
     size_t dataSizeBytes;
-    size_t resultSizeBytes;
+    size_t replySizeBytes;
 };
 
 typedef void (*gnwIpcListener)(const struct gnwIpcEndpointQuery * const);
@@ -96,14 +96,14 @@ extern enum gnwIpcError ipcRegister(const char * const path,
         * path - IPC path (see line 14)
         * dataPtr - pointer to message data
         * dataSizeBytes - size of the message in bytes
-        * resultPtr - address of the buffer for result data
-        * resultSizeBytes - size of the result in bytes
+        * replyPtr - address of the buffer for reply data
+        * replySizeBytes - size of the reply in bytes
 */
 extern enum gnwIpcError ipcSend(const char * const path,
                                 const ptr_t dataPtr,
                                 const size_t dataSizeBytes,
-                                const ptr_t resultPtr,
-                                const size_t resultSizeBytes);
+                                const ptr_t replyPtr,
+                                const size_t replySizeBytes);
 
 #endif // _GUNWAPI_KERNEL
 

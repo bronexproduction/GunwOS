@@ -39,8 +39,8 @@ enum gnwIpcError ipcRegister(const char * const path, const enum gnwIpcAccessSco
 enum gnwIpcError ipcSend(const char * const path,
                          const ptr_t dataPtr,
                          const size_t dataSizeBytes,
-                         const ptr_t resultPtr,
-                         const size_t resultSizeBytes) {
+                         const ptr_t replyPtr,
+                         const size_t replySizeBytes) {
     CHECKPTR(path);
 
     struct gnwIpcSenderQuery query;
@@ -48,8 +48,8 @@ enum gnwIpcError ipcSend(const char * const path,
     query.pathLen = strlen(path);
     query.dataPtr = dataPtr;
     query.dataSizeBytes = dataSizeBytes;
-    query.resultPtr = resultPtr;
-    query.resultSizeBytes = resultSizeBytes;
+    query.replyPtr = replyPtr;
+    query.replySizeBytes = replySizeBytes;
 
     SYSCALL_PAR1(&query);
 

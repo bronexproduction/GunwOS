@@ -110,7 +110,7 @@ enum gnwIpcError k_ipc_ipcSend(const procId_t procId,
     endpointQuery.sourceProcId = procId;
     endpointQuery.dataPtr = absQuery.dataPtr;
     endpointQuery.dataSizeBytes = absQuery.dataSizeBytes;
-    endpointQuery.resultSizeBytes = absQuery.resultSizeBytes;
+    endpointQuery.replySizeBytes = absQuery.replySizeBytes;
 
     #warning endpoint query - how to handle response? response bytes not counted
     const enum k_proc_error err = k_proc_callback_invoke_ptr(ipcListenerRegister[index].procId,
