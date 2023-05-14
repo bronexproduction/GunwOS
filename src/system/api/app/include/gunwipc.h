@@ -105,6 +105,15 @@ extern enum gnwIpcError ipcSend(const char * const path,
                                 const ptr_t replyPtr,
                                 const size_t replySizeBytes);
 
+/*
+    Sends response for the last IPC message
+
+    Params:
+        * replyPtr - pointer to the reply data
+                     (buffer of size replySizeBytes expected - see struct gnwIpcEndpointQuery)
+*/
+extern enum gnwIpcError ipcReply(const ptr_t replyPtr);
+
 #endif // _GUNWAPI_KERNEL
 
 #endif // GUNWOS_GUNWIPC_H

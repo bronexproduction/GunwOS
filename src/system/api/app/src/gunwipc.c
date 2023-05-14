@@ -59,6 +59,17 @@ enum gnwIpcError ipcSend(const char * const path,
     SYSCALL_RETVAL(32);
 }
 
+enum gnwIpcError ipcReply(const ptr_t replyPtr) {
+    CHECKPTR(replyPtr);
+
+    SYSCALL_PAR1(replyPtr);
+
+    SYSCALL_USER_FUNC(IPC_REPLY);
+    SYSCALL_USER_INT;
+
+    SYSCALL_RETVAL(32);
+}
+
 void gnwIpcEndpointQuery_decode(const ptr_t absDataPtr, struct gnwIpcEndpointQuery * const absQueryPtr) {
     memcopy(absDataPtr, absQueryPtr, sizeof(struct gnwIpcEndpointQuery));
     absQueryPtr->dataPtr = absDataPtr + sizeof(struct gnwIpcEndpointQuery);
