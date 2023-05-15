@@ -59,10 +59,11 @@ enum gnwIpcError ipcSend(const char * const path,
     SYSCALL_RETVAL(32);
 }
 
-enum gnwIpcError ipcReply(const ptr_t replyPtr) {
+enum gnwIpcError ipcReply(const ptr_t replyPtr, const size_t token) {
     CHECKPTR(replyPtr);
 
     SYSCALL_PAR1(replyPtr);
+    SYSCALL_PAR2(token);
 
     SYSCALL_USER_FUNC(IPC_REPLY);
     SYSCALL_USER_INT;
