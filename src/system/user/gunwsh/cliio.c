@@ -15,13 +15,7 @@
 #define IO_GENERAL_FAILURE -1
 
 static int append(char c) {
-    struct gnwIpcQueryParams params;
-    params.dataPtr = (ptr_t)&c;
-    params.dataSizeBytes = sizeof(char);
-    params.resultPtr = nullptr;
-    params.resultSizeBytes = 0;
-
-    enum gnwIpcError e = ipcSend("t0", params);
+    enum gnwIpcError e = ipcSend("t0", (ptr_t)&c, sizeof(char), nullptr, 0);
     if (e != GIPCE_NONE) {
         return IO_GENERAL_FAILURE;
     }
