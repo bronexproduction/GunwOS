@@ -59,6 +59,7 @@ struct gnwIpcEndpointQuery {
     ptr_t dataPtr;
     size_t dataSizeBytes;
     size_t replySizeBytes;
+    size_t token;
 };
 
 typedef void (*gnwIpcListener)(const struct gnwIpcEndpointQuery * const);
@@ -104,6 +105,17 @@ extern enum gnwIpcError ipcSend(const char * const path,
                                 const size_t dataSizeBytes,
                                 const ptr_t replyPtr,
                                 const size_t replySizeBytes);
+
+/*
+    Sends response for the IPC message with provided token
+
+    Params:
+        * replyPtr - pointer to the reply data
+                     (buffer of size replySizeBytes expected - see struct gnwIpcEndpointQuery)
+        * token - token of the currently handled message (see gnwIpcEndpointQuery)
+*/
+extern enum gnwIpcError ipcReply(const ptr_t replyPtr,
+                                 const size_t token);
 
 #endif // _GUNWAPI_KERNEL
 
