@@ -103,10 +103,11 @@ extern enum gnwIpcError ipcSend(const char * const path,
 
     Params:
         * replyPtr - pointer to the reply data
-                     (buffer of size replySizeBytes expected - see struct gnwIpcEndpointQuery)
+        * replySizeBytes - size of the reply data in bytes
         * token - token of the currently handled message (see gnwIpcEndpointQuery)
 */
 extern enum gnwIpcError ipcReply(const ptr_t replyPtr,
+                                 const size_t replySizeBytes,
                                  const size_t token);
 
 #endif // _GUNWAPI_KERNEL

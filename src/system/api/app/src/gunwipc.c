@@ -14,7 +14,9 @@
 #include "../include/gunwfug.h"
 #include <string.h>
 
-enum gnwIpcError ipcRegister(const char * const path, const enum gnwIpcAccessScope accessScope, const gnwIpcListener handler) {
+enum gnwIpcError ipcRegister(const char * const path,
+                             const enum gnwIpcAccessScope accessScope,
+                             const gnwIpcListener handler) {
     CHECKPTR(path);
     CHECKPTR(handler);
 
@@ -59,11 +61,14 @@ enum gnwIpcError ipcSend(const char * const path,
     SYSCALL_RETVAL(32);
 }
 
-enum gnwIpcError ipcReply(const ptr_t replyPtr, const size_t token) {
+enum gnwIpcError ipcReply(const ptr_t replyPtr,
+                          const size_t replySizeBytes,
+                          const size_t token) {
     CHECKPTR(replyPtr);
 
     SYSCALL_PAR1(replyPtr);
-    SYSCALL_PAR2(token);
+    SYSCALL_PAR2(replySizeBytes);
+    SYSCALL_PAR3(token);
 
     SYSCALL_USER_FUNC(IPC_REPLY);
     SYSCALL_USER_INT;
