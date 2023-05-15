@@ -66,14 +66,6 @@ typedef void (*gnwIpcListener)(const struct gnwIpcEndpointQuery * const);
 
 typedef void (*gnwIpcEndpointQueryDecoder)(const ptr_t, struct gnwIpcEndpointQuery * const);
 
-struct gnwIpcHandlerDescriptor {
-    const char * path;
-    size_t pathLen;
-    enum gnwIpcAccessScope accessScope;
-    gnwIpcListener handlerRoutine;
-    gnwIpcEndpointQueryDecoder decoder;
-};
-
 #ifndef _GUNWAPI_KERNEL
 
 extern void gnwIpcEndpointQuery_decode(const ptr_t, struct gnwIpcEndpointQuery * const);

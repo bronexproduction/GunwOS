@@ -15,6 +15,7 @@
 #include <error/panic.h>
 #include <runloop/runloop.h>
 #include <scl_def.h>
+#include <src/_gunwipc.h>
 
 /*
     User-level system calls

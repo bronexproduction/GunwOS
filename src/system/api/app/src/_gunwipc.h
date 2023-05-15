@@ -9,6 +9,14 @@
 
 #include "../include/gunwipc.h"
 
+struct gnwIpcHandlerDescriptor {
+    const char * path;
+    size_t pathLen;
+    enum gnwIpcAccessScope accessScope;
+    gnwIpcListener handlerRoutine;
+    gnwIpcEndpointQueryDecoder decoder;
+};
+
 #ifdef _GUNWAPI_KERNEL
 
 void gnwIpcEndpointQuery_encode(const struct gnwIpcEndpointQuery * const, ptr_t);

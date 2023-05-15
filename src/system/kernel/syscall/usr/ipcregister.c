@@ -9,6 +9,7 @@
 #include <gunwevent.h>
 #include <ipc/ipc.h>
 #include <hal/proc/proc.h>
+#include <src/_gunwipc.h>
 
 enum gnwIpcError k_scr_usr_ipcRegister(const struct gnwIpcHandlerDescriptor * descPtr) {
 
