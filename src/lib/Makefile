@@ -12,9 +12,11 @@ MODULES=$(shell $(MODULE_DIR_LISTING))
 all: $(MODULES) clean
 
 $(MODULES):
+ifeq ("$(wildcard $(LIB_BUILD_DIR)/lib$@.a)","")
 	make -C $@
 	mv $@/$@.o $(LIB_BUILD_DIR)/
 	mv $@/lib$@.a $(LIB_BUILD_DIR)/
+endif
 
 clean:
 	find . -mindepth 2 -type f -name '*.o' -delete
