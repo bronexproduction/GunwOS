@@ -107,7 +107,7 @@ extern enum gnwIpcError ipcSend(const char * const path,
                                 const size_t replySizeBytes);
 
 /*
-    Sends response for the last IPC message
+    Sends response for the IPC message with provided token
 
     Params:
         * replyPtr - pointer to the reply data
