@@ -124,7 +124,7 @@ enum gnwRunLoopError k_runloop_dispatch(const procId_t procId,
         OOPS("Unexpected token");
         return GRLE_UNKNOWN;
     }
-    struct dispatchItem * queueItem = reservedEmptyItemOrNull(procId, token);
+    struct dispatchItem * const queueItem = reservedEmptyItemOrNull(procId, token);
     if (!queueItem) {
         OOPS("Invalid dispatch item state");
         return GRLE_INVALID_STATE;
@@ -223,7 +223,7 @@ enum gnwRunLoopError k_runloop_getPendingItemData(const procId_t procId, ptr_t a
 bool k_runloop_isEmpty(const procId_t procId) {
     if (!IN_RANGE(0, procId, MAX_PROC)) {
         OOPS("Unexpected process ID");
-        return GRLE_UNKNOWN;
+        return true;
     }
 
     return isItemEmpty(nextItem(&rlp_main[procId]));
