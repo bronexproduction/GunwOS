@@ -108,13 +108,13 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
     endpointQuery.replySizeBytes = absQuery.replySizeBytes;
 
     #warning endpoint query - how to handle response? response bytes not counted
-    const enum k_proc_error err = k_proc_callback_invoke_ptr(ipcListenerRegister[index].procId,
-                                                             (gnwEventListener_ptr)ipcListenerRegister[index].listener,
+    const enum k_proc_error err = k_proc_callback_invoke_ptr(ipcListenerRegister[listenerIndex].procId,
+                                                             (gnwEventListener_ptr)ipcListenerRegister[listenerIndex].listener,
                                                              (ptr_t)&endpointQuery,
                                                              sizeof(struct gnwIpcEndpointQuery) + endpointQuery.dataSizeBytes,
                                                              sizeof(struct gnwIpcEndpointQuery),
                                                              (gnwRunLoopDataEncodingRoutine)gnwIpcEndpointQuery_encode,
-                                                             (gnwRunLoopDataEncodingRoutine)ipcListenerRegister[index].decoder);
+                                                             (gnwRunLoopDataEncodingRoutine)ipcListenerRegister[listenerIndex].decoder);
     if (err == PE_IGNORED) {
         return GIPCE_IGNORED;
     }
