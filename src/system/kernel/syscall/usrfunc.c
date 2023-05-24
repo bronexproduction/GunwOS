@@ -245,7 +245,7 @@ SCR(devMemWrite,
 SCR(fug,
     REG(32, code, ebx)
 
-    k_err_fug(code);
+    k_err_fug(k_proc_getCurrentId(), code);
 )
 
 /*
