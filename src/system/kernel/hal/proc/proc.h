@@ -13,7 +13,7 @@
 #include <hal/gdt/gdt.h>
 #include <src/_gunwrlp.h>
 
-#define MAX_PROC 8
+#define MAX_PROC 4
 #define NONE_PROC_ID -2
 #define KERNEL_PROC_ID -1
 
