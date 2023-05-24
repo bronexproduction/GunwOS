@@ -337,8 +337,10 @@ void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const procId_t currentP
     kernelProc.info.state = PS_RUNNING;
     procCurrent = KERNEL_PROC_ID;
 
-    if (pTab[currentProcId].info.state == PS_RUNNING) {
-        pTab[currentProcId].info.state = PS_READY;
+    if (pTab[currentProcId].info.state != PS_FINISHED) {
+        if (pTab[currentProcId].info.state == PS_RUNNING) {
+            pTab[currentProcId].info.state = PS_READY;
+        }
         struct k_cpu_state * const currentCpuState = &pTab[currentProcId].cpuState;
         
         // D       31              0         
@@ -457,7 +459,9 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
     CRITICAL_SECTION(
         err = k_runloop_reserve(procId, &runloopToken);
     )
-    if (err != GRLE_NONE) {
+    if (err == GRLE_FULL) {
+        return PE_LIMIT_REACHED;
+    } else if (err != GRLE_NONE) {
         return PE_OPERATION_FAILED;
     }
     
@@ -466,9 +470,6 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
         return PE_OPERATION_FAILED;
     }
 
-    if (pTab[procId].info.state == PS_BLOCKED) {
-        pTab[procId].info.state = PS_READY;
-    }
     k_proc_unlock(procId, PLT_EVENT);
     k_proc_schedule_processStateDidChange();
 
