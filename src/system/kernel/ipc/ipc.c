@@ -79,8 +79,8 @@ static bool processPermitted(const procId_t procId,
            (procId > KERNEL_PROC_ID && (accessScope & GIAS_USER));
 }
 
-enum gnwIpcError k_ipc_ipcSend(const procId_t procId,
-                               const struct gnwIpcSenderQuery absQuery) {
+enum gnwIpcError k_ipc_send(const procId_t procId,
+                            const struct gnwIpcSenderQuery absQuery) {
     if (!absQuery.path || !absQuery.dataPtr) {
         OOPS("Nullptr");
         return GIPCE_UNKNOWN;
@@ -130,12 +130,12 @@ enum gnwIpcError k_ipc_ipcSend(const procId_t procId,
     return GIPCE_NONE;
 }
 
-enum gnwIpcError k_ipc_ipcRegister(const procId_t procId,
-                                   const char * const absPathPtr,
-                                   const size_t pathLen,
-                                   const enum gnwIpcAccessScope accessScope,
-                                   const gnwIpcListener handlerRoutine,
-                                   const gnwIpcEndpointQueryDecoder decoder) {
+enum gnwIpcError k_ipc_register(const procId_t procId,
+                                const char * const absPathPtr,
+                                const size_t pathLen,
+                                const enum gnwIpcAccessScope accessScope,
+                                const gnwIpcListener handlerRoutine,
+                                const gnwIpcEndpointQueryDecoder decoder) {
     if (!absPathPtr) {
         OOPS("Nullptr");
         return GIPCE_UNKNOWN;

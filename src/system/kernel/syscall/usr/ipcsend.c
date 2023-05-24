@@ -40,5 +40,5 @@ enum gnwIpcError k_scr_usr_ipcSend(const struct gnwIpcSenderQuery * const queryP
     absoluteQuery.replyPtr = abs_replyPtr;
     absoluteQuery.replySizeBytes = abs_queryPtr->replySizeBytes;
 
-    return k_ipc_ipcSend(procId, absoluteQuery);
+    return k_ipc_send(procId, absoluteQuery);
 }
