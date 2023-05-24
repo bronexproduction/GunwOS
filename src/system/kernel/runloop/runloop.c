@@ -107,6 +107,10 @@ enum gnwRunLoopError k_runloop_reserve(const procId_t procId, size_t * const tok
     return GRLE_NONE;
 }
 
+static void release(struct dispatchItem * const item) {
+    memzero(item, sizeof(struct dispatchItem));
+}
+
 enum gnwRunLoopError k_runloop_dispatch(const procId_t procId,
                                         const size_t token,
                                         const struct gnwRunLoopDispatchItem item,
@@ -128,22 +132,27 @@ enum gnwRunLoopError k_runloop_dispatch(const procId_t procId,
     if (item.dataSizeBytes) {
         if (item.dataSizeBytes > DISPATCH_MAX_DATA_SIZE_BYTES) {
             OOPS("Payload too large");
+            release(queueItem);
             return GRLE_INVALID_PARAMETER;
         }
         if (!GNWEVENT_ACCEPTS_DATA(item.format)) {
             OOPS("Invalid dispatch format");
+            release(queueItem);
             return GRLE_INVALID_PARAMETER;
         }
         if (!data) {
             OOPS("Nullptr");
+            release(queueItem);
             return GRLE_INVALID_PARAMETER;
         }
         if (!dataEncoder || !item.decode) {
             OOPS("No encode/decode present");
+            release(queueItem);
             return GRLE_INVALID_PARAMETER;
         }
     } else if (data) {
         OOPS("No data expected");
+        release(queueItem);
         return GRLE_INVALID_PARAMETER;
     } else {
         queueItem->dataHandled = true;
