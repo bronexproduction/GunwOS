@@ -23,3 +23,8 @@ void k_cpu_loadTaskRegister() {
     __asm__ volatile ("movw %0, %%ax" : : "r" ((uint_16)(GDT_OFFSET(tss) | DPL_0)));
     __asm__ volatile ("ltr %ax");
 }
+
+void k_cpu_halt() {
+    __asm__ volatile ("cli");
+    __asm__ volatile ("hlt");
+}

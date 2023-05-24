@@ -150,4 +150,9 @@ void k_cpu_init();
 */
 void k_cpu_loadTaskRegister();
 
+/*
+    Halts the CPU
+*/
+void k_cpu_halt();
+
 #endif // CPU_H
