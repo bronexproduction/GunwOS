@@ -24,7 +24,7 @@ static struct ipcListener {
     gnwIpcEndpointQueryDecoder decoder;
 } ipcListenerRegister[MAX_IPC_LISTENER];
 
-static void clear(const size_t entryId) {
+static void clearListener(const size_t entryId) {
     if (entryId >= MAX_IPC_LISTENER) {
         OOPS("Listener index out of bounds");
         return;
@@ -35,7 +35,7 @@ static void clear(const size_t entryId) {
 }
 
 void k_ipc_init() {
-    for (size_t i = 0; i < MAX_IPC_LISTENER; clear(i++));
+    for (size_t i = 0; i < MAX_IPC_LISTENER; clearListener(i++));
 }
 
 static bool pathGlobalValidate(const char * absPathPtr, const size_t pathLen) {
@@ -175,5 +175,5 @@ enum gnwIpcError k_ipc_register(const procId_t procId,
 }
 
 void k_ipc_procCleanup(const procId_t procId) {
-    clear(procId);
+    clearListener(procId);
 }
