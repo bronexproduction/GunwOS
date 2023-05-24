@@ -35,6 +35,7 @@ enum gnwIpcError {
     GIPCE_NOT_FOUND         = -5,
     GIPCE_IGNORED           = -6,
     GIPCE_FORBIDDEN         = -7,
+    GIPCE_FULL              = -8,
     GIPCE_UNKNOWN           = -1
 };
 
