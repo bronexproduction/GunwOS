@@ -28,6 +28,11 @@ static struct process {
     struct k_proc_process info;
 
     /*
+        Lock mask (if BLOCKED)
+    */
+    enum k_proc_lockType lockMask;
+
+    /*
         Process CPU state
     */
     struct k_cpu_state cpuState;
@@ -119,19 +124,41 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
     return PE_NONE;
 }
 
-void k_proc_lockIfNeeded(const procId_t procId) {
+void k_proc_lock(const procId_t procId, enum k_proc_lockType lockType) {
     if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
         OOPS("Process id out of range");
+        return;
     }
+
+    pTab[procId].lockMask |= lockType;
+    
     if (pTab[procId].info.state == PS_BLOCKED) {
         return;
     }
     if (pTab[procId].info.state != PS_READY &&
         pTab[procId].info.state != PS_RUNNING) {
         OOPS("Unexpected process state during lock");
+        return;
     }
 
     pTab[procId].info.state = PS_BLOCKED;
+    k_proc_schedule_processStateDidChange();
+}
+
+void k_proc_unlock(const procId_t procId, enum k_proc_lockType lockType) {
+    if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
+        OOPS("Process id out of range");
+        return;
+    }
+
+    pTab[procId].lockMask &= ~lockType;
+
+    if (pTab[procId].info.state != PS_BLOCKED ||
+        pTab[procId].lockMask) {
+        return;
+    }
+    
+    pTab[procId].info.state = PS_READY;
     k_proc_schedule_processStateDidChange();
 }
 
@@ -190,6 +217,10 @@ void k_proc_switch(const procId_t procId) {
     }
     if (pTab[procId].info.state != PS_READY) {
         OOPS("Invalid next process state during switch");
+    }
+    if (pTab[procId].lockMask) {
+        OOPS("Attempted switch to locked process");
+        return;
     }
     
     kernelProc.info.state = PS_READY;
@@ -271,6 +302,7 @@ void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const procId_t currentP
         OOPS("Current process id over limit during switch");
     }
     if (pTab[currentProcId].info.state != PS_RUNNING &&
+        pTab[currentProcId].info.state != PS_BLOCKED &&
         pTab[currentProcId].info.state != PS_FINISHED) {
         OOPS("Invalid current process state during switch");
     }
@@ -414,6 +446,7 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
     if (pTab[procId].info.state == PS_BLOCKED) {
         pTab[procId].info.state = PS_READY;
     }
+    k_proc_unlock(procId, PLT_EVENT);
     k_proc_schedule_processStateDidChange();
 
     return PE_NONE;
