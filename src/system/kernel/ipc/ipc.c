@@ -40,9 +40,10 @@ void k_ipc_init() {
 
 static bool pathGlobalValidate(const char * absPathPtr, const size_t pathLen) {
     for (size_t i = 0; i < pathLen; ++i) {
-        if (IN_RANGE(48, absPathPtr[i], 57) ||  /* 0 - 9 */
-            IN_RANGE(65, absPathPtr[i], 90) ||  /* A - Z */
-            IN_RANGE(97, absPathPtr[i], 122)    /* a - z */) {
+        if (IN_RANGE('0', absPathPtr[i], '9') ||  /* 0 - 9 */
+            IN_RANGE('A', absPathPtr[i], 'Z') ||  /* A - Z */
+            IN_RANGE('a', absPathPtr[i], 'z') ||  /* a - z */
+            absPathPtr[i] == '/') {
             continue;
         }
 
