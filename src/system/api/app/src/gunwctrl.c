@@ -40,4 +40,9 @@ void waitForEvent() {
     SYSCALL_USER_INT;
 }
 
+void yield() {
+    SYSCALL_USER_FUNC(YIELD);
+    SYSCALL_USER_INT;
+}
+
 #endif // _GUNWAPI_KERNEL

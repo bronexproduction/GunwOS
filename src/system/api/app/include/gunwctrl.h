@@ -40,6 +40,12 @@ extern void exit(const int_32 status);
 */
 extern void waitForEvent();
 
+/*
+    Ceases to claim associated CPU time; 
+    frees up the CPU in order to let other processes claim its time slice
+*/
+extern void yield();
+
 #endif // _GUNWAPI_KERNEL
 
 #endif // GUNWOS_GUNWCTRL_H
