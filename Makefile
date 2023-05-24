@@ -51,6 +51,7 @@ export STDGUNW_INCLUDE_DIR="$(LIB_SRC_DIR)/stdgunw/include"
 export APP_API_INCLUDE_DIR="$(APP_API_SRC_DIR)/include"
 export DRIVER_API_INCLUDE_DIR="$(DRIVER_API_SRC_DIR)/include"
 export API_SHARED_INCLUDE_DIR="$(API_DIR)/shared"
+export API_SYS_DIR="$(API_DIR)/sys"
 
 # Build directories
 
