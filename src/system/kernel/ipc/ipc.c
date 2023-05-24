@@ -6,14 +6,15 @@
 //
 
 #include "ipc.h"
+#include <src/_gunwipc.h>
 #include <mem.h>
 #include <utils.h>
 #include <string.h>
 #include <hal/proc/proc.h>
 #include <error/panic.h>
-#include <src/_gunwipc.h>
+#include <queue/queue.h>
 
-#define MAX_IPC_LISTENER 16
+#define MAX_IPC_LISTENER 8
 
 static struct ipcListener {
     procId_t procId;
