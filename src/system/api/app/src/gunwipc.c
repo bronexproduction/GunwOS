@@ -79,8 +79,6 @@ enum gnwIpcError ipcReply(const ptr_t replyPtr,
 void gnwIpcEndpointQuery_decode(const ptr_t absDataPtr, struct gnwIpcEndpointQuery * const absQueryPtr) {
     memcopy(absDataPtr, absQueryPtr, sizeof(struct gnwIpcEndpointQuery));
     absQueryPtr->dataPtr = absDataPtr + sizeof(struct gnwIpcEndpointQuery);
-
-    #warning result not handled
 }
 
 #else
@@ -90,8 +88,6 @@ void gnwIpcEndpointQuery_encode(const struct gnwIpcEndpointQuery * const absQuer
     size_t offset = sizeof(struct gnwIpcEndpointQuery);
     memcopy(absQueryPtr->dataPtr, absDataPtr + offset, absQueryPtr->dataSizeBytes);
     offset += absQueryPtr->dataSizeBytes;
-
-    #warning result not handled
 }
 
 #endif // _GUNWAPI_KERNEL
