@@ -106,5 +106,10 @@ void dupa() {
     ipcRegister("t0", GIAS_ALL, ipcListener);
     clear();
 
+    char i = 0;
+    while (true) {
+        trm_append(i++);
+    }
+
     runLoopStart();
 }

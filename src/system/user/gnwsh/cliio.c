@@ -10,17 +10,23 @@
 #include <mem.h>
 #include <string.h>
 #include <gunwipc.h>
+#include <gunwctrl.h>
 #include <defs.h>
 
 #define IO_GENERAL_FAILURE -1
 
 static int append(char c) {
-    enum gnwIpcError e = ipcSend("t0", (ptr_t)&c, sizeof(char), nullptr, 0);
-    if (e != GIPCE_NONE) {
-        return IO_GENERAL_FAILURE;
+    while (1) { 
+        enum gnwIpcError e = ipcSend("t0", (ptr_t)&c, sizeof(char), nullptr, 0);
+        if (e == GIPCE_NONE) {
+            return 1;
+        } else if (e == GIPCE_FULL) {
+            yield();
+            continue;
+        } else {
+            return IO_GENERAL_FAILURE;
+        }
     }
-
-    return 1;
 }
 
 int user_cli_putc(const char c) {
