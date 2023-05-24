@@ -53,15 +53,13 @@ static bool pathGlobalValidate(const char * absPathPtr, const size_t pathLen) {
     return true;
 }
 
-static size_t listenerIndexForPath(const char * absPathPtr, const size_t pathLen, bool * const found) {
+static size_t listenerIndexForPath(const char * absPathPtr, const size_t pathLen) {
     for (size_t index = 0; index < MAX_IPC_LISTENER; ++index) {
         if (!strcmpl(absPathPtr, ipcListenerRegister[index].path, pathLen)) {
-            *found = true;
             return index;
         }
     }
 
-    *found = false;
     return MAX_IPC_LISTENER;
 }
 
@@ -95,16 +93,11 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
         return GIPCE_INVALID_PATH;
     }
 
-    bool found;
-    size_t index = listenerIndexForPath(absQuery.path, absQuery.pathLen, &found);
-    if (!found) {
+    size_t listenerIndex = listenerIndexForPath(absQuery.path, absQuery.pathLen);
+    if (listenerIndex >= MAX_IPC_LISTENER) {
         return GIPCE_NOT_FOUND;
     }
-    if (index >= MAX_IPC_LISTENER) {
-        OOPS("Listener index out of bounds");
-        return GIPCE_UNKNOWN;
-    }
-    if (!processPermitted(procId, ipcListenerRegister[index].accessScope)) {
+    if (!processPermitted(procId, ipcListenerRegister[listenerIndex].accessScope)) {
         return GIPCE_FORBIDDEN;
     }
 
@@ -154,9 +147,7 @@ enum gnwIpcError k_ipc_register(const procId_t procId,
     if (!pathGlobalValidate(absPathPtr, pathLen)) {
         return GIPCE_INVALID_PATH;
     }
-    bool registered;
-    listenerIndexForPath(absPathPtr, pathLen, &registered);
-    if (registered) {
+    if (listenerIndexForPath(absPathPtr, pathLen) < MAX_IPC_LISTENER) {
         return GIPCE_ALREADY_EXISTS;
     }
 
