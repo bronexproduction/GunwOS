@@ -51,7 +51,7 @@ static void (*userSyscallReg[SYSCALL_COUNT])() = {
     /* 0x10 */ (void *)k_scr_devSetParam,
     /* 0x11 */ (void *)k_scr_runLoopGetItem,
     /* 0x12 */ (void *)k_scr_runLoopGetData,
-    /* 0x13 */ nullptr,
+    /* 0x13 */ (void *)k_scr_ipcReply,
     /* 0x14 */ (void *)k_scr_yield,
 };
 

@@ -18,6 +18,10 @@ enum gnwIpcError k_ipc_register(const procId_t procId,
                                 const enum gnwIpcAccessScope accessScope,
                                 const gnwIpcListener handlerRoutine,
                                 const gnwIpcEndpointQueryDecoder decoder);
+enum gnwIpcError k_ipc_reply(const procId_t procId,
+                             const ptr_t absReplyBufferPtr,
+                             const size_t replySizeBytes,
+                             const size_t token);
 
 void k_ipc_procCleanup(const procId_t procId);
 

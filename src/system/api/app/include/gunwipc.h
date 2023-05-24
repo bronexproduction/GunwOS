@@ -51,6 +51,7 @@ struct gnwIpcSenderQuery {
     size_t pathLen;
     ptr_t dataPtr;
     size_t dataSizeBytes;
+    enum gnwIpcError * replyErrPtr;
     ptr_t replyPtr;
     size_t replySizeBytes;
 };

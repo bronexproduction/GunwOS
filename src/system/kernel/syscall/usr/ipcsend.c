@@ -22,6 +22,9 @@ enum gnwIpcError k_scr_usr_ipcSend(const struct gnwIpcSenderQuery * const queryP
     SCLF_GET_VALID_ABS_NAMED(const ptr_t, dataPtr, abs_queryPtr->dataPtr, abs_queryPtr->dataSizeBytes, {
         return GIPCE_UNKNOWN;
     });
+    SCLF_GET_VALID_ABS_NAMED(enum gnwIpcError * const, replyErrPtr, abs_queryPtr->replyErrPtr, sizeof(enum gnwIpcError), {
+        return GIPCE_UNKNOWN;
+    });
 
     ptr_t abs_replyPtr = nullptr;
     if (abs_queryPtr->replyPtr) {
@@ -37,6 +40,7 @@ enum gnwIpcError k_scr_usr_ipcSend(const struct gnwIpcSenderQuery * const queryP
     absoluteQuery.pathLen = abs_queryPtr->pathLen;
     absoluteQuery.dataPtr = abs_dataPtr;
     absoluteQuery.dataSizeBytes = abs_queryPtr->dataSizeBytes;
+    absoluteQuery.replyErrPtr = abs_replyErrPtr;
     absoluteQuery.replyPtr = abs_replyPtr;
     absoluteQuery.replySizeBytes = abs_queryPtr->replySizeBytes;
 

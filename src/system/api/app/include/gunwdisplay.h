@@ -14,6 +14,11 @@
 #include "uha/gunwuha_display_desc.h"
 #include "gunwdev.h"
 
+enum gnwDisplayType {
+    TEXT,
+    GRAPHICS
+};
+
 struct gnwDisplayDescriptor { 
     /*
         Display identifier
