@@ -141,4 +141,11 @@ __attribute__((naked)) enum gnwRunLoopError k_scr_runLoopGetItem(struct gnwRunLo
 */
 __attribute__((naked)) enum gnwRunLoopError k_scr_runLoopGetData(ptr_t dataBufferPtr);
 
+
+/*
+    Code - 0x14
+    Function - YIELD
+*/
+__attribute__((naked)) void k_scr_yield();
+
 #endif // USRFUNC_H

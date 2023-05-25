@@ -12,8 +12,8 @@
 #include <defs.h>
 #include <error/panic.h>
 
-#define DISPATCH_QUEUE_SIZE 8
 #define DISPATCH_MAX_DATA_SIZE_BYTES 64 // KiB(4) overlaps with non-kernel memory or kernel stack
+#define DISPATCH_QUEUE_SIZE 3
 
 #warning critical sections might be useful here instead of in the other layers
 
@@ -107,6 +107,10 @@ enum gnwRunLoopError k_runloop_reserve(const procId_t procId, size_t * const tok
     return GRLE_NONE;
 }
 
+static void release(struct dispatchItem * const item) {
+    memzero(item, sizeof(struct dispatchItem));
+}
+
 enum gnwRunLoopError k_runloop_dispatch(const procId_t procId,
                                         const size_t token,
                                         const struct gnwRunLoopDispatchItem item,
@@ -120,7 +124,7 @@ enum gnwRunLoopError k_runloop_dispatch(const procId_t procId,
         OOPS("Unexpected token");
         return GRLE_UNKNOWN;
     }
-    struct dispatchItem * queueItem = reservedEmptyItemOrNull(procId, token);
+    struct dispatchItem * const queueItem = reservedEmptyItemOrNull(procId, token);
     if (!queueItem) {
         OOPS("Invalid dispatch item state");
         return GRLE_INVALID_STATE;
@@ -128,22 +132,27 @@ enum gnwRunLoopError k_runloop_dispatch(const procId_t procId,
     if (item.dataSizeBytes) {
         if (item.dataSizeBytes > DISPATCH_MAX_DATA_SIZE_BYTES) {
             OOPS("Payload too large");
+            release(queueItem);
             return GRLE_INVALID_PARAMETER;
         }
         if (!GNWEVENT_ACCEPTS_DATA(item.format)) {
             OOPS("Invalid dispatch format");
+            release(queueItem);
             return GRLE_INVALID_PARAMETER;
         }
         if (!data) {
             OOPS("Nullptr");
+            release(queueItem);
             return GRLE_INVALID_PARAMETER;
         }
         if (!dataEncoder || !item.decode) {
             OOPS("No encode/decode present");
+            release(queueItem);
             return GRLE_INVALID_PARAMETER;
         }
     } else if (data) {
         OOPS("No data expected");
+        release(queueItem);
         return GRLE_INVALID_PARAMETER;
     } else {
         queueItem->dataHandled = true;
@@ -214,7 +223,7 @@ enum gnwRunLoopError k_runloop_getPendingItemData(const procId_t procId, ptr_t a
 bool k_runloop_isEmpty(const procId_t procId) {
     if (!IN_RANGE(0, procId, MAX_PROC)) {
         OOPS("Unexpected process ID");
-        return GRLE_UNKNOWN;
+        return true;
     }
 
     return isItemEmpty(nextItem(&rlp_main[procId]));

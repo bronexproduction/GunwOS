@@ -7,15 +7,16 @@
 
 #include "func.h"
 #include <src/_gunwctrl.h>
+#include <src/_gunwipc.h>
 #include <error/fug.h>
 #include <hal/proc/proc.h>
+#include <schedule/schedule.h>
 #include <dev/dev.h>
 #include <ipc/ipc.h>
 #include <queue/queue.h>
 #include <error/panic.h>
 #include <runloop/runloop.h>
 #include <scl_def.h>
-#include <src/_gunwipc.h>
 
 /*
     User-level system calls
@@ -244,7 +245,7 @@ SCR(devMemWrite,
 SCR(fug,
     REG(32, code, ebx)
 
-    k_err_fug(code);
+    k_err_fug(k_proc_getCurrentId(), code);
 )
 
 /*
@@ -353,4 +354,15 @@ SCR(runLoopGetData,
 
     extern enum gnwRunLoopError k_scr_usr_runLoopGetData(ptr_t);
     err = k_scr_usr_runLoopGetData((ptr_t)dataBufferPtr);
+)
+
+/*
+    Code - 0x14
+    Function - YIELD
+*/
+SCR(yield,
+    /*
+        Change execution to another process
+    */
+    k_proc_schedule_processStateDidChange();
 )

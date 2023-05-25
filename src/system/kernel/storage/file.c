@@ -48,7 +48,7 @@ static enum gnwFileErrorCode loadFile(const size_t volumeId,
     const size_t expectedBytes = fsDesc.allocUnitAlignedBytes(headerBytes, fileInfo->sizeBytes);
     do {
         uint_8 sectorBuffer[currentLocation.sizeBytes];
-        enum k_stor_error err = k_stor_volume_readSector(volumeId, currentLocation.sector, sectorBuffer);
+        enum k_stor_error err = k_stor_volume_readSector(volumeId, currentLocation.sector, 1, sectorBuffer);
         if (err != SE_NONE) {
             return GFEC_UNKNOWN;
         }

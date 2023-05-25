@@ -110,7 +110,7 @@ enum k_stor_error k_stor_volume_readBytes(const size_t volumeId, const range_siz
     return readBytes(volumeId, range, buffer);
 }
 
-enum k_stor_error k_stor_volume_readSector(const size_t volumeId, const size_t sector, uint_8 * const buffer) {
+enum k_stor_error k_stor_volume_readSector(const size_t volumeId, const size_t lba, const size_t count, uint_8 * const buffer) {
     const struct k_stor_volume volume = k_stor_volumes[volumeId];
     const struct k_stor_drive drive = k_stor_drives[volume.driveId];
     struct gnwDeviceUHA uha; {
@@ -123,7 +123,7 @@ enum k_stor_error k_stor_volume_readSector(const size_t volumeId, const size_t s
     const struct gnwStorGeometry geometry = uha.storCtrl.routine.driveGeometry(drive.driveId);
     range_size_t readRange;
 
-    readRange.offset = sector * geometry.sectSizeBytes;
+    readRange.offset = lba * geometry.sectSizeBytes;
     readRange.length = geometry.sectSizeBytes;
 
     return k_stor_volume_readBytes(volumeId, readRange, buffer);

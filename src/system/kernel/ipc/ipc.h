@@ -10,14 +10,14 @@
 
 #include <gunwipc.h>
 
-enum gnwIpcError k_ipc_ipcSend(const procId_t procId,
-                               const struct gnwIpcSenderQuery absQuery);
-enum gnwIpcError k_ipc_ipcRegister(const procId_t procId, 
-                                   const char * const absPathPtr,
-                                   const size_t pathLen,
-                                   const enum gnwIpcAccessScope accessScope,
-                                   const gnwIpcListener handlerRoutine,
-                                   const gnwIpcEndpointQueryDecoder decoder);
+enum gnwIpcError k_ipc_send(const procId_t procId,
+                            const struct gnwIpcSenderQuery absQuery);
+enum gnwIpcError k_ipc_register(const procId_t procId, 
+                                const char * const absPathPtr,
+                                const size_t pathLen,
+                                const enum gnwIpcAccessScope accessScope,
+                                const gnwIpcListener handlerRoutine,
+                                const gnwIpcEndpointQueryDecoder decoder);
 
 void k_ipc_procCleanup(const procId_t procId);
 

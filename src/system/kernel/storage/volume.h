@@ -31,7 +31,7 @@ extern struct k_stor_volume {
 
 enum k_stor_error k_stor_volume_readHeader(const size_t volumeId, uint_8 * const header);
 enum k_stor_error k_stor_volume_readBytes(const size_t volumeId, const range_size_t range, uint_8 * const buffer);
-enum k_stor_error k_stor_volume_readSector(const size_t volumeId, const size_t sector, uint_8 * const buffer);
+enum k_stor_error k_stor_volume_readSector(const size_t volumeId, const size_t lba, const size_t count, uint_8 * const buffer);
 
 bool k_stor_volume_validateId(const size_t volumeId);
 

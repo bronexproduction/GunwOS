@@ -13,7 +13,7 @@
 #include <hal/gdt/gdt.h>
 #include <src/_gunwrlp.h>
 
-#define MAX_PROC 8
+#define MAX_PROC 4
 #define NONE_PROC_ID -2
 #define KERNEL_PROC_ID -1
 
@@ -40,6 +40,11 @@ enum k_proc_state {
     PS_RUNNING,
     PS_BLOCKED,
     PS_FINISHED
+};
+
+enum k_proc_lockType {
+    PLT_EVENT   = 1 << 0,
+    PLT_IPC     = 1 << 1
 };
 
 struct k_proc_process {
@@ -77,8 +82,18 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const);
 
     Params:
     * procId - Identifier of the process
+    * lockType - type/source of the lock
 */
-void k_proc_lockIfNeeded(const procId_t procId);
+void k_proc_lock(const procId_t procId, const enum k_proc_lockType lockType);
+
+/*
+    Removing a lock from the process and resuming alive process if able
+
+    Params:
+    * procId - identifier of the process to be resumed
+    * lockType - type of lock to be released
+*/
+void k_proc_unlock(const procId_t procId, const enum k_proc_lockType lockType);
 
 /*
     Stopping and cleaning up after running process
