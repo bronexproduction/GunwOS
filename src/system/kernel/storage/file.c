@@ -74,7 +74,8 @@ static enum gnwFileErrorCode loadFile(const size_t volumeId,
         /*
             Read contiguous fragment
         */
-        uint_8 sectorBuffer[allocUnitsToRead * currentLocation.sizeBytes];
+        const size_t bytesToBeRead = allocUnitsToRead * currentLocation.sizeBytes;
+        uint_8 sectorBuffer[bytesToBeRead];
         enum k_stor_error err = k_stor_volume_readSector(volumeId, currentLocation.sector, allocUnitsToRead * sectorsPerAllocUnit, sectorBuffer);
         if (err != SE_NONE) {
             return GFEC_UNKNOWN;
@@ -82,13 +83,16 @@ static enum gnwFileErrorCode loadFile(const size_t volumeId,
 
         memcopy(sectorBuffer,
                 dst + totalBytes,
-                currentLocation.sizeBytes);
+                bytesToBeRead);
 
-        totalBytes += currentLocation.sizeBytes;
+        totalBytes += bytesToBeRead;
         currentLocation = fsDesc.nextLocation(headerBytes, fatBytes, lastContiguousLocation);
     } while (fsDesc.isValidForRead(headerBytes, currentLocation) && totalBytes < expectedBytes); 
 
     if (!fsDesc.isEOF(currentLocation)) {
+        return GFEC_UNKNOWN;
+    }
+    if (expectedBytes != totalBytes) {
         return GFEC_UNKNOWN;
     }
 
