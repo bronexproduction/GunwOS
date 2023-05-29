@@ -45,6 +45,9 @@ bool k_stor_fileSys_validateId(const size_t fileSysId) {
     if (!k_stor_fileSystems[fileSysId].desc.maxExtensionLength) {
         return false;
     }
+    if (!k_stor_fileSystems[fileSysId].desc.sectorsPerAllocUnit) {
+        return false;
+    }
     if (!k_stor_fileSystems[fileSysId].desc.directoryRange) {
         return false;
     }
@@ -58,6 +61,9 @@ bool k_stor_fileSys_validateId(const size_t fileSysId) {
         return false;
     }
     if (!k_stor_fileSystems[fileSysId].desc.nextLocation) {
+        return false;
+    }
+    if (!k_stor_fileSystems[fileSysId].desc.isContiguous) {
         return false;
     }
     if (!k_stor_fileSystems[fileSysId].desc.isValidForRead) {

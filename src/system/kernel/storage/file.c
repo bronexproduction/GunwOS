@@ -46,9 +46,36 @@ static enum gnwFileErrorCode loadFile(const size_t volumeId,
     struct gnwFileSystemLocation currentLocation = fsDesc.fileStartLocation(headerBytes, fileInfo);
     size_t totalBytes = 0;
     const size_t expectedBytes = fsDesc.allocUnitAlignedBytes(headerBytes, fileInfo->sizeBytes);
+    const size_t sectorsPerAllocUnit = fsDesc.sectorsPerAllocUnit(headerBytes);
     do {
-        uint_8 sectorBuffer[currentLocation.sizeBytes];
-        enum k_stor_error err = k_stor_volume_readSector(volumeId, currentLocation.sector, 1, sectorBuffer);
+        /*
+            Calculate number of contiguous sectors for given file
+        */
+        struct gnwFileSystemLocation lastContiguousLocation = currentLocation;
+        do {
+            const struct gnwFileSystemLocation nextLocation = fsDesc.nextLocation(headerBytes, fatBytes, lastContiguousLocation);
+            const bool isContiguous = fsDesc.isContiguous(headerBytes, lastContiguousLocation, nextLocation);
+            if (isContiguous) {
+                lastContiguousLocation = nextLocation;
+            } else {
+                break;
+            }
+        } while (true);
+
+        if (lastContiguousLocation.allocUnit < currentLocation.allocUnit) {
+            return GFEC_UNKNOWN;
+        }
+        const size_t allocUnitsToRead = lastContiguousLocation.allocUnit - currentLocation.allocUnit + 1;
+        const size_t allocUnitsLeft = (expectedBytes - totalBytes) / currentLocation.sizeBytes;
+        if (allocUnitsToRead > allocUnitsLeft) {
+            return GFEC_UNKNOWN;
+        }
+
+        /*
+            Read contiguous fragment
+        */
+        uint_8 sectorBuffer[allocUnitsToRead * currentLocation.sizeBytes];
+        enum k_stor_error err = k_stor_volume_readSector(volumeId, currentLocation.sector, allocUnitsToRead * sectorsPerAllocUnit, sectorBuffer);
         if (err != SE_NONE) {
             return GFEC_UNKNOWN;
         }
@@ -58,7 +85,7 @@ static enum gnwFileErrorCode loadFile(const size_t volumeId,
                 currentLocation.sizeBytes);
 
         totalBytes += currentLocation.sizeBytes;
-        currentLocation = fsDesc.nextLocation(headerBytes, fatBytes, currentLocation);
+        currentLocation = fsDesc.nextLocation(headerBytes, fatBytes, lastContiguousLocation);
     } while (fsDesc.isValidForRead(headerBytes, currentLocation) && totalBytes < expectedBytes); 
 
     if (!fsDesc.isEOF(currentLocation)) {
