@@ -11,4 +11,4 @@ else
     EPARAMS=()
 fi
 
-qemu-system-i386 ${EPARAMS[@]} -monitor stdio -drive file=$1,index=0,if=floppy,format=raw
+qemu-system-i386 ${EPARAMS[@]} -monitor stdio -m 10M -drive file=$1,index=0,if=floppy,format=raw
