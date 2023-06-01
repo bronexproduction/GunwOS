@@ -8,8 +8,15 @@
 #ifndef CRITICALSEC_H
 #define CRITICALSEC_H
 
-#define CRITICAL_SECTION_BEGIN { __asm__ volatile ("cli"); }
-#define CRITICAL_SECTION_END { __asm__ volatile ("sti"); }
+#define CRITICAL_SECTION_BEGIN {        \
+    __asm__ volatile ("cli");           \
+}
+#define CRITICAL_SECTION_END {          \
+    extern const size_t isrStackHeight; \
+    if (!isrStackHeight) {              \
+        __asm__ volatile ("sti");       \
+    }                                   \
+}
 #define CRITICAL_SECTION(CODE) { CRITICAL_SECTION_BEGIN; { CODE; } CRITICAL_SECTION_END; }
 
 #endif // CRITICALSEC_H

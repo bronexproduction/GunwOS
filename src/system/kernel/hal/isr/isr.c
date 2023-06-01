@@ -16,7 +16,7 @@
     Counts how many interrupt service routines 
     are currently on the stack
 */
-static size_t isrStackHeight = 0;
+size_t isrStackHeight = 0;
 
 /*
     Interrupt service routine handling preparation
