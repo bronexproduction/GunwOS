@@ -85,7 +85,6 @@ static enum gnwRunLoopError getPendingDispatchItem(const procId_t procId, struct
 }
 
 enum gnwRunLoopError k_runloop_reserve(const procId_t procId, size_t * const token) {
-    return GRLE_NONE;
     if (!IN_RANGE(0, procId, MAX_PROC)) {
         OOPS("Unexpected process ID");
         return GRLE_UNKNOWN;
@@ -118,7 +117,6 @@ enum gnwRunLoopError k_runloop_dispatch(const procId_t procId,
                                         const struct gnwRunLoopDispatchItem item,
                                         const ptr_t data,
                                         const gnwRunLoopDataEncodingRoutine dataEncoder) {
-    return GRLE_NONE;
     if (!IN_RANGE(0, procId, MAX_PROC)) {
         OOPS("Unexpected process ID");
         return GRLE_UNKNOWN;
@@ -168,7 +166,6 @@ enum gnwRunLoopError k_runloop_dispatch(const procId_t procId,
 }
 
 enum gnwRunLoopError k_runloop_getPendingItem(const procId_t procId, struct gnwRunLoopDispatchItem * const absItemPtr) {
-    return GRLE_EMPTY;
     struct dispatchItem * item;
     size_t index;
     const enum gnwRunLoopError err = getPendingDispatchItem(procId, &item, &index);
@@ -225,7 +222,6 @@ enum gnwRunLoopError k_runloop_getPendingItemData(const procId_t procId, ptr_t a
 }
 
 bool k_runloop_isEmpty(const procId_t procId) {
-    return true;
     if (!IN_RANGE(0, procId, MAX_PROC)) {
         OOPS("Unexpected process ID");
         return true;

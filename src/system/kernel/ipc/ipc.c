@@ -193,17 +193,6 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
         }
     }
 
-    {
-        /*
-            Do not wait for the reply, just ignore it
-        */
-        *(absQuery.replyErrPtr) = GIPCE_NONE;
-        *(uint_32 *)absQuery.replyPtr = 0;
-        (*(uint_64 *)(0xb8000))++;
-        clearReply(token);
-        k_que_dispatch_arch((fPtr_arch)unlockIfAble, procId);
-    }
-
     return GIPCE_NONE;
 }
 
