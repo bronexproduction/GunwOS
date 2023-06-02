@@ -113,14 +113,5 @@ void dupa() {
     ipcRegister("t0", GIAS_ALL, ipcListener);
     clear();
 
-    char i = 0;
-    while (true) {
-        const bool result = trm_append(i++);
-        if (!result) {
-            fug(FUG_UNDEFINED);
-            return;
-        }
-    }
-
     runLoopStart();
 }

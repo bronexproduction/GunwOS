@@ -39,13 +39,13 @@ void k_startup() {
     /*
         Load command line
     */
-    // if (err == GCE_NONE) {
-    //     struct gnwCtrlStartDescriptor desc;
-    //     desc.pathPtr = "0:GNWSH.ELF";
-    //     desc.pathLen = 11;
-    //     desc.errorPtr = &err;
-    //     k_scr_usr_start(KERNEL_PROC_ID, &desc);
-    // }
+    if (err == GCE_NONE) {
+        struct gnwCtrlStartDescriptor desc;
+        desc.pathPtr = "0:GNWSH.ELF";
+        desc.pathLen = 11;
+        desc.errorPtr = &err;
+        k_scr_usr_start(KERNEL_PROC_ID, &desc);
+    }
 
     if (err != GCE_NONE) {
         OOPS("Unable to start core modules");
