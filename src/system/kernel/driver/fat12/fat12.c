@@ -38,6 +38,12 @@ static range_size_t fatRange(const uint_8 * const headerBytes) {
     return range;
 }
 
+static size_t sectorsPerAllocUnit(const uint_8 * const headerBytes) {
+    const struct dos_4_0_ebpb_t * const bpb = (struct dos_4_0_ebpb_t *)headerBytes;
+
+    return bpb->logicalSectorsPerCluster;
+}
+
 static range_size_t directoryRange(const uint_8 * const headerBytes) {
     range_size_t range;
 
@@ -127,6 +133,14 @@ static bool isValidForRead(const uint_8 * const headerBytes,
     const size_t lastCluster = dataSectors / bpb->logicalSectorsPerCluster + 1;
 
     return IN_RANGE(MIN_FILE_CLUSTER, location.allocUnit, MIN(lastCluster, 0xFEF));
+}
+
+static bool isContiguous(const uint_8 * const headerBytes,
+                         const struct gnwFileSystemLocation firstLocation,
+                         const struct gnwFileSystemLocation secondLocation) {
+    return (secondLocation.allocUnit == (firstLocation.allocUnit + 1)) &&
+           isValidForRead(headerBytes, firstLocation) && 
+           isValidForRead(headerBytes, secondLocation);
 }
 
 static bool isEOF(const struct gnwFileSystemLocation location) {
@@ -301,11 +315,13 @@ struct gnwFileSystemDescriptor k_drv_fat12_descriptor() {
         },
         /* maxFilenameLength */ FILE_NAME_MAX_LENGTH,
         /* maxExtensionLength */ FILE_EXTENSION_MAX_LENGTH,
+        /* sectorsPerAllocUnit */ sectorsPerAllocUnit,
         /* directoryRange */ directoryRange,
         /* fatRange */ fatRange,
         /* fatVerify */ fatVerify,
         /* fileStartLocation */ fileStartLocation,
         /* nextLocation */ nextLocation,
+        /* isContiguous */ isContiguous,
         /* isValidForRead */ isValidForRead,
         /* isEOF */ isEOF,
         /* fileInfo */ fileInfo,

@@ -41,6 +41,17 @@ struct gnwFileSystemDescriptor {
     size_t maxExtensionLength;
 
     /*
+        Returns number of sectors in every allocation unit
+        based on header
+
+        Params:
+        * headerBytes - file system header data
+
+        Result: number of sectors per allocation unit
+    */
+    size_t (*sectorsPerAllocUnit)(const uint_8 * const headerBytes);
+
+    /*
         Returns file directory range (values in bytes)
         based on header
 
@@ -99,6 +110,18 @@ struct gnwFileSystemDescriptor {
     struct gnwFileSystemLocation (*nextLocation)(const uint_8 * const headerBytes,
                                                  const uint_8 * const fatBytes,
                                                  const struct gnwFileSystemLocation currentLocation);
+
+    /*
+        Tells if firstLocation is logically contiguous to secondLocation
+
+        Params:
+        * headerBytes - file system header data
+        * firstLocation - first file system location (see gnwFileSystemLocation)
+        * secondLocation - second file system location (see gnwFileSystemLocation)
+    */
+    bool (*isContiguous)(const uint_8 * const headerBytes,
+                         const struct gnwFileSystemLocation firstLocation,
+                         const struct gnwFileSystemLocation secondLocation);
 
     /*
         Returns if the location is valid for read operation

@@ -124,7 +124,7 @@ enum k_stor_error k_stor_volume_readSector(const size_t volumeId, const size_t l
     range_size_t readRange;
 
     readRange.offset = lba * geometry.sectSizeBytes;
-    readRange.length = geometry.sectSizeBytes;
+    readRange.length = geometry.sectSizeBytes * count;
 
     return k_stor_volume_readBytes(volumeId, readRange, buffer);
 }
