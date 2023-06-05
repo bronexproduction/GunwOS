@@ -1,4 +1,4 @@
-CFLAGS=$(APP_CFLAGS) -I $(shell pwd)
+CFLAGS=$(APP_CFLAGS) -I $(shell pwd) -I $(API_SYS_DIR)/dispmgr/include
 RSFLAGS=$(APP_RSFLAGS)
 LFLAGS=$(APP_LFLAGS) -Ttext=0x00100000
 

@@ -24,6 +24,7 @@
 #define SYSCALL_INT(CODE) { __asm__ volatile ("int $" STR(CODE) ); }
 #define REG_RET(BITS, NAME) REG(BITS, NAME, eax)
 #define SYSCALL_RETVAL(BITS) { REG_RET(BITS, _retVal); return _retVal; }
+#define SYSCALL_GET_RETVAL(BITS, NAME) REG_RET(BITS, _retVal); uint_ ## BITS NAME = _retVal;
 
 #define SYSCALL_PAR(NAME, VALUE, REG_NAME) REG(32, _param ## NAME , REG_NAME); _param ## NAME = (uint_32) VALUE ;
 #define SYSCALL_PAR1(VALUE) SYSCALL_PAR(1, VALUE, ebx)

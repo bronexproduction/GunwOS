@@ -47,7 +47,7 @@ enum gnwDeviceError attachToGraphicsDisplay(const struct gnwDisplayDescriptor * 
         return e;
     }
 
-    fillDisplayDescriptor(displayDescriptor->identifier, displayDescriptor->format, displayDescriptor->dimensions, &handle->descriptor);
+    handle->descriptor = *displayDescriptor;
     handle->invalidate = invalidateGraphicsHandle;
     handle->update = pushGraphicsFrame;
 

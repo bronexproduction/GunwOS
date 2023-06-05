@@ -47,7 +47,7 @@ enum gnwDeviceError attachToTextDisplay(const struct gnwDisplayDescriptor * cons
         return e;
     }
 
-    fillDisplayDescriptor(displayDescriptor->identifier, displayDescriptor->format, displayDescriptor->dimensions, &handle->descriptor);
+    handle->descriptor = *displayDescriptor;
     handle->invalidate = invalidateTextHandle;
     handle->update = pushTextFrame;
 

@@ -57,11 +57,14 @@ static bool trm_append(const char c) {
         newline();
     } else if (c == '\b') {
         if (!(termData.cursorX || termData.cursorY)) {
-            return 0;
+            return false;
         }
 
         back();
-        trm_append(' ');
+        const bool result = trm_append(' ');
+        if (!result) {
+            return false;
+        }
         back();
     } else {
         const struct gnwDeviceUHA_display_character vChar = {TERMINAL_BG_COLOR_DFLT, TERMINAL_CHAR_COLOR_DFLT, c};
@@ -74,7 +77,7 @@ static bool trm_append(const char c) {
         }
     }
 
-    return 1;
+    return true;
 }
 
 static void clear() {
@@ -97,7 +100,11 @@ static void ipcListener(const struct gnwIpcEndpointQuery * const query) {
     }
 
     for (size_t i = 0; i < query->dataSizeBytes; ++i) {
-        trm_append(query->dataPtr[i]);
+        const bool result = trm_append(query->dataPtr[i]);
+        if (!result) {
+            fug(FUG_UNDEFINED);
+            return;
+        }
     }
 }
 

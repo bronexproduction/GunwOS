@@ -135,23 +135,7 @@ static void prompt() {
 
 static void s_cli_init() {
 
-    // /* 
-    //     Attach to character output
-    // */
-    // struct gnwDeviceUHADesc charOutDesc;
     enum gnwDeviceError e = GDE_NONE;
-    // e = devGetByType(DEV_TYPE_CHAR_OUT, &charOutDesc);
-
-    // if (e) {
-    //     // OOPS("Error retrieving available character output device");
-    //     fug(FUG_UNDEFINED);
-    // }
-
-    // e = devAcquire(charOutDesc.identifier);
-    // if (e) {
-    //     // OOPS("Unable to attach to character output");
-    //     fug(FUG_UNDEFINED);
-    // }
     
     /* 
         Attach keyboard listener
@@ -179,12 +163,6 @@ static void s_cli_init() {
         // OOPS("Unable to attach keyboard listener");
         fug(FUG_UNDEFINED);
     }
-
-    /*
-        Configure variables
-    */
-    // user_cli_charOutAttached = true;
-    // user_cli_charOutIdentifier = charOutDesc.identifier;
 
     user_cli_kbf_register((struct user_cli_kbf_listener){0, onKeyDown});
     

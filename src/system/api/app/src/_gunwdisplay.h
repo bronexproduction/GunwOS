@@ -10,23 +10,13 @@
 
 #include "../include/gunwdisplay.h"
 
-enum DisplayType {
-    TEXT,
-    GRAPHICS
-};
-
-void fillDisplayDescriptor(const size_t identifier,
-                           const enum gnwDeviceUHA_display_format format,
-                           const point_t dimensions,
-                           struct gnwDisplayDescriptor * const desc);
-
-enum gnwDeviceError getDisplay(enum DisplayType type, 
+enum gnwDeviceError getDisplay(enum gnwDisplayType type, 
                                struct gnwDisplayDescriptor * const displayDescriptor);
                                
-enum gnwDeviceError attachToDisplay(const enum DisplayType type, 
+enum gnwDeviceError attachToDisplay(const enum gnwDisplayType type, 
                                     const struct gnwDisplayDescriptor * const displayDescriptor);
 
-enum gnwDeviceError pushFrame(const size_t deviceId,
+enum gnwDeviceError pushFrame(const size_t displayId,
                               const ptr_t buffer,
                               const size_t bufferSizeBytes);
                               

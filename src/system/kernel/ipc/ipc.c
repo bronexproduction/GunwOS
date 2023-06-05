@@ -15,6 +15,7 @@
 #include <queue/queue.h>
 
 #define MAX_IPC_LISTENER 8
+#define MAX_IPC_TOKEN 8
 
 static struct ipcListener {
     procId_t procId;
@@ -23,6 +24,14 @@ static struct ipcListener {
     gnwIpcListener listener;
     gnwIpcEndpointQueryDecoder decoder;
 } ipcListenerRegister[MAX_IPC_LISTENER];
+
+static struct ipcReply {
+    procId_t senderProcId;
+    procId_t handlerProcId;
+    enum gnwIpcError * absReplyErrorPtr;
+    ptr_t absReplyBufferPtr;
+    size_t replySizeBytes;
+} ipcReplyRegister[MAX_IPC_TOKEN];
 
 static void clearListener(const size_t entryId) {
     if (entryId >= MAX_IPC_LISTENER) {
@@ -34,8 +43,20 @@ static void clearListener(const size_t entryId) {
     ipcListenerRegister[entryId].procId = NONE_PROC_ID;
 }
 
+static void clearReply(const size_t entryId) {
+    if (entryId >= MAX_IPC_TOKEN) {
+        OOPS("Reply index out of bounds");
+        return;
+    }
+    
+    memzero(&ipcReplyRegister[entryId], sizeof(struct ipcReply));
+    ipcReplyRegister[entryId].senderProcId = NONE_PROC_ID;
+    ipcReplyRegister[entryId].handlerProcId = NONE_PROC_ID;
+}
+
 void k_ipc_init() {
     for (size_t i = 0; i < MAX_IPC_LISTENER; clearListener(i++));
+    for (size_t i = 0; i < MAX_IPC_TOKEN; clearReply(i++));
 }
 
 static bool pathGlobalValidate(const char * absPathPtr, const size_t pathLen) {
@@ -73,15 +94,35 @@ static size_t freeListenerIndex() {
     return MAX_IPC_LISTENER;
 }
 
+static size_t freeReplyIndex() {
+    for (size_t index = 0; index < MAX_IPC_TOKEN; ++index) {
+        if (ipcReplyRegister[index].senderProcId == NONE_PROC_ID) {
+            return index;
+        }
+    }
+
+    return MAX_IPC_TOKEN;
+}
+
 static bool processPermitted(const procId_t procId,
                              const enum gnwIpcAccessScope accessScope) {
     return (procId == KERNEL_PROC_ID && (accessScope & GIAS_KERNEL)) ||
            (procId > KERNEL_PROC_ID && (accessScope & GIAS_USER));
 }
 
+static void unlockIfAble(const procId_t procId) {
+    for (size_t token = 0; token < MAX_IPC_TOKEN; ++token) {
+        if (ipcReplyRegister[token].senderProcId == procId) {
+            return;
+        }
+    }
+
+    k_proc_unlock(procId, PLT_IPC);
+}
+
 enum gnwIpcError k_ipc_send(const procId_t procId,
                             const struct gnwIpcSenderQuery absQuery) {
-    if (!absQuery.path || !absQuery.dataPtr) {
+    if (!absQuery.path || !absQuery.dataPtr || !absQuery.replyErrPtr) {
         OOPS("Nullptr");
         return GIPCE_UNKNOWN;
     }
@@ -107,7 +148,29 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
     endpointQuery.dataSizeBytes = absQuery.dataSizeBytes;
     endpointQuery.replySizeBytes = absQuery.replySizeBytes;
 
-    #warning endpoint query - how to handle response? response bytes not counted
+    size_t token;
+
+    if (endpointQuery.replySizeBytes) {
+        token = freeReplyIndex();
+        if (token >= MAX_IPC_TOKEN) {
+            OOPS("IPC reply table full");
+            return GIPCE_UNKNOWN;
+        }
+
+        ipcReplyRegister[token].senderProcId = procId;
+        ipcReplyRegister[token].handlerProcId = ipcListenerRegister[listenerIndex].procId;
+        ipcReplyRegister[token].absReplyErrorPtr = absQuery.replyErrPtr;
+        ipcReplyRegister[token].absReplyBufferPtr = absQuery.replyPtr;
+        ipcReplyRegister[token].replySizeBytes = endpointQuery.replySizeBytes;
+
+        endpointQuery.token = token;
+        
+        k_proc_lock(procId, PLT_IPC);
+    } else {
+        *(absQuery.replyErrPtr) = GIPCE_NONE;
+        endpointQuery.token = MAX_IPC_TOKEN;
+    }
+
     const enum k_proc_error err = k_proc_callback_invoke_ptr(ipcListenerRegister[listenerIndex].procId,
                                                              (gnwEventListener_ptr)ipcListenerRegister[listenerIndex].listener,
                                                              (ptr_t)&endpointQuery,
@@ -115,11 +178,20 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
                                                              sizeof(struct gnwIpcEndpointQuery),
                                                              (gnwRunLoopDataEncodingRoutine)gnwIpcEndpointQuery_encode,
                                                              (gnwRunLoopDataEncodingRoutine)ipcListenerRegister[listenerIndex].decoder);
-    if (err == PE_IGNORED) {
-        return GIPCE_IGNORED;
-    }
-    else if (err != PE_NONE) {
-        return GIPCE_UNKNOWN;
+
+    if (err != PE_NONE) {
+        if (endpointQuery.replySizeBytes) {
+            clearReply(token);
+            k_que_dispatch_arch((fPtr_arch)unlockIfAble, procId);
+        }
+
+        if (err == PE_IGNORED) {
+            return GIPCE_IGNORED;
+        } else if (err == PE_LIMIT_REACHED) {
+            return GIPCE_FULL;
+        } else {
+            return GIPCE_UNKNOWN;
+        }
     }
 
     return GIPCE_NONE;
@@ -166,6 +238,103 @@ enum gnwIpcError k_ipc_register(const procId_t procId,
     return GIPCE_NONE;
 }
 
+enum gnwIpcError k_ipc_reply(const procId_t procId,
+                             const ptr_t absReplyBufferPtr,
+                             const size_t replySizeBytes,
+                             const size_t token) {
+    if (!absReplyBufferPtr) {
+        OOPS("Null reply buffer pointer");
+        return GIPCE_UNKNOWN;
+    }
+    if (!replySizeBytes) {
+        return GIPCE_INVALID_PARAMETER;
+    }
+    if (token >= MAX_IPC_TOKEN) {
+        return GIPCE_INVALID_PARAMETER;
+    }
+
+    const struct ipcReply * const reply = &ipcReplyRegister[token];
+    if (reply->handlerProcId == NONE_PROC_ID) {
+        /*
+            Empty slot
+
+            Note: Can happen if sender process terminated before receiving the reply
+        */
+        return GIPCE_NOT_FOUND;
+    }
+    if (reply->handlerProcId != procId) {
+        return GIPCE_FORBIDDEN;
+    }
+    if (reply->replySizeBytes != replySizeBytes) {
+        return GIPCE_INVALID_PARAMETER;
+    }
+    if (!reply->absReplyErrorPtr) {
+        OOPS("Unexpected reply error nullptr");
+        return GIPCE_UNKNOWN;
+    }
+    if (!reply->absReplyBufferPtr) {
+        OOPS("Unexpected reply buffer nullptr");
+        return GIPCE_UNKNOWN;
+    }
+    const procId_t senderProcId = reply->senderProcId;
+    if (senderProcId <= KERNEL_PROC_ID) {
+        OOPS("Unexpected sender process ID on IPC reply");
+        return GIPCE_UNKNOWN;
+    }
+
+    memcopy(absReplyBufferPtr, reply->absReplyBufferPtr, replySizeBytes);
+    *(reply->absReplyErrorPtr) = GIPCE_NONE;
+
+    clearReply(token);
+    unlockIfAble(senderProcId);
+
+    return GIPCE_NONE;
+}
+
+static void failReply(const size_t token) {
+    if (token >= MAX_IPC_TOKEN) {
+        OOPS("Unexpected IPC token on error");
+        return;
+    }
+
+    const struct ipcReply * const reply = &ipcReplyRegister[token];
+    if (reply->handlerProcId == NONE_PROC_ID) {
+        OOPS("Unexpected empty IPC slot on error");
+        return;
+    }
+    if (!reply->absReplyErrorPtr) {
+        OOPS("Unexpected reply error nullptr");
+        return;
+    }
+    const procId_t senderProcId = reply->senderProcId;
+    if (senderProcId <= KERNEL_PROC_ID) {
+        OOPS("Unexpected sender process ID on IPC reply");
+        return;
+    }
+
+    *(reply->absReplyErrorPtr) = GIPCE_IGNORED;
+
+    clearReply(token);
+    unlockIfAble(senderProcId);
+}
+
 void k_ipc_procCleanup(const procId_t procId) {
     clearListener(procId);
+    for (int token = 0; token < MAX_IPC_TOKEN; ++token) {
+        if (ipcReplyRegister[token].handlerProcId == procId) {
+            /*
+                Handler process terminated
+
+                Note: Nullptr reply must be issued and sender process IPC lock must be released
+            */
+            failReply(token);
+        } else if (ipcReplyRegister[token].senderProcId == procId) {
+            /*
+                Sender process terminated
+
+                Note: Handler process will get GIPCE_NOT_FOUND as ipcReply return value for current token
+            */
+            clearReply(token);
+        }
+    }
 }

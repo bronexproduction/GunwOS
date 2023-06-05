@@ -41,15 +41,17 @@ enum gnwIpcError ipcRegister(const char * const path,
 enum gnwIpcError ipcSend(const char * const path,
                          const ptr_t dataPtr,
                          const size_t dataSizeBytes,
-                         const ptr_t replyPtr,
+                         ptr_t replyPtr,
                          const size_t replySizeBytes) {
     CHECKPTR(path);
 
+    enum gnwIpcError replyErr = GIPCE_NONE;
     struct gnwIpcSenderQuery query;
     query.path = path;
     query.pathLen = strlen(path);
     query.dataPtr = dataPtr;
     query.dataSizeBytes = dataSizeBytes;
+    query.replyErrPtr = &replyErr;
     query.replyPtr = replyPtr;
     query.replySizeBytes = replySizeBytes;
 
@@ -58,7 +60,8 @@ enum gnwIpcError ipcSend(const char * const path,
     SYSCALL_USER_FUNC(IPC_SEND);
     SYSCALL_USER_INT;
 
-    SYSCALL_RETVAL(32);
+    SYSCALL_GET_RETVAL(32, err);
+    return (replyErr == GIPCE_NONE) ? (enum gnwIpcError)err : replyErr;
 }
 
 enum gnwIpcError ipcReply(const ptr_t replyPtr,
