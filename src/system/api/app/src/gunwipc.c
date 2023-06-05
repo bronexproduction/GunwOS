@@ -45,7 +45,7 @@ enum gnwIpcError ipcSend(const char * const path,
                          const size_t replySizeBytes) {
     CHECKPTR(path);
 
-    enum gnwIpcError replyErr;
+    enum gnwIpcError replyErr = GIPCE_NONE;
     struct gnwIpcSenderQuery query;
     query.path = path;
     query.pathLen = strlen(path);
