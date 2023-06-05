@@ -15,12 +15,18 @@
 
 #define IO_GENERAL_FAILURE -1
 
+static bool outputReady = false;
+
 static int append(char c) {
     while (1) { 
         enum gnwIpcError e = ipcSend("t0", (ptr_t)&c, sizeof(char), nullptr, 0);
         if (e == GIPCE_NONE) {
+            outputReady = true;
             return 1;
         } else if (e == GIPCE_FULL) {
+            yield();
+            continue;
+        } else if (e == GIPCE_NOT_FOUND && !outputReady) {
             yield();
             continue;
         } else {
