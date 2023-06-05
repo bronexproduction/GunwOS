@@ -122,7 +122,7 @@ static void unlockIfAble(const procId_t procId) {
 
 enum gnwIpcError k_ipc_send(const procId_t procId,
                             const struct gnwIpcSenderQuery absQuery) {
-    if (!absQuery.path || !absQuery.dataPtr) {
+    if (!absQuery.path || !absQuery.dataPtr || !absQuery.replyErrPtr) {
         OOPS("Nullptr");
         return GIPCE_UNKNOWN;
     }
@@ -167,6 +167,7 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
         
         k_proc_lock(procId, PLT_IPC);
     } else {
+        *(absQuery.replyErrPtr) = GIPCE_NONE;
         endpointQuery.token = MAX_IPC_TOKEN;
     }
 
