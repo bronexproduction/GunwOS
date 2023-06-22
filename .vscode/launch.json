@@ -6,12 +6,13 @@
     "configurations": [
         {
             "type": "gdb",
-            "request": "attach",
-            "name": "Attach to gdbserver",
+            "request": "launch",
+            "name": "Build and debug",
             "executable": "build/kernel/kernel.elf",
             "target": ":1234",
             "remote": true,
-            "cwd": "${workspaceRoot}"
+            "cwd": "${workspaceRoot}",
+            "preLaunchTask": "Build and debug (QEMU)"
         },
     ]
 }
