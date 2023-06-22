@@ -6,13 +6,22 @@
     "configurations": [
         {
             "type": "gdb",
-            "request": "launch",
-            "name": "Build and debug",
+            "request": "attach",
+            "name": "Attach to gdbserver",
             "executable": "build/kernel/kernel.elf",
             "target": ":1234",
             "remote": true,
-            "cwd": "${workspaceRoot}",
-            "preLaunchTask": "Build and debug (QEMU)"
+            "cwd": "${workspaceRoot}"
         },
+        // {
+        //     "type": "gdb",
+        //     "request": "launch",
+        //     "name": "Build and debug",
+        //     "executable": "build/kernel/kernel.elf",
+        //     "target": ":1234",
+        //     "remote": true,
+        //     "cwd": "${workspaceRoot}",
+        //     "preLaunchTask": "Build and debug (QEMU - detached)"
+        // },
     ]
 }
