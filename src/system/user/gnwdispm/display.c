@@ -138,11 +138,16 @@ enum gnwDeviceError display_getDisplay(const enum gnwDisplayType type,
 
 enum gnwDeviceError display_attachToDisplay(const enum gnwDisplayType type, 
                                             const struct gnwDisplayDescriptor * const displayDescriptor) {
+
+    /*
+        TO BE REPLACED 
+    */
+
     CHECKPTR(displayDescriptor)
 
     struct gnwDeviceUHADesc uha;
     enum gnwDeviceError e = devGetById(displayDescriptor->identifier, &uha);
-    
+
     if (e) {
         return e;
     }

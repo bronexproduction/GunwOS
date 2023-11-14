@@ -63,9 +63,9 @@ void dupa() {
     }
     pushFrame();
 
-    size_t i = 0;
+    size_t i;
 
-    for(; i < 1000000000; ++i);
+    for(i = 0; i < 1000000000; ++i);
 
     for (size_t i = 0; i < DISPLAY_COLS * DISPLAY_ROWS; ++i) {
         frameBuffer[i].bgColor = 2;
@@ -73,4 +73,15 @@ void dupa() {
         frameBuffer[i].character = 50;
     }
     pushFrame();
+
+    for(i = 0; i < 1000000000; ++i);
+
+    for (size_t i = 0; i < DISPLAY_COLS * DISPLAY_ROWS; ++i) {
+        frameBuffer[i].bgColor = 3;
+        frameBuffer[i].charColor = 0;
+        frameBuffer[i].character = 51;
+    }
+    pushFrame();
+
+    for(i = 0; i < 1000000000; ++i);
 }
