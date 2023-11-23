@@ -5,8 +5,8 @@
 //  Created by Artur Danielewski on 21.01.2018.
 //
 
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef STDGUNW_UTILS_H
+#define STDGUNW_UTILS_H
 
 #include "types.h"
 
@@ -29,4 +29,4 @@
 
 size_t aligned(const size_t value, const size_t alignment);
 
-#endif // UTILS_H
+#endif // STDGUNW_UTILS_H
