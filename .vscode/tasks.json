@@ -71,7 +71,17 @@
         {
             "label": "Build",
             "type": "shell",
-            "command": "make clean all",
+            "command": "make all",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Clean",
+            "type": "shell",
+            "command": "make clean",
             "group": {
                 "kind": "build",
                 "isDefault": false
