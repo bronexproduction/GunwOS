@@ -29,11 +29,11 @@ DISPMGR_LISTENER(GetDisplay,
 )
 
 DISPMGR_LISTENER(AttachToDisplay,
-    result.error = display_attachToDisplay(dispQueryPtr->type, &dispQueryPtr->displayDescriptor);
+    result.error = display_attachToDisplay(query->sourceProcId, dispQueryPtr->type, &dispQueryPtr->displayDescriptor);
 )
 
 DISPMGR_LISTENER(PushFrame,
-    result.error = display_pushFrame(dispQueryPtr->displayId, dispQueryPtr->frameBuffer, dispQueryPtr->inputRange);
+    result.error = display_pushFrame(query->sourceProcId, dispQueryPtr->displayId, dispQueryPtr->frameBuffer, dispQueryPtr->inputRange);
 )
 
 void dupa() {

@@ -117,11 +117,12 @@ static enum gnwDeviceError setDisplayFormat(const size_t deviceId, const enum gn
     return devSetParam(deviceId, &paramDesc, format);
 }
 
-enum gnwDeviceError display_attachToDisplay(const enum gnwDisplayType type, 
+enum gnwDeviceError display_attachToDisplay(const procId_t procId,
+                                            const enum gnwDisplayType type, 
                                             const struct gnwDisplayDescriptor * const displayDescriptor) {
 
     /*
-        TO BE REPLACED 
+        TO BE REPLACED
     */
 
     CHECKPTR(displayDescriptor)
@@ -135,6 +136,22 @@ enum gnwDeviceError display_attachToDisplay(const enum gnwDisplayType type,
     if (GDD_FMT_ISTEXT(displayDescriptor->format) != (type == TEXT)) {
         return GDE_ID_INVALID;
     }
+
+    /*
+        Configure process permission for given displayId
+
+        To be implemented
+    */
+
+    /*
+        Move process to foreground
+
+        To be implemented
+    */
+
+    /*
+        Set display adapter format
+    */
 
     e = setDisplayFormat(displayDescriptor->identifier, displayDescriptor->format);
     if (e) {

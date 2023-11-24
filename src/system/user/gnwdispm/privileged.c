@@ -9,7 +9,8 @@
 
 #include <gunwfug.h>
 
-enum gnwDeviceError display_pushFrame(const size_t displayId,
+enum gnwDeviceError display_pushFrame(const procId_t procId,
+                                      const size_t displayId,
                                       const ptr_t buffer,
                                       const range_addr_t inputRange) {
     CHECKPTR(buffer)
