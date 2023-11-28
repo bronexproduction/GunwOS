@@ -6,6 +6,9 @@
 //
 
 #include "display.h"
+#include "session.h"
+
+#include <defs.h>
 
 #include <gunwfug.h>
 
@@ -109,14 +112,6 @@ enum gnwDeviceError display_getDisplay(const enum gnwDisplayType type,
     return GDE_NONE;
 }
 
-static enum gnwDeviceError setDisplayFormat(const size_t deviceId, const enum gnwDeviceUHA_display_format format) {
-    struct gnwDeviceParamDescriptor paramDesc;
-
-    paramDesc.param = GDU_DISPLAY_PARAM_FORMAT;
-
-    return devSetParam(deviceId, &paramDesc, format);
-}
-
 enum gnwDeviceError display_attachToDisplay(const procId_t procId,
                                             const enum gnwDisplayType type, 
                                             const struct gnwDisplayDescriptor * const displayDescriptor) {
@@ -137,24 +132,19 @@ enum gnwDeviceError display_attachToDisplay(const procId_t procId,
         return GDE_ID_INVALID;
     }
 
-    /*
-        Configure process permission for given displayId
-
-        To be implemented
-    */
-
-    /*
-        Move process to foreground
-
-        To be implemented
-    */
-
-    /*
-        Set display adapter format
-    */
-
-    e = setDisplayFormat(displayDescriptor->identifier, displayDescriptor->format);
+    const struct session * displaySession = nullptr;
+    e = sessionCreate(procId, displayDescriptor, &displaySession);
     if (e) {
+        return e;
+    }
+    if (!displaySession) {
+        fug(FUG_NULLPTR);
+        return GDE_UNKNOWN;
+    }
+
+    e = sessionEnable(displaySession);
+    if (e) {
+        sessionDestroy(displaySession);
         return e;
     }
 
