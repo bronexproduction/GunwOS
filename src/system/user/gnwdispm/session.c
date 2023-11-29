@@ -7,8 +7,10 @@
 
 #include "session.h"
 
+#include <defs.h>
 #include <gunwfug.h>
 
+const struct session * displayStack[MAX_SESSION][MAX_DISPLAY];
 struct session sessions[MAX_SESSION];
 
 static enum gnwDeviceError setDisplayFormat(const size_t deviceId, const enum gnwDeviceUHA_display_format format) {
@@ -25,6 +27,7 @@ enum gnwDeviceError sessionCreate(const procId_t procId,
     
     CHECKPTR(displayDescriptor);
     CHECKPTR(sessionPtr);
+
     /*
         TO BE DETERMINED
     */
@@ -65,21 +68,24 @@ enum gnwDeviceError sessionEnable(const struct session * const sessionPtr) {
 }
 
 struct session * sessionForProc(const procId_t procId) {
-    /*
-        TO BE DETERMINED
-    */
-    return 0;
+    for (size_t index = 0; index < MAX_SESSION; ++index) {
+        if (sessions[index].procId == procId) {
+            return &sessions[index];
+        }
+    }
+    
+    return nullptr;
 }
 
 bool sessionIsOnTop(const struct session * const sessionPtr) {
-    /*
-        TO BE DETERMINED
-    */
-    return false;
+    return *displayStack[sessionPtr->displayDescriptor.identifier] == sessionPtr;
 }
 
 void sessionDestroy(const struct session * sessionPtr) {
     /*
         TO BE DETERMINED   
+    */
+    /*
+        SHIFT DISPLAY STACK
     */
 }

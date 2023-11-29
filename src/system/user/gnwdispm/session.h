@@ -11,6 +11,7 @@
 #include <gunwdisplay.h>
 
 #define MAX_SESSION 8
+#define MAX_DISPLAY 8
 
 struct session {
 
