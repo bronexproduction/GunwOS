@@ -120,6 +120,7 @@ clean:
 	rm -rf $(BUILD_DIR)
 	find $(SRC_DIR)/ -type f -name '*.o' -delete
 	find $(SRC_DIR)/ -type f -name '*.a' -delete
+	find $(SRC_DIR)/ -type f -name '*.elf' -delete
 
 test:
 	make -C $(TESTS_SRC_DIR)/bootloader/boot clean all run
