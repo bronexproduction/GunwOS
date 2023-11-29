@@ -64,6 +64,20 @@ enum gnwDeviceError sessionEnable(const struct session * const sessionPtr) {
     return GDE_NONE;
 }
 
+struct session * sessionForProc(const procId_t procId) {
+    /*
+        TO BE DETERMINED
+    */
+    return 0;
+}
+
+bool sessionIsOnTop(const struct session * const sessionPtr) {
+    /*
+        TO BE DETERMINED
+    */
+    return false;
+}
+
 void sessionDestroy(const struct session * sessionPtr) {
     /*
         TO BE DETERMINED   

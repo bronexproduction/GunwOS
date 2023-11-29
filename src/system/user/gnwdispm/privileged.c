@@ -6,6 +6,7 @@
 //
 
 #include "display.h"
+#include "session.h"
 
 #include <gunwfug.h>
 
@@ -15,10 +16,17 @@ enum gnwDeviceError display_pushFrame(const procId_t procId,
                                       const range_addr_t inputRange) {
     CHECKPTR(buffer)
 
-    if (!processPermitted) {
+    const struct session * const displaySession = sessionForProc(procId);
+    if (!displaySession) {
         return GDE_HANDLE_INVALID;
     }
-    if (!processOnTop) {
+
+    if (displaySession->displayDescriptor.identifier != displayId) {
+        sessionDestroy(displaySession);
+        return GDE_HANDLE_INVALID;
+    }
+
+    if (!sessionIsOnTop(displaySession)) {
         return GDE_BUSY;
     }
 
@@ -28,5 +36,10 @@ enum gnwDeviceError display_pushFrame(const procId_t procId,
         or the content from the last process may stay presented
     */
 
-    return devMemWrite(displayId, buffer, &inputRange);
+    const enum gnwDeviceError e = devMemWrite(displayId, buffer, &inputRange);
+    if (e != GDE_NONE) {
+        sessionDestroy(displaySession);
+    }
+
+    return e;
 }
