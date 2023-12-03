@@ -8,10 +8,25 @@
 #include "session.h"
 
 #include <defs.h>
+#include <proc.h>
 #include <gunwfug.h>
 
 const struct session * displayStack[MAX_SESSION][MAX_DISPLAY];
 struct session sessions[MAX_SESSION];
+
+struct session * sessionForProc(const procId_t procId) {
+    for (size_t index = 0; index < MAX_SESSION; ++index) {
+        if (sessions[index].procId == procId) {
+            return &sessions[index];
+        }
+    }
+    
+    return nullptr;
+}
+
+bool sessionIsOnTop(const struct session * const sessionPtr) {
+    return *displayStack[sessionPtr->displayDescriptor.identifier] == sessionPtr;
+}
 
 static enum gnwDeviceError setDisplayFormat(const size_t deviceId, const enum gnwDeviceUHA_display_format format) {
     struct gnwDeviceParamDescriptor paramDesc;
@@ -23,22 +38,35 @@ static enum gnwDeviceError setDisplayFormat(const size_t deviceId, const enum gn
 
 enum gnwDeviceError sessionCreate(const procId_t procId, 
                                   const struct gnwDisplayDescriptor * const displayDescriptor, 
-                                  const struct session * const * sessionPtr) {
+                                  const struct session * * sessionPtr) {
     
     CHECKPTR(displayDescriptor);
     CHECKPTR(sessionPtr);
 
     /*
-        TO BE DETERMINED
+        Find free session
     */
-
-
+    struct session * freeSession = nullptr;
+    for (size_t i = 0; i < MAX_SESSION; ++i) {
+        if (sessions[i].procId == NONE_PROC_ID) {
+            freeSession = &sessions[i];
+            break;
+        }
+    }
+    if (!freeSession) {
+        return GDE_OPERATION_FAILED;
+    }
 
     /*
-        Configure process permission for given displayId ( create valid session )
-
-        To be implemented
+        Configure session values
     */
+    freeSession->procId = procId;
+    freeSession->displayDescriptor = *displayDescriptor;
+
+    /*
+        Set session return value
+    */
+    *sessionPtr = freeSession;
 
     return GDE_NONE;
 }
@@ -65,20 +93,6 @@ enum gnwDeviceError sessionEnable(const struct session * const sessionPtr) {
     */
 
     return GDE_NONE;
-}
-
-struct session * sessionForProc(const procId_t procId) {
-    for (size_t index = 0; index < MAX_SESSION; ++index) {
-        if (sessions[index].procId == procId) {
-            return &sessions[index];
-        }
-    }
-    
-    return nullptr;
-}
-
-bool sessionIsOnTop(const struct session * const sessionPtr) {
-    return *displayStack[sessionPtr->displayDescriptor.identifier] == sessionPtr;
 }
 
 void sessionDestroy(const struct session * sessionPtr) {
