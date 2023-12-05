@@ -75,13 +75,6 @@ enum gnwDeviceError sessionEnable(const sessionPtr_t sessionPtr) {
 
     CHECKPTR(sessionPtr);
 
-    if (sessionIsOnTop(sessionPtr)) {
-        /*
-            Session already on top
-        */
-        return GDE_ALREADY_SET;
-    }
-
     sessionPtr_t * stack = displayStack[sessionPtr->displayDescriptor.identifier];
 
     /*

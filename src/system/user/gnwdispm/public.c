@@ -138,7 +138,7 @@ enum gnwDeviceError display_attachToDisplay(const procId_t procId,
     }
 
     e = sessionEnable(displaySession);
-    if (e != GDE_NONE && e != GDE_ALREADY_SET) {
+    if (e != GDE_NONE) {
         sessionDestroy(displaySession);
         return e;
     }
