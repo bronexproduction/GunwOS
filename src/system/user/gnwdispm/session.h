@@ -26,14 +26,15 @@ struct session {
     struct gnwDisplayDescriptor displayDescriptor;
 
 };
+typedef struct session * sessionPtr_t;
 
-struct session * sessionForProc(const procId_t procId);
-bool sessionIsOnTop(const struct session * const sessionPtr);
+sessionPtr_t sessionForProc(const procId_t procId);
+bool sessionIsOnTop(const sessionPtr_t sessionPtr);
 
 enum gnwDeviceError sessionCreate(const procId_t procId, 
                                   const struct gnwDisplayDescriptor * const displayDescriptor, 
-                                  const struct session * * sessionPtr);
-enum gnwDeviceError sessionEnable(const struct session * const sessionPtr);
-void sessionDestroy(const struct session * sessionPtr);
+                                  const sessionPtr_t * sessionPtr);
+enum gnwDeviceError sessionEnable(const sessionPtr_t sessionPtr);
+void sessionDestroy(const sessionPtr_t sessionPtr);
 
 #endif // SESSION_H

@@ -11,10 +11,10 @@
 #include <proc.h>
 #include <gunwfug.h>
 
-const struct session * displayStack[MAX_SESSION][MAX_DISPLAY];
+const sessionPtr_t displayStack[MAX_SESSION][MAX_DISPLAY];
 struct session sessions[MAX_SESSION];
 
-struct session * sessionForProc(const procId_t procId) {
+sessionPtr_t sessionForProc(const procId_t procId) {
     for (size_t index = 0; index < MAX_SESSION; ++index) {
         if (sessions[index].procId == procId) {
             return &sessions[index];
@@ -24,7 +24,7 @@ struct session * sessionForProc(const procId_t procId) {
     return nullptr;
 }
 
-bool sessionIsOnTop(const struct session * const sessionPtr) {
+bool sessionIsOnTop(const sessionPtr_t sessionPtr) {
     return *displayStack[sessionPtr->displayDescriptor.identifier] == sessionPtr;
 }
 
@@ -38,7 +38,7 @@ static enum gnwDeviceError setDisplayFormat(const size_t deviceId, const enum gn
 
 enum gnwDeviceError sessionCreate(const procId_t procId, 
                                   const struct gnwDisplayDescriptor * const displayDescriptor, 
-                                  const struct session * * sessionPtr) {
+                                  const sessionPtr_t * sessionPtr) {
     
     CHECKPTR(displayDescriptor);
     CHECKPTR(sessionPtr);
@@ -46,7 +46,7 @@ enum gnwDeviceError sessionCreate(const procId_t procId,
     /*
         Find free session
     */
-    struct session * freeSession = nullptr;
+    sessionPtr_t freeSession = nullptr;
     for (size_t i = 0; i < MAX_SESSION; ++i) {
         if (sessions[i].procId == NONE_PROC_ID) {
             freeSession = &sessions[i];
@@ -71,9 +71,48 @@ enum gnwDeviceError sessionCreate(const procId_t procId,
     return GDE_NONE;
 }
 
-enum gnwDeviceError sessionEnable(const struct session * const sessionPtr) {
+enum gnwDeviceError sessionEnable(const sessionPtr_t sessionPtr) {
 
     CHECKPTR(sessionPtr);
+
+    if (sessionIsOnTop(sessionPtr)) {
+        /*
+            Session already on top
+        */
+        return GDE_ALREADY_SET;
+    }
+
+    sessionPtr_t * stack = displayStack[sessionPtr->displayDescriptor.identifier];
+
+    /*
+        Check if session already on display stack
+    */
+    size_t sessionIndex = 0;
+    for (; sessionIndex < MAX_SESSION; ++sessionIndex) {
+        if (stack[sessionIndex] == sessionPtr) {
+            break;
+        }
+    }
+
+    if (sessionIndex == MAX_SESSION && stack[MAX_SESSION - 1]) {
+        /*
+            Display stack full
+        */
+        return GDE_OPERATION_FAILED;
+    }
+
+    /*
+        Shift stack - TBD - take sessionIndex into consideration
+    */
+    for (size_t i = MAX_SESSION - 1; i > 0; --i) {
+        if (stack[i-1] != sessionPtr) {
+            stack[i] = stack[i-1];
+        }
+    }
+
+    /*
+        Add session at the beginning
+    */
 
     /*
         Set display adapter format
@@ -85,17 +124,10 @@ enum gnwDeviceError sessionEnable(const struct session * const sessionPtr) {
         return e;
     }
 
-
-    /*
-        Move process to foreground
-
-        To be implemented
-    */
-
     return GDE_NONE;
 }
 
-void sessionDestroy(const struct session * sessionPtr) {
+void sessionDestroy(const sessionPtr_t sessionPtr) {
     /*
         TO BE DETERMINED   
     */

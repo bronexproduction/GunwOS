@@ -120,7 +120,7 @@ enum gnwDeviceError display_attachToDisplay(const procId_t procId,
     struct gnwDeviceUHADesc uha;
     enum gnwDeviceError e = devGetById(displayDescriptor->identifier, &uha);
 
-    if (e) {
+    if (e != GDE_NONE) {
         return e;
     }
     if (GDD_FMT_ISTEXT(displayDescriptor->format) != (type == TEXT)) {
@@ -129,7 +129,7 @@ enum gnwDeviceError display_attachToDisplay(const procId_t procId,
 
     const struct session * displaySession = nullptr;
     e = sessionCreate(procId, displayDescriptor, &displaySession);
-    if (e) {
+    if (e != GDE_NONE) {
         return e;
     }
     if (!displaySession) {
@@ -138,7 +138,7 @@ enum gnwDeviceError display_attachToDisplay(const procId_t procId,
     }
 
     e = sessionEnable(displaySession);
-    if (e) {
+    if (e != GDE_NONE && e != GDE_ALREADY_SET) {
         sessionDestroy(displaySession);
         return e;
     }
