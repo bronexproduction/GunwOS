@@ -8,10 +8,12 @@
 #include "session.h"
 
 #include <defs.h>
+#include <mem.h>
 #include <proc.h>
+#include <utils.h>
 #include <gunwfug.h>
 
-const sessionPtr_t displayStack[MAX_SESSION][MAX_DISPLAY];
+sessionPtr_t displayStack[MAX_SESSION][MAX_DISPLAY];
 struct session sessions[MAX_SESSION];
 
 sessionPtr_t sessionForProc(const procId_t procId) {
@@ -38,7 +40,7 @@ static enum gnwDeviceError setDisplayFormat(const size_t deviceId, const enum gn
 
 enum gnwDeviceError sessionCreate(const procId_t procId, 
                                   const struct gnwDisplayDescriptor * const displayDescriptor, 
-                                  const sessionPtr_t * sessionPtr) {
+                                  sessionPtr_t * const sessionPtr) {
     
     CHECKPTR(displayDescriptor);
     CHECKPTR(sessionPtr);
@@ -95,22 +97,22 @@ enum gnwDeviceError sessionEnable(const sessionPtr_t sessionPtr) {
     }
 
     /*
-        Shift stack - TBD - take sessionIndex into consideration
+        Shift stack
     */
-    for (size_t i = MAX_SESSION - 1; i > 0; --i) {
-        if (stack[i-1] != sessionPtr) {
-            stack[i] = stack[i-1];
+    for (sessionIndex = MIN(sessionIndex, MAX_SESSION - 1); sessionIndex > 0; --sessionIndex) {
+        if (stack[sessionIndex-1] != sessionPtr) {
+            stack[sessionIndex] = stack[sessionIndex-1];
         }
     }
 
     /*
         Add session at the beginning
     */
+    stack[0] = sessionPtr;
 
     /*
         Set display adapter format
     */
-
     enum gnwDeviceError e = setDisplayFormat(sessionPtr->displayDescriptor.identifier, 
                                              sessionPtr->displayDescriptor.format);
     if (e) {
@@ -120,11 +122,33 @@ enum gnwDeviceError sessionEnable(const sessionPtr_t sessionPtr) {
     return GDE_NONE;
 }
 
+void sessionClear(const sessionPtr_t sessionPtr) {
+    memzero(sessionPtr, sizeof(struct session));
+    sessionPtr->procId = NONE_PROC_ID;
+}
+
 void sessionDestroy(const sessionPtr_t sessionPtr) {
+
+    CHECKPTR(sessionPtr);
+
+    sessionPtr_t * stack = displayStack[sessionPtr->displayDescriptor.identifier];
+    
     /*
-        TO BE DETERMINED   
+        Look for the session on the stack
     */
+    int sessionIndex = MAX_SESSION - 1;
+    for (; sessionIndex >= 0; --sessionIndex) {
+        if (stack[sessionIndex] == sessionPtr) {
+            break;
+        }
+    }
+
     /*
-        SHIFT DISPLAY STACK
+        Shift stack
     */
+    for (; IN_RANGE(0, sessionIndex, MAX_SESSION - 1); --sessionIndex) {
+        stack[sessionIndex] = (sessionIndex == (MAX_SESSION - 1)) ? nullptr : stack[sessionIndex + 1];
+    }
+    
+    sessionClear(sessionPtr);
 }

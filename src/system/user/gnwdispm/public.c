@@ -127,7 +127,7 @@ enum gnwDeviceError display_attachToDisplay(const procId_t procId,
         return GDE_ID_INVALID;
     }
 
-    const struct session * displaySession = nullptr;
+    struct session * displaySession = nullptr;
     e = sessionCreate(procId, displayDescriptor, &displaySession);
     if (e != GDE_NONE) {
         return e;

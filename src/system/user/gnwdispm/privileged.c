@@ -16,7 +16,7 @@ enum gnwDeviceError display_pushFrame(const procId_t procId,
                                       const range_addr_t inputRange) {
     CHECKPTR(buffer)
 
-    const struct session * const displaySession = sessionForProc(procId);
+    struct session * const displaySession = sessionForProc(procId);
     if (!displaySession) {
         return GDE_HANDLE_INVALID;
     }

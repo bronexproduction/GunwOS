@@ -33,7 +33,7 @@ bool sessionIsOnTop(const sessionPtr_t sessionPtr);
 
 enum gnwDeviceError sessionCreate(const procId_t procId, 
                                   const struct gnwDisplayDescriptor * const displayDescriptor, 
-                                  const sessionPtr_t * sessionPtr);
+                                  sessionPtr_t * const sessionPtr);
 enum gnwDeviceError sessionEnable(const sessionPtr_t sessionPtr);
 void sessionDestroy(const sessionPtr_t sessionPtr);
 
