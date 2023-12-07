@@ -40,9 +40,9 @@ void dupa() {
     if (!display_init()) {
         fug(FUG_UNDEFINED);
     }
-    ipcRegister(DISPMGR_PATH_GET, GIAS_ALL, ipcGetDisplayListener);
-    ipcRegister(DISPMGR_PATH_ATTACH, GIAS_ALL, ipcAttachToDisplayListener);
-    ipcRegister(DISPMGR_PATH_PUSH, GIAS_ALL, ipcPushFrameListener);
+    ipcRegister(DISPMGR_PATH_GET, ipcGetDisplayListener);
+    ipcRegister(DISPMGR_PATH_ATTACH, ipcAttachToDisplayListener);
+    ipcRegister(DISPMGR_PATH_PUSH, ipcPushFrameListener);
 
     runLoopStart();
 }

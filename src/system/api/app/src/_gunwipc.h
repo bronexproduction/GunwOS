@@ -12,7 +12,6 @@
 struct gnwIpcHandlerDescriptor {
     const char * path;
     size_t pathLen;
-    enum gnwIpcAccessScope accessScope;
     gnwIpcListener handlerRoutine;
     gnwIpcEndpointQueryDecoder decoder;
 };

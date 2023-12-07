@@ -15,7 +15,6 @@
 #include <string.h>
 
 enum gnwIpcError ipcRegister(const char * const path,
-                             const enum gnwIpcAccessScope accessScope,
                              const gnwIpcListener handler) {
     CHECKPTR(path);
     CHECKPTR(handler);
@@ -26,7 +25,6 @@ enum gnwIpcError ipcRegister(const char * const path,
     if (desc.pathLen > GNW_PATH_IPC_MAX_LENGTH) {
         return GIPCE_INVALID_PATH;
     }
-    desc.accessScope = accessScope;
     desc.handlerRoutine = handler;
     desc.decoder = gnwIpcEndpointQuery_decode;
 

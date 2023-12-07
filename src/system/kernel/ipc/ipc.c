@@ -20,7 +20,6 @@
 static struct ipcListener {
     procId_t procId;
     char path[GNW_PATH_IPC_MAX_LENGTH];
-    enum gnwIpcAccessScope accessScope;
     gnwIpcListener listener;
     gnwIpcEndpointQueryDecoder decoder;
 } ipcListenerRegister[MAX_IPC_LISTENER];
@@ -112,15 +111,6 @@ static size_t freeReplyIndex() {
 static bool processPermittedForPath(const procId_t procId,
                                     const char * absPathPtr,
                                     const size_t pathLen) {
-    if (pathLen >= 2) {
-        /*
-            k/
-        */
-        if (absPathPtr[0] == GNW_PATH_IPC_KERNEL_BROADCAST_ID &&
-            absPathPtr[1] == GNW_PATH_IPC_COMPONENT_SEPARATOR) {
-            return false;
-        }
-    }
     if (pathLen >= 3) {
         /*
             _k/
@@ -133,12 +123,6 @@ static bool processPermittedForPath(const procId_t procId,
     }
 
     return true;
-}
-
-static bool processPermittedForScope(const procId_t procId,
-                                     const enum gnwIpcAccessScope accessScope) {
-    return (procId == KERNEL_PROC_ID && (accessScope & GIAS_KERNEL)) ||
-           (procId > KERNEL_PROC_ID && (accessScope & GIAS_USER));
 }
 
 static void unlockIfAble(const procId_t procId) {
@@ -171,9 +155,6 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
     size_t listenerIndex = listenerIndexForPath(absQuery.path, absQuery.pathLen);
     if (listenerIndex >= MAX_IPC_LISTENER) {
         return GIPCE_NOT_FOUND;
-    }
-    if (!processPermittedForScope(procId, ipcListenerRegister[listenerIndex].accessScope)) {
-        return GIPCE_FORBIDDEN;
     }
 
     if ((absQuery.replyPtr || absQuery.replyErrPtr || absQuery.replySizeBytes) && 
@@ -242,7 +223,6 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
 enum gnwIpcError k_ipc_register(const procId_t procId,
                                 const char * const absPathPtr,
                                 const size_t pathLen,
-                                const enum gnwIpcAccessScope accessScope,
                                 const gnwIpcListener handlerRoutine,
                                 const gnwIpcEndpointQueryDecoder decoder) {
     if (!absPathPtr) {
@@ -251,9 +231,6 @@ enum gnwIpcError k_ipc_register(const procId_t procId,
     }
     if (!pathLen || pathLen > GNW_PATH_IPC_MAX_LENGTH) {
         return GIPCE_INVALID_PATH;
-    }
-    if (!IN_RANGE(GIAS_NONE, accessScope, GIAS_ALL)) {
-        return GIPCE_INVALID_PARAMETER;
     }
     if (!handlerRoutine) {
         return GIPCE_INVALID_PARAMETER;
@@ -273,7 +250,6 @@ enum gnwIpcError k_ipc_register(const procId_t procId,
 
     ipcListenerRegister[index].procId = procId;
     memcopy(absPathPtr, ipcListenerRegister[index].path, pathLen);
-    ipcListenerRegister[index].accessScope = accessScope;
     ipcListenerRegister[index].listener = handlerRoutine;
     ipcListenerRegister[index].decoder = decoder;
 

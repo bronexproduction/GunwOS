@@ -41,13 +41,6 @@ enum gnwIpcError {
     GIPCE_UNKNOWN           = -1
 };
 
-enum gnwIpcAccessScope {
-    GIAS_NONE       = 0,
-    GIAS_KERNEL     = (1 << 0),     /* For system event notifications */
-    GIAS_USER       = (1 << 1),     /* For custom inter-process messaging */
-    GIAS_ALL        = GIAS_KERNEL | GIAS_USER
-};
-
 struct gnwIpcSenderQuery {
     const char * path;
     size_t pathLen;
@@ -79,11 +72,9 @@ extern void gnwIpcEndpointQuery_decode(const ptr_t, struct gnwIpcEndpointQuery *
 
     Params:
         * path - IPC path (see line 14)
-        * accessScope - IPC path access scope
         * handler - IPC message handler
 */
 extern enum gnwIpcError ipcRegister(const char * const path,
-                                    const enum gnwIpcAccessScope accessScope,
                                     const gnwIpcListener handler);
 
 /*
