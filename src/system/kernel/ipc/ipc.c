@@ -111,6 +111,9 @@ static size_t freeReplyIndex() {
 static bool processPermittedForPath(const procId_t procId,
                                     const char * absPathPtr,
                                     const size_t pathLen) {
+    
+    bool isKernelBroadcast = false;
+
     if (pathLen >= 3) {
         /*
             _k/
@@ -118,11 +121,11 @@ static bool processPermittedForPath(const procId_t procId,
         if (absPathPtr[0] == GNW_PATH_IPC_BROADCAST_PREFIX &&
             absPathPtr[1] == GNW_PATH_IPC_KERNEL_BROADCAST_ID &&
             absPathPtr[2] == GNW_PATH_IPC_COMPONENT_SEPARATOR) {
-            return false;
+            isKernelBroadcast = true;
         }
     }
 
-    return true;
+    return isKernelBroadcast == (procId == KERNEL_PROC_ID);
 }
 
 static void unlockIfAble(const procId_t procId) {
