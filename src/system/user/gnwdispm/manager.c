@@ -36,6 +36,17 @@ DISPMGR_LISTENER(PushFrame,
     result.error = display_pushFrame(query->sourceProcId, dispQueryPtr->displayId, dispQueryPtr->frameBuffer, dispQueryPtr->inputRange);
 )
 
+static void ipcProcessKilledListener(const struct gnwIpcEndpointQuery * const query) {
+    if (!query) { fug(FUG_NULLPTR); return; }
+    if (!query->dataPtr) { fug(FUG_INCONSISTENT); return; }
+    if (query->dataSizeBytes != sizeof(procId_t)) { fug(FUG_INCONSISTENT); return; }
+
+    const procId_t * const procIdPtr = (procId_t *)query->dataPtr;
+    (void)procIdPtr;
+
+    fug(0x69);
+}
+
 void dupa() {
     if (!display_init()) {
         fug(FUG_UNDEFINED);
@@ -43,6 +54,7 @@ void dupa() {
     ipcRegister(DISPMGR_PATH_GET, ipcGetDisplayListener);
     ipcRegister(DISPMGR_PATH_ATTACH, ipcAttachToDisplayListener);
     ipcRegister(DISPMGR_PATH_PUSH, ipcPushFrameListener);
+    ipcRegister(GNW_PATH_IPC_KERNEL_NOTIFICATION_PROCESS_KILLED, ipcProcessKilledListener);
 
     runLoopStart();
 }

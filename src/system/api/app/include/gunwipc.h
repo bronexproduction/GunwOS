@@ -29,6 +29,8 @@
 #define GNW_PATH_IPC_KERNEL_BROADCAST_ID 'k'
 #define GNW_PATH_IPC_MAX_LENGTH 64
 
+#define GNW_PATH_IPC_KERNEL_NOTIFICATION_PROCESS_KILLED "_k/pk"
+
 enum gnwIpcError {
     GIPCE_NONE              = 0,
     GIPCE_INVALID_PATH      = -2,
