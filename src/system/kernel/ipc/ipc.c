@@ -7,6 +7,7 @@
 
 #include "ipc.h"
 #include <src/_gunwipc.h>
+#include <defs.h>
 #include <mem.h>
 #include <utils.h>
 #include <string.h>
@@ -78,8 +79,8 @@ static bool pathIsBroadcast(const char * absPathPtr, const size_t pathLen) {
     return absPathPtr[0] == GNW_PATH_IPC_BROADCAST_PREFIX;
 }
 
-static size_t listenerIndexForPath(const char * absPathPtr, const size_t pathLen) {
-    for (size_t index = 0; index < MAX_IPC_LISTENER; ++index) {
+static size_t nextListenerIndexForPath(const char * absPathPtr, const size_t pathLen, const size_t * const after) {
+    for (size_t index = after ? *after + 1 : 0; index < MAX_IPC_LISTENER; ++index) {
         if (!strcmpl(absPathPtr, ipcListenerRegister[index].path, pathLen)) {
             return index;
         }
@@ -155,13 +156,13 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
     if (!processPermittedForPath(procId, absQuery.path, absQuery.pathLen)) {
         return GIPCE_FORBIDDEN;
     }
-    size_t listenerIndex = listenerIndexForPath(absQuery.path, absQuery.pathLen);
+    size_t listenerIndex = nextListenerIndexForPath(absQuery.path, absQuery.pathLen, nullptr);
     if (listenerIndex >= MAX_IPC_LISTENER) {
         return GIPCE_NOT_FOUND;
     }
 
-    if ((absQuery.replyPtr || absQuery.replyErrPtr || absQuery.replySizeBytes) && 
-        pathIsBroadcast(absQuery.path, absQuery.pathLen)) {
+    const bool isBroadcast = pathIsBroadcast(absQuery.path, absQuery.pathLen);
+    if ((absQuery.replyPtr || absQuery.replyErrPtr || absQuery.replySizeBytes) && isBroadcast) {
         /*
             Replying to broadcast events not supported
         */
@@ -197,27 +198,31 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
         endpointQuery.token = MAX_IPC_TOKEN;
     }
 
-    const enum k_proc_error err = k_proc_callback_invoke_ptr(ipcListenerRegister[listenerIndex].procId,
-                                                             (gnwEventListener_ptr)ipcListenerRegister[listenerIndex].listener,
-                                                             (ptr_t)&endpointQuery,
-                                                             sizeof(struct gnwIpcEndpointQuery) + endpointQuery.dataSizeBytes,
-                                                             sizeof(struct gnwIpcEndpointQuery),
-                                                             (gnwRunLoopDataEncodingRoutine)gnwIpcEndpointQuery_encode,
-                                                             (gnwRunLoopDataEncodingRoutine)ipcListenerRegister[listenerIndex].decoder);
+    while (listenerIndex < MAX_IPC_LISTENER) {
+        const enum k_proc_error err = k_proc_callback_invoke_ptr(ipcListenerRegister[listenerIndex].procId,
+                                                                 (gnwEventListener_ptr)ipcListenerRegister[listenerIndex].listener,
+                                                                 (ptr_t)&endpointQuery,
+                                                                 sizeof(struct gnwIpcEndpointQuery) + endpointQuery.dataSizeBytes,
+                                                                 sizeof(struct gnwIpcEndpointQuery),
+                                                                 (gnwRunLoopDataEncodingRoutine)gnwIpcEndpointQuery_encode,
+                                                                 (gnwRunLoopDataEncodingRoutine)ipcListenerRegister[listenerIndex].decoder);
 
-    if (err != PE_NONE) {
-        if (endpointQuery.replySizeBytes) {
-            clearReply(token);
-            k_que_dispatch_arch((fPtr_arch)unlockIfAble, procId);
+        if (err != PE_NONE) {
+            if (endpointQuery.replySizeBytes) {
+                clearReply(token);
+                k_que_dispatch_arch((fPtr_arch)unlockIfAble, procId);
+            }
+
+            if (err == PE_IGNORED && !isBroadcast) {
+                return GIPCE_IGNORED;
+            } else if (err == PE_LIMIT_REACHED) {
+                return GIPCE_FULL;
+            } else {
+                return GIPCE_UNKNOWN;
+            }
         }
 
-        if (err == PE_IGNORED) {
-            return GIPCE_IGNORED;
-        } else if (err == PE_LIMIT_REACHED) {
-            return GIPCE_FULL;
-        } else {
-            return GIPCE_UNKNOWN;
-        }
+        listenerIndex = nextListenerIndexForPath(absQuery.path, absQuery.pathLen, &listenerIndex);
     }
 
     return GIPCE_NONE;
@@ -241,7 +246,7 @@ enum gnwIpcError k_ipc_register(const procId_t procId,
     if (!pathGlobalValidate(absPathPtr, pathLen)) {
         return GIPCE_INVALID_PATH;
     }
-    if (!pathIsBroadcast(absPathPtr, pathLen) && listenerIndexForPath(absPathPtr, pathLen) < MAX_IPC_LISTENER) {
+    if (!pathIsBroadcast(absPathPtr, pathLen) && nextListenerIndexForPath(absPathPtr, pathLen, nullptr) < MAX_IPC_LISTENER) {
         return GIPCE_ALREADY_EXISTS;
     }
 
