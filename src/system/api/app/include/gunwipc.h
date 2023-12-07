@@ -12,7 +12,7 @@
 /*
     IPC path structure:
 
-        processId - optional | GNW_ROOT_IPC_PATH_SEPARATOR - only if processId present | pathComponent0 | (GNW_PATH_IPC_COMPONENT_SEPARATOR | pathComponentN) - if needed
+        (processId - optional | GNW_ROOT_IPC_PROC_ID_SEPARATOR - only if processId present) OR GNW_PATH_IPC_BROADCAST_PREFIX - optional | pathComponent0 | (GNW_PATH_IPC_COMPONENT_SEPARATOR | pathComponentN) - if needed
 
     Correct path examples:
 
@@ -23,8 +23,10 @@
     
     Allowed characters: a-z A-Z 0-9
 */ 
-#define GNW_ROOT_IPC_PATH_SEPARATOR ":"
-#define GNW_PATH_IPC_COMPONENT_SEPARATOR "/"
+#define GNW_ROOT_IPC_PROC_ID_SEPARATOR ':'
+#define GNW_PATH_IPC_COMPONENT_SEPARATOR '/'
+#define GNW_PATH_IPC_BROADCAST_PREFIX '_'
+#define GNW_PATH_IPC_KERNEL_BROADCAST_ID 'k'
 #define GNW_PATH_IPC_MAX_LENGTH 64
 
 enum gnwIpcError {
@@ -41,8 +43,8 @@ enum gnwIpcError {
 
 enum gnwIpcAccessScope {
     GIAS_NONE       = 0,
-    GIAS_KERNEL     = (1 << 0),
-    GIAS_USER       = (1 << 1),
+    GIAS_KERNEL     = (1 << 0),     /* For system event notifications */
+    GIAS_USER       = (1 << 1),     /* For custom inter-process messaging */
     GIAS_ALL        = GIAS_KERNEL | GIAS_USER
 };
 

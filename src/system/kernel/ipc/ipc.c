@@ -61,10 +61,11 @@ void k_ipc_init() {
 
 static bool pathGlobalValidate(const char * absPathPtr, const size_t pathLen) {
     for (size_t i = 0; i < pathLen; ++i) {
-        if (IN_RANGE('0', absPathPtr[i], '9') ||  /* 0 - 9 */
-            IN_RANGE('A', absPathPtr[i], 'Z') ||  /* A - Z */
-            IN_RANGE('a', absPathPtr[i], 'z') ||  /* a - z */
-            absPathPtr[i] == '/') {
+        if (IN_RANGE('0', absPathPtr[i], '9')                          ||   /* 0 - 9 */
+            IN_RANGE('A', absPathPtr[i], 'Z')                          ||   /* A - Z */
+            IN_RANGE('a', absPathPtr[i], 'z')                          ||   /* a - z */
+            ((absPathPtr[i] == GNW_PATH_IPC_COMPONENT_SEPARATOR) && i) ||   /* path separator */
+            ((absPathPtr[i] == GNW_PATH_IPC_BROADCAST_PREFIX) && !i)        /* broadcast prefix */) {
             continue;
         }
 
@@ -72,6 +73,10 @@ static bool pathGlobalValidate(const char * absPathPtr, const size_t pathLen) {
     }
 
     return true;
+}
+
+static bool pathIsBroadcast(const char * absPathPtr, const size_t pathLen) {
+    return absPathPtr[0] == GNW_PATH_IPC_BROADCAST_PREFIX;
 }
 
 static size_t listenerIndexForPath(const char * absPathPtr, const size_t pathLen) {
@@ -104,8 +109,34 @@ static size_t freeReplyIndex() {
     return MAX_IPC_TOKEN;
 }
 
-static bool processPermitted(const procId_t procId,
-                             const enum gnwIpcAccessScope accessScope) {
+static bool processPermittedForPath(const procId_t procId,
+                                    const char * absPathPtr,
+                                    const size_t pathLen) {
+    if (pathLen >= 2) {
+        /*
+            k/
+        */
+        if (absPathPtr[0] == GNW_PATH_IPC_KERNEL_BROADCAST_ID &&
+            absPathPtr[1] == GNW_PATH_IPC_COMPONENT_SEPARATOR) {
+            return false;
+        }
+    }
+    if (pathLen >= 3) {
+        /*
+            _k/
+        */
+        if (absPathPtr[0] == GNW_PATH_IPC_BROADCAST_PREFIX &&
+            absPathPtr[1] == GNW_PATH_IPC_KERNEL_BROADCAST_ID &&
+            absPathPtr[2] == GNW_PATH_IPC_COMPONENT_SEPARATOR) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+static bool processPermittedForScope(const procId_t procId,
+                                     const enum gnwIpcAccessScope accessScope) {
     return (procId == KERNEL_PROC_ID && (accessScope & GIAS_KERNEL)) ||
            (procId > KERNEL_PROC_ID && (accessScope & GIAS_USER));
 }
@@ -134,12 +165,23 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
         return GIPCE_INVALID_PATH;
     }
 
+    if (!processPermittedForPath(procId, absQuery.path, absQuery.pathLen)) {
+        return GIPCE_FORBIDDEN;
+    }
     size_t listenerIndex = listenerIndexForPath(absQuery.path, absQuery.pathLen);
     if (listenerIndex >= MAX_IPC_LISTENER) {
         return GIPCE_NOT_FOUND;
     }
-    if (!processPermitted(procId, ipcListenerRegister[listenerIndex].accessScope)) {
+    if (!processPermittedForScope(procId, ipcListenerRegister[listenerIndex].accessScope)) {
         return GIPCE_FORBIDDEN;
+    }
+
+    if ((absQuery.replyPtr || absQuery.replyErrPtr || absQuery.replySizeBytes) && 
+        pathIsBroadcast(absQuery.path, absQuery.pathLen)) {
+        /*
+            Replying to broadcast events not supported
+        */
+        return GIPCE_INVALID_PARAMETER;
     }
 
     struct gnwIpcEndpointQuery endpointQuery;
@@ -210,7 +252,7 @@ enum gnwIpcError k_ipc_register(const procId_t procId,
     if (!pathLen || pathLen > GNW_PATH_IPC_MAX_LENGTH) {
         return GIPCE_INVALID_PATH;
     }
-    if (accessScope == GIAS_NONE || accessScope > GIAS_ALL) {
+    if (!IN_RANGE(GIAS_NONE, accessScope, GIAS_ALL)) {
         return GIPCE_INVALID_PARAMETER;
     }
     if (!handlerRoutine) {
@@ -219,7 +261,7 @@ enum gnwIpcError k_ipc_register(const procId_t procId,
     if (!pathGlobalValidate(absPathPtr, pathLen)) {
         return GIPCE_INVALID_PATH;
     }
-    if (listenerIndexForPath(absPathPtr, pathLen) < MAX_IPC_LISTENER) {
+    if (!pathIsBroadcast(absPathPtr, pathLen) && listenerIndexForPath(absPathPtr, pathLen) < MAX_IPC_LISTENER) {
         return GIPCE_ALREADY_EXISTS;
     }
 
