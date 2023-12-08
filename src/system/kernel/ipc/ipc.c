@@ -141,7 +141,7 @@ static void unlockIfAble(const procId_t procId) {
 
 enum gnwIpcError k_ipc_send(const procId_t procId,
                             const struct gnwIpcSenderQuery absQuery) {
-    if (!absQuery.path || !absQuery.dataPtr || !absQuery.replyErrPtr) {
+    if (!absQuery.path || !absQuery.dataPtr) {
         OOPS("Nullptr");
         return GIPCE_UNKNOWN;
     }
@@ -156,10 +156,6 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
     if (!processPermittedForPath(procId, absQuery.path, absQuery.pathLen)) {
         return GIPCE_FORBIDDEN;
     }
-    size_t listenerIndex = nextListenerIndexForPath(absQuery.path, absQuery.pathLen, nullptr);
-    if (listenerIndex >= MAX_IPC_LISTENER) {
-        return GIPCE_NOT_FOUND;
-    }
 
     const bool isBroadcast = pathIsBroadcast(absQuery.path, absQuery.pathLen);
     if ((absQuery.replyPtr || absQuery.replyErrPtr || absQuery.replySizeBytes) && isBroadcast) {
@@ -167,6 +163,11 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
             Replying to broadcast events not supported
         */
         return GIPCE_INVALID_PARAMETER;
+    }
+
+    size_t listenerIndex = nextListenerIndexForPath(absQuery.path, absQuery.pathLen, nullptr);
+    if (listenerIndex >= MAX_IPC_LISTENER) {
+        return GIPCE_NOT_FOUND;
     }
 
     struct gnwIpcEndpointQuery endpointQuery;
@@ -178,6 +179,11 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
     size_t token;
 
     if (endpointQuery.replySizeBytes) {
+        if (!absQuery.replyPtr || !absQuery.replyErrPtr) {
+            OOPS("Nullptr");
+            return GIPCE_UNKNOWN;
+        }
+
         token = freeReplyIndex();
         if (token >= MAX_IPC_TOKEN) {
             OOPS("IPC reply table full");
@@ -194,7 +200,6 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
         
         k_proc_lock(procId, PLT_IPC);
     } else {
-        *(absQuery.replyErrPtr) = GIPCE_NONE;
         endpointQuery.token = MAX_IPC_TOKEN;
     }
 
