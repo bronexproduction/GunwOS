@@ -350,7 +350,11 @@ static void failReply(const size_t token) {
 }
 
 void k_ipc_procCleanup(const procId_t procId) {
-    clearListener(procId);
+    for (size_t entryId = 0; entryId < MAX_IPC_LISTENER; ++entryId) {
+        if (ipcListenerRegister[entryId].procId == procId) {
+            clearListener(entryId);
+        }
+    }
     for (int token = 0; token < MAX_IPC_TOKEN; ++token) {
         if (ipcReplyRegister[token].handlerProcId == procId) {
             /*
