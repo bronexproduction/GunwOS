@@ -11,6 +11,7 @@
 #include <dispmgr.h>
 
 #include "display.h"
+#include "session.h"
 
 #define DISPMGR_LISTENER(NAME, PREPARE_RESULT) static void ipc ## NAME ## Listener(const struct gnwIpcEndpointQuery * const query) {    \
     if (!query) { fug(FUG_NULLPTR); return; }                                                                                           \
@@ -42,9 +43,11 @@ static void ipcProcessKilledListener(const struct gnwIpcEndpointQuery * const qu
     if (query->dataSizeBytes != sizeof(procId_t)) { fug(FUG_INCONSISTENT); return; }
 
     const procId_t * const procIdPtr = (procId_t *)query->dataPtr;
-    (void)procIdPtr;
-
-    fug(0x69);
+    const sessionPtr_t session = sessionForProc(*procIdPtr);
+    
+    if (session) {
+        sessionDestroy(session);
+    }
 }
 
 void dupa() {
