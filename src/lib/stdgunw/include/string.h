@@ -5,6 +5,9 @@
 //  Created by Artur Danielewski on 27.01.2018.
 //
 
+#ifndef STDGUNW_STRING_H
+#define STDGUNW_STRING_H
+
 #include "types.h"
 
 #define ASCII_DIGIT_OFFSET 48
@@ -34,3 +37,5 @@ size_t int2str(const int_32 i, char * const s);
 size_t uint2dec(const uint_32 i, char * const s);
 size_t uint2hex(const uint_32 i, char * const s);
 size_t uint2bin(const uint_32 i, char * const s);
+
+#endif // STDGUNW_STRING_H

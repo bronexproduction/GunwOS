@@ -90,6 +90,8 @@
     "__hash_table": "c",
     "__tree": "c",
     "charconv": "c",
-    "forward_list": "c"
+    "forward_list": "c",
+    "ranges": "c",
+    "span": "c"
   }
 }

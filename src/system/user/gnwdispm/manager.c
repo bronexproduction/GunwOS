@@ -11,6 +11,7 @@
 #include <dispmgr.h>
 
 #include "display.h"
+#include "session.h"
 
 #define DISPMGR_LISTENER(NAME, PREPARE_RESULT) static void ipc ## NAME ## Listener(const struct gnwIpcEndpointQuery * const query) {    \
     if (!query) { fug(FUG_NULLPTR); return; }                                                                                           \
@@ -29,20 +30,34 @@ DISPMGR_LISTENER(GetDisplay,
 )
 
 DISPMGR_LISTENER(AttachToDisplay,
-    result.error = display_attachToDisplay(dispQueryPtr->type, &dispQueryPtr->displayDescriptor);
+    result.error = display_attachToDisplay(query->sourceProcId, dispQueryPtr->type, &dispQueryPtr->displayDescriptor);
 )
 
 DISPMGR_LISTENER(PushFrame,
-    result.error = display_pushFrame(dispQueryPtr->displayId, dispQueryPtr->frameBuffer, dispQueryPtr->inputRange);
+    result.error = display_pushFrame(query->sourceProcId, dispQueryPtr->displayId, dispQueryPtr->frameBuffer, dispQueryPtr->inputRange);
 )
+
+static void ipcProcessKilledListener(const struct gnwIpcEndpointQuery * const query) {
+    if (!query) { fug(FUG_NULLPTR); return; }
+    if (!query->dataPtr) { fug(FUG_INCONSISTENT); return; }
+    if (query->dataSizeBytes != sizeof(procId_t)) { fug(FUG_INCONSISTENT); return; }
+
+    const procId_t * const procIdPtr = (procId_t *)query->dataPtr;
+    const sessionPtr_t session = sessionForProc(*procIdPtr);
+    
+    if (session) {
+        sessionDestroy(session);
+    }
+}
 
 void dupa() {
     if (!display_init()) {
         fug(FUG_UNDEFINED);
     }
-    ipcRegister(DISPMGR_PATH_GET, GIAS_ALL, ipcGetDisplayListener);
-    ipcRegister(DISPMGR_PATH_ATTACH, GIAS_ALL, ipcAttachToDisplayListener);
-    ipcRegister(DISPMGR_PATH_PUSH, GIAS_ALL, ipcPushFrameListener);
+    ipcRegister(DISPMGR_PATH_GET, ipcGetDisplayListener);
+    ipcRegister(DISPMGR_PATH_ATTACH, ipcAttachToDisplayListener);
+    ipcRegister(DISPMGR_PATH_PUSH, ipcPushFrameListener);
+    ipcRegister(GNW_PATH_IPC_KERNEL_NOTIFICATION_PROCESS_KILLED, ipcProcessKilledListener);
 
     runLoopStart();
 }

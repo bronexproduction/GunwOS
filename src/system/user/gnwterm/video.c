@@ -7,6 +7,7 @@
 
 #include <mem.h>
 // #include <error/panic.h>
+#include <gunwctrl.h>
 #include <gunwfug.h>
 #include <defs.h>
 #include "video.h"
@@ -54,7 +55,10 @@ static void k_vid_push() {
         return;
     }
 
-    enum gnwDeviceError e = displayHandle.update(&displayHandle, frameBuffer);
+    enum gnwDeviceError e;
+    while ((e = displayHandle.update(&displayHandle, frameBuffer)) == GDE_BUSY) {
+        yield();
+    }
     if (e) {
         fug(FUG_UNDEFINED);
         // OOPS("Error updating display buffer");

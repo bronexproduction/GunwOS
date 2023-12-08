@@ -28,6 +28,7 @@ enum gnwDeviceType {
 
 enum gnwDeviceError {
     GDE_NONE = 0,
+    GDE_BUSY,
     GDE_ID_INVALID,
     GDE_NOT_FOUND,
     GDE_CANNOT_BE_HELD,

@@ -9,10 +9,12 @@
 
 #include <mem.h>
 #include <defs.h>
+#include <string.h>
 
 #include <schedule/schedule.h>
 #include <hal/criticalsec/criticalsec.h>
 #include <hal/mem/mem.h>
+#include <ipc/ipc.h>
 #include <timer/timer.h>
 #include <error/panic.h>
 #include <queue/queue.h>
@@ -176,6 +178,24 @@ static bool isProcessAlive(const procId_t procId) {
            pTab[procId].info.state == PS_BLOCKED;
 }
 
+static void procKillNotify(const procId_t procId) {
+    struct gnwIpcSenderQuery query;
+
+    query.path = GNW_PATH_IPC_KERNEL_NOTIFICATION_PROCESS_KILLED;
+    query.pathLen = strlen(GNW_PATH_IPC_KERNEL_NOTIFICATION_PROCESS_KILLED);
+    query.dataPtr = (ptr_t)&procId;
+    query.dataSizeBytes = sizeof(procId_t);
+    query.replyErrPtr = nullptr;
+    query.replyPtr = nullptr;
+    query.replySizeBytes = 0;
+
+    const enum gnwIpcError e = k_ipc_send(KERNEL_PROC_ID, query);
+    if (e != GIPCE_NONE) {
+        OOPS("Unexpected kernel event broadcast error");
+        return;
+    }
+}
+
 static void procCleanup(const procId_t procId) {
     if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
         OOPS("Process id out of range");
@@ -185,6 +205,8 @@ static void procCleanup(const procId_t procId) {
         OOPS("Unexpected process state during cleanup");
         return;
     }
+
+    procKillNotify(procId);
 
     memzero(&pTab[procId], sizeof(struct process));
     k_mem_procCleanup(procId);

@@ -12,7 +12,7 @@
 /*
     IPC path structure:
 
-        processId - optional | GNW_ROOT_IPC_PATH_SEPARATOR - only if processId present | pathComponent0 | (GNW_PATH_IPC_COMPONENT_SEPARATOR | pathComponentN) - if needed
+        (processId - optional | GNW_ROOT_IPC_PROC_ID_SEPARATOR - only if processId present) OR GNW_PATH_IPC_BROADCAST_PREFIX - optional | pathComponent0 | (GNW_PATH_IPC_COMPONENT_SEPARATOR | pathComponentN) - if needed
 
     Correct path examples:
 
@@ -23,9 +23,13 @@
     
     Allowed characters: a-z A-Z 0-9
 */ 
-#define GNW_ROOT_IPC_PATH_SEPARATOR ":"
-#define GNW_PATH_IPC_COMPONENT_SEPARATOR "/"
+#define GNW_ROOT_IPC_PROC_ID_SEPARATOR ':'
+#define GNW_PATH_IPC_COMPONENT_SEPARATOR '/'
+#define GNW_PATH_IPC_BROADCAST_PREFIX '_'
+#define GNW_PATH_IPC_KERNEL_BROADCAST_ID 'k'
 #define GNW_PATH_IPC_MAX_LENGTH 64
+
+#define GNW_PATH_IPC_KERNEL_NOTIFICATION_PROCESS_KILLED "_k/pk"
 
 enum gnwIpcError {
     GIPCE_NONE              = 0,
@@ -37,13 +41,6 @@ enum gnwIpcError {
     GIPCE_FORBIDDEN         = -7,
     GIPCE_FULL              = -8,
     GIPCE_UNKNOWN           = -1
-};
-
-enum gnwIpcAccessScope {
-    GIAS_NONE       = 0,
-    GIAS_KERNEL     = (1 << 0),
-    GIAS_USER       = (1 << 1),
-    GIAS_ALL        = GIAS_KERNEL | GIAS_USER
 };
 
 struct gnwIpcSenderQuery {
@@ -77,11 +74,9 @@ extern void gnwIpcEndpointQuery_decode(const ptr_t, struct gnwIpcEndpointQuery *
 
     Params:
         * path - IPC path (see line 14)
-        * accessScope - IPC path access scope
         * handler - IPC message handler
 */
 extern enum gnwIpcError ipcRegister(const char * const path,
-                                    const enum gnwIpcAccessScope accessScope,
                                     const gnwIpcListener handler);
 
 /*
