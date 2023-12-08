@@ -11,15 +11,8 @@
 #include <types.h>
 #include <gunwdisplay.h>
 
-bool display_init();
+bool keyboard_init();
 
-enum gnwDeviceError display_getDisplay(const enum gnwDisplayType type,
-                                       struct gnwDisplayDescriptor * const displayDescriptor);
-enum gnwDeviceError display_attachToDisplay(const procId_t procId,
-                                            const enum gnwDisplayType type, 
-                                            const struct gnwDisplayDescriptor * const displayDescriptor);
-enum gnwDeviceError display_pushFrame(const procId_t procId,
-                                      const size_t displayId,
-                                      const ptr_t buffer,
-                                      const range_addr_t inputRange);
+enum gnwDeviceError keyboard_attach(const procId_t procId);
+
 #endif // KEYBOARD_H

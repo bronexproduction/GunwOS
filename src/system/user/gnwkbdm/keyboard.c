@@ -13,7 +13,7 @@
 #include <gunwkeyboard.h>
 #include <gunwfug.h>
 
-extern sessionPtr_t displayStack[MAX_SESSION][MAX_DISPLAY];
+extern sessionPtr_t keyboardStack[MAX_SESSION];
 extern struct session sessions[MAX_SESSION];
 extern void sessionClear(const sessionPtr_t sessionPtr);
 
@@ -31,8 +31,8 @@ static GNW_KEYBOARD_EVENT_LISTENER(onKeyboardEvent) {
     }
 }
 
-bool display_init() {
-    memzero(displayStack, sizeof(sessionPtr_t) * MAX_SESSION * MAX_DISPLAY);
+bool keyboard_init() {
+    memzero(keyboardStack, sizeof(sessionPtr_t) * MAX_SESSION);
     for (size_t i = 0; i < MAX_SESSION; ++i) {
         sessionClear(&sessions[i]);
     }
@@ -59,4 +59,36 @@ bool display_init() {
     }
 
     return true;
+}
+
+enum gnwDeviceError keyboard_attach(const procId_t procId) {
+    // CHECKPTR(displayDescriptor)
+
+    // struct gnwDeviceUHADesc uha;
+    // enum gnwDeviceError e = devGetById(displayDescriptor->identifier, &uha);
+
+    // if (e != GDE_NONE) {
+    //     return e;
+    // }
+    // if (GDD_FMT_ISTEXT(displayDescriptor->format) != (type == TEXT)) {
+    //     return GDE_ID_INVALID;
+    // }
+
+    // struct session * displaySession = nullptr;
+    // e = sessionCreate(procId, displayDescriptor, &displaySession);
+    // if (e != GDE_NONE) {
+    //     return e;
+    // }
+    // if (!displaySession) {
+    //     fug(FUG_NULLPTR);
+    //     return GDE_UNKNOWN;
+    // }
+
+    // e = sessionEnable(displaySession);
+    // if (e != GDE_NONE) {
+    //     sessionDestroy(displaySession);
+    //     return e;
+    // }
+
+    return GDE_NONE;
 }

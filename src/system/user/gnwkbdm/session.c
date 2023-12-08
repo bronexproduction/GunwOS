@@ -11,9 +11,10 @@
 #include <mem.h>
 #include <proc.h>
 #include <utils.h>
+#include <gunwdevtypes.h>
 #include <gunwfug.h>
 
-sessionPtr_t displayStack[MAX_SESSION][MAX_DISPLAY];
+sessionPtr_t keyboardStack[MAX_SESSION];
 struct session sessions[MAX_SESSION];
 
 sessionPtr_t sessionForProc(const procId_t procId) {
@@ -27,22 +28,12 @@ sessionPtr_t sessionForProc(const procId_t procId) {
 }
 
 bool sessionIsOnTop(const sessionPtr_t sessionPtr) {
-    return *displayStack[sessionPtr->displayDescriptor.identifier] == sessionPtr;
+    return *keyboardStack == sessionPtr;
 }
 
-static enum gnwDeviceError setDisplayFormat(const size_t deviceId, const enum gnwDeviceUHA_display_format format) {
-    struct gnwDeviceParamDescriptor paramDesc;
-
-    paramDesc.param = GDU_DISPLAY_PARAM_FORMAT;
-
-    return devSetParam(deviceId, &paramDesc, format);
-}
-
-enum gnwDeviceError sessionCreate(const procId_t procId, 
-                                  const struct gnwDisplayDescriptor * const displayDescriptor, 
+enum gnwDeviceError sessionCreate(const procId_t procId,
                                   sessionPtr_t * const sessionPtr) {
     
-    CHECKPTR(displayDescriptor);
     CHECKPTR(sessionPtr);
 
     /*
@@ -63,7 +54,6 @@ enum gnwDeviceError sessionCreate(const procId_t procId,
         Configure session values
     */
     freeSession->procId = procId;
-    freeSession->displayDescriptor = *displayDescriptor;
 
     /*
         Set session return value
@@ -77,19 +67,17 @@ enum gnwDeviceError sessionEnable(const sessionPtr_t sessionPtr) {
 
     CHECKPTR(sessionPtr);
 
-    sessionPtr_t * stack = displayStack[sessionPtr->displayDescriptor.identifier];
-
     /*
         Check if session already on display stack
     */
     size_t sessionIndex = 0;
     for (; sessionIndex < MAX_SESSION; ++sessionIndex) {
-        if (stack[sessionIndex] == sessionPtr) {
+        if (keyboardStack[sessionIndex] == sessionPtr) {
             break;
         }
     }
 
-    if (sessionIndex == MAX_SESSION && stack[MAX_SESSION - 1]) {
+    if (sessionIndex == MAX_SESSION && keyboardStack[MAX_SESSION - 1]) {
         /*
             Display stack full
         */
@@ -100,24 +88,15 @@ enum gnwDeviceError sessionEnable(const sessionPtr_t sessionPtr) {
         Shift stack
     */
     for (sessionIndex = MIN(sessionIndex, MAX_SESSION - 1); sessionIndex > 0; --sessionIndex) {
-        if (stack[sessionIndex-1] != sessionPtr) {
-            stack[sessionIndex] = stack[sessionIndex-1];
+        if (keyboardStack[sessionIndex-1] != sessionPtr) {
+            keyboardStack[sessionIndex] = keyboardStack[sessionIndex-1];
         }
     }
 
     /*
         Add session at the beginning
     */
-    stack[0] = sessionPtr;
-
-    /*
-        Set display adapter format
-    */
-    enum gnwDeviceError e = setDisplayFormat(sessionPtr->displayDescriptor.identifier, 
-                                             sessionPtr->displayDescriptor.format);
-    if (e) {
-        return e;
-    }
+    keyboardStack[0] = sessionPtr;
 
     return GDE_NONE;
 }
@@ -130,15 +109,13 @@ void sessionClear(const sessionPtr_t sessionPtr) {
 void sessionDestroy(const sessionPtr_t sessionPtr) {
 
     CHECKPTR(sessionPtr);
-
-    sessionPtr_t * stack = displayStack[sessionPtr->displayDescriptor.identifier];
     
     /*
         Look for the session on the stack
     */
     int sessionIndex = MAX_SESSION - 1;
     for (; sessionIndex >= 0; --sessionIndex) {
-        if (stack[sessionIndex] == sessionPtr) {
+        if (keyboardStack[sessionIndex] == sessionPtr) {
             break;
         }
     }
@@ -147,7 +124,7 @@ void sessionDestroy(const sessionPtr_t sessionPtr) {
         Shift stack
     */
     for (; IN_RANGE(0, sessionIndex, MAX_SESSION - 1); --sessionIndex) {
-        stack[sessionIndex] = (sessionIndex == (MAX_SESSION - 1)) ? nullptr : stack[sessionIndex + 1];
+        keyboardStack[sessionIndex] = (sessionIndex == (MAX_SESSION - 1)) ? nullptr : keyboardStack[sessionIndex + 1];
     }
     
     sessionClear(sessionPtr);
