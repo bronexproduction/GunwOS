@@ -167,6 +167,7 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
 
     size_t listenerIndex = nextListenerIndexForPath(absQuery.path, absQuery.pathLen, nullptr);
     if (listenerIndex >= MAX_IPC_LISTENER) {
+        OOPS("3");
         return GIPCE_NOT_FOUND;
     }
 
