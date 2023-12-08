@@ -179,8 +179,12 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
     size_t token;
 
     if (endpointQuery.replySizeBytes) {
-        if (!absQuery.replyPtr || !absQuery.replyErrPtr) {
-            OOPS("Nullptr");
+        if (!absQuery.replyPtr) {
+            OOPS("Unexpected null pointer to IPC reply data");
+            return GIPCE_UNKNOWN;
+        }
+        if (!absQuery.replyErrPtr) {
+            OOPS("Unexpected null pointer to IPC reply error");
             return GIPCE_UNKNOWN;
         }
 
