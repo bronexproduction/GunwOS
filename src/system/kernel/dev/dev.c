@@ -470,9 +470,7 @@ void k_dev_procCleanup(const procId_t procId) {
     for (size_t devId = 0; devId < MAX_DEVICES; ++devId) {
         if (devices[devId].holder == procId) {
             CRITICAL_SECTION(
-                devices[devId].holder = NONE_PROC_ID;
-                devices[devId].listener = nullptr;
-                devices[devId].decoder = nullptr;
+                k_dev_releaseHold(procId, devId);
             )
         }
     }
