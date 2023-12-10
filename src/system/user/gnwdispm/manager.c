@@ -57,7 +57,7 @@ void dupa() {
     ipcRegister(DISPMGR_PATH_GET, ipcGetDisplayListener);
     ipcRegister(DISPMGR_PATH_ATTACH, ipcAttachToDisplayListener);
     ipcRegister(DISPMGR_PATH_PUSH, ipcPushFrameListener);
-    ipcRegister(GNW_PATH_IPC_KERNEL_NOTIFICATION_PROCESS_KILLED, ipcProcessKilledListener);
+    ipcRegister(GNW_PATH_IPC_BINDING_NOTIFICATION_PROCESS_KILLED, ipcProcessKilledListener);
 
     runLoopStart();
 }
