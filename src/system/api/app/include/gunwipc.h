@@ -43,14 +43,11 @@ enum gnwIpcError {
     GIPCE_UNKNOWN           = -1
 };
 
-struct gnwIpcSenderQuery {
-    const char * path;
-    size_t pathLen;
-    ptr_t dataPtr;
-    size_t dataSizeBytes;
-    enum gnwIpcError * replyErrPtr;
-    ptr_t replyPtr;
-    size_t replySizeBytes;
+enum gnwIpcBindFlag {
+    GIBF_NONE,
+    GIBF_BIND,
+    GIBF_UPDATE,
+    GIBF_UNBIND
 };
 
 struct gnwIpcEndpointQuery {
@@ -102,10 +99,14 @@ extern enum gnwIpcError ipcSend(const char * const path,
         * replyPtr - pointer to the reply data
         * replySizeBytes - size of the reply data in bytes
         * token - token of the currently handled message (see gnwIpcEndpointQuery)
+        * bindFlag - determines binding update mode or GIBF_NONE otherwise
+        * permissions - binding permissions if needed, otherwise ignored
 */
 extern enum gnwIpcError ipcReply(const ptr_t replyPtr,
                                  const size_t replySizeBytes,
-                                 const size_t token);
+                                 const size_t token,
+                                 const enum gnwIpcBindFlag bindFlag,
+                                 const size_t permissions);
 
 #endif // _GUNWAPI_KERNEL
 

@@ -64,12 +64,20 @@ enum gnwIpcError ipcSend(const char * const path,
 
 enum gnwIpcError ipcReply(const ptr_t replyPtr,
                           const size_t replySizeBytes,
-                          const size_t token) {
+                          const size_t token,
+                          const enum gnwIpcBindFlag bindFlag,
+                          const size_t permissions) {
     CHECKPTR(replyPtr);
+
+    struct gnwIpcReplyInfo info;
+
+    info.token = token;
+    info.bindFlag = bindFlag;
+    info.permissions = permissions;
 
     SYSCALL_PAR1(replyPtr);
     SYSCALL_PAR2(replySizeBytes);
-    SYSCALL_PAR3(token);
+    SYSCALL_PAR3(&info);
 
     SYSCALL_USER_FUNC(IPC_REPLY);
     SYSCALL_USER_INT;

@@ -16,6 +16,22 @@ struct gnwIpcHandlerDescriptor {
     gnwIpcEndpointQueryDecoder decoder;
 };
 
+struct gnwIpcSenderQuery {
+    const char * path;
+    size_t pathLen;
+    ptr_t dataPtr;
+    size_t dataSizeBytes;
+    enum gnwIpcError * replyErrPtr;
+    ptr_t replyPtr;
+    size_t replySizeBytes;
+};
+
+struct gnwIpcReplyInfo {
+    size_t token;
+    enum gnwIpcBindFlag bindFlag;
+    size_t permissions;
+};
+
 #ifdef _GUNWAPI_KERNEL
 
 void gnwIpcEndpointQuery_encode(const struct gnwIpcEndpointQuery * const, ptr_t);
