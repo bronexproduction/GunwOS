@@ -60,10 +60,12 @@ void dupa() {
     if (!display_init()) {
         fug(FUG_UNDEFINED);
     }
-    ipcRegister(DISPMGR_PATH_GET, ipcGetDisplayListener);
-    ipcRegister(DISPMGR_PATH_ATTACH, ipcAttachToDisplayListener);
-    ipcRegister(DISPMGR_PATH_PUSH, ipcPushFrameListener);
-    ipcRegister(GNW_PATH_IPC_BINDING_NOTIFICATION_PROCESS_KILLED, ipcProcessKilledListener);
+    ipcRegister(DISPMGR_PATH_GET, ipcGetDisplayListener, false, 0);
+    ipcRegister(DISPMGR_PATH_ATTACH, ipcAttachToDisplayListener, false, 0);
+
+    ipcRegister(GNW_PATH_IPC_BINDING_NOTIFICATION_PROCESS_KILLED, ipcProcessKilledListener, false, 0);
+
+    ipcRegister(DISPMGR_PATH_PUSH, ipcPushFrameListener, true, 0);
 
     runLoopStart();
 }

@@ -14,6 +14,8 @@ struct gnwIpcHandlerDescriptor {
     size_t pathLen;
     gnwIpcListener handlerRoutine;
     gnwIpcEndpointQueryDecoder decoder;
+    bool bindingRequired;
+    size_t permissionMask;
 };
 
 struct gnwIpcSenderQuery {

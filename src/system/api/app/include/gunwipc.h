@@ -72,9 +72,13 @@ extern void gnwIpcEndpointQuery_decode(const ptr_t, struct gnwIpcEndpointQuery *
     Params:
         * path - IPC path (see line 14)
         * handler - IPC message handler
+        * bindingRequired - marks that the endpoint requires previous binding (ignored in kernel notifications)
+        * permissionMask - sets the required permission set to call the endpoint (ignored in kernel notifications)
 */
 extern enum gnwIpcError ipcRegister(const char * const path,
-                                    const gnwIpcListener handler);
+                                    const gnwIpcListener handler,
+                                    const bool bindingRequired,
+                                    const size_t permissionMask);
 
 /*
     Sends query to specified IPC path

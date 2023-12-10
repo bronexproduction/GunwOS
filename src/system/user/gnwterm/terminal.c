@@ -110,7 +110,7 @@ static void ipcListener(const struct gnwIpcEndpointQuery * const query) {
 
 void dupa() {
     k_trm_vid_init();
-    ipcRegister("t0", ipcListener);
+    ipcRegister("t0", ipcListener, false, 0);
     clear();
 
     runLoopStart();

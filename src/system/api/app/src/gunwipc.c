@@ -15,7 +15,9 @@
 #include <string.h>
 
 enum gnwIpcError ipcRegister(const char * const path,
-                             const gnwIpcListener handler) {
+                             const gnwIpcListener handler,
+                             const bool bindingRequired,
+                             const size_t permissionMask) {
     CHECKPTR(path);
     CHECKPTR(handler);
 
@@ -27,6 +29,8 @@ enum gnwIpcError ipcRegister(const char * const path,
     }
     desc.handlerRoutine = handler;
     desc.decoder = gnwIpcEndpointQuery_decode;
+    desc.bindingRequired = bindingRequired;
+    desc.permissionMask = permissionMask;
 
     SYSCALL_PAR1(&desc);
 
