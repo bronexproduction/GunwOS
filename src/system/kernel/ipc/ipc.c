@@ -276,19 +276,23 @@ enum gnwIpcError k_ipc_register(const procId_t procId,
 enum gnwIpcError k_ipc_reply(const procId_t procId,
                              const ptr_t absReplyBufferPtr,
                              const size_t replySizeBytes,
-                             const size_t token) {
+                             const struct gnwIpcReplyInfo * const absInfoPtr) {
     if (!absReplyBufferPtr) {
         OOPS("Null reply buffer pointer");
+        return GIPCE_UNKNOWN;
+    }
+    if (!absInfoPtr) {
+        OOPS("Null reply info pointer");
         return GIPCE_UNKNOWN;
     }
     if (!replySizeBytes) {
         return GIPCE_INVALID_PARAMETER;
     }
-    if (token >= MAX_IPC_TOKEN) {
+    if (absInfoPtr->token >= MAX_IPC_TOKEN) {
         return GIPCE_INVALID_PARAMETER;
     }
 
-    const struct ipcReply * const reply = &ipcReplyRegister[token];
+    const struct ipcReply * const reply = &ipcReplyRegister[absInfoPtr->token];
     if (reply->handlerProcId == NONE_PROC_ID) {
         /*
             Empty slot
@@ -320,7 +324,7 @@ enum gnwIpcError k_ipc_reply(const procId_t procId,
     memcopy(absReplyBufferPtr, reply->absReplyBufferPtr, replySizeBytes);
     *(reply->absReplyErrorPtr) = GIPCE_NONE;
 
-    clearReply(token);
+    clearReply(absInfoPtr->token);
     unlockIfAble(senderProcId);
 
     return GIPCE_NONE;

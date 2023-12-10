@@ -145,7 +145,7 @@ __attribute__((naked)) enum gnwRunLoopError k_scr_runLoopGetData(ptr_t dataBuffe
     Code - 0x13
     Function - IPC_REPLY
 */
-__attribute__((naked)) enum gnwIpcError k_scr_ipcReply(const ptr_t replyBufferPtr, const size_t replySizeBytes, const size_t token);
+__attribute__((naked)) enum gnwIpcError k_scr_ipcReply(const ptr_t replyBufferPtr, const size_t replySizeBytes, const struct gnwIpcReplyInfo * infoPtr);
 
 /*
     Code - 0x14

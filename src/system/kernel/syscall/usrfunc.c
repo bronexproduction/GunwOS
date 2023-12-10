@@ -363,7 +363,7 @@ SCR(runLoopGetData,
     Params:
         * EBX - pointer to reply buffer data relative to caller process memory
         * ECX - size of reply buffer in bytes
-        * EDX - IPC query token
+        * EDX - IPC reply info pointer
     
     Return:
         * EAX - enum gnwIpcError code if any, GIPCE_NONE otherwise
@@ -371,12 +371,12 @@ SCR(runLoopGetData,
 SCR(ipcReply,
     REG(32, replyBufferPtr, ebx)
     REG(32, replySizeBytes, ecx)
-    REG(32, token, edx)
+    REG(32, infoPtr, edx)
 
     REG_RET(32, err)
 
-    extern enum gnwIpcError k_scr_usr_ipcReply(const ptr_t, const size_t, const size_t);
-    err = k_scr_usr_ipcReply((ptr_t)replyBufferPtr, replySizeBytes, token);
+    extern enum gnwIpcError k_scr_usr_ipcReply(const ptr_t, const size_t, const struct gnwIpcReplyInfo * const);
+    err = k_scr_usr_ipcReply((ptr_t)replyBufferPtr, replySizeBytes, (struct gnwIpcReplyInfo *)infoPtr);
 )
 
 /*
