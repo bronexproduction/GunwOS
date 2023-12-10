@@ -181,8 +181,8 @@ static bool isProcessAlive(const procId_t procId) {
 static void procKillNotify(const procId_t procId) {
     struct gnwIpcSenderQuery query;
 
-    query.path = GNW_PATH_IPC_BINDING_NOTIFICATION_PROCESS_KILLED;
-    query.pathLen = strlen(GNW_PATH_IPC_BINDING_NOTIFICATION_PROCESS_KILLED);
+    query.path = GNW_PATH_IPC_BINDING_NOTIFICATION_SESSION_DESTROYED;
+    query.pathLen = strlen(GNW_PATH_IPC_BINDING_NOTIFICATION_SESSION_DESTROYED);
     query.dataPtr = (ptr_t)&procId;
     query.dataSizeBytes = sizeof(procId_t);
     query.replyErrPtr = nullptr;

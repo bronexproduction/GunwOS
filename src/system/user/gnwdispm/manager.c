@@ -63,7 +63,7 @@ void dupa() {
     ipcRegister(DISPMGR_PATH_GET, ipcGetDisplayListener, false, 0);
     ipcRegister(DISPMGR_PATH_ATTACH, ipcAttachToDisplayListener, false, 0);
 
-    ipcRegister(GNW_PATH_IPC_BINDING_NOTIFICATION_PROCESS_KILLED, ipcProcessKilledListener, false, 0);
+    ipcRegister(GNW_PATH_IPC_BINDING_NOTIFICATION_SESSION_DESTROYED, ipcProcessKilledListener, false, 0);
 
     ipcRegister(DISPMGR_PATH_PUSH, ipcPushFrameListener, true, 0);
 
