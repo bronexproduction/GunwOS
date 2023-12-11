@@ -16,7 +16,9 @@ enum gnwIpcError k_ipc_register(const procId_t procId,
                                 const char * const absPathPtr,
                                 const size_t pathLen,
                                 const gnwIpcListener handlerRoutine,
-                                const gnwIpcEndpointQueryDecoder decoder);
+                                const gnwIpcEndpointQueryDecoder decoder,
+                                const bool bindingRequired,
+                                const size_t permissionMask);
 enum gnwIpcError k_ipc_reply(const procId_t procId,
                              const ptr_t absReplyBufferPtr,
                              const size_t replySizeBytes,

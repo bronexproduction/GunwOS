@@ -23,6 +23,8 @@ static struct ipcListener {
     char path[GNW_PATH_IPC_MAX_LENGTH];
     gnwIpcListener listener;
     gnwIpcEndpointQueryDecoder decoder;
+    bool bindingRequired;
+    size_t permissionMask;
 } ipcListenerRegister[MAX_IPC_LISTENER];
 
 static struct ipcReply {
@@ -241,7 +243,9 @@ enum gnwIpcError k_ipc_register(const procId_t procId,
                                 const char * const absPathPtr,
                                 const size_t pathLen,
                                 const gnwIpcListener handlerRoutine,
-                                const gnwIpcEndpointQueryDecoder decoder) {
+                                const gnwIpcEndpointQueryDecoder decoder,
+                                const bool bindingRequired,
+                                const size_t permissionMask) {
     if (!absPathPtr) {
         OOPS("Nullptr");
         return GIPCE_UNKNOWN;
@@ -250,6 +254,9 @@ enum gnwIpcError k_ipc_register(const procId_t procId,
         return GIPCE_INVALID_PATH;
     }
     if (!handlerRoutine) {
+        return GIPCE_INVALID_PARAMETER;
+    }
+    if (!bindingRequired && permissionMask) {
         return GIPCE_INVALID_PARAMETER;
     }
     if (!pathGlobalValidate(absPathPtr, pathLen)) {
@@ -269,6 +276,8 @@ enum gnwIpcError k_ipc_register(const procId_t procId,
     memcopy(absPathPtr, ipcListenerRegister[index].path, pathLen);
     ipcListenerRegister[index].listener = handlerRoutine;
     ipcListenerRegister[index].decoder = decoder;
+    ipcListenerRegister[index].bindingRequired = bindingRequired;
+    ipcListenerRegister[index].permissionMask = permissionMask;
 
     return GIPCE_NONE;
 }
