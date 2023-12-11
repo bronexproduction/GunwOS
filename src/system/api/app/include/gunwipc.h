@@ -26,21 +26,21 @@
 #define GNW_ROOT_IPC_PROC_ID_SEPARATOR ':'
 #define GNW_PATH_IPC_COMPONENT_SEPARATOR '/'
 #define GNW_PATH_IPC_BROADCAST_PREFIX '_'
-#define GNW_PATH_IPC_KERNEL_BROADCAST_ID 'k'
 #define GNW_PATH_IPC_MAX_LENGTH 64
 
-#define GNW_PATH_IPC_BINDING_NOTIFICATION_SESSION_DESTROYED "_k/ipc/sd"
+#define GNW_PATH_IPC_BINDING_NOTIFICATION_SESSION_DESTROYED "_/ipc/sd"
 
 enum gnwIpcError {
-    GIPCE_NONE              = 0,
-    GIPCE_INVALID_PATH      = -2,
-    GIPCE_INVALID_PARAMETER = -3,
-    GIPCE_ALREADY_EXISTS    = -4,
-    GIPCE_NOT_FOUND         = -5,
-    GIPCE_IGNORED           = -6,
-    GIPCE_FORBIDDEN         = -7,
-    GIPCE_FULL              = -8,
-    GIPCE_UNKNOWN           = -1
+    GIPCE_NONE                          = 0,
+    GIPCE_INVALID_PATH                  = -2,
+    GIPCE_INVALID_PARAMETER             = -3,
+    GIPCE_ALREADY_EXISTS                = -4,
+    GIPCE_NOT_FOUND                     = -5,
+    GIPCE_IGNORED                       = -6,
+    GIPCE_FORBIDDEN                     = -7,
+    GIPCE_FULL                          = -8,
+    GIPCE_PRECONDITION_NOT_SATISFIED    = -9,
+    GIPCE_UNKNOWN                       = -1
 };
 
 enum gnwIpcBindFlag {
@@ -56,6 +56,8 @@ struct gnwIpcEndpointQuery {
     size_t dataSizeBytes;
     size_t replySizeBytes;
     size_t token;
+    bool bound;
+    size_t permissions;
 };
 
 typedef void (*gnwIpcListener)(const struct gnwIpcEndpointQuery * const);
