@@ -71,7 +71,7 @@
         {
             "label": "Build",
             "type": "shell",
-            "command": "make all",
+            "command": "make clean all",
             "group": {
                 "kind": "build",
                 "isDefault": false

@@ -14,6 +14,24 @@ struct gnwIpcHandlerDescriptor {
     size_t pathLen;
     gnwIpcListener handlerRoutine;
     gnwIpcEndpointQueryDecoder decoder;
+    bool bindingRequired;
+    size_t permissionMask;
+};
+
+struct gnwIpcSenderQuery {
+    const char * path;
+    size_t pathLen;
+    ptr_t dataPtr;
+    size_t dataSizeBytes;
+    enum gnwIpcError * replyErrPtr;
+    ptr_t replyPtr;
+    size_t replySizeBytes;
+};
+
+struct gnwIpcReplyInfo {
+    size_t token;
+    enum gnwIpcBindFlag bindFlag;
+    size_t permissions;
 };
 
 #ifdef _GUNWAPI_KERNEL

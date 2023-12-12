@@ -21,5 +21,11 @@ enum gnwIpcError k_scr_usr_ipcRegister(const struct gnwIpcHandlerDescriptor * de
         return GIPCE_UNKNOWN;
     });
     
-    return k_ipc_register(procId, abs_pathPtr, abs_descPtr->pathLen, abs_descPtr->handlerRoutine, abs_descPtr->decoder);
+    return k_ipc_register(procId,
+                          abs_pathPtr,
+                          abs_descPtr->pathLen,
+                          abs_descPtr->handlerRoutine,
+                          abs_descPtr->decoder,
+                          abs_descPtr->bindingRequired,
+                          abs_descPtr->permissionMask);
 }
