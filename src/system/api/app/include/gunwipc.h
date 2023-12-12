@@ -83,6 +83,16 @@ extern enum gnwIpcError ipcRegister(const char * const path,
                                     const size_t permissionMask);
 
 /*
+    Registers the process as IPC notification receiver for given path
+
+    Params:
+        * path - IPC path (see line 14)
+        * handler - IPC message handler
+*/
+extern enum gnwIpcError ipcRegisterNotification(const char * const path,
+                                                const gnwIpcListener handler);
+
+/*
     Sends query to specified IPC path
 
     Params:

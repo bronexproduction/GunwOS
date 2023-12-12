@@ -40,6 +40,11 @@ enum gnwIpcError ipcRegister(const char * const path,
     SYSCALL_RETVAL(32);
 }
 
+enum gnwIpcError ipcRegisterNotification(const char * const path,
+                                         const gnwIpcListener handler) {
+    return ipcRegister(path, handler, false, 0);
+}
+
 enum gnwIpcError ipcSend(const char * const path,
                          const ptr_t dataPtr,
                          const size_t dataSizeBytes,

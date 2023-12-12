@@ -13,7 +13,7 @@
 #include "keyboard.h"
 #include "session.h"
 
-static void ipcProcessKilledListener(const struct gnwIpcEndpointQuery * const query) {
+static void ipcSessionDestroyListener(const struct gnwIpcEndpointQuery * const query) {
     if (!query) { fug(FUG_NULLPTR); return; }
     if (!query->dataPtr) { fug(FUG_INCONSISTENT); return; }
     if (query->dataSizeBytes != sizeof(procId_t)) { fug(FUG_INCONSISTENT); return; }
@@ -30,7 +30,13 @@ void dupa() {
     if (!keyboard_init()) {
         fug(FUG_UNDEFINED);
     }
-    ipcRegister(GNW_PATH_IPC_KERNEL_NOTIFICATION_PROCESS_KILLED, ipcProcessKilledListener);
+
+    enum gnwIpcError e;
+
+    e = ipcRegisterNotification(GNW_PATH_IPC_BINDING_NOTIFICATION_SESSION_DESTROYED, ipcSessionDestroyListener);
+    if (e != GIPCE_NONE) {
+        fug(FUG_UNDEFINED);
+    }
 
     runLoopStart();
 }

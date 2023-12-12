@@ -72,7 +72,7 @@ void dupa() {
         fug(FUG_UNDEFINED);
     }
 
-    e = ipcRegister(GNW_PATH_IPC_BINDING_NOTIFICATION_SESSION_DESTROYED, ipcSessionDestroyListener, false, 0);
+    e = ipcRegisterNotification(GNW_PATH_IPC_BINDING_NOTIFICATION_SESSION_DESTROYED, ipcSessionDestroyListener);
     if (e != GIPCE_NONE) {
         fug(FUG_UNDEFINED);
     }
