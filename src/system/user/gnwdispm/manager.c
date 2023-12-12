@@ -34,7 +34,7 @@ DISPMGR_LISTENER(GetDisplay, {
 DISPMGR_LISTENER(AttachToDisplay, {
     result.error = display_attachToDisplay(query->sourceProcId, dispQueryPtr->type, &dispQueryPtr->displayDescriptor);
 }, {
-    if (result.error != GDE_NONE) {
+    if (result.error == GDE_NONE) {
         bindFlag = GIBF_BIND;
     }
 }, {})
