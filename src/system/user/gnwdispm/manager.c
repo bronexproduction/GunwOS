@@ -43,7 +43,7 @@ DISPMGR_LISTENER(PushFrame, {
     result.error = display_pushFrame(query->sourceProcId, dispQueryPtr->displayId, dispQueryPtr->frameBuffer, dispQueryPtr->inputRange);
 }, {}, {})
 
-static void ipcProcessKilledListener(const struct gnwIpcEndpointQuery * const query) {
+static void ipcSessionDestroyListener(const struct gnwIpcEndpointQuery * const query) {
     if (!query) { fug(FUG_NULLPTR); return; }
     if (!query->dataPtr) { fug(FUG_INCONSISTENT); return; }
     if (query->dataSizeBytes != sizeof(procId_t)) { fug(FUG_INCONSISTENT); return; }
@@ -60,12 +60,27 @@ void dupa() {
     if (!display_init()) {
         fug(FUG_UNDEFINED);
     }
-    ipcRegister(DISPMGR_PATH_GET, ipcGetDisplayListener, false, 0);
-    ipcRegister(DISPMGR_PATH_ATTACH, ipcAttachToDisplayListener, false, 0);
+    
+    enum gnwIpcError e;
+    
+    e = ipcRegister(DISPMGR_PATH_GET, ipcGetDisplayListener, false, 0);
+    if (e != GIPCE_NONE) {
+        fug(FUG_UNDEFINED);
+    }
+    e = ipcRegister(DISPMGR_PATH_ATTACH, ipcAttachToDisplayListener, false, 0);
+    if (e != GIPCE_NONE) {
+        fug(FUG_UNDEFINED);
+    }
 
-    ipcRegister(GNW_PATH_IPC_BINDING_NOTIFICATION_SESSION_DESTROYED, ipcProcessKilledListener, false, 0);
+    e = ipcRegister(GNW_PATH_IPC_BINDING_NOTIFICATION_SESSION_DESTROYED, ipcSessionDestroyListener, false, 0);
+    if (e != GIPCE_NONE) {
+        fug(FUG_UNDEFINED);
+    }
 
-    ipcRegister(DISPMGR_PATH_PUSH, ipcPushFrameListener, true, 0);
+    e = ipcRegister(DISPMGR_PATH_PUSH, ipcPushFrameListener, true, 0);
+    if (e != GIPCE_NONE) {
+        fug(FUG_UNDEFINED);
+    }
 
     runLoopStart();
 }
