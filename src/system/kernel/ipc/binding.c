@@ -82,18 +82,18 @@ enum gnwIpcError k_ipc_binding_update(const procId_t sender, const procId_t rece
     return GIPCE_NONE;
 }
 
-static void bindingDestroyNotify(const procId_t procId) {
+static void bindingDestroyNotify(const struct binding * const bindingPtr, const procId_t requester) {
     struct gnwIpcSenderQuery query;
 
     query.path = GNW_PATH_IPC_BINDING_NOTIFICATION_SESSION_DESTROYED;
     query.pathLen = strlen(GNW_PATH_IPC_BINDING_NOTIFICATION_SESSION_DESTROYED);
-    query.dataPtr = (ptr_t)&procId;
+    query.dataPtr = (ptr_t)&requester;
     query.dataSizeBytes = sizeof(procId_t);
     query.replyErrPtr = nullptr;
     query.replyPtr = nullptr;
     query.replySizeBytes = 0;
 
-    const enum gnwIpcError e = k_ipc_notify(query, procId);
+    const enum gnwIpcError e = k_ipc_notify(query, bindingPtr->receiver == requester ? bindingPtr->sender : bindingPtr->receiver);
     if (e != GIPCE_NONE) {
         OOPS("Unexpected kernel event broadcast error");
         return;
@@ -101,7 +101,7 @@ static void bindingDestroyNotify(const procId_t procId) {
 }
 
 static void bindingDestroy(struct binding * const bindingPtr, const procId_t requester) {
-    bindingDestroyNotify(bindingPtr->receiver == requester ? bindingPtr->sender : bindingPtr->receiver);
+    bindingDestroyNotify(bindingPtr, requester);
     bindingClear(bindingPtr);
 }
 
