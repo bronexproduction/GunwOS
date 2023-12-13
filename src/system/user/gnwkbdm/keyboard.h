@@ -8,8 +8,7 @@
 #ifndef KEYBOARD_H
 #define KEYBOARD_H
 
-#include <types.h>
-#include <gunwdisplay.h>
+#include <gunwdevtypes.h>
 
 bool keyboard_init();
 

@@ -10,6 +10,7 @@
 
 #include <mem.h>
 #include <proc.h>
+#include <gunwdev.h>
 #include <gunwkeyboard.h>
 #include <gunwfug.h>
 
@@ -90,5 +91,7 @@ enum gnwDeviceError keyboard_attach(const procId_t procId) {
     //     return e;
     // }
 
-    return GDE_NONE;
+    // return GDE_NONE;
+
+    return GDE_UNKNOWN;
 }
