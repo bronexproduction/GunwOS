@@ -63,35 +63,25 @@ bool keyboard_init() {
 }
 
 enum gnwDeviceError keyboard_attach(const procId_t procId) {
-    // CHECKPTR(displayDescriptor)
+    struct session * keyboardSession = sessionForProc(procId);
+    if (keyboardSession) {
+        return GDE_ALREADY_HELD;
+    }
 
-    // struct gnwDeviceUHADesc uha;
-    // enum gnwDeviceError e = devGetById(displayDescriptor->identifier, &uha);
+    enum gnwDeviceError e = sessionCreate(procId, &keyboardSession);
+    if (e != GDE_NONE) {
+        return e;
+    }
+    if (!keyboardSession) {
+        fug(FUG_NULLPTR);
+        return GDE_UNKNOWN;
+    }
 
-    // if (e != GDE_NONE) {
-    //     return e;
-    // }
-    // if (GDD_FMT_ISTEXT(displayDescriptor->format) != (type == TEXT)) {
-    //     return GDE_ID_INVALID;
-    // }
+    e = sessionEnable(keyboardSession);
+    if (e != GDE_NONE) {
+        sessionDestroy(keyboardSession);
+        return e;
+    }
 
-    // struct session * displaySession = nullptr;
-    // e = sessionCreate(procId, displayDescriptor, &displaySession);
-    // if (e != GDE_NONE) {
-    //     return e;
-    // }
-    // if (!displaySession) {
-    //     fug(FUG_NULLPTR);
-    //     return GDE_UNKNOWN;
-    // }
-
-    // e = sessionEnable(displaySession);
-    // if (e != GDE_NONE) {
-    //     sessionDestroy(displaySession);
-    //     return e;
-    // }
-
-    // return GDE_NONE;
-
-    return GDE_UNKNOWN;
+    return GDE_NONE;
 }

@@ -25,6 +25,10 @@ enum gnwDeviceError attachToKeyboard(const gnwKeyboardEventListener listener) {
         return result.error;
     }
 
+    /*
+        TODO: Handling incoming events by the listener
+    */
+
     return GDE_NONE;
 }
 

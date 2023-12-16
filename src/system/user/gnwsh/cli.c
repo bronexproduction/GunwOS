@@ -133,7 +133,7 @@ static void prompt() {
     user_cli_puts("[GunwSH]: ");
 }
 
-static void s_cli_init() {
+static void cli_init() {
 
     enum gnwDeviceError e = GDE_NONE;
     
@@ -142,8 +142,6 @@ static void s_cli_init() {
     */
     e = attachToKeyboard(onKeyboardEvent);
     if (e != GDE_NONE) {
-        // devRelease(charOutDesc.identifier);
-        // OOPS("Error retrieving available keyboard");
         fug(FUG_UNDEFINED);
     }
 
@@ -157,7 +155,7 @@ static void s_cli_init() {
 }
 
 void dupa() {
-    s_cli_init();
+    cli_init();
 
     runLoopStart();
 }
