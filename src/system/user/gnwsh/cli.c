@@ -137,30 +137,13 @@ static void s_cli_init() {
 
     enum gnwDeviceError e = GDE_NONE;
     
-    /* 
+    /*
         Attach keyboard listener
     */
-    struct gnwDeviceUHADesc keyboardDesc;
-    e = devGetByType(DEV_TYPE_KEYBOARD, &keyboardDesc);
-
-    if (e) {
+    e = attachToKeyboard(onKeyboardEvent);
+    if (e != GDE_NONE) {
         // devRelease(charOutDesc.identifier);
         // OOPS("Error retrieving available keyboard");
-        fug(FUG_UNDEFINED);
-    }
-
-    e = devAcquire(keyboardDesc.identifier);
-    if (e) {
-        // devRelease(charOutDesc.identifier);
-        // OOPS("Unable to attach to keyboard");
-        fug(FUG_UNDEFINED);
-    }
-
-    e = devListen(keyboardDesc.identifier, (gnwDeviceEventListener)onKeyboardEvent);
-    if (e) {
-        // devRelease(charOutDesc.identifier);
-        devRelease(keyboardDesc.identifier);
-        // OOPS("Unable to attach keyboard listener");
         fug(FUG_UNDEFINED);
     }
 

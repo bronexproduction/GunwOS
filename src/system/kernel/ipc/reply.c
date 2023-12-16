@@ -65,6 +65,7 @@ enum gnwIpcError k_ipc_reply(const procId_t procId,
     enum gnwIpcError e = GIPCE_NONE;
     switch (absInfoPtr->bindFlag) {
         case GIBF_BIND:
+        #warning CHECK IF SENDER ACCEPTS KERNEL NOTIFICATIONS (SESSION CLOSE DUE TO SERVER FAILURE)
             e = k_ipc_binding_create(senderProcId, procId, absInfoPtr->permissions);
             break;
         case GIBF_UPDATE:
