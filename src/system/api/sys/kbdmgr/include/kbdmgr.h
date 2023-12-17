@@ -12,6 +12,8 @@
 #include <gunwdevtypes.h>
 
 #define KBDMGR_PATH_ATTACH "km/a"
+#define KBDMGR_REVERSE_PATH_BIND ":km/b"
+#define KBDMGR_REVERSE_PATH_EVENT ":km/e"
 
 struct gnwKeyboardManagerAttachToKeyboardQuery {
     size_t _unused;
