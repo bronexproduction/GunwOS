@@ -94,5 +94,6 @@
     "ranges": "c",
     "span": "c",
     "numbers": "c"
-  }
+  },
+  "cmake.configureOnOpen": false
 }

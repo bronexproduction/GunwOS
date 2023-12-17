@@ -26,6 +26,8 @@ struct gnwIpcSenderQuery {
     enum gnwIpcError * replyErrPtr;
     ptr_t replyPtr;
     size_t replySizeBytes;
+    enum gnwIpcBindFlag bindFlag;
+    size_t permissions;
 };
 
 struct gnwIpcReplyInfo {

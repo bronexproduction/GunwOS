@@ -49,7 +49,9 @@ enum gnwIpcError ipcSend(const char * const path,
                          const ptr_t dataPtr,
                          const size_t dataSizeBytes,
                          ptr_t replyPtr,
-                         const size_t replySizeBytes) {
+                         const size_t replySizeBytes,
+                         const enum gnwIpcBindFlag bindFlag,
+                         const size_t permissions) {
     CHECKPTR(path);
 
     enum gnwIpcError replyErr = GIPCE_NONE;
@@ -61,6 +63,8 @@ enum gnwIpcError ipcSend(const char * const path,
     query.replyErrPtr = &replyErr;
     query.replyPtr = replyPtr;
     query.replySizeBytes = replySizeBytes;
+    query.bindFlag = bindFlag;
+    query.permissions = permissions;
 
     SYSCALL_PAR1(&query);
 
