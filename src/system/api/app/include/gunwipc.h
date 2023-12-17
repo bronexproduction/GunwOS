@@ -69,6 +69,15 @@ typedef void (*gnwIpcEndpointQueryDecoder)(const ptr_t, struct gnwIpcEndpointQue
 extern void gnwIpcEndpointQuery_decode(const ptr_t, struct gnwIpcEndpointQuery * const);
 
 /*
+    Default listener used by APIs
+
+    To be set in order to use APIs listening for events
+
+    ipcSessionDestroyListener - GNW_PATH_IPC_BINDING_NOTIFICATION_SESSION_DESTROYED
+*/
+extern gnwIpcListener ipcSessionDestroyListener;
+
+/*
     Registers the process as global IPC receiver for given path
 
     Params:

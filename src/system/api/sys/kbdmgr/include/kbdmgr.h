@@ -10,6 +10,7 @@
 
 #include <defs.h>
 #include <gunwdevtypes.h>
+#include <gunwkeyboard.h>
 
 #define KBDMGR_PATH_ATTACH "km/a"
 #define KBDMGR_PATH_EVENT ":km/e"
@@ -20,6 +21,10 @@ struct gnwKeyboardManagerAttachToKeyboardQuery {
 
 struct gnwKeyboardManagerAttachToKeyboardResult {
     enum gnwDeviceError error;
+};
+
+struct gnwKeyboardManagerEventQuery {
+    struct gnwKeyboardEvent keyboardEvent;
 };
 
 #endif // GUNWOS_API_KBDMGR_H

@@ -43,7 +43,7 @@ DISPMGR_LISTENER(PushFrame, {
     result.error = display_pushFrame(query->sourceProcId, dispQueryPtr->displayId, dispQueryPtr->frameBuffer, dispQueryPtr->inputRange);
 }, {}, {})
 
-static void ipcSessionDestroyListener(const struct gnwIpcEndpointQuery * const query) {
+static void onSessionDestroy(const struct gnwIpcEndpointQuery * const query) {
     if (!query) { fug(FUG_NULLPTR); return; }
     if (!query->dataPtr) { fug(FUG_INCONSISTENT); return; }
     if (query->dataSizeBytes != sizeof(procId_t)) { fug(FUG_INCONSISTENT); return; }
@@ -72,6 +72,7 @@ void dupa() {
         fug(FUG_UNDEFINED);
     }
 
+    ipcSessionDestroyListener = onSessionDestroy;
     e = ipcRegisterNotification(GNW_PATH_IPC_BINDING_NOTIFICATION_SESSION_DESTROYED, ipcSessionDestroyListener);
     if (e != GIPCE_NONE) {
         fug(FUG_UNDEFINED);

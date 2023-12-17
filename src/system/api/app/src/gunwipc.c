@@ -12,7 +12,10 @@
 
 #include "scl_user.h"
 #include "../include/gunwfug.h"
+#include <defs.h>
 #include <string.h>
+
+gnwIpcListener ipcSessionDestroyListener = nullptr;
 
 enum gnwIpcError ipcRegister(const char * const path,
                              const gnwIpcListener handler,
