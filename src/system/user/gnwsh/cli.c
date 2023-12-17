@@ -11,6 +11,7 @@
 #include <types.h>
 #include <mem.h>
 #include <gunwdev.h>
+#include <gunwipc.h>
 #include <gunwkeyboard.h>
 #include <gunwfug.h>
 #include <gunwrlp.h>
@@ -133,14 +134,14 @@ static void prompt() {
     user_cli_puts("[GunwSH]: ");
 }
 
-static void cli_init() {
+static void onSessionDestroy(const struct gnwIpcEndpointQuery * const query) {
+    fug(FUG_UNDEFINED);
+}
 
-    enum gnwDeviceError e = GDE_NONE;
-    
-    /*
-        Attach keyboard listener
-    */
-    e = attachToKeyboard(onKeyboardEvent);
+static void cli_init() {
+    ipcSessionDestroyListener = onSessionDestroy;
+
+    enum gnwDeviceError e = attachToKeyboard(onKeyboardEvent);
     if (e != GDE_NONE) {
         fug(FUG_UNDEFINED);
     }
