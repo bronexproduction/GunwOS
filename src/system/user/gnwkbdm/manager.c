@@ -13,28 +13,47 @@
 #include "keyboard.h"
 #include "session.h"
 
-#define KBDMGR_LISTENER(NAME, PREPARE_RESULT, PREPARE_BINDING, PREPARE_PERMISSIONS) static void ipc ## NAME ## Listener(const struct gnwIpcEndpointQuery * const query) {   \
-    if (!query) { fug(FUG_NULLPTR); return; }                                                                                                                               \
-    if (!query->dataPtr) { fug(FUG_INCONSISTENT); return; }                                                                                                                 \
-    if (query->dataSizeBytes != sizeof(struct gnwKeyboardManager ## NAME ## Query)) { fug(FUG_INCONSISTENT); return; }                                                      \
-    if (query->replySizeBytes != sizeof(struct gnwKeyboardManager ## NAME ## Result)) { fug(FUG_INCONSISTENT); return; }                                                    \
-    struct gnwKeyboardManager ## NAME ## Query * const kbdQueryPtr = (struct gnwKeyboardManager ## NAME ## Query *)query->dataPtr;                                         \
-    struct gnwKeyboardManager ## NAME ## Result result; { PREPARE_RESULT; }                                                                                                 \
-    enum gnwIpcBindFlag bindFlag = GIBF_NONE; { PREPARE_BINDING; }                                                                                                          \
-    size_t permissions = 0; { PREPARE_PERMISSIONS; }                                                                                                                        \
-    enum gnwIpcError error = ipcReply((ptr_t)&result, sizeof(struct gnwKeyboardManager ## NAME ## Result), query->token, bindFlag, permissions);                            \
-    if (error == GIPCE_NOT_FOUND) { return; }                                                                                                                               \
-    else if (error != GIPCE_NONE) { fug(FUG_UNDEFINED); return; }                                                                                                           \
-}
-
-KBDMGR_LISTENER(AttachToKeyboard, {
-    (void)kbdQueryPtr;
-    result.error = keyboard_attach(query->sourceProcId);
-}, {
-    if (result.error == GDE_NONE) {
-        bindFlag = GIBF_BIND;
+static void ipcAttachToKeyboardListener(const struct gnwIpcEndpointQuery * const query) {
+    if (!query) { 
+        fug(FUG_NULLPTR); 
+        return; 
     }
-}, {})
+    if (!query->dataPtr) {
+        fug(FUG_INCONSISTENT);
+        return;
+    }
+    if (query->dataSizeBytes != sizeof(struct gnwKeyboardManagerAttachToKeyboardQuery)) {
+        fug(FUG_INCONSISTENT);
+        return;
+    }
+    if (query->replySizeBytes != sizeof(struct gnwKeyboardManagerAttachToKeyboardResult)) {
+        fug(FUG_INCONSISTENT);
+        return;
+    }
+
+    struct gnwKeyboardManagerAttachToKeyboardQuery * const kbdQueryPtr = (struct gnwKeyboardManagerAttachToKeyboardQuery *)query->dataPtr;
+    (void)kbdQueryPtr;
+    struct gnwKeyboardManagerAttachToKeyboardResult result;
+    
+    result.error = keyboard_attach(query->sourceProcId);
+    
+    enum gnwIpcError error = ipcReply((ptr_t)&result,
+                                      sizeof(struct gnwKeyboardManagerAttachToKeyboardResult),
+                                      query->token,
+                                      (result.error == GDE_NONE) ? GIBF_BIND : GIBF_NONE,
+                                      0);
+    if (error == GIPCE_NOT_FOUND) {
+        return;
+    }
+    else if (error != GIPCE_NONE) {
+        fug(FUG_UNDEFINED);
+        return;
+    }
+
+    /*
+        Call IPC path for called procId in order to bind reverse endpoint
+    */
+}
 
 static void ipcSessionDestroyListener(const struct gnwIpcEndpointQuery * const query) {
     if (!query) { fug(FUG_NULLPTR); return; }
