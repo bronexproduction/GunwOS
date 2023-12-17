@@ -11,24 +11,44 @@
 #include <mem.h>
 #include <proc.h>
 #include <gunwdev.h>
+#include <gunwipc.h>
 #include <gunwkeyboard.h>
 #include <gunwfug.h>
+#include <kbdmgr.h>
 
 extern sessionPtr_t keyboardStack[MAX_SESSION];
 extern struct session sessions[MAX_SESSION];
 extern void sessionClear(const sessionPtr_t sessionPtr);
 
 static GNW_KEYBOARD_EVENT_LISTENER(onKeyboardEvent) {
-    if (event->code == GKEC_KEY_DOWN) {
-        /*
-            Send key down event
-        */
-    } else if (event->code == GKEC_KEY_UP) {
-        /*
-            Send key up event
-        */
-    } else {
+    CHECKPTR(event);
+
+    if (event->code != GKEC_KEY_DOWN &&
+        event->code != GKEC_KEY_UP) {
         fug(FUG_INCONSISTENT);
+        return;
+    }
+
+    struct session * const session = sessionOnTop();
+    if (!session) {
+        return;
+    }
+
+    struct gnwKeyboardManagerEventQuery query;
+    query.keyboardEvent = *event;
+
+    const enum gnwIpcError e = ipcSendDirect(session->procId, KBDMGR_PATH_EVENT,
+                                             (ptr_t)&query, sizeof(struct gnwKeyboardManagerEventQuery),
+                                             nullptr, 0,
+                                             GIBF_NONE, 0);
+    if (e != GIPCE_NONE) {
+        sessionDestroy(session);
+    
+        if (e == GIPCE_FORBIDDEN || e == GIPCE_NOT_FOUND) {
+            return;
+        } else {
+            fug(FUG_UNDEFINED);
+        }
     }
 }
 

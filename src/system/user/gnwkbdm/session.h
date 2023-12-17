@@ -23,6 +23,7 @@ struct session {
 typedef struct session * sessionPtr_t;
 
 sessionPtr_t sessionForProc(const procId_t procId);
+struct session * sessionOnTop();
 bool sessionIsOnTop(const sessionPtr_t sessionPtr);
 
 enum gnwDeviceError sessionCreate(const procId_t procId,

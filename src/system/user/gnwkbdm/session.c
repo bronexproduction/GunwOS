@@ -27,6 +27,10 @@ sessionPtr_t sessionForProc(const procId_t procId) {
     return nullptr;
 }
 
+struct session * sessionOnTop() {
+    return *keyboardStack;
+}
+
 bool sessionIsOnTop(const sessionPtr_t sessionPtr) {
     return *keyboardStack == sessionPtr;
 }
