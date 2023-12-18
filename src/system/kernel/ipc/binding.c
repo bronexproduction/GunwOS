@@ -85,6 +85,7 @@ enum gnwIpcError k_ipc_binding_update(const procId_t sender, const procId_t rece
 static void bindingDestroyNotify(const struct binding * const bindingPtr, const procId_t requester) {
     struct gnwIpcSenderQuery query;
 
+    query.procId = NONE_PROC_ID;
     query.path = GNW_PATH_IPC_BINDING_NOTIFICATION_SESSION_DESTROYED;
     query.pathLen = strlen(GNW_PATH_IPC_BINDING_NOTIFICATION_SESSION_DESTROYED);
     query.dataPtr = (ptr_t)&requester;
@@ -120,9 +121,6 @@ void k_ipc_binding_cleanup(const procId_t procId) {
         if (bindings[i].sender == procId) {
             bindingDestroy(&bindings[i], procId);
         } else if (bindings[i].receiver == procId) {
-            /*
-                TODO: To be implemented with two-way IPC
-            */
             bindingClear(&bindings[i]);
         }
     }

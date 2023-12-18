@@ -36,6 +36,7 @@ enum gnwIpcError k_scr_usr_ipcSend(const struct gnwIpcSenderQuery * const queryP
     }
 
     struct gnwIpcSenderQuery absoluteQuery;
+    absoluteQuery.procId = abs_queryPtr->procId;
     absoluteQuery.path = abs_pathPtr;
     absoluteQuery.pathLen = abs_queryPtr->pathLen;
     absoluteQuery.dataPtr = abs_dataPtr;
