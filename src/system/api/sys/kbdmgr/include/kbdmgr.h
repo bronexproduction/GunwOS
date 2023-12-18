@@ -13,7 +13,7 @@
 #include <gunwkeyboard.h>
 
 #define KBDMGR_PATH_ATTACH "km/a"
-#define KBDMGR_PATH_EVENT ":km/e"
+#define KBDMGR_PATH_EVENT ":/km/e"
 
 struct gnwKeyboardManagerAttachToKeyboardQuery {
     size_t _unused;
