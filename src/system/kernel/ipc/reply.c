@@ -66,6 +66,9 @@ enum gnwIpcError k_ipc_reply(const procId_t procId,
     switch (absInfoPtr->bindFlag) {
         case GIBF_BIND:
             e = k_ipc_binding_create(senderProcId, procId, absInfoPtr->permissions);
+            if (e == GIPCE_ALREADY_EXISTS) {
+                e = GIPCE_NONE;
+            }
             break;
         case GIBF_UPDATE:
             e = k_ipc_binding_update(senderProcId, procId, absInfoPtr->permissions);
