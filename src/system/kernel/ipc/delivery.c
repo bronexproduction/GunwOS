@@ -102,15 +102,10 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
         return GIPCE_INVALID_PATH;
     }
 
-    size_t listenerIndex = 0;
+    size_t listenerIndex = k_ipc_utl_nextListenerIndexForPath(absQuery.path, absQuery.pathLen, nullptr);
     const struct ipcListener * listenerPtr = nullptr;
-    while (true) {
-        listenerIndex = k_ipc_utl_nextListenerIndexForPath(absQuery.path, absQuery.pathLen, &listenerIndex);
-        
-        if (listenerIndex >= MAX_IPC_LISTENER) {
-            return GIPCE_NOT_FOUND;
-        }
 
+    while (listenerIndex < MAX_IPC_LISTENER) {
         listenerPtr = &ipcListenerRegister[listenerIndex];
 
         if (type == GILT_GLOBAL) {
@@ -118,8 +113,13 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
         } else if ((type == GILT_DIRECT) && (listenerPtr->procId == absQuery.procId)) {
             break;
         }
+
+        listenerIndex = k_ipc_utl_nextListenerIndexForPath(absQuery.path, absQuery.pathLen, &listenerIndex);
     }
-    
+    if (listenerIndex >= MAX_IPC_LISTENER) {
+        return GIPCE_NONE;
+    }
+
     if (!listenerPtr->bindingRequired && (type == GILT_DIRECT)) {
         return GIPCE_INVALID_PARAMETER;
     }
