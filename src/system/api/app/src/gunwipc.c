@@ -14,6 +14,7 @@
 #include "../include/gunwfug.h"
 #include <defs.h>
 #include <string.h>
+#include <proc.h>
 
 gnwIpcListener ipcSessionDestroyListener = nullptr;
 
@@ -55,10 +56,22 @@ enum gnwIpcError ipcSend(const char * const path,
                          const size_t replySizeBytes,
                          const enum gnwIpcBindFlag bindFlag,
                          const size_t permissions) {
+    return ipcSendDirect(NONE_PROC_ID, path, dataPtr, dataSizeBytes, replyPtr, replySizeBytes, bindFlag, permissions);
+}
+
+enum gnwIpcError ipcSendDirect(const procId_t procId,
+                               const char * const path,
+                               const ptr_t dataPtr,
+                               const size_t dataSizeBytes,
+                               ptr_t replyPtr,
+                               const size_t replySizeBytes,
+                               const enum gnwIpcBindFlag bindFlag,
+                               const size_t permissions) {
     CHECKPTR(path);
 
     enum gnwIpcError replyErr = GIPCE_NONE;
     struct gnwIpcSenderQuery query;
+    query.procId = procId;
     query.path = path;
     query.pathLen = strlen(path);
     query.dataPtr = dataPtr;

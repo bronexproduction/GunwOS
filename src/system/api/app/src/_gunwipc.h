@@ -19,6 +19,7 @@ struct gnwIpcHandlerDescriptor {
 };
 
 struct gnwIpcSenderQuery {
+    procId_t procId;
     const char * path;
     size_t pathLen;
     ptr_t dataPtr;

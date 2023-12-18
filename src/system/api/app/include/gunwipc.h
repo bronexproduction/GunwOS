@@ -104,6 +104,8 @@ extern enum gnwIpcError ipcRegisterNotification(const char * const path,
 /*
     Sends query to specified IPC path
 
+    Use for global paths (without prefix)
+
     Params:
         * path - IPC path (see line 14)
         * dataPtr - pointer to message data
@@ -123,6 +125,33 @@ extern enum gnwIpcError ipcSend(const char * const path,
                                 const size_t replySizeBytes,
                                 const enum gnwIpcBindFlag bindFlag,
                                 const size_t permissions);
+
+/*
+    Sends query to specified IPC path of given process
+
+    Use for direct paths (prefixed with ':')
+
+    Params:
+        * procId - receiver process identifier
+        * path - IPC path (see line 14)
+        * dataPtr - pointer to message data
+        * dataSizeBytes - size of the message in bytes
+        * replyPtr - address of the buffer for reply data
+        * replySizeBytes - size of the reply in bytes
+        * bindFlag - determines binding update mode or GIBF_NONE otherwise
+          
+          On-send binding enables the sender process (client) to receive messages from the receiver process (server)
+
+        * permissions - binding permissions if needed, otherwise ignored
+*/
+extern enum gnwIpcError ipcSendDirect(const procId_t procId,
+                                      const char * const path,
+                                      const ptr_t dataPtr,
+                                      const size_t dataSizeBytes,
+                                      const ptr_t replyPtr,
+                                      const size_t replySizeBytes,
+                                      const enum gnwIpcBindFlag bindFlag,
+                                      const size_t permissions);
 
 /*
     Sends response for the IPC message with provided token
