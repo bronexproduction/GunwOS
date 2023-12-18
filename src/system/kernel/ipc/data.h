@@ -10,7 +10,7 @@
 
 #include <gunwipc.h>
 
-#define MAX_IPC_LISTENER 8
+#define MAX_IPC_LISTENER 16
 #define MAX_IPC_TOKEN 8
 
 enum gnwIpcListenerType {
