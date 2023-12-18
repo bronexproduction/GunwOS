@@ -49,10 +49,6 @@ static void ipcAttachToKeyboardListener(const struct gnwIpcEndpointQuery * const
         fug(FUG_UNDEFINED);
         return;
     }
-
-    /*
-        Call IPC path for called procId in order to bind reverse endpoint
-    */
 }
 
 static void onSessionDestroy(const struct gnwIpcEndpointQuery * const query) {
