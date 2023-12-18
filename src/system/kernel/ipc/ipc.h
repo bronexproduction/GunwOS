@@ -10,11 +10,24 @@
 
 #include <src/_gunwipc.h>
 
+/*
+    Handling IPC messages sent by user process
+
+    Available types:
+    * Global
+    * Direct
+*/
 enum gnwIpcError k_ipc_send(const procId_t procId,
                             const struct gnwIpcSenderQuery absQuery);
+
+/*
+    Handling IPC messages sent by kernel
+
+    Available types:
+    * Notification
+*/
 enum gnwIpcError k_ipc_notify(const struct gnwIpcSenderQuery absQuery,
                               const procId_t target);
-enum gnwIpcError k_ipc_broadcast(const struct gnwIpcSenderQuery absQuery);
 
 enum gnwIpcError k_ipc_register(const procId_t procId, 
                                 const char * const absPathPtr,
@@ -23,6 +36,7 @@ enum gnwIpcError k_ipc_register(const procId_t procId,
                                 const gnwIpcEndpointQueryDecoder decoder,
                                 const bool bindingRequired,
                                 const size_t permissionMask);
+
 enum gnwIpcError k_ipc_reply(const procId_t procId,
                              const ptr_t absReplyBufferPtr,
                              const size_t replySizeBytes,

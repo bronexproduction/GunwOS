@@ -11,25 +11,9 @@
 #include <src/_gunwipc.h>
 #include <defs.h>
 #include <mem.h>
-#include <proc.h>
+#include <hal/proc/proc.h>
 #include <string.h>
 #include <error/panic.h>
-
-static bool pathGlobalValidate(const char * absPathPtr, const size_t pathLen) {
-    for (size_t i = 0; i < pathLen; ++i) {
-        if (IN_RANGE('0', absPathPtr[i], '9')                          ||   /* 0 - 9 */
-            IN_RANGE('A', absPathPtr[i], 'Z')                          ||   /* A - Z */
-            IN_RANGE('a', absPathPtr[i], 'z')                          ||   /* a - z */
-            ((absPathPtr[i] == GNW_PATH_IPC_COMPONENT_SEPARATOR) && i) ||   /* path separator */
-            ((absPathPtr[i] == GNW_PATH_IPC_BROADCAST_PREFIX) && !i)        /* broadcast prefix */) {
-            continue;
-        }
-
-        return false;
-    }
-
-    return true;
-}
 
 static size_t freeListenerIndex() {
     for (size_t index = 0; index < MAX_IPC_LISTENER; ++index) {
@@ -59,6 +43,9 @@ enum gnwIpcError k_ipc_register(const procId_t procId,
                                 const gnwIpcEndpointQueryDecoder decoder,
                                 const bool bindingRequired,
                                 const size_t permissionMask) {
+    if (procId <= KERNEL_PROC_ID) {
+        return GIPCE_INVALID_PARAMETER;
+    }
     if (!absPathPtr) {
         OOPS("Nullptr");
         return GIPCE_UNKNOWN;
@@ -72,18 +59,39 @@ enum gnwIpcError k_ipc_register(const procId_t procId,
     if (!bindingRequired && permissionMask) {
         return GIPCE_INVALID_PARAMETER;
     }
-    if (!pathGlobalValidate(absPathPtr, pathLen)) {
+
+    enum gnwIpcListenerType type = k_ipc_utl_pathGlobalValidate(absPathPtr, pathLen) ? GILT_GLOBAL : GILT_NONE;
+    type |= k_ipc_utl_pathDirectValidate(absPathPtr, pathLen) ? GILT_DIRECT : GILT_NONE;
+    type |= k_ipc_utl_pathNotificationValidate(absPathPtr, pathLen) ? GILT_NOTIFICATION : GILT_NONE;
+
+    if (__builtin_popcount(type) != 1) {
         return GIPCE_INVALID_PATH;
     }
-    
-    const bool isNotification = k_ipc_utl_pathIsNotification(absPathPtr, pathLen);
-    if (isNotification && bindingRequired) {
+
+    /*
+        Binding parameters validation
+    */
+
+    if ((type == GILT_DIRECT) && !bindingRequired) {
         return GIPCE_INVALID_PARAMETER;
     }
-    if (!isNotification && bindingRequired && !receivesKernelNotifications(procId)) {
+    if ((type == GILT_NOTIFICATION) && bindingRequired) {
+        return GIPCE_INVALID_PARAMETER;
+    }
+
+    /*
+        Check binding preconditions
+    */
+
+    if (bindingRequired && !receivesKernelNotifications(procId)) {
         return GIPCE_PRECONDITION_NOT_SATISFIED;
     }
-    if (!isNotification && k_ipc_utl_nextListenerIndexForPath(absPathPtr, pathLen, nullptr) < MAX_IPC_LISTENER) {
+
+    /*
+        Check if global listener already exists
+    */
+
+    if ((type == GILT_GLOBAL) && k_ipc_utl_nextListenerIndexForPath(absPathPtr, pathLen, nullptr) < MAX_IPC_LISTENER) {
         return GIPCE_ALREADY_EXISTS;
     }
 
@@ -95,6 +103,7 @@ enum gnwIpcError k_ipc_register(const procId_t procId,
 
     ipcListenerRegister[index].procId = procId;
     memcopy(absPathPtr, ipcListenerRegister[index].path, pathLen);
+    ipcListenerRegister[index].type = type;
     ipcListenerRegister[index].listener = handlerRoutine;
     ipcListenerRegister[index].decoder = decoder;
     ipcListenerRegister[index].bindingRequired = bindingRequired;

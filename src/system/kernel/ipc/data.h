@@ -13,9 +13,17 @@
 #define MAX_IPC_LISTENER 8
 #define MAX_IPC_TOKEN 8
 
+enum gnwIpcListenerType {
+    GILT_NONE         = 0,
+    GILT_GLOBAL       = (1 << 0),
+    GILT_DIRECT       = (1 << 1),
+    GILT_NOTIFICATION = (1 << 2)
+};
+
 struct ipcListener {
     procId_t procId;
     char path[GNW_PATH_IPC_MAX_LENGTH];
+    enum gnwIpcListenerType type;
     gnwIpcListener listener;
     gnwIpcEndpointQueryDecoder decoder;
     bool bindingRequired;

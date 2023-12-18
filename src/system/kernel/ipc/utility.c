@@ -13,8 +13,46 @@
 #include <hal/proc/proc.h>
 #include <error/panic.h>
 
-bool k_ipc_utl_pathIsNotification(const char * absPathPtr, const size_t pathLen) {
-    return absPathPtr[0] == GNW_PATH_IPC_BROADCAST_PREFIX;
+bool k_ipc_utl_pathGlobalValidate(const char * absPathPtr, const size_t pathLen) {
+    for (size_t i = 0; i < pathLen; ++i) {
+        if (IN_RANGE('0', absPathPtr[i], '9')                          ||   /* 0 - 9 */
+            IN_RANGE('A', absPathPtr[i], 'Z')                          ||   /* A - Z */
+            IN_RANGE('a', absPathPtr[i], 'z')                          ||   /* a - z */
+            ((absPathPtr[i] == GNW_PATH_IPC_COMPONENT_SEPARATOR) && i)      /* path separator */) {
+            continue;
+        }
+
+        return false;
+    }
+
+    return true;
+}
+
+bool k_ipc_utl_pathDirectValidate(const char * absPathPtr, const size_t pathLen) {
+    if (pathLen <= 2) {
+        return false;
+    }
+    if (absPathPtr[0] != GNW_PATH_IPC_DIRECT_PREFIX) {
+        return false;
+    }
+    if (absPathPtr[1] != GNW_PATH_IPC_COMPONENT_SEPARATOR) {
+        return false;
+    }
+    return k_ipc_utl_pathGlobalValidate(absPathPtr + 2, pathLen - 2);
+}
+
+bool k_ipc_utl_pathNotificationValidate(const char * absPathPtr, const size_t pathLen) {
+    if (pathLen <= 2) {
+        return false;
+    }
+    if (absPathPtr[0] != GNW_PATH_IPC_NOTIFICATION_PREFIX) {
+        return false;
+    }
+    if (absPathPtr[1] != GNW_PATH_IPC_COMPONENT_SEPARATOR) {
+        return false;
+    }
+
+    return k_ipc_utl_pathGlobalValidate(absPathPtr + 2, pathLen - 2);
 }
 
 void k_ipc_utl_clearReply(const size_t entryId) {

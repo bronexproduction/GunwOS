@@ -11,21 +11,28 @@
 
 /*
     IPC path structure:
-
-        (processId - optional | GNW_ROOT_IPC_PROC_ID_SEPARATOR - only if processId present) OR GNW_PATH_IPC_BROADCAST_PREFIX - optional | pathComponent0 | (GNW_PATH_IPC_COMPONENT_SEPARATOR | pathComponentN) - if needed
+        
+        * Global:
+        pathComponent0 | (GNW_PATH_IPC_COMPONENT_SEPARATOR | pathComponentN) - if needed
+        * Direct:
+        GNW_PATH_IPC_DIRECT_PREFIX | GNW_PATH_IPC_COMPONENT_SEPARATOR | pathComponent0 | (GNW_PATH_IPC_COMPONENT_SEPARATOR | pathComponentN) - if needed
+        * Notification:
+        GNW_PATH_IPC_NOTIFICATION_PREFIX | GNW_PATH_IPC_COMPONENT_SEPARATOR | pathComponent0 | (GNW_PATH_IPC_COMPONENT_SEPARATOR | pathComponentN) - if needed
 
     Correct path examples:
 
         * banana
         * banana/potato/strawberry/pizza
-        * 0:banana
-        * 2:banana/potato
+        * :/banana
+        * :/banana/potato
+        * _/banana
+        * _/banana/potato
     
     Allowed characters: a-z A-Z 0-9
-*/ 
-#define GNW_ROOT_IPC_PROC_ID_SEPARATOR ':'
+*/
+#define GNW_PATH_IPC_NOTIFICATION_PREFIX '_'
+#define GNW_PATH_IPC_DIRECT_PREFIX ':'
 #define GNW_PATH_IPC_COMPONENT_SEPARATOR '/'
-#define GNW_PATH_IPC_BROADCAST_PREFIX '_'
 #define GNW_PATH_IPC_MAX_LENGTH 64
 
 #define GNW_PATH_IPC_BINDING_NOTIFICATION_SESSION_DESTROYED "_/ipc/sd"

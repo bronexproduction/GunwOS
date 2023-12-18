@@ -46,7 +46,7 @@ static enum gnwIpcError validateNotificationQuery(const struct gnwIpcSenderQuery
         return e;
     }
 
-    if (!k_ipc_utl_pathIsNotification(absQuery.path, absQuery.pathLen)) {
+    if (!k_ipc_utl_pathNotificationValidate(absQuery.path, absQuery.pathLen)) {
         return GIPCE_INVALID_PATH;
     }
     if (absQuery.replyPtr || absQuery.replyErrPtr || absQuery.replySizeBytes) {
@@ -60,8 +60,7 @@ static enum gnwIpcError validateNotificationQuery(const struct gnwIpcSenderQuery
 }
 
 static enum gnwIpcError deliver(const struct ipcListener * const listenerPtr,
-                                const struct gnwIpcEndpointQuery * const queryPtr,
-                                const bool isNotification) {
+                                const struct gnwIpcEndpointQuery * const queryPtr) {
 
     const enum k_proc_error err = k_proc_callback_invoke_ptr(listenerPtr->procId,
                                                              (gnwEventListener_ptr)listenerPtr->listener,
@@ -77,7 +76,7 @@ static enum gnwIpcError deliver(const struct ipcListener * const listenerPtr,
         }
 
         if (err == PE_IGNORED) {
-            return isNotification ? GIPCE_UNKNOWN : GIPCE_IGNORED;
+            return (listenerPtr->type == GILT_NOTIFICATION) ? GIPCE_UNKNOWN : GIPCE_IGNORED;
         } else if (err == PE_LIMIT_REACHED) {
             return GIPCE_FULL;
         } else {
@@ -96,18 +95,36 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
         return e;
     }
 
-    if (k_ipc_utl_pathIsNotification(absQuery.path, absQuery.pathLen)) {
+    enum gnwIpcListenerType type = k_ipc_utl_pathGlobalValidate(absQuery.path, absQuery.pathLen) ? GILT_GLOBAL : GILT_NONE;
+    type |= k_ipc_utl_pathDirectValidate(absQuery.path, absQuery.pathLen) ? GILT_DIRECT : GILT_NONE;
+
+    if (__builtin_popcount(type) != 1) {
         return GIPCE_INVALID_PATH;
     }
 
-    size_t listenerIndex = k_ipc_utl_nextListenerIndexForPath(absQuery.path, absQuery.pathLen, nullptr);
-    if (listenerIndex >= MAX_IPC_LISTENER) {
-        return GIPCE_NOT_FOUND;
+    size_t listenerIndex = 0;
+    const struct ipcListener * listenerPtr = nullptr;
+    while (true) {
+        listenerIndex = k_ipc_utl_nextListenerIndexForPath(absQuery.path, absQuery.pathLen, &listenerIndex);
+        
+        if (listenerIndex >= MAX_IPC_LISTENER) {
+            return GIPCE_NOT_FOUND;
+        }
+
+        listenerPtr = &ipcListenerRegister[listenerIndex];
+
+        if (type == GILT_GLOBAL) {
+            break;
+        } else if ((type == GILT_DIRECT) && (listenerPtr->procId == absQuery.procId)) {
+            break;
+        }
+    }
+    
+    if (!listenerPtr->bindingRequired && (type == GILT_DIRECT)) {
+        return GIPCE_INVALID_PARAMETER;
     }
 
-    const struct ipcListener * listenerPtr = &ipcListenerRegister[listenerIndex];
     size_t permissions = 0;
-
     if (listenerPtr->bindingRequired) {
         e = k_ipc_binding_getPermissions(procId, listenerPtr->procId, &permissions);
         if (e != GIPCE_NONE) {
@@ -153,7 +170,7 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
         endpointQuery.token = MAX_IPC_TOKEN;
     }
 
-    return deliver(listenerPtr, &endpointQuery, false);
+    return deliver(listenerPtr, &endpointQuery);
 }
 
 enum gnwIpcError k_ipc_notify(const struct gnwIpcSenderQuery absQuery,
@@ -185,38 +202,5 @@ enum gnwIpcError k_ipc_notify(const struct gnwIpcSenderQuery absQuery,
     endpointQuery.permissions = 0;
     endpointQuery.token = MAX_IPC_TOKEN;
 
-    return deliver(&ipcListenerRegister[listenerIndex], &endpointQuery, true);
-}
-
-enum gnwIpcError k_ipc_broadcast(const struct gnwIpcSenderQuery absQuery) {
-
-    enum gnwIpcError e = validateNotificationQuery(absQuery);
-    if (e != GIPCE_NONE) {
-        return e;
-    }
-
-    size_t listenerIndex = k_ipc_utl_nextListenerIndexForPath(absQuery.path, absQuery.pathLen, nullptr);
-    if (listenerIndex >= MAX_IPC_LISTENER) {
-        return GIPCE_NONE;
-    }
-
-    struct gnwIpcEndpointQuery endpointQuery;
-    endpointQuery.sourceProcId = KERNEL_PROC_ID;
-    endpointQuery.dataPtr = absQuery.dataPtr;
-    endpointQuery.dataSizeBytes = absQuery.dataSizeBytes;
-    endpointQuery.replySizeBytes = 0;
-    endpointQuery.bound = 0;
-    endpointQuery.permissions = 0;
-    endpointQuery.token = MAX_IPC_TOKEN;
-
-    while (listenerIndex < MAX_IPC_LISTENER) {
-        e = deliver(&ipcListenerRegister[listenerIndex], &endpointQuery, true);
-        if (e != GIPCE_NONE) {
-            return e;
-        }
-
-        listenerIndex = k_ipc_utl_nextListenerIndexForPath(absQuery.path, absQuery.pathLen, &listenerIndex);
-    }
-
-    return GIPCE_NONE;
+    return deliver(&ipcListenerRegister[listenerIndex], &endpointQuery);
 }
