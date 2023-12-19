@@ -94,6 +94,10 @@ extern gnwIpcListener ipcSessionDestroyListener;
 /*
     Registers the process as global IPC receiver for given path
 
+    For all types of paths, although for notification paths
+    (with GNW_PATH_IPC_NOTIFICATION_PREFIX prefix)
+    usage of ipcRegisterNotification function is recommended
+
     Params:
         * path - IPC path (see line 14)
         * handler - IPC message handler
@@ -107,6 +111,8 @@ extern enum gnwIpcError ipcRegister(const char * const path,
 
 /*
     Registers the process as IPC notification receiver for given path
+
+    For paths prefixed with GNW_PATH_IPC_NOTIFICATION_PREFIX
 
     Params:
         * path - IPC path (see line 14)
