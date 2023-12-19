@@ -13,20 +13,22 @@
     IPC path structure:
         
         * Global:
-        pathComponent0 | (GNW_PATH_IPC_COMPONENT_SEPARATOR | pathComponentN) - if needed
+            pathComponent0 | (GNW_PATH_IPC_COMPONENT_SEPARATOR | pathComponentN) - if needed
+            Examples:
+                * banana
+                * banana/potato/strawberry/pizza
+        
         * Direct:
-        GNW_PATH_IPC_DIRECT_PREFIX | GNW_PATH_IPC_COMPONENT_SEPARATOR | pathComponent0 | (GNW_PATH_IPC_COMPONENT_SEPARATOR | pathComponentN) - if needed
+            GNW_PATH_IPC_DIRECT_PREFIX | GNW_PATH_IPC_COMPONENT_SEPARATOR | pathComponent0 | (GNW_PATH_IPC_COMPONENT_SEPARATOR | pathComponentN) - if needed
+            Examples:
+                * :/banana
+                * :/banana/potato
+        
         * Notification:
-        GNW_PATH_IPC_NOTIFICATION_PREFIX | GNW_PATH_IPC_COMPONENT_SEPARATOR | pathComponent0 | (GNW_PATH_IPC_COMPONENT_SEPARATOR | pathComponentN) - if needed
-
-    Correct path examples:
-
-        * banana
-        * banana/potato/strawberry/pizza
-        * :/banana
-        * :/banana/potato
-        * _/banana
-        * _/banana/potato
+            GNW_PATH_IPC_NOTIFICATION_PREFIX | GNW_PATH_IPC_COMPONENT_SEPARATOR | pathComponent0 | (GNW_PATH_IPC_COMPONENT_SEPARATOR | pathComponentN) - if needed
+            Examples:
+                * _/banana
+                * _/banana/potato
     
     Allowed characters: a-z A-Z 0-9
 */
