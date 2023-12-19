@@ -25,12 +25,12 @@ static size_t freeReplyIndex() {
 }
 
 static enum gnwIpcError validateQuery(const struct gnwIpcSenderQuery absQuery) {
-    if (!absQuery.path || !absQuery.dataPtr) {
-        OOPS("Nullptr");
+    if (!absQuery.path) {
+        OOPS("IPC path nullptr");
         return GIPCE_UNKNOWN;
     }
-    if (!absQuery.dataSizeBytes) {
-        OOPS("No data");
+    if ((absQuery.dataPtr != nullptr) != (absQuery.dataSizeBytes != 0)) {
+        OOPS("IPC query data inconsistency");
         return GIPCE_UNKNOWN;
     }
     if (!absQuery.pathLen || absQuery.pathLen > GNW_PATH_IPC_MAX_LENGTH) {

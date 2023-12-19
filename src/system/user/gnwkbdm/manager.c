@@ -18,21 +18,11 @@ static void ipcAttachToKeyboardListener(const struct gnwIpcEndpointQuery * const
         fug(FUG_NULLPTR); 
         return; 
     }
-    if (!query->dataPtr) {
-        fug(FUG_INCONSISTENT);
-        return;
-    }
-    if (query->dataSizeBytes != sizeof(struct gnwKeyboardManagerAttachToKeyboardQuery)) {
-        fug(FUG_INCONSISTENT);
-        return;
-    }
     if (query->replySizeBytes != sizeof(struct gnwKeyboardManagerAttachToKeyboardResult)) {
         fug(FUG_INCONSISTENT);
         return;
     }
 
-    struct gnwKeyboardManagerAttachToKeyboardQuery * const kbdQueryPtr = (struct gnwKeyboardManagerAttachToKeyboardQuery *)query->dataPtr;
-    (void)kbdQueryPtr;
     struct gnwKeyboardManagerAttachToKeyboardResult result;
     
     result.error = keyboard_attach(query->sourceProcId);

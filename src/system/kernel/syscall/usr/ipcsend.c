@@ -19,21 +19,15 @@ enum gnwIpcError k_scr_usr_ipcSend(const struct gnwIpcSenderQuery * const queryP
     SCLF_GET_VALID_ABS_NAMED(const char * const, pathPtr, abs_queryPtr->path, abs_queryPtr->pathLen, {
         return GIPCE_UNKNOWN;
     });
-    SCLF_GET_VALID_ABS_NAMED(const ptr_t, dataPtr, abs_queryPtr->dataPtr, abs_queryPtr->dataSizeBytes, {
+    SCLF_GET_VALID_NULLABLE_ABS_NAMED(const ptr_t, dataPtr, abs_queryPtr->dataPtr, abs_queryPtr->dataSizeBytes, {
         return GIPCE_UNKNOWN;
     });
     SCLF_GET_VALID_ABS_NAMED(enum gnwIpcError * const, replyErrPtr, abs_queryPtr->replyErrPtr, sizeof(enum gnwIpcError), {
         return GIPCE_UNKNOWN;
     });
-
-    ptr_t abs_replyPtr = nullptr;
-    if (abs_queryPtr->replyPtr) {
-        abs_replyPtr = k_scl_func_getValidAbsoluteForProc(procId, (const ptr_t)(abs_queryPtr->replyPtr), abs_queryPtr->replySizeBytes);
-        if (!abs_replyPtr) {
-            OOPS("Invalid pointer referenced");
-            return GIPCE_UNKNOWN;
-        }
-    }
+    SCLF_GET_VALID_NULLABLE_ABS_NAMED(const ptr_t, replyPtr, abs_queryPtr->replyPtr, abs_queryPtr->replySizeBytes, {
+        return GIPCE_UNKNOWN;
+    });
 
     struct gnwIpcSenderQuery absoluteQuery;
     absoluteQuery.procId = abs_queryPtr->procId;

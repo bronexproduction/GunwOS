@@ -34,10 +34,6 @@ static void ipcKeyboardEventListener(const struct gnwIpcEndpointQuery * const qu
 }
 
 enum gnwDeviceError attachToKeyboard(const gnwKeyboardEventListener listener) {
-    struct gnwKeyboardManagerAttachToKeyboardQuery query;
-    query._unused = 0;
-    struct gnwKeyboardManagerAttachToKeyboardResult result;
-
     if (!ipcSessionDestroyListener) {
         return GDE_INVALID_PARAMETER;
     }
@@ -48,8 +44,9 @@ enum gnwDeviceError attachToKeyboard(const gnwKeyboardEventListener listener) {
         return GDE_INVALID_OPERATION;
     }
 
+    struct gnwKeyboardManagerAttachToKeyboardResult result;
     error = ipcSend(KBDMGR_PATH_ATTACH,
-                    (ptr_t)&query, sizeof(struct gnwKeyboardManagerAttachToKeyboardQuery),
+                    nullptr, 0,
                     (ptr_t)&result, sizeof(struct gnwKeyboardManagerAttachToKeyboardResult),
                     GIBF_BIND, 0);
     if (error != GIPCE_NONE) {
