@@ -17,6 +17,9 @@ bool k_ipc_utl_pathGlobalValidate(const char * absPathPtr, const size_t pathLen)
     if (!pathLen) {
         return false;
     }
+    if (*absPathPtr == GNW_PATH_IPC_COMPONENT_SEPARATOR) {
+        return false;
+    }
     for (size_t i = 0; i < pathLen; ++i) {
         if (IN_RANGE('0', absPathPtr[i], '9')                          ||   /* 0 - 9 */
             IN_RANGE('A', absPathPtr[i], 'Z')                          ||   /* A - Z */
