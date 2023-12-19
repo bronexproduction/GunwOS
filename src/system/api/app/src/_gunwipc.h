@@ -25,14 +25,13 @@ struct gnwIpcSenderQuery {
     data_t data;
     enum gnwIpcError * replyErrPtr;
     data_t replyData;
-    enum gnwIpcBindFlag bindFlag;
-    size_t permissions;
+    struct gnwIpcBindData bindData;
 };
 
 struct gnwIpcReplyInfo {
+    data_t data;
     size_t token;
-    enum gnwIpcBindFlag bindFlag;
-    size_t permissions;
+    struct gnwIpcBindData bindData;
 };
 
 #ifdef _GUNWAPI_KERNEL

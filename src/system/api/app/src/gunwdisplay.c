@@ -23,8 +23,8 @@ enum gnwDeviceError getDisplay(const enum gnwDisplayType type,
 
     enum gnwIpcError error = ipcSend(DISPMGR_PATH_GET,
                                      (data_t){ (ptr_t)&query, sizeof(struct gnwDisplayManagerGetDisplayQuery) },
-                                     (ptr_t)&result, sizeof(struct gnwDisplayManagerGetDisplayResult),
-                                     GIBF_NONE, 0);
+                                     (data_t){ (ptr_t)&result, sizeof(struct gnwDisplayManagerGetDisplayResult) },
+                                     (struct gnwIpcBindData){ GIBF_NONE, 0 });
     if (error != GIPCE_NONE) {
         return GDE_OPERATION_FAILED;
     } else if (result.error != GDE_NONE) {
@@ -50,8 +50,8 @@ enum gnwDeviceError attachToDisplay(const enum gnwDisplayType type,
 
     enum gnwIpcError error = ipcSend(DISPMGR_PATH_ATTACH,
                                      (data_t){ (ptr_t)&query, sizeof(struct gnwDisplayManagerAttachToDisplayQuery) },
-                                     (ptr_t)&result, sizeof(struct gnwDisplayManagerAttachToDisplayResult),
-                                     GIBF_NONE, 0);
+                                     (data_t){ (ptr_t)&result, sizeof(struct gnwDisplayManagerAttachToDisplayResult) },
+                                     (struct gnwIpcBindData){ GIBF_NONE, 0 });
     if (error != GIPCE_NONE) {
         return GDE_OPERATION_FAILED;
     } else if (result.error != GDE_NONE) {
@@ -82,8 +82,8 @@ enum gnwDeviceError pushFrame(const size_t displayId,
 
     enum gnwIpcError error = ipcSend(DISPMGR_PATH_PUSH,
                                      (data_t){ (ptr_t)&query, sizeof(struct gnwDisplayManagerPushFrameQuery) },
-                                     (ptr_t)&result, sizeof(struct gnwDisplayManagerPushFrameResult),
-                                     GIBF_NONE, 0);
+                                     (data_t){ (ptr_t)&result, sizeof(struct gnwDisplayManagerPushFrameResult) },
+                                     (struct gnwIpcBindData){ GIBF_NONE, 0 });
     if (error != GIPCE_NONE) {
         return GDE_OPERATION_FAILED;
     } else if (result.error != GDE_NONE) {

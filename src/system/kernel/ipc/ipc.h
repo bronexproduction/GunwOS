@@ -38,8 +38,6 @@ enum gnwIpcError k_ipc_register(const procId_t procId,
                                 const size_t permissionMask);
 
 enum gnwIpcError k_ipc_reply(const procId_t procId,
-                             const ptr_t absReplyBufferPtr,
-                             const size_t replySizeBytes,
                              const struct gnwIpcReplyInfo * const absInfoPtr);
 
 void k_ipc_procCleanup(const procId_t procId);

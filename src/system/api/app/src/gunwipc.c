@@ -51,20 +51,16 @@ enum gnwIpcError ipcRegisterNotification(const char * const path,
 
 enum gnwIpcError ipcSend(const char * const path,
                          const data_t data,
-                         ptr_t replyPtr,
-                         const size_t replySizeBytes,
-                         const enum gnwIpcBindFlag bindFlag,
-                         const size_t permissions) {
-    return ipcSendDirect(NONE_PROC_ID, path, data, replyPtr, replySizeBytes, bindFlag, permissions);
+                         const data_t replyData,
+                         const struct gnwIpcBindData bindData) {
+    return ipcSendDirect(NONE_PROC_ID, path, data, replyData, bindData);
 }
 
 enum gnwIpcError ipcSendDirect(const procId_t procId,
                                const char * const path,
                                const data_t data,
-                               ptr_t replyPtr,
-                               const size_t replySizeBytes,
-                               const enum gnwIpcBindFlag bindFlag,
-                               const size_t permissions) {
+                               const data_t replyData,
+                               const struct gnwIpcBindData bindData) {
     CHECKPTR(path);
 
     enum gnwIpcError replyErr = GIPCE_NONE;
