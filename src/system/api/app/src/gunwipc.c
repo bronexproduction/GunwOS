@@ -50,19 +50,17 @@ enum gnwIpcError ipcRegisterNotification(const char * const path,
 }
 
 enum gnwIpcError ipcSend(const char * const path,
-                         const ptr_t dataPtr,
-                         const size_t dataSizeBytes,
+                         const data_t data,
                          ptr_t replyPtr,
                          const size_t replySizeBytes,
                          const enum gnwIpcBindFlag bindFlag,
                          const size_t permissions) {
-    return ipcSendDirect(NONE_PROC_ID, path, dataPtr, dataSizeBytes, replyPtr, replySizeBytes, bindFlag, permissions);
+    return ipcSendDirect(NONE_PROC_ID, path, data, replyPtr, replySizeBytes, bindFlag, permissions);
 }
 
 enum gnwIpcError ipcSendDirect(const procId_t procId,
                                const char * const path,
-                               const ptr_t dataPtr,
-                               const size_t dataSizeBytes,
+                               const data_t data,
                                ptr_t replyPtr,
                                const size_t replySizeBytes,
                                const enum gnwIpcBindFlag bindFlag,
