@@ -70,10 +70,8 @@ enum gnwIpcError ipcSendDirect(const procId_t procId,
     query.pathLen = strlen(path);
     query.data = data;
     query.replyErrPtr = &replyErr;
-    query.replyPtr = replyPtr;
-    query.replySizeBytes = replySizeBytes;
-    query.bindFlag = bindFlag;
-    query.permissions = permissions;
+    query.replyData = replyData;
+    query.bindData = bindData;
 
     SYSCALL_PAR1(&query);
 
@@ -84,22 +82,18 @@ enum gnwIpcError ipcSendDirect(const procId_t procId,
     return (replyErr == GIPCE_NONE) ? (enum gnwIpcError)err : replyErr;
 }
 
-enum gnwIpcError ipcReply(const ptr_t replyPtr,
-                          const size_t replySizeBytes,
+enum gnwIpcError ipcReply(const data_t replyData,
                           const size_t token,
-                          const enum gnwIpcBindFlag bindFlag,
-                          const size_t permissions) {
-    CHECKPTR(replyPtr);
+                          const struct gnwIpcBindData bindData) {
+    CHECKPTR(replyData.ptr);
 
     struct gnwIpcReplyInfo info;
 
+    info.data = replyData;
     info.token = token;
-    info.bindFlag = bindFlag;
-    info.permissions = permissions;
+    info.bindData = bindData;
 
-    SYSCALL_PAR1(replyPtr);
-    SYSCALL_PAR2(replySizeBytes);
-    SYSCALL_PAR3(&info);
+    SYSCALL_PAR1(&info);
 
     SYSCALL_USER_FUNC(IPC_REPLY);
     SYSCALL_USER_INT;

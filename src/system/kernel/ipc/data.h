@@ -34,8 +34,7 @@ struct ipcReply {
     procId_t senderProcId;
     procId_t handlerProcId;
     enum gnwIpcError * absReplyErrorPtr;
-    ptr_t absReplyBufferPtr;
-    size_t replySizeBytes;
+    data_t absReplyBufferData;
 };
 
 struct ipcListener ipcListenerRegister[MAX_IPC_LISTENER];
