@@ -91,10 +91,10 @@ static void bindingDestroyNotify(const struct binding * const bindingPtr, const 
     query.data.ptr = (ptr_t)&requester;
     query.data.bytes = sizeof(procId_t);
     query.replyErrPtr = nullptr;
-    query.replyPtr = nullptr;
-    query.replySizeBytes = 0;
-    query.bindFlag = GIBF_NONE;
-    query.permissions = 0;
+    query.replyData.ptr = nullptr;
+    query.replyData.bytes = 0;
+    query.bindData.flag = GIBF_NONE;
+    query.bindData.permissions = 0;
 
     const enum gnwIpcError e = k_ipc_notify(query, bindingPtr->receiver == requester ? bindingPtr->sender : bindingPtr->receiver);
     if (e != GIPCE_NONE) {

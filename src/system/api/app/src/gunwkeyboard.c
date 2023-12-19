@@ -47,8 +47,8 @@ enum gnwDeviceError attachToKeyboard(const gnwKeyboardEventListener listener) {
     struct gnwKeyboardManagerAttachToKeyboardResult result;
     error = ipcSend(KBDMGR_PATH_ATTACH,
                     (data_t){ nullptr, 0 },
-                    (ptr_t)&result, sizeof(struct gnwKeyboardManagerAttachToKeyboardResult),
-                    GIBF_BIND, 0);
+                    (data_t){ (ptr_t)&result, sizeof(struct gnwKeyboardManagerAttachToKeyboardResult) },
+                    (struct gnwIpcBindData){ GIBF_BIND, 0 });
     if (error != GIPCE_NONE) {
         return GDE_OPERATION_FAILED;
     } else if (result.error != GDE_NONE) {
