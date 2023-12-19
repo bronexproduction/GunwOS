@@ -37,7 +37,7 @@ static bool receivesKernelNotifications(const procId_t procId) {
 }
 
 enum gnwIpcError k_ipc_register(const procId_t procId,
-                                const char * const absPathPtr,
+                                const gnwIpcPath absPathPtr,
                                 const size_t pathLen,
                                 const gnwIpcListener handlerRoutine,
                                 const gnwIpcEndpointQueryDecoder decoder,

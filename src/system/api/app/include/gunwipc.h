@@ -78,6 +78,8 @@ typedef void (*gnwIpcListener)(const struct gnwIpcEndpointQuery * const);
 
 typedef void (*gnwIpcEndpointQueryDecoder)(const ptr_t, struct gnwIpcEndpointQuery * const);
 
+typedef const char * gnwIpcPath;
+
 #ifndef _GUNWAPI_KERNEL
 
 extern void gnwIpcEndpointQuery_decode(const ptr_t, struct gnwIpcEndpointQuery * const);
@@ -104,7 +106,7 @@ extern gnwIpcListener ipcSessionDestroyListener;
         * bindingRequired - marks that the endpoint requires previous binding (ignored in kernel notifications)
         * permissionMask - sets the required permission set to call the endpoint (ignored in kernel notifications)
 */
-extern enum gnwIpcError ipcRegister(const char * const path,
+extern enum gnwIpcError ipcRegister(const gnwIpcPath path,
                                     const gnwIpcListener handler,
                                     const bool bindingRequired,
                                     const size_t permissionMask);
@@ -118,7 +120,7 @@ extern enum gnwIpcError ipcRegister(const char * const path,
         * path - IPC path (see line 14)
         * handler - IPC message handler
 */
-extern enum gnwIpcError ipcRegisterNotification(const char * const path,
+extern enum gnwIpcError ipcRegisterNotification(const gnwIpcPath path,
                                                 const gnwIpcListener handler);
 
 /*
@@ -134,7 +136,7 @@ extern enum gnwIpcError ipcRegisterNotification(const char * const path,
           
           On-send binding enables the sender process (client) to receive messages from the receiver process (server)
 */
-extern enum gnwIpcError ipcSend(const char * const path,
+extern enum gnwIpcError ipcSend(const gnwIpcPath path,
                                 const data_t data,
                                 const data_t replyData,
                                 const struct gnwIpcBindData bindData);
@@ -154,7 +156,7 @@ extern enum gnwIpcError ipcSend(const char * const path,
           On-send binding enables the sender process (client) to receive messages from the receiver process (server)
 */
 extern enum gnwIpcError ipcSendDirect(const procId_t procId,
-                                      const char * const path,
+                                      const gnwIpcPath path,
                                       const data_t data,
                                       const data_t replyData,
                                       const struct gnwIpcBindData bindData);

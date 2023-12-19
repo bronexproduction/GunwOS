@@ -9,11 +9,10 @@
 #include "data.h"
 #include <mem.h>
 #include <string.h>
-#include <gunwipc.h>
 #include <hal/proc/proc.h>
 #include <error/panic.h>
 
-bool k_ipc_utl_pathGlobalValidate(const char * absPathPtr, const size_t pathLen) {
+bool k_ipc_utl_pathGlobalValidate(const gnwIpcPath absPathPtr, const size_t pathLen) {
     /*
         Path empty
     */
@@ -61,7 +60,7 @@ bool k_ipc_utl_pathGlobalValidate(const char * absPathPtr, const size_t pathLen)
     return true;
 }
 
-bool k_ipc_utl_pathDirectValidate(const char * absPathPtr, const size_t pathLen) {
+bool k_ipc_utl_pathDirectValidate(const gnwIpcPath absPathPtr, const size_t pathLen) {
     if (pathLen <= 2) {
         return false;
     }
@@ -74,7 +73,7 @@ bool k_ipc_utl_pathDirectValidate(const char * absPathPtr, const size_t pathLen)
     return k_ipc_utl_pathGlobalValidate(absPathPtr + 2, pathLen - 2);
 }
 
-bool k_ipc_utl_pathNotificationValidate(const char * absPathPtr, const size_t pathLen) {
+bool k_ipc_utl_pathNotificationValidate(const gnwIpcPath absPathPtr, const size_t pathLen) {
     if (pathLen <= 2) {
         return false;
     }
@@ -109,7 +108,7 @@ void k_ipc_utl_unlockIfAble(const procId_t procId) {
     k_proc_unlock(procId, PLT_IPC);
 }
 
-size_t k_ipc_utl_nextListenerIndexForPath(const char * absPathPtr, const size_t pathLen, const size_t * const after) {
+size_t k_ipc_utl_nextListenerIndexForPath(const gnwIpcPath absPathPtr, const size_t pathLen, const size_t * const after) {
     for (size_t index = after ? *after + 1 : 0; index < MAX_IPC_LISTENER; ++index) {
         if (!strcmpl(absPathPtr, ipcListenerRegister[index].path, pathLen)) {
             return index;

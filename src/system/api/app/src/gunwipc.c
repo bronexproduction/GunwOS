@@ -18,7 +18,7 @@
 
 gnwIpcListener ipcSessionDestroyListener = nullptr;
 
-enum gnwIpcError ipcRegister(const char * const path,
+enum gnwIpcError ipcRegister(const gnwIpcPath path,
                              const gnwIpcListener handler,
                              const bool bindingRequired,
                              const size_t permissionMask) {
@@ -44,12 +44,12 @@ enum gnwIpcError ipcRegister(const char * const path,
     SYSCALL_RETVAL(32);
 }
 
-enum gnwIpcError ipcRegisterNotification(const char * const path,
+enum gnwIpcError ipcRegisterNotification(const gnwIpcPath path,
                                          const gnwIpcListener handler) {
     return ipcRegister(path, handler, false, 0);
 }
 
-enum gnwIpcError ipcSend(const char * const path,
+enum gnwIpcError ipcSend(const gnwIpcPath path,
                          const data_t data,
                          const data_t replyData,
                          const struct gnwIpcBindData bindData) {
@@ -57,7 +57,7 @@ enum gnwIpcError ipcSend(const char * const path,
 }
 
 enum gnwIpcError ipcSendDirect(const procId_t procId,
-                               const char * const path,
+                               const gnwIpcPath path,
                                const data_t data,
                                const data_t replyData,
                                const struct gnwIpcBindData bindData) {

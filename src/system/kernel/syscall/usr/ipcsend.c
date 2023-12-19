@@ -16,7 +16,7 @@ enum gnwIpcError k_scr_usr_ipcSend(const struct gnwIpcSenderQuery * const queryP
     SCLF_GET_VALID_ABS(const struct gnwIpcSenderQuery * const, queryPtr, sizeof(struct gnwIpcSenderQuery), {
         return GIPCE_UNKNOWN;
     });
-    SCLF_GET_VALID_ABS_NAMED(const char * const, pathPtr, abs_queryPtr->path, abs_queryPtr->pathLen, {
+    SCLF_GET_VALID_ABS_NAMED(const gnwIpcPath, pathPtr, abs_queryPtr->path, abs_queryPtr->pathLen, {
         return GIPCE_UNKNOWN;
     });
     SCLF_GET_VALID_NULLABLE_ABS_NAMED(const ptr_t, dataPtr, abs_queryPtr->data.ptr, abs_queryPtr->data.bytes, {
