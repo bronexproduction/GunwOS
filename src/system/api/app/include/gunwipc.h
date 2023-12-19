@@ -62,8 +62,7 @@ enum gnwIpcBindFlag {
 
 struct gnwIpcEndpointQuery {
     procId_t sourceProcId;
-    ptr_t dataPtr;
-    size_t dataSizeBytes;
+    data_t data;
     size_t replySizeBytes;
     size_t token;
     bool bound;
@@ -118,8 +117,7 @@ extern enum gnwIpcError ipcRegisterNotification(const char * const path,
 
     Params:
         * path - IPC path (see line 14)
-        * dataPtr - pointer to message data
-        * dataSizeBytes - size of the message in bytes
+        * data - message data
         * replyPtr - address of the buffer for reply data
         * replySizeBytes - size of the reply in bytes
         * bindFlag - determines binding update mode or GIBF_NONE otherwise
@@ -129,8 +127,7 @@ extern enum gnwIpcError ipcRegisterNotification(const char * const path,
         * permissions - binding permissions if needed, otherwise ignored
 */
 extern enum gnwIpcError ipcSend(const char * const path,
-                                const ptr_t dataPtr,
-                                const size_t dataSizeBytes,
+                                const data_t data,
                                 const ptr_t replyPtr,
                                 const size_t replySizeBytes,
                                 const enum gnwIpcBindFlag bindFlag,
@@ -144,8 +141,7 @@ extern enum gnwIpcError ipcSend(const char * const path,
     Params:
         * procId - receiver process identifier
         * path - IPC path (see line 14)
-        * dataPtr - pointer to message data
-        * dataSizeBytes - size of the message in bytes
+        * data - message data
         * replyPtr - address of the buffer for reply data
         * replySizeBytes - size of the reply in bytes
         * bindFlag - determines binding update mode or GIBF_NONE otherwise
@@ -156,8 +152,7 @@ extern enum gnwIpcError ipcSend(const char * const path,
 */
 extern enum gnwIpcError ipcSendDirect(const procId_t procId,
                                       const char * const path,
-                                      const ptr_t dataPtr,
-                                      const size_t dataSizeBytes,
+                                      const data_t data,
                                       const ptr_t replyPtr,
                                       const size_t replySizeBytes,
                                       const enum gnwIpcBindFlag bindFlag,

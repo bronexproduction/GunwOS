@@ -22,8 +22,7 @@ struct gnwIpcSenderQuery {
     procId_t procId;
     const char * path;
     size_t pathLen;
-    ptr_t dataPtr;
-    size_t dataSizeBytes;
+    data_t data;
     enum gnwIpcError * replyErrPtr;
     ptr_t replyPtr;
     size_t replySizeBytes;
