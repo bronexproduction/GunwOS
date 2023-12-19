@@ -41,15 +41,16 @@ static GNW_KEYBOARD_EVENT_LISTENER(onKeyboardEvent) {
                                              (ptr_t)&query, sizeof(struct gnwKeyboardManagerEventQuery),
                                              nullptr, 0,
                                              GIBF_NONE, 0);
-    if (e != GIPCE_NONE) {
-        sessionDestroy(session);
-    
-        if (e == GIPCE_FORBIDDEN || e == GIPCE_NOT_FOUND) {
-            return;
-        } else {
-            fug(FUG_UNDEFINED);
-        }
+    if (e == GIPCE_NONE) {
+        return;
     }
+    sessionDestroy(session);
+    
+    if (e == GIPCE_FORBIDDEN || e == GIPCE_NOT_FOUND) {
+        return;
+   } else {
+       fug(FUG_UNDEFINED);
+  }
 }
 
 bool keyboard_init() {
