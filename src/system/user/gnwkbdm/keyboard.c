@@ -38,7 +38,7 @@ static GNW_KEYBOARD_EVENT_LISTENER(onKeyboardEvent) {
     query.keyboardEvent = *event;
 
     const enum gnwIpcError e = ipcSendDirect(session->procId, KBDMGR_PATH_EVENT,
-                                             (ptr_t)&query, sizeof(struct gnwKeyboardManagerEventQuery),
+                                             (data_t){ (ptr_t)&query, sizeof(struct gnwKeyboardManagerEventQuery) },
                                              nullptr, 0,
                                              GIBF_NONE, 0);
     if (e == GIPCE_NONE) {

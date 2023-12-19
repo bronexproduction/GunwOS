@@ -23,12 +23,12 @@ static void ipcKeyboardEventListener(const struct gnwIpcEndpointQuery * const qu
         fug(FUG_NULLPTR); 
         return; 
     }
-    if (!query->dataPtr || query->dataSizeBytes != sizeof(struct gnwKeyboardManagerEventQuery)) {
+    if (!query->data.ptr || query->data.bytes != sizeof(struct gnwKeyboardManagerEventQuery)) {
         fug(FUG_INCONSISTENT);
         return;
     }
 
-    struct gnwKeyboardManagerEventQuery * const eventQueryPtr = (struct gnwKeyboardManagerEventQuery *)query->dataPtr;
+    struct gnwKeyboardManagerEventQuery * const eventQueryPtr = (struct gnwKeyboardManagerEventQuery *)query->data.ptr;
     
     eventListener(&eventQueryPtr->keyboardEvent);
 }
@@ -46,7 +46,7 @@ enum gnwDeviceError attachToKeyboard(const gnwKeyboardEventListener listener) {
 
     struct gnwKeyboardManagerAttachToKeyboardResult result;
     error = ipcSend(KBDMGR_PATH_ATTACH,
-                    nullptr, 0,
+                    (data_t){ nullptr, 0 },
                     (ptr_t)&result, sizeof(struct gnwKeyboardManagerAttachToKeyboardResult),
                     GIBF_BIND, 0);
     if (error != GIPCE_NONE) {

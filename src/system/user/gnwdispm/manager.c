@@ -15,10 +15,10 @@
 
 #define DISPMGR_LISTENER(NAME, PREPARE_RESULT, PREPARE_BINDING, PREPARE_PERMISSIONS) static void ipc ## NAME ## Listener(const struct gnwIpcEndpointQuery * const query) {  \
     if (!query) { fug(FUG_NULLPTR); return; }                                                                                                                               \
-    if (!query->dataPtr) { fug(FUG_INCONSISTENT); return; }                                                                                                                 \
-    if (query->dataSizeBytes != sizeof(struct gnwDisplayManager ## NAME ## Query)) { fug(FUG_INCONSISTENT); return; }                                                       \
+    if (!query->data.ptr) { fug(FUG_INCONSISTENT); return; }                                                                                                                 \
+    if (query->data.bytes != sizeof(struct gnwDisplayManager ## NAME ## Query)) { fug(FUG_INCONSISTENT); return; }                                                       \
     if (query->replySizeBytes != sizeof(struct gnwDisplayManager ## NAME ## Result)) { fug(FUG_INCONSISTENT); return; }                                                     \
-    struct gnwDisplayManager ## NAME ## Query * const dispQueryPtr = (struct gnwDisplayManager ## NAME ## Query *)query->dataPtr;                                           \
+    struct gnwDisplayManager ## NAME ## Query * const dispQueryPtr = (struct gnwDisplayManager ## NAME ## Query *)query->data.ptr;                                           \
     struct gnwDisplayManager ## NAME ## Result result; { PREPARE_RESULT; }                                                                                                  \
     enum gnwIpcBindFlag bindFlag = GIBF_NONE; { PREPARE_BINDING; }                                                                                                          \
     size_t permissions = 0; { PREPARE_PERMISSIONS; }                                                                                                                        \
@@ -45,10 +45,10 @@ DISPMGR_LISTENER(PushFrame, {
 
 static void onSessionDestroy(const struct gnwIpcEndpointQuery * const query) {
     if (!query) { fug(FUG_NULLPTR); return; }
-    if (!query->dataPtr) { fug(FUG_INCONSISTENT); return; }
-    if (query->dataSizeBytes != sizeof(procId_t)) { fug(FUG_INCONSISTENT); return; }
+    if (!query->data.ptr) { fug(FUG_INCONSISTENT); return; }
+    if (query->data.bytes != sizeof(procId_t)) { fug(FUG_INCONSISTENT); return; }
 
-    const procId_t * const procIdPtr = (procId_t *)query->dataPtr;
+    const procId_t * const procIdPtr = (procId_t *)query->data.ptr;
     const sessionPtr_t session = sessionForProc(*procIdPtr);
     
     if (session) {

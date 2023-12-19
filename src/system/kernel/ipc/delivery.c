@@ -29,7 +29,7 @@ static enum gnwIpcError validateQuery(const struct gnwIpcSenderQuery absQuery) {
         OOPS("IPC path nullptr");
         return GIPCE_UNKNOWN;
     }
-    if ((absQuery.dataPtr != nullptr) != (absQuery.dataSizeBytes != 0)) {
+    if ((absQuery.data.ptr != nullptr) != (absQuery.data.bytes != 0)) {
         OOPS("IPC query data inconsistency");
         return GIPCE_UNKNOWN;
     }
@@ -65,7 +65,7 @@ static enum gnwIpcError deliver(const struct ipcListener * const listenerPtr,
     const enum k_proc_error err = k_proc_callback_invoke_ptr(listenerPtr->procId,
                                                              (gnwEventListener_ptr)listenerPtr->listener,
                                                              (ptr_t)queryPtr,
-                                                             sizeof(struct gnwIpcEndpointQuery) + queryPtr->dataSizeBytes,
+                                                             sizeof(struct gnwIpcEndpointQuery) + queryPtr->data.bytes,
                                                              sizeof(struct gnwIpcEndpointQuery),
                                                              (gnwRunLoopDataEncodingRoutine)gnwIpcEndpointQuery_encode,
                                                              (gnwRunLoopDataEncodingRoutine)listenerPtr->decoder);
@@ -137,8 +137,7 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
 
     struct gnwIpcEndpointQuery endpointQuery;
     endpointQuery.sourceProcId = procId;
-    endpointQuery.dataPtr = absQuery.dataPtr;
-    endpointQuery.dataSizeBytes = absQuery.dataSizeBytes;
+    endpointQuery.data = absQuery.data;
     endpointQuery.replySizeBytes = absQuery.replySizeBytes;
     endpointQuery.bound = listenerPtr->bindingRequired;
     endpointQuery.permissions = permissions;
@@ -221,8 +220,7 @@ enum gnwIpcError k_ipc_notify(const struct gnwIpcSenderQuery absQuery,
 
     struct gnwIpcEndpointQuery endpointQuery;
     endpointQuery.sourceProcId = KERNEL_PROC_ID;
-    endpointQuery.dataPtr = absQuery.dataPtr;
-    endpointQuery.dataSizeBytes = absQuery.dataSizeBytes;
+    endpointQuery.data = absQuery.data;
     endpointQuery.replySizeBytes = 0;
     endpointQuery.bound = 0;
     endpointQuery.permissions = 0;

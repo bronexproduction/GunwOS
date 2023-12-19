@@ -43,10 +43,10 @@ static void ipcAttachToKeyboardListener(const struct gnwIpcEndpointQuery * const
 
 static void onSessionDestroy(const struct gnwIpcEndpointQuery * const query) {
     if (!query) { fug(FUG_NULLPTR); return; }
-    if (!query->dataPtr) { fug(FUG_INCONSISTENT); return; }
-    if (query->dataSizeBytes != sizeof(procId_t)) { fug(FUG_INCONSISTENT); return; }
+    if (!query->data.ptr) { fug(FUG_INCONSISTENT); return; }
+    if (query->data.bytes != sizeof(procId_t)) { fug(FUG_INCONSISTENT); return; }
 
-    const procId_t * const procIdPtr = (procId_t *)query->dataPtr;
+    const procId_t * const procIdPtr = (procId_t *)query->data.ptr;
     const sessionPtr_t session = sessionForProc(*procIdPtr);
     
     if (session) {

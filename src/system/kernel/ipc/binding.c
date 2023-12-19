@@ -88,8 +88,8 @@ static void bindingDestroyNotify(const struct binding * const bindingPtr, const 
     query.procId = NONE_PROC_ID;
     query.path = GNW_PATH_IPC_BINDING_NOTIFICATION_SESSION_DESTROYED;
     query.pathLen = strlen(GNW_PATH_IPC_BINDING_NOTIFICATION_SESSION_DESTROYED);
-    query.dataPtr = (ptr_t)&requester;
-    query.dataSizeBytes = sizeof(procId_t);
+    query.data.ptr = (ptr_t)&requester;
+    query.data.bytes = sizeof(procId_t);
     query.replyErrPtr = nullptr;
     query.replyPtr = nullptr;
     query.replySizeBytes = 0;

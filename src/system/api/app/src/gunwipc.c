@@ -72,8 +72,7 @@ enum gnwIpcError ipcSendDirect(const procId_t procId,
     query.procId = procId;
     query.path = path;
     query.pathLen = strlen(path);
-    query.dataPtr = dataPtr;
-    query.dataSizeBytes = dataSizeBytes;
+    query.data = data;
     query.replyErrPtr = &replyErr;
     query.replyPtr = replyPtr;
     query.replySizeBytes = replySizeBytes;
@@ -114,7 +113,7 @@ enum gnwIpcError ipcReply(const ptr_t replyPtr,
 
 void gnwIpcEndpointQuery_decode(const ptr_t absDataPtr, struct gnwIpcEndpointQuery * const absQueryPtr) {
     memcopy(absDataPtr, absQueryPtr, sizeof(struct gnwIpcEndpointQuery));
-    absQueryPtr->dataPtr = absDataPtr + sizeof(struct gnwIpcEndpointQuery);
+    absQueryPtr->data.ptr = absDataPtr + sizeof(struct gnwIpcEndpointQuery);
 }
 
 #else
@@ -122,8 +121,8 @@ void gnwIpcEndpointQuery_decode(const ptr_t absDataPtr, struct gnwIpcEndpointQue
 void gnwIpcEndpointQuery_encode(const struct gnwIpcEndpointQuery * const absQueryPtr, ptr_t absDataPtr) {
     memcopy(absQueryPtr, absDataPtr, sizeof(struct gnwIpcEndpointQuery));
     size_t offset = sizeof(struct gnwIpcEndpointQuery);
-    memcopy(absQueryPtr->dataPtr, absDataPtr + offset, absQueryPtr->dataSizeBytes);
-    offset += absQueryPtr->dataSizeBytes;
+    memcopy(absQueryPtr->data.ptr, absDataPtr + offset, absQueryPtr->data.bytes);
+    offset += absQueryPtr->data.bytes;
 }
 
 #endif // _GUNWAPI_KERNEL
