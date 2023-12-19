@@ -27,11 +27,9 @@ static void ipcAttachToKeyboardListener(const struct gnwIpcEndpointQuery * const
     
     result.error = keyboard_attach(query->sourceProcId);
     
-    enum gnwIpcError error = ipcReply((ptr_t)&result,
-                                      sizeof(struct gnwKeyboardManagerAttachToKeyboardResult),
+    enum gnwIpcError error = ipcReply((data_t){ (ptr_t)&result, sizeof(struct gnwKeyboardManagerAttachToKeyboardResult) },
                                       query->token,
-                                      (result.error == GDE_NONE) ? GIBF_BIND : GIBF_NONE,
-                                      0);
+                                      (struct gnwIpcBindData){ (result.error == GDE_NONE) ? GIBF_BIND : GIBF_NONE, 0 });
     if (error == GIPCE_NOT_FOUND) {
         return;
     }

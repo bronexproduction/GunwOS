@@ -15,18 +15,16 @@
 #include <error/panic.h>
 
 enum gnwIpcError k_ipc_reply(const procId_t procId,
-                             const ptr_t absReplyBufferPtr,
-                             const size_t replySizeBytes,
                              const struct gnwIpcReplyInfo * const absInfoPtr) {
-    if (!absReplyBufferPtr) {
-        OOPS("Null reply buffer pointer");
-        return GIPCE_UNKNOWN;
-    }
     if (!absInfoPtr) {
         OOPS("Null reply info pointer");
         return GIPCE_UNKNOWN;
     }
-    if (!replySizeBytes) {
+    if (!absInfoPtr->data.ptr) {
+        OOPS("Null reply buffer pointer");
+        return GIPCE_UNKNOWN;
+    }
+    if (!absInfoPtr->data.bytes) {
         return GIPCE_INVALID_PARAMETER;
     }
     if (absInfoPtr->token >= MAX_IPC_TOKEN) {
@@ -45,14 +43,14 @@ enum gnwIpcError k_ipc_reply(const procId_t procId,
     if (reply->handlerProcId != procId) {
         return GIPCE_FORBIDDEN;
     }
-    if (reply->replySizeBytes != replySizeBytes) {
+    if (reply->absReplyBufferData.bytes != absInfoPtr->data.bytes) {
         return GIPCE_INVALID_PARAMETER;
     }
     if (!reply->absReplyErrorPtr) {
         OOPS("Unexpected reply error nullptr");
         return GIPCE_UNKNOWN;
     }
-    if (!reply->absReplyBufferPtr) {
+    if (!reply->absReplyBufferData.ptr) {
         OOPS("Unexpected reply buffer nullptr");
         return GIPCE_UNKNOWN;
     }
@@ -63,15 +61,15 @@ enum gnwIpcError k_ipc_reply(const procId_t procId,
     }
 
     enum gnwIpcError e = GIPCE_NONE;
-    switch (absInfoPtr->bindFlag) {
+    switch (absInfoPtr->bindData.flag) {
         case GIBF_BIND:
-            e = k_ipc_binding_create(senderProcId, procId, absInfoPtr->permissions);
+            e = k_ipc_binding_create(senderProcId, procId, absInfoPtr->bindData.permissions);
             if (e == GIPCE_ALREADY_EXISTS) {
                 e = GIPCE_NONE;
             }
             break;
         case GIBF_UPDATE:
-            e = k_ipc_binding_update(senderProcId, procId, absInfoPtr->permissions);
+            e = k_ipc_binding_update(senderProcId, procId, absInfoPtr->bindData.permissions);
             break;
         case GIBF_UNBIND:
             e = k_ipc_binding_destroy(senderProcId, procId, procId);
@@ -83,7 +81,7 @@ enum gnwIpcError k_ipc_reply(const procId_t procId,
         return e;
     }
 
-    memcopy(absReplyBufferPtr, reply->absReplyBufferPtr, replySizeBytes);
+    memcopy(absInfoPtr->data.ptr, reply->absReplyBufferData.ptr, absInfoPtr->data.bytes);
     *(reply->absReplyErrorPtr) = GIPCE_NONE;
 
     k_ipc_utl_clearReply(absInfoPtr->token);

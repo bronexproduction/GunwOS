@@ -49,7 +49,7 @@ static enum gnwIpcError validateNotificationQuery(const struct gnwIpcSenderQuery
     if (!k_ipc_utl_pathNotificationValidate(absQuery.path, absQuery.pathLen)) {
         return GIPCE_INVALID_PATH;
     }
-    if (absQuery.replyPtr || absQuery.replyErrPtr || absQuery.replySizeBytes) {
+    if (absQuery.replyData.ptr || absQuery.replyErrPtr || absQuery.replyData.bytes) {
         /*
             Replying to broadcast events not supported
         */
@@ -138,12 +138,12 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
     struct gnwIpcEndpointQuery endpointQuery;
     endpointQuery.sourceProcId = procId;
     endpointQuery.data = absQuery.data;
-    endpointQuery.replySizeBytes = absQuery.replySizeBytes;
+    endpointQuery.replySizeBytes = absQuery.replyData.bytes;
     endpointQuery.bound = listenerPtr->bindingRequired;
     endpointQuery.permissions = permissions;
 
     if (endpointQuery.replySizeBytes) {
-        if (!absQuery.replyPtr) {
+        if (!absQuery.replyData.ptr) {
             OOPS("Unexpected null pointer to IPC reply data");
             return GIPCE_UNKNOWN;
         }
@@ -161,8 +161,8 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
         ipcReplyRegister[endpointQuery.token].senderProcId = procId;
         ipcReplyRegister[endpointQuery.token].handlerProcId = listenerPtr->procId;
         ipcReplyRegister[endpointQuery.token].absReplyErrorPtr = absQuery.replyErrPtr;
-        ipcReplyRegister[endpointQuery.token].absReplyBufferPtr = absQuery.replyPtr;
-        ipcReplyRegister[endpointQuery.token].replySizeBytes = endpointQuery.replySizeBytes;
+        ipcReplyRegister[endpointQuery.token].absReplyBufferData.ptr = absQuery.replyData.ptr;
+        ipcReplyRegister[endpointQuery.token].absReplyBufferData.bytes = endpointQuery.replySizeBytes;
         
         k_proc_lock(procId, PLT_IPC);
     } else {

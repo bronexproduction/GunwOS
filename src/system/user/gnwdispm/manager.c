@@ -13,18 +13,18 @@
 #include "display.h"
 #include "session.h"
 
-#define DISPMGR_LISTENER(NAME, PREPARE_RESULT, PREPARE_BINDING, PREPARE_PERMISSIONS) static void ipc ## NAME ## Listener(const struct gnwIpcEndpointQuery * const query) {  \
-    if (!query) { fug(FUG_NULLPTR); return; }                                                                                                                               \
-    if (!query->data.ptr) { fug(FUG_INCONSISTENT); return; }                                                                                                                 \
-    if (query->data.bytes != sizeof(struct gnwDisplayManager ## NAME ## Query)) { fug(FUG_INCONSISTENT); return; }                                                       \
-    if (query->replySizeBytes != sizeof(struct gnwDisplayManager ## NAME ## Result)) { fug(FUG_INCONSISTENT); return; }                                                     \
-    struct gnwDisplayManager ## NAME ## Query * const dispQueryPtr = (struct gnwDisplayManager ## NAME ## Query *)query->data.ptr;                                           \
-    struct gnwDisplayManager ## NAME ## Result result; { PREPARE_RESULT; }                                                                                                  \
-    enum gnwIpcBindFlag bindFlag = GIBF_NONE; { PREPARE_BINDING; }                                                                                                          \
-    size_t permissions = 0; { PREPARE_PERMISSIONS; }                                                                                                                        \
-    enum gnwIpcError error = ipcReply((ptr_t)&result, sizeof(struct gnwDisplayManager ## NAME ## Result), query->token, bindFlag, permissions);                             \
-    if (error == GIPCE_NOT_FOUND) { return; }                                                                                                                               \
-    else if (error != GIPCE_NONE) { fug(FUG_UNDEFINED); return; }                                                                                                           \
+#define DISPMGR_LISTENER(NAME, PREPARE_RESULT, PREPARE_BINDING, PREPARE_PERMISSIONS) static void ipc ## NAME ## Listener(const struct gnwIpcEndpointQuery * const query) {              \
+    if (!query) { fug(FUG_NULLPTR); return; }                                                                                                                                           \
+    if (!query->data.ptr) { fug(FUG_INCONSISTENT); return; }                                                                                                                            \
+    if (query->data.bytes != sizeof(struct gnwDisplayManager ## NAME ## Query)) { fug(FUG_INCONSISTENT); return; }                                                                      \
+    if (query->replySizeBytes != sizeof(struct gnwDisplayManager ## NAME ## Result)) { fug(FUG_INCONSISTENT); return; }                                                                 \
+    struct gnwDisplayManager ## NAME ## Query * const dispQueryPtr = (struct gnwDisplayManager ## NAME ## Query *)query->data.ptr;                                                      \
+    struct gnwDisplayManager ## NAME ## Result result; { PREPARE_RESULT; }                                                                                                              \
+    enum gnwIpcBindFlag bindFlag = GIBF_NONE; { PREPARE_BINDING; }                                                                                                                      \
+    size_t permissions = 0; { PREPARE_PERMISSIONS; }                                                                                                                                    \
+    enum gnwIpcError error = ipcReply((data_t){ (ptr_t)&result, sizeof(struct gnwDisplayManager ## NAME ## Result) }, query->token, (struct gnwIpcBindData){ bindFlag, permissions });  \
+    if (error == GIPCE_NOT_FOUND) { return; }                                                                                                                                           \
+    else if (error != GIPCE_NONE) { fug(FUG_UNDEFINED); return; }                                                                                                                       \
 }
 
 DISPMGR_LISTENER(GetDisplay, {
