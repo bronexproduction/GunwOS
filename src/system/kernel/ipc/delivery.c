@@ -174,15 +174,15 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
         return e;
     }
 
-    switch (absQuery.bindFlag) {
+    switch (absQuery.bindData.flag) {
         case GIBF_BIND:
-            e = k_ipc_binding_create(listenerPtr->procId, procId, absQuery.permissions);
+            e = k_ipc_binding_create(listenerPtr->procId, procId, absQuery.bindData.permissions);
             if (e == GIPCE_ALREADY_EXISTS) {
                 e = GIPCE_NONE;
             }
             break;
         case GIBF_UPDATE:
-            e = k_ipc_binding_update(listenerPtr->procId, procId, absQuery.permissions);
+            e = k_ipc_binding_update(listenerPtr->procId, procId, absQuery.bindData.permissions);
             break;
         case GIBF_UNBIND:
             e = k_ipc_binding_destroy(listenerPtr->procId, procId, procId);
