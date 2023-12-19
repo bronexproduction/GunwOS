@@ -23,10 +23,10 @@ void k_startup() {
     
     enum gnwCtrlError err = GCE_NONE;
 
-    START("0:GNWDISPM.ELF");    /* Display manager */
-    START("0:GNWKBDM.ELF");     /* Keyboard manager */
-    START("0:GNWTERM.ELF");     /* Terminal */
-    START("0:GNWSH.ELF");       /* Command line */
+    START("0:GNWDISPM.ELF");    /* Display manager  - process ID: 0 */
+    START("0:GNWKBDM.ELF");     /* Keyboard manager - process ID: 1 */
+    START("0:GNWTERM.ELF");     /* Terminal         - process ID: 2 */
+    START("0:GNWSH.ELF");       /* Command line     - process ID: 3 */
 
     if (err != GCE_NONE) {
         OOPS("Unable to start core modules");
