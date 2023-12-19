@@ -14,21 +14,48 @@
 #include <error/panic.h>
 
 bool k_ipc_utl_pathGlobalValidate(const char * absPathPtr, const size_t pathLen) {
+    /*
+        Path empty
+    */
     if (!pathLen) {
         return false;
     }
-    if (*absPathPtr == GNW_PATH_IPC_COMPONENT_SEPARATOR) {
+    
+    /*
+        Path starting with separator
+    */
+    if (absPathPtr[0] == GNW_PATH_IPC_COMPONENT_SEPARATOR) {
         return false;
     }
+    
+    /*
+        Path ending with separator
+    */
+    if (absPathPtr[pathLen - 1] == GNW_PATH_IPC_COMPONENT_SEPARATOR) {
+        return false;
+    }
+
+    /*
+        Path containing invalid characters
+        Adjacent separators
+    */
+    bool hasSeparator = false;
+    size_t lastSeparatorIndex = 0;
     for (size_t i = 0; i < pathLen; ++i) {
-        if (IN_RANGE('0', absPathPtr[i], '9')                          ||   /* 0 - 9 */
-            IN_RANGE('A', absPathPtr[i], 'Z')                          ||   /* A - Z */
-            IN_RANGE('a', absPathPtr[i], 'z')                          ||   /* a - z */
-            ((absPathPtr[i] == GNW_PATH_IPC_COMPONENT_SEPARATOR) && i)      /* path separator */) {
+        if (!(IN_RANGE('0', absPathPtr[i], '9')                          ||   /* 0 - 9 */
+              IN_RANGE('A', absPathPtr[i], 'Z')                          ||   /* A - Z */
+              IN_RANGE('a', absPathPtr[i], 'z')                          ||   /* a - z */
+              absPathPtr[i] == GNW_PATH_IPC_COMPONENT_SEPARATOR               /* path separator */)) {
+            return false;
+        }
+        if (absPathPtr[i] != GNW_PATH_IPC_COMPONENT_SEPARATOR) {
             continue;
         }
-
-        return false;
+        if (lastSeparatorIndex == (i - 1) && hasSeparator) {
+            return false;
+        }
+        hasSeparator = true;
+        lastSeparatorIndex = i;
     }
 
     return true;
