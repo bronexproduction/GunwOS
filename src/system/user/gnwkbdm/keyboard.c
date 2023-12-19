@@ -44,13 +44,14 @@ static GNW_KEYBOARD_EVENT_LISTENER(onKeyboardEvent) {
     if (e == GIPCE_NONE) {
         return;
     }
+
     sessionDestroy(session);
     
     if (e == GIPCE_FORBIDDEN || e == GIPCE_NOT_FOUND) {
         return;
-   } else {
-       fug(FUG_UNDEFINED);
-  }
+    } else {
+        fug(FUG_UNDEFINED);
+    }
 }
 
 bool keyboard_init() {
