@@ -170,7 +170,33 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
         endpointQuery.token = MAX_IPC_TOKEN;
     }
 
-    return deliver(listenerPtr, &endpointQuery);
+    e = deliver(listenerPtr, &endpointQuery);
+    if (e != GIPCE_NONE) {
+        return e;
+    }
+
+    switch (absQuery.bindFlag) {
+        case GIBF_BIND:
+            e = k_ipc_binding_create(listenerPtr->procId, procId, absQuery.permissions);
+            if (e == GIPCE_ALREADY_EXISTS) {
+                e = GIPCE_NONE;
+            }
+            break;
+        case GIBF_UPDATE:
+            e = k_ipc_binding_update(listenerPtr->procId, procId, absQuery.permissions);
+            break;
+        case GIBF_UNBIND:
+            e = k_ipc_binding_destroy(listenerPtr->procId, procId, procId);
+            break;
+        default:
+            break;
+    }
+
+    if (e != GIPCE_NONE) {
+        return e;
+    }
+    
+    return GIPCE_NONE;
 }
 
 enum gnwIpcError k_ipc_notify(const struct gnwIpcSenderQuery absQuery,
