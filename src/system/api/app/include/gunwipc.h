@@ -60,6 +60,11 @@ enum gnwIpcBindFlag {
     GIBF_UNBIND
 };
 
+struct gnwIpcBindData {
+    enum gnwIpcBindFlag flag;
+    size_t permissions;
+};
+
 struct gnwIpcEndpointQuery {
     procId_t sourceProcId;
     data_t data;
@@ -118,20 +123,15 @@ extern enum gnwIpcError ipcRegisterNotification(const char * const path,
     Params:
         * path - IPC path (see line 14)
         * data - message data
-        * replyPtr - address of the buffer for reply data
-        * replySizeBytes - size of the reply in bytes
-        * bindFlag - determines binding update mode or GIBF_NONE otherwise
+        * replyData - reply data (buffer ptr, size in bytes)
+        * bindData - determines binding update mode (or GIBF_NONE otherwise) and binding permissions
           
           On-send binding enables the sender process (client) to receive messages from the receiver process (server)
-
-        * permissions - binding permissions if needed, otherwise ignored
 */
 extern enum gnwIpcError ipcSend(const char * const path,
                                 const data_t data,
-                                const ptr_t replyPtr,
-                                const size_t replySizeBytes,
-                                const enum gnwIpcBindFlag bindFlag,
-                                const size_t permissions);
+                                const data_t replyData,
+                                const struct gnwIpcBindData bindData);
 
 /*
     Sends query to specified IPC path of given process
@@ -142,40 +142,30 @@ extern enum gnwIpcError ipcSend(const char * const path,
         * procId - receiver process identifier
         * path - IPC path (see line 14)
         * data - message data
-        * replyPtr - address of the buffer for reply data
-        * replySizeBytes - size of the reply in bytes
-        * bindFlag - determines binding update mode or GIBF_NONE otherwise
+        * replyData - reply data (buffer ptr, size in bytes)
+        * bindData - determines binding update mode (or GIBF_NONE otherwise) and binding permissions
           
           On-send binding enables the sender process (client) to receive messages from the receiver process (server)
-
-        * permissions - binding permissions if needed, otherwise ignored
 */
 extern enum gnwIpcError ipcSendDirect(const procId_t procId,
                                       const char * const path,
                                       const data_t data,
-                                      const ptr_t replyPtr,
-                                      const size_t replySizeBytes,
-                                      const enum gnwIpcBindFlag bindFlag,
-                                      const size_t permissions);
+                                      const data_t replyData,
+                                      const struct gnwIpcBindData bindData);
 
 /*
     Sends response for the IPC message with provided token
 
     Params:
-        * replyPtr - pointer to the reply data
-        * replySizeBytes - size of the reply data in bytes
+        * replyData - reply data
         * token - token of the currently handled message (see gnwIpcEndpointQuery)
-        * bindFlag - determines binding update mode or GIBF_NONE otherwise
+        * bindData - determines binding update mode (or GIBF_NONE otherwise) and binding permissions
         
           On-reply binding enables the sender process (client) to send messages to the receiver process (server)
-          
-        * permissions - binding permissions if needed, otherwise ignored
 */
-extern enum gnwIpcError ipcReply(const ptr_t replyPtr,
-                                 const size_t replySizeBytes,
+extern enum gnwIpcError ipcReply(const data_t replyData,
                                  const size_t token,
-                                 const enum gnwIpcBindFlag bindFlag,
-                                 const size_t permissions);
+                                 const struct gnwIpcBindData bindData);
 
 #endif // _GUNWAPI_KERNEL
 
