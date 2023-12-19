@@ -10,8 +10,7 @@
 #include "../include/gunwipc.h"
 
 struct gnwIpcHandlerDescriptor {
-    gnwIpcPath path;
-    size_t pathLen;
+    data_t pathData;
     gnwIpcListener handlerRoutine;
     gnwIpcEndpointQueryDecoder decoder;
     bool bindingRequired;
@@ -20,8 +19,7 @@ struct gnwIpcHandlerDescriptor {
 
 struct gnwIpcSenderQuery {
     procId_t procId;
-    gnwIpcPath path;
-    size_t pathLen;
+    data_t pathData;
     data_t data;
     enum gnwIpcError * replyErrPtr;
     data_t replyData;

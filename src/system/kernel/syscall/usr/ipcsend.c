@@ -16,7 +16,7 @@ enum gnwIpcError k_scr_usr_ipcSend(const struct gnwIpcSenderQuery * const queryP
     SCLF_GET_VALID_ABS(const struct gnwIpcSenderQuery * const, queryPtr, sizeof(struct gnwIpcSenderQuery), {
         return GIPCE_UNKNOWN;
     });
-    SCLF_GET_VALID_ABS_NAMED(const gnwIpcPath, pathPtr, abs_queryPtr->path, abs_queryPtr->pathLen, {
+    SCLF_GET_VALID_ABS_NAMED(const gnwIpcPath, pathPtr, abs_queryPtr->pathData.ptr, abs_queryPtr->pathData.bytes, {
         return GIPCE_UNKNOWN;
     });
     SCLF_GET_VALID_NULLABLE_ABS_NAMED(const ptr_t, dataPtr, abs_queryPtr->data.ptr, abs_queryPtr->data.bytes, {
@@ -31,8 +31,8 @@ enum gnwIpcError k_scr_usr_ipcSend(const struct gnwIpcSenderQuery * const queryP
 
     struct gnwIpcSenderQuery absoluteQuery;
     absoluteQuery.procId = abs_queryPtr->procId;
-    absoluteQuery.path = abs_pathPtr;
-    absoluteQuery.pathLen = abs_queryPtr->pathLen;
+    absoluteQuery.pathData.ptr = (ptr_t)abs_pathPtr;
+    absoluteQuery.pathData.bytes = abs_queryPtr->pathData.bytes;
     absoluteQuery.data.ptr = abs_dataPtr;
     absoluteQuery.data.bytes = abs_queryPtr->data.bytes;
     absoluteQuery.replyErrPtr = abs_replyErrPtr;

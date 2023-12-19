@@ -86,8 +86,8 @@ static void bindingDestroyNotify(const struct binding * const bindingPtr, const 
     struct gnwIpcSenderQuery query;
 
     query.procId = NONE_PROC_ID;
-    query.path = GNW_PATH_IPC_BINDING_NOTIFICATION_SESSION_DESTROYED;
-    query.pathLen = strlen(GNW_PATH_IPC_BINDING_NOTIFICATION_SESSION_DESTROYED);
+    query.pathData.ptr = (ptr_t)GNW_PATH_IPC_BINDING_NOTIFICATION_SESSION_DESTROYED;
+    query.pathData.bytes = strlen(GNW_PATH_IPC_BINDING_NOTIFICATION_SESSION_DESTROYED);
     query.data.ptr = (ptr_t)&requester;
     query.data.bytes = sizeof(procId_t);
     query.replyErrPtr = nullptr;

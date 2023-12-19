@@ -26,9 +26,9 @@ enum gnwIpcError ipcRegister(const gnwIpcPath path,
     CHECKPTR(handler);
 
     struct gnwIpcHandlerDescriptor desc;
-    desc.path = path;
-    desc.pathLen = strlen(path);
-    if (desc.pathLen > GNW_PATH_IPC_MAX_LENGTH) {
+    desc.pathData.ptr = (ptr_t)path;
+    desc.pathData.bytes = strlen(path);
+    if (desc.pathData.bytes > GNW_PATH_IPC_MAX_LENGTH) {
         return GIPCE_INVALID_PATH;
     }
     desc.handlerRoutine = handler;
@@ -66,8 +66,8 @@ enum gnwIpcError ipcSendDirect(const procId_t procId,
     enum gnwIpcError replyErr = GIPCE_NONE;
     struct gnwIpcSenderQuery query;
     query.procId = procId;
-    query.path = path;
-    query.pathLen = strlen(path);
+    query.pathData.ptr = (ptr_t)path;
+    query.pathData.bytes = strlen(path);
     query.data = data;
     query.replyErrPtr = &replyErr;
     query.replyData = replyData;

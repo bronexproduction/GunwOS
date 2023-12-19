@@ -12,25 +12,25 @@
 #include <hal/proc/proc.h>
 #include <error/panic.h>
 
-bool k_ipc_utl_pathGlobalValidate(const gnwIpcPath absPathPtr, const size_t pathLen) {
+bool k_ipc_utl_pathGlobalValidate(const data_t absPathData) {
     /*
         Path empty
     */
-    if (!pathLen) {
+    if (!absPathData.bytes) {
         return false;
     }
     
     /*
         Path starting with separator
     */
-    if (absPathPtr[0] == GNW_PATH_IPC_COMPONENT_SEPARATOR) {
+    if (absPathData.ptr[0] == GNW_PATH_IPC_COMPONENT_SEPARATOR) {
         return false;
     }
     
     /*
         Path ending with separator
     */
-    if (absPathPtr[pathLen - 1] == GNW_PATH_IPC_COMPONENT_SEPARATOR) {
+    if (absPathData.ptr[absPathData.bytes - 1] == GNW_PATH_IPC_COMPONENT_SEPARATOR) {
         return false;
     }
 
@@ -40,14 +40,14 @@ bool k_ipc_utl_pathGlobalValidate(const gnwIpcPath absPathPtr, const size_t path
     */
     bool hasSeparator = false;
     size_t lastSeparatorIndex = 0;
-    for (size_t i = 0; i < pathLen; ++i) {
-        if (!(IN_RANGE('0', absPathPtr[i], '9')                          ||   /* 0 - 9 */
-              IN_RANGE('A', absPathPtr[i], 'Z')                          ||   /* A - Z */
-              IN_RANGE('a', absPathPtr[i], 'z')                          ||   /* a - z */
-              absPathPtr[i] == GNW_PATH_IPC_COMPONENT_SEPARATOR               /* path separator */)) {
+    for (size_t i = 0; i < absPathData.bytes; ++i) {
+        if (!(IN_RANGE('0', absPathData.ptr[i], '9')                          ||   /* 0 - 9 */
+              IN_RANGE('A', absPathData.ptr[i], 'Z')                          ||   /* A - Z */
+              IN_RANGE('a', absPathData.ptr[i], 'z')                          ||   /* a - z */
+              absPathData.ptr[i] == GNW_PATH_IPC_COMPONENT_SEPARATOR               /* path separator */)) {
             return false;
         }
-        if (absPathPtr[i] != GNW_PATH_IPC_COMPONENT_SEPARATOR) {
+        if (absPathData.ptr[i] != GNW_PATH_IPC_COMPONENT_SEPARATOR) {
             continue;
         }
         if (lastSeparatorIndex == (i - 1) && hasSeparator) {
@@ -60,31 +60,36 @@ bool k_ipc_utl_pathGlobalValidate(const gnwIpcPath absPathPtr, const size_t path
     return true;
 }
 
-bool k_ipc_utl_pathDirectValidate(const gnwIpcPath absPathPtr, const size_t pathLen) {
-    if (pathLen <= 2) {
+bool k_ipc_utl_pathDirectValidate(data_t absPathData) {
+    if (absPathData.bytes <= 2) {
         return false;
     }
-    if (absPathPtr[0] != GNW_PATH_IPC_DIRECT_PREFIX) {
+    if (absPathData.ptr[0] != GNW_PATH_IPC_DIRECT_PREFIX) {
         return false;
     }
-    if (absPathPtr[1] != GNW_PATH_IPC_COMPONENT_SEPARATOR) {
+    if (absPathData.ptr[1] != GNW_PATH_IPC_COMPONENT_SEPARATOR) {
         return false;
     }
-    return k_ipc_utl_pathGlobalValidate(absPathPtr + 2, pathLen - 2);
+
+    absPathData.ptr += 2;
+    absPathData.bytes -= 2;
+    return k_ipc_utl_pathGlobalValidate(absPathData);
 }
 
-bool k_ipc_utl_pathNotificationValidate(const gnwIpcPath absPathPtr, const size_t pathLen) {
-    if (pathLen <= 2) {
+bool k_ipc_utl_pathNotificationValidate(data_t absPathData) {
+    if (absPathData.bytes <= 2) {
         return false;
     }
-    if (absPathPtr[0] != GNW_PATH_IPC_NOTIFICATION_PREFIX) {
+    if (absPathData.ptr[0] != GNW_PATH_IPC_NOTIFICATION_PREFIX) {
         return false;
     }
-    if (absPathPtr[1] != GNW_PATH_IPC_COMPONENT_SEPARATOR) {
+    if (absPathData.ptr[1] != GNW_PATH_IPC_COMPONENT_SEPARATOR) {
         return false;
     }
 
-    return k_ipc_utl_pathGlobalValidate(absPathPtr + 2, pathLen - 2);
+    absPathData.ptr += 2;
+    absPathData.bytes -= 2;
+    return k_ipc_utl_pathGlobalValidate(absPathData);
 }
 
 void k_ipc_utl_clearReply(const size_t entryId) {
@@ -108,9 +113,9 @@ void k_ipc_utl_unlockIfAble(const procId_t procId) {
     k_proc_unlock(procId, PLT_IPC);
 }
 
-size_t k_ipc_utl_nextListenerIndexForPath(const gnwIpcPath absPathPtr, const size_t pathLen, const size_t * const after) {
+size_t k_ipc_utl_nextListenerIndexForPath(const data_t absPathData, const size_t * const after) {
     for (size_t index = after ? *after + 1 : 0; index < MAX_IPC_LISTENER; ++index) {
-        if (!strcmpl(absPathPtr, ipcListenerRegister[index].path, pathLen)) {
+        if (!strcmpl((const gnwIpcPath)absPathData.ptr, ipcListenerRegister[index].path, absPathData.bytes)) {
             return index;
         }
     }

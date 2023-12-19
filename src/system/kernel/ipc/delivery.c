@@ -25,7 +25,7 @@ static size_t freeReplyIndex() {
 }
 
 static enum gnwIpcError validateQuery(const struct gnwIpcSenderQuery absQuery) {
-    if (!absQuery.path) {
+    if (!absQuery.pathData.ptr) {
         OOPS("IPC path nullptr");
         return GIPCE_UNKNOWN;
     }
@@ -33,7 +33,7 @@ static enum gnwIpcError validateQuery(const struct gnwIpcSenderQuery absQuery) {
         OOPS("IPC query data inconsistency");
         return GIPCE_UNKNOWN;
     }
-    if (!absQuery.pathLen || absQuery.pathLen > GNW_PATH_IPC_MAX_LENGTH) {
+    if (!absQuery.pathData.bytes || absQuery.pathData.bytes > GNW_PATH_IPC_MAX_LENGTH) {
         return GIPCE_INVALID_PATH;
     }
 
@@ -46,7 +46,7 @@ static enum gnwIpcError validateNotificationQuery(const struct gnwIpcSenderQuery
         return e;
     }
 
-    if (!k_ipc_utl_pathNotificationValidate(absQuery.path, absQuery.pathLen)) {
+    if (!k_ipc_utl_pathNotificationValidate(absQuery.pathData)) {
         return GIPCE_INVALID_PATH;
     }
     if (absQuery.replyData.ptr || absQuery.replyErrPtr || absQuery.replyData.bytes) {
@@ -95,14 +95,14 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
         return e;
     }
 
-    enum gnwIpcListenerType type = k_ipc_utl_pathGlobalValidate(absQuery.path, absQuery.pathLen) ? GILT_GLOBAL : GILT_NONE;
-    type |= k_ipc_utl_pathDirectValidate(absQuery.path, absQuery.pathLen) ? GILT_DIRECT : GILT_NONE;
+    enum gnwIpcListenerType type = k_ipc_utl_pathGlobalValidate(absQuery.pathData) ? GILT_GLOBAL : GILT_NONE;
+    type |= k_ipc_utl_pathDirectValidate(absQuery.pathData) ? GILT_DIRECT : GILT_NONE;
 
     if (__builtin_popcount(type) != 1) {
         return GIPCE_INVALID_PATH;
     }
 
-    size_t listenerIndex = k_ipc_utl_nextListenerIndexForPath(absQuery.path, absQuery.pathLen, nullptr);
+    size_t listenerIndex = k_ipc_utl_nextListenerIndexForPath(absQuery.pathData, nullptr);
     const struct ipcListener * listenerPtr = nullptr;
 
     while (listenerIndex < MAX_IPC_LISTENER) {
@@ -114,7 +114,7 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
             break;
         }
 
-        listenerIndex = k_ipc_utl_nextListenerIndexForPath(absQuery.path, absQuery.pathLen, &listenerIndex);
+        listenerIndex = k_ipc_utl_nextListenerIndexForPath(absQuery.pathData, &listenerIndex);
     }
     if (listenerIndex >= MAX_IPC_LISTENER) {
         return GIPCE_NONE;
@@ -206,13 +206,13 @@ enum gnwIpcError k_ipc_notify(const struct gnwIpcSenderQuery absQuery,
         return e;
     }
 
-    size_t listenerIndex = k_ipc_utl_nextListenerIndexForPath(absQuery.path, absQuery.pathLen, nullptr);
+    size_t listenerIndex = k_ipc_utl_nextListenerIndexForPath(absQuery.pathData, nullptr);
     while (listenerIndex < MAX_IPC_LISTENER) {
         if (ipcListenerRegister[listenerIndex].procId == target) {
             break;
         }
 
-        listenerIndex = k_ipc_utl_nextListenerIndexForPath(absQuery.path, absQuery.pathLen, &listenerIndex);
+        listenerIndex = k_ipc_utl_nextListenerIndexForPath(absQuery.pathData, &listenerIndex);
     }
     if (listenerIndex >= MAX_IPC_LISTENER) {
         return GIPCE_NONE;
