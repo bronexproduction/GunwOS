@@ -72,11 +72,8 @@ SCR(devCharWrite,
 SCR(exit,
     REG(32, status, ebx)
     
-    const procId_t procId = k_proc_getCurrentId();
-    k_que_dispatch_arch((fPtr_arch)k_dev_procCleanup, procId);
-    k_que_dispatch_arch((fPtr_arch)k_ipc_procCleanup, procId);
-    k_que_dispatch_arch((fPtr_arch)k_runloop_procCleanup, procId);
-    k_proc_stop(procId);
+    extern void k_scr_usr_exit(procId_t, int_32);
+    k_scr_usr_exit(k_proc_getCurrentId(), status);
 )
 
 /*

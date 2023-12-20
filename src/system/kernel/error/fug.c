@@ -6,6 +6,7 @@
 //
 
 #include "fug.h"
+#include <log/log.h>
 #include <string.h>
 #include <error/panic.h>
 
@@ -15,5 +16,8 @@ void k_err_fug(const procId_t procId, enum gnwFugCode code) {
     uint2hex(code, log + 9);
     uint2hex(procId, log + 25);
     
-    OOPS(log);
+    k_log_log(log);
+    
+    extern void k_scr_usr_exit(procId_t, int_32);
+    k_scr_usr_exit(procId, code);
 }
