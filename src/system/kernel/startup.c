@@ -12,7 +12,7 @@
 #include <error/panic.h>
 
 #define START(PATH) if (err == GCE_NONE) {                                                      \
-    k_log_log("Starting " PATH);                                                                \
+    LOG(PATH);                                                                                  \
     struct gnwCtrlStartDescriptor desc;                                                         \
     desc.pathPtr = PATH;                                                                        \
     desc.pathLen = strlen(desc.pathPtr);                                                        \
@@ -23,7 +23,7 @@
 
 void k_startup() {
 
-    k_log_log("Starting GunwOS initial modules...");
+    LOG("Starting core modules");
 
     enum gnwCtrlError err = GCE_NONE;
 
