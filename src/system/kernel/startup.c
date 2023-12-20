@@ -8,9 +8,11 @@
 #include <string.h>
 #include <src/_gunwctrl.h>
 #include <hal/proc/proc.h>
+#include <log/log.h>
 #include <error/panic.h>
 
 #define START(PATH) if (err == GCE_NONE) {                                                      \
+    k_log_log("Starting " PATH);                                                                \
     struct gnwCtrlStartDescriptor desc;                                                         \
     desc.pathPtr = PATH;                                                                        \
     desc.pathLen = strlen(desc.pathPtr);                                                        \
@@ -20,7 +22,9 @@
 }
 
 void k_startup() {
-    
+
+    k_log_log("Starting GunwOS initial modules...");
+
     enum gnwCtrlError err = GCE_NONE;
 
     START("0:GNWDISPM.ELF");    /* Display manager  - process ID: 0 */
