@@ -19,7 +19,10 @@ static bool outputReady = false;
 
 static int append(char c) {
     while (1) { 
-        enum gnwIpcError e = ipcSend("t0", (ptr_t)&c, sizeof(char), nullptr, 0);
+        enum gnwIpcError e = ipcSend("t0",
+                                     (data_t){ (ptr_t)&c, sizeof(char) },
+                                     (data_t){ nullptr, 0 },
+                                     (struct gnwIpcBindData){ GIBF_NONE, 0 });
         if (e == GIPCE_NONE) {
             outputReady = true;
             return 1;

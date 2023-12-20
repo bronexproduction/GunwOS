@@ -12,9 +12,13 @@
 
 #include "scl_user.h"
 #include "../include/gunwfug.h"
+#include <defs.h>
 #include <string.h>
+#include <proc.h>
 
-enum gnwIpcError ipcRegister(const char * const path,
+gnwIpcListener ipcSessionDestroyListener = nullptr;
+
+enum gnwIpcError ipcRegister(const gnwIpcPath path,
                              const gnwIpcListener handler,
                              const bool bindingRequired,
                              const size_t permissionMask) {
@@ -22,9 +26,9 @@ enum gnwIpcError ipcRegister(const char * const path,
     CHECKPTR(handler);
 
     struct gnwIpcHandlerDescriptor desc;
-    desc.path = path;
-    desc.pathLen = strlen(path);
-    if (desc.pathLen > GNW_PATH_IPC_MAX_LENGTH) {
+    desc.pathData.ptr = (ptr_t)path;
+    desc.pathData.bytes = strlen(path);
+    if (desc.pathData.bytes > GNW_PATH_IPC_MAX_LENGTH) {
         return GIPCE_INVALID_PATH;
     }
     desc.handlerRoutine = handler;
@@ -40,22 +44,34 @@ enum gnwIpcError ipcRegister(const char * const path,
     SYSCALL_RETVAL(32);
 }
 
-enum gnwIpcError ipcSend(const char * const path,
-                         const ptr_t dataPtr,
-                         const size_t dataSizeBytes,
-                         ptr_t replyPtr,
-                         const size_t replySizeBytes) {
+enum gnwIpcError ipcRegisterNotification(const gnwIpcPath path,
+                                         const gnwIpcListener handler) {
+    return ipcRegister(path, handler, false, 0);
+}
+
+enum gnwIpcError ipcSend(const gnwIpcPath path,
+                         const data_t data,
+                         const data_t replyData,
+                         const struct gnwIpcBindData bindData) {
+    return ipcSendDirect(NONE_PROC_ID, path, data, replyData, bindData);
+}
+
+enum gnwIpcError ipcSendDirect(const procId_t procId,
+                               const gnwIpcPath path,
+                               const data_t data,
+                               const data_t replyData,
+                               const struct gnwIpcBindData bindData) {
     CHECKPTR(path);
 
     enum gnwIpcError replyErr = GIPCE_NONE;
     struct gnwIpcSenderQuery query;
-    query.path = path;
-    query.pathLen = strlen(path);
-    query.dataPtr = dataPtr;
-    query.dataSizeBytes = dataSizeBytes;
+    query.procId = procId;
+    query.pathData.ptr = (ptr_t)path;
+    query.pathData.bytes = strlen(path);
+    query.data = data;
     query.replyErrPtr = &replyErr;
-    query.replyPtr = replyPtr;
-    query.replySizeBytes = replySizeBytes;
+    query.replyData = replyData;
+    query.bindData = bindData;
 
     SYSCALL_PAR1(&query);
 
@@ -66,22 +82,18 @@ enum gnwIpcError ipcSend(const char * const path,
     return (replyErr == GIPCE_NONE) ? (enum gnwIpcError)err : replyErr;
 }
 
-enum gnwIpcError ipcReply(const ptr_t replyPtr,
-                          const size_t replySizeBytes,
+enum gnwIpcError ipcReply(const data_t replyData,
                           const size_t token,
-                          const enum gnwIpcBindFlag bindFlag,
-                          const size_t permissions) {
-    CHECKPTR(replyPtr);
+                          const struct gnwIpcBindData bindData) {
+    CHECKPTR(replyData.ptr);
 
     struct gnwIpcReplyInfo info;
 
+    info.data = replyData;
     info.token = token;
-    info.bindFlag = bindFlag;
-    info.permissions = permissions;
+    info.bindData = bindData;
 
-    SYSCALL_PAR1(replyPtr);
-    SYSCALL_PAR2(replySizeBytes);
-    SYSCALL_PAR3(&info);
+    SYSCALL_PAR1(&info);
 
     SYSCALL_USER_FUNC(IPC_REPLY);
     SYSCALL_USER_INT;
@@ -91,7 +103,7 @@ enum gnwIpcError ipcReply(const ptr_t replyPtr,
 
 void gnwIpcEndpointQuery_decode(const ptr_t absDataPtr, struct gnwIpcEndpointQuery * const absQueryPtr) {
     memcopy(absDataPtr, absQueryPtr, sizeof(struct gnwIpcEndpointQuery));
-    absQueryPtr->dataPtr = absDataPtr + sizeof(struct gnwIpcEndpointQuery);
+    absQueryPtr->data.ptr = absDataPtr + sizeof(struct gnwIpcEndpointQuery);
 }
 
 #else
@@ -99,8 +111,8 @@ void gnwIpcEndpointQuery_decode(const ptr_t absDataPtr, struct gnwIpcEndpointQue
 void gnwIpcEndpointQuery_encode(const struct gnwIpcEndpointQuery * const absQueryPtr, ptr_t absDataPtr) {
     memcopy(absQueryPtr, absDataPtr, sizeof(struct gnwIpcEndpointQuery));
     size_t offset = sizeof(struct gnwIpcEndpointQuery);
-    memcopy(absQueryPtr->dataPtr, absDataPtr + offset, absQueryPtr->dataSizeBytes);
-    offset += absQueryPtr->dataSizeBytes;
+    memcopy(absQueryPtr->data.ptr, absDataPtr + offset, absQueryPtr->data.bytes);
+    offset += absQueryPtr->data.bytes;
 }
 
 #endif // _GUNWAPI_KERNEL

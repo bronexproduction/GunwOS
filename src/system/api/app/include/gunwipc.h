@@ -11,21 +11,31 @@
 
 /*
     IPC path structure:
-
-        (processId - optional | GNW_ROOT_IPC_PROC_ID_SEPARATOR - only if processId present) OR GNW_PATH_IPC_BROADCAST_PREFIX - optional | pathComponent0 | (GNW_PATH_IPC_COMPONENT_SEPARATOR | pathComponentN) - if needed
-
-    Correct path examples:
-
-        * banana
-        * banana/potato/strawberry/pizza
-        * 0:banana
-        * 2:banana/potato
+        
+        * Global:
+            pathComponent0 | (GNW_PATH_IPC_COMPONENT_SEPARATOR | pathComponentN) - if needed
+            Examples:
+                * banana
+                * banana/potato/strawberry/pizza
+        
+        * Direct:
+            GNW_PATH_IPC_DIRECT_PREFIX | GNW_PATH_IPC_COMPONENT_SEPARATOR | pathComponent0 | (GNW_PATH_IPC_COMPONENT_SEPARATOR | pathComponentN) - if needed
+            Examples:
+                * :/banana
+                * :/banana/potato
+        
+        * Notification:
+            GNW_PATH_IPC_NOTIFICATION_PREFIX | GNW_PATH_IPC_COMPONENT_SEPARATOR | pathComponent0 | (GNW_PATH_IPC_COMPONENT_SEPARATOR | pathComponentN) - if needed
+            Examples:
+                * _/banana
+                * _/banana/potato
     
     Allowed characters: a-z A-Z 0-9
-*/ 
-#define GNW_ROOT_IPC_PROC_ID_SEPARATOR ':'
+*/
+#define GNW_PATH_IPC_NOTIFICATION_PREFIX '_'
+#define GNW_PATH_IPC_BROADCAST_PREFIX '*'
+#define GNW_PATH_IPC_DIRECT_PREFIX ':'
 #define GNW_PATH_IPC_COMPONENT_SEPARATOR '/'
-#define GNW_PATH_IPC_BROADCAST_PREFIX '_'
 #define GNW_PATH_IPC_MAX_LENGTH 64
 
 #define GNW_PATH_IPC_BINDING_NOTIFICATION_SESSION_DESTROYED "_/ipc/sd"
@@ -50,10 +60,14 @@ enum gnwIpcBindFlag {
     GIBF_UNBIND
 };
 
+struct gnwIpcBindData {
+    enum gnwIpcBindFlag flag;
+    size_t permissions;
+};
+
 struct gnwIpcEndpointQuery {
     procId_t sourceProcId;
-    ptr_t dataPtr;
-    size_t dataSizeBytes;
+    data_t data;
     size_t replySizeBytes;
     size_t token;
     bool bound;
@@ -64,12 +78,27 @@ typedef void (*gnwIpcListener)(const struct gnwIpcEndpointQuery * const);
 
 typedef void (*gnwIpcEndpointQueryDecoder)(const ptr_t, struct gnwIpcEndpointQuery * const);
 
+typedef const char * gnwIpcPath;
+
 #ifndef _GUNWAPI_KERNEL
 
 extern void gnwIpcEndpointQuery_decode(const ptr_t, struct gnwIpcEndpointQuery * const);
 
 /*
+    Default listener used by APIs
+
+    To be set in order to use APIs listening for events
+
+    ipcSessionDestroyListener - GNW_PATH_IPC_BINDING_NOTIFICATION_SESSION_DESTROYED
+*/
+extern gnwIpcListener ipcSessionDestroyListener;
+
+/*
     Registers the process as global IPC receiver for given path
+
+    For all types of paths, although for notification paths
+    (with GNW_PATH_IPC_NOTIFICATION_PREFIX prefix)
+    usage of ipcRegisterNotification function is recommended
 
     Params:
         * path - IPC path (see line 14)
@@ -77,42 +106,74 @@ extern void gnwIpcEndpointQuery_decode(const ptr_t, struct gnwIpcEndpointQuery *
         * bindingRequired - marks that the endpoint requires previous binding (ignored in kernel notifications)
         * permissionMask - sets the required permission set to call the endpoint (ignored in kernel notifications)
 */
-extern enum gnwIpcError ipcRegister(const char * const path,
+extern enum gnwIpcError ipcRegister(const gnwIpcPath path,
                                     const gnwIpcListener handler,
                                     const bool bindingRequired,
                                     const size_t permissionMask);
 
 /*
-    Sends query to specified IPC path
+    Registers the process as IPC notification receiver for given path
+
+    For paths prefixed with GNW_PATH_IPC_NOTIFICATION_PREFIX
 
     Params:
         * path - IPC path (see line 14)
-        * dataPtr - pointer to message data
-        * dataSizeBytes - size of the message in bytes
-        * replyPtr - address of the buffer for reply data
-        * replySizeBytes - size of the reply in bytes
+        * handler - IPC message handler
 */
-extern enum gnwIpcError ipcSend(const char * const path,
-                                const ptr_t dataPtr,
-                                const size_t dataSizeBytes,
-                                const ptr_t replyPtr,
-                                const size_t replySizeBytes);
+extern enum gnwIpcError ipcRegisterNotification(const gnwIpcPath path,
+                                                const gnwIpcListener handler);
+
+/*
+    Sends query to specified IPC path
+
+    Use for global paths (without prefix)
+
+    Params:
+        * path - IPC path (see line 14)
+        * data - message data
+        * replyData - reply data (buffer ptr, size in bytes)
+        * bindData - determines binding update mode (or GIBF_NONE otherwise) and binding permissions
+          
+          On-send binding enables the sender process (client) to receive messages from the receiver process (server)
+*/
+extern enum gnwIpcError ipcSend(const gnwIpcPath path,
+                                const data_t data,
+                                const data_t replyData,
+                                const struct gnwIpcBindData bindData);
+
+/*
+    Sends query to specified IPC path of given process
+
+    Use for direct paths (prefixed with ':')
+
+    Params:
+        * procId - receiver process identifier
+        * path - IPC path (see line 14)
+        * data - message data
+        * replyData - reply data (buffer ptr, size in bytes)
+        * bindData - determines binding update mode (or GIBF_NONE otherwise) and binding permissions
+          
+          On-send binding enables the sender process (client) to receive messages from the receiver process (server)
+*/
+extern enum gnwIpcError ipcSendDirect(const procId_t procId,
+                                      const gnwIpcPath path,
+                                      const data_t data,
+                                      const data_t replyData,
+                                      const struct gnwIpcBindData bindData);
 
 /*
     Sends response for the IPC message with provided token
 
     Params:
-        * replyPtr - pointer to the reply data
-        * replySizeBytes - size of the reply data in bytes
+        * replyData - reply data
         * token - token of the currently handled message (see gnwIpcEndpointQuery)
-        * bindFlag - determines binding update mode or GIBF_NONE otherwise
-        * permissions - binding permissions if needed, otherwise ignored
+        * bindData - determines binding update mode (or GIBF_NONE otherwise) and binding permissions
+        
+          On-reply binding enables the sender process (client) to send messages to the receiver process (server)
 */
-extern enum gnwIpcError ipcReply(const ptr_t replyPtr,
-                                 const size_t replySizeBytes,
+extern enum gnwIpcError ipcReply(const data_t replyData,
                                  const size_t token,
-                                 const enum gnwIpcBindFlag bindFlag,
-                                 const size_t permissions);
+                                 const struct gnwIpcBindData bindData);
 
 #endif // _GUNWAPI_KERNEL
 

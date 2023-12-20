@@ -22,8 +22,9 @@ enum gnwDeviceError getDisplay(const enum gnwDisplayType type,
     struct gnwDisplayManagerGetDisplayResult result;
 
     enum gnwIpcError error = ipcSend(DISPMGR_PATH_GET,
-                                     (ptr_t)&query, sizeof(struct gnwDisplayManagerGetDisplayQuery),
-                                     (ptr_t)&result, sizeof(struct gnwDisplayManagerGetDisplayResult));
+                                     (data_t){ (ptr_t)&query, sizeof(struct gnwDisplayManagerGetDisplayQuery) },
+                                     (data_t){ (ptr_t)&result, sizeof(struct gnwDisplayManagerGetDisplayResult) },
+                                     (struct gnwIpcBindData){ GIBF_NONE, 0 });
     if (error != GIPCE_NONE) {
         return GDE_OPERATION_FAILED;
     } else if (result.error != GDE_NONE) {
@@ -48,8 +49,9 @@ enum gnwDeviceError attachToDisplay(const enum gnwDisplayType type,
     struct gnwDisplayManagerAttachToDisplayResult result;
 
     enum gnwIpcError error = ipcSend(DISPMGR_PATH_ATTACH,
-                                     (ptr_t)&query, sizeof(struct gnwDisplayManagerAttachToDisplayQuery),
-                                     (ptr_t)&result, sizeof(struct gnwDisplayManagerAttachToDisplayResult));
+                                     (data_t){ (ptr_t)&query, sizeof(struct gnwDisplayManagerAttachToDisplayQuery) },
+                                     (data_t){ (ptr_t)&result, sizeof(struct gnwDisplayManagerAttachToDisplayResult) },
+                                     (struct gnwIpcBindData){ GIBF_NONE, 0 });
     if (error != GIPCE_NONE) {
         return GDE_OPERATION_FAILED;
     } else if (result.error != GDE_NONE) {
@@ -79,8 +81,9 @@ enum gnwDeviceError pushFrame(const size_t displayId,
     struct gnwDisplayManagerPushFrameResult result;
 
     enum gnwIpcError error = ipcSend(DISPMGR_PATH_PUSH,
-                                     (ptr_t)&query, sizeof(struct gnwDisplayManagerPushFrameQuery),
-                                     (ptr_t)&result, sizeof(struct gnwDisplayManagerPushFrameResult));
+                                     (data_t){ (ptr_t)&query, sizeof(struct gnwDisplayManagerPushFrameQuery) },
+                                     (data_t){ (ptr_t)&result, sizeof(struct gnwDisplayManagerPushFrameResult) },
+                                     (struct gnwIpcBindData){ GIBF_NONE, 0 });
     if (error != GIPCE_NONE) {
         return GDE_OPERATION_FAILED;
     } else if (result.error != GDE_NONE) {

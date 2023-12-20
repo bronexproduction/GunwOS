@@ -16,33 +16,29 @@ enum gnwIpcError k_scr_usr_ipcSend(const struct gnwIpcSenderQuery * const queryP
     SCLF_GET_VALID_ABS(const struct gnwIpcSenderQuery * const, queryPtr, sizeof(struct gnwIpcSenderQuery), {
         return GIPCE_UNKNOWN;
     });
-    SCLF_GET_VALID_ABS_NAMED(const char * const, pathPtr, abs_queryPtr->path, abs_queryPtr->pathLen, {
+    SCLF_GET_VALID_ABS_NAMED(const gnwIpcPath, pathPtr, abs_queryPtr->pathData.ptr, abs_queryPtr->pathData.bytes, {
         return GIPCE_UNKNOWN;
     });
-    SCLF_GET_VALID_ABS_NAMED(const ptr_t, dataPtr, abs_queryPtr->dataPtr, abs_queryPtr->dataSizeBytes, {
+    SCLF_GET_VALID_NULLABLE_ABS_NAMED(const ptr_t, dataPtr, abs_queryPtr->data.ptr, abs_queryPtr->data.bytes, {
         return GIPCE_UNKNOWN;
     });
     SCLF_GET_VALID_ABS_NAMED(enum gnwIpcError * const, replyErrPtr, abs_queryPtr->replyErrPtr, sizeof(enum gnwIpcError), {
         return GIPCE_UNKNOWN;
     });
-
-    ptr_t abs_replyPtr = nullptr;
-    if (abs_queryPtr->replyPtr) {
-        abs_replyPtr = k_scl_func_getValidAbsoluteForProc(procId, (const ptr_t)(abs_queryPtr->replyPtr), abs_queryPtr->replySizeBytes);
-        if (!abs_replyPtr) {
-            OOPS("Invalid pointer referenced");
-            return GIPCE_UNKNOWN;
-        }
-    }
+    SCLF_GET_VALID_NULLABLE_ABS_NAMED(const ptr_t, replyPtr, abs_queryPtr->replyData.ptr, abs_queryPtr->replyData.bytes, {
+        return GIPCE_UNKNOWN;
+    });
 
     struct gnwIpcSenderQuery absoluteQuery;
-    absoluteQuery.path = abs_pathPtr;
-    absoluteQuery.pathLen = abs_queryPtr->pathLen;
-    absoluteQuery.dataPtr = abs_dataPtr;
-    absoluteQuery.dataSizeBytes = abs_queryPtr->dataSizeBytes;
+    absoluteQuery.procId = abs_queryPtr->procId;
+    absoluteQuery.pathData.ptr = (ptr_t)abs_pathPtr;
+    absoluteQuery.pathData.bytes = abs_queryPtr->pathData.bytes;
+    absoluteQuery.data.ptr = abs_dataPtr;
+    absoluteQuery.data.bytes = abs_queryPtr->data.bytes;
     absoluteQuery.replyErrPtr = abs_replyErrPtr;
-    absoluteQuery.replyPtr = abs_replyPtr;
-    absoluteQuery.replySizeBytes = abs_queryPtr->replySizeBytes;
+    absoluteQuery.replyData.ptr = abs_replyPtr;
+    absoluteQuery.replyData.bytes = abs_queryPtr->replyData.bytes;
+    absoluteQuery.bindData = abs_queryPtr->bindData;
 
     return k_ipc_send(procId, absoluteQuery);
 }

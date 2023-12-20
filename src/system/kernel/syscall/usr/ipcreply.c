@@ -9,15 +9,18 @@
 #include <ipc/ipc.h>
 #include <syscall/func.h>
 
-enum gnwIpcError k_scr_usr_ipcReply(const ptr_t replyBufferPtr, const size_t replySizeBytes, const struct gnwIpcReplyInfo * const infoPtr) {
+enum gnwIpcError k_scr_usr_ipcReply(const struct gnwIpcReplyInfo * const infoPtr) {
 
     const procId_t procId = k_proc_getCurrentId();
-    SCLF_GET_VALID_ABS(ptr_t, replyBufferPtr, replySizeBytes, {
-        return GIPCE_UNKNOWN;
-    });
     SCLF_GET_VALID_ABS(const struct gnwIpcReplyInfo * const, infoPtr, sizeof(struct gnwIpcReplyInfo), {
         return GIPCE_UNKNOWN;
     });
+    SCLF_GET_VALID_ABS_NAMED(ptr_t, replyBufferPtr, abs_infoPtr->data.ptr, abs_infoPtr->data.bytes, {
+        return GIPCE_UNKNOWN;
+    });
 
-    return k_ipc_reply(procId, abs_replyBufferPtr, replySizeBytes, abs_infoPtr);
+    struct gnwIpcReplyInfo absInfo = *abs_infoPtr;
+    absInfo.data.ptr = abs_replyBufferPtr;
+
+    return k_ipc_reply(procId, &absInfo);
 }

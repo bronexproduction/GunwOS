@@ -92,6 +92,8 @@
     "charconv": "c",
     "forward_list": "c",
     "ranges": "c",
-    "span": "c"
-  }
+    "span": "c",
+    "numbers": "c"
+  },
+  "cmake.configureOnOpen": false
 }

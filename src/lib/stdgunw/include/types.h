@@ -53,6 +53,11 @@ typedef struct {
     size_t sizeBytes;
 } range_addr_t;
 
+typedef struct {
+    ptr_t ptr;
+    size_t bytes;
+} data_t;
+
 #ifndef __cplusplus
     #define true  1
     #define false 0

@@ -8,6 +8,7 @@
 #ifndef FUNC_H
 #define FUNC_H
 
+#include <defs.h>
 #include <types.h>
 #include <error/panic.h>
 
@@ -18,9 +19,16 @@
 */
 #define SCR(NAME, CODE) __attribute__((naked)) void k_scr_ ## NAME () { CODE; __asm__ volatile ("ret"); }
 
+#define _SCLF_CHECK_ABS(VALUE, NULLABLE) (VALUE || !NULLABLE)
+#define _SCLF_GET_VALID_ABS_NAMED(TYPE, NAME, VALUE, SIZEBYTES, ERR_HANDLE, NULLABLE) \
+    TYPE abs_ ## NAME = _SCLF_CHECK_ABS(VALUE, NULLABLE) ? (TYPE)k_scl_func_getValidAbsoluteForProc(procId, (const ptr_t)(VALUE), SIZEBYTES) : nullptr; \
+    if (_SCLF_CHECK_ABS(VALUE, NULLABLE) && !abs_ ## NAME) { OOPS("Invalid pointer referenced"); {ERR_HANDLE;} }
+
 #define SCLF_GET_VALID_ABS_NAMED(TYPE, NAME, VALUE, SIZEBYTES, ERR_HANDLE) \
-    TYPE abs_ ## NAME = (TYPE)k_scl_func_getValidAbsoluteForProc(procId, (const ptr_t)(VALUE), SIZEBYTES); \
-    if (!abs_ ## NAME) { OOPS("Invalid pointer referenced"); {ERR_HANDLE;} }
+    _SCLF_GET_VALID_ABS_NAMED(TYPE, NAME, VALUE, SIZEBYTES, ERR_HANDLE, false)
+#define SCLF_GET_VALID_NULLABLE_ABS_NAMED(TYPE, NAME, VALUE, SIZEBYTES, ERR_HANDLE) \
+    _SCLF_GET_VALID_ABS_NAMED(TYPE, NAME, VALUE, SIZEBYTES, ERR_HANDLE, true)
+
 #define SCLF_GET_VALID_ABS(TYPE, VALUE, SIZEBYTES, ERR_HANDLE) SCLF_GET_VALID_ABS_NAMED(TYPE, VALUE, VALUE, SIZEBYTES, ERR_HANDLE)
 
 /*

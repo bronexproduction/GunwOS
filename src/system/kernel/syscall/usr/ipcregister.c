@@ -17,13 +17,16 @@ enum gnwIpcError k_scr_usr_ipcRegister(const struct gnwIpcHandlerDescriptor * de
     SCLF_GET_VALID_ABS(const struct gnwIpcHandlerDescriptor *, descPtr, sizeof(struct gnwIpcHandlerDescriptor), {
         return GIPCE_UNKNOWN;
     });
-    SCLF_GET_VALID_ABS_NAMED(const char * const, pathPtr, abs_descPtr->path, abs_descPtr->pathLen, {
+    SCLF_GET_VALID_ABS_NAMED(const gnwIpcPath, pathPtr, abs_descPtr->pathData.ptr, abs_descPtr->pathData.bytes, {
         return GIPCE_UNKNOWN;
     });
     
+    data_t absPathData;
+    absPathData.ptr = (ptr_t)abs_pathPtr;
+    absPathData.bytes = abs_descPtr->pathData.bytes;
+
     return k_ipc_register(procId,
-                          abs_pathPtr,
-                          abs_descPtr->pathLen,
+                          absPathData,
                           abs_descPtr->handlerRoutine,
                           abs_descPtr->decoder,
                           abs_descPtr->bindingRequired,

@@ -8,15 +8,7 @@
 #ifndef GUNWOS_GUNWKEYBOARD_H
 #define GUNWOS_GUNWKEYBOARD_H
 
-#warning commented until drivers running in separate processes
-// #ifndef _GUNWAPI_KERNEL
-
 #include <types.h>
-
-/*
-    Macro for keyboard event listener signature
-*/
-#define GNW_KEYBOARD_EVENT_LISTENER(NAME) void NAME (const struct gnwKeyboardEvent * const event)
 
 /*
     Event type code for keyboard event listener
@@ -26,6 +18,13 @@ enum gnwKeyboardEventCode {
     GKEC_KEY_UP
 };
 _Static_assert(sizeof(enum gnwKeyboardEventCode) == sizeof(int_32), "Unexpected enum gnwKeyboardEventCode size");
+
+#ifndef _GUNWAPI_KERNEL
+
+/*
+    Macro for keyboard event listener signature
+*/
+#define GNW_KEYBOARD_EVENT_LISTENER(NAME) void NAME (const struct gnwKeyboardEvent * const event)
 
 /*
     Listener callback data definition
@@ -40,7 +39,19 @@ struct gnwKeyboardEvent {
 */
 typedef __attribute__((cdecl)) void (*gnwKeyboardEventListener)(const struct gnwKeyboardEvent * const);
 
-#warning commented until drivers running in separate processes
-// #endif // _GUNWAPI_KERNEL
+/*
+    Attaching to the keyboard
+
+    Params:
+        * listener - keyboard event handler
+
+    Result:
+        * Error value indicating what went wrong while attaching
+
+    Note: Only the process attached to the keyboard can receive key status updates
+*/
+enum gnwDeviceError attachToKeyboard(const gnwKeyboardEventListener listener);
+
+#endif // _GUNWAPI_KERNEL
 
 #endif // GUNWOS_GUNWKEYBOARD_H

@@ -11,6 +11,7 @@
 #include <types.h>
 #include <mem.h>
 #include <gunwdev.h>
+#include <gunwipc.h>
 #include <gunwkeyboard.h>
 #include <gunwfug.h>
 #include <gunwrlp.h>
@@ -133,34 +134,15 @@ static void prompt() {
     user_cli_puts("[GunwSH]: ");
 }
 
-static void s_cli_init() {
+static void onSessionDestroy(const struct gnwIpcEndpointQuery * const query) {
+    fug(FUG_UNDEFINED);
+}
 
-    enum gnwDeviceError e = GDE_NONE;
-    
-    /* 
-        Attach keyboard listener
-    */
-    struct gnwDeviceUHADesc keyboardDesc;
-    e = devGetByType(DEV_TYPE_KEYBOARD, &keyboardDesc);
+static void cli_init() {
+    ipcSessionDestroyListener = onSessionDestroy;
 
-    if (e) {
-        // devRelease(charOutDesc.identifier);
-        // OOPS("Error retrieving available keyboard");
-        fug(FUG_UNDEFINED);
-    }
-
-    e = devAcquire(keyboardDesc.identifier);
-    if (e) {
-        // devRelease(charOutDesc.identifier);
-        // OOPS("Unable to attach to keyboard");
-        fug(FUG_UNDEFINED);
-    }
-
-    e = devListen(keyboardDesc.identifier, (gnwDeviceEventListener)onKeyboardEvent);
-    if (e) {
-        // devRelease(charOutDesc.identifier);
-        devRelease(keyboardDesc.identifier);
-        // OOPS("Unable to attach keyboard listener");
+    enum gnwDeviceError e = attachToKeyboard(onKeyboardEvent);
+    if (e != GDE_NONE) {
         fug(FUG_UNDEFINED);
     }
 
@@ -174,7 +156,7 @@ static void s_cli_init() {
 }
 
 void dupa() {
-    s_cli_init();
+    cli_init();
 
     runLoopStart();
 }

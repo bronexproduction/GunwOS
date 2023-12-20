@@ -85,13 +85,16 @@ enum gnwIpcError k_ipc_binding_update(const procId_t sender, const procId_t rece
 static void bindingDestroyNotify(const struct binding * const bindingPtr, const procId_t requester) {
     struct gnwIpcSenderQuery query;
 
-    query.path = GNW_PATH_IPC_BINDING_NOTIFICATION_SESSION_DESTROYED;
-    query.pathLen = strlen(GNW_PATH_IPC_BINDING_NOTIFICATION_SESSION_DESTROYED);
-    query.dataPtr = (ptr_t)&requester;
-    query.dataSizeBytes = sizeof(procId_t);
+    query.procId = NONE_PROC_ID;
+    query.pathData.ptr = (ptr_t)GNW_PATH_IPC_BINDING_NOTIFICATION_SESSION_DESTROYED;
+    query.pathData.bytes = strlen(GNW_PATH_IPC_BINDING_NOTIFICATION_SESSION_DESTROYED);
+    query.data.ptr = (ptr_t)&requester;
+    query.data.bytes = sizeof(procId_t);
     query.replyErrPtr = nullptr;
-    query.replyPtr = nullptr;
-    query.replySizeBytes = 0;
+    query.replyData.ptr = nullptr;
+    query.replyData.bytes = 0;
+    query.bindData.flag = GIBF_NONE;
+    query.bindData.permissions = 0;
 
     const enum gnwIpcError e = k_ipc_notify(query, bindingPtr->receiver == requester ? bindingPtr->sender : bindingPtr->receiver);
     if (e != GIPCE_NONE) {
@@ -120,9 +123,6 @@ void k_ipc_binding_cleanup(const procId_t procId) {
         if (bindings[i].sender == procId) {
             bindingDestroy(&bindings[i], procId);
         } else if (bindings[i].receiver == procId) {
-            /*
-                TODO: To be implemented with two-way IPC
-            */
             bindingClear(&bindings[i]);
         }
     }
