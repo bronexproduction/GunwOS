@@ -6,7 +6,9 @@
 //
 
 #include "keybuf.h"
+#include <string.h>
 #include <gunwfug.h>
+#include <gunwlog.h>
 #include "keymap.h"
 
 static char kbuf[SCANCODES_MAX];
@@ -22,6 +24,11 @@ uint_8 user_cli_kbf_currModMask() {
 }
 
 void user_cli_kbf_up(const uint_8 k) {
+    
+    char msg[16] = "cli_kbf_up -   ";
+    uint2hex(k, msg + 13);
+    log(msg);
+    
     if (k >= SCANCODES_MAX) {
         // OOPS("Key code exceeds limit");
         fug(FUG_UNDEFINED);
