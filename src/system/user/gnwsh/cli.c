@@ -10,6 +10,7 @@
 #include "charset.h"
 #include <types.h>
 #include <mem.h>
+#include <gunwctrl.h>
 #include <gunwdev.h>
 #include <gunwipc.h>
 #include <gunwkeyboard.h>
@@ -148,6 +149,8 @@ static void cli_init() {
 
     user_cli_kbf_register((struct user_cli_kbf_listener){0, onKeyDown});
     
+    yield();
+
 #warning IO_GENERAL_FAILURE not handled at all
 
     user_cli_puts("GunwOS 0.0.5_DEV started. (C) Bronex Production 2023\n\n");
