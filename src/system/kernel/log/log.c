@@ -51,5 +51,4 @@ void k_log_log(const char * const msg) {
     for (size_t i = 0; i < msgLen; ++i) {
         writeSerial(msg[i]);
     }
-    writeSerial('\n');
 }
