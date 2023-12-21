@@ -16,7 +16,7 @@
 #define SYSCALL_USER_INTERRUPT                  0x69
 
 #define SYSCALL_USER_FUNCTION_START             0x00
-/* 0x01 */
+#define SYSCALL_USER_FUNCTION_LOG               0x01
 #define SYSCALL_USER_FUNCTION_DEV_CHAR_WRITE    0x02
 #define SYSCALL_USER_FUNCTION_EXIT              0x03
 #define SYSCALL_USER_FUNCTION_WAIT_FOR_EVENT    0x04
