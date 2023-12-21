@@ -30,7 +30,7 @@ void user_cli_kbf_up(const uint_8 k) {
     log(msg);
     
     if (k >= SCANCODES_MAX) {
-        // OOPS("Key code exceeds limit");
+        log("cli_kbf_up - scancode limit exceeded");
         fug(FUG_UNDEFINED);
         return;
     }
@@ -44,8 +44,13 @@ void user_cli_kbf_up(const uint_8 k) {
 }
 
 void user_cli_kbf_down(const uint_8 k) {
+    
+    char msg[18] = "cli_kbf_down -   ";
+    uint2hex(k, msg + 15);
+    log(msg);
+
     if (k >= SCANCODES_MAX) {
-        // OOPS("Key code exceeds limit");
+        log("cli_kbf_down - scancode limit exceeded");
         fug(FUG_UNDEFINED);
         return;
     }
