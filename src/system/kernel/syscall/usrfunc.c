@@ -38,8 +38,19 @@ SCR(start,
 
 /*
     Code - 0x01
-    Function - none
+    Function - LOG
+
+    Params:
+        * EBX - message pointer
+        * ECX - message size in bytes
 */
+SCR(log,
+    REG(32, msgPtr, ebx)
+    REG(32, msgBytes, ecx)
+
+    extern void k_scr_usr_log(const char * const, const size_t);
+    k_scr_usr_log((char *)msgPtr, msgBytes);
+)
 
 /*
     Code - 0x02

@@ -27,8 +27,10 @@ __attribute__((naked)) void k_scr_start(const struct gnwCtrlStartDescriptor * co
 
 /*
     Code - 0x01
-    Function - none
+    Function - LOG
 */
+__attribute__((naked)) void k_scr_log(const char * const msg,
+                                      const size_t bytes);
 
 /*
     Code - 0x02

@@ -7,6 +7,7 @@
 
 #include "log.h"
 #include <string.h>
+#include <error/panic.h>
 #include <hal/io/bus.h>
 
 /*
@@ -46,9 +47,26 @@ void k_log_init() {
    k_bus_outb(PORT + 4, 0x0F);
 }
 
-void k_log_log(const char * const msg) {
-    const size_t msgLen = strlen(msg);
-    for (size_t i = 0; i < msgLen; ++i) {
-        writeSerial(msg[i]);
+void k_log_log(const char * const absMsgPtr) {
+    if (!absMsgPtr) {
+      OOPS("log_log: access violation");
+      return;
+    }
+
+    data_t absData;
+    absData.ptr = (ptr_t)absMsgPtr;
+    absData.bytes = strlen(absMsgPtr);
+
+    k_log_logd(absData);
+}
+
+void k_log_logd(const data_t absMsgData) {
+   if (!absMsgData.ptr) {
+      OOPS("log_logd: access violation");
+      return;
+    }
+    
+    for (size_t i = 0; i < absMsgData.bytes; ++i) {
+        writeSerial(absMsgData.ptr[i]);
     }
 }
