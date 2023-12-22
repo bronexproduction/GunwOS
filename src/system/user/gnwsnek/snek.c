@@ -10,6 +10,7 @@
 #include <gunwdev.h>
 #include <gunwfug.h>
 #include <gunwdisplay.h>
+#include <gunwkeyboard.h>
 
 #warning TAKE IT FROM DISPLAY INSTEAD (requires dynamic memory allocation)
 #define DISPLAY_ROWS 25
@@ -18,6 +19,12 @@
 point_t vid_dimensions = { DISPLAY_COLS, DISPLAY_ROWS };
 struct gnwDeviceUHA_display_character frameBuffer[DISPLAY_COLS * DISPLAY_ROWS];
 static struct gnwTextDisplayHandle displayHandle;
+
+static size_t global_i = 0;
+
+static GNW_KEYBOARD_EVENT_LISTENER(onKeyboardEvent) {
+    ++global_i;
+}
 
 static void init() {
     struct gnwDisplayDescriptor desc;
@@ -34,6 +41,12 @@ static void init() {
     }
 
     e = attachToTextDisplay(&desc, &displayHandle);
+    if (e) {
+        fug(FUG_UNDEFINED);
+        // OOPS("Unable to attach display");
+    }
+
+    e = attachToKeyboard(onKeyboardEvent);
     if (e) {
         fug(FUG_UNDEFINED);
         // OOPS("Unable to attach display");
@@ -56,32 +69,12 @@ static void pushFrame() {
 void dupa() {
     init();
 
-    for (size_t i = 0; i < DISPLAY_COLS * DISPLAY_ROWS; ++i) {
-        frameBuffer[i].bgColor = 1;
-        frameBuffer[i].charColor = 8;
-        frameBuffer[i].character = 49;
+    while (global_i < 4) {
+        for (size_t i = 0; i < DISPLAY_COLS * DISPLAY_ROWS; ++i) {
+            frameBuffer[i].bgColor = i;
+            frameBuffer[i].charColor = i * 2;
+            frameBuffer[i].character = 48 + i;
+        }
+        pushFrame();    
     }
-    pushFrame();
-
-    size_t i;
-
-    for(i = 0; i < 1000000000; ++i);
-
-    for (size_t i = 0; i < DISPLAY_COLS * DISPLAY_ROWS; ++i) {
-        frameBuffer[i].bgColor = 2;
-        frameBuffer[i].charColor = 4;
-        frameBuffer[i].character = 50;
-    }
-    pushFrame();
-
-    for(i = 0; i < 1000000000; ++i);
-
-    for (size_t i = 0; i < DISPLAY_COLS * DISPLAY_ROWS; ++i) {
-        frameBuffer[i].bgColor = 3;
-        frameBuffer[i].charColor = 0;
-        frameBuffer[i].character = 51;
-    }
-    pushFrame();
-
-    for(i = 0; i < 1000000000; ++i);
 }
