@@ -12,7 +12,7 @@
 #include <defs.h>
 #include <error/panic.h>
 
-#define DISPATCH_QUEUE_SIZE 8
+#define DISPATCH_QUEUE_SIZE 4
 #define DISPATCH_MAX_DATA_SIZE_BYTES KiB(7)
 #warning more data may overlap with critical memory region (linker script to be updated?)
 
