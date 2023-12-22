@@ -10,6 +10,7 @@
 
 #include <hal/proc/proc.h>
 #include <error/panic.h>
+#include <log/log.h>
 
 #include <defs.h>
 #include <mem.h>
@@ -98,6 +99,11 @@ static void bindingDestroyNotify(const struct binding * const bindingPtr, const 
 
     const enum gnwIpcError e = k_ipc_notify(query, bindingPtr->receiver == requester ? bindingPtr->sender : bindingPtr->receiver);
     if (e != GIPCE_NONE) {
+        {
+            char logMsg[55] = "Unexpected kernel event broadcast error -             ";
+            int2str(e, logMsg + 42);
+            LOG(logMsg);
+        }
         OOPS("Unexpected kernel event broadcast error");
         return;
     }
