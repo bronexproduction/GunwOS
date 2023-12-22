@@ -12,6 +12,7 @@
 #include <defs.h>
 #include <hal/proc/proc.h>
 #include <error/panic.h>
+#include <log/log.h>
 #include <queue/queue.h>
 
 static size_t freeReplyIndex() {
@@ -205,6 +206,8 @@ enum gnwIpcError k_ipc_notify(const struct gnwIpcSenderQuery absQuery,
     if (e != GIPCE_NONE) {
         return e;
     }
+
+    LOG2("ipc_notify: path - ", (gnwIpcPath)absQuery.pathData.ptr);
 
     size_t listenerIndex = k_ipc_utl_nextListenerIndexForPath(absQuery.pathData, nullptr);
     while (listenerIndex < MAX_IPC_LISTENER) {

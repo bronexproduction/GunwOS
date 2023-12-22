@@ -10,10 +10,12 @@
 
 #include <mem.h>
 #include <proc.h>
+#include <string.h>
 #include <gunwdev.h>
 #include <gunwipc.h>
 #include <gunwkeyboard.h>
 #include <gunwfug.h>
+#include <gunwlog.h>
 #include <kbdmgr.h>
 
 extern sessionPtr_t keyboardStack[MAX_SESSION];
@@ -45,11 +47,15 @@ static GNW_KEYBOARD_EVENT_LISTENER(onKeyboardEvent) {
         return;
     }
 
+    log("gnwkbdm - onKeyboardEvent - ipcSendDirect failed - destroying session");
     sessionDestroy(session);
     
     if (e == GIPCE_FORBIDDEN || e == GIPCE_NOT_FOUND) {
         return;
     } else {
+        char logMsg[75] = "gnwkbdm - onKeyboardEvent - ipcSendDirect failure unexpected error        ";
+        int2str(e, logMsg + 67);
+        log(logMsg);
         fug(FUG_UNDEFINED);
     }
 }
