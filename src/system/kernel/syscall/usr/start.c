@@ -13,6 +13,7 @@
 #include <hal/mem/mem.h>
 #include <hal/proc/proc.h>
 #include <error/panic.h>
+#include <log/log.h>
 #include <storage/file.h>
 #include "../func.h"
 
@@ -88,6 +89,20 @@ enum gnwCtrlError loadElf(const ptr_t filePtr,
     return GCE_NONE;
 }
 
+#define LOG_CODE(MSG, CODE) {                                           \
+    LOG_START;                                                          \
+    k_log_logd((data_t){ (ptr_t)abs_pathPtr, abs_descPtr->pathLen });   \
+    LOG_NBR(" - ");                                                     \
+    LOG_NBR(MSG);                                                       \
+    if (CODE) {                                                         \
+        char loc_code_str[10] = { 0 };                                  \
+        int2str(CODE, loc_code_str);                                    \
+        LOG_NBR(", code ");                                             \
+        k_log_logd((data_t){ (ptr_t)loc_code_str, 10 });                \
+    }                                                                   \
+    LOG_END;                                                            \
+}
+
 void k_scr_usr_start(const procId_t procId, const struct gnwCtrlStartDescriptor * const descPtr) {
     SCLF_GET_VALID_ABS(const struct gnwCtrlStartDescriptor * const, descPtr, sizeof(struct gnwCtrlStartDescriptor), {
         return;
@@ -105,25 +120,35 @@ void k_scr_usr_start(const procId_t procId, const struct gnwCtrlStartDescriptor 
     /*
         Get file info
     */
-        
+
+    {
+        LOG_START;
+        LOG_NBR("Loading file ");
+        k_log_logd((data_t){ (ptr_t)abs_pathPtr, abs_descPtr->pathLen });
+        LOG_END;
+    }
+    
     struct gnwFileInfo fileInfo; {
         const enum gnwFileErrorCode err = k_stor_file_getInfo(abs_pathPtr, abs_descPtr->pathLen, &fileInfo);
         if (err != GFEC_NONE) {
             switch (err) {
             case GFEC_NOT_FOUND:
                 *abs_errorPtr = GCE_NOT_FOUND;
+                LOG_CODE("File not found", err);
                 return;
             default:
                 *abs_errorPtr = GCE_UNKNOWN;
+                LOG_CODE("File info error", err);
                 return;
             }
         }
         if (!fileInfo.sizeBytes) {
             *abs_errorPtr = GCE_OPERATION_FAILED;
+            LOG_CODE("Unexpected empty file size", 0);
             return;
         }
     }
-         
+
     /*
         Allocate memory 
     */
@@ -138,6 +163,7 @@ void k_scr_usr_start(const procId_t procId, const struct gnwCtrlStartDescriptor 
         const enum gnwFileErrorCode err = k_stor_file_load(abs_pathPtr, abs_descPtr->pathLen, filePtr);
         if (err != GFEC_NONE) {
             *abs_errorPtr = GCE_UNKNOWN;
+            LOG_CODE("Storage error", err);
             return;
         }
     }
@@ -158,6 +184,7 @@ void k_scr_usr_start(const procId_t procId, const struct gnwCtrlStartDescriptor 
 
     if (!elfValidate(filePtr, fileSizeBytes, &exp)) {
         *abs_errorPtr = GCE_HEADER_INVALID;
+        LOG_CODE("ELF header validation failure", 0);
         return;
     }
     
@@ -178,10 +205,12 @@ void k_scr_usr_start(const procId_t procId, const struct gnwCtrlStartDescriptor 
     
     enum gnwCtrlError err;
     size_t memBytes;
-    addr_t entry; 
+    addr_t entry;
+
     err = loadElf(filePtr, fileSizeBytes, dstPtr, &memBytes, &entry);
     if (err != GCE_NONE) {
         *abs_errorPtr = err;
+        LOG_CODE("Failed to load ELF", err);
         return;
     }
 
@@ -198,6 +227,7 @@ void k_scr_usr_start(const procId_t procId, const struct gnwCtrlStartDescriptor 
     enum k_proc_error procErr = k_proc_spawn(&desc);
     if (procErr != PE_NONE) {
         *abs_errorPtr = GCE_OPERATION_FAILED;
+        LOG_CODE("Failed to spawn process", procErr);
         return;
     }
 
