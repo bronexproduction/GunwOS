@@ -31,6 +31,12 @@
 */
 void runLoopStart();
 
+/*
+    Synchronously forcing the run loop
+    to process all the current events
+*/
+void runLoopHandle();
+
 #endif // _GUNWAPI_KERNEL
 
 #endif // GUNWOS_GUNWRLP_H

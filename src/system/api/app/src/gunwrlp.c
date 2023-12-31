@@ -9,8 +9,9 @@
 
 #include "_gunwrlp.h"
 #include <defs.h>
-#include "../include/gunwfug.h"
 #include "../include/gunwctrl.h"
+#include "../include/gunwfug.h"
+#include "../include/gunwrlp.h"
 #include "scl_user.h"
 
 /*
@@ -46,12 +47,18 @@ static void execute(const union gnwEventListener routine, const ptr_t data) {
 }
 
 void runLoopStart() {
+    while (1) {
+        runLoopHandle();
+        waitForEvent();
+    }
+}
+
+void runLoopHandle() {
     struct gnwRunLoopDispatchItem currentItem;
     while (1) {
         const enum gnwRunLoopError err = runLoopGetItem(&currentItem);
         if (err == GRLE_EMPTY) {
-            waitForEvent();
-            continue;
+            return;
         } else if (err != GRLE_NONE) {
             fug(FUG_INCONSISTENT);
             return;

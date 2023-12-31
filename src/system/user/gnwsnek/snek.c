@@ -9,6 +9,8 @@
 #include <defs.h>
 #include <gunwdev.h>
 #include <gunwfug.h>
+#include <gunwipc.h>
+#include <gunwrlp.h>
 #include <gunwdisplay.h>
 #include <gunwkeyboard.h>
 
@@ -20,10 +22,17 @@ point_t vid_dimensions = { DISPLAY_COLS, DISPLAY_ROWS };
 struct gnwDeviceUHA_display_character frameBuffer[DISPLAY_COLS * DISPLAY_ROWS];
 static struct gnwTextDisplayHandle displayHandle;
 
-static size_t global_i = 0;
+static size_t global_i = 1;
 
 static GNW_KEYBOARD_EVENT_LISTENER(onKeyboardEvent) {
-    ++global_i;
+    if (event->code != GKEC_KEY_DOWN) {
+        ++global_i;
+    }
+}
+
+static void onSessionDestroy(const struct gnwIpcEndpointQuery * const query) {
+    (void)query;
+    fug(FUG_INCONSISTENT);
 }
 
 static void init() {
@@ -46,6 +55,7 @@ static void init() {
         // OOPS("Unable to attach display");
     }
 
+    ipcSessionDestroyListener = onSessionDestroy;
     e = attachToKeyboard(onKeyboardEvent);
     if (e) {
         fug(FUG_UNDEFINED);
@@ -69,12 +79,13 @@ static void pushFrame() {
 void dupa() {
     init();
 
-    while (global_i < 4) {
+    while (global_i < 10) {
         for (size_t i = 0; i < DISPLAY_COLS * DISPLAY_ROWS; ++i) {
-            frameBuffer[i].bgColor = i;
-            frameBuffer[i].charColor = i * 2;
-            frameBuffer[i].character = 48 + i;
+            frameBuffer[i].bgColor = global_i;
+            frameBuffer[i].charColor = global_i * 2;
+            frameBuffer[i].character = 48 + global_i;
         }
-        pushFrame();    
+        pushFrame();
+        runLoopHandle();
     }
 }

@@ -35,7 +35,7 @@ static void ipcKeyboardEventListener(const struct gnwIpcEndpointQuery * const qu
 
 enum gnwDeviceError attachToKeyboard(const gnwKeyboardEventListener listener) {
     if (!ipcSessionDestroyListener) {
-        return GDE_INVALID_PARAMETER;
+        return GDE_PRECONDITION_NOT_SATISFIED;
     }
 
     enum gnwIpcError error = ipcRegisterNotification(GNW_PATH_IPC_BINDING_NOTIFICATION_SESSION_DESTROYED,
