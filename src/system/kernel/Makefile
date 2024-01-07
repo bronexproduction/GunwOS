@@ -13,15 +13,20 @@ KERNEL_LIBS=$(LIB_BUILD_DIR)/stdgunw.o \
 			$(LIB_BUILD_DIR)/gunwapi_driver_kernel.o \
 			$(LIB_BUILD_DIR)/gunwapi_driver.o
 
+LFLAGS_BASE=-m$(L_OUTFORMAT) --fatal-warnings
+
 ASMFLAGS=-f elf
 CFLAGS=-std=c11 -c -ffreestanding -mno-red-zone -ggdb $(KERNEL_INCLUDE) -D_GUNWAPI_KERNEL $(CFLAGS_GLOBAL)
 CXXFLAGS=-std=c++11 -c -ffreestanding -mno-red-zone -ggdb $(CXXFLAGS_GLOBAL)
 RSFLAGS=$(RSFLAGS_GLOBAL)
-LFLAGS=-m$(L_OUTFORMAT) -T linker.ld
+
+LFLAGS=$(LFLAGS_BASE) -T linker.ld
+O_DIR_LISTING=find . -name '*.o' -type f
 
 RS_TEST_DIR_LISTING=find $(TESTS_UNIT_SRC_DIR)/kernel -name '*.rs' -type f
-O_DIR_LISTING=find . -name '*.o' -type f
+LFLAGS_TEST=$(LFLAGS_BASE) -T $(TESTS_UNIT_SRC_DIR)/kernel/linker.ld
 O_TEST_DIR_LISTING=find $(TESTS_UNIT_SRC_DIR)/kernel -name '*.o' -type f
+
 EXEC_TERMINATOR=\;
 
 .PHONY: all
@@ -30,7 +35,7 @@ all: kernel.elf clean_o
 
 kernel.elf: kernel_entry.o kernel.o
 ifneq ($(GNW_TEST_UNIT),)
-	$(L) $(LFLAGS) -o $@ $(KERNEL_LIBS) $(shell $(O_DIR_LISTING)) $(shell $(O_TEST_DIR_LISTING))
+	$(L) $(LFLAGS_TEST) -o $@ $(KERNEL_LIBS) $(shell $(O_DIR_LISTING)) $(shell $(O_TEST_DIR_LISTING))
 else
 	$(L) $(LFLAGS) -o $@ $(KERNEL_LIBS) $(shell $(O_DIR_LISTING))
 endif
