@@ -28,9 +28,6 @@ static void bss_clear() {
 
 static void k_init() {
     bss_clear();
-
-    // TODO: not sure where to put it (driver? service?)
-    k_tmr_init();
 }
 
 extern void __attribute__((fastcall, section(".start"))) __kernel_start(const struct k_krn_bootData * const bootData);
@@ -38,6 +35,7 @@ extern void __attribute__((fastcall, section(".start"))) __kernel_start(const st
 void __attribute__((fastcall, section(".start"))) __kernel_start(const struct k_krn_bootData * const bootData) {
     k_init();
 
+    k_tmr_init();
     k_hal_init();
     k_ipc_init();
     k_dev_init();
