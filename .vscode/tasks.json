@@ -43,6 +43,19 @@
             "problemMatcher": []
         },
         {
+            "label": "Build and run unit tests (QEMU)",
+            "type": "shell",
+            "command": "bash scripts/qemu_run.sh build/gunwos.img test_unit",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "dependsOn": [
+                "Build for unit tests and image"
+            ],
+            "problemMatcher": []
+        },
+        {
             "label": "Build and run (VirtualBox)",
             "type": "shell",
             "command": "bash scripts/virtualbox_run.sh",
@@ -69,9 +82,37 @@
             "problemMatcher": []
         },
         {
+            "label": "Build for unit tests and image",
+            "type": "shell",
+            "command": "make img",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "dependsOn": [
+                "Build for unit tests"
+            ],
+            "problemMatcher": []
+        },
+        {
             "label": "Build",
             "type": "shell",
             "command": "make clean all",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Build for unit tests",
+            "type": "shell",
+            "command": "make clean all",
+            "options": {
+                "env": {
+                    "GNW_TEST_UNIT": "GNW_TEST_UNIT"
+                }
+            },
             "group": {
                 "kind": "build",
                 "isDefault": false

@@ -19,6 +19,7 @@ CXXFLAGS=-std=c++11 -c -ffreestanding -mno-red-zone -ggdb $(CXXFLAGS_GLOBAL)
 RSFLAGS=$(RSFLAGS_GLOBAL)
 LFLAGS=-m$(L_OUTFORMAT) -T linker.ld
 
+RS_TEST_DIR_LISTING=find $(TESTS_UNIT_SRC_DIR)/kernel -name '*.rs' -type f
 O_DIR_LISTING=find . -name '*.o' -type f
 EXEC_TERMINATOR=\;
 
@@ -37,6 +38,9 @@ kernel.o:
 	$(C_DIR_LISTING) -exec $(C) $(CFLAGS) -o {}.o {} $(EXEC_TERMINATOR)
 	$(CXX_DIR_LISTING) -exec $(CXX) $(CXXFLAGS) -o {}.o {} $(EXEC_TERMINATOR)
 	$(RS_DIR_LISTING) -exec $(RUSTC) $(RSFLAGS) -o {}.o {} $(EXEC_TERMINATOR)
+ifneq ($(GNW_TEST_UNIT),)
+	$(RS_TEST_DIR_LISTING) -exec $(RUSTC) $(RSFLAGS) -o {}.o {} $(EXEC_TERMINATOR)
+endif
 	
 clean_o:
 	find . -type f -name '*.o' -delete
