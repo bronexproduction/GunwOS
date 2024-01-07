@@ -5,7 +5,7 @@
 #![reexport_test_harness_main = "test_main"]
 
 #[no_mangle]
-pub extern "C" fn __kernel_start() -> ! {
+pub extern "C" fn __kernel_start_test() -> ! {
     // test_main();
 
     loop {}
