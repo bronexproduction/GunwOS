@@ -40,10 +40,12 @@ export APP_API_SRC_DIR="$(API_DIR)/app"
 export DRIVER_API_SRC_DIR="$(API_DIR)/driver"
 KERNEL_SRC_DIR="$(SYSTEM_SRC_DIR)/kernel"
 APPS_SRC_DIR="$(SYSTEM_SRC_DIR)/user"
-TESTS_SRC_DIR="$(CUR_DIR)/tests/modules"
+TESTS_SRC_DIR="$(CUR_DIR)/tests"
+TESTS_BLACKBOX_DIR="$(TESTS_SRC_DIR)/blackbox"
+TESTS_BLACKBOX_SRC_DIR="$(TESTS_BLACKBOX_DIR)/modules"
 export SCRIPTS_DIR="$(CUR_DIR)/scripts"
-export TEST_FRAMEWORK_DIR="$(CUR_DIR)/tests/framework"
-export TEST_SHARED_DIR="$(CUR_DIR)/tests/shared"
+export TEST_BLACKBOX_FRAMEWORK_DIR="$(TESTS_BLACKBOX_DIR)/framework"
+export TEST_BLACKBOX_SHARED_DIR="$(TESTS_BLACKBOX_DIR)/shared"
 
 # Header include paths
 
@@ -81,7 +83,7 @@ export C_DIR_LISTING=find . -name '*.c' -type f
 export CXX_DIR_LISTING=find . -name '*.cpp' -type f
 export RS_DIR_LISTING=find . -name '*.rs' -type f
 
-.PHONY: all libs pre_build img clean test 
+.PHONY: all libs pre_build img clean test_blackbox
 
 all: boot.bin boot.gfb kernel.gfb app_pack
 
@@ -122,9 +124,9 @@ clean:
 	find $(SRC_DIR)/ -type f -name '*.a' -delete
 	find $(SRC_DIR)/ -type f -name '*.elf' -delete
 
-test:
-	make -C $(TESTS_SRC_DIR)/bootloader/boot clean all run
-	make -C $(TESTS_SRC_DIR)/bootloader/preloader clean all run
-	make -C $(TESTS_SRC_DIR)/lib clean all run
-	make -C $(TESTS_SRC_DIR)/api clean all run
-	make -C $(TESTS_SRC_DIR)/system clean all run
+test_blackbox:
+	make -C $(TESTS_BLACKBOX_SRC_DIR)/bootloader/boot clean all run
+	make -C $(TESTS_BLACKBOX_SRC_DIR)/bootloader/preloader clean all run
+	make -C $(TESTS_BLACKBOX_SRC_DIR)/lib clean all run
+	make -C $(TESTS_BLACKBOX_SRC_DIR)/api clean all run
+	make -C $(TESTS_BLACKBOX_SRC_DIR)/system clean all run

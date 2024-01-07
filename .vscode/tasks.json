@@ -89,9 +89,9 @@
             "problemMatcher": []
         },
         {
-            "label": "Run tests",
+            "label": "Run tests (blackbox)",
             "type": "shell",
-            "command": "make test",
+            "command": "make test_blackbox",
             "group": {
                 "kind": "test",
                 "isDefault": false
