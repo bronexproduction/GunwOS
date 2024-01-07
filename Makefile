@@ -125,6 +125,7 @@ clean:
 	find $(SRC_DIR)/ -type f -name '*.o' -delete
 	find $(SRC_DIR)/ -type f -name '*.a' -delete
 	find $(SRC_DIR)/ -type f -name '*.elf' -delete
+	find $(TESTS_SRC_DIR)/ -type f -name '*.o' -delete
 
 test_blackbox:
 	make -C $(TESTS_BLACKBOX_SRC_DIR)/bootloader/boot clean all run

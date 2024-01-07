@@ -21,6 +21,7 @@ LFLAGS=-m$(L_OUTFORMAT) -T linker.ld
 
 RS_TEST_DIR_LISTING=find $(TESTS_UNIT_SRC_DIR)/kernel -name '*.rs' -type f
 O_DIR_LISTING=find . -name '*.o' -type f
+O_TEST_DIR_LISTING=find $(TESTS_UNIT_SRC_DIR)/kernel -name '*.o' -type f
 EXEC_TERMINATOR=\;
 
 .PHONY: all
@@ -28,7 +29,11 @@ EXEC_TERMINATOR=\;
 all: kernel.elf clean_o
 
 kernel.elf: kernel_entry.o kernel.o
+ifneq ($(GNW_TEST_UNIT),)
+	$(L) $(LFLAGS) -o $@ $(KERNEL_LIBS) $(shell $(O_DIR_LISTING)) $(shell $(O_TEST_DIR_LISTING))
+else
 	$(L) $(LFLAGS) -o $@ $(KERNEL_LIBS) $(shell $(O_DIR_LISTING))
+endif
 	mv $@ $(KERNEL_BUILD_DIR)/$@
 
 kernel_entry.o:
@@ -44,6 +49,7 @@ endif
 	
 clean_o:
 	find . -type f -name '*.o' -delete
+	find $(TESTS_UNIT_SRC_DIR)/kernel -type f -name '*.o' -delete
 
 clean: clean_o
 	rm kernel.elf
