@@ -9,6 +9,7 @@ mod kernel_tests;
 mod utils;
 
 use core::panic::PanicInfo;
+use kernel_symbols::k_bus_outb;
 use utils::log;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -36,11 +37,15 @@ pub extern "C" fn __kernel_start_test() -> ! {
 fn panic(_info: &PanicInfo) -> ! {
     log("panic while running tests\n\0");
 
+    exit_qemu(QemuExitCode::Failed);
+
     loop {}
 }
 
 fn exit_qemu(exit_code: QemuExitCode) {
-    k_bus_outb(0xf4, exit_code);
+    unsafe {
+        k_bus_outb(0xf4, exit_code as u8);
+    }
 }
 
 fn kernel_test_runner(tests: &[&dyn Fn()]) {
