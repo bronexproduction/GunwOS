@@ -14,7 +14,6 @@ LFLAGS=-m$(L_OUTFORMAT) -i
 
 O_APP_DIR_LISTING=find . -name '*_app.o' -type f
 O_KERNEL_DIR_LISTING=find . -name '*_app_kernel.o' -type f
-EXEC_TERMINATOR=\;
 
 TARGET_O=gunwapi
 
@@ -33,14 +32,14 @@ $(TARGET_O)_app_kernel: build_kernel_o
 	$(L) $(LFLAGS) -o $@.o $(shell $(O_KERNEL_DIR_LISTING))
 
 build_app_o:
-	$(C_DIR_LISTING) -exec $(C) $(CFLAGS_APP) -o {}_app.o {} $(EXEC_TERMINATOR)
-	$(CXX_DIR_LISTING) -exec $(CXX) $(CXXFLAGS_APP) -o {}_app.o {} $(EXEC_TERMINATOR)
-	$(RS_DIR_LISTING) -exec $(RUSTC) $(RSFLAGS_APP) -o {}_app.o {} $(EXEC_TERMINATOR)
+	$(C_DIR_LISTING) -print0 | xargs -0I{} $(C) $(CFLAGS_APP) -o {}_app.o {}
+	$(CXX_DIR_LISTING) -print0 | xargs -0I{} $(CXX) $(CXXFLAGS_APP) -o {}_app.o {}
+	$(RS_DIR_LISTING) -print0 | xargs -0I{} $(RUSTC) $(RSFLAGS_APP) -o {}_app.o {}
 
 build_kernel_o:
-	$(C_DIR_LISTING) -exec $(C) $(CFLAGS_KERNEL) -o {}_app_kernel.o {} $(EXEC_TERMINATOR)
-	$(CXX_DIR_LISTING) -exec $(CXX) $(CXXFLAGS_KERNEL) -o {}_app_kernel.o {} $(EXEC_TERMINATOR)
-	$(RS_DIR_LISTING) -exec $(RUSTC) $(RSFLAGS_KERNEL) -o {}_app_kernel.o {} $(EXEC_TERMINATOR)
+	$(C_DIR_LISTING) -print0 | xargs -0I{} $(C) $(CFLAGS_KERNEL) -o {}_app_kernel.o {}
+	$(CXX_DIR_LISTING) -print0 | xargs -0I{} $(CXX) $(CXXFLAGS_KERNEL) -o {}_app_kernel.o {}
+	$(RS_DIR_LISTING) -print0 | xargs -0I{} $(RUSTC) $(RSFLAGS_KERNEL) -o {}_app_kernel.o {}
 
 clean_o:
 	find . -type f -name '*.o' ! -name '$(TARGET_O)_app.o' -delete ! -name '$(TARGET_O)_app_kernel.o' -delete

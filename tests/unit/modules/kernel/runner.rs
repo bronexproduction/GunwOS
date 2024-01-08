@@ -6,7 +6,7 @@
 
 #[link_section = ".start_override"]
 pub extern "C" fn __kernel_start_test() -> ! {
-    // test_main();
+    test_main();
 
     loop {}
 }

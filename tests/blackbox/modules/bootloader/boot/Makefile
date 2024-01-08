@@ -6,8 +6,6 @@ CXX_FRAMEWORK_LISTING=find $(TEST_BLACKBOX_FRAMEWORK_DIR)/src -name '*.cpp' -typ
 CXX_SHARED_DIR_LISTING=find $(TEST_BLACKBOX_SHARED_DIR) -name '*.cpp' -type f
 O_DIR_LISTING=find . -name '*.o' -type f
 
-EXEC_TERMINATOR=\;
-
 .PHONY: all clean run
 
 CXX_FRAMEWORK_INPUT=$(shell $(CXX_FRAMEWORK_LISTING))
