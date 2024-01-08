@@ -9,8 +9,8 @@ mod kernel_tests;
 mod utils;
 
 use core::panic::PanicInfo;
-use kernel_symbols::k_bus_outb;
 use utils::log;
+use utils::outb;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -44,7 +44,7 @@ fn panic(_info: &PanicInfo) -> ! {
 
 fn exit_qemu(exit_code: QemuExitCode) {
     unsafe {
-        k_bus_outb(0xf4, exit_code as u8);
+        outb(0xf4, exit_code as u8);
     }
 }
 

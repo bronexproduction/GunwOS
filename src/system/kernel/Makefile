@@ -21,6 +21,7 @@ O_DIR_LISTING=find . -name '*.o' -type f
 
 RSFLAGS_TEST=$(RSFLAGS) --test
 LFLAGS_TEST=$(LFLAGS) --no-warn-rwx-segments
+C_TEST_DIR_LISTING=find $(TESTS_UNIT_SRC_DIR)/kernel -name '*.c' -type f
 RS_TEST_DIR_LISTING=find $(TESTS_UNIT_SRC_DIR)/kernel -name '*.rs' -type f -depth 1
 O_TEST_DIR_LISTING=find $(TESTS_UNIT_SRC_DIR)/kernel -name '*.o' -type f
 
@@ -41,6 +42,7 @@ kernel.o:
 	$(CXX_DIR_LISTING) -print0 | xargs -0I{} $(CXX) $(CXXFLAGS) -o {}.o {}
 	$(RS_DIR_LISTING) -print0 | xargs -0I{} $(RUSTC) $(RSFLAGS) -o {}.o {}
 ifneq ($(GNW_TEST_UNIT),)
+	$(C_TEST_DIR_LISTING) -print0 | xargs -0I{} $(C) $(CFLAGS) -o {}.o {}
 	$(RS_TEST_DIR_LISTING) -print0 | xargs -0I{} $(RUSTC) $(RSFLAGS_TEST) -o {}.o {}
 endif
 	
