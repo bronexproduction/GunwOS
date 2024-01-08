@@ -6,33 +6,28 @@
 
 mod kernel_symbols;
 mod kernel_tests;
+mod utils;
 
 use core::panic::PanicInfo;
-use kernel_symbols::k_log_log;
+use utils::log;
 
 #[used]
 static TEST_ENTRY: extern "C" fn() -> ! = __kernel_start_test;
 
 #[link_section = ".start_override"]
 pub extern "C" fn __kernel_start_test() -> ! {
-    unsafe {
-        k_log_log("Unit tests run started\n");
-    }
+    log("Unit tests run started\n\0");
 
     test_main();
 
-    unsafe {
-        k_log_log("Unit tests run finished - all tests passed\n");
-    }
+    log("Unit tests run finished - all tests passed\n\0");
 
     loop {}
 }
 
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
-    unsafe {
-        k_log_log("panic while running tests")
-    }
+    log("panic while running tests\n\0");
 
     loop {}
 }

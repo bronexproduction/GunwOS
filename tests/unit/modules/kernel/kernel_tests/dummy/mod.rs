@@ -1,23 +1,15 @@
-use kernel_symbols::*;
+use utils::*;
 
 #[test_case]
 fn test_test_case() {
-    unsafe {
-        k_log_log("test_test_case start\n");
-    }
+    log("test_test_case start\n\0");
     assert_eq!(1, 1);
-    unsafe {
-        k_log_log("test_test_case end\n");
-    }
+    log("test_test_case end\n\0");
 }
 
 #[test_case]
 fn test_test_srase() {
-    unsafe {
-        k_log_log("test_test_srase start\n");
-    }
+    log("test_test_srase start\n\0");
     assert_eq!(1, 1);
-    unsafe {
-        k_log_log("test_test_srase end\n");
-    }
+    log("test_test_srase end\n\0");
 }
