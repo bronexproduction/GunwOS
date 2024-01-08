@@ -1,4 +1,11 @@
+ifneq ($(GNW_TEST_UNIT),)
+	KERNEL_TEST_INCLUDE=-include $(TESTS_UNIT_SRC_DIR)/kernel/kernel.pch
+else
+	KERNEL_TEST_INCLUDE=
+endif
+
 KERNEL_INCLUDE=-include kernel.pch \
+			   $(KERNEL_TEST_INCLUDE) \
 			   -I $(STDGUNW_INCLUDE_DIR) \
 			   -I $(APP_API_INCLUDE_DIR) \
 			   -I $(DRIVER_API_INCLUDE_DIR) \
