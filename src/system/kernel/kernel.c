@@ -26,12 +26,12 @@ static void bss_clear() {
     }
 }
 
-static void k_init() {
+PRIVATE void k_purge() {
     bss_clear();
 }
 
 void __attribute__((fastcall, section(".start"))) __kernel_start(const struct k_krn_bootData * const bootData) {
-    k_init();
+    k_purge();
 
     k_tmr_init();
     k_hal_init();

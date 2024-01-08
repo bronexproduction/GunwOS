@@ -9,6 +9,7 @@ mod kernel_tests;
 mod utils;
 
 use core::panic::PanicInfo;
+use kernel_symbols::k_purge;
 use utils::log;
 use utils::outb;
 
@@ -50,6 +51,9 @@ fn exit_qemu(exit_code: QemuExitCode) {
 
 fn kernel_test_runner(tests: &[&dyn Fn()]) {
     for test in tests {
+        unsafe {
+            k_purge();
+        }
         test();
     }
 }
