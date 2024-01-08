@@ -27,7 +27,9 @@ RSFLAGS=$(RSFLAGS_GLOBAL)
 LFLAGS=-m$(L_OUTFORMAT) -z noexecstack --fatal-warnings -T linker.ld
 O_DIR_LISTING=find . -name '*.o' -type f
 
-RS_TEST_DIR_LISTING=find $(TESTS_UNIT_SRC_DIR)/kernel -name '*.rs' -type f
+RSFLAGS_TEST=$(RSFLAGS) --test
+LFLAGS_TEST=$(LFLAGS) --no-warn-rwx-segments
+RS_TEST_DIR_LISTING=find $(TESTS_UNIT_SRC_DIR)/kernel -name '*.rs' -type f -depth 1
 O_TEST_DIR_LISTING=find $(TESTS_UNIT_SRC_DIR)/kernel -name '*.o' -type f
 
 .PHONY: all
@@ -36,7 +38,7 @@ all: kernel.elf clean_o
 
 kernel.elf: kernel.o
 ifneq ($(GNW_TEST_UNIT),)
-	$(L) $(LFLAGS) -o $@ $(KERNEL_LIBS) $(shell $(O_DIR_LISTING)) $(shell $(O_TEST_DIR_LISTING))
+	$(L) $(LFLAGS_TEST) -o $@ $(KERNEL_LIBS) $(shell $(O_DIR_LISTING)) $(shell $(O_TEST_DIR_LISTING))
 else
 	$(L) $(LFLAGS) -o $@ $(KERNEL_LIBS) $(shell $(O_DIR_LISTING))
 endif
@@ -47,7 +49,7 @@ kernel.o:
 	$(CXX_DIR_LISTING) -print0 | xargs -0I{} $(CXX) $(CXXFLAGS) -o {}.o {}
 	$(RS_DIR_LISTING) -print0 | xargs -0I{} $(RUSTC) $(RSFLAGS) -o {}.o {}
 ifneq ($(GNW_TEST_UNIT),)
-	$(RS_TEST_DIR_LISTING) -print0 | xargs -0I{} $(RUSTC) $(RSFLAGS) -o {}.o {}
+	$(RS_TEST_DIR_LISTING) -print0 | xargs -0I{} $(RUSTC) $(RSFLAGS_TEST) -o {}.o {}
 endif
 	
 clean_o:
