@@ -26,7 +26,7 @@ static void bss_clear() {
     }
 }
 
-PRIVATE void k_init() {
+static void k_init() {
     bss_clear();
 }
 
