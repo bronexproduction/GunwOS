@@ -15,8 +15,8 @@ use utils::outb;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 enum QemuExitCode {
-    Success = 0x10,
-    Failed = 0x11,
+    Success = 0x22,
+    Failed = 0x23,
 }
 
 #[used]
