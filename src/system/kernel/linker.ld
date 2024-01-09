@@ -3,6 +3,10 @@ ENTRY("__kernel_start")
 SECTIONS {
     . = 0x00010000;
 
+    .start_override : {
+        *(.start_override)
+    }
+
     .start : {
         *(.start)
     }

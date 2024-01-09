@@ -14,7 +14,6 @@ LFLAGS=-m$(L_OUTFORMAT) -i
 
 O_DRIVER_DIR_LISTING=find . -name '*_driver.o' -type f
 O_KERNEL_DIR_LISTING=find . -name '*_driver_kernel.o' -type f
-EXEC_TERMINATOR=\;
 
 TARGET_O=gunwapi
 
@@ -33,14 +32,14 @@ $(TARGET_O)_driver_kernel: build_kernel_o
 	$(L) $(LFLAGS) -o $@.o $(shell $(O_KERNEL_DIR_LISTING))
 
 build_driver_o:
-	$(C_DIR_LISTING) -exec $(C) $(CFLAGS_DRIVER) -o {}_driver.o {} $(EXEC_TERMINATOR)
-	$(CXX_DIR_LISTING) -exec $(CXX) $(CXXFLAGS_DRIVER) -o {}_driver.o {} $(EXEC_TERMINATOR)
-	$(RS_DIR_LISTING) -exec $(RUSTC) $(RSFLAGS_DRIVER) -o {}_driver.o {} $(EXEC_TERMINATOR)
+	$(C_DIR_LISTING) -print0 | xargs -0I{} $(C) $(CFLAGS_DRIVER) -o {}_driver.o {}
+	$(CXX_DIR_LISTING) -print0 | xargs -0I{} $(CXX) $(CXXFLAGS_DRIVER) -o {}_driver.o {}
+	$(RS_DIR_LISTING) -print0 | xargs -0I{} $(RUSTC) $(RSFLAGS_DRIVER) -o {}_driver.o {}
 
 build_kernel_o:
-	$(C_DIR_LISTING) -exec $(C) $(CFLAGS_KERNEL) -o {}_driver_kernel.o {} $(EXEC_TERMINATOR)
-	$(CXX_DIR_LISTING) -exec $(CXX) $(CXXFLAGS_KERNEL) -o {}_driver_kernel.o {} $(EXEC_TERMINATOR)
-	$(RS_DIR_LISTING) -exec $(RUSTC) $(RSFLAGS_KERNEL) -o {}_driver_kernel.o {} $(EXEC_TERMINATOR)
+	$(C_DIR_LISTING) -print0 | xargs -0I{} $(C) $(CFLAGS_KERNEL) -o {}_driver_kernel.o {}
+	$(CXX_DIR_LISTING) -print0 | xargs -0I{} $(CXX) $(CXXFLAGS_KERNEL) -o {}_driver_kernel.o {}
+	$(RS_DIR_LISTING) -print0 | xargs -0I{} $(RUSTC) $(RSFLAGS_KERNEL) -o {}_driver_kernel.o {}
 
 clean_o:
 	find . -type f -name '*.o' ! -name '$(TARGET_O)_driver.o' -delete ! -name '$(TARGET_O)_driver_kernel.o' -delete
