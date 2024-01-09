@@ -72,6 +72,8 @@ export APP_BUILD_DIR="$(BUILD_DIR)/app"
 # Base library paths
 
 export STDGUNW_LIB="$(LIB_BUILD_DIR)/stdgunw.o"
+export RUSTLIB_DIR="$(RUST_DIR)/lib/rustlib/$(TARGET_MACHINE)-$(TARGET_VENDOR)-$(TARGET_OS)/lib"
+export RUSTLIB_CORE="$(shell find $(RUSTLIB_DIR) -name libcore* -type f -exec basename {} \;)"
 
 # Build flags
 
