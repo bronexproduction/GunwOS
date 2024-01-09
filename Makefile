@@ -72,15 +72,17 @@ export APP_BUILD_DIR="$(BUILD_DIR)/app"
 # Base library paths
 
 export STDGUNW_LIB="$(LIB_BUILD_DIR)/stdgunw.o"
-export RUSTLIB_DIR="$(RUST_DIR)/lib/rustlib/$(TARGET_MACHINE)-$(TARGET_VENDOR)-$(TARGET_OS)/lib"
-export RUSTLIB_CORE="$(shell find $(RUSTLIB_DIR) -name libcore* -type f -exec basename {} \;)"
 
 # Build flags
 
 WARN_PARAMS=-Wall -Wextra -Werror -Wno-error=cpp -Wno-error=unused-parameter
 export CFLAGS_GLOBAL=-m$(TARGET_BITS) -fdebug-prefix-map=$(BUILD_DIR)=. $(WARN_PARAMS)
 export CXXFLAGS_GLOBAL=$(CFLAGS_GLOBAL)
-export RSFLAGS_GLOBAL=--emit=obj --crate-type=lib -g --target=$(SPEC_DIR)/$(TARGET_MACHINE)-$(TARGET_VENDOR)-$(TARGET_OS).json
+RSFLAGS_GLOBAL=-g --target=$(SPEC_DIR)/$(TARGET_MACHINE)-$(TARGET_VENDOR)-$(TARGET_OS).json
+export RSFLAGS_OBJECT=$(RSFLAGS_GLOBAL) --emit=obj --crate-type=lib
+export RSFLAGS_STATICLIB=$(RSFLAGS_GLOBAL) --crate-type=staticlib -Clinker=$(L) -C lto -O \
+	-Clink-arg=-L$(GCC_DIR)/lib/gcc/$(TARGET_MACHINE)-$(L_BINFORMAT)/$(GCC_VERSION) \
+	-Clink-arg=-lgcc -Clink-arg=-r -Clink-arg=--no-gc-sections 
 
 # Archiver flags
 

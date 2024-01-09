@@ -2,6 +2,10 @@
 use utils::*;
 use kernel_symbols::*;
 
+/*
+    static bool validateId(size_t id)
+*/
+
 #[test_case]
 fn validateId_checkCorrect() {
     log("validateId_checkCorrect1 start\n\0");
