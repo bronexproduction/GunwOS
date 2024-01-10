@@ -38,6 +38,10 @@ else
     GDOWN="$HOME/.local/bin/gdown"
 fi
 
+BINDGEN_VERSION=0.69.1
+export CARGO_HOME="tools/rust-bindgen-$BINDGEN_VERSION"
+curl --proto '=https' --tlsv1.2 -LsSf https://github.com/rust-lang/rust-bindgen/releases/download/v$BINDGEN_VERSION/bindgen-cli-installer.sh | sh
+
 rm -rf temp && mkdir temp && cd temp
 "$GDOWN" "$TOOLS_ID" -O tools.zip
 unzip tools.zip
