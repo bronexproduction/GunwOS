@@ -1,32 +1,28 @@
+#![allow(non_camel_case_types)]
+#![allow(non_snake_case)]
+#![allow(dead_code)]
+
 use core::ffi::c_char;
 
-#[allow(non_camel_case_types)]
 type procId_t = i32;
-
-#[allow(non_camel_case_types)]
 type size_t = u32;
-
-#[allow(non_camel_case_types)]
 type ptr_t = *mut u8;
-
-#[allow(non_camel_case_types)]
 type addr_t = u32;
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 struct range_addr_t {
     offset: addr_t,
     sizeBytes: size_t,
 }
 
-#[repr(packed)]
-#[allow(non_camel_case_types)]
+#[repr(C, packed)]
 pub struct gnwStorCHS {
     c: u16,
     h: u8,
     s: u8,
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwStorGeometry {
     chs: gnwStorCHS,
     lba: size_t,
@@ -34,7 +30,6 @@ pub struct gnwStorGeometry {
 }
 
 #[repr(i32)]
-#[allow(non_camel_case_types)]
 pub enum gnwStorErrorCode {
     GSEC_NONE = 0,
     GSEC_DRIVE_NOT_PRESENT,
@@ -47,14 +42,13 @@ pub enum gnwStorErrorCode {
     GSEC_UNKNOWN = -1
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwStorError {
     code: gnwStorErrorCode,
     internalCode: u32,
 }
 
 #[repr(i32)]
-#[allow(non_camel_case_types)]
 pub enum gnwDeviceType {
     DEV_TYPE_SYSTEM     = (1 << 0),
     DEV_TYPE_MEM        = (1 << 1),
@@ -68,185 +62,185 @@ pub enum gnwDeviceType {
     DEV_TYPE_NONE       = 0
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceUHA_system_desc {
     _unused: u32,
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceUHA_system_routine {
-    getParam: fn(param: size_t,
-                 subParam: size_t,
-                 paramIndex: size_t,
-                 result: *mut size_t) -> bool,
-    setParam: fn(param: size_t,
-                 subParam: size_t,
-                 paramIndex: size_t,
-                 value: size_t) -> bool,
+    getParam: extern "C" fn(param: size_t,
+                            subParam: size_t,
+                            paramIndex: size_t,
+                            result: *mut size_t) -> bool,
+    setParam: extern "C" fn(param: size_t,
+                            subParam: size_t,
+                            paramIndex: size_t,
+                            value: size_t) -> bool,
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceUHA_system {
     desc: gnwDeviceUHA_system_desc,
     routine: gnwDeviceUHA_system_routine,
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceUHA_mem_desc {
     bytesRange: range_addr_t,
     maxInputSizeBytes: size_t,
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceUHA_mem_routine {
-    write: fn(buffer: ptr_t, inputBufferRange: range_addr_t),
+    write: extern "C" fn(buffer: ptr_t, inputBufferRange: range_addr_t),
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceUHA_mem {
     desc: gnwDeviceUHA_mem_desc,
     routine: gnwDeviceUHA_mem_routine,
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceUHA_keyboard_desc {
     _unused: u32,
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceUHA_keyboard_routine {
-    _unused: fn(),
+    _unused: extern "C" fn(),
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceUHA_keyboard {
     desc: gnwDeviceUHA_keyboard_desc,
     routine: gnwDeviceUHA_keyboard_routine,
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceUHA_mouse_desc {
     _unused: u32,
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceUHA_mouse_routine {
-    _unused: fn(),
+    _unused: extern "C" fn(),
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceUHA_mouse {
     desc: gnwDeviceUHA_mouse_desc,
     routine: gnwDeviceUHA_mouse_routine,
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceUHA_fdc_desc {
     _unused: u32,
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceUHA_fdc_routine {
-    _unused: fn(),
+    _unused: extern "C" fn(),
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceUHA_fdc {
     desc: gnwDeviceUHA_fdc_desc,
     routine: gnwDeviceUHA_fdc_routine,
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceUHA_storCtrl_desc {
     driveCount: u8,
     removable: bool,
     removableMedia: bool,
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceUHA_storCtrl_routine {
-    drivePresent: fn(index: u8) -> bool,
-    driveGeometry: fn(index: u8) -> gnwStorGeometry,
-    read: fn(index: u8,
-             lba: size_t,
-             count: size_t,
-             buffer: *const u8,
-             error: *mut gnwStorError) -> size_t,
+    drivePresent: extern "C" fn(index: u8) -> bool,
+    driveGeometry: extern "C" fn(index: u8) -> gnwStorGeometry,
+    read: extern "C" fn(index: u8,
+                        lba: size_t,
+                        count: size_t,
+                        buffer: *const u8,
+                        error: *mut gnwStorError) -> size_t,
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceUHA_storCtrl {
     desc: gnwDeviceUHA_storCtrl_desc,
     routine: gnwDeviceUHA_storCtrl_routine,
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceUHA_charIn_desc {
     _unused: u32,
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceUHA_charOut_desc {
     _unused: u32,
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceUHA_charIn_routine {
-    hasData: fn() -> bool,
-    read: fn(c: *const u8) -> size_t,
+    hasData: extern "C" fn() -> bool,
+    read: extern "C" fn(c: *const u8) -> size_t,
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceUHA_charOut_routine {
-    isReadyToWrite: fn() -> bool,
-    write: fn(c: char) -> bool,
+    isReadyToWrite: extern "C" fn() -> bool,
+    write: extern "C" fn(c: c_char) -> bool,
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceUHA_charIn {
     desc: gnwDeviceUHA_charIn_desc,
     routine: gnwDeviceUHA_charIn_routine,
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceUHA_charOut {
     desc: gnwDeviceUHA_charOut_desc,
     routine: gnwDeviceUHA_charOut_routine,
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceUHA_display_desc {
     supportedFormatCount: size_t,
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceUHA_display_routine {
-    _unused: fn(),
+    _unused: extern "C" fn(),
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceUHA_display {
     desc: gnwDeviceUHA_display_desc,
     routine: gnwDeviceUHA_display_routine,
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceUHA_event_desc {
     _unused: u32,
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceUHA_event_routine {
-    _unused: fn(),
+    _unused: extern "C" fn(),
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceUHA_event {
     desc: gnwDeviceUHA_event_desc,
     routine: gnwDeviceUHA_event_routine,
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceUHA {
     system: gnwDeviceUHA_system,      // DEV_TYPE_SYSTEM
     mem: gnwDeviceUHA_mem,            // DEV_TYPE_MEM
@@ -260,26 +254,26 @@ pub struct gnwDeviceUHA {
     event: gnwDeviceUHA_event,        // event emitting devices
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDriverConfig {
-    init: fn() -> bool,
-    start: fn() -> bool,
-    isr: fn(),
+    init: extern "C" fn() -> bool,
+    start: extern "C" fn() -> bool,
+    isr: extern "C" fn(),
     irq: u8,
 }
-    
-#[allow(non_camel_case_types)]
+
+#[repr(C)]
 pub struct gnwDeviceIO {
     busBase: u16,
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceDriver {
     io: gnwDeviceIO,
     descriptor: gnwDriverConfig,
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceDescriptor {
     r#type: gnwDeviceType,
     api: gnwDeviceUHA,
@@ -287,31 +281,27 @@ pub struct gnwDeviceDescriptor {
     name: *const u8,
 }
 
-#[allow(non_camel_case_types)]
+#[repr(C)]
 pub struct gnwDeviceEvent {
     r#type: u32,
     data: ptr_t,
     dataSizeBytes: size_t,
 }
 
-#[allow(non_camel_case_types)]
 type gnwDeviceEventListener = extern "cdecl" fn(event: *const gnwDeviceEvent);
+type gnwDeviceEventDecoder = extern "C" fn(ptr_t, *const gnwDeviceEvent);
 
-#[allow(non_camel_case_types)]
-type gnwDeviceEventDecoder = fn(ptr_t, *const gnwDeviceEvent);
-
-#[allow(non_camel_case_types)]
-struct device {
+#[repr(C)]
+pub struct device {
     desc: gnwDeviceDescriptor,
     initialized: bool,
-    started: bool,
-    holder: procId_t,
+    pub started: bool,
+    pub holder: procId_t,
     listener: gnwDeviceEventListener,
     decoder: gnwDeviceEventDecoder,
 }
 
 #[repr(i32)]
-#[allow(non_camel_case_types)]
 #[derive(PartialEq, Debug)]
 pub enum gnwDeviceError {
     GDE_NONE = 0,
@@ -331,6 +321,9 @@ pub enum gnwDeviceError {
     GDE_OPERATION_FAILED,
     GDE_UNKNOWN = -1
 }
+
+pub const NONE_PROC_ID: procId_t = -2;
+pub const KERNEL_PROC_ID: procId_t = -1;
 
 pub const MAX_DEVICES: size_t = 8;
 

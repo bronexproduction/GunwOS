@@ -81,7 +81,7 @@ export STDGUNW_LIB="$(LIB_BUILD_DIR)/stdgunw.o"
 WARN_PARAMS=-Wall -Wextra -Werror -Wno-error=cpp -Wno-error=unused-parameter
 export CFLAGS_GLOBAL=-m$(TARGET_BITS) -fdebug-prefix-map=$(BUILD_DIR)=. $(WARN_PARAMS)
 export CXXFLAGS_GLOBAL=$(CFLAGS_GLOBAL)
-RSFLAGS_GLOBAL=-g --target=$(SPEC_DIR)/$(TARGET_MACHINE)-$(TARGET_VENDOR)-$(TARGET_OS).json
+RSFLAGS_GLOBAL=-g --target=$(SPEC_DIR)/$(TARGET_MACHINE)-$(TARGET_VENDOR)-$(TARGET_OS).json --deny warnings
 export RSFLAGS_OBJECT=$(RSFLAGS_GLOBAL) --emit=obj --crate-type=lib
 export RSFLAGS_STATICLIB=$(RSFLAGS_GLOBAL) --crate-type=staticlib -Clinker=$(L) -C lto -O \
 	-Clink-arg=-L$(GCC_DIR)/lib/gcc/$(TARGET_MACHINE)-$(L_BINFORMAT)/$(GCC_VERSION) \

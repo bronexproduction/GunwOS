@@ -19,7 +19,7 @@
 
 #define MAX_DEVICES 8
 
-static struct device {
+PRIVATE struct device {
     /*
         Driver descriptor
     */
@@ -71,9 +71,8 @@ PRIVATE bool validateInstalledId(size_t id) {
     return id < MAX_DEVICES && id < devicesCount;
 }
 
-static enum gnwDeviceError validateStartedDevice(const procId_t processId, const size_t deviceId) {
+PRIVATE enum gnwDeviceError validateStartedDevice(const procId_t processId, const size_t deviceId) {
     if (!validateInstalledId(deviceId)) {
-        OOPS("Device identifier invalid");
         return GDE_UNKNOWN;
     }
 
