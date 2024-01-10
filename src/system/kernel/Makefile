@@ -60,7 +60,7 @@ libunittest.a:
 
 kernel_symbols/mod.rs:
 	rm -f $(TESTS_UNIT_SRC_DIR)/kernel/$@
-	$(RUST_BINDGEN) --verbose /Users/bronex/Repos/GunwOS/src/lib/stdgunw/include/types.h -o $(TESTS_UNIT_SRC_DIR)/kernel/$@
+	$(RUST_BINDGEN) --verbose $(BINDGEN_INPUT_FILES) -o $(TESTS_UNIT_SRC_DIR)/kernel/$@
 
 clean_o:
 	find . -type f -name '*.o' -delete
