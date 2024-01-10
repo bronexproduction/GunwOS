@@ -288,6 +288,19 @@ pub struct gnwDeviceDescriptor {
 }
 
 #[allow(non_camel_case_types)]
+pub struct gnwDeviceEvent {
+    r#type: u32,
+    data: ptr_t,
+    dataSizeBytes: size_t,
+}
+
+#[allow(non_camel_case_types)]
+type gnwDeviceEventListener = extern "cdecl" fn(event: *const gnwDeviceEvent);
+
+#[allow(non_camel_case_types)]
+type gnwDeviceEventDecoder = fn(ptr_t, *const gnwDeviceEvent);
+
+#[allow(non_camel_case_types)]
 struct device {
     desc: gnwDeviceDescriptor,
     initialized: bool,
@@ -319,15 +332,16 @@ pub enum gnwDeviceError {
     GDE_UNKNOWN = -1
 }
 
+pub const MAX_DEVICES: size_t = 8;
+
 extern "C" {
     pub fn k_purge();
     pub fn k_log_log(szMsg: *const c_char);
     
     // dev
 
-    pub static maxDevices: u32;
     pub static mut devicesCount: u32;
-    pub static mut devices: [device];
+    pub static mut devices: [device; MAX_DEVICES as usize];
     pub fn validateId(id: size_t) -> bool;
     pub fn validateInstalledId(id: size_t) -> bool;
     pub fn validateStartedDevice(procId: procId_t, devId: size_t) -> gnwDeviceError;

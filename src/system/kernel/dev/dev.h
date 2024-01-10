@@ -12,8 +12,6 @@
 #include <gunwdrv.h>
 #include <src/_gunwrlp.h>
 
-#define MAX_DEVICES 8
-
 enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescriptor * const descriptor);
 enum gnwDriverError k_dev_start(size_t id);
 

@@ -17,6 +17,8 @@
 #include <hal/criticalsec/criticalsec.h>
 #include <src/_gunwdev.h>
 
+#define MAX_DEVICES 8
+
 static struct device {
     /*
         Driver descriptor
