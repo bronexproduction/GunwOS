@@ -57,7 +57,7 @@ static struct device {
     gnwDeviceEventDecoder decoder;
 } devices[MAX_DEVICES];
 
-static uint_32 devicesCount;
+PRIVATE uint_32 devicesCount;
 
 extern uint_8 k_hal_isIRQRegistered(uint_8 num);
 
@@ -65,7 +65,7 @@ PRIVATE bool validateId(size_t id) {
     return id < MAX_DEVICES;
 }
 
-static bool validateInstalledId(size_t id) {
+PRIVATE bool validateInstalledId(size_t id) {
     return id < MAX_DEVICES && id < devicesCount;
 }
 

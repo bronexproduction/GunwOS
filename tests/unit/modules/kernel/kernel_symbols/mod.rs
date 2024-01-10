@@ -7,5 +7,7 @@ extern "C" {
     // dev
 
     pub static maxDevices: u32;
+    pub static mut devicesCount: u32;
     pub fn validateId(id: u32) -> bool;
+    pub fn validateInstalledId(id: u32) -> bool;
 }
