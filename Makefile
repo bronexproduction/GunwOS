@@ -3,7 +3,14 @@
 GCC_VERSION=9.4.0
 BINUTILS_VERSION=2.39
 NEWLIB_VERSION=4.2.0.20211231
-RUST_VERSION=1.66.0
+RUST_VERSION=1.75.0
+
+# Target parameters
+
+TARGET_MACHINE=i386
+TARGET_VENDOR=none
+TARGET_OS=none
+TARGET_BITS=32
 
 # Toolchain directories
 
@@ -16,18 +23,16 @@ RUST_DIR="$(TOOLS_DIR)/rust-$(RUST_VERSION)"
 # Toolchain executables paths
 
 export ASM=nasm
-export C="$(GCC_DIR)/bin/i386-elf-gcc"
-export CXX="$(GCC_DIR)/bin/i386-elf-g++"
-export L="$(GCC_DIR)/bin/i386-elf-ld"
-export AR="$(GCC_DIR)/bin/i386-elf-ar"
+export C="$(GCC_DIR)/bin/$(TARGET_MACHINE)-elf-gcc"
+export CXX="$(GCC_DIR)/bin/$(TARGET_MACHINE)-elf-g++"
+export L="$(GCC_DIR)/bin/$(TARGET_MACHINE)-elf-ld"
+export AR="$(GCC_DIR)/bin/$(TARGET_MACHINE)-elf-ar"
 export RUSTC="$(RUST_DIR)/bin/rustc"
 
 # Output binary params
 
-TARGET_BITS=32
 L_BINFORMAT=elf
-L_ARCH=i386
-export L_OUTFORMAT=$(L_BINFORMAT)_$(L_ARCH)
+export L_OUTFORMAT=$(L_BINFORMAT)_$(TARGET_MACHINE)
 
 # Source directories
 
@@ -73,7 +78,11 @@ export STDGUNW_LIB="$(LIB_BUILD_DIR)/stdgunw.o"
 WARN_PARAMS=-Wall -Wextra -Werror -Wno-error=cpp -Wno-error=unused-parameter
 export CFLAGS_GLOBAL=-m$(TARGET_BITS) -fdebug-prefix-map=$(BUILD_DIR)=. $(WARN_PARAMS)
 export CXXFLAGS_GLOBAL=$(CFLAGS_GLOBAL)
-export RSFLAGS_GLOBAL=--emit=obj --crate-type=lib -g --target=$(SPEC_DIR)/i386-none-none.json
+RSFLAGS_GLOBAL=-g --target=$(SPEC_DIR)/$(TARGET_MACHINE)-$(TARGET_VENDOR)-$(TARGET_OS).json
+export RSFLAGS_OBJECT=$(RSFLAGS_GLOBAL) --emit=obj --crate-type=lib
+export RSFLAGS_STATICLIB=$(RSFLAGS_GLOBAL) --crate-type=staticlib -Clinker=$(L) -C lto -O \
+	-Clink-arg=-L$(GCC_DIR)/lib/gcc/$(TARGET_MACHINE)-$(L_BINFORMAT)/$(GCC_VERSION) \
+	-Clink-arg=-lgcc -Clink-arg=-r -Clink-arg=--no-gc-sections 
 
 # Archiver flags
 

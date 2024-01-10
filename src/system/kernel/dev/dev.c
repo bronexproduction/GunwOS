@@ -17,8 +17,6 @@
 #include <hal/criticalsec/criticalsec.h>
 #include <src/_gunwdev.h>
 
-#define MAX_DEVICES 8
-
 static struct device {
     /*
         Driver descriptor
@@ -63,7 +61,7 @@ static uint_32 devicesCount;
 
 extern uint_8 k_hal_isIRQRegistered(uint_8 num);
 
-static bool validateId(size_t id) {
+PRIVATE bool validateId(size_t id) {
     return id < MAX_DEVICES;
 }
 
