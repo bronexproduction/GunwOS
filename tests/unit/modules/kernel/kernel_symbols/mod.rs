@@ -4,29 +4,29 @@
 
 use core::ffi::c_char;
 
-type procId_t = i32;
-type size_t = u32;
-type ptr_t = *mut u8;
-type addr_t = u32;
+pub type procId_t = i32;
+pub type size_t = u32;
+pub type ptr_t = *mut u8;
+pub type addr_t = u32;
 
 #[repr(C)]
-struct range_addr_t {
-    offset: addr_t,
-    sizeBytes: size_t,
+pub struct range_addr_t {
+    pub offset: addr_t,
+    pub sizeBytes: size_t,
 }
 
 #[repr(C, packed)]
 pub struct gnwStorCHS {
-    c: u16,
-    h: u8,
-    s: u8,
+    pub c: u16,
+    pub h: u8,
+    pub s: u8,
 }
 
 #[repr(C)]
 pub struct gnwStorGeometry {
-    chs: gnwStorCHS,
-    lba: size_t,
-    sectSizeBytes: u16,
+    pub chs: gnwStorCHS,
+    pub lba: size_t,
+    pub sectSizeBytes: u16,
 }
 
 #[repr(i32)]
@@ -44,8 +44,8 @@ pub enum gnwStorErrorCode {
 
 #[repr(C)]
 pub struct gnwStorError {
-    code: gnwStorErrorCode,
-    internalCode: u32,
+    pub code: gnwStorErrorCode,
+    pub internalCode: u32,
 }
 
 #[repr(i32)]
@@ -64,241 +64,241 @@ pub enum gnwDeviceType {
 
 #[repr(C)]
 pub struct gnwDeviceUHA_system_desc {
-    _unused: u32,
+    pub _unused: u32,
 }
 
 #[repr(C)]
 pub struct gnwDeviceUHA_system_routine {
-    getParam: extern "C" fn(param: size_t,
-                            subParam: size_t,
-                            paramIndex: size_t,
-                            result: *mut size_t) -> bool,
-    setParam: extern "C" fn(param: size_t,
-                            subParam: size_t,
-                            paramIndex: size_t,
-                            value: size_t) -> bool,
+    pub getParam: Option<extern "C" fn(param: size_t,
+                                       subParam: size_t,
+                                       paramIndex: size_t,
+                                       result: *mut size_t) -> bool>,
+    pub setParam: Option<extern "C" fn(param: size_t,
+                                       subParam: size_t,
+                                       paramIndex: size_t,
+                                       value: size_t) -> bool>,
 }
 
 #[repr(C)]
 pub struct gnwDeviceUHA_system {
-    desc: gnwDeviceUHA_system_desc,
-    routine: gnwDeviceUHA_system_routine,
+    pub desc: gnwDeviceUHA_system_desc,
+    pub routine: gnwDeviceUHA_system_routine,
 }
 
 #[repr(C)]
 pub struct gnwDeviceUHA_mem_desc {
-    bytesRange: range_addr_t,
-    maxInputSizeBytes: size_t,
+    pub bytesRange: range_addr_t,
+    pub maxInputSizeBytes: size_t,
 }
 
 #[repr(C)]
 pub struct gnwDeviceUHA_mem_routine {
-    write: extern "C" fn(buffer: ptr_t, inputBufferRange: range_addr_t),
+    pub write: Option<extern "C" fn(buffer: ptr_t, inputBufferRange: range_addr_t)>,
 }
 
 #[repr(C)]
 pub struct gnwDeviceUHA_mem {
-    desc: gnwDeviceUHA_mem_desc,
-    routine: gnwDeviceUHA_mem_routine,
+    pub desc: gnwDeviceUHA_mem_desc,
+    pub routine: gnwDeviceUHA_mem_routine,
 }
 
 #[repr(C)]
 pub struct gnwDeviceUHA_keyboard_desc {
-    _unused: u32,
+    pub _unused: u32,
 }
 
 #[repr(C)]
 pub struct gnwDeviceUHA_keyboard_routine {
-    _unused: extern "C" fn(),
+    pub _unused: Option<extern "C" fn()>,
 }
 
 #[repr(C)]
 pub struct gnwDeviceUHA_keyboard {
-    desc: gnwDeviceUHA_keyboard_desc,
-    routine: gnwDeviceUHA_keyboard_routine,
+    pub desc: gnwDeviceUHA_keyboard_desc,
+    pub routine: gnwDeviceUHA_keyboard_routine,
 }
 
 #[repr(C)]
 pub struct gnwDeviceUHA_mouse_desc {
-    _unused: u32,
+    pub _unused: u32,
 }
 
 #[repr(C)]
 pub struct gnwDeviceUHA_mouse_routine {
-    _unused: extern "C" fn(),
+    pub _unused: Option<extern "C" fn()>,
 }
 
 #[repr(C)]
 pub struct gnwDeviceUHA_mouse {
-    desc: gnwDeviceUHA_mouse_desc,
-    routine: gnwDeviceUHA_mouse_routine,
+    pub desc: gnwDeviceUHA_mouse_desc,
+    pub routine: gnwDeviceUHA_mouse_routine,
 }
 
 #[repr(C)]
 pub struct gnwDeviceUHA_fdc_desc {
-    _unused: u32,
+    pub _unused: u32,
 }
 
 #[repr(C)]
 pub struct gnwDeviceUHA_fdc_routine {
-    _unused: extern "C" fn(),
+    pub _unused: Option<extern "C" fn()>,
 }
 
 #[repr(C)]
 pub struct gnwDeviceUHA_fdc {
-    desc: gnwDeviceUHA_fdc_desc,
-    routine: gnwDeviceUHA_fdc_routine,
+    pub desc: gnwDeviceUHA_fdc_desc,
+    pub routine: gnwDeviceUHA_fdc_routine,
 }
 
 #[repr(C)]
 pub struct gnwDeviceUHA_storCtrl_desc {
-    driveCount: u8,
-    removable: bool,
-    removableMedia: bool,
+    pub driveCount: u8,
+    pub removable: bool,
+    pub removableMedia: bool,
 }
 
 #[repr(C)]
 pub struct gnwDeviceUHA_storCtrl_routine {
-    drivePresent: extern "C" fn(index: u8) -> bool,
-    driveGeometry: extern "C" fn(index: u8) -> gnwStorGeometry,
-    read: extern "C" fn(index: u8,
-                        lba: size_t,
-                        count: size_t,
-                        buffer: *const u8,
-                        error: *mut gnwStorError) -> size_t,
+    pub drivePresent: Option<extern "C" fn(index: u8) -> bool>,
+    pub driveGeometry: Option<extern "C" fn(index: u8) -> gnwStorGeometry>,
+    pub read: Option<extern "C" fn(index: u8,
+                                   lba: size_t,
+                                   count: size_t,
+                                   buffer: *const u8,
+                                   error: *mut gnwStorError) -> size_t>,
 }
 
 #[repr(C)]
 pub struct gnwDeviceUHA_storCtrl {
-    desc: gnwDeviceUHA_storCtrl_desc,
-    routine: gnwDeviceUHA_storCtrl_routine,
+    pub desc: gnwDeviceUHA_storCtrl_desc,
+    pub routine: gnwDeviceUHA_storCtrl_routine,
 }
 
 #[repr(C)]
 pub struct gnwDeviceUHA_charIn_desc {
-    _unused: u32,
+    pub _unused: u32,
 }
 
 #[repr(C)]
 pub struct gnwDeviceUHA_charOut_desc {
-    _unused: u32,
+    pub _unused: u32,
 }
 
 #[repr(C)]
 pub struct gnwDeviceUHA_charIn_routine {
-    hasData: extern "C" fn() -> bool,
-    read: extern "C" fn(c: *const u8) -> size_t,
+    pub hasData: Option<extern "C" fn() -> bool>,
+    pub read: Option<extern "C" fn(c: *const u8) -> size_t>,
 }
 
 #[repr(C)]
 pub struct gnwDeviceUHA_charOut_routine {
-    isReadyToWrite: extern "C" fn() -> bool,
-    write: extern "C" fn(c: c_char) -> bool,
+    pub isReadyToWrite: Option<extern "C" fn() -> bool>,
+    pub write: Option<extern "C" fn(c: c_char) -> bool>,
 }
 
 #[repr(C)]
 pub struct gnwDeviceUHA_charIn {
-    desc: gnwDeviceUHA_charIn_desc,
-    routine: gnwDeviceUHA_charIn_routine,
+    pub desc: gnwDeviceUHA_charIn_desc,
+    pub routine: gnwDeviceUHA_charIn_routine,
 }
 
 #[repr(C)]
 pub struct gnwDeviceUHA_charOut {
-    desc: gnwDeviceUHA_charOut_desc,
-    routine: gnwDeviceUHA_charOut_routine,
+    pub desc: gnwDeviceUHA_charOut_desc,
+    pub routine: gnwDeviceUHA_charOut_routine,
 }
 
 #[repr(C)]
 pub struct gnwDeviceUHA_display_desc {
-    supportedFormatCount: size_t,
+    pub supportedFormatCount: size_t,
 }
 
 #[repr(C)]
 pub struct gnwDeviceUHA_display_routine {
-    _unused: extern "C" fn(),
+    pub _unused: Option<extern "C" fn()>,
 }
 
 #[repr(C)]
 pub struct gnwDeviceUHA_display {
-    desc: gnwDeviceUHA_display_desc,
-    routine: gnwDeviceUHA_display_routine,
+    pub desc: gnwDeviceUHA_display_desc,
+    pub routine: gnwDeviceUHA_display_routine,
 }
 
 #[repr(C)]
 pub struct gnwDeviceUHA_event_desc {
-    _unused: u32,
+    pub _unused: u32,
 }
 
 #[repr(C)]
 pub struct gnwDeviceUHA_event_routine {
-    _unused: extern "C" fn(),
+    pub _unused: Option<extern "C" fn()>,
 }
 
 #[repr(C)]
 pub struct gnwDeviceUHA_event {
-    desc: gnwDeviceUHA_event_desc,
-    routine: gnwDeviceUHA_event_routine,
+    pub desc: gnwDeviceUHA_event_desc,
+    pub routine: gnwDeviceUHA_event_routine,
 }
 
 #[repr(C)]
 pub struct gnwDeviceUHA {
-    system: gnwDeviceUHA_system,      // DEV_TYPE_SYSTEM
-    mem: gnwDeviceUHA_mem,            // DEV_TYPE_MEM
-    keyboard: gnwDeviceUHA_keyboard,  // DEV_TYPE_KEYBOARD
-    mouse: gnwDeviceUHA_mouse,        // DEV_TYPE_MOUSE
-    fdc: gnwDeviceUHA_fdc,            // DEV_TYPE_FDC
-    storCtrl: gnwDeviceUHA_storCtrl,  // DEV_TYPE_STORAGE
-    charIn: gnwDeviceUHA_charIn,      // DEV_TYPE_CHAR_IN
-    charOut: gnwDeviceUHA_charOut,    // DEV_TYPE_CHAR_OUT
-    display: gnwDeviceUHA_display,    // DEV_TYPE_DISPLAY
-    event: gnwDeviceUHA_event,        // event emitting devices
+    pub system: gnwDeviceUHA_system,      // DEV_TYPE_SYSTEM
+    pub mem: gnwDeviceUHA_mem,            // DEV_TYPE_MEM
+    pub keyboard: gnwDeviceUHA_keyboard,  // DEV_TYPE_KEYBOARD
+    pub mouse: gnwDeviceUHA_mouse,        // DEV_TYPE_MOUSE
+    pub fdc: gnwDeviceUHA_fdc,            // DEV_TYPE_FDC
+    pub storCtrl: gnwDeviceUHA_storCtrl,  // DEV_TYPE_STORAGE
+    pub charIn: gnwDeviceUHA_charIn,      // DEV_TYPE_CHAR_IN
+    pub charOut: gnwDeviceUHA_charOut,    // DEV_TYPE_CHAR_OUT
+    pub display: gnwDeviceUHA_display,    // DEV_TYPE_DISPLAY
+    pub event: gnwDeviceUHA_event,        // event emitting devices
 }
 
 #[repr(C)]
 pub struct gnwDriverConfig {
-    init: extern "C" fn() -> bool,
-    start: extern "C" fn() -> bool,
-    isr: extern "C" fn(),
-    irq: u8,
+    pub init: Option<extern "C" fn() -> bool>,
+    pub start: Option<extern "C" fn() -> bool>,
+    pub isr: Option<extern "C" fn()>,
+    pub irq: u8,
 }
 
 #[repr(C)]
 pub struct gnwDeviceIO {
-    busBase: u16,
+    pub busBase: u16,
 }
 
 #[repr(C)]
 pub struct gnwDeviceDriver {
-    io: gnwDeviceIO,
-    descriptor: gnwDriverConfig,
+    pub io: gnwDeviceIO,
+    pub descriptor: gnwDriverConfig,
 }
 
 #[repr(C)]
 pub struct gnwDeviceDescriptor {
-    r#type: gnwDeviceType,
-    api: gnwDeviceUHA,
-    driver: gnwDeviceDriver,
-    name: *const u8,
+    pub r#type: gnwDeviceType,
+    pub api: gnwDeviceUHA,
+    pub driver: gnwDeviceDriver,
+    pub name: *const u8,
 }
 
 #[repr(C)]
 pub struct gnwDeviceEvent {
-    r#type: u32,
-    data: ptr_t,
-    dataSizeBytes: size_t,
+    pub r#type: u32,
+    pub data: ptr_t,
+    pub dataSizeBytes: size_t,
 }
 
-type gnwDeviceEventListener = extern "cdecl" fn(event: *const gnwDeviceEvent);
-type gnwDeviceEventDecoder = extern "C" fn(ptr_t, *const gnwDeviceEvent);
+pub type gnwDeviceEventListener = Option<extern "cdecl" fn(event: *const gnwDeviceEvent)>;
+pub type gnwDeviceEventDecoder = Option<extern "C" fn(ptr_t, *const gnwDeviceEvent)>;
 
 #[repr(C)]
 pub struct device {
-    desc: gnwDeviceDescriptor,
-    initialized: bool,
+    pub desc: gnwDeviceDescriptor,
+    pub initialized: bool,
     pub started: bool,
     pub holder: procId_t,
-    listener: gnwDeviceEventListener,
-    decoder: gnwDeviceEventDecoder,
+    pub listener: gnwDeviceEventListener,
+    pub decoder: gnwDeviceEventDecoder,
 }
 
 #[repr(i32)]
