@@ -319,7 +319,20 @@ pub enum gnwDeviceError {
     GDE_INVALID_PARAMETER,
     GDE_PRECONDITION_NOT_SATISFIED,
     GDE_OPERATION_FAILED,
-    GDE_UNKNOWN = -1
+    GDE_UNKNOWN = -1,
+}
+
+#[repr(i32)]
+#[derive(PartialEq, Debug)]
+pub enum gnwDriverError {
+    NO_ERROR        = 0,
+    UNINITIALIZED   = 1,
+    START_FAILED    = 2,
+    IRQ_CONFLICT    = 3,
+    IRQ_INVALID     = 4,
+    LIMIT_REACHED   = 5,
+    ISR_MISSING     = 6,
+    UNKNOWN         = -1,
 }
 
 pub const NONE_PROC_ID: procId_t = -2;
@@ -338,4 +351,5 @@ extern "C" {
     pub fn validateId(id: size_t) -> bool;
     pub fn validateInstalledId(id: size_t) -> bool;
     pub fn validateStartedDevice(procId: procId_t, devId: size_t) -> gnwDeviceError;
+    pub fn k_dev_install(id: *const size_t, descriptor: *const gnwDeviceDescriptor) -> gnwDriverError;
 }
