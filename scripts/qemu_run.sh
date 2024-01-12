@@ -9,6 +9,8 @@ UNIT_TEST_FLAGS=("-device" "isa-debug-exit,iobase=0xf4,iosize=0x01")
 
 # needs some improvements
 
+# qemu exit on cpu reset during testing
+
 if [[ "$MODE" == "debug"* ]]; then
     EPARAMS=("-serial stdio" ${DEBUG_FLAGS[@]})
 elif [[ "$MODE" == "test_unit_debug"* ]]; then
