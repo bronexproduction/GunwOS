@@ -275,7 +275,7 @@ pub struct gnwDeviceDriver {
 
 #[repr(C)]
 pub struct gnwDeviceDescriptor {
-    pub r#type: gnwDeviceType,
+    pub r#type: i32, /* gnwDeviceType bitmask */
     pub api: gnwDeviceUHA,
     pub driver: gnwDeviceDriver,
     pub name: *const u8,
@@ -338,6 +338,7 @@ pub enum gnwDriverError {
 pub const NONE_PROC_ID: procId_t = -2;
 pub const KERNEL_PROC_ID: procId_t = -1;
 
+pub const DEV_IRQ_LIMIT: u8 = 8;
 pub const MAX_DEVICES: size_t = 8;
 
 extern "C" {

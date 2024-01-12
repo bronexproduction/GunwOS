@@ -139,7 +139,7 @@ pub fn create_empty_device_desc() -> gnwDeviceDescriptor {
     };
     let name: *const u8 = "Dummy device\0".as_ptr();
     let descriptor = gnwDeviceDescriptor {
-        r#type: gnwDeviceType::DEV_TYPE_NONE,
+        r#type: gnwDeviceType::DEV_TYPE_NONE as i32,
         api: api,
         driver: driver,
         name: name as *const u8,
