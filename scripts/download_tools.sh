@@ -32,7 +32,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     GDOWN="gdown"
 else
     # Linux
-    sudo apt install python3-pip python3-testresources
+    sudo apt install python3-pip python3-testresources pkg-config
     pip3 install gdown
     # Workaround for Visual Studio Code
     GDOWN="$HOME/.local/bin/gdown"
