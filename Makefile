@@ -4,7 +4,6 @@ GCC_VERSION=9.4.0
 BINUTILS_VERSION=2.39
 NEWLIB_VERSION=4.2.0.20211231
 RUST_VERSION=1.75.0
-RUST_BINDGEN_VERSION=0.69.1
 
 # Target parameters
 
@@ -20,7 +19,6 @@ CUR_DIR=$(shell pwd)
 TOOLS_DIR="$(CUR_DIR)/tools"
 GCC_DIR="$(TOOLS_DIR)/gunwxcc-$(GCC_VERSION)_binutils-$(BINUTILS_VERSION)_newlib-$(NEWLIB_VERSION)"
 RUST_DIR="$(TOOLS_DIR)/rust-$(RUST_VERSION)"
-RUST_BINDGEN_DIR="$(TOOLS_DIR)/rust-bindgen-$(RUST_BINDGEN_VERSION)"
 
 # Toolchain executables paths
 
@@ -30,7 +28,6 @@ export CXX="$(GCC_DIR)/bin/$(TARGET_MACHINE)-elf-g++"
 export L="$(GCC_DIR)/bin/$(TARGET_MACHINE)-elf-ld"
 export AR="$(GCC_DIR)/bin/$(TARGET_MACHINE)-elf-ar"
 export RUSTC="$(RUST_DIR)/bin/rustc"
-export RUST_BINDGEN="$(RUST_BINDGEN_DIR)/bin/bindgen"
 
 # Output binary params
 
