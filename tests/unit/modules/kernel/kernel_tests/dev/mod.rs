@@ -108,17 +108,23 @@ fn k_dev_install_checkCorrect_simple() {
     log("k_dev_install_checkCorrect_simple end\n\0");
 }
 
+static mut DRIVER_INIT_CALLED: bool = false;
+
 #[test_case]
 fn k_dev_install_checkCorrect_complex() {
     log("k_dev_install_checkCorrect_complex start\n\0");
 
-    let expected_device_count = MAX_DEVICES - 1;
+    let expected_device_id = MAX_DEVICES - 1;
+    let expected_device_count = MAX_DEVICES;
     unsafe {
-        devicesCount = expected_device_count;
+        devicesCount = expected_device_id;
     }
 
     let id: size_t = 0;
     let mut device_descriptor = create_empty_device_desc();
+    unsafe {
+        DRIVER_INIT_CALLED = false;
+    }
     device_descriptor.r#type = gnwDeviceType::DEV_TYPE_SYSTEM as i32   |
                                gnwDeviceType::DEV_TYPE_MEM as i32      |
                                gnwDeviceType::DEV_TYPE_KEYBOARD as i32 |
@@ -172,23 +178,53 @@ fn k_dev_install_checkCorrect_complex() {
     device_descriptor.api.storCtrl.routine.read = Some(stor_ctrl_read);
 
     device_descriptor.driver.descriptor.irq = DEV_IRQ_LIMIT - 1;
-    extern "C" fn isr() {}
-    device_descriptor.driver.descriptor.isr = Some(isr);
-    extern "C" fn init() -> bool { return true; }
+    
+    // ISR has to be disabled due to k_pic_enableIRQ causing triple fault
+    // extern "C" fn isr() {}
+    // device_descriptor.driver.descriptor.isr = Some(isr);
+    device_descriptor.driver.descriptor.isr = None;
+    extern "C" fn init() -> bool {
+        unsafe {
+            DRIVER_INIT_CALLED = true;
+        }
+        return true;
+    }
     device_descriptor.driver.descriptor.init = Some(init);
 
     unsafe {
+        /*
+            Check install
+        */
         assert_eq!(k_dev_install(&id, &device_descriptor), gnwDriverError::NO_ERROR);
+        
+        /*
+            Check driver init called
+        */
+        assert_eq!(DRIVER_INIT_CALLED, true);
+        
+        /*
+            Check device count
+        */
+        assert_eq!(devicesCount, expected_device_count);
+        
+        /*
+            Check devices array
+        */
+        assert_eq!(devices[id as usize].desc, device_descriptor);
+        assert_eq!(devices[id as usize].initialized, true);
+        assert_eq!(devices[id as usize].started, false);
+        assert_eq!(devices[id as usize].holder, NONE_PROC_ID);
+        assert_eq!(devices[id as usize].listener, None);
+        assert_eq!(devices[id as usize].decoder, None);
     }
-    assert_eq!(id, expected_device_count);
 
-    // check driver_init called
-    // check devicesCount incremented
-    // check k_hal_install outcome
-    // check devices array
-
-    assert_eq!(0, 1);
-
+    /*
+        Check device identifier
+    */    
+    assert_eq!(id, expected_device_id);
+    
+    // check k_hal_install outcome - not applicable as long as ISR check is disabled    
+    
     log("k_dev_install_checkCorrect_complex end\n\0");
 }
 

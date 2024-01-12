@@ -10,6 +10,7 @@ pub type ptr_t = *mut u8;
 pub type addr_t = u32;
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct range_addr_t {
     pub offset: addr_t,
     pub sizeBytes: size_t,
@@ -63,11 +64,13 @@ pub enum gnwDeviceType {
 }
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceUHA_system_desc {
     pub _unused: u32,
 }
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceUHA_system_routine {
     pub getParam: Option<extern "C" fn(param: size_t,
                                        subParam: size_t,
@@ -80,77 +83,91 @@ pub struct gnwDeviceUHA_system_routine {
 }
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceUHA_system {
     pub desc: gnwDeviceUHA_system_desc,
     pub routine: gnwDeviceUHA_system_routine,
 }
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceUHA_mem_desc {
     pub bytesRange: range_addr_t,
     pub maxInputSizeBytes: size_t,
 }
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceUHA_mem_routine {
     pub write: Option<extern "C" fn(buffer: ptr_t, inputBufferRange: range_addr_t)>,
 }
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceUHA_mem {
     pub desc: gnwDeviceUHA_mem_desc,
     pub routine: gnwDeviceUHA_mem_routine,
 }
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceUHA_keyboard_desc {
     pub _unused: u32,
 }
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceUHA_keyboard_routine {
     pub _unused: Option<extern "C" fn()>,
 }
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceUHA_keyboard {
     pub desc: gnwDeviceUHA_keyboard_desc,
     pub routine: gnwDeviceUHA_keyboard_routine,
 }
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceUHA_mouse_desc {
     pub _unused: u32,
 }
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceUHA_mouse_routine {
     pub _unused: Option<extern "C" fn()>,
 }
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceUHA_mouse {
     pub desc: gnwDeviceUHA_mouse_desc,
     pub routine: gnwDeviceUHA_mouse_routine,
 }
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceUHA_fdc_desc {
     pub _unused: u32,
 }
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceUHA_fdc_routine {
     pub _unused: Option<extern "C" fn()>,
 }
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceUHA_fdc {
     pub desc: gnwDeviceUHA_fdc_desc,
     pub routine: gnwDeviceUHA_fdc_routine,
 }
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceUHA_storCtrl_desc {
     pub driveCount: u8,
     pub removable: bool,
@@ -158,6 +175,7 @@ pub struct gnwDeviceUHA_storCtrl_desc {
 }
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceUHA_storCtrl_routine {
     pub drivePresent: Option<extern "C" fn(index: u8) -> bool>,
     pub driveGeometry: Option<extern "C" fn(index: u8) -> gnwStorGeometry>,
@@ -169,78 +187,92 @@ pub struct gnwDeviceUHA_storCtrl_routine {
 }
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceUHA_storCtrl {
     pub desc: gnwDeviceUHA_storCtrl_desc,
     pub routine: gnwDeviceUHA_storCtrl_routine,
 }
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceUHA_charIn_desc {
     pub _unused: u32,
 }
 
 #[repr(C)]
-pub struct gnwDeviceUHA_charOut_desc {
-    pub _unused: u32,
-}
-
-#[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceUHA_charIn_routine {
     pub hasData: Option<extern "C" fn() -> bool>,
     pub read: Option<extern "C" fn(c: *const u8) -> size_t>,
 }
 
 #[repr(C)]
-pub struct gnwDeviceUHA_charOut_routine {
-    pub isReadyToWrite: Option<extern "C" fn() -> bool>,
-    pub write: Option<extern "C" fn(c: c_char) -> bool>,
-}
-
-#[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceUHA_charIn {
     pub desc: gnwDeviceUHA_charIn_desc,
     pub routine: gnwDeviceUHA_charIn_routine,
 }
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
+pub struct gnwDeviceUHA_charOut_desc {
+    pub _unused: u32,
+}
+
+#[repr(C)]
+#[derive(PartialEq, Debug)]
+pub struct gnwDeviceUHA_charOut_routine {
+    pub isReadyToWrite: Option<extern "C" fn() -> bool>,
+    pub write: Option<extern "C" fn(c: c_char) -> bool>,
+}
+
+#[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceUHA_charOut {
     pub desc: gnwDeviceUHA_charOut_desc,
     pub routine: gnwDeviceUHA_charOut_routine,
 }
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceUHA_display_desc {
     pub supportedFormatCount: size_t,
 }
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceUHA_display_routine {
     pub _unused: Option<extern "C" fn()>,
 }
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceUHA_display {
     pub desc: gnwDeviceUHA_display_desc,
     pub routine: gnwDeviceUHA_display_routine,
 }
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceUHA_event_desc {
     pub _unused: u32,
 }
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceUHA_event_routine {
     pub _unused: Option<extern "C" fn()>,
 }
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceUHA_event {
     pub desc: gnwDeviceUHA_event_desc,
     pub routine: gnwDeviceUHA_event_routine,
 }
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceUHA {
     pub system: gnwDeviceUHA_system,      // DEV_TYPE_SYSTEM
     pub mem: gnwDeviceUHA_mem,            // DEV_TYPE_MEM
@@ -255,6 +287,7 @@ pub struct gnwDeviceUHA {
 }
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDriverConfig {
     pub init: Option<extern "C" fn() -> bool>,
     pub start: Option<extern "C" fn() -> bool>,
@@ -263,17 +296,20 @@ pub struct gnwDriverConfig {
 }
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceIO {
     pub busBase: u16,
 }
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceDriver {
     pub io: gnwDeviceIO,
     pub descriptor: gnwDriverConfig,
 }
 
 #[repr(C)]
+#[derive(PartialEq, Debug)]
 pub struct gnwDeviceDescriptor {
     pub r#type: i32, /* gnwDeviceType bitmask */
     pub api: gnwDeviceUHA,
