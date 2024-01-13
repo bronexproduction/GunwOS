@@ -21,7 +21,7 @@ extern void k_pic_configure();
 extern void k_idt_loadDefault();
 extern void k_proc_init();
 
-static struct isrEntry {
+PRIVATE struct isrEntry {
     size_t devId;
     void (*routine)();
 } isrReg[DEV_IRQ_LIMIT];

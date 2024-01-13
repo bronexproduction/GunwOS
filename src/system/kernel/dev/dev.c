@@ -93,7 +93,6 @@ PRIVATE enum gnwDeviceError validateStartedDevice(const procId_t processId, cons
 
 enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescriptor * const descriptor) {
     if (!id) {
-        OOPS("Identifier storage cannot be nullptr");
         return UNKNOWN;
     }
     if (devicesCount >= MAX_DEVICES) {
@@ -108,12 +107,10 @@ enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescr
     const struct gnwDriverConfig *driverDesc = &(descriptor->driver.descriptor);
 
     if (driverDesc->irq >= DEV_IRQ_LIMIT) {
-        OOPS("Invalid IRQ value");
         return IRQ_INVALID;
     }
 
     if (driverDesc->isr && k_hal_isIRQRegistered(driverDesc->irq)) {
-        OOPS("IRQ conflict");
         return IRQ_CONFLICT;
     }
 

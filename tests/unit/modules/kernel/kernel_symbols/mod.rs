@@ -371,6 +371,12 @@ pub enum gnwDriverError {
     UNKNOWN         = -1,
 }
 
+#[repr(C)]
+pub struct isrEntry {
+    pub devId: size_t,
+    pub routine: Option<extern "C" fn()>,
+}
+
 pub const NONE_PROC_ID: procId_t = -2;
 pub const KERNEL_PROC_ID: procId_t = -1;
 
@@ -389,4 +395,8 @@ extern "C" {
     pub fn validateInstalledId(id: size_t) -> bool;
     pub fn validateStartedDevice(procId: procId_t, devId: size_t) -> gnwDeviceError;
     pub fn k_dev_install(id: *const size_t, descriptor: *const gnwDeviceDescriptor) -> gnwDriverError;
+
+    // hal
+
+    pub static mut isrReg: [isrEntry; DEV_IRQ_LIMIT as usize];
 }
