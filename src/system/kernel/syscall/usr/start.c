@@ -23,12 +23,10 @@ enum gnwCtrlError loadElf(const ptr_t filePtr,
                           size_t * const memBytes, 
                           addr_t * const entry) {
     if (!memBytes) {
-        OOPS("Unexpected nullptr");
-        return GCE_UNKNOWN;
+        OOPS("Unexpected nullptr", GCE_UNKNOWN);
     }
     if (!entry) {
-        OOPS("Unexpected nullptr");
-        return GCE_UNKNOWN;
+        OOPS("Unexpected nullptr", GCE_UNKNOWN);
     }
     addr_t vMemLow;
     *memBytes = elfAllocBytes(filePtr, fileSizeBytes, &vMemLow);
@@ -48,8 +46,7 @@ enum gnwCtrlError loadElf(const ptr_t filePtr,
     for (size_t index = 0; index < elfGetSectionHeaderEntryCount(filePtr); ++index) {
         const struct elfSectionHeaderEntry32 * const entry = elfGetSectionHeaderEntry(filePtr, index, fileSizeBytes); 
         if (!entry) {
-            OOPS("Unexpected nullptr");
-            return GCE_UNKNOWN;
+            OOPS("Unexpected nullptr", GCE_UNKNOWN);
         }
         if (!(entry->attributes & ESECATTR_ALLOC &&
               entry->type == ESECTYPE_PROGBITS)) {
@@ -104,16 +101,11 @@ enum gnwCtrlError loadElf(const ptr_t filePtr,
 }
 
 void k_scr_usr_start(const procId_t procId, const struct gnwCtrlStartDescriptor * const descPtr) {
-    SCLF_GET_VALID_ABS(const struct gnwCtrlStartDescriptor * const, descPtr, sizeof(struct gnwCtrlStartDescriptor), {
-        return;
-    });
-    SCLF_GET_VALID_ABS_NAMED(enum gnwCtrlError * const, errorPtr, abs_descPtr->errorPtr, sizeof(enum gnwCtrlError), {
-        return;
-    });
+    SCLF_GET_VALID_ABS(const struct gnwCtrlStartDescriptor * const, descPtr, sizeof(struct gnwCtrlStartDescriptor), {},);
+    SCLF_GET_VALID_ABS_NAMED(enum gnwCtrlError * const, errorPtr, abs_descPtr->errorPtr, sizeof(enum gnwCtrlError), {},);
     SCLF_GET_VALID_ABS_NAMED(const char * const, pathPtr, abs_descPtr->pathPtr, abs_descPtr->pathLen, {
         *abs_errorPtr = GCE_INVALID_ARGUMENT;
-        return;
-    });
+    },);
 
     size_t fileSizeBytes;
     
