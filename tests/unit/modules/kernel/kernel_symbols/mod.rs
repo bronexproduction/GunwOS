@@ -361,14 +361,15 @@ pub enum gnwDeviceError {
 #[repr(i32)]
 #[derive(PartialEq, Debug)]
 pub enum gnwDriverError {
-    NO_ERROR        = 0,
-    UNINITIALIZED   = 1,
-    START_FAILED    = 2,
-    IRQ_CONFLICT    = 3,
-    IRQ_INVALID     = 4,
-    LIMIT_REACHED   = 5,
-    ISR_MISSING     = 6,
-    UNKNOWN         = -1,
+    GDRE_NONE               = 0,
+    GDRE_UNINITIALIZED      = 1,
+    GDRE_START_FAILED       = 2,
+    GDRE_IRQ_CONFLICT       = 3,
+    GDRE_IRQ_INVALID        = 4,
+    GDRE_LIMIT_REACHED      = 5,
+    GDRE_ISR_MISSING        = 6,
+    GDRE_INVALID_DESCRIPTOR = 7,
+    GDRE_UNKNOWN            = -1,
 }
 
 #[repr(C)]

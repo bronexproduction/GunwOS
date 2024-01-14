@@ -93,13 +93,16 @@ PRIVATE enum gnwDeviceError validateStartedDevice(const procId_t processId, cons
 
 enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescriptor * const descriptor) {
     if (!id) {
-        return UNKNOWN;
+        LOG("ID nullptr not allowed");
+        return GDRE_UNKNOWN;
     }
     if (devicesCount >= MAX_DEVICES) {
-        return LIMIT_REACHED;
+        LOG("Device limit reached");
+        return GDRE_LIMIT_REACHED;
     }
     if (!validateDeviceDescriptor(descriptor)) {
-        return UNKNOWN;
+        LOG("Device descriptor invalid");
+        return GDRE_INVALID_DESCRIPTOR;
     }
 
     #warning CHECK MEMORY-MAPPED DEVICES FOR OVERLAPS WITH CURRENTLY INSTALLED ONES
@@ -107,11 +110,11 @@ enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescr
     const struct gnwDriverConfig *driverDesc = &(descriptor->driver.descriptor);
 
     if (driverDesc->irq >= DEV_IRQ_LIMIT) {
-        return IRQ_INVALID;
+        return GDRE_IRQ_INVALID;
     }
 
     if (driverDesc->isr && k_hal_isIRQRegistered(driverDesc->irq)) {
-        return IRQ_CONFLICT;
+        return GDRE_IRQ_CONFLICT;
     }
 
     struct device dev = { 
@@ -126,10 +129,10 @@ enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescr
     dev.initialized = (driverDesc->init ? driverDesc->init() : 1);
     if (!dev.initialized) {
         OOPS("Driver init failed");
-        return UNINITIALIZED;
+        return GDRE_UNINITIALIZED;
     }
     
-    enum gnwDriverError e = NO_ERROR;
+    enum gnwDriverError e = GDRE_NONE;
 
     *id = devicesCount;
 
@@ -137,27 +140,27 @@ enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescr
         e = k_hal_install(*id, descriptor->driver.descriptor);   
     }
 
-    if (e != NO_ERROR) {
+    if (e != GDRE_NONE) {
         OOPS("Error: Driver initialization failed");
         return e;
     }
 
     devices[devicesCount++] = dev;
 
-    return NO_ERROR;
+    return GDRE_NONE;
 }
 
 enum gnwDriverError k_dev_start(size_t id) {
     if (!validateId(id)) {
         OOPS("Device identifier invalid");
-        return UNKNOWN;
+        return GDRE_UNKNOWN;
     }
 
     struct device *dev = &devices[id];
 
     if (!dev->initialized) {
         OOPS("Trying to start uninitialized driver");
-        return UNINITIALIZED;
+        return GDRE_UNINITIALIZED;
     }
 
     bool (*start)(void) = dev->desc.driver.descriptor.start;
@@ -165,10 +168,10 @@ enum gnwDriverError k_dev_start(size_t id) {
     dev->started = (start ? start() : 1);
     if (!dev->started) {
         OOPS("Error: Driver startup failed");
-        return START_FAILED;
+        return GDRE_START_FAILED;
     }
 
-    return NO_ERROR;
+    return GDRE_NONE;
 }
 
 void k_dev_init() {

@@ -28,12 +28,12 @@ static void loadDevice(struct gnwDeviceDescriptor (*descProvider)(),
     size_t id;
     const struct gnwDeviceDescriptor desc = descProvider();
     e = k_dev_install(&id, &desc);
-    if (e != NO_ERROR) { 
+    if (e != GDRE_NONE) { 
         OOPS(installFailureMsg); 
     }
 
     e = k_dev_start(id);
-    if (e != NO_ERROR) { 
+    if (e != GDRE_NONE) { 
         OOPS(startFailureMsg);
     }
 }
