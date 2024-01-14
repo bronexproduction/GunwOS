@@ -396,6 +396,7 @@ extern "C" {
     pub fn validateInstalledId(id: size_t) -> bool;
     pub fn validateStartedDevice(procId: procId_t, devId: size_t) -> gnwDeviceError;
     pub fn k_dev_install(id: *const size_t, descriptor: *const gnwDeviceDescriptor) -> gnwDriverError;
+    pub fn k_dev_start(id: size_t) -> gnwDriverError;
 
     // hal
 

@@ -156,6 +156,7 @@ pub fn create_valid_device_desc_minimal() -> gnwDeviceDescriptor {
 }
 
 pub static mut DRIVER_INIT_CALLED: bool = false;
+pub static mut DRIVER_START_CALLED: bool = false;
 
 pub fn create_valid_device_desc_complex() -> gnwDeviceDescriptor {
     let mut device_descriptor = create_empty_device_desc();
@@ -226,6 +227,20 @@ pub fn create_valid_device_desc_complex() -> gnwDeviceDescriptor {
         return true;
     }
     device_descriptor.driver.descriptor.init = Some(init);
+    extern "C" fn start() -> bool {
+        unsafe {
+            DRIVER_START_CALLED = true;
+        }
+        return true;
+    }
+    device_descriptor.driver.descriptor.start = Some(start);
 
     return device_descriptor;
+}
+
+pub fn install_dummy_device(id: &size_t) {
+    let device_descriptor = create_valid_device_desc_minimal();
+    unsafe {
+        k_dev_install(id, &device_descriptor);
+    }
 }

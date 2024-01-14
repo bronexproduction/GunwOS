@@ -197,8 +197,7 @@ enum gnwFileErrorCode k_stor_file_getInfo(const char * const path,
                                           const size_t pathLen, 
                                           struct gnwFileInfo * const fileInfo) {
     if (!path || !fileInfo) {
-        OOPS("Nullptr access");
-        return GFEC_UNKNOWN;
+        OOPS("Nullptr access", GFEC_UNKNOWN);
     }
 
     return loadFileChain(path, pathLen, fileInfo, nullptr);
@@ -208,8 +207,7 @@ enum gnwFileErrorCode k_stor_file_load(const char * const path,
                                        const size_t pathLen,
                                        const ptr_t dst) {
     if (!path || !dst) {
-        OOPS("Nullptr access");
-        return GFEC_UNKNOWN;
+        OOPS("Nullptr access", GFEC_UNKNOWN);
     }
 
     return loadFileChain(path, pathLen, nullptr, dst);

@@ -70,8 +70,7 @@ static void finishIfNeeded(const procId_t procId, const size_t index) {
 
 static enum gnwRunLoopError getPendingDispatchItem(const procId_t procId, struct dispatchItem * * const itemPtr, size_t * const index) {
     if (!IN_RANGE(0, procId, MAX_PROC)) {
-        OOPS("Unexpected process ID");
-        return GRLE_UNKNOWN;
+        OOPS("Unexpected process ID", GRLE_UNKNOWN);
     }
 
     struct runLoop * const loop = &rlp_main[procId];
@@ -86,12 +85,10 @@ static enum gnwRunLoopError getPendingDispatchItem(const procId_t procId, struct
 
 enum gnwRunLoopError k_runloop_reserve(const procId_t procId, size_t * const token) {
     if (!IN_RANGE(0, procId, MAX_PROC)) {
-        OOPS("Unexpected process ID");
-        return GRLE_UNKNOWN;
+        OOPS("Unexpected process ID", GRLE_UNKNOWN);
     }
     if (!token) {
-        OOPS("Nullptr");
-        return GRLE_UNKNOWN;
+        OOPS("Nullptr", GRLE_UNKNOWN);
     }
 
     struct runLoop * loop = &rlp_main[procId];
@@ -118,43 +115,35 @@ enum gnwRunLoopError k_runloop_dispatch(const procId_t procId,
                                         const ptr_t data,
                                         const gnwRunLoopDataEncodingRoutine dataEncoder) {
     if (!IN_RANGE(0, procId, MAX_PROC)) {
-        OOPS("Unexpected process ID");
-        return GRLE_UNKNOWN;
+        OOPS("Unexpected process ID", GRLE_UNKNOWN);
     }
     if (token >= DISPATCH_QUEUE_SIZE) {
-        OOPS("Unexpected token");
-        return GRLE_UNKNOWN;
+        OOPS("Unexpected token", GRLE_UNKNOWN);
     }
     struct dispatchItem * const queueItem = reservedEmptyItemOrNull(procId, token);
     if (!queueItem) {
-        OOPS("Invalid dispatch item state");
-        return GRLE_INVALID_STATE;
+        OOPS("Invalid dispatch item state", GRLE_INVALID_STATE);
     }
     if (item.dataSizeBytes) {
         if (item.dataSizeBytes > DISPATCH_MAX_DATA_SIZE_BYTES) {
-            OOPS("Payload too large");
             release(queueItem);
-            return GRLE_INVALID_PARAMETER;
+            OOPS("Payload too large", GRLE_INVALID_PARAMETER);
         }
         if (!GNWEVENT_ACCEPTS_DATA(item.format)) {
-            OOPS("Invalid dispatch format");
             release(queueItem);
-            return GRLE_INVALID_PARAMETER;
+            OOPS("Invalid dispatch format", GRLE_INVALID_PARAMETER);
         }
         if (!data) {
-            OOPS("Nullptr");
             release(queueItem);
-            return GRLE_INVALID_PARAMETER;
+            OOPS("Nullptr", GRLE_INVALID_PARAMETER);
         }
         if (!dataEncoder || !item.decode) {
-            OOPS("No encode/decode present");
             release(queueItem);
-            return GRLE_INVALID_PARAMETER;
+            OOPS("No encode/decode present", GRLE_INVALID_PARAMETER);
         }
     } else if (data) {
-        OOPS("No data expected");
         release(queueItem);
-        return GRLE_INVALID_PARAMETER;
+        OOPS("No data expected", GRLE_INVALID_PARAMETER);
     } else {
         queueItem->dataHandled = true;
     }
@@ -223,8 +212,7 @@ enum gnwRunLoopError k_runloop_getPendingItemData(const procId_t procId, ptr_t a
 
 bool k_runloop_isEmpty(const procId_t procId) {
     if (!IN_RANGE(0, procId, MAX_PROC)) {
-        OOPS("Unexpected process ID");
-        return true;
+        OOPS("Unexpected process ID", true);
     }
 
     return isItemEmpty(nextItem(&rlp_main[procId]));
@@ -232,8 +220,7 @@ bool k_runloop_isEmpty(const procId_t procId) {
 
 void k_runloop_procCleanup(const procId_t procId) {
     if (!IN_RANGE(0, procId, MAX_PROC)) {
-        OOPS("Unexpected process ID");
-        return;
+        OOPS("Unexpected process ID",);
     }
 
     memzero(&rlp_main[procId], sizeof(struct runLoop));

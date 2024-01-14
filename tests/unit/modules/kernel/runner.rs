@@ -4,6 +4,7 @@
 #![test_runner(kernel_test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
+mod kernel_override;
 mod kernel_symbols;
 mod kernel_tests;
 mod utils;

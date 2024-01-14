@@ -54,7 +54,7 @@ void setMode(const enum modeOfOperation mode) {
         attributeEnable();
     } break;
     default:
-        OOPS("Unsupported display mode");
+        OOPS("Unsupported display mode",);
         return;
     }
 }

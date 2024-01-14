@@ -82,11 +82,11 @@ enum failReason_t {
 static void fail(const enum failReason_t reason) {
     switch (reason) {
     case FAIL_REASON_IRQ_NOT_FOUND:
-        OOPS("Driver for specified IRQ not found"); break;
+        OOPS("Driver for specified IRQ not found",); break;
     case FAIL_REASON_IRQ_ABOVE_LIMIT:
-        OOPS("Requested service of IRQ above limit"); break;
+        OOPS("Requested service of IRQ above limit",); break;
     default:
-        OOPS("Unknown IRQ handling failure"); break;
+        OOPS("Unknown IRQ handling failure",); break;
     }
 }
 

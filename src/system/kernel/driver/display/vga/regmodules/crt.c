@@ -210,7 +210,7 @@ void crtSetMode(const enum modeOfOperation mode, uint_8 * const regContextMCR, u
         *regContextMCR |= BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER;
     } break;
     default: {
-        OOPS("Unsupported video mode");
+        OOPS("Unsupported video mode",);
     } break;
     }
 

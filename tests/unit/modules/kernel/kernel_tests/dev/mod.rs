@@ -245,3 +245,77 @@ fn k_dev_install_checkIncorrect_irqConflict() {
     
     log("k_dev_install_checkIncorrect_irqConflict end\n\0");
 }
+
+#[test_case]
+fn k_dev_install_checkIncorrect_initFailure() {
+    log("k_dev_install_checkIncorrect_initFailure start\n\0");
+
+    let id: size_t = 0;
+    let mut device_descriptor = create_valid_device_desc_minimal();
+    extern "C" fn init() -> bool { return false; }
+    device_descriptor.driver.descriptor.init = Some(init);
+
+    unsafe {
+        assert_eq!(k_dev_install(&id, &device_descriptor), gnwDriverError::GDRE_UNINITIALIZED);
+    }
+    
+    log("k_dev_install_checkIncorrect_initFailure end\n\0");
+}
+
+#[test_case]
+fn k_dev_start_checkCorrect() {
+    log("k_dev_start_checkCorrect start\n\0");
+
+    let id: size_t = 0;
+    install_dummy_device(&id);
+
+    unsafe {
+        assert_eq!(k_dev_start(id), gnwDriverError::GDRE_NONE);
+    }
+    
+    log("k_dev_start_checkCorrect end\n\0");
+}
+
+#[test_case]
+fn k_dev_start_checkIncorrect_idInvalid() {
+    log("k_dev_start_checkIncorrect_idInvalid start\n\0");
+
+    unsafe {
+        assert_eq!(k_dev_start(MAX_DEVICES), gnwDriverError::GDRE_UNKNOWN);
+        assert_eq!(k_dev_start(MAX_DEVICES + 1), gnwDriverError::GDRE_UNKNOWN);
+    }
+    
+    log("k_dev_start_checkIncorrect_idInvalid end\n\0");
+}
+
+#[test_case]
+fn k_dev_start_checkIncorrect_deviceNotInitialized() {
+    log("k_dev_start_checkIncorrect_deviceNotInitialized start\n\0");
+
+    let id: size_t = 0;
+    install_dummy_device(&id);
+
+    unsafe {
+        devices[0].initialized = false;
+        k_dev_start(0);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+    }
+    
+    log("k_dev_start_checkIncorrect_deviceNotInitialized end\n\0");
+}
+
+#[test_case]
+fn k_dev_start_checkIncorrect_deviceStartFailed() {
+    log("k_dev_start_checkIncorrect_deviceStartFailed start\n\0");
+
+    let id: size_t = 0;
+    install_dummy_device(&id);
+
+    extern "C" fn start() -> bool { return false; }
+    unsafe {
+        devices[0].desc.driver.descriptor.start = Some(start);
+        assert_eq!(k_dev_start(0), gnwDriverError::GDRE_START_FAILED);
+    }
+    
+    log("k_dev_start_checkIncorrect_deviceStartFailed end\n\0");
+}

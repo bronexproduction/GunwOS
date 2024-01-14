@@ -15,6 +15,7 @@
 #include <hal/mem/mem.h>
 #include <error/panic.h>
 #include <hal/criticalsec/criticalsec.h>
+#include <log/log.h>
 #include <src/_gunwdev.h>
 
 #define MAX_DEVICES 8
@@ -128,7 +129,7 @@ enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescr
 
     dev.initialized = (driverDesc->init ? driverDesc->init() : 1);
     if (!dev.initialized) {
-        OOPS("Driver init failed");
+        LOG("Driver init failed");
         return GDRE_UNINITIALIZED;
     }
     
@@ -141,7 +142,7 @@ enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescr
     }
 
     if (e != GDRE_NONE) {
-        OOPS("Error: Driver initialization failed");
+        LOG("Error: Driver installation failed");
         return e;
     }
 
@@ -152,22 +153,21 @@ enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescr
 
 enum gnwDriverError k_dev_start(size_t id) {
     if (!validateId(id)) {
-        OOPS("Device identifier invalid");
+        LOG("Device identifier invalid");
         return GDRE_UNKNOWN;
     }
 
     struct device *dev = &devices[id];
 
     if (!dev->initialized) {
-        OOPS("Trying to start uninitialized driver");
-        return GDRE_UNINITIALIZED;
+        OOPS("Trying to start uninitialized driver", GDRE_UNKNOWN);
     }
 
     bool (*start)(void) = dev->desc.driver.descriptor.start;
 
     dev->started = (start ? start() : 1);
     if (!dev->started) {
-        OOPS("Error: Driver startup failed");
+        LOG("Error: Driver startup failed");
         return GDRE_START_FAILED;
     }
 
@@ -179,13 +179,11 @@ void k_dev_init() {
 
 enum gnwDeviceError k_dev_getById(const size_t id, struct gnwDeviceUHADesc * const desc) {
     if (!validateInstalledId(id)) {
-        OOPS("Device identifier invalid");
-        return GDE_UNKNOWN;
+        OOPS("Device identifier invalid", GDE_UNKNOWN);
     }
     
     if (!desc) {
-        OOPS("Device descriptor nullptr");
-        return GDE_UNKNOWN;
+        OOPS("Device descriptor nullptr", GDE_UNKNOWN);
     }
     
     *desc = uhaGetDesc(id, devices[id].desc.type, devices[id].desc.api);
@@ -194,8 +192,7 @@ enum gnwDeviceError k_dev_getById(const size_t id, struct gnwDeviceUHADesc * con
 
 enum gnwDeviceError k_dev_getByType(const enum gnwDeviceType type, struct gnwDeviceUHADesc * const desc) {
     if (!desc) {
-        OOPS("Device descriptor nullptr");
-        return GDE_UNKNOWN;
+        OOPS("Device descriptor nullptr", GDE_UNKNOWN);
     }
 
     for (size_t index = 0; index < MAX_DEVICES; ++index) {
@@ -209,13 +206,11 @@ enum gnwDeviceError k_dev_getByType(const enum gnwDeviceType type, struct gnwDev
 
 enum gnwDeviceError k_dev_getUHAForId(const size_t id, struct gnwDeviceUHA * const uha) {
     if (!validateInstalledId(id)) {
-        OOPS("Device identifier invalid");
-        return GDE_UNKNOWN;
+        OOPS("Device identifier invalid", GDE_UNKNOWN);
     }
     
     if (!uha) {
-        OOPS("UHA descriptor nullptr");
-        return GDE_UNKNOWN;
+        OOPS("UHA descriptor nullptr", GDE_UNKNOWN);
     }
 
     *uha = devices[id].desc.api;
@@ -224,8 +219,7 @@ enum gnwDeviceError k_dev_getUHAForId(const size_t id, struct gnwDeviceUHA * con
 
 enum gnwDeviceError k_dev_acquireHold(const procId_t processId, const size_t deviceId) {
     if (!validateInstalledId(deviceId)) {
-        OOPS("Device identifier invalid");
-        return GDE_UNKNOWN;
+        OOPS("Device identifier invalid", GDE_UNKNOWN);
     }
 
     if (devices[deviceId].holder != NONE_PROC_ID) {
@@ -239,7 +233,7 @@ enum gnwDeviceError k_dev_acquireHold(const procId_t processId, const size_t dev
 
 void k_dev_releaseHold(const procId_t processId, const size_t deviceId) {
     if (!validateInstalledId(deviceId)) {
-        OOPS("Device identifier invalid");
+        OOPS("Device identifier invalid",);
     }
 
     if (devices[deviceId].holder == processId) {
@@ -254,8 +248,7 @@ enum gnwDeviceError k_dev_writeMem(const procId_t processId,
                                    const ptr_t buffer,
                                    const range_addr_t devMemRange) {
     if (!buffer) {
-        OOPS("Buffer cannot be nullptr");
-        return GDE_UNKNOWN;
+        OOPS("Buffer cannot be nullptr", GDE_UNKNOWN);
     }
 
     const enum gnwDeviceError e = validateStartedDevice(processId, deviceId);
@@ -353,8 +346,7 @@ enum gnwDeviceError k_dev_getParam(const size_t deviceId,
                                    const struct gnwDeviceParamDescriptor paramDescriptor,
                                    size_t * const absResult) {
     if (!absResult) {
-        OOPS("Nullptr");
-        return GDE_UNKNOWN;
+        OOPS("Nullptr", GDE_UNKNOWN);
     }
 
     if (!validateInstalledId(deviceId)) {
@@ -403,8 +395,7 @@ static enum gnwDeviceError validateEmitter(const size_t * const devIdPtr) {
         return GDE_INVALID_DEVICE_STATE;
     }
     if (!validateInstalledId(*devIdPtr)) {
-        OOPS("Unexpected serviced device ID");
-        return GDE_UNKNOWN;
+        OOPS("Unexpected serviced device ID", GDE_UNKNOWN);
     }
     if (!devices[*devIdPtr].started) {
         return GDE_INVALID_DEVICE_STATE;
@@ -422,8 +413,7 @@ static enum gnwDeviceError validateListenerInvocation(const size_t deviceId) {
         return GDE_UNKNOWN;
     } 
     if (dev->holder == NONE_PROC_ID) {
-        OOPS("Inconsistent holder listener state");
-        return GDE_UNKNOWN;
+        OOPS("Inconsistent holder listener state", GDE_UNKNOWN);
     }
 
     return GDE_NONE;
@@ -431,8 +421,7 @@ static enum gnwDeviceError validateListenerInvocation(const size_t deviceId) {
 
 enum gnwDeviceError k_dev_emit(const struct gnwDeviceEvent * const eventPtr) {
     if (!eventPtr) {
-        OOPS("Nullptr");
-        return GDE_UNKNOWN;
+        OOPS("Nullptr", GDE_UNKNOWN);
     }
     enum gnwDeviceError err = validateEmitter(k_hal_servicedDevIdPtr);
     if (err) {

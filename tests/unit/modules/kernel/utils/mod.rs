@@ -1,6 +1,8 @@
 use core::ffi::c_char;
 use kernel_symbols::k_log_log;
 
+pub static mut KERNEL_PANIC_FLAG: bool = false;
+
 extern "C" {
     /*
         bus

@@ -48,8 +48,7 @@ procId_t k_proc_getCurrentId() {
 
 struct k_proc_process k_proc_getInfo(const procId_t procId) {
     if (procId < KERNEL_PROC_ID || procId >= MAX_PROC) {
-        OOPS("Process id out of range");
-        return kernelProc.info;
+        OOPS("Process id out of range", kernelProc.info);
     }
     
     return (procId == KERNEL_PROC_ID) ? kernelProc.info : pTab[procId].info;
@@ -85,32 +84,25 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
     ptr_t dataEndPtr = dataStartPtr + stackBytes - 1;
 
     if (codeStartPtr < GDT_SEGMENT_START(r3code)) {
-        OOPS("Attempted to spawn process below its code segment");
-        return PE_UNKNOWN;
+        OOPS("Attempted to spawn process below its code segment", PE_UNKNOWN);
     }
     if (codeEndPtr > GDT_SEGMENT_END(r3code)) {
-        OOPS("Attempted to spawn process above its code segment");
-        return PE_UNKNOWN;
+        OOPS("Attempted to spawn process above its code segment", PE_UNKNOWN);
     }
     if (codeEndPtr <= codeStartPtr) {
-        OOPS("Attempted to spawn process outside its code segment");
-        return PE_UNKNOWN;
+        OOPS("Attempted to spawn process outside its code segment", PE_UNKNOWN);
     }
     if (dataStartPtr < GDT_SEGMENT_START(r3data)) {
-        OOPS("Attempted to spawn process below its data segment");
-        return PE_UNKNOWN;
+        OOPS("Attempted to spawn process below its data segment", PE_UNKNOWN);
     }
     if (dataEndPtr > GDT_SEGMENT_END(r3data)) {
-        OOPS("Attempted to spawn process above its data segment");
-        return PE_UNKNOWN;
+        OOPS("Attempted to spawn process above its data segment", PE_UNKNOWN);
     }
     if (dataEndPtr <= dataStartPtr) {
-        OOPS("Attempted to spawn process outside its data segment");
-        return PE_UNKNOWN;
+        OOPS("Attempted to spawn process outside its data segment", PE_UNKNOWN);
     }
     if (dataEndPtr <= codeStartPtr) {
-        OOPS("Attempted to spawn process outside its segments");
-        return PE_UNKNOWN;
+        OOPS("Attempted to spawn process outside its segments", PE_UNKNOWN);
     }
 
     addr_t relativeImgPtr = codeStartPtr - GDT_SEGMENT_START(r3code);
@@ -136,8 +128,7 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
 
 void k_proc_lock(const procId_t procId, enum k_proc_lockType lockType) {
     if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
-        OOPS("Process id out of range");
-        return;
+        OOPS("Process id out of range",);
     }
 
     pTab[procId].lockMask |= lockType;
@@ -147,8 +138,7 @@ void k_proc_lock(const procId_t procId, enum k_proc_lockType lockType) {
     }
     if (pTab[procId].info.state != PS_READY &&
         pTab[procId].info.state != PS_RUNNING) {
-        OOPS("Unexpected process state during lock");
-        return;
+        OOPS("Unexpected process state during lock",);
     }
 
     pTab[procId].info.state = PS_BLOCKED;
@@ -157,8 +147,7 @@ void k_proc_lock(const procId_t procId, enum k_proc_lockType lockType) {
 
 void k_proc_unlock(const procId_t procId, enum k_proc_lockType lockType) {
     if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
-        OOPS("Process id out of range");
-        return;
+        OOPS("Process id out of range",);
     }
 
     pTab[procId].lockMask &= ~lockType;
@@ -180,12 +169,10 @@ static bool isProcessAlive(const procId_t procId) {
 
 static void procCleanup(const procId_t procId) {
     if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
-        OOPS("Process id out of range");
-        return;
+        OOPS("Process id out of range",);
     }
     if (isProcessAlive(procId)) {
-        OOPS("Unexpected process state during cleanup");
-        return;
+        OOPS("Unexpected process state during cleanup",);
     }
 
     memzero(&pTab[procId], sizeof(struct process));
@@ -194,12 +181,10 @@ static void procCleanup(const procId_t procId) {
 
 void k_proc_stop(const procId_t procId) {
     if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
-        OOPS("Process id out of range");
-        return;
+        OOPS("Process id out of range",);
     }
     if (!isProcessAlive(procId)) {
-        OOPS("Unexpected process state during stop");
-        return;
+        OOPS("Unexpected process state during stop",);
     }
     
     pTab[procId].info.state = PS_FINISHED;
@@ -221,24 +206,19 @@ void k_proc_stop(const procId_t procId) {
 */
 void k_proc_switch(const procId_t procId) {
     if (procId < 0) {
-        OOPS("Invalid next process id during switch");
-        return;
+        OOPS("Invalid next process id during switch",);
     }
     if (procId >= MAX_PROC) {
-        OOPS("Next process id over limit during switch");
-        return;
+        OOPS("Next process id over limit during switch",);
     }
     if (kernelProc.info.state != PS_RUNNING) {
-        OOPS("Invalid kernel process state during switch");
-        return;
+        OOPS("Invalid kernel process state during switch",);
     }
     if (pTab[procId].info.state != PS_READY) {
-        OOPS("Invalid next process state during switch");
-        return;
+        OOPS("Invalid next process state during switch",);
     }
     if (pTab[procId].lockMask) {
-        OOPS("Attempted switch to locked process");
-        return;
+        OOPS("Attempted switch to locked process",);
     }
     
     kernelProc.info.state = PS_READY;
@@ -314,26 +294,21 @@ void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const procId_t currentP
         return;
     }
     if (currentProcId < 0) {
-        OOPS("Invalid current process id during switch");
-        return;
+        OOPS("Invalid current process id during switch",);
     }
     if (currentProcId >= MAX_PROC) {
-        OOPS("Current process id over limit during switch");
-        return;
+        OOPS("Current process id over limit during switch",);
     }
     if (pTab[currentProcId].info.state != PS_RUNNING &&
         pTab[currentProcId].info.state != PS_BLOCKED &&
         pTab[currentProcId].info.state != PS_FINISHED) {
-        OOPS("Invalid current process state during switch");
-        return;
+        OOPS("Invalid current process state during switch",);
     }
     if (kernelProc.info.state != PS_READY) {
-        OOPS("Invalid kernel process state during switch");
-        return;
+        OOPS("Invalid kernel process state during switch",);
     }
     if (!refEsp) {
-        OOPS("Invalid reference stack pointer during switch");
-        return;
+        OOPS("Invalid reference stack pointer during switch",);
     }
     
     kernelProc.info.state = PS_RUNNING;
@@ -428,15 +403,13 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
                                         const gnwRunLoopDataEncodingRoutine encoder,
                                         const gnwRunLoopDataEncodingRoutine decoder) {
     if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
-        OOPS("Process id out of range");
-        return PE_UNKNOWN;
+        OOPS("Process id out of range", PE_UNKNOWN);
     }
     if (pTab[procId].info.state == PS_FINISHED) {
         return PE_IGNORED;
     }
     if (!isProcessAlive(procId)) {
-        OOPS("Attempted callback invocation in dead process");
-        return PE_UNKNOWN;
+        OOPS("Attempted callback invocation in dead process", PE_UNKNOWN);
     }
     
     struct gnwRunLoopDispatchItem item;
@@ -449,8 +422,7 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
         item.routine._ptr = (gnwEventListener_ptr)funPtr;
         break;
     case GEF_NONE:
-        OOPS("Unexpected event format");
-        return PE_UNKNOWN;
+        OOPS("Unexpected event format", PE_UNKNOWN);
     }
     item.dataSizeBytes = pSizeBytes;
     item.decodedDataSizeBytes = pDecodedSizeBytes;

@@ -19,8 +19,7 @@ enum k_stor_error k_stor_fileSys_install(const struct gnwFileSystemDescriptor * 
         }
     }
     if (fileSysIndex >= MAX_FILESYS) {
-        OOPS("File system count limit exceeded");
-        return SE_LIMIT_REACHED;
+        OOPS("File system count limit exceeded", SE_LIMIT_REACHED);
     }
             
     k_stor_fileSystems[fileSysIndex].used = true;

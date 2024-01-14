@@ -88,7 +88,7 @@ void attributeSetMode(const enum modeOfOperation mode) {
         // reg.horizontalPelPanning = BIT_RANGE_ALIGNED(0x08, BRA_HPPR_HORIZONTAL_PEL_PANNING_RANGE); /* 0x08 */
     } break;
     default: {
-        OOPS("Unsupported video mode");
+        OOPS("Unsupported video mode",);
     } break;
     }
 

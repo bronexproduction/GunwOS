@@ -97,15 +97,14 @@ static void emitEvent(const int_32 type, const char data) {
 
     err = emit(&event);
     if (err != GDE_NONE) {
-        OOPS("Error emitting keyboard event");
-        return;
+        OOPS("Error emitting keyboard event",);
     }
 }
 
 ISR(
     /* Checking output buffer status */
     if (!rdb(KBD_BUS_STATUS) & KBD_STAT_OUTB) {
-        OOPS("Keyboard output buffer empty on keyboard interrupt");
+        OOPS_NBR("Keyboard output buffer empty on keyboard interrupt");
         ISR_END
     }
 

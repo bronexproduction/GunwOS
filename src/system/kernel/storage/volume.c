@@ -84,12 +84,10 @@ static enum k_stor_error readBytes(const size_t volumeId, const range_size_t ran
 
 enum k_stor_error k_stor_volume_readHeader(const size_t volumeId, uint_8 * const headerBuffer) {
     if (!headerBuffer) {
-        OOPS("Nullptr");
-        return SE_UNKNOWN;
+        OOPS("Nullptr", SE_UNKNOWN);
     }
     if (!k_stor_volume_validateId(volumeId)) {
-        OOPS("Invalid volume");
-        return SE_UNKNOWN;
+        OOPS("Invalid volume", SE_UNKNOWN);
     }
 
 
@@ -99,12 +97,10 @@ enum k_stor_error k_stor_volume_readHeader(const size_t volumeId, uint_8 * const
 
 enum k_stor_error k_stor_volume_readBytes(const size_t volumeId, const range_size_t range, uint_8 * const buffer) {
     if (!buffer) {
-        OOPS("Nullptr");
-        return SE_UNKNOWN;
+        OOPS("Nullptr", SE_UNKNOWN);
     }
     if (!k_stor_volume_validateId(volumeId)) {
-        OOPS("Invalid volume");
-        return SE_UNKNOWN;
+        OOPS("Invalid volume", SE_UNKNOWN);
     }
 
     return readBytes(volumeId, range, buffer);

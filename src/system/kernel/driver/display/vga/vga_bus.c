@@ -34,8 +34,7 @@ uint_8 busReadExternal(const enum bus_reg_external reg) {
     if (reg != BRE_INPUT_STATUS_0 &&
         reg != BRE_INPUT_STATUS_1) {
         /* Write-only registers */
-        OOPS("Invalid driver operation");
-        return 0;
+        OOPS("Invalid driver operation", 0);
     }
 
     return rdb(reg);
@@ -49,8 +48,7 @@ uint_8 busReadCRT(const enum bus_reg_crt_index index) {
         index != BRCI_LIGHT_PEN_HIGH &&
         index != BRCI_LIGHT_PEN_LOW) {
         /* Write-only registers */
-        OOPS("Invalid driver operation");
-        return 0;
+        OOPS("Invalid driver operation", 0);
     }
 
     return busReadLSI(BRC_ADDRESS, BRC_DATA, index);
@@ -59,8 +57,7 @@ uint_8 busReadCRT(const enum bus_reg_crt_index index) {
 void busWriteExternal(const enum bus_reg_external reg, const uint_8 data) {
     if (reg == BRE_INPUT_STATUS_1) {
         /* Read-only register addresses */
-        OOPS("Invalid driver operation");
-        return;
+        OOPS("Invalid driver operation",);
     }
 
     vga_wrb(reg, data);

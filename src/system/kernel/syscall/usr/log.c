@@ -13,13 +13,11 @@ void k_scr_usr_log(const char * const msgPtr, const size_t msgBytes) {
     
     const procId_t procId = k_proc_getCurrentId();
     SCLF_GET_VALID_ABS(const char * const, msgPtr, msgBytes, {
-        OOPS("scr_usr_log: access violation");
-        return;
+        OOPS("scr_usr_log: access violation",);
     });
 
     if (!abs_msgPtr) {
-        OOPS("scr_usr_log: access violation");
-        return;
+        OOPS("scr_usr_log: access violation",);
     }
 
     data_t absLogData;

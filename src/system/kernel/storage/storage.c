@@ -21,8 +21,7 @@ static void addDrive(const size_t ctrlId, const size_t driveId) {
         }
     }
     if (index >= MAX_DRIVES) {
-        OOPS("Drive count limit exceeded");
-        return;
+        OOPS("Drive count limit exceeded",);
     }
     
     k_stor_drives[index].used = true;
@@ -46,8 +45,7 @@ static void addVolume(const size_t driveId, const size_t fileSysId) {
         }
     }
     if (index >= MAX_VOLUMES) {
-        OOPS("Volume count limit exceeded");
-        return;
+        OOPS("Volume count limit exceeded",);
     }
     
     k_stor_volumes[index].used = true;
@@ -57,12 +55,10 @@ static void addVolume(const size_t driveId, const size_t fileSysId) {
 
 static void detectFileSystem(const struct gnwDeviceUHA_storCtrl * const uha, const uint_8 driveIndex) {
     if (driveIndex >= MAX_DRIVES) {
-        OOPS("Drive index over limit");
-        return;
+        OOPS("Drive index over limit",);
     }
     if (!k_stor_drives[driveIndex].used) {
-        OOPS("Drive descriptor empty");
-        return;
+        OOPS("Drive descriptor empty",);
     }
     for (size_t fileSysIndex = 0; fileSysIndex < MAX_FILESYS; ++fileSysIndex) {
         if (!k_stor_fileSystems[fileSysIndex].used) {
@@ -74,8 +70,7 @@ static void detectFileSystem(const struct gnwDeviceUHA_storCtrl * const uha, con
         */
         
         if (!k_stor_fileSystems[fileSysIndex].desc.headerRange.length) {
-            OOPS("Invalid header bytes value");
-            return;
+            OOPS("Invalid header bytes value",);
         }
         const struct gnwStorGeometry geometry = uha->routine.driveGeometry(k_stor_drives[driveIndex].driveId);
         const struct k_stor_fileSystem fs = k_stor_fileSystems[fileSysIndex];
@@ -98,12 +93,10 @@ static void detectFileSystem(const struct gnwDeviceUHA_storCtrl * const uha, con
             if (uha->desc.removableMedia && err.code == GSEC_MEDIA_NOT_PRESENT) {
                 return;
             } else {
-                OOPS("Header read error");
-                return;
+                OOPS("Header read error",);
             }
         } else if (bytesRead != bytesToBeRead) {
-            OOPS("Header read error");
-            return;
+            OOPS("Header read error",);
         }
 
         memcopy(readBuffer + headerRange.offset % geometry.sectSizeBytes, 
@@ -141,15 +134,13 @@ void k_stor_init() {
     struct gnwDeviceUHADesc desc;
     enum gnwDeviceError err = k_dev_getByType(DEV_TYPE_STORAGE, &desc);
     if (err != GDE_NONE) {
-        OOPS("Error getting storage devices");
-        return;
+        OOPS("Error getting storage devices",);
     }
 
     struct gnwDeviceUHA uha;
     err = k_dev_getUHAForId(desc.identifier, &uha);
     if (err != GDE_NONE) {
-        OOPS("Error getting storage device API");
-        return;
+        OOPS("Error getting storage device API",);
     }
 
     detectDrives(desc, uha.storCtrl.routine.drivePresent);
