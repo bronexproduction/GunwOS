@@ -28,7 +28,7 @@ LFLAGS=-m$(L_OUTFORMAT) -z noexecstack --fatal-warnings -T linker.ld
 O_DIR_LISTING=find . -name '*.o' -type f
 
 RSFLAGS_TEST=$(RSFLAGS_STATICLIB) --test
-LFLAGS_TEST=$(LFLAGS) -L $(KERNEL_BUILD_DIR) -lunittest --no-warn-rwx-segments
+LFLAGS_TEST=$(LFLAGS) -L $(KERNEL_BUILD_DIR) -lunittest --allow-multiple-definition --no-warn-rwx-segments
 C_TEST_DIR_LISTING=find $(TESTS_UNIT_SRC_DIR)/kernel -name '*.c' -type f
 RS_TEST_DIR_LISTING=find $(TESTS_UNIT_SRC_DIR)/kernel -name '*.rs' -type f -depth 1
 O_TEST_DIR_LISTING=find $(TESTS_UNIT_SRC_DIR)/kernel -name '*.o' -type f
