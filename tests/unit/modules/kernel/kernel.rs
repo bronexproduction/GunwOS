@@ -14,6 +14,9 @@ static TEST___KERNEL_START: extern "C" fn() -> ! = __kernel_start;
 #[link_section = ".start"]
 #[no_mangle]
 pub extern "C" fn __kernel_start() -> ! {
+    /*
+        Jump but where to?
+    */
     loop {}
 }
 

@@ -2,7 +2,7 @@ LFLAGS_DEFAULT=-m$(L_OUTFORMAT) -z noexecstack --fatal-warnings -T linker.ld
 
 ifneq ($(GNW_TEST_UNIT),)
 KERNEL_TEST_INCLUDE=-include $(TESTS_UNIT_SRC_DIR)/kernel/kernel.pch
-LFLAGS=$(LFLAGS_DEFAULT) -L $(KERNEL_BUILD_DIR) -lunittest --no-warn-rwx-segments --allow-multiple-definition 
+LFLAGS=$(LFLAGS_DEFAULT) -L $(KERNEL_BUILD_DIR) -lunittest --no-warn-rwx-segments --allow-multiple-definition
 else
 KERNEL_TEST_INCLUDE=
 LFLAGS=$(LFLAGS_DEFAULT)
