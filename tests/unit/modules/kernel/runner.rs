@@ -51,6 +51,7 @@ fn exit_qemu(exit_code: QemuExitCode) {
 fn kernel_test_runner(tests: &[&dyn Fn()]) {
     for test in tests {
         unsafe {
+            KERNEL_PANIC_FLAG = false;
             cpu_cli();
             k_purge();
         }

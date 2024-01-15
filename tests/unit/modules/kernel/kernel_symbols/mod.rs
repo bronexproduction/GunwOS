@@ -10,7 +10,7 @@ pub type ptr_t = *mut u8;
 pub type addr_t = u32;
 
 #[repr(C)]
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Default)]
 pub struct range_addr_t {
     pub offset: addr_t,
     pub sizeBytes: size_t,
@@ -50,6 +50,7 @@ pub struct gnwStorError {
 }
 
 #[repr(i32)]
+#[derive(PartialEq, Debug)]
 pub enum gnwDeviceType {
     DEV_TYPE_SYSTEM     = (1 << 0),
     DEV_TYPE_MEM        = (1 << 1),
@@ -64,7 +65,7 @@ pub enum gnwDeviceType {
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Default)]
 pub struct gnwDeviceUHA_system_desc {
     pub _unused: u32,
 }
@@ -90,7 +91,7 @@ pub struct gnwDeviceUHA_system {
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Default)]
 pub struct gnwDeviceUHA_mem_desc {
     pub bytesRange: range_addr_t,
     pub maxInputSizeBytes: size_t,
@@ -110,7 +111,7 @@ pub struct gnwDeviceUHA_mem {
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Default)]
 pub struct gnwDeviceUHA_keyboard_desc {
     pub _unused: u32,
 }
@@ -129,7 +130,7 @@ pub struct gnwDeviceUHA_keyboard {
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Default)]
 pub struct gnwDeviceUHA_mouse_desc {
     pub _unused: u32,
 }
@@ -148,7 +149,7 @@ pub struct gnwDeviceUHA_mouse {
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Default)]
 pub struct gnwDeviceUHA_fdc_desc {
     pub _unused: u32,
 }
@@ -167,7 +168,7 @@ pub struct gnwDeviceUHA_fdc {
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Default)]
 pub struct gnwDeviceUHA_storCtrl_desc {
     pub driveCount: u8,
     pub removable: bool,
@@ -194,7 +195,7 @@ pub struct gnwDeviceUHA_storCtrl {
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Default)]
 pub struct gnwDeviceUHA_charIn_desc {
     pub _unused: u32,
 }
@@ -214,7 +215,7 @@ pub struct gnwDeviceUHA_charIn {
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Default)]
 pub struct gnwDeviceUHA_charOut_desc {
     pub _unused: u32,
 }
@@ -234,7 +235,7 @@ pub struct gnwDeviceUHA_charOut {
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Default)]
 pub struct gnwDeviceUHA_display_desc {
     pub supportedFormatCount: size_t,
 }
@@ -253,7 +254,7 @@ pub struct gnwDeviceUHA_display {
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Default)]
 pub struct gnwDeviceUHA_event_desc {
     pub _unused: u32,
 }
@@ -269,6 +270,23 @@ pub struct gnwDeviceUHA_event_routine {
 pub struct gnwDeviceUHA_event {
     pub desc: gnwDeviceUHA_event_desc,
     pub routine: gnwDeviceUHA_event_routine,
+}
+
+#[repr(C)]
+#[derive(PartialEq, Debug, Default)]
+pub struct gnwDeviceUHADesc {
+    pub identifier: u32,
+    pub r#type: u32, /* gnwDeviceType bitmask */
+    pub system: gnwDeviceUHA_system_desc,       // DEV_TYPE_SYSTEM
+    pub mem: gnwDeviceUHA_mem_desc,             // DEV_TYPE_MEM
+    pub keyboard: gnwDeviceUHA_keyboard_desc,   // DEV_TYPE_KEYBOARD
+    pub mouse: gnwDeviceUHA_mouse_desc,         // DEV_TYPE_MOUSE
+    pub fdc: gnwDeviceUHA_fdc_desc,             // DEV_TYPE_FDC
+    pub storage: gnwDeviceUHA_storCtrl_desc,    // DEV_TYPE_STORAGE
+    pub charIn: gnwDeviceUHA_charIn_desc,       // DEV_TYPE_CHAR_IN
+    pub charOut: gnwDeviceUHA_charOut_desc,     // DEV_TYPE_CHAR_OUT
+    pub display: gnwDeviceUHA_display_desc,     // DEV_TYPE_DISPLAY
+    pub event: gnwDeviceUHA_event_desc,         // event emitting devices
 }
 
 #[repr(C)]
@@ -387,6 +405,10 @@ pub const MAX_DEVICES: size_t = 8;
 extern "C" {
     pub fn k_purge();
     pub fn k_log_log(szMsg: *const c_char);
+
+    // api
+
+    pub fn uhaGetDesc(identifier: size_t, r#type: i32 /* gnwDeviceType bitmask */, api: gnwDeviceUHA) -> gnwDeviceUHADesc;
     
     // dev
 
@@ -397,6 +419,7 @@ extern "C" {
     pub fn validateStartedDevice(procId: procId_t, devId: size_t) -> gnwDeviceError;
     pub fn k_dev_install(id: *const size_t, descriptor: *const gnwDeviceDescriptor) -> gnwDriverError;
     pub fn k_dev_start(id: size_t) -> gnwDriverError;
+    pub fn k_dev_getById(id: size_t, desc: *const gnwDeviceUHADesc) -> gnwDeviceError;
 
     // hal
 

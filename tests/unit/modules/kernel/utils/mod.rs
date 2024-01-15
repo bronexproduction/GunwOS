@@ -3,7 +3,7 @@ use kernel_symbols::k_log_log;
 
 extern "C" {
     
-    pub static KERNEL_PANIC_FLAG: bool;
+    pub static mut KERNEL_PANIC_FLAG: bool;
 
     /*
         bus

@@ -4,6 +4,7 @@ mod helpers;
 use utils::*;
 use kernel_symbols::*;
 use self::helpers::*;
+use core::ptr::null;
 
 /*
     PRIVATE bool validateId(size_t id)
@@ -319,3 +320,338 @@ fn k_dev_start_checkIncorrect_deviceStartFailed() {
     
     log("k_dev_start_checkIncorrect_deviceStartFailed end\n\0");
 }
+
+#[test_case]
+fn k_dev_getById_checkCorrect() {
+    log("k_dev_getById_checkCorrect start\n\0");
+
+    let id: size_t = 0;
+    let uha_descriptor: gnwDeviceUHADesc = Default::default();
+    install_dummy_device(&id);
+    assert_eq!(id, 0);
+    let expected_descriptor = create_valid_device_desc_complex();
+    unsafe {
+        let expected_api_desc = uhaGetDesc(id, expected_descriptor.r#type, expected_descriptor.api);
+        assert_eq!(k_dev_getById(id, &uha_descriptor), gnwDeviceError::GDE_NONE);
+        assert_eq!(uha_descriptor, expected_api_desc);
+    }
+    
+    log("k_dev_getById_checkCorrect end\n\0");
+}
+
+#[test_case]
+fn k_dev_getById_checkIncorrect_idInvalid() {
+    log("k_dev_getById_checkIncorrect_idInvalid start\n\0");
+
+    let mut id: size_t = 0;
+    let uha_descriptor: gnwDeviceUHADesc = Default::default();
+    unsafe {
+        assert_eq!(k_dev_getById(id, &uha_descriptor), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+    }
+    install_dummy_device(&id);
+    assert_eq!(id, 0);
+    id = 1;
+    unsafe {
+        assert_eq!(k_dev_getById(id, &uha_descriptor), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+    }
+    id = MAX_DEVICES;
+    unsafe {
+        assert_eq!(k_dev_getById(id, &uha_descriptor), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+    }
+    
+    log("k_dev_getById_checkIncorrect_idInvalid end\n\0");
+}
+
+#[test_case]
+fn k_dev_getById_checkIncorrect_descNull() {
+    log("k_dev_getById_checkIncorrect_descNull start\n\0");
+
+    let id: size_t = 0;
+    install_dummy_device(&id);
+    assert_eq!(id, 0);
+    unsafe {
+        assert_eq!(k_dev_getById(id, null()), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+    }
+    
+    log("k_dev_getById_checkIncorrect_descNull end\n\0");
+}
+
+// enum gnwDeviceError k_dev_getByType(const enum gnwDeviceType type, struct gnwDeviceUHADesc * const desc) {
+//     if (!desc) {
+//         OOPS("Device descriptor nullptr", GDE_UNKNOWN);
+//     }
+
+//     for (size_t index = 0; index < MAX_DEVICES; ++index) {
+//         if (devices[index].desc.type & type) {
+//             return k_dev_getById(index, desc);
+//         }
+//     }
+
+//     return GDE_NOT_FOUND;
+// }
+
+// enum gnwDeviceError k_dev_getUHAForId(const size_t id, struct gnwDeviceUHA * const uha) {
+//     if (!validateInstalledId(id)) {
+//         OOPS("Device identifier invalid", GDE_UNKNOWN);
+//     }
+    
+//     if (!uha) {
+//         OOPS("UHA descriptor nullptr", GDE_UNKNOWN);
+//     }
+
+//     *uha = devices[id].desc.api;
+//     return GDE_NONE;
+// }
+
+// enum gnwDeviceError k_dev_acquireHold(const procId_t processId, const size_t deviceId) {
+//     if (!validateInstalledId(deviceId)) {
+//         OOPS("Device identifier invalid", GDE_UNKNOWN);
+//     }
+
+//     if (devices[deviceId].holder != NONE_PROC_ID) {
+//         return GDE_ALREADY_HELD;
+//     }
+
+//     devices[deviceId].holder = processId;
+
+//     return GDE_NONE;
+// }
+
+// void k_dev_releaseHold(const procId_t processId, const size_t deviceId) {
+//     if (!validateInstalledId(deviceId)) {
+//         OOPS("Device identifier invalid",);
+//     }
+
+//     if (devices[deviceId].holder == processId) {
+//         devices[deviceId].holder = NONE_PROC_ID;
+//         devices[deviceId].listener = nullptr;
+//         devices[deviceId].decoder = nullptr;
+//     }
+// }
+
+// enum gnwDeviceError k_dev_writeMem(const procId_t processId, 
+//                                    const size_t deviceId,
+//                                    const ptr_t buffer,
+//                                    const range_addr_t devMemRange) {
+//     if (!buffer) {
+//         OOPS("Buffer cannot be nullptr", GDE_UNKNOWN);
+//     }
+
+//     const enum gnwDeviceError e = validateStartedDevice(processId, deviceId);
+//     if (e) {
+//         return e;
+//     }
+
+//     const size_t maxInputSizeBytes = devices[deviceId].desc.api.mem.desc.maxInputSizeBytes;
+//     if (!maxInputSizeBytes) {
+//         return GDE_INVALID_OPERATION;
+//     }
+
+//     if (devMemRange.offset >= maxInputSizeBytes) {
+//         return GDE_INVALID_PARAMETER;
+//     }
+//     const size_t devBytesLeft = maxInputSizeBytes - devMemRange.offset;
+//     if (devMemRange.sizeBytes > devBytesLeft) {
+//         return GDE_INVALID_PARAMETER;
+//     }
+
+//     const struct gnwDeviceUHA_mem_routine * const routine = &devices[deviceId].desc.api.mem.routine;
+//     if (!routine->write) {
+//         return GDE_INVALID_OPERATION;
+//     }
+//     #warning it is more than dangerous to allow the driver to access the buffer directly, moreover it could be even impossible when driver processes are implemented
+//     routine->write(buffer, devMemRange);
+
+//     return GDE_NONE;
+// }
+
+// enum gnwDeviceError k_dev_writeChar(const procId_t processId, 
+//                                     const size_t deviceId,
+//                                     const char character) {
+
+//     const enum gnwDeviceError e = validateStartedDevice(processId, deviceId);
+//     if (e) {
+//         return e;
+//     }
+
+//     const struct gnwDeviceUHA_charOut_routine * const routine = &devices[deviceId].desc.api.charOut.routine;
+//     if (!routine->isReadyToWrite) {
+//         return GDE_INVALID_OPERATION;
+//     }
+//     if (!routine->isReadyToWrite()) {
+//         return GDE_INVALID_DEVICE_STATE;
+//     }
+//     if (!routine->write) {
+//         return GDE_INVALID_OPERATION;
+//     }
+//     if (!routine->write(character)) {
+//         return GDE_OPERATION_FAILED;
+//     }
+
+//     return GDE_NONE;
+// }
+
+// static enum gnwDeviceError validateListener(const procId_t processId, 
+//                                             const size_t deviceId, 
+//                                             const gnwDeviceEventListener listener,
+//                                             const gnwDeviceEventDecoder decoder) {
+//     if (!listener) {
+//         return GDE_LISTENER_INVALID;
+//     }
+//     if (!decoder) {
+//         return GDE_DECODER_INVALID;
+//     }
+
+//     enum gnwDeviceError err = validateStartedDevice(processId, deviceId);
+//     if (err) {
+//         return err;
+//     }
+
+//     if (devices[deviceId].listener) {
+//         return GDE_ALREADY_SET;
+//     }
+
+//     return GDE_NONE;
+// }
+
+// enum gnwDeviceError k_dev_listen(const procId_t processId, 
+//                                  const size_t deviceId, 
+//                                  const gnwDeviceEventListener listener,
+//                                  const gnwDeviceEventDecoder decoder) {
+//     enum gnwDeviceError err = validateListener(processId, deviceId, listener, decoder);
+//     if (err) {
+//         return err;
+//     }
+
+//     devices[deviceId].listener = listener;
+//     devices[deviceId].decoder = decoder;
+//     return GDE_NONE;
+// }
+
+// enum gnwDeviceError k_dev_getParam(const size_t deviceId,
+//                                    const struct gnwDeviceParamDescriptor paramDescriptor,
+//                                    size_t * const absResult) {
+//     if (!absResult) {
+//         OOPS("Nullptr", GDE_UNKNOWN);
+//     }
+
+//     if (!validateInstalledId(deviceId)) {
+//         return GDE_ID_INVALID;
+//     }
+
+//     if (!devices[deviceId].desc.api.system.routine.getParam) {
+//         return GDE_INVALID_OPERATION;
+//     }
+
+//     if (!devices[deviceId].desc.api.system.routine.getParam(paramDescriptor.param,
+//                                                             paramDescriptor.subParam,
+//                                                             paramDescriptor.paramIndex,
+//                                                             absResult)) {
+//         return GDE_OPERATION_FAILED;
+//     }
+
+//     return GDE_NONE;
+// }
+
+// enum gnwDeviceError k_dev_setParam(const procId_t procId,
+//                                    const size_t deviceId,
+//                                    const struct gnwDeviceParamDescriptor paramDescriptor,
+//                                    const size_t value) {
+//     const enum gnwDeviceError err = validateStartedDevice(procId, deviceId);
+//     if (err != GDE_NONE) {
+//         return err;
+//     }
+
+//     if (!devices[deviceId].desc.api.system.routine.setParam) {
+//         return GDE_INVALID_OPERATION;
+//     }
+
+//     if (!devices[deviceId].desc.api.system.routine.setParam(paramDescriptor.param,
+//                                                             paramDescriptor.subParam,
+//                                                             paramDescriptor.paramIndex,
+//                                                             value)) {
+//         return GDE_OPERATION_FAILED;
+//     }
+
+//     return GDE_NONE;
+// }
+
+// static enum gnwDeviceError validateEmitter(const size_t * const devIdPtr) {
+//     if (!devIdPtr) {
+//         return GDE_INVALID_DEVICE_STATE;
+//     }
+//     if (!validateInstalledId(*devIdPtr)) {
+//         OOPS("Unexpected serviced device ID", GDE_UNKNOWN);
+//     }
+//     if (!devices[*devIdPtr].started) {
+//         return GDE_INVALID_DEVICE_STATE;
+//     }
+
+//     return GDE_NONE;
+// }
+
+// static enum gnwDeviceError validateListenerInvocation(const size_t deviceId) {
+//     struct device *dev = &devices[deviceId];
+//     if (!dev->listener) {
+//         return GDE_NOT_FOUND;
+//     }
+//     if (!dev->decoder) {
+//         return GDE_UNKNOWN;
+//     } 
+//     if (dev->holder == NONE_PROC_ID) {
+//         OOPS("Inconsistent holder listener state", GDE_UNKNOWN);
+//     }
+
+//     return GDE_NONE;
+// }
+
+// enum gnwDeviceError k_dev_emit(const struct gnwDeviceEvent * const eventPtr) {
+//     if (!eventPtr) {
+//         OOPS("Nullptr", GDE_UNKNOWN);
+//     }
+//     enum gnwDeviceError err = validateEmitter(k_hal_servicedDevIdPtr);
+//     if (err) {
+//         return err;
+//     }
+//     err = validateListenerInvocation(*k_hal_servicedDevIdPtr);
+//     if (err == GDE_NOT_FOUND) {
+//         return GDE_NONE;
+//     } else if (err) {
+//         return err;
+//     }
+
+//     struct device *dev = &devices[*k_hal_servicedDevIdPtr];
+//     enum k_proc_error callbackErr = k_proc_callback_invoke_ptr(dev->holder, 
+//                                                                (gnwEventListener_ptr)dev->listener,
+//                                                                (ptr_t)eventPtr,
+//                                                                eventPtr->dataSizeBytes + sizeof(struct gnwDeviceEvent),
+//                                                                sizeof(struct gnwDeviceEvent),
+//                                                                (gnwRunLoopDataEncodingRoutine)gnwDeviceEvent_encode,
+//                                                                (gnwRunLoopDataEncodingRoutine)dev->decoder);
+//     switch (callbackErr) {
+//     case PE_NONE:
+//         return GDE_NONE;
+//     case PE_IGNORED:
+//         return GDE_HANDLE_INVALID;
+//     case PE_ACCESS_VIOLATION:
+//         return GDE_LISTENER_INVALID;
+//     default:
+//         return GDE_UNKNOWN;
+//     }
+// }
+
+// void k_dev_procCleanup(const procId_t procId) {
+//     for (size_t devId = 0; devId < MAX_DEVICES; ++devId) {
+//         if (devices[devId].holder == procId) {
+//             CRITICAL_SECTION(
+//                 k_dev_releaseHold(procId, devId);
+//             )
+//         }
+//     }
+// }
