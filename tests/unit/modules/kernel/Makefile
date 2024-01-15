@@ -5,10 +5,10 @@ C_DIR_LISTING=find . -name '*.c' -type f
 TEST_INCLUDE=-I $(KERNEL_SRC_DIR) \
 		     -I $(STDGUNW_INCLUDE_DIR)
 
-.PHONY: lib bin kernel_test_unit_build
+.PHONY: lib bin test_unit_build
 
-lib: clean libunittest.a
-bin: clean test_unit.gfb
+lib: clean libunittest.a clean
+bin: clean test_unit.gfb clean
 
 libunittest.a:
 	$(RUSTC) $(RSFLAGS_STATICLIB) -o $@ $(TESTS_UNIT_SRC_DIR)/kernel/kernel.rs

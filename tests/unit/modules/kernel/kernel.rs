@@ -2,6 +2,7 @@
 #![no_main]
 
 use core::panic::PanicInfo;
+use core::intrinsics::transmute;
 use core::ffi::c_char;
 
 #[panic_handler]
@@ -14,10 +15,9 @@ static TEST___KERNEL_START: extern "C" fn() -> ! = __kernel_start;
 #[link_section = ".start"]
 #[no_mangle]
 pub extern "C" fn __kernel_start() -> ! {
-    /*
-        Jump but where to?
-    */
-    loop {}
+    let ptr = 0x00200000 as *const ();
+    let test_entry: extern "C" fn() -> ! = unsafe { transmute(ptr) };
+    (test_entry)();
 }
 
 #[no_mangle]
