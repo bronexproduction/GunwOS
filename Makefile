@@ -108,7 +108,7 @@ boot.gfb: pre_build
 	make -C $(SRC_DIR)/bootloader/preloader
 
 kernel.gfb: kernel.elf
-# Remove bytes before .text section
+# Remove bytes before .start section
 # TO BE IMPROVED - no fixed offset, removing debug data
 	dd if="$(KERNEL_BUILD_DIR)/kernel.elf" of="$(KERNEL_BUILD_DIR)/$@" bs=4096 skip=1
 
