@@ -238,9 +238,18 @@ pub fn create_valid_device_desc_complex() -> gnwDeviceDescriptor {
     return device_descriptor;
 }
 
-pub fn install_dummy_device(id: &size_t) {
-    let device_descriptor = create_valid_device_desc_complex();
+pub fn install_dummy_device(id: &size_t, complex: bool) {
+    let device_descriptor = if complex {
+        create_valid_device_desc_complex()
+    } else { 
+        create_valid_device_desc_minimal()
+    };
+
+    install_device(id, device_descriptor);
+}
+
+pub fn install_device(id: &size_t, descriptor: gnwDeviceDescriptor) {
     unsafe {
-        k_dev_install(id, &device_descriptor);
+        k_dev_install(id, &descriptor);
     }
 }
