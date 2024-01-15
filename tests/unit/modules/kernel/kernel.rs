@@ -20,6 +20,7 @@ pub extern "C" fn __kernel_start() -> ! {
     loop {}
 }
 
+#[no_mangle]
 pub static mut KERNEL_PANIC_FLAG: bool = false;
 
 #[used]
