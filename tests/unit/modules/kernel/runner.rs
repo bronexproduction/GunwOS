@@ -4,7 +4,6 @@
 #![test_runner(kernel_test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
-mod kernel_override;
 mod kernel_symbols;
 mod kernel_tests;
 mod utils;
@@ -21,10 +20,10 @@ enum QemuExitCode {
 }
 
 #[used]
-static TEST_ENTRY: extern "C" fn() -> ! = __kernel_start_test;
-
-#[link_section = ".start_override"]
-pub extern "C" fn __kernel_start_test() -> ! {
+static TEST_ENTRY: extern "C" fn() -> ! = _test_entry;
+#[link_section = ".start"]
+#[no_mangle]
+pub extern "C" fn _test_entry() -> ! {
     log("Unit tests run started\n\0");
     test_main();
     log("Unit tests run finished - all tests passed\n\0");

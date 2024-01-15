@@ -43,7 +43,7 @@ SYSTEM_SRC_DIR="$(SRC_DIR)/system"
 API_DIR="$(SYSTEM_SRC_DIR)/api"
 export APP_API_SRC_DIR="$(API_DIR)/app"
 export DRIVER_API_SRC_DIR="$(API_DIR)/driver"
-KERNEL_SRC_DIR="$(SYSTEM_SRC_DIR)/kernel"
+export KERNEL_SRC_DIR="$(SYSTEM_SRC_DIR)/kernel"
 APPS_SRC_DIR="$(SYSTEM_SRC_DIR)/user"
 TESTS_SRC_DIR="$(CUR_DIR)/tests"
 TESTS_BLACKBOX_DIR="$(TESTS_SRC_DIR)/blackbox"
@@ -108,7 +108,7 @@ boot.gfb: pre_build
 	make -C $(SRC_DIR)/bootloader/preloader
 
 kernel.gfb: kernel.elf
-# Remove bytes before .text section
+# Remove bytes before .start section
 # TO BE IMPROVED - no fixed offset, removing debug data
 	dd if="$(KERNEL_BUILD_DIR)/kernel.elf" of="$(KERNEL_BUILD_DIR)/$@" bs=4096 skip=1
 
