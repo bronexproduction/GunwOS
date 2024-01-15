@@ -71,7 +71,7 @@ pub struct gnwDeviceUHA_system_desc {
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug, Copy, Clone)]
+#[derive(PartialEq, Debug, Copy, Clone, Default)]
 pub struct gnwDeviceUHA_system_routine {
     pub getParam: Option<extern "C" fn(param: size_t,
                                        subParam: size_t,
@@ -84,7 +84,7 @@ pub struct gnwDeviceUHA_system_routine {
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug, Copy, Clone)]
+#[derive(PartialEq, Debug, Copy, Clone, Default)]
 pub struct gnwDeviceUHA_system {
     pub desc: gnwDeviceUHA_system_desc,
     pub routine: gnwDeviceUHA_system_routine,
@@ -98,13 +98,13 @@ pub struct gnwDeviceUHA_mem_desc {
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug, Copy, Clone)]
+#[derive(PartialEq, Debug, Copy, Clone, Default)]
 pub struct gnwDeviceUHA_mem_routine {
     pub write: Option<extern "C" fn(buffer: ptr_t, inputBufferRange: range_addr_t)>,
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug, Copy, Clone)]
+#[derive(PartialEq, Debug, Copy, Clone, Default)]
 pub struct gnwDeviceUHA_mem {
     pub desc: gnwDeviceUHA_mem_desc,
     pub routine: gnwDeviceUHA_mem_routine,
@@ -117,13 +117,13 @@ pub struct gnwDeviceUHA_keyboard_desc {
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug, Copy, Clone)]
+#[derive(PartialEq, Debug, Copy, Clone, Default)]
 pub struct gnwDeviceUHA_keyboard_routine {
     pub _unused: Option<extern "C" fn()>,
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug, Copy, Clone)]
+#[derive(PartialEq, Debug, Copy, Clone, Default)]
 pub struct gnwDeviceUHA_keyboard {
     pub desc: gnwDeviceUHA_keyboard_desc,
     pub routine: gnwDeviceUHA_keyboard_routine,
@@ -136,13 +136,13 @@ pub struct gnwDeviceUHA_mouse_desc {
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug, Copy, Clone)]
+#[derive(PartialEq, Debug, Copy, Clone, Default)]
 pub struct gnwDeviceUHA_mouse_routine {
     pub _unused: Option<extern "C" fn()>,
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug, Copy, Clone)]
+#[derive(PartialEq, Debug, Copy, Clone, Default)]
 pub struct gnwDeviceUHA_mouse {
     pub desc: gnwDeviceUHA_mouse_desc,
     pub routine: gnwDeviceUHA_mouse_routine,
@@ -155,13 +155,13 @@ pub struct gnwDeviceUHA_fdc_desc {
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug, Copy, Clone)]
+#[derive(PartialEq, Debug, Copy, Clone, Default)]
 pub struct gnwDeviceUHA_fdc_routine {
     pub _unused: Option<extern "C" fn()>,
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug, Copy, Clone)]
+#[derive(PartialEq, Debug, Copy, Clone, Default)]
 pub struct gnwDeviceUHA_fdc {
     pub desc: gnwDeviceUHA_fdc_desc,
     pub routine: gnwDeviceUHA_fdc_routine,
@@ -176,7 +176,7 @@ pub struct gnwDeviceUHA_storCtrl_desc {
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug, Copy, Clone)]
+#[derive(PartialEq, Debug, Copy, Clone, Default)]
 pub struct gnwDeviceUHA_storCtrl_routine {
     pub drivePresent: Option<extern "C" fn(index: u8) -> bool>,
     pub driveGeometry: Option<extern "C" fn(index: u8) -> gnwStorGeometry>,
@@ -188,7 +188,7 @@ pub struct gnwDeviceUHA_storCtrl_routine {
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug, Copy, Clone)]
+#[derive(PartialEq, Debug, Copy, Clone, Default)]
 pub struct gnwDeviceUHA_storCtrl {
     pub desc: gnwDeviceUHA_storCtrl_desc,
     pub routine: gnwDeviceUHA_storCtrl_routine,
@@ -201,14 +201,14 @@ pub struct gnwDeviceUHA_charIn_desc {
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug, Copy, Clone)]
+#[derive(PartialEq, Debug, Copy, Clone, Default)]
 pub struct gnwDeviceUHA_charIn_routine {
     pub hasData: Option<extern "C" fn() -> bool>,
     pub read: Option<extern "C" fn(c: *const u8) -> size_t>,
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug, Copy, Clone)]
+#[derive(PartialEq, Debug, Copy, Clone, Default)]
 pub struct gnwDeviceUHA_charIn {
     pub desc: gnwDeviceUHA_charIn_desc,
     pub routine: gnwDeviceUHA_charIn_routine,
@@ -221,14 +221,14 @@ pub struct gnwDeviceUHA_charOut_desc {
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug, Copy, Clone)]
+#[derive(PartialEq, Debug, Copy, Clone, Default)]
 pub struct gnwDeviceUHA_charOut_routine {
     pub isReadyToWrite: Option<extern "C" fn() -> bool>,
     pub write: Option<extern "C" fn(c: c_char) -> bool>,
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug, Copy, Clone)]
+#[derive(PartialEq, Debug, Copy, Clone, Default)]
 pub struct gnwDeviceUHA_charOut {
     pub desc: gnwDeviceUHA_charOut_desc,
     pub routine: gnwDeviceUHA_charOut_routine,
@@ -241,13 +241,13 @@ pub struct gnwDeviceUHA_display_desc {
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug, Copy, Clone)]
+#[derive(PartialEq, Debug, Copy, Clone, Default)]
 pub struct gnwDeviceUHA_display_routine {
     pub _unused: Option<extern "C" fn()>,
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug, Copy, Clone)]
+#[derive(PartialEq, Debug, Copy, Clone, Default)]
 pub struct gnwDeviceUHA_display {
     pub desc: gnwDeviceUHA_display_desc,
     pub routine: gnwDeviceUHA_display_routine,
@@ -260,13 +260,13 @@ pub struct gnwDeviceUHA_event_desc {
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug, Copy, Clone)]
+#[derive(PartialEq, Debug, Copy, Clone, Default)]
 pub struct gnwDeviceUHA_event_routine {
     pub _unused: Option<extern "C" fn()>,
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug, Copy, Clone)]
+#[derive(PartialEq, Debug, Copy, Clone, Default)]
 pub struct gnwDeviceUHA_event {
     pub desc: gnwDeviceUHA_event_desc,
     pub routine: gnwDeviceUHA_event_routine,
@@ -290,7 +290,7 @@ pub struct gnwDeviceUHADesc {
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug, Copy, Clone)]
+#[derive(PartialEq, Debug, Copy, Clone, Default)]
 pub struct gnwDeviceUHA {
     pub system: gnwDeviceUHA_system,      // DEV_TYPE_SYSTEM
     pub mem: gnwDeviceUHA_mem,            // DEV_TYPE_MEM
@@ -396,11 +396,69 @@ pub struct isrEntry {
     pub routine: Option<extern "C" fn()>,
 }
 
+#[repr(i32)]
+pub enum k_gdt_dpl {
+    DPL_0 = 0b00,
+    DPL_1 = 0b01,
+    DPL_2 = 0b10,
+    DPL_3 = 0b11,
+}
+
+#[repr(i32)]
+pub enum k_proc_state {
+    PS_NONE = 0,
+    PS_NEW,
+    PS_READY,
+    PS_RUNNING,
+    PS_BLOCKED,
+    PS_FINISHED,
+}
+
+#[repr(C)]
+pub struct k_proc_process {
+    pub state: k_proc_state,
+    pub dpl: k_gdt_dpl,
+}
+
+#[repr(i32)]
+pub enum k_proc_lockType {
+    PLT_EVENT   = 1 << 0,
+    PLT_IPC     = 1 << 1,
+}
+
+#[repr(C)]
+pub struct k_cpu_state {
+    pub eax: u32,
+    pub ecx: u32,
+    pub edx: u32,
+    pub ebx: u32,
+    pub esp: u32,
+    pub ebp: u32,
+    pub esi: u32,
+    pub edi: u32,
+    pub eip: u32,
+    pub cs: u16,
+    pub ds: u16,
+    pub es: u16,
+    pub fs: u16,
+    pub gs: u16,
+    pub ss: u16,
+    pub eflags: u32,
+}
+
+#[repr(C)]
+pub struct process {
+    pub info: k_proc_process,
+    pub lockMask: k_proc_lockType,
+    pub cpuState: k_cpu_state,
+}
+
 pub const NONE_PROC_ID: procId_t = -2;
 pub const KERNEL_PROC_ID: procId_t = -1;
 
 pub const DEV_IRQ_LIMIT: u8 = 8;
 pub const MAX_DEVICES: size_t = 8;
+pub const MAX_PROC: size_t = 5;
 
 extern "C" {
     pub fn k_purge();
@@ -421,8 +479,14 @@ extern "C" {
     pub fn k_dev_start(id: size_t) -> gnwDriverError;
     pub fn k_dev_getById(id: size_t, desc: *const gnwDeviceUHADesc) -> gnwDeviceError;
     pub fn k_dev_getByType(r#type: u32 /* gnwDeviceType bitmask */, desc: *const gnwDeviceUHADesc) -> gnwDeviceError;
+    pub fn k_dev_getUHAForId(id: size_t, uha: *const gnwDeviceUHA) -> gnwDeviceError;
+    pub fn k_dev_acquireHold(processId: procId_t, deviceId: size_t) -> gnwDeviceError;
 
     // hal
 
     pub static mut isrReg: [isrEntry; DEV_IRQ_LIMIT as usize];
+
+    // proc
+
+    pub static mut pTab: [process; MAX_PROC as usize];
 }

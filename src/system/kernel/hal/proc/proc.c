@@ -23,7 +23,7 @@
 register const uint_32 cur_esp __asm__ ("esp");
 #define STACK_VAL(REFESP, SIZE, OFFSET) (*(uint_ ## SIZE *)(REFESP + OFFSET))
 
-static struct process {
+PRIVATE struct process {
     /*
         Process info
     */

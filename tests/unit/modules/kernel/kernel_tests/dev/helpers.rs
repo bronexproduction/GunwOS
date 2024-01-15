@@ -253,3 +253,10 @@ pub fn install_device(id: &size_t, descriptor: gnwDeviceDescriptor) {
         k_dev_install(id, &descriptor);
     }
 }
+
+pub fn install_dummy_process() -> procId_t {
+    unsafe {
+        pTab[0].info.state = k_proc_state::PS_RUNNING;
+    }
+    return 0;
+}

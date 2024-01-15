@@ -435,18 +435,81 @@ fn k_dev_getByType_checkIncorrect_descNull() {
     log("k_dev_getByType_checkIncorrect_descNull end\n\0");
 }
 
-// enum gnwDeviceError k_dev_getUHAForId(const size_t id, struct gnwDeviceUHA * const uha) {
-//     if (!validateInstalledId(id)) {
-//         OOPS("Device identifier invalid", GDE_UNKNOWN);
-//     }
-    
-//     if (!uha) {
-//         OOPS("UHA descriptor nullptr", GDE_UNKNOWN);
-//     }
+#[test_case]
+fn k_dev_getUHAForId_checkCorrect() {
+    log("k_dev_getUHAForId_checkCorrect start\n\0");
 
-//     *uha = devices[id].desc.api;
-//     return GDE_NONE;
-// }
+    let id: size_t = 0;
+    let uha: gnwDeviceUHA = Default::default();
+    let expected_descriptor = create_valid_device_desc_complex();
+    install_device(&id, expected_descriptor);
+    assert_eq!(id, 0);
+    unsafe {
+        let expected_uha = expected_descriptor.api;
+        assert_eq!(k_dev_getUHAForId(id, &uha), gnwDeviceError::GDE_NONE);
+        assert_eq!(uha, expected_uha);
+    }
+    
+    log("k_dev_getUHAForId_checkCorrect end\n\0");
+}
+
+#[test_case]
+fn k_dev_getUHAForId_checkIncorrect_idInvalid() {
+    log("k_dev_getUHAForId_checkIncorrect_idInvalid start\n\0");
+
+    let mut id: size_t = 0;
+    let uha: gnwDeviceUHA = Default::default();
+    unsafe {
+        assert_eq!(k_dev_getUHAForId(id, &uha), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+    }
+    let descriptor = create_valid_device_desc_complex();
+    install_device(&id, descriptor);
+    id = 1;
+    unsafe {
+        assert_eq!(k_dev_getUHAForId(id, &uha), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+    }
+    id = MAX_DEVICES;
+    unsafe {
+        assert_eq!(k_dev_getUHAForId(id, &uha), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+    }
+    
+    log("k_dev_getUHAForId_checkIncorrect_idInvalid end\n\0");
+}
+
+#[test_case]
+fn k_dev_getUHAForId_checkIncorrect_descNull() {
+    log("k_dev_getUHAForId_checkIncorrect_descNull start\n\0");
+
+    unsafe {
+        assert_eq!(k_dev_getUHAForId(0, null()), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+    }
+    
+    log("k_dev_getUHAForId_checkIncorrect_descNull end\n\0");
+}
+
+#[test_case]
+fn k_dev_acquireHold_checkCorrect() {
+    log("k_dev_acquireHold_checkCorrect start\n\0");
+
+    let id: size_t = 0;
+    let proc_id: procId_t = install_dummy_process();
+    install_dummy_device(&id, true);
+    assert_eq!(id, 0);
+    assert_eq!(proc_id, 0);
+
+    unsafe {
+        assert_eq!(k_dev_acquireHold(proc_id, id), gnwDeviceError::GDE_NONE);
+        assert_eq!(devices[id as usize].holder, proc_id);
+    }
+    
+    log("k_dev_acquireHold_checkCorrect end\n\0");
+}
 
 // enum gnwDeviceError k_dev_acquireHold(const procId_t processId, const size_t deviceId) {
 //     if (!validateInstalledId(deviceId)) {
@@ -461,6 +524,74 @@ fn k_dev_getByType_checkIncorrect_descNull() {
 
 //     return GDE_NONE;
 // }
+
+#[test_case]
+fn k_dev_acquireHold_checkIncorrect_deviceIdInvalid() {
+    log("k_dev_acquireHold_checkIncorrect_deviceIdInvalid start\n\0");
+
+    // let mut id: size_t = 0;
+    // let uha: gnwDeviceUHA = Default::default();
+    // unsafe {
+    //     assert_eq!(k_dev_getUHAForId(id, &uha), gnwDeviceError::GDE_UNKNOWN);
+    //     assert_eq!(KERNEL_PANIC_FLAG, true);
+    //     KERNEL_PANIC_FLAG = false;
+    // }
+    // let descriptor = create_valid_device_desc_complex();
+    // install_device(&id, descriptor);
+    // id = 1;
+    // unsafe {
+    //     assert_eq!(k_dev_getUHAForId(id, &uha), gnwDeviceError::GDE_UNKNOWN);
+    //     assert_eq!(KERNEL_PANIC_FLAG, true);
+    //     KERNEL_PANIC_FLAG = false;
+    // }
+    // id = MAX_DEVICES;
+    // unsafe {
+    //     assert_eq!(k_dev_getUHAForId(id, &uha), gnwDeviceError::GDE_UNKNOWN);
+    //     assert_eq!(KERNEL_PANIC_FLAG, true);
+    // }
+    
+    log("k_dev_acquireHold_checkIncorrect_deviceIdInvalid end\n\0");
+}
+
+#[test_case]
+fn k_dev_acquireHold_checkIncorrect_processIdInvalid() {
+    log("k_dev_acquireHold_checkIncorrect_processIdInvalid start\n\0");
+
+    // let mut id: size_t = 0;
+    // let uha: gnwDeviceUHA = Default::default();
+    // unsafe {
+    //     assert_eq!(k_dev_getUHAForId(id, &uha), gnwDeviceError::GDE_UNKNOWN);
+    //     assert_eq!(KERNEL_PANIC_FLAG, true);
+    //     KERNEL_PANIC_FLAG = false;
+    // }
+    // let descriptor = create_valid_device_desc_complex();
+    // install_device(&id, descriptor);
+    // id = 1;
+    // unsafe {
+    //     assert_eq!(k_dev_getUHAForId(id, &uha), gnwDeviceError::GDE_UNKNOWN);
+    //     assert_eq!(KERNEL_PANIC_FLAG, true);
+    //     KERNEL_PANIC_FLAG = false;
+    // }
+    // id = MAX_DEVICES;
+    // unsafe {
+    //     assert_eq!(k_dev_getUHAForId(id, &uha), gnwDeviceError::GDE_UNKNOWN);
+    //     assert_eq!(KERNEL_PANIC_FLAG, true);
+    // }
+    
+    log("k_dev_acquireHold_checkIncorrect_processIdInvalid end\n\0");
+}
+
+#[test_case]
+fn k_dev_acquireHold_checkIncorrect_alreadyHeld() {
+    log("k_dev_acquireHold_checkIncorrect_alreadyHeld start\n\0");
+
+    // unsafe {
+    //     assert_eq!(k_dev_getUHAForId(0, null()), gnwDeviceError::GDE_UNKNOWN);
+    //     assert_eq!(KERNEL_PANIC_FLAG, true);
+    // }
+    
+    log("k_dev_acquireHold_checkIncorrect_alreadyHeld end\n\0");
+}
 
 // void k_dev_releaseHold(const procId_t processId, const size_t deviceId) {
 //     if (!validateInstalledId(deviceId)) {
