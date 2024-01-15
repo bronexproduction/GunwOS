@@ -1,25 +1,26 @@
-CFLAGS=-std=c11 -c -ffreestanding -mno-red-zone -ggdb $(KERNEL_INCLUDE) -D_GUNWAPI_KERNEL $(CFLAGS_GLOBAL)
-LFLAGS=-m$(L_OUTFORMAT) -z noexecstack --fatal-warnings -T linker.ld
+LFLAGS=-m$(L_OUTFORMAT) -z noexecstack --fatal-warnings -T linker.ld --no-warn-rwx-segments
 O_DIR_LISTING=find . -name '*.o' -type f
+C_DIR_LISTING=find . -name '*.c' -type f
 
-RSFLAGS=$(RSFLAGS_STATICLIB) --test
-LFLAGS_TEST=$(LFLAGS) -L $(KERNEL_BUILD_DIR) -lunittest --allow-multiple-definition --no-warn-rwx-segments
-C_TEST_DIR_LISTING=find $(TESTS_UNIT_SRC_DIR)/kernel -name '*.c' -type f
-RS_TEST_DIR_LISTING=find $(TESTS_UNIT_SRC_DIR)/kernel -name '*.rs' -type f -depth 1
-O_TEST_DIR_LISTING=find $(TESTS_UNIT_SRC_DIR)/kernel -name '*.o' -type f
+TEST_INCLUDE=-I $(KERNEL_SRC_DIR) \
+		     -I $(STDGUNW_INCLUDE_DIR)
 
-.PHONY: all
+.PHONY: lib bin kernel_test_unit_build
 
-all: clean libunittest.a kernel_test_unit.elf
+lib: clean libunittest.a
+bin: clean kernel_test_unit.elf
 
 libunittest.a:
 	$(RUSTC) $(RSFLAGS_STATICLIB) -o $@ $(TESTS_UNIT_SRC_DIR)/kernel/kernel.rs
 	mv $@ $(KERNEL_BUILD_DIR)/$@
 
-kernel_test_unit.elf:
-#	$(C_TEST_DIR_LISTING) -print0 | xargs -0I{} $(C) $(CFLAGS) -o {}.o {}
-#	$(RUSTC) $(RSFLAGS_TEST) -o $@ $(TESTS_UNIT_SRC_DIR)/kernel/runner.rs
-#	mv $@ $(KERNEL_BUILD_DIR)/$@
+kernel_test_unit.elf: kernel_test_unit_build
+	$(L) $(LFLAGS) -o $@ $(shell $(O_DIR_LISTING))
+	mv $@ $(KERNEL_BUILD_DIR)/$@
+
+kernel_test_unit_build:
+	$(C_DIR_LISTING) -print0 | xargs -0I{} $(C) $(KERNEL_BUILD_CFLAGS) $(TEST_INCLUDE) -o {}.o {}
+	$(RUSTC) $(RSFLAGS_STATICLIB) --test -o $@.o $(TESTS_UNIT_SRC_DIR)/kernel/runner.rs
 
 clean:
 	find . -type f -name '*.o' -delete

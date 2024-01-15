@@ -31,11 +31,11 @@ RSFLAGS=$(RSFLAGS_OBJECT)
 
 O_DIR_LISTING=find . -name '*.o' -type f
 
-.PHONY: all unit_tests
+.PHONY: all unit_tests_bin unit_tests_lib
 
-all: kernel.elf clean_o
+all: kernel.elf unit_tests_bin clean_o
 
-kernel.elf: kernel.o unit_tests
+kernel.elf: kernel.o unit_tests_lib
 	$(L) $(LFLAGS) -o $@ $(KERNEL_LIBS) $(shell $(O_DIR_LISTING))
 	mv $@ $(KERNEL_BUILD_DIR)/$@
 
@@ -44,9 +44,14 @@ kernel.o:
 	$(CXX_DIR_LISTING) -print0 | xargs -0I{} $(CXX) $(CXXFLAGS) -o {}.o {}
 	$(RS_DIR_LISTING) -print0 | xargs -0I{} $(RUSTC) $(RSFLAGS) -o {}.o {}
 
-unit_tests:
+unit_tests_bin: kernel.elf
 ifneq ($(GNW_TEST_UNIT),)
-	make -C $(TESTS_UNIT_SRC_DIR)/kernel
+	make -C $(TESTS_UNIT_SRC_DIR)/kernel bin
+endif
+
+unit_tests_lib:
+ifneq ($(GNW_TEST_UNIT),)
+	make -C $(TESTS_UNIT_SRC_DIR)/kernel lib
 endif
 
 clean_o:
