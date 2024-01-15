@@ -15,7 +15,7 @@ libunittest.a:
 	mv $@ $(KERNEL_BUILD_DIR)/$@
 
 kernel_test_unit.elf: kernel_test_unit_build
-	$(L) $(LFLAGS) -o $@ $(shell $(O_DIR_LISTING))
+	$(L) $(LFLAGS) -o $@ $(shell $(O_DIR_LISTING)) --just-symbols=$(KERNEL_BUILD_DIR)/kernel.elf
 	mv $@ $(KERNEL_BUILD_DIR)/$@
 
 kernel_test_unit_build:
