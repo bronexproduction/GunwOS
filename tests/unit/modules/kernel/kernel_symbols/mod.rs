@@ -346,6 +346,7 @@ pub type gnwDeviceEventListener = Option<extern "cdecl" fn(event: *const gnwDevi
 pub type gnwDeviceEventDecoder = Option<extern "C" fn(ptr_t, *const gnwDeviceEvent)>;
 
 #[repr(C)]
+#[derive(PartialEq, Debug, Copy, Clone)]
 pub struct device {
     pub desc: gnwDeviceDescriptor,
     pub initialized: bool,
@@ -481,6 +482,7 @@ extern "C" {
     pub fn k_dev_getByType(r#type: u32 /* gnwDeviceType bitmask */, desc: *const gnwDeviceUHADesc) -> gnwDeviceError;
     pub fn k_dev_getUHAForId(id: size_t, uha: *const gnwDeviceUHA) -> gnwDeviceError;
     pub fn k_dev_acquireHold(processId: procId_t, deviceId: size_t) -> gnwDeviceError;
+    pub fn k_dev_releaseHold(processId: procId_t, deviceId: size_t);
 
     // hal
 

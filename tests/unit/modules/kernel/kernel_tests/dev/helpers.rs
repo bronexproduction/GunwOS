@@ -260,3 +260,13 @@ pub fn install_dummy_process() -> procId_t {
     }
     return 0;
 }
+
+pub fn install_dummy_device_listener(device_id: size_t, proc_id: procId_t) {
+    extern "cdecl" fn listener(_: *const gnwDeviceEvent) {}
+    extern "C" fn decoder(_: *mut u8, _: *const gnwDeviceEvent) {}
+    unsafe {
+        devices[device_id as usize].holder = proc_id;
+        devices[device_id as usize].listener = Some(listener);
+        devices[device_id as usize].decoder = Some(decoder);
+    }
+}

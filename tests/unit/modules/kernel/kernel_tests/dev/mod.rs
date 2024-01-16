@@ -615,17 +615,98 @@ fn k_dev_acquireHold_checkIncorrect_alreadyHeld() {
     log("k_dev_acquireHold_checkIncorrect_alreadyHeld end\n\0");
 }
 
-// void k_dev_releaseHold(const procId_t processId, const size_t deviceId) {
-//     if (!validateInstalledId(deviceId)) {
-//         OOPS("Device identifier invalid",);
-//     }
+#[test_case]
+fn k_dev_releaseHold_checkCorrect() {
+    log("k_dev_releaseHold_checkCorrect start\n\0");
 
-//     if (devices[deviceId].holder == processId) {
-//         devices[deviceId].holder = NONE_PROC_ID;
-//         devices[deviceId].listener = nullptr;
-//         devices[deviceId].decoder = nullptr;
-//     }
-// }
+    let id: size_t = 0;
+    let proc_id: procId_t = install_dummy_process();
+    install_dummy_device(&id, true);
+    assert_eq!(id, 0);
+    assert_eq!(proc_id, 0);
+    install_dummy_device_listener(id, proc_id);
+    unsafe {
+        k_dev_releaseHold(proc_id, id);
+        assert_eq!(KERNEL_PANIC_FLAG, false);
+        assert_eq!(devices[id as usize].holder, NONE_PROC_ID);
+        assert_eq!(devices[id as usize].listener, None);
+        assert_eq!(devices[id as usize].decoder, None);
+    }
+    
+    log("k_dev_releaseHold_checkCorrect end\n\0");
+}
+
+#[test_case]
+fn k_dev_releaseHold_checkIncorrect_deviceIdInvalid() {
+    log("k_dev_releaseHold_checkIncorrect_deviceIdInvalid start\n\0");
+
+    unsafe {
+        k_dev_releaseHold(0, 0);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        k_dev_releaseHold(0, 1);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        k_dev_releaseHold(0, MAX_DEVICES - 1);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        k_dev_releaseHold(0, MAX_DEVICES);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        k_dev_releaseHold(0, MAX_DEVICES + 1);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+    }
+    let id: size_t = 0;
+    install_dummy_device(&id, true);
+    assert_eq!(id, 0);
+    unsafe {
+        k_dev_releaseHold(0, 1);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        k_dev_releaseHold(0, MAX_DEVICES - 1);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        k_dev_releaseHold(0, MAX_DEVICES);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        k_dev_releaseHold(0, MAX_DEVICES + 1);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+    }
+    
+    log("k_dev_releaseHold_checkIncorrect_deviceIdInvalid end\n\0");
+}
+
+#[test_case]
+fn k_dev_releaseHold_checkIncorrect_processIdInvalid() {
+    log("k_dev_releaseHold_checkIncorrect_deviceIdInvalid start\n\0");
+    
+    let id: size_t = 0;
+    let proc_id = install_dummy_process();
+    install_dummy_device(&id, true);
+    assert_eq!(id, 0);
+    assert_eq!(proc_id, 0);
+    install_dummy_device_listener(id, proc_id);
+    unsafe {
+        let expected_device = devices[0];
+        k_dev_releaseHold(NONE_PROC_ID - 1, 0);
+        assert_eq!(devices[0], expected_device);
+        k_dev_releaseHold(NONE_PROC_ID, 0);
+        assert_eq!(devices[0], expected_device);
+        k_dev_releaseHold(KERNEL_PROC_ID, 0);
+        assert_eq!(devices[0], expected_device);
+        k_dev_releaseHold(1, 0);
+        assert_eq!(devices[0], expected_device);
+        k_dev_releaseHold(MAX_PROC - 1, 0);
+        assert_eq!(devices[0], expected_device);
+        k_dev_releaseHold(MAX_PROC, 0);
+        assert_eq!(devices[0], expected_device);
+        k_dev_releaseHold(MAX_PROC + 1, 0);
+        assert_eq!(devices[0], expected_device);
+    }
+    
+    log("k_dev_releaseHold_checkIncorrect_deviceIdInvalid end\n\0");
+}
 
 // enum gnwDeviceError k_dev_writeMem(const procId_t processId, 
 //                                    const size_t deviceId,
