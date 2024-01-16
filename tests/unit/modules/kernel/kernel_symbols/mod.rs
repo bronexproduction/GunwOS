@@ -458,7 +458,7 @@ pub const KERNEL_PROC_ID: procId_t = -1;
 
 pub const DEV_IRQ_LIMIT: u8 = 8;
 pub const MAX_DEVICES: size_t = 8;
-pub const MAX_PROC: size_t = 5;
+pub const MAX_PROC: procId_t = 5;
 
 extern "C" {
     pub fn k_purge();

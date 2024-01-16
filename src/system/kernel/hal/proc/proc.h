@@ -67,6 +67,11 @@ struct k_proc_process {
 procId_t k_proc_getCurrentId();
 
 /*
+    Returns whether the process identifier belongs to an user process
+*/
+bool k_proc_idIsUser(const procId_t procId);
+
+/*
     Returns information about the process with given procId
 */
 struct k_proc_process k_proc_getInfo(const procId_t procId);

@@ -46,9 +46,15 @@ procId_t k_proc_getCurrentId() {
     return procCurrent;
 }
 
+bool k_proc_idIsUser(const procId_t procId) {
+    return procId >= 0;
+}
+
 struct k_proc_process k_proc_getInfo(const procId_t procId) {
     if (procId < KERNEL_PROC_ID || procId >= MAX_PROC) {
-        OOPS("Process id out of range", kernelProc.info);
+        struct k_proc_process info;
+        memzero(&info, sizeof(struct k_proc_process));
+        OOPS("Process id out of range", info);
     }
     
     return (procId == KERNEL_PROC_ID) ? kernelProc.info : pTab[procId].info;

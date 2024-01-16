@@ -511,45 +511,27 @@ fn k_dev_acquireHold_checkCorrect() {
     log("k_dev_acquireHold_checkCorrect end\n\0");
 }
 
-// enum gnwDeviceError k_dev_acquireHold(const procId_t processId, const size_t deviceId) {
-//     if (!validateInstalledId(deviceId)) {
-//         OOPS("Device identifier invalid", GDE_UNKNOWN);
-//     }
-
-//     if (devices[deviceId].holder != NONE_PROC_ID) {
-//         return GDE_ALREADY_HELD;
-//     }
-
-//     devices[deviceId].holder = processId;
-
-//     return GDE_NONE;
-// }
-
 #[test_case]
 fn k_dev_acquireHold_checkIncorrect_deviceIdInvalid() {
     log("k_dev_acquireHold_checkIncorrect_deviceIdInvalid start\n\0");
 
-    // let mut id: size_t = 0;
-    // let uha: gnwDeviceUHA = Default::default();
-    // unsafe {
-    //     assert_eq!(k_dev_getUHAForId(id, &uha), gnwDeviceError::GDE_UNKNOWN);
-    //     assert_eq!(KERNEL_PANIC_FLAG, true);
-    //     KERNEL_PANIC_FLAG = false;
-    // }
-    // let descriptor = create_valid_device_desc_complex();
-    // install_device(&id, descriptor);
-    // id = 1;
-    // unsafe {
-    //     assert_eq!(k_dev_getUHAForId(id, &uha), gnwDeviceError::GDE_UNKNOWN);
-    //     assert_eq!(KERNEL_PANIC_FLAG, true);
-    //     KERNEL_PANIC_FLAG = false;
-    // }
-    // id = MAX_DEVICES;
-    // unsafe {
-    //     assert_eq!(k_dev_getUHAForId(id, &uha), gnwDeviceError::GDE_UNKNOWN);
-    //     assert_eq!(KERNEL_PANIC_FLAG, true);
-    // }
-    
+    unsafe {
+        assert_eq!(k_dev_acquireHold(0, 0), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(k_dev_acquireHold(0, 1), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(k_dev_acquireHold(0, MAX_DEVICES - 1), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(k_dev_acquireHold(0, MAX_DEVICES), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(k_dev_acquireHold(0, MAX_DEVICES + 1), gnwDeviceError::GDE_UNKNOWN);
+    }
+    let id: size_t = 0;
+    install_dummy_device(&id, true);
+    assert_eq!(id, 0);
+    unsafe {
+        assert_eq!(k_dev_acquireHold(0, 1), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(k_dev_acquireHold(0, MAX_DEVICES - 1), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(k_dev_acquireHold(0, MAX_DEVICES), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(k_dev_acquireHold(0, MAX_DEVICES + 1), gnwDeviceError::GDE_UNKNOWN);
+    }
+
     log("k_dev_acquireHold_checkIncorrect_deviceIdInvalid end\n\0");
 }
 
@@ -557,27 +539,60 @@ fn k_dev_acquireHold_checkIncorrect_deviceIdInvalid() {
 fn k_dev_acquireHold_checkIncorrect_processIdInvalid() {
     log("k_dev_acquireHold_checkIncorrect_processIdInvalid start\n\0");
 
-    // let mut id: size_t = 0;
-    // let uha: gnwDeviceUHA = Default::default();
-    // unsafe {
-    //     assert_eq!(k_dev_getUHAForId(id, &uha), gnwDeviceError::GDE_UNKNOWN);
-    //     assert_eq!(KERNEL_PANIC_FLAG, true);
-    //     KERNEL_PANIC_FLAG = false;
-    // }
-    // let descriptor = create_valid_device_desc_complex();
-    // install_device(&id, descriptor);
-    // id = 1;
-    // unsafe {
-    //     assert_eq!(k_dev_getUHAForId(id, &uha), gnwDeviceError::GDE_UNKNOWN);
-    //     assert_eq!(KERNEL_PANIC_FLAG, true);
-    //     KERNEL_PANIC_FLAG = false;
-    // }
-    // id = MAX_DEVICES;
-    // unsafe {
-    //     assert_eq!(k_dev_getUHAForId(id, &uha), gnwDeviceError::GDE_UNKNOWN);
-    //     assert_eq!(KERNEL_PANIC_FLAG, true);
-    // }
-    
+    let id: size_t = 0;
+    install_dummy_device(&id, true);
+    assert_eq!(id, 0);
+    unsafe {
+        assert_eq!(k_dev_acquireHold(NONE_PROC_ID - 1, id), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(k_dev_acquireHold(NONE_PROC_ID, id), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(k_dev_acquireHold(KERNEL_PROC_ID, id), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(k_dev_acquireHold(0, id), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(k_dev_acquireHold(1, id), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(k_dev_acquireHold(MAX_PROC - 1, id), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(k_dev_acquireHold(MAX_PROC, id), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(k_dev_acquireHold(MAX_PROC + 1, id), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+    }
+    let proc_id = install_dummy_process();
+    assert_eq!(proc_id, 0);
+    unsafe {
+        assert_eq!(k_dev_acquireHold(NONE_PROC_ID - 1, id), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(k_dev_acquireHold(NONE_PROC_ID, id), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(k_dev_acquireHold(KERNEL_PROC_ID, id), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(k_dev_acquireHold(1, id), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(k_dev_acquireHold(MAX_PROC - 1, id), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(k_dev_acquireHold(MAX_PROC, id), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(k_dev_acquireHold(MAX_PROC + 1, id), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+    }
+
     log("k_dev_acquireHold_checkIncorrect_processIdInvalid end\n\0");
 }
 
@@ -585,10 +600,17 @@ fn k_dev_acquireHold_checkIncorrect_processIdInvalid() {
 fn k_dev_acquireHold_checkIncorrect_alreadyHeld() {
     log("k_dev_acquireHold_checkIncorrect_alreadyHeld start\n\0");
 
-    // unsafe {
-    //     assert_eq!(k_dev_getUHAForId(0, null()), gnwDeviceError::GDE_UNKNOWN);
-    //     assert_eq!(KERNEL_PANIC_FLAG, true);
-    // }
+    let id: size_t = 0;
+    let proc_id: procId_t = install_dummy_process();
+    install_dummy_device(&id, true);
+    assert_eq!(id, 0);
+    assert_eq!(proc_id, 0);
+    unsafe {
+        devices[id as usize].holder = 0;
+        assert_eq!(k_dev_acquireHold(proc_id, id), gnwDeviceError::GDE_ALREADY_HELD);
+        devices[id as usize].holder = 1;
+        assert_eq!(k_dev_acquireHold(proc_id, id), gnwDeviceError::GDE_ALREADY_HELD);
+    }
     
     log("k_dev_acquireHold_checkIncorrect_alreadyHeld end\n\0");
 }

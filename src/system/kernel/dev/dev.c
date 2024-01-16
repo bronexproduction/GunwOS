@@ -222,6 +222,14 @@ enum gnwDeviceError k_dev_acquireHold(const procId_t processId, const size_t dev
         OOPS("Device identifier invalid", GDE_UNKNOWN);
     }
 
+    if (!k_proc_idIsUser(processId)) {
+        OOPS("Invalid process identifier", GDE_UNKNOWN);
+    }
+
+    if (k_proc_getInfo(processId).state != PS_RUNNING) {
+        OOPS("Invalid process state", GDE_UNKNOWN);
+    }
+
     if (devices[deviceId].holder != NONE_PROC_ID) {
         return GDE_ALREADY_HELD;
     }
