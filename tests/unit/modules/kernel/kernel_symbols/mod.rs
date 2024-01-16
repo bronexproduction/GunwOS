@@ -483,6 +483,7 @@ extern "C" {
     pub fn k_dev_getUHAForId(id: size_t, uha: *const gnwDeviceUHA) -> gnwDeviceError;
     pub fn k_dev_acquireHold(processId: procId_t, deviceId: size_t) -> gnwDeviceError;
     pub fn k_dev_releaseHold(processId: procId_t, deviceId: size_t);
+    pub fn k_dev_writeMem(processId: procId_t, deviceId: size_t, buffer: ptr_t, devMemRange: range_addr_t) -> gnwDeviceError;
 
     // hal
 

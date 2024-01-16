@@ -1,5 +1,4 @@
-
-mod helpers;
+pub mod helpers;
 
 use utils::*;
 use kernel_symbols::*;
@@ -624,7 +623,7 @@ fn k_dev_releaseHold_checkCorrect() {
     install_dummy_device(&id, true);
     assert_eq!(id, 0);
     assert_eq!(proc_id, 0);
-    install_dummy_device_listener(id, proc_id);
+    install_dummy_device_holder(id, proc_id);
     unsafe {
         k_dev_releaseHold(proc_id, id);
         assert_eq!(KERNEL_PANIC_FLAG, false);
@@ -686,7 +685,7 @@ fn k_dev_releaseHold_checkIncorrect_processIdInvalid() {
     install_dummy_device(&id, true);
     assert_eq!(id, 0);
     assert_eq!(proc_id, 0);
-    install_dummy_device_listener(id, proc_id);
+    install_dummy_device_holder(id, proc_id);
     unsafe {
         let expected_device = devices[0];
         k_dev_releaseHold(NONE_PROC_ID - 1, 0);
@@ -706,6 +705,37 @@ fn k_dev_releaseHold_checkIncorrect_processIdInvalid() {
     }
     
     log("k_dev_releaseHold_checkIncorrect_deviceIdInvalid end\n\0");
+}
+
+#[test_case]
+fn k_dev_writeMem_checkCorrect() {
+    log("k_dev_releaseHold_checkCorrect start\n\0");
+
+    let id: size_t = 0;
+    let proc_id: procId_t = install_dummy_process();
+    let mut device_descriptor = create_valid_device_desc_complex();
+    let device_range = range_addr_t {
+        offset: 1,
+        sizeBytes: 1,
+    };
+    let input_range = range_addr_t {
+        offset: 0,
+        sizeBytes: 1,
+    };
+    device_descriptor.api.mem.desc.bytesRange = device_range;
+    device_descriptor.api.mem.desc.maxInputSizeBytes = 1;
+    install_device(&id, device_descriptor);
+    assert_eq!(id, 0);
+    assert_eq!(proc_id, 0);
+    install_dummy_device_holder(id, proc_id);
+    let mut buffer: u8 = 0;
+    unsafe {
+        assert_eq!(k_dev_writeMem(proc_id, id, &mut buffer, input_range), gnwDeviceError::GDE_NONE);
+        assert_eq!(DEV_WRITE_CALLED, true);
+        DEV_WRITE_CALLED = false;
+    }
+    
+    log("k_dev_releaseHold_checkCorrect end\n\0");
 }
 
 // enum gnwDeviceError k_dev_writeMem(const procId_t processId, 

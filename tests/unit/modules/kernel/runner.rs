@@ -12,6 +12,8 @@ use core::panic::PanicInfo;
 use kernel_symbols::k_purge;
 use utils::*;
 
+use kernel_tests::dev::helpers::dev_clear;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 enum QemuExitCode {
@@ -51,9 +53,10 @@ fn exit_qemu(exit_code: QemuExitCode) {
 fn kernel_test_runner(tests: &[&dyn Fn()]) {
     for test in tests {
         unsafe {
-            KERNEL_PANIC_FLAG = false;
             cpu_cli();
             k_purge();
+            KERNEL_PANIC_FLAG = false;
+            dev_clear();
         }
         test();
     }

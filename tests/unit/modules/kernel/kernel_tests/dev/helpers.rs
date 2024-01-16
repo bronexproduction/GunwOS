@@ -1,5 +1,17 @@
 use kernel_symbols::*;
 
+pub static mut DRIVER_INIT_CALLED: bool = false;
+pub static mut DRIVER_START_CALLED: bool = false;
+pub static mut DEV_WRITE_CALLED: bool = false;
+
+pub fn dev_clear() {
+    unsafe {
+        DRIVER_INIT_CALLED = false;
+        DRIVER_START_CALLED = false;
+        DEV_WRITE_CALLED = false;
+    }
+}
+
 pub fn create_empty_device_desc() -> gnwDeviceDescriptor {
     let system_api_desc = gnwDeviceUHA_system_desc {
         _unused: 0,
@@ -155,9 +167,6 @@ pub fn create_valid_device_desc_minimal() -> gnwDeviceDescriptor {
     return device_descriptor;
 }
 
-pub static mut DRIVER_INIT_CALLED: bool = false;
-pub static mut DRIVER_START_CALLED: bool = false;
-
 pub fn create_valid_device_desc_complex() -> gnwDeviceDescriptor {
     let mut device_descriptor = create_empty_device_desc();
     device_descriptor.r#type = gnwDeviceType::DEV_TYPE_SYSTEM as i32;
@@ -193,7 +202,12 @@ pub fn create_valid_device_desc_complex() -> gnwDeviceDescriptor {
 
     extern "C" fn char_out_is_ready_to_write() -> bool { return false; }
     device_descriptor.api.charOut.routine.isReadyToWrite = Some(char_out_is_ready_to_write);
-    extern "C" fn char_out_write(_: i8) -> bool { return false; }
+    extern "C" fn char_out_write(_: i8) -> bool { 
+        unsafe {
+            DEV_WRITE_CALLED = true;
+        }
+        return true;
+    }
     device_descriptor.api.charOut.routine.write = Some(char_out_write);
 
     device_descriptor.api.storCtrl.desc.driveCount = 1;
@@ -261,12 +275,8 @@ pub fn install_dummy_process() -> procId_t {
     return 0;
 }
 
-pub fn install_dummy_device_listener(device_id: size_t, proc_id: procId_t) {
-    extern "cdecl" fn listener(_: *const gnwDeviceEvent) {}
-    extern "C" fn decoder(_: *mut u8, _: *const gnwDeviceEvent) {}
+pub fn install_dummy_device_holder(device_id: size_t, proc_id: procId_t) {
     unsafe {
         devices[device_id as usize].holder = proc_id;
-        devices[device_id as usize].listener = Some(listener);
-        devices[device_id as usize].decoder = Some(decoder);
     }
 }
