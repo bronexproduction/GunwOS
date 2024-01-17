@@ -320,10 +320,10 @@ enum gnwDeviceError k_dev_writeChar(const procId_t processId,
     return GDE_NONE;
 }
 
-PRIVATE enum gnwDeviceError validateListener(const procId_t processId, 
-                                            const size_t deviceId, 
-                                            const gnwDeviceEventListener listener,
-                                            const gnwDeviceEventDecoder decoder) {
+enum gnwDeviceError k_dev_listen(const procId_t processId, 
+                                 const size_t deviceId, 
+                                 const gnwDeviceEventListener listener,
+                                 const gnwDeviceEventDecoder decoder) {
     if (!listener) {
         return GDE_LISTENER_INVALID;
     }
@@ -338,18 +338,6 @@ PRIVATE enum gnwDeviceError validateListener(const procId_t processId,
 
     if (devices[deviceId].listener) {
         return GDE_ALREADY_SET;
-    }
-
-    return GDE_NONE;
-}
-
-enum gnwDeviceError k_dev_listen(const procId_t processId, 
-                                 const size_t deviceId, 
-                                 const gnwDeviceEventListener listener,
-                                 const gnwDeviceEventDecoder decoder) {
-    enum gnwDeviceError err = validateListener(processId, deviceId, listener, decoder);
-    if (err) {
-        return err;
     }
 
     devices[deviceId].listener = listener;
