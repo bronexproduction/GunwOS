@@ -1016,31 +1016,168 @@ fn k_dev_writeMem_checkIncorrect_writeNotSupported() {
                                         const char character)
 */
 
-// enum gnwDeviceError k_dev_writeChar(const procId_t processId, 
-//                                     const size_t deviceId,
-//                                     const char character) {
+#[test_case]
+fn k_dev_writeChar_checkCorrect() {
+    log("k_dev_writeChar_checkCorrect start\n\0");
 
-//     const enum gnwDeviceError e = validateStartedDevice(processId, deviceId);
-//     if (e) {
-//         return e;
-//     }
+    let id: size_t = 0;
+    let mut proc_id: procId_t = 0;
+    install_dummy_writable_device(&id, &mut proc_id);
 
-//     const struct gnwDeviceUHA_charOut_routine * const routine = &devices[deviceId].desc.api.charOut.routine;
-//     if (!routine->isReadyToWrite) {
-//         return GDE_INVALID_OPERATION;
-//     }
-//     if (!routine->isReadyToWrite()) {
-//         return GDE_INVALID_DEVICE_STATE;
-//     }
-//     if (!routine->write) {
-//         return GDE_INVALID_OPERATION;
-//     }
-//     if (!routine->write(character)) {
-//         return GDE_OPERATION_FAILED;
-//     }
+    unsafe {
+        assert_eq!(k_dev_writeChar(proc_id, id, 0), gnwDeviceError::GDE_NONE);
+        assert_eq!(DEV_CHAR_WRITE_CALLED, true);
+        DEV_CHAR_WRITE_CALLED = false;
+    }
+    
+    log("k_dev_writeChar_checkCorrect end\n\0");
+}
 
-//     return GDE_NONE;
-// }
+#[test_case]
+fn k_dev_writeChar_checkIncorrect_deviceNotInstalled() {
+    log("k_dev_writeChar_checkIncorrect_deviceNotInstalled start\n\0");
+    
+    let id: size_t = 0;
+    let mut proc_id: procId_t = 0;
+    install_dummy_writable_device(&id, &mut proc_id);
+
+    unsafe {
+        devicesCount = 0;
+        assert_eq!(k_dev_writeChar(proc_id, id, 0), gnwDeviceError::GDE_UNKNOWN);
+    }
+    
+    log("k_dev_writeChar_checkIncorrect_deviceNotInstalled end\n\0");
+}
+
+#[test_case]
+fn k_dev_writeChar_checkIncorrect_processIdInvalid() {
+    log("k_dev_writeChar_checkIncorrect_processIdInvalid start\n\0");
+
+    let id: size_t = 0;
+    let mut proc_id: procId_t = 0;
+    install_dummy_writable_device(&id, &mut proc_id);
+
+    unsafe {
+        assert_eq!(k_dev_writeChar(NONE_PROC_ID - 1, id, 0), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(k_dev_writeChar(NONE_PROC_ID, id, 0), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(k_dev_writeChar(KERNEL_PROC_ID, id, 0), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(k_dev_writeChar(1, id, 0), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(k_dev_writeChar(MAX_PROC - 1, id, 0), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(k_dev_writeChar(MAX_PROC, id, 0), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(k_dev_writeChar(MAX_PROC + 1, id, 0), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+    }
+    
+    log("k_dev_writeChar_checkIncorrect_processIdInvalid end\n\0");
+}
+
+#[test_case]
+fn k_dev_writeChar_checkIncorrect_deviceHandleInvalid() {
+    log("k_dev_writeChar_checkIncorrect_deviceHandleInvalid start\n\0");
+
+    let id: size_t = 0;
+    let mut proc_id: procId_t = 0;
+    install_dummy_writable_device(&id, &mut proc_id);
+    
+    unsafe {
+        devices[id as usize].holder = NONE_PROC_ID;
+        assert_eq!(k_dev_writeChar(0, id, 0), gnwDeviceError::GDE_HANDLE_INVALID);
+    }
+    
+    log("k_dev_writeChar_checkIncorrect_deviceHandleInvalid end\n\0");
+}
+
+#[test_case]
+fn k_dev_writeChar_checkIncorrect_deviceNotStarted() {
+    log("k_dev_writeChar_checkIncorrect_deviceNotStarted start\n\0");
+
+    let id: size_t = 0;
+    let mut proc_id: procId_t = 0;
+    install_dummy_writable_device(&id, &mut proc_id);
+    
+    unsafe {
+        devices[id as usize].started = false;
+        assert_eq!(k_dev_writeChar(0, id, 0), gnwDeviceError::GDE_INVALID_DEVICE_STATE);
+    }
+    
+    log("k_dev_writeChar_checkIncorrect_deviceNotStarted end\n\0");
+}
+
+#[test_case]
+fn k_dev_writeChar_checkIncorrect_isReadyNotSupported() {
+    log("k_dev_writeChar_checkIncorrect_isReadyNotSupported start\n\0");
+
+    let id: size_t = 0;
+    let mut proc_id: procId_t = 0;
+    install_dummy_writable_device(&id, &mut proc_id);
+    
+    unsafe {
+        devices[id as usize].desc.api.charOut.routine.isReadyToWrite = None;
+        assert_eq!(k_dev_writeChar(proc_id, id, 0), gnwDeviceError::GDE_INVALID_OPERATION);
+    }
+    
+    log("k_dev_writeChar_checkIncorrect_isReadyNotSupported end\n\0");
+}
+
+#[test_case]
+fn k_dev_writeChar_checkIncorrect_deviceNotReady() {
+    log("k_dev_writeChar_checkIncorrect_deviceNotReady start\n\0");
+
+    let id: size_t = 0;
+    let mut proc_id: procId_t = 0;
+    install_dummy_writable_device(&id, &mut proc_id);
+    extern "C" fn char_out_is_ready_to_write() -> bool { return false; }
+    unsafe {
+        devices[id as usize].desc.api.charOut.routine.isReadyToWrite = Some(char_out_is_ready_to_write);
+        assert_eq!(k_dev_writeChar(proc_id, id, 0), gnwDeviceError::GDE_INVALID_DEVICE_STATE);
+    }
+    
+    log("k_dev_writeChar_checkIncorrect_deviceNotReady end\n\0");
+}
+
+#[test_case]
+fn k_dev_writeChar_checkIncorrect_writeNotSupported() {
+    log("k_dev_writeChar_checkIncorrect_writeNotSupported start\n\0");
+
+    let id: size_t = 0;
+    let mut proc_id: procId_t = 0;
+    install_dummy_writable_device(&id, &mut proc_id);
+    
+    unsafe {
+        devices[id as usize].desc.api.charOut.routine.write = None;
+        assert_eq!(k_dev_writeChar(proc_id, id, 0), gnwDeviceError::GDE_INVALID_OPERATION);
+    }
+    
+    log("k_dev_writeChar_checkIncorrect_writeNotSupported end\n\0");
+}
+
+#[test_case]
+fn k_dev_writeChar_checkIncorrect_writeFailed() {
+    log("k_dev_writeChar_checkIncorrect_writeFailed start\n\0");
+
+    let id: size_t = 0;
+    let mut proc_id: procId_t = 0;
+    install_dummy_writable_device(&id, &mut proc_id);
+    extern "C" fn char_out_write(_: i8) -> bool { return false; }
+    unsafe {
+        devices[id as usize].desc.api.charOut.routine.write = Some(char_out_write);
+        assert_eq!(k_dev_writeChar(proc_id, id, 0), gnwDeviceError::GDE_OPERATION_FAILED);
+    }
+    
+    log("k_dev_writeChar_checkIncorrect_writeFailed end\n\0");
+}
 
 // static enum gnwDeviceError validateListener(const procId_t processId, 
 //                                             const size_t deviceId, 

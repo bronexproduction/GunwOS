@@ -3,12 +3,14 @@ use kernel_symbols::*;
 pub static mut DRIVER_INIT_CALLED: bool = false;
 pub static mut DRIVER_START_CALLED: bool = false;
 pub static mut DEV_WRITE_CALLED: bool = false;
+pub static mut DEV_CHAR_WRITE_CALLED: bool = false;
 
 pub fn dev_clear() {
     unsafe {
         DRIVER_INIT_CALLED = false;
         DRIVER_START_CALLED = false;
         DEV_WRITE_CALLED = false;
+        DEV_CHAR_WRITE_CALLED = false;
     }
 }
 
@@ -204,9 +206,14 @@ pub fn create_valid_device_desc_complex() -> gnwDeviceDescriptor {
     extern "C" fn char_in_read(_: *const u8) -> u32 { return 0; }
     device_descriptor.api.charIn.routine.read = Some(char_in_read);
 
-    extern "C" fn char_out_is_ready_to_write() -> bool { return false; }
+    extern "C" fn char_out_is_ready_to_write() -> bool { return true; }
     device_descriptor.api.charOut.routine.isReadyToWrite = Some(char_out_is_ready_to_write);
-    extern "C" fn char_out_write(_: i8) -> bool { return false; }
+    extern "C" fn char_out_write(_: i8) -> bool { 
+        unsafe {
+            DEV_CHAR_WRITE_CALLED = true;
+        }
+        return true;
+    }
     device_descriptor.api.charOut.routine.write = Some(char_out_write);
 
     device_descriptor.api.storCtrl.desc.driveCount = 1;
