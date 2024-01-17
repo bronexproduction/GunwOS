@@ -25,7 +25,7 @@ void k_dev_releaseHold(const procId_t processId, const size_t deviceId);
 
 enum gnwDeviceError k_dev_writeMem(const procId_t processId, 
                                    const size_t deviceId,
-                                   const ptr_t buffer,
+                                   const ptr_t absBuffer,
                                    const range_addr_t devMemRange);
 enum gnwDeviceError k_dev_writeChar(const procId_t processId, 
                                     const size_t deviceId,

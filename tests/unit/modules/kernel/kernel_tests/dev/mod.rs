@@ -759,7 +759,7 @@ fn k_dev_releaseHold_checkIncorrect_processIdInvalid() {
 /*
     enum gnwDeviceError k_dev_writeMem(const procId_t processId, 
                                        const size_t deviceId,
-                                       const ptr_t buffer,
+                                       const ptr_t absBuffer,
                                        const range_addr_t devMemRange)
 */
 
@@ -866,47 +866,47 @@ fn k_dev_writeMem_checkIncorrect_processIdInvalid() {
     log("k_dev_writeMem_checkIncorrect_processIdInvalid end\n\0");
 }
 
-// #[test_case]
-// fn k_dev_writeMem_checkIncorrect_bufferOutsideProcessMemory() {
-//     log("k_dev_writeMem_checkIncorrect_bufferOutsideProcessMemory start\n\0");
+#[test_case]
+fn k_dev_writeMem_checkIncorrect_deviceHandleInvalid() {
+    log("k_dev_writeMem_checkIncorrect_deviceHandleInvalid start\n\0");
 
-//     assert_eq!(1,0);
-//     // let mut buffer: u8 = 0;
-//     // unsafe {
-//     //     assert_eq!(k_dev_writeMem(0, 0, &mut buffer, Default::default()), gnwDeviceError::GDE_UNKNOWN);
-//     // }
+    let id: size_t = 0;
+    let mut proc_id: procId_t = 0;
+    install_dummy_writable_device(&id, &mut proc_id);
+    let mut buffer: u8 = 0;
+    let input_range = range_addr_t {
+        offset: 0,
+        sizeBytes: 1,
+    };
     
-//     log("k_dev_writeMem_checkIncorrect_bufferOutsideProcessMemory end\n\0");
-// }
-
-// #[test_case]
-// fn k_dev_writeMem_checkIncorrect_deviceNotHeld() {
-//     log("k_dev_writeMem_checkIncorrect_deviceNotHeld start\n\0");
-
-//     assert_eq!(1,0);
-//     // let id: size_t = 0;
-//     // install_dummy_device(&id, false);
-//     // assert_eq(id, 0);
-//     // let mut buffer: u8 = 0;
-//     // unsafe {
-//     //     assert_eq!(k_dev_writeMem(0, id, &mut buffer, Default::default()), gnwDeviceError::GDE_UNKNOWN);
-//     // }
+    unsafe {
+        devices[id as usize].holder = NONE_PROC_ID;
+        assert_eq!(k_dev_writeMem(0, id, &mut buffer, input_range), gnwDeviceError::GDE_HANDLE_INVALID);
+    }
     
-//     log("k_dev_writeMem_checkIncorrect_deviceNotHeld end\n\0");
-// }
+    log("k_dev_writeMem_checkIncorrect_deviceHandleInvalid end\n\0");
+}
 
-// #[test_case]
-// fn k_dev_writeMem_checkIncorrect_deviceNotStarted() {
-//     log("k_dev_writeMem_checkIncorrect_deviceNotStarted start\n\0");
+#[test_case]
+fn k_dev_writeMem_checkIncorrect_deviceNotStarted() {
+    log("k_dev_writeMem_checkIncorrect_deviceNotStarted start\n\0");
 
-//     assert_eq!(1,0);
-//     // let mut buffer: u8 = 0;
-//     // unsafe {
-//     //     assert_eq!(k_dev_writeMem(0, 0, &mut buffer, Default::default()), gnwDeviceError::GDE_UNKNOWN);
-//     // }
+    let id: size_t = 0;
+    let mut proc_id: procId_t = 0;
+    install_dummy_writable_device(&id, &mut proc_id);
+    let mut buffer: u8 = 0;
+    let input_range = range_addr_t {
+        offset: 0,
+        sizeBytes: 1,
+    };
     
-//     log("k_dev_writeMem_checkIncorrect_deviceNotStarted end\n\0");
-// }
+    unsafe {
+        devices[id as usize].started = false;
+        assert_eq!(k_dev_writeMem(0, id, &mut buffer, input_range), gnwDeviceError::GDE_INVALID_DEVICE_STATE);
+    }
+    
+    log("k_dev_writeMem_checkIncorrect_deviceNotStarted end\n\0");
+}
 
 // enum gnwDeviceError k_dev_writeMem(const procId_t processId, 
 //                                    const size_t deviceId,

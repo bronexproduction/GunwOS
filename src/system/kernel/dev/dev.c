@@ -85,9 +85,6 @@ PRIVATE enum gnwDeviceError validateStartedDevice(const procId_t processId, cons
         OOPS("Invalid process state", GDE_UNKNOWN);
     }
 
-    #warning TODO: checks
-    // * check if buffer does not exceed process memory
-
     struct device *dev = &devices[deviceId];
     if (dev->holder != processId) {
         return GDE_HANDLE_INVALID;
@@ -260,9 +257,9 @@ void k_dev_releaseHold(const procId_t processId, const size_t deviceId) {
 
 enum gnwDeviceError k_dev_writeMem(const procId_t processId, 
                                    const size_t deviceId,
-                                   const ptr_t buffer,
+                                   const ptr_t absBuffer,
                                    const range_addr_t devMemRange) {
-    if (!buffer) {
+    if (!absBuffer) {
         OOPS("Buffer cannot be nullptr", GDE_UNKNOWN);
     }
 
@@ -289,7 +286,7 @@ enum gnwDeviceError k_dev_writeMem(const procId_t processId,
         return GDE_INVALID_OPERATION;
     }
     #warning it is more than dangerous to allow the driver to access the buffer directly, moreover it could be even impossible when driver processes are implemented
-    routine->write(buffer, devMemRange);
+    routine->write(absBuffer, devMemRange);
 
     return GDE_NONE;
 }
