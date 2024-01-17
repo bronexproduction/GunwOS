@@ -908,24 +908,101 @@ fn k_dev_writeMem_checkIncorrect_deviceNotStarted() {
     log("k_dev_writeMem_checkIncorrect_deviceNotStarted end\n\0");
 }
 
+#[test_case]
+fn k_dev_writeMem_checkIncorrect_deviceInputSizeBytesNull() {
+    log("k_dev_writeMem_checkIncorrect_deviceInputSizeBytesNull start\n\0");
+
+    let id: size_t = 0;
+    let mut proc_id: procId_t = 0;
+    install_dummy_writable_device(&id, &mut proc_id);
+    let mut buffer: u8 = 0;
+    let input_range = range_addr_t {
+        offset: 0,
+        sizeBytes: 1,
+    };
+    
+    unsafe {
+        devices[id as usize].desc.api.mem.desc.maxInputSizeBytes = 0;
+        log("asdasf\n\0");
+        assert_eq!(k_dev_writeMem(proc_id, id, &mut buffer, input_range), gnwDeviceError::GDE_INVALID_OPERATION);
+    }
+    
+    log("k_dev_writeMem_checkIncorrect_deviceInputSizeBytesNull end\n\0");
+}
+
+#[test_case]
+fn k_dev_writeMem_checkIncorrect_inputRangeExceeded() {
+    log("k_dev_writeMem_checkIncorrect_inputRangeExceeded start\n\0");
+
+    let id: size_t = 0;
+    let mut proc_id: procId_t = 0;
+    install_dummy_writable_device(&id, &mut proc_id);
+    let mut buffer: u8 = 0;
+    let empty_input_range = range_addr_t {
+        offset: 0,
+        sizeBytes: 0,
+    };
+    let offset_empty_input_range = range_addr_t {
+        offset: 1,
+        sizeBytes: 0,
+    };
+    let offset_outside_empty_input_range = range_addr_t {
+        offset: 2,
+        sizeBytes: 0,
+    };
+    let offset_input_range = range_addr_t {
+        offset: 1,
+        sizeBytes: 1,
+    };
+    let offset_outside_input_range = range_addr_t {
+        offset: 2,
+        sizeBytes: 1,
+    };
+    let input_range_too_large = range_addr_t {
+        offset: 0,
+        sizeBytes: 2,
+    };
+    let input_range_too_large_2 = range_addr_t {
+        offset: 0,
+        sizeBytes: 2,
+    };
+    let offset_input_range_too_large = range_addr_t {
+        offset: 1,
+        sizeBytes: 2,
+    };
+    let offset_outside_input_range_too_large = range_addr_t {
+        offset: 2,
+        sizeBytes: 2,
+    };
+    
+    unsafe {
+        assert_eq!(k_dev_writeMem(0, id, &mut buffer, empty_input_range), gnwDeviceError::GDE_INVALID_PARAMETER);
+        assert_eq!(k_dev_writeMem(0, id, &mut buffer, offset_empty_input_range), gnwDeviceError::GDE_INVALID_PARAMETER);
+        assert_eq!(k_dev_writeMem(0, id, &mut buffer, offset_outside_empty_input_range), gnwDeviceError::GDE_INVALID_PARAMETER);
+        assert_eq!(k_dev_writeMem(0, id, &mut buffer, offset_input_range), gnwDeviceError::GDE_INVALID_PARAMETER);
+        assert_eq!(k_dev_writeMem(0, id, &mut buffer, offset_outside_input_range), gnwDeviceError::GDE_INVALID_PARAMETER);
+        assert_eq!(k_dev_writeMem(0, id, &mut buffer, input_range_too_large), gnwDeviceError::GDE_INVALID_PARAMETER);
+        assert_eq!(k_dev_writeMem(0, id, &mut buffer, input_range_too_large_2), gnwDeviceError::GDE_INVALID_PARAMETER);
+        assert_eq!(k_dev_writeMem(0, id, &mut buffer, offset_input_range_too_large), gnwDeviceError::GDE_INVALID_PARAMETER);
+        assert_eq!(k_dev_writeMem(0, id, &mut buffer, offset_outside_input_range_too_large), gnwDeviceError::GDE_INVALID_PARAMETER);
+    }
+    
+    log("k_dev_writeMem_checkIncorrect_inputRangeExceeded end\n\0");
+}
+
 // enum gnwDeviceError k_dev_writeMem(const procId_t processId, 
 //                                    const size_t deviceId,
 //                                    const ptr_t buffer,
 //                                    const range_addr_t devMemRange) {
-//     if (!buffer) {
-//         OOPS("Buffer cannot be nullptr", GDE_UNKNOWN);
-//     }
-
-//     const enum gnwDeviceError e = validateStartedDevice(processId, deviceId);
-//     if (e) {
-//         return e;
-//     }
 
 //     const size_t maxInputSizeBytes = devices[deviceId].desc.api.mem.desc.maxInputSizeBytes;
 //     if (!maxInputSizeBytes) {
 //         return GDE_INVALID_OPERATION;
 //     }
 
+//     if (!devMemRange.sizeBytes) {
+//         return GDE_INVALID_PARAMETER;
+//     }
 //     if (devMemRange.offset >= maxInputSizeBytes) {
 //         return GDE_INVALID_PARAMETER;
 //     }

@@ -273,6 +273,9 @@ enum gnwDeviceError k_dev_writeMem(const procId_t processId,
         return GDE_INVALID_OPERATION;
     }
 
+    if (!devMemRange.sizeBytes) {
+        return GDE_INVALID_PARAMETER;
+    }
     if (devMemRange.offset >= maxInputSizeBytes) {
         return GDE_INVALID_PARAMETER;
     }
