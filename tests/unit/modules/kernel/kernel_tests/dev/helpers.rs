@@ -292,5 +292,8 @@ pub fn install_dummy_writable_device(id: &size_t, proc_id: &mut procId_t) {
     install_device(&id, device_descriptor);
     assert_eq!(*id, 0);
     assert_eq!(*proc_id, 0);
+    unsafe {
+        devices[*id as usize].started = true;
+    }
     install_dummy_device_holder(*id, *proc_id);
 }
