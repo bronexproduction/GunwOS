@@ -4,6 +4,7 @@ use utils::*;
 use kernel_symbols::*;
 use self::helpers::*;
 use core::ptr::null;
+use core::ptr::null_mut;
 
 /*
     PRIVATE bool validateId(size_t id)
@@ -69,6 +70,7 @@ fn validateStartedDevice_checkCorrect() {
         devicesCount = 1;
         devices[0].holder = 0;
         devices[0].started = true;
+        install_dummy_process();
         assert_eq!(validateStartedDevice(0, 0), gnwDeviceError::GDE_NONE);
     }
     log("validateStartedDevice_checkCorrect end\n\0");
@@ -79,6 +81,29 @@ fn validateStartedDevice_checkIncorrect() {
     log("validateStartedDevice_checkIncorrect start\n\0");
     unsafe {
         devicesCount = 1;
+        let proc_id = install_dummy_process();
+        assert_eq!(proc_id, 0);
+        assert_eq!(validateStartedDevice(NONE_PROC_ID - 1, 0), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(validateStartedDevice(NONE_PROC_ID, 0), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(validateStartedDevice(KERNEL_PROC_ID, 0), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(validateStartedDevice(1, 0), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(validateStartedDevice(MAX_PROC - 1, 0), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(validateStartedDevice(MAX_PROC, 0), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(validateStartedDevice(MAX_PROC + 1, 0), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        
         devices[0].holder = NONE_PROC_ID;
         devices[0].started = false;
         assert_eq!(validateStartedDevice(0, 1), gnwDeviceError::GDE_UNKNOWN);
@@ -262,6 +287,10 @@ fn k_dev_install_checkIncorrect_initFailure() {
     log("k_dev_install_checkIncorrect_initFailure end\n\0");
 }
 
+/*
+    enum gnwDriverError k_dev_start(size_t id)
+*/
+
 #[test_case]
 fn k_dev_start_checkCorrect() {
     log("k_dev_start_checkCorrect start\n\0");
@@ -319,6 +348,10 @@ fn k_dev_start_checkIncorrect_deviceStartFailed() {
     
     log("k_dev_start_checkIncorrect_deviceStartFailed end\n\0");
 }
+
+/*
+    enum gnwDeviceError k_dev_getById(const size_t id, struct gnwDeviceUHADesc * const desc)
+*/
 
 #[test_case]
 fn k_dev_getById_checkCorrect() {
@@ -382,6 +415,10 @@ fn k_dev_getById_checkIncorrect_descNull() {
     log("k_dev_getById_checkIncorrect_descNull end\n\0");
 }
 
+/*
+    enum gnwDeviceError k_dev_getByType(const enum gnwDeviceType type, struct gnwDeviceUHADesc * const desc)
+*/
+
 #[test_case]
 fn k_dev_getByType_checkCorrect_minimal() {
     log("k_dev_getByType_checkCorrect_minimal start\n\0");
@@ -433,6 +470,10 @@ fn k_dev_getByType_checkIncorrect_descNull() {
     
     log("k_dev_getByType_checkIncorrect_descNull end\n\0");
 }
+
+/*
+    enum gnwDeviceError k_dev_getUHAForId(const size_t id, struct gnwDeviceUHA * const uha)
+*/
 
 #[test_case]
 fn k_dev_getUHAForId_checkCorrect() {
@@ -491,6 +532,10 @@ fn k_dev_getUHAForId_checkIncorrect_descNull() {
     
     log("k_dev_getUHAForId_checkIncorrect_descNull end\n\0");
 }
+
+/*
+    enum gnwDeviceError k_dev_acquireHold(const procId_t processId, const size_t deviceId)
+*/
 
 #[test_case]
 fn k_dev_acquireHold_checkCorrect() {
@@ -614,6 +659,10 @@ fn k_dev_acquireHold_checkIncorrect_alreadyHeld() {
     log("k_dev_acquireHold_checkIncorrect_alreadyHeld end\n\0");
 }
 
+/*
+    void k_dev_releaseHold(const procId_t processId, const size_t deviceId)
+*/
+
 #[test_case]
 fn k_dev_releaseHold_checkCorrect() {
     log("k_dev_releaseHold_checkCorrect start\n\0");
@@ -707,29 +756,28 @@ fn k_dev_releaseHold_checkIncorrect_processIdInvalid() {
     log("k_dev_releaseHold_checkIncorrect_deviceIdInvalid end\n\0");
 }
 
+/*
+    enum gnwDeviceError k_dev_writeMem(const procId_t processId, 
+                                       const size_t deviceId,
+                                       const ptr_t buffer,
+                                       const range_addr_t devMemRange)
+*/
+
 #[test_case]
 fn k_dev_writeMem_checkCorrect() {
     log("k_dev_writeMem_checkCorrect start\n\0");
 
     let id: size_t = 0;
-    let proc_id: procId_t = install_dummy_process();
-    let mut device_descriptor = create_valid_device_desc_complex();
-    let device_range = range_addr_t {
-        offset: 1,
-        sizeBytes: 1,
-    };
+    let mut proc_id: procId_t = 0;
+    install_dummy_writable_device(&id, &mut proc_id);
+    let mut buffer: u8 = 0;
     let input_range = range_addr_t {
         offset: 0,
         sizeBytes: 1,
     };
-    device_descriptor.api.mem.desc.bytesRange = device_range;
-    device_descriptor.api.mem.desc.maxInputSizeBytes = 1;
-    install_device(&id, device_descriptor);
-    assert_eq!(id, 0);
-    assert_eq!(proc_id, 0);
-    install_dummy_device_holder(id, proc_id);
-    let mut buffer: u8 = 0;
+
     unsafe {
+        devices[0].started = true;
         assert_eq!(k_dev_writeMem(proc_id, id, &mut buffer, input_range), gnwDeviceError::GDE_NONE);
         assert_eq!(DEV_WRITE_CALLED, true);
         DEV_WRITE_CALLED = false;
@@ -737,6 +785,128 @@ fn k_dev_writeMem_checkCorrect() {
     
     log("k_dev_writeMem_checkCorrect end\n\0");
 }
+
+#[test_case]
+fn k_dev_writeMem_checkIncorrect_nullBuffer() {
+    log("k_dev_writeMem_checkIncorrect_nullBuffer start\n\0");
+
+    let id: size_t = 0;
+    let mut proc_id: procId_t = 0;
+    install_dummy_writable_device(&id, &mut proc_id);
+    let input_range = range_addr_t {
+        offset: 0,
+        sizeBytes: 1,
+    };
+
+    unsafe {
+        assert_eq!(k_dev_writeMem(proc_id, id, null_mut(), input_range), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+    }
+    
+    log("k_dev_writeMem_checkIncorrect_nullBuffer end\n\0");
+}
+
+#[test_case]
+fn k_dev_writeMem_checkIncorrect_deviceNotInstalled() {
+    log("k_dev_writeMem_checkIncorrect_deviceNotInstalled start\n\0");
+    
+    let id: size_t = 0;
+    let mut proc_id: procId_t = 0;
+    install_dummy_writable_device(&id, &mut proc_id);
+    let mut buffer: u8 = 0;
+    let input_range = range_addr_t {
+        offset: 0,
+        sizeBytes: 1,
+    };
+
+    unsafe {
+        devicesCount = 0;
+        assert_eq!(k_dev_writeMem(proc_id, id, &mut buffer, input_range), gnwDeviceError::GDE_UNKNOWN);
+    }
+    
+    log("k_dev_writeMem_checkIncorrect_deviceNotInstalled end\n\0");
+}
+
+#[test_case]
+fn k_dev_writeMem_checkIncorrect_processIdInvalid() {
+    log("k_dev_writeMem_checkIncorrect_processIdInvalid start\n\0");
+
+    let id: size_t = 0;
+    let mut proc_id: procId_t = 0;
+    install_dummy_writable_device(&id, &mut proc_id);
+    let mut buffer: u8 = 0;
+    let input_range = range_addr_t {
+        offset: 0,
+        sizeBytes: 1,
+    };
+
+    unsafe {
+        assert_eq!(k_dev_writeMem(NONE_PROC_ID - 1, id, &mut buffer, input_range), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(k_dev_writeMem(NONE_PROC_ID, id, &mut buffer, input_range), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(k_dev_writeMem(KERNEL_PROC_ID, id, &mut buffer, input_range), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(k_dev_writeMem(1, id, &mut buffer, input_range), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(k_dev_writeMem(MAX_PROC - 1, id, &mut buffer, input_range), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(k_dev_writeMem(MAX_PROC, id, &mut buffer, input_range), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(k_dev_writeMem(MAX_PROC + 1, id, &mut buffer, input_range), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+    }
+    
+    log("k_dev_writeMem_checkIncorrect_processIdInvalid end\n\0");
+}
+
+// #[test_case]
+// fn k_dev_writeMem_checkIncorrect_bufferOutsideProcessMemory() {
+//     log("k_dev_writeMem_checkIncorrect_bufferOutsideProcessMemory start\n\0");
+
+//     assert_eq!(1,0);
+//     // let mut buffer: u8 = 0;
+//     // unsafe {
+//     //     assert_eq!(k_dev_writeMem(0, 0, &mut buffer, Default::default()), gnwDeviceError::GDE_UNKNOWN);
+//     // }
+    
+//     log("k_dev_writeMem_checkIncorrect_bufferOutsideProcessMemory end\n\0");
+// }
+
+// #[test_case]
+// fn k_dev_writeMem_checkIncorrect_deviceNotHeld() {
+//     log("k_dev_writeMem_checkIncorrect_deviceNotHeld start\n\0");
+
+//     assert_eq!(1,0);
+//     // let id: size_t = 0;
+//     // install_dummy_device(&id, false);
+//     // assert_eq(id, 0);
+//     // let mut buffer: u8 = 0;
+//     // unsafe {
+//     //     assert_eq!(k_dev_writeMem(0, id, &mut buffer, Default::default()), gnwDeviceError::GDE_UNKNOWN);
+//     // }
+    
+//     log("k_dev_writeMem_checkIncorrect_deviceNotHeld end\n\0");
+// }
+
+// #[test_case]
+// fn k_dev_writeMem_checkIncorrect_deviceNotStarted() {
+//     log("k_dev_writeMem_checkIncorrect_deviceNotStarted start\n\0");
+
+//     assert_eq!(1,0);
+//     // let mut buffer: u8 = 0;
+//     // unsafe {
+//     //     assert_eq!(k_dev_writeMem(0, 0, &mut buffer, Default::default()), gnwDeviceError::GDE_UNKNOWN);
+//     // }
+    
+//     log("k_dev_writeMem_checkIncorrect_deviceNotStarted end\n\0");
+// }
 
 // enum gnwDeviceError k_dev_writeMem(const procId_t processId, 
 //                                    const size_t deviceId,
@@ -958,3 +1128,26 @@ fn k_dev_writeMem_checkCorrect() {
 //         }
 //     }
 // }
+
+
+// #[macro_export]
+// macro_rules! my_test_case {
+//     ($function_name:ident, $test_name:ident, $body:block) => {
+//         concat_idents!(test_name = $function_name, _, $test_name {
+//             #[test_case]
+//             fn test_name() {
+//                 //   log("Start {}, $test_name);
+//                 $body
+//                 //   log("Finished {}, $test_name);
+//             }
+//         });            
+//     }
+// }
+
+// my_test_case! { dick, checkCorrect, {
+//     assert_eq!(0,0);
+// }}
+
+// my_test_case! { dick, checkIncorrect, {
+//     assert_eq!(1,1);
+// }}

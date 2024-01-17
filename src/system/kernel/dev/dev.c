@@ -77,8 +77,15 @@ PRIVATE enum gnwDeviceError validateStartedDevice(const procId_t processId, cons
         return GDE_UNKNOWN;
     }
 
+    if (!k_proc_idIsUser(processId)) {
+        OOPS("Invalid process identifier", GDE_UNKNOWN);
+    }
+
+    if (k_proc_getInfo(processId).state != PS_RUNNING) {
+        OOPS("Invalid process state", GDE_UNKNOWN);
+    }
+
     #warning TODO: checks
-    // * check if process exists
     // * check if buffer does not exceed process memory
 
     struct device *dev = &devices[deviceId];

@@ -190,7 +190,11 @@ pub fn create_valid_device_desc_complex() -> gnwDeviceDescriptor {
         offset: 0x69,
         sizeBytes: 0x69,
     };
-    extern "C" fn mem_write(_: *mut u8, _: range_addr_t) {}
+    extern "C" fn mem_write(_: *mut u8, _: range_addr_t) {
+        unsafe {
+            DEV_WRITE_CALLED = true;
+        }
+    }
     device_descriptor.api.mem.routine.write = Some(mem_write);
 
     device_descriptor.api.display.desc.supportedFormatCount = 1;
@@ -202,12 +206,7 @@ pub fn create_valid_device_desc_complex() -> gnwDeviceDescriptor {
 
     extern "C" fn char_out_is_ready_to_write() -> bool { return false; }
     device_descriptor.api.charOut.routine.isReadyToWrite = Some(char_out_is_ready_to_write);
-    extern "C" fn char_out_write(_: i8) -> bool { 
-        unsafe {
-            DEV_WRITE_CALLED = true;
-        }
-        return true;
-    }
+    extern "C" fn char_out_write(_: i8) -> bool { return false; }
     device_descriptor.api.charOut.routine.write = Some(char_out_write);
 
     device_descriptor.api.storCtrl.desc.driveCount = 1;
@@ -279,4 +278,19 @@ pub fn install_dummy_device_holder(device_id: size_t, proc_id: procId_t) {
     unsafe {
         devices[device_id as usize].holder = proc_id;
     }
+}
+
+pub fn install_dummy_writable_device(id: &size_t, proc_id: &mut procId_t) {
+    *proc_id = install_dummy_process();
+    let mut device_descriptor = create_valid_device_desc_complex();
+    let device_range = range_addr_t {
+        offset: 1,
+        sizeBytes: 1,
+    };
+    device_descriptor.api.mem.desc.bytesRange = device_range;
+    device_descriptor.api.mem.desc.maxInputSizeBytes = 1;
+    install_device(&id, device_descriptor);
+    assert_eq!(*id, 0);
+    assert_eq!(*proc_id, 0);
+    install_dummy_device_holder(*id, *proc_id);
 }
