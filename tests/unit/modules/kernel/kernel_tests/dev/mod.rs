@@ -1190,13 +1190,17 @@ fn k_dev_writeChar_checkIncorrect_writeFailed() {
 fn validateListener_checkCorrect() {
     log("validateListener_checkCorrect start\n\0");
 
-    // let id: size_t = 0;
-    // let mut proc_id: procId_t = 0;
-    // install_dummy_device(&id, &mut proc_id);
+    let proc_id: procId_t = install_dummy_process();
+    assert_eq!(proc_id, 0);
+    let device_id: size_t = 0;
+    install_dummy_device(&device_id, false);
+    assert_eq!(device_id, 0);
+    extern "cdecl" fn listener(_unused: *const gnwDeviceEvent) {}
+    extern "C" fn decoder(_: ptr_t, _: *const gnwDeviceEvent) {}
 
-    // unsafe {
-    //     assert_eq!(validateListener(proc_id, device_id, listener, decoder), gnwDeviceError::GDE_NONE);
-    // }
+    unsafe {
+        assert_eq!(validateListener(proc_id, device_id, Some(listener), Some(decoder)), gnwDeviceError::GDE_NONE);
+    }
     
     log("validateListener_checkCorrect end\n\0");
 }
