@@ -923,7 +923,6 @@ fn k_dev_writeMem_checkIncorrect_deviceInputSizeBytesNull() {
     
     unsafe {
         devices[id as usize].desc.api.mem.desc.maxInputSizeBytes = 0;
-        log("asdasf\n\0");
         assert_eq!(k_dev_writeMem(proc_id, id, &mut buffer, input_range), gnwDeviceError::GDE_INVALID_OPERATION);
     }
     
@@ -990,36 +989,32 @@ fn k_dev_writeMem_checkIncorrect_inputRangeExceeded() {
     log("k_dev_writeMem_checkIncorrect_inputRangeExceeded end\n\0");
 }
 
-// enum gnwDeviceError k_dev_writeMem(const procId_t processId, 
-//                                    const size_t deviceId,
-//                                    const ptr_t buffer,
-//                                    const range_addr_t devMemRange) {
+#[test_case]
+fn k_dev_writeMem_checkIncorrect_writeNotSupported() {
+    log("k_dev_writeMem_checkIncorrect_writeNotSupported start\n\0");
 
-//     const size_t maxInputSizeBytes = devices[deviceId].desc.api.mem.desc.maxInputSizeBytes;
-//     if (!maxInputSizeBytes) {
-//         return GDE_INVALID_OPERATION;
-//     }
+    let id: size_t = 0;
+    let mut proc_id: procId_t = 0;
+    install_dummy_writable_device(&id, &mut proc_id);
+    let mut buffer: u8 = 0;
+    let input_range = range_addr_t {
+        offset: 0,
+        sizeBytes: 1,
+    };
+    
+    unsafe {
+        devices[id as usize].desc.api.mem.routine.write = None;
+        assert_eq!(k_dev_writeMem(proc_id, id, &mut buffer, input_range), gnwDeviceError::GDE_INVALID_OPERATION);
+    }
+    
+    log("k_dev_writeMem_checkIncorrect_writeNotSupported end\n\0");
+}
 
-//     if (!devMemRange.sizeBytes) {
-//         return GDE_INVALID_PARAMETER;
-//     }
-//     if (devMemRange.offset >= maxInputSizeBytes) {
-//         return GDE_INVALID_PARAMETER;
-//     }
-//     const size_t devBytesLeft = maxInputSizeBytes - devMemRange.offset;
-//     if (devMemRange.sizeBytes > devBytesLeft) {
-//         return GDE_INVALID_PARAMETER;
-//     }
-
-//     const struct gnwDeviceUHA_mem_routine * const routine = &devices[deviceId].desc.api.mem.routine;
-//     if (!routine->write) {
-//         return GDE_INVALID_OPERATION;
-//     }
-//     #warning it is more than dangerous to allow the driver to access the buffer directly, moreover it could be even impossible when driver processes are implemented
-//     routine->write(buffer, devMemRange);
-
-//     return GDE_NONE;
-// }
+/*
+    enum gnwDeviceError k_dev_writeChar(const procId_t processId, 
+                                        const size_t deviceId,
+                                        const char character)
+*/
 
 // enum gnwDeviceError k_dev_writeChar(const procId_t processId, 
 //                                     const size_t deviceId,
