@@ -1195,6 +1195,7 @@ fn validateListener_checkCorrect() {
     let device_id: size_t = 0;
     install_dummy_device(&device_id, false);
     assert_eq!(device_id, 0);
+    install_dummy_device_holder(device_id, proc_id);
     extern "cdecl" fn listener(_unused: *const gnwDeviceEvent) {}
     extern "C" fn decoder(_: ptr_t, _: *const gnwDeviceEvent) {}
 
