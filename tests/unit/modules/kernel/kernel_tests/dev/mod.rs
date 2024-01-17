@@ -709,7 +709,7 @@ fn k_dev_releaseHold_checkIncorrect_processIdInvalid() {
 
 #[test_case]
 fn k_dev_writeMem_checkCorrect() {
-    log("k_dev_releaseHold_checkCorrect start\n\0");
+    log("k_dev_writeMem_checkCorrect start\n\0");
 
     let id: size_t = 0;
     let proc_id: procId_t = install_dummy_process();
@@ -735,7 +735,7 @@ fn k_dev_writeMem_checkCorrect() {
         DEV_WRITE_CALLED = false;
     }
     
-    log("k_dev_releaseHold_checkCorrect end\n\0");
+    log("k_dev_writeMem_checkCorrect end\n\0");
 }
 
 // enum gnwDeviceError k_dev_writeMem(const procId_t processId, 
