@@ -1179,6 +1179,28 @@ fn k_dev_writeChar_checkIncorrect_writeFailed() {
     log("k_dev_writeChar_checkIncorrect_writeFailed end\n\0");
 }
 
+/*
+    PRIVATE enum gnwDeviceError validateListener(const procId_t processId, 
+                                                 const size_t deviceId, 
+                                                 const gnwDeviceEventListener listener,
+                                                 const gnwDeviceEventDecoder decoder)
+*/
+
+#[test_case]
+fn validateListener_checkCorrect() {
+    log("validateListener_checkCorrect start\n\0");
+
+    // let id: size_t = 0;
+    // let mut proc_id: procId_t = 0;
+    // install_dummy_device(&id, &mut proc_id);
+
+    // unsafe {
+    //     assert_eq!(validateListener(proc_id, device_id, listener, decoder), gnwDeviceError::GDE_NONE);
+    // }
+    
+    log("validateListener_checkCorrect end\n\0");
+}
+
 // static enum gnwDeviceError validateListener(const procId_t processId, 
 //                                             const size_t deviceId, 
 //                                             const gnwDeviceEventListener listener,

@@ -320,7 +320,7 @@ enum gnwDeviceError k_dev_writeChar(const procId_t processId,
     return GDE_NONE;
 }
 
-static enum gnwDeviceError validateListener(const procId_t processId, 
+PRIVATE enum gnwDeviceError validateListener(const procId_t processId, 
                                             const size_t deviceId, 
                                             const gnwDeviceEventListener listener,
                                             const gnwDeviceEventDecoder decoder) {

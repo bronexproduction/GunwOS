@@ -485,6 +485,7 @@ extern "C" {
     pub fn k_dev_releaseHold(processId: procId_t, deviceId: size_t);
     pub fn k_dev_writeMem(processId: procId_t, deviceId: size_t, buffer: ptr_t, devMemRange: range_addr_t) -> gnwDeviceError;
     pub fn k_dev_writeChar(processId: procId_t, deviceId: size_t, character: c_char) -> gnwDeviceError;
+    pub fn validateListener(processId: procId_t, deviceId: size_t, listener: gnwDeviceEventListener, decoder: gnwDeviceEventDecoder) -> gnwDeviceError;
 
     // hal
 
