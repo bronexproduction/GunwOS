@@ -1979,6 +1979,7 @@ fn k_dev_emit_checkCorrect() {
     };
     
     unsafe {
+        isrStackHeight = 1;
         k_hal_servicedDevIdPtr = &device_id;
         assert_eq!(k_dev_emit(&event), gnwDeviceError::GDE_NONE);
         assert_eq!(data, 0);
