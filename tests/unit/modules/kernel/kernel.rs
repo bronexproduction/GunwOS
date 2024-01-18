@@ -15,7 +15,7 @@ static TEST___KERNEL_START: extern "C" fn() -> ! = __kernel_start;
 #[link_section = ".start"]
 #[no_mangle]
 pub extern "C" fn __kernel_start() -> ! {
-    let ptr = 0x00200000 as *const ();
+    let ptr = 0x00400000 as *const ();
     let test_entry: extern "C" fn() -> ! = unsafe { transmute(ptr) };
     (test_entry)();
 }

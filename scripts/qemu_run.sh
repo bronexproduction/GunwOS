@@ -6,7 +6,7 @@ set -x
 MODE=$2
 TEST_FILE=$3
 DEBUG_FLAGS=("-s" "-S" "-d cpu_reset")
-UNIT_TEST_FLAGS=("-device" "isa-debug-exit,iobase=0xf4,iosize=0x01" "-device" "loader,file=$TEST_FILE,addr=0x00200000,force-raw=on")
+UNIT_TEST_FLAGS=("-device" "isa-debug-exit,iobase=0xf4,iosize=0x01" "-device" "loader,file=$TEST_FILE,addr=0x00400000,force-raw=on")
 
 # needs some improvements
 
