@@ -828,6 +828,29 @@ fn k_dev_writeMem_checkIncorrect_deviceNotInstalled() {
 }
 
 #[test_case]
+fn k_dev_writeMem_checkIncorrect_deviceIdInvalid() {
+    log("k_dev_writeMem_checkIncorrect_deviceIdInvalid start\n\0");
+    
+    let id: size_t = 0;
+    let mut proc_id: procId_t = 0;
+    install_dummy_writable_device(&id, &mut proc_id);
+    let mut buffer: u8 = 0;
+    let input_range = range_addr_t {
+        offset: 0,
+        sizeBytes: 1,
+    };
+
+    unsafe {
+        assert_eq!(k_dev_writeMem(proc_id, 1, &mut buffer, input_range), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(k_dev_writeMem(proc_id, MAX_DEVICES - 1, &mut buffer, input_range), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(k_dev_writeMem(proc_id, MAX_DEVICES, &mut buffer, input_range), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(k_dev_writeMem(proc_id, MAX_DEVICES + 1, &mut buffer, input_range), gnwDeviceError::GDE_UNKNOWN);
+    }
+    
+    log("k_dev_writeMem_checkIncorrect_deviceIdInvalid end\n\0");
+}
+
+#[test_case]
 fn k_dev_writeMem_checkIncorrect_processIdInvalid() {
     log("k_dev_writeMem_checkIncorrect_processIdInvalid start\n\0");
 
@@ -1050,6 +1073,26 @@ fn k_dev_writeChar_checkIncorrect_deviceNotInstalled() {
 }
 
 #[test_case]
+fn k_dev_writeChar_checkIncorrect_deviceIdInvalid() {
+    log("k_dev_writeChar_checkIncorrect_deviceIdInvalid start\n\0");
+    
+    let id: size_t = 0;
+    let mut proc_id: procId_t = 0;
+    install_dummy_writable_device(&id, &mut proc_id);
+    assert_eq!(id, 0);
+    assert_eq!(proc_id, 0);
+
+    unsafe {
+        assert_eq!(k_dev_writeChar(proc_id, 1, 0), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(k_dev_writeChar(proc_id, MAX_DEVICES - 1, 0), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(k_dev_writeChar(proc_id, MAX_DEVICES, 0), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(k_dev_writeChar(proc_id, MAX_DEVICES + 1, 0), gnwDeviceError::GDE_UNKNOWN);
+    }
+    
+    log("k_dev_writeChar_checkIncorrect_deviceIdInvalid end\n\0");
+}
+
+#[test_case]
 fn k_dev_writeChar_checkIncorrect_processIdInvalid() {
     log("k_dev_writeChar_checkIncorrect_processIdInvalid start\n\0");
 
@@ -1265,6 +1308,29 @@ fn k_dev_listen_checkIncorrect_deviceNotInstalled() {
 }
 
 #[test_case]
+fn k_dev_listen_checkIncorrect_deviceIdInvalid() {
+    log("k_dev_listen_checkIncorrect_deviceIdInvalid start\n\0");
+
+    let proc_id: procId_t = install_dummy_process();
+    assert_eq!(proc_id, 0);
+    let device_id: size_t = 0;
+    install_dummy_device(&device_id, false);
+    assert_eq!(device_id, 0);
+    install_dummy_device_holder(device_id, proc_id);
+    extern "cdecl" fn listener(_unused: *const gnwDeviceEvent) {}
+    extern "C" fn decoder(_: ptr_t, _: *const gnwDeviceEvent) {}
+
+    unsafe {
+        assert_eq!(k_dev_listen(proc_id, 1, Some(listener), Some(decoder)), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(k_dev_listen(proc_id, MAX_DEVICES - 1, Some(listener), Some(decoder)), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(k_dev_listen(proc_id, MAX_DEVICES, Some(listener), Some(decoder)), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(k_dev_listen(proc_id, MAX_DEVICES + 1, Some(listener), Some(decoder)), gnwDeviceError::GDE_UNKNOWN);
+    }
+    
+    log("k_dev_listen_checkIncorrect_deviceIdInvalid end\n\0");
+}
+
+#[test_case]
 fn k_dev_listen_checkIncorrect_processIdInvalid() {
     log("k_dev_listen_checkIncorrect_processIdInvalid start\n\0");
 
@@ -1366,53 +1432,360 @@ fn k_dev_listen_checkIncorrect_listenerAlreadySet() {
     log("k_dev_listen_checkIncorrect_listenerAlreadySet end\n\0");
 }
 
-// enum gnwDeviceError k_dev_getParam(const size_t deviceId,
-//                                    const struct gnwDeviceParamDescriptor paramDescriptor,
-//                                    size_t * const absResult) {
-//     if (!absResult) {
-//         OOPS("Nullptr", GDE_UNKNOWN);
-//     }
+/*
+    enum gnwDeviceError k_dev_getParam(const size_t deviceId,
+                                       const struct gnwDeviceParamDescriptor paramDescriptor,
+                                       size_t * const absResult)
+*/
 
-//     if (!validateInstalledId(deviceId)) {
-//         return GDE_ID_INVALID;
-//     }
+#[test_case]
+fn k_dev_getParam_checkCorrect() {
+    log("k_dev_getParam_checkCorrect start\n\0");
 
-//     if (!devices[deviceId].desc.api.system.routine.getParam) {
-//         return GDE_INVALID_OPERATION;
-//     }
+    let device_id: size_t = 0;
+    install_dummy_device(&device_id, true);
+    assert_eq!(device_id, 0);
+    let abs_result: size_t = 0;
+    let param_descriptor = gnwDeviceParamDescriptor {
+        param: 0,
+        subParam: 0,
+        paramIndex: 0,
+    };
 
-//     if (!devices[deviceId].desc.api.system.routine.getParam(paramDescriptor.param,
-//                                                             paramDescriptor.subParam,
-//                                                             paramDescriptor.paramIndex,
-//                                                             absResult)) {
-//         return GDE_OPERATION_FAILED;
-//     }
+    unsafe {
+        assert_eq!(k_dev_getParam(device_id, param_descriptor, &abs_result), gnwDeviceError::GDE_NONE);
+        assert_eq!(DEV_GET_PARAM_CALLED, true);
+        DEV_GET_PARAM_CALLED = false;
+    }
+    
+    log("k_dev_getParam_checkCorrect end\n\0");
+}
 
-//     return GDE_NONE;
-// }
+#[test_case]
+fn k_dev_getParam_checkIncorrect_absResultNull() {
+    log("k_dev_getParam_checkIncorrect_absResultNull start\n\0");
 
-// enum gnwDeviceError k_dev_setParam(const procId_t procId,
-//                                    const size_t deviceId,
-//                                    const struct gnwDeviceParamDescriptor paramDescriptor,
-//                                    const size_t value) {
-//     const enum gnwDeviceError err = validateStartedDevice(procId, deviceId);
-//     if (err != GDE_NONE) {
-//         return err;
-//     }
+    let device_id: size_t = 0;
+    install_dummy_device(&device_id, true);
+    assert_eq!(device_id, 0);
+    let param_descriptor = gnwDeviceParamDescriptor {
+        param: 0,
+        subParam: 0,
+        paramIndex: 0,
+    };
 
-//     if (!devices[deviceId].desc.api.system.routine.setParam) {
-//         return GDE_INVALID_OPERATION;
-//     }
+    unsafe {
+        assert_eq!(k_dev_getParam(device_id, param_descriptor, null()), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+    }
+    
+    log("k_dev_getParam_checkIncorrect_absResultNull end\n\0");
+}
 
-//     if (!devices[deviceId].desc.api.system.routine.setParam(paramDescriptor.param,
-//                                                             paramDescriptor.subParam,
-//                                                             paramDescriptor.paramIndex,
-//                                                             value)) {
-//         return GDE_OPERATION_FAILED;
-//     }
+#[test_case]
+fn k_dev_getParam_checkIncorrect_deviceNotInstalled() {
+    log("k_dev_getParam_checkIncorrect_deviceNotInstalled start\n\0");
 
-//     return GDE_NONE;
-// }
+    let abs_result: size_t = 0;
+    let param_descriptor = gnwDeviceParamDescriptor {
+        param: 0,
+        subParam: 0,
+        paramIndex: 0,
+    };
+
+    unsafe {
+        assert_eq!(k_dev_getParam(0, param_descriptor, &abs_result), gnwDeviceError::GDE_ID_INVALID);
+    }
+    
+    log("k_dev_getParam_checkIncorrect_deviceNotInstalled end\n\0");
+}
+
+#[test_case]
+fn k_dev_getParam_checkIncorrect_deviceIdInvalid() {
+    log("k_dev_getParam_checkIncorrect_deviceIdInvalid start\n\0");
+
+    let device_id: size_t = 0;
+    install_dummy_device(&device_id, true);
+    assert_eq!(device_id, 0);
+    let abs_result: size_t = 0;
+    let param_descriptor = gnwDeviceParamDescriptor {
+        param: 0,
+        subParam: 0,
+        paramIndex: 0,
+    };
+
+    unsafe {
+        assert_eq!(k_dev_getParam(1, param_descriptor, &abs_result), gnwDeviceError::GDE_ID_INVALID);
+        assert_eq!(k_dev_getParam(MAX_DEVICES - 1, param_descriptor, &abs_result), gnwDeviceError::GDE_ID_INVALID);
+        assert_eq!(k_dev_getParam(MAX_DEVICES, param_descriptor, &abs_result), gnwDeviceError::GDE_ID_INVALID);
+        assert_eq!(k_dev_getParam(MAX_DEVICES + 1, param_descriptor, &abs_result), gnwDeviceError::GDE_ID_INVALID);
+    }
+    
+    log("k_dev_getParam_checkIncorrect_deviceIdInvalid end\n\0");
+}
+
+#[test_case]
+fn k_dev_getParam_checkIncorrect_getParamNotSupported() {
+    log("k_dev_getParam_checkIncorrect_getParamNotSupported start\n\0");
+
+    let device_id: size_t = 0;
+    install_dummy_device(&device_id, true);
+    assert_eq!(device_id, 0);
+    let abs_result: size_t = 0;
+    let param_descriptor = gnwDeviceParamDescriptor {
+        param: 0,
+        subParam: 0,
+        paramIndex: 0,
+    };
+
+    unsafe {
+        devices[device_id as usize].desc.api.system.routine.getParam = None;
+        assert_eq!(k_dev_getParam(device_id, param_descriptor, &abs_result), gnwDeviceError::GDE_INVALID_OPERATION);
+    }
+    
+    log("k_dev_getParam_checkIncorrect_getParamNotSupported end\n\0");
+}
+
+#[test_case]
+fn k_dev_getParam_checkIncorrect_getParamReturnsFalse() {
+    log("k_dev_getParam_checkIncorrect_getParamReturnsFalse start\n\0");
+
+    let device_id: size_t = 0;
+    install_dummy_device(&device_id, true);
+    assert_eq!(device_id, 0);
+    let abs_result: size_t = 0;
+    let param_descriptor = gnwDeviceParamDescriptor {
+        param: 0,
+        subParam: 0,
+        paramIndex: 0,
+    };
+    extern "C" fn get_param(_: u32, _: u32, _: u32, _: *mut u32) -> bool { return false; }
+
+    unsafe {
+        devices[device_id as usize].desc.api.system.routine.getParam = Some(get_param);
+        assert_eq!(k_dev_getParam(device_id, param_descriptor, &abs_result), gnwDeviceError::GDE_OPERATION_FAILED);
+    }
+    
+    log("k_dev_getParam_checkIncorrect_getParamReturnsFalse end\n\0");
+}
+
+/*
+    enum gnwDeviceError k_dev_setParam(const procId_t procId,
+                                       const size_t deviceId,
+                                       const struct gnwDeviceParamDescriptor paramDescriptor,
+                                       const size_t value)
+*/
+
+#[test_case]
+fn k_dev_setParam_checkCorrect() {
+    log("k_dev_setParam_checkCorrect start\n\0");
+
+    let device_id: size_t = 0;
+    install_dummy_device(&device_id, true);
+    let proc_id: procId_t = install_dummy_process();
+    assert_eq!(device_id, 0);
+    assert_eq!(proc_id, 0);
+    install_dummy_device_holder(device_id, proc_id);
+    let param_descriptor = gnwDeviceParamDescriptor {
+        param: 0,
+        subParam: 0,
+        paramIndex: 0,
+    };
+
+    unsafe {
+        assert_eq!(k_dev_setParam(proc_id, device_id, param_descriptor, 0), gnwDeviceError::GDE_NONE);
+        assert_eq!(DEV_SET_PARAM_CALLED, true);
+        DEV_SET_PARAM_CALLED = false;
+    }
+    
+    log("k_dev_setParam_checkCorrect end\n\0");
+}
+
+#[test_case]
+fn k_dev_setParam_checkIncorrect_deviceNotInstalled() {
+    log("k_dev_setParam_checkIncorrect_deviceNotInstalled start\n\0");
+
+    let device_id: size_t = 0;
+    let proc_id: procId_t = install_dummy_process();
+    assert_eq!(proc_id, 0);
+    let param_descriptor = gnwDeviceParamDescriptor {
+        param: 0,
+        subParam: 0,
+        paramIndex: 0,
+    };
+
+    unsafe {
+        assert_eq!(k_dev_setParam(proc_id, device_id, param_descriptor, 0), gnwDeviceError::GDE_UNKNOWN);
+    }
+    
+    log("k_dev_setParam_checkIncorrect_deviceNotInstalled end\n\0");
+}
+
+#[test_case]
+fn k_dev_setParam_checkIncorrect_deviceIdInvalid() {
+    log("k_dev_setParam_checkIncorrect_deviceIdInvalid start\n\0");
+
+    let device_id: size_t = 0;
+    install_dummy_device(&device_id, true);
+    let proc_id: procId_t = install_dummy_process();
+    assert_eq!(device_id, 0);
+    assert_eq!(proc_id, 0);
+    install_dummy_device_holder(device_id, proc_id);
+    let param_descriptor = gnwDeviceParamDescriptor {
+        param: 0,
+        subParam: 0,
+        paramIndex: 0,
+    };
+
+    unsafe {
+        assert_eq!(k_dev_setParam(proc_id, 1, param_descriptor, 0), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(k_dev_setParam(proc_id, MAX_DEVICES - 1, param_descriptor, 0), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(k_dev_setParam(proc_id, MAX_DEVICES, param_descriptor, 0), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(k_dev_setParam(proc_id, MAX_DEVICES + 1, param_descriptor, 0), gnwDeviceError::GDE_UNKNOWN);
+    }
+    
+    log("k_dev_setParam_checkIncorrect_deviceIdInvalid end\n\0");
+}
+
+#[test_case]
+fn k_dev_setParam_checkIncorrect_processIdInvalid() {
+    log("k_dev_setParam_checkIncorrect_processIdInvalid start\n\0");
+
+    let device_id: size_t = 0;
+    install_dummy_device(&device_id, true);
+    let proc_id: procId_t = install_dummy_process();
+    assert_eq!(device_id, 0);
+    assert_eq!(proc_id, 0);
+    install_dummy_device_holder(device_id, proc_id);
+    let param_descriptor = gnwDeviceParamDescriptor {
+        param: 0,
+        subParam: 0,
+        paramIndex: 0,
+    };
+
+    unsafe {
+        assert_eq!(k_dev_setParam(NONE_PROC_ID - 1, device_id, param_descriptor, 0), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(k_dev_setParam(NONE_PROC_ID, device_id, param_descriptor, 0), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(k_dev_setParam(KERNEL_PROC_ID, device_id, param_descriptor, 0), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(k_dev_setParam(1, device_id, param_descriptor, 0), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(k_dev_setParam(MAX_PROC - 1, device_id, param_descriptor, 0), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(k_dev_setParam(MAX_PROC, device_id, param_descriptor, 0), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(k_dev_setParam(MAX_PROC + 1, device_id, param_descriptor, 0), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+    }
+    
+    log("k_dev_setParam_checkIncorrect_processIdInvalid end\n\0");
+}
+
+#[test_case]
+fn k_dev_setParam_checkIncorrect_deviceHandleInvalid() {
+    log("k_dev_setParam_checkIncorrect_deviceHandleInvalid start\n\0");
+
+    let device_id: size_t = 0;
+    install_dummy_device(&device_id, true);
+    let proc_id: procId_t = install_dummy_process();
+    assert_eq!(device_id, 0);
+    assert_eq!(proc_id, 0);
+    install_dummy_device_holder(device_id, proc_id);
+    let param_descriptor = gnwDeviceParamDescriptor {
+        param: 0,
+        subParam: 0,
+        paramIndex: 0,
+    };
+
+    unsafe {
+        devices[device_id as usize].holder = NONE_PROC_ID;
+        assert_eq!(k_dev_setParam(proc_id, device_id, param_descriptor, 0), gnwDeviceError::GDE_HANDLE_INVALID);
+    }
+    
+    log("k_dev_setParam_checkIncorrect_deviceHandleInvalid end\n\0");
+}
+
+#[test_case]
+fn k_dev_setParam_checkIncorrect_deviceNotStarted() {
+    log("k_dev_setParam_checkIncorrect_deviceNotStarted start\n\0");
+
+    let device_id: size_t = 0;
+    install_dummy_device(&device_id, true);
+    let proc_id: procId_t = install_dummy_process();
+    assert_eq!(device_id, 0);
+    assert_eq!(proc_id, 0);
+    install_dummy_device_holder(device_id, proc_id);
+    let param_descriptor = gnwDeviceParamDescriptor {
+        param: 0,
+        subParam: 0,
+        paramIndex: 0,
+    };
+
+    unsafe {
+        devices[device_id as usize].started = false;
+        assert_eq!(k_dev_setParam(proc_id, device_id, param_descriptor, 0), gnwDeviceError::GDE_INVALID_DEVICE_STATE);
+    }
+    
+    log("k_dev_setParam_checkIncorrect_deviceNotStarted end\n\0");
+}
+
+#[test_case]
+fn k_dev_setParam_checkIncorrect_getParamNotSupported() {
+    log("k_dev_setParam_checkIncorrect_getParamNotSupported start\n\0");
+
+    let device_id: size_t = 0;
+    install_dummy_device(&device_id, true);
+    let proc_id: procId_t = install_dummy_process();
+    assert_eq!(device_id, 0);
+    assert_eq!(proc_id, 0);
+    install_dummy_device_holder(device_id, proc_id);
+    let param_descriptor = gnwDeviceParamDescriptor {
+        param: 0,
+        subParam: 0,
+        paramIndex: 0,
+    };
+
+    unsafe {
+        devices[device_id as usize].desc.api.system.routine.setParam = None;
+        assert_eq!(k_dev_setParam(proc_id, device_id, param_descriptor, 0), gnwDeviceError::GDE_INVALID_OPERATION);
+    }
+    
+    log("k_dev_setParam_checkIncorrect_getParamNotSupported end\n\0");
+}
+
+#[test_case]
+fn k_dev_setParam_checkIncorrect_getParamReturnsFalse() {
+    log("k_dev_setParam_checkIncorrect_getParamReturnsFalse start\n\0");
+
+    let device_id: size_t = 0;
+    install_dummy_device(&device_id, true);
+    let proc_id: procId_t = install_dummy_process();
+    assert_eq!(device_id, 0);
+    assert_eq!(proc_id, 0);
+    install_dummy_device_holder(device_id, proc_id);
+    let param_descriptor = gnwDeviceParamDescriptor {
+        param: 0,
+        subParam: 0,
+        paramIndex: 0,
+    };
+    extern "C" fn set_param(_: u32, _: u32, _: u32, _: u32) -> bool { return false; }
+
+    unsafe {
+        devices[device_id as usize].desc.api.system.routine.setParam = Some(set_param);
+        assert_eq!(k_dev_setParam(proc_id, device_id, param_descriptor, 0), gnwDeviceError::GDE_OPERATION_FAILED);
+    }
+    
+    log("k_dev_setParam_checkIncorrect_getParamReturnsFalse end\n\0");
+}
 
 // static enum gnwDeviceError validateEmitter(const size_t * const devIdPtr) {
 //     if (!devIdPtr) {

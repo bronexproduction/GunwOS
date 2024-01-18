@@ -377,6 +377,14 @@ pub enum gnwDeviceError {
     GDE_UNKNOWN = -1,
 }
 
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct gnwDeviceParamDescriptor {
+    pub param: size_t,
+    pub subParam: size_t,
+    pub paramIndex: size_t,
+}
+
 #[repr(i32)]
 #[derive(PartialEq, Debug)]
 pub enum gnwDriverError {
@@ -486,6 +494,8 @@ extern "C" {
     pub fn k_dev_writeMem(processId: procId_t, deviceId: size_t, buffer: ptr_t, devMemRange: range_addr_t) -> gnwDeviceError;
     pub fn k_dev_writeChar(processId: procId_t, deviceId: size_t, character: c_char) -> gnwDeviceError;
     pub fn k_dev_listen(processId: procId_t, deviceId: size_t, listener: gnwDeviceEventListener, decoder: gnwDeviceEventDecoder) -> gnwDeviceError;
+    pub fn k_dev_getParam(deviceId: size_t, paramDescriptor: gnwDeviceParamDescriptor, absResult: *const size_t) -> gnwDeviceError;
+    pub fn k_dev_setParam(procId: procId_t, deviceId: size_t, paramDescriptor: gnwDeviceParamDescriptor, value: size_t) -> gnwDeviceError;
 
     // hal
 

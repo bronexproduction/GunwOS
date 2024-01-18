@@ -4,6 +4,8 @@ pub static mut DRIVER_INIT_CALLED: bool = false;
 pub static mut DRIVER_START_CALLED: bool = false;
 pub static mut DEV_WRITE_CALLED: bool = false;
 pub static mut DEV_CHAR_WRITE_CALLED: bool = false;
+pub static mut DEV_GET_PARAM_CALLED: bool = false;
+pub static mut DEV_SET_PARAM_CALLED: bool = false;
 
 pub fn dev_clear() {
     unsafe {
@@ -11,6 +13,8 @@ pub fn dev_clear() {
         DRIVER_START_CALLED = false;
         DEV_WRITE_CALLED = false;
         DEV_CHAR_WRITE_CALLED = false;
+        DEV_GET_PARAM_CALLED = false;
+        DEV_SET_PARAM_CALLED = false;
     }
 }
 
@@ -183,9 +187,19 @@ pub fn create_valid_device_desc_complex() -> gnwDeviceDescriptor {
                                gnwDeviceType::DEV_TYPE_STORAGE as i32  |
                                gnwDeviceType::DEV_TYPE_FDC as i32;
 
-    extern "C" fn system_get_param(_: u32, _: u32, _: u32, _: *mut u32) -> bool { return false; }
+    extern "C" fn system_get_param(_: u32, _: u32, _: u32, _: *mut u32) -> bool { 
+        unsafe {
+            DEV_GET_PARAM_CALLED = true;
+        }
+        return true;
+    }
     device_descriptor.api.system.routine.getParam = Some(system_get_param);
-    extern "C" fn system_set_param(_: u32, _: u32, _: u32, _: u32) -> bool { return false; }
+    extern "C" fn system_set_param(_: u32, _: u32, _: u32, _: u32) -> bool {
+        unsafe {
+            DEV_SET_PARAM_CALLED = true;
+        }
+        return true;
+    }
     device_descriptor.api.system.routine.setParam = Some(system_set_param);
 
     device_descriptor.api.mem.desc.bytesRange = range_addr_t {
