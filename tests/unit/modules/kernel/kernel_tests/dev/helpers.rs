@@ -302,6 +302,17 @@ pub fn install_dummy_device_holder(device_id: size_t, proc_id: procId_t) {
     }
 }
 
+pub fn install_dummy_device_listener(device_id: size_t, proc_id: procId_t) {
+    install_dummy_device_holder(device_id, proc_id);
+
+    extern "cdecl" fn listener(_: *const gnwDeviceEvent) {}
+    extern "C" fn decoder(_: *mut u8, _: *const gnwDeviceEvent) {}
+    unsafe {
+        devices[device_id as usize].listener = Some(listener);
+        devices[device_id as usize].decoder = Some(decoder);
+    }
+}
+
 pub fn install_dummy_writable_device(id: &size_t, proc_id: &mut procId_t) {
     *proc_id = install_dummy_process();
     let mut device_descriptor = create_valid_device_desc_complex();

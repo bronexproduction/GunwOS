@@ -496,6 +496,8 @@ extern "C" {
     pub fn k_dev_listen(processId: procId_t, deviceId: size_t, listener: gnwDeviceEventListener, decoder: gnwDeviceEventDecoder) -> gnwDeviceError;
     pub fn k_dev_getParam(deviceId: size_t, paramDescriptor: gnwDeviceParamDescriptor, absResult: *const size_t) -> gnwDeviceError;
     pub fn k_dev_setParam(procId: procId_t, deviceId: size_t, paramDescriptor: gnwDeviceParamDescriptor, value: size_t) -> gnwDeviceError;
+    pub fn validateEmitter(devIdPtr: *const size_t) -> gnwDeviceError;
+    pub fn validateListenerInvocation(deviceId: size_t) -> gnwDeviceError;
 
     // hal
 

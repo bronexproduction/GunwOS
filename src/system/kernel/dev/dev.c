@@ -393,9 +393,9 @@ enum gnwDeviceError k_dev_setParam(const procId_t procId,
     return GDE_NONE;
 }
 
-static enum gnwDeviceError validateEmitter(const size_t * const devIdPtr) {
+PRIVATE enum gnwDeviceError validateEmitter(const size_t * const devIdPtr) {
     if (!devIdPtr) {
-        return GDE_INVALID_DEVICE_STATE;
+        OOPS("Unexpected null device ID pointer", GDE_UNKNOWN);
     }
     if (!validateInstalledId(*devIdPtr)) {
         OOPS("Unexpected serviced device ID", GDE_UNKNOWN);
@@ -407,13 +407,13 @@ static enum gnwDeviceError validateEmitter(const size_t * const devIdPtr) {
     return GDE_NONE;
 }
 
-static enum gnwDeviceError validateListenerInvocation(const size_t deviceId) {
+PRIVATE enum gnwDeviceError validateListenerInvocation(const size_t deviceId) {
     struct device *dev = &devices[deviceId];
     if (!dev->listener) {
         return GDE_NOT_FOUND;
     }
     if (!dev->decoder) {
-        return GDE_UNKNOWN;
+        OOPS("Unexpected null decoder", GDE_UNKNOWN);
     } 
     if (dev->holder == NONE_PROC_ID) {
         OOPS("Inconsistent holder listener state", GDE_UNKNOWN);

@@ -93,7 +93,9 @@
     "forward_list": "c",
     "ranges": "c",
     "span": "c",
-    "numbers": "c"
+    "numbers": "c",
+    "__node_handle": "c",
+    "__memory": "c"
   },
   "cmake.configureOnOpen": false
 }

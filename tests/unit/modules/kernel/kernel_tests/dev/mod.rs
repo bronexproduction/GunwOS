@@ -1787,34 +1787,175 @@ fn k_dev_setParam_checkIncorrect_getParamReturnsFalse() {
     log("k_dev_setParam_checkIncorrect_getParamReturnsFalse end\n\0");
 }
 
-// static enum gnwDeviceError validateEmitter(const size_t * const devIdPtr) {
-//     if (!devIdPtr) {
-//         return GDE_INVALID_DEVICE_STATE;
-//     }
-//     if (!validateInstalledId(*devIdPtr)) {
-//         OOPS("Unexpected serviced device ID", GDE_UNKNOWN);
-//     }
-//     if (!devices[*devIdPtr].started) {
-//         return GDE_INVALID_DEVICE_STATE;
-//     }
+/*
+    PRIVATE enum gnwDeviceError validateEmitter(const size_t * const devIdPtr)
+*/
 
-//     return GDE_NONE;
-// }
+#[test_case]
+fn validateEmitter_checkCorrect() {
+    log("validateEmitter_checkCorrect start\n\0");
 
-// static enum gnwDeviceError validateListenerInvocation(const size_t deviceId) {
-//     struct device *dev = &devices[deviceId];
-//     if (!dev->listener) {
-//         return GDE_NOT_FOUND;
-//     }
-//     if (!dev->decoder) {
-//         return GDE_UNKNOWN;
-//     } 
-//     if (dev->holder == NONE_PROC_ID) {
-//         OOPS("Inconsistent holder listener state", GDE_UNKNOWN);
-//     }
+    let device_id: size_t = 0;
+    install_dummy_device(&device_id, true);
+    assert_eq!(device_id, 0);
+    
+    unsafe {
+        assert_eq!(validateEmitter(&device_id), gnwDeviceError::GDE_NONE);
+        assert_eq!(device_id, 0);
+    }
+    
+    log("validateEmitter_checkCorrect end\n\0");
+}
 
-//     return GDE_NONE;
-// }
+#[test_case]
+fn validateEmitter_checkIncorrect_devIdPtrNull() {
+    log("validateEmitter_checkIncorrect_devIdPtrNull start\n\0");
+
+    let device_id: size_t = 0;
+    install_dummy_device(&device_id, true);
+    assert_eq!(device_id, 0);
+    
+    unsafe {
+        assert_eq!(validateEmitter(null()), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+    }
+    
+    log("validateEmitter_checkIncorrect_devIdPtrNull end\n\0");
+}
+
+#[test_case]
+fn validateEmitter_checkIncorrect_deviceIdInvalid() {
+    log("validateEmitter_checkIncorrect_deviceIdInvalid start\n\0");
+
+    let mut 
+    device_id: size_t = 0;
+    install_dummy_device(&device_id, true);
+    assert_eq!(device_id, 0);
+
+    unsafe {
+        device_id = 1;
+        assert_eq!(validateEmitter(&device_id), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(device_id, 1);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        device_id = MAX_DEVICES - 1;
+        assert_eq!(validateEmitter(&device_id), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(device_id, MAX_DEVICES - 1);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        device_id = MAX_DEVICES;
+        assert_eq!(validateEmitter(&device_id), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(device_id, MAX_DEVICES);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        device_id = MAX_DEVICES + 1;
+        assert_eq!(validateEmitter(&device_id), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(device_id, MAX_DEVICES + 1);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+    }
+    
+    log("validateEmitter_checkIncorrect_deviceIdInvalid end\n\0");
+}
+
+#[test_case]
+fn validateEmitter_checkIncorrect_deviceNotStarted() {
+    log("validateEmitter_checkIncorrect_deviceNotStarted start\n\0");
+
+    let device_id: size_t = 0;
+    install_dummy_device(&device_id, true);
+    assert_eq!(device_id, 0);
+    
+    unsafe {
+        devices[device_id as usize].started = false;
+        assert_eq!(validateEmitter(&device_id), gnwDeviceError::GDE_INVALID_DEVICE_STATE);
+        assert_eq!(device_id, 0);
+    }
+    
+    log("validateEmitter_checkIncorrect_deviceNotStarted end\n\0");
+}
+
+/*
+    PRIVATE enum gnwDeviceError validateListenerInvocation(const size_t deviceId)
+*/
+
+#[test_case]
+fn validateListenerInvocation_checkCorrect() {
+    log("validateListenerInvocation_checkCorrect start\n\0");
+
+    let device_id: size_t = 0;
+    install_dummy_device(&device_id, true);
+    let proc_id: procId_t = install_dummy_process();
+    assert_eq!(device_id, 0);
+    assert_eq!(proc_id, 0);
+    install_dummy_device_listener(device_id, proc_id);
+    
+    unsafe {
+        assert_eq!(validateListenerInvocation(device_id), gnwDeviceError::GDE_NONE);
+    }
+    
+    log("validateListenerInvocation_checkCorrect end\n\0");
+}
+
+#[test_case]
+fn validateListenerInvocation_checkIncorrect_listenerNull() {
+    log("validateListenerInvocation_checkIncorrect_listenerNull start\n\0");
+
+    let device_id: size_t = 0;
+    install_dummy_device(&device_id, true);
+    let proc_id: procId_t = install_dummy_process();
+    assert_eq!(device_id, 0);
+    assert_eq!(proc_id, 0);
+    install_dummy_device_listener(device_id, proc_id);
+    
+    unsafe {
+        devices[device_id as usize].listener = None;
+        assert_eq!(validateListenerInvocation(device_id), gnwDeviceError::GDE_NOT_FOUND);
+    }
+    
+    log("validateListenerInvocation_checkIncorrect_listenerNull end\n\0");
+}
+
+#[test_case]
+fn validateListenerInvocation_checkIncorrect_decoderNull() {
+    log("validateListenerInvocation_checkIncorrect_decoderNull start\n\0");
+
+    let device_id: size_t = 0;
+    install_dummy_device(&device_id, true);
+    let proc_id: procId_t = install_dummy_process();
+    assert_eq!(device_id, 0);
+    assert_eq!(proc_id, 0);
+    install_dummy_device_listener(device_id, proc_id);
+    
+    unsafe {
+        devices[device_id as usize].decoder = None;
+        assert_eq!(validateListenerInvocation(device_id), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+    }
+    
+    log("validateListenerInvocation_checkIncorrect_decoderNull end\n\0");
+}
+
+#[test_case]
+fn validateListenerInvocation_checkIncorrect_noHolderProcId() {
+    log("validateListenerInvocation_checkIncorrect_noHolderProcId start\n\0");
+
+    let device_id: size_t = 0;
+    install_dummy_device(&device_id, true);
+    let proc_id: procId_t = install_dummy_process();
+    assert_eq!(device_id, 0);
+    assert_eq!(proc_id, 0);
+    install_dummy_device_listener(device_id, proc_id);
+    
+    unsafe {
+        devices[device_id as usize].holder = NONE_PROC_ID;
+        assert_eq!(validateListenerInvocation(device_id), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+    }
+    
+    log("validateListenerInvocation_checkIncorrect_noHolderProcId end\n\0");
+}
 
 // enum gnwDeviceError k_dev_emit(const struct gnwDeviceEvent * const eventPtr) {
 //     if (!eventPtr) {
