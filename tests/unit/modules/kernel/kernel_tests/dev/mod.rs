@@ -1983,6 +1983,28 @@ fn k_dev_emit_checkCorrect() {
         k_hal_servicedDevIdPtr = &device_id;
         assert_eq!(k_dev_emit(&event), gnwDeviceError::GDE_NONE);
         assert_eq!(data, 0);
+        // check k_proc_callback_invoke_ptr side effects
+        /*
+        
+            struct gnwRunLoopDispatchItem item;
+            item.format = format;
+            switch (format) {
+            case GEF_PTR:
+                item.routine._ptr = (gnwEventListener_ptr)funPtr;
+                break;
+            }
+            item.dataSizeBytes = pSizeBytes;
+            item.decodedDataSizeBytes = pDecodedSizeBytes;
+            item.decode = decoder;
+
+            err = k_runloop_reserve(procId, &runloopToken);
+    
+            err = k_runloop_dispatch(procId, runloopToken, item, p, encoder);
+
+            k_proc_unlock(procId, PLT_EVENT);
+            k_proc_schedule_processStateDidChange();
+        
+        */
     }
     
     log("k_dev_emit_checkCorrect end\n\0");
