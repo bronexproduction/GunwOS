@@ -498,6 +498,7 @@ extern "C" {
     pub fn k_dev_setParam(procId: procId_t, deviceId: size_t, paramDescriptor: gnwDeviceParamDescriptor, value: size_t) -> gnwDeviceError;
     pub fn validateEmitter(devIdPtr: *const size_t) -> gnwDeviceError;
     pub fn validateListenerInvocation(deviceId: size_t) -> gnwDeviceError;
+    pub fn k_dev_emit(eventPtr: *const gnwDeviceEvent) -> gnwDeviceError;
 
     // hal
 

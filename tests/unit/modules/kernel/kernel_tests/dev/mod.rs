@@ -1957,6 +1957,29 @@ fn validateListenerInvocation_checkIncorrect_noHolderProcId() {
     log("validateListenerInvocation_checkIncorrect_noHolderProcId end\n\0");
 }
 
+/*
+    enum gnwDeviceError k_dev_emit(const struct gnwDeviceEvent * const eventPtr)
+*/
+
+#[test_case]
+fn k_dev_emit_checkCorrect() {
+    log("k_dev_emit_checkCorrect start\n\0");
+
+    let mut data: u8 = 0;
+    let event = gnwDeviceEvent {
+        r#type: 69,
+        data: &mut data,
+        dataSizeBytes: 1,
+    };
+    
+    unsafe {
+        assert_eq!(k_dev_emit(&event), gnwDeviceError::GDE_NONE);
+        assert_eq!(data, 0);
+    }
+    
+    log("k_dev_emit_checkCorrect end\n\0");
+}
+
 // enum gnwDeviceError k_dev_emit(const struct gnwDeviceEvent * const eventPtr) {
 //     if (!eventPtr) {
 //         OOPS("Nullptr", GDE_UNKNOWN);
