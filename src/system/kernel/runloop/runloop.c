@@ -26,7 +26,7 @@ struct dispatchItem {
     uint_8 data[DISPATCH_MAX_DATA_SIZE_BYTES];
 };
 
-static struct runLoop {
+PRIVATE struct runLoop {
     struct dispatchItem queue[DISPATCH_QUEUE_SIZE];
     size_t finishedIndex;
     size_t endIndex;

@@ -13,7 +13,7 @@
 
 #define GRANULARITY_MS  30000
 
-static size_t executionTimeCounter = GRANULARITY_MS;
+PRIVATE size_t executionTimeCounter = GRANULARITY_MS;
 
 /*
     Process identifiers (last, next)

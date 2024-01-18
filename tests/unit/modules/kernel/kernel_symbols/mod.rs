@@ -430,6 +430,7 @@ pub struct k_proc_process {
 }
 
 #[repr(i32)]
+#[derive(Debug)]
 pub enum k_proc_lockType {
     PLT_EVENT   = 1 << 0,
     PLT_IPC     = 1 << 1,
@@ -458,8 +459,63 @@ pub struct k_cpu_state {
 #[repr(C)]
 pub struct process {
     pub info: k_proc_process,
-    pub lockMask: k_proc_lockType,
+    pub lockMask: i32 /* k_proc_lockType bitmask */,
     pub cpuState: k_cpu_state,
+}
+
+#[repr(i32)]
+#[derive(PartialEq, Debug)]
+pub enum gnwEventFormat {
+    GEF_NONE = 0,
+    GEF_VOID,
+    GEF_PTR,
+}
+
+pub type gnwEventListener_void = Option<extern "cdecl" fn()>;
+pub type gnwEventListener_ptr = Option<extern "cdecl" fn(ptr_t)>;
+
+#[repr(C)]
+pub union gnwEventListener {
+    pub _handle: u32,
+    pub _void: gnwEventListener_void,
+    pub _ptr: gnwEventListener_ptr,
+}
+
+#[repr(i32)]
+pub enum gnwRunLoopError {
+    GRLE_NONE = 0,
+    GRLE_EMPTY,
+    GRLE_FULL,
+    GRLE_INVALID_STATE,
+    GRLE_INVALID_PARAMETER,
+    GRLE_UNKNOWN,
+}
+
+pub type gnwRunLoopDataEncodingRoutine = Option<extern "C" fn(ptr_t, ptr_t)>;
+
+#[repr(C)]
+pub struct gnwRunLoopDispatchItem {
+    pub format: gnwEventFormat,
+    pub routine: gnwEventListener,
+    pub dataSizeBytes: size_t,
+    pub decodedDataSizeBytes: size_t,
+    pub decode: gnwRunLoopDataEncodingRoutine,
+}
+
+#[repr(C)]
+pub struct dispatchItem {
+    pub reserved: bool,
+    pub handled: bool,
+    pub dataHandled: bool,
+    pub item: gnwRunLoopDispatchItem,
+    pub data: [u8; DISPATCH_MAX_DATA_SIZE_BYTES as usize],
+}
+
+#[repr(C)]
+pub struct runLoop {
+    pub queue: [dispatchItem; DISPATCH_QUEUE_SIZE as usize],
+    pub finishedIndex: size_t,
+    pub endIndex: size_t,
 }
 
 pub const NONE_PROC_ID: procId_t = -2;
@@ -468,6 +524,11 @@ pub const KERNEL_PROC_ID: procId_t = -1;
 pub const DEV_IRQ_LIMIT: u8 = 8;
 pub const MAX_DEVICES: size_t = 8;
 pub const MAX_PROC: procId_t = 5;
+
+pub const DISPATCH_QUEUE_SIZE: size_t = 8;
+pub const DISPATCH_MAX_DATA_SIZE_BYTES: size_t = 7 * 1024;
+
+pub const GRANULARITY_MS: size_t = 30000;
 
 extern "C" {
     pub fn k_purge();
@@ -509,4 +570,12 @@ extern "C" {
     // proc
 
     pub static mut pTab: [process; MAX_PROC as usize];
+
+    // runloop
+
+    pub static mut rlp_main: [runLoop; MAX_PROC as usize];
+
+    // schedule
+
+    pub static executionTimeCounter: size_t;
 }
