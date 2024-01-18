@@ -502,6 +502,7 @@ extern "C" {
 
     // hal
 
+    pub static mut isrStackHeight: size_t;
     pub static mut isrReg: [isrEntry; DEV_IRQ_LIMIT as usize];
     pub static mut k_hal_servicedDevIdPtr: *const size_t;
 
