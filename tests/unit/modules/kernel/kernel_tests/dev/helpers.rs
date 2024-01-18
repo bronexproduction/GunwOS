@@ -6,6 +6,8 @@ pub static mut DEV_WRITE_CALLED: bool = false;
 pub static mut DEV_CHAR_WRITE_CALLED: bool = false;
 pub static mut DEV_GET_PARAM_CALLED: bool = false;
 pub static mut DEV_SET_PARAM_CALLED: bool = false;
+pub static mut DEV_EVENT_LISTENER_CALLED: bool = false;
+pub static mut DEV_EVENT_DECODER_CALLED: bool = false;
 
 pub fn dev_clear() {
     unsafe {
@@ -15,6 +17,8 @@ pub fn dev_clear() {
         DEV_CHAR_WRITE_CALLED = false;
         DEV_GET_PARAM_CALLED = false;
         DEV_SET_PARAM_CALLED = false;
+        DEV_EVENT_LISTENER_CALLED = false;
+        DEV_EVENT_DECODER_CALLED = false;
     }
 }
 
@@ -305,8 +309,16 @@ pub fn install_dummy_device_holder(device_id: size_t, proc_id: procId_t) {
 pub fn install_dummy_device_listener(device_id: size_t, proc_id: procId_t) {
     install_dummy_device_holder(device_id, proc_id);
 
-    extern "cdecl" fn listener(_: *const gnwDeviceEvent) {}
-    extern "C" fn decoder(_: *mut u8, _: *const gnwDeviceEvent) {}
+    extern "cdecl" fn listener(_: *const gnwDeviceEvent) {
+        unsafe {
+            DEV_EVENT_LISTENER_CALLED = true;
+        }
+    }
+    extern "C" fn decoder(_: *mut u8, _: *const gnwDeviceEvent) {
+        unsafe {
+            DEV_EVENT_DECODER_CALLED = true;
+        }
+    }
     unsafe {
         devices[device_id as usize].listener = Some(listener);
         devices[device_id as usize].decoder = Some(decoder);

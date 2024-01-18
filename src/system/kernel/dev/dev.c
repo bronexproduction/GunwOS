@@ -431,9 +431,7 @@ enum gnwDeviceError k_dev_emit(const struct gnwDeviceEvent * const eventPtr) {
         return err;
     }
     err = validateListenerInvocation(*k_hal_servicedDevIdPtr);
-    if (err == GDE_NOT_FOUND) {
-        return GDE_NONE;
-    } else if (err) {
+    if (err != GDE_NONE) {
         return err;
     }
 

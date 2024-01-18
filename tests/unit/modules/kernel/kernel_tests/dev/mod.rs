@@ -1965,6 +1965,12 @@ fn validateListenerInvocation_checkIncorrect_noHolderProcId() {
 fn k_dev_emit_checkCorrect() {
     log("k_dev_emit_checkCorrect start\n\0");
 
+    let device_id: size_t = 0;
+    let proc_id: procId_t = install_dummy_process();
+    assert_eq!(proc_id, 0);
+    install_dummy_device(&device_id, true);
+    assert_eq!(device_id, 0);
+    install_dummy_device_listener(device_id, proc_id);
     let mut data: u8 = 0;
     let event = gnwDeviceEvent {
         r#type: 69,
@@ -1973,6 +1979,7 @@ fn k_dev_emit_checkCorrect() {
     };
     
     unsafe {
+        k_hal_servicedDevIdPtr = &device_id;
         assert_eq!(k_dev_emit(&event), gnwDeviceError::GDE_NONE);
         assert_eq!(data, 0);
     }
@@ -1989,9 +1996,7 @@ fn k_dev_emit_checkCorrect() {
 //         return err;
 //     }
 //     err = validateListenerInvocation(*k_hal_servicedDevIdPtr);
-//     if (err == GDE_NOT_FOUND) {
-//         return GDE_NONE;
-//     } else if (err) {
+//     if (err != GDE_NONE) {
 //         return err;
 //     }
 
