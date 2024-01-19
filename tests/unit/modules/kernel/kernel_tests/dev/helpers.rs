@@ -306,22 +306,24 @@ pub fn install_dummy_device_holder(device_id: size_t, proc_id: procId_t) {
     }
 }
 
+pub extern "cdecl" fn dev_event_listener(_: *const gnwDeviceEvent) {
+    unsafe {
+        DEV_EVENT_LISTENER_CALLED = true;
+    }
+}
+
+pub extern "C" fn dev_event_decoder(_: *mut u8, _: *const gnwDeviceEvent) {
+    unsafe {
+        DEV_EVENT_DECODER_CALLED = true;
+    }
+}
+
 pub fn install_dummy_device_listener(device_id: size_t, proc_id: procId_t) {
     install_dummy_device_holder(device_id, proc_id);
 
-    extern "cdecl" fn listener(_: *const gnwDeviceEvent) {
-        unsafe {
-            DEV_EVENT_LISTENER_CALLED = true;
-        }
-    }
-    extern "C" fn decoder(_: *mut u8, _: *const gnwDeviceEvent) {
-        unsafe {
-            DEV_EVENT_DECODER_CALLED = true;
-        }
-    }
     unsafe {
-        devices[device_id as usize].listener = Some(listener);
-        devices[device_id as usize].decoder = Some(decoder);
+        devices[device_id as usize].listener = Some(dev_event_listener);
+        devices[device_id as usize].decoder = Some(dev_event_decoder);
     }
 }
 

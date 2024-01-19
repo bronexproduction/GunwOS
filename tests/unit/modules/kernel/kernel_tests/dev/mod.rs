@@ -5,6 +5,8 @@ use kernel_symbols::*;
 use self::helpers::*;
 use core::ptr::null;
 use core::ptr::null_mut;
+use core::slice::from_raw_parts;
+use core::mem;
 
 /*
     PRIVATE bool validateId(size_t id)
@@ -1971,7 +1973,7 @@ fn k_dev_emit_checkCorrect() {
     install_dummy_device(&device_id, true);
     assert_eq!(device_id, 0);
     install_dummy_device_listener(device_id, proc_id);
-    let mut data: u8 = 0;
+    let mut data: u8 = 96;
     let event = gnwDeviceEvent {
         r#type: 69,
         data: &mut data,
@@ -1984,31 +1986,28 @@ fn k_dev_emit_checkCorrect() {
                            k_proc_lockType::PLT_IPC as i32;
         k_hal_servicedDevIdPtr = &device_id;
         let index: u32 = 1;
+        let expected_queue_decoded_data: &[u8] = from_raw_parts((&event as *const gnwDeviceEvent) as *const u8, mem::size_of::<gnwDeviceEvent>());
         assert_eq!(KERNEL_PANIC_FLAG, false);
         assert_eq!(k_dev_emit(&event), gnwDeviceError::GDE_NONE);
-        assert_eq!(data, 0);
+        assert_eq!(data, 96);
         assert_eq!(rlp_main[proc_id as usize].endIndex, index);
         assert_eq!(rlp_main[proc_id as usize].finishedIndex, index - 1);
         assert_eq!(rlp_main[proc_id as usize].queue[index as usize].reserved, true);
         assert_eq!(rlp_main[proc_id as usize].queue[index as usize].handled, false);
         assert_eq!(rlp_main[proc_id as usize].queue[index as usize].dataHandled, false);
         assert_eq!(rlp_main[proc_id as usize].queue[index as usize].item.format, gnwEventFormat::GEF_PTR);
-        log("1\n\0");
-        assert_eq!(rlp_main[proc_id as usize].queue[index as usize].item.routine._handle, 1);
-        log("2\n\0");
-        assert_eq!(rlp_main[proc_id as usize].queue[index as usize].item.dataSizeBytes, 1);
-        log("3\n\0");
-        assert_eq!(rlp_main[proc_id as usize].queue[index as usize].item.decodedDataSizeBytes, 1);
-        log("4\n\0");
-        assert_eq!(rlp_main[proc_id as usize].queue[index as usize].item.decode, None);
-        log("5\n\0");
-        for byte_offset in 0..DISPATCH_MAX_DATA_SIZE_BYTES {
-            log("6\n\0");
-            assert_eq!(rlp_main[proc_id as usize].queue[index as usize].data[byte_offset as usize], 1);
+        assert_eq!(rlp_main[proc_id as usize].queue[index as usize].item.routine._ptr.unwrap() as ptr_t, dev_event_listener as ptr_t);
+        assert_eq!(rlp_main[proc_id as usize].queue[index as usize].item.dataSizeBytes, 13);
+        assert_eq!(rlp_main[proc_id as usize].queue[index as usize].item.decodedDataSizeBytes, 12);
+        assert_eq!(rlp_main[proc_id as usize].queue[index as usize].item.decode.unwrap() as ptr_t, dev_event_decoder as ptr_t);
+        for byte_offset in 0..rlp_main[proc_id as usize].queue[index as usize].item.decodedDataSizeBytes {
+            assert_eq!(rlp_main[proc_id as usize].queue[index as usize].data[byte_offset as usize], expected_queue_decoded_data[byte_offset as usize]);
         }
-        log("7\n\0");
+        assert_eq!(rlp_main[proc_id as usize].queue[index as usize].data[rlp_main[proc_id as usize].queue[index as usize].item.decodedDataSizeBytes as usize], data);
+        for byte_offset in rlp_main[proc_id as usize].queue[index as usize].item.dataSizeBytes..DISPATCH_MAX_DATA_SIZE_BYTES {
+            assert_eq!(rlp_main[proc_id as usize].queue[index as usize].data[byte_offset as usize], 0);
+        }
         assert_eq!(pTab[proc_id as usize].lockMask, k_proc_lockType::PLT_IPC as i32);
-        log("8\n\0");
         assert_eq!(executionTimeCounter, GRANULARITY_MS);
     }
     
