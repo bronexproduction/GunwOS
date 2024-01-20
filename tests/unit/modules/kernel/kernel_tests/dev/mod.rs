@@ -1989,6 +1989,7 @@ fn k_dev_emit_checkCorrect() {
         let expected_queue_decoded_data: &[u8] = from_raw_parts((&event as *const gnwDeviceEvent) as *const u8, mem::size_of::<gnwDeviceEvent>());
         assert_eq!(KERNEL_PANIC_FLAG, false);
         assert_eq!(k_dev_emit(&event), gnwDeviceError::GDE_NONE);
+        assert_eq!(KERNEL_PANIC_FLAG, false);
         assert_eq!(data, 96);
         assert_eq!(rlp_main[proc_id as usize].endIndex, index);
         assert_eq!(rlp_main[proc_id as usize].finishedIndex, index - 1);
@@ -2014,14 +2015,134 @@ fn k_dev_emit_checkCorrect() {
     log("k_dev_emit_checkCorrect end\n\0");
 }
 
+#[test_case]
+fn k_dev_emit_checkIncorrect_eventPtrNull() {
+    log("k_dev_emit_checkIncorrect_eventPtrNull start\n\0");
+
+    let device_id: size_t = 0;
+    let proc_id: procId_t = install_dummy_process();
+    assert_eq!(proc_id, 0);
+    install_dummy_device(&device_id, true);
+    assert_eq!(device_id, 0);
+    install_dummy_device_listener(device_id, proc_id);
+    
+    unsafe {
+        isrStackHeight = 1;
+        pTab[0].lockMask = k_proc_lockType::PLT_EVENT as i32 |
+                           k_proc_lockType::PLT_IPC as i32;
+        k_hal_servicedDevIdPtr = &device_id;
+        assert_eq!(KERNEL_PANIC_FLAG, false);
+        assert_eq!(k_dev_emit(null()), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+    }
+    
+    log("k_dev_emit_checkIncorrect_eventPtrNull end\n\0");
+}
+
+#[test_case]
+fn k_dev_emit_checkIncorrect_devIdPtrNull() {
+    log("k_dev_emit_checkIncorrect_devIdPtrNull start\n\0");
+
+    let device_id: size_t = 0;
+    let proc_id: procId_t = install_dummy_process();
+    assert_eq!(proc_id, 0);
+    install_dummy_device(&device_id, true);
+    assert_eq!(device_id, 0);
+    install_dummy_device_listener(device_id, proc_id);
+    let mut data: u8 = 96;
+    let event = gnwDeviceEvent {
+        r#type: 69,
+        data: &mut data,
+        dataSizeBytes: 1,
+    };
+    
+    unsafe {
+        isrStackHeight = 1;
+        pTab[0].lockMask = k_proc_lockType::PLT_EVENT as i32 |
+                           k_proc_lockType::PLT_IPC as i32;
+        assert_eq!(KERNEL_PANIC_FLAG, false);
+        assert_eq!(k_dev_emit(&event), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+    }
+    
+    log("k_dev_emit_checkIncorrect_devIdPtrNull end\n\0");
+}
+
+#[test_case]
+fn k_dev_emit_checkIncorrect_deviceIdInvalid() {
+    log("k_dev_emit_checkIncorrect_deviceIdInvalid start\n\0");
+
+    /*
+        Can it be checked?
+    */
+
+    assert_eq!(1,0);
+
+    // let device_id: size_t = 0;
+    // let proc_id: procId_t = install_dummy_process();
+    // assert_eq!(proc_id, 0);
+    // install_dummy_device(&device_id, true);
+    // assert_eq!(device_id, 0);
+    // install_dummy_device_listener(device_id, proc_id);
+    // let mut data: u8 = 96;
+    // let event = gnwDeviceEvent {
+    //     r#type: 69,
+    //     data: &mut data,
+    //     dataSizeBytes: 1,
+    // };
+    
+    // unsafe {
+    //     isrStackHeight = 1;
+    //     pTab[0].lockMask = k_proc_lockType::PLT_EVENT as i32 |
+    //                        k_proc_lockType::PLT_IPC as i32;
+    //     k_hal_servicedDevIdPtr = &device_id;
+    //     let index: u32 = 1;
+    //     assert_eq!(KERNEL_PANIC_FLAG, false);
+    //     assert_eq!(k_dev_emit(null()), gnwDeviceError::GDE_UNKNOWN);
+    //     assert_eq!(KERNEL_PANIC_FLAG, true);
+    // }
+    
+    log("k_dev_emit_checkIncorrect_deviceIdInvalid end\n\0");
+}
+
+#[test_case]
+fn k_dev_emit_checkIncorrect_deviceNotStarted() {
+    log("k_dev_emit_checkIncorrect_deviceNotStarted start\n\0");
+
+    /*
+        Can it be checked?
+    */
+
+    assert_eq!(1,0);
+
+    // let device_id: size_t = 0;
+    // let proc_id: procId_t = install_dummy_process();
+    // assert_eq!(proc_id, 0);
+    // install_dummy_device(&device_id, true);
+    // assert_eq!(device_id, 0);
+    // install_dummy_device_listener(device_id, proc_id);
+    // let mut data: u8 = 96;
+    // let event = gnwDeviceEvent {
+    //     r#type: 69,
+    //     data: &mut data,
+    //     dataSizeBytes: 1,
+    // };
+    
+    // unsafe {
+    //     isrStackHeight = 1;
+    //     pTab[0].lockMask = k_proc_lockType::PLT_EVENT as i32 |
+    //                        k_proc_lockType::PLT_IPC as i32;
+    //     k_hal_servicedDevIdPtr = &device_id;
+    //     let index: u32 = 1;
+    //     assert_eq!(KERNEL_PANIC_FLAG, false);
+    //     assert_eq!(k_dev_emit(null()), gnwDeviceError::GDE_UNKNOWN);
+    //     assert_eq!(KERNEL_PANIC_FLAG, true);
+    // }
+    
+    log("k_dev_emit_checkIncorrect_deviceNotStarted end\n\0");
+}
+
 // enum gnwDeviceError k_dev_emit(const struct gnwDeviceEvent * const eventPtr) {
-//     if (!eventPtr) {
-//         OOPS("Nullptr", GDE_UNKNOWN);
-//     }
-//     enum gnwDeviceError err = validateEmitter(k_hal_servicedDevIdPtr);
-//     if (err) {
-//         return err;
-//     }
 //     err = validateListenerInvocation(*k_hal_servicedDevIdPtr);
 //     if (err != GDE_NONE) {
 //         return err;
