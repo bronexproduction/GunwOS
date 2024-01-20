@@ -1985,6 +1985,7 @@ fn k_dev_emit_checkCorrect() {
         pTab[0].lockMask = k_proc_lockType::PLT_EVENT as i32 |
                            k_proc_lockType::PLT_IPC as i32;
         k_hal_servicedDevIdPtr = &device_id;
+        queueRunning = true;
         let index: u32 = 1;
         let expected_queue_decoded_data: &[u8] = from_raw_parts((&event as *const gnwDeviceEvent) as *const u8, mem::size_of::<gnwDeviceEvent>());
         assert_eq!(KERNEL_PANIC_FLAG, false);

@@ -571,6 +571,10 @@ extern "C" {
 
     pub static mut pTab: [process; MAX_PROC as usize];
 
+    // queue
+
+    pub static mut queueRunning: bool;
+
     // runloop
 
     pub static mut rlp_main: [runLoop; MAX_PROC as usize];

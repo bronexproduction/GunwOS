@@ -50,7 +50,7 @@ struct dispatchEntry {
 
 static struct dispatchEntry queue[MAX_QUEUE_LENGTH];
 struct dispatchEntry *k_que_currentDispatchEntry = 0;
-static bool running = 0;
+PRIVATE bool queueRunning = 0;
 
 static void dispatch(const ptr_t funcPtr,
                      const enum dispatchFuncType type, 
@@ -59,7 +59,7 @@ static void dispatch(const ptr_t funcPtr,
     
     #warning how to avoid duplicates?
 
-    if (!running) {
+    if (!queueRunning) {
         OOPS("Running queue required to dispatch items - aborting",);
     }
 
@@ -120,7 +120,7 @@ void k_que_dispatch_arch_arch(const fPtr_arch_arch func, const addr_t p0, const 
 }
 
 void k_que_start() {
-    running = true;
+    queueRunning = true;
     while (1) {
         struct dispatchEntry *enqueued;
         CRITICAL_SECTION_BEGIN {
