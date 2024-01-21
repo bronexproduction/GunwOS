@@ -15,20 +15,24 @@ use core::mem;
 #[test_case]
 fn validateId_checkCorrect() {
     log("validateId_checkCorrect start\n\0");
+
     unsafe {
         assert_eq!(validateId(0), true);
         assert_eq!(validateId(MAX_DEVICES - 1), true);
     }
+    
     log("validateId_checkCorrect end\n\0");
 }
 
 #[test_case]
 fn validateId_checkIncorrect() {
     log("validateId_checkIncorrect start\n\0");
+
     unsafe {
         assert_eq!(validateId(MAX_DEVICES), false);
         assert_eq!(validateId(MAX_DEVICES + 1), false);
     }
+
     log("validateId_checkIncorrect end\n\0");
 }
 
@@ -36,28 +40,42 @@ fn validateId_checkIncorrect() {
     PRIVATE bool validateInstalledId(size_t id)
 */
 
+macro_rules! validateInstalledId_preconditions {
+    () => {
+        unsafe {
+            devicesCount = MAX_DEVICES / 2;
+        }
+    };
+}
+
 #[test_case]
 fn validateInstalledId_checkCorrect() {
     log("validateInstalledId_checkCorrect start\n\0");
+
+    validateInstalledId_preconditions!();
+
     unsafe {
-        devicesCount = MAX_DEVICES / 2;
         assert_eq!(validateInstalledId(0), true);
         assert_eq!(validateInstalledId(devicesCount - 1), true);
     }
+
     log("validateInstalledId_checkCorrect end\n\0");
 }
 
 #[test_case]
 fn validateInstalledId_checkIncorrect() {
     log("validateInstalledId_checkIncorrect start\n\0");
+
+    validateInstalledId_preconditions!();
+
     unsafe {
-        devicesCount = MAX_DEVICES / 2;
         assert_eq!(validateInstalledId(devicesCount), false);
         assert_eq!(validateInstalledId(devicesCount + 1), false);
         assert_eq!(validateInstalledId(MAX_DEVICES - 1), false);
         assert_eq!(validateInstalledId(MAX_DEVICES), false);
         assert_eq!(validateInstalledId(MAX_DEVICES + 1), false);
     }
+
     log("validateInstalledId_checkIncorrect end\n\0");
 }
 
@@ -65,55 +83,100 @@ fn validateInstalledId_checkIncorrect() {
     PRIVATE enum gnwDeviceError validateStartedDevice(const procId_t processId, const size_t deviceId)
 */
 
+macro_rules! validateStartedDevice_preconditions {
+    () => {
+        unsafe {
+            devicesCount = 1;
+            devices[0].holder = 0;
+            devices[0].started = true;
+            assert_eq!(install_dummy_process(), 0);
+        }
+    };
+}
+
+#[allow(non_snake_case)]
+fn validateStartedDevice_expect(proc_id: procId_t, device_id: size_t, error: gnwDeviceError, kernel_panic: bool) {
+    unsafe {
+        assert_eq!(validateStartedDevice(proc_id, device_id), error);
+        assert_eq!(KERNEL_PANIC_FLAG, kernel_panic);
+        KERNEL_PANIC_FLAG = false;
+    }
+}
+
 #[test_case]
 fn validateStartedDevice_checkCorrect() {
     log("validateStartedDevice_checkCorrect start\n\0");
-    unsafe {
-        devicesCount = 1;
-        devices[0].holder = 0;
-        devices[0].started = true;
-        install_dummy_process();
-        assert_eq!(validateStartedDevice(0, 0), gnwDeviceError::GDE_NONE);
-    }
+
+    validateStartedDevice_preconditions!();
+
+    validateStartedDevice_expect(0, 0, gnwDeviceError::GDE_NONE, false);
+
     log("validateStartedDevice_checkCorrect end\n\0");
 }
 
 #[test_case]
-fn validateStartedDevice_checkIncorrect() {
-    log("validateStartedDevice_checkIncorrect start\n\0");
+fn validateStartedDevice_checkIncorrect_noHolderProcId() {
+    log("validateStartedDevice_checkIncorrect_noHolderProcId start\n\0");
+
+    validateStartedDevice_preconditions!();
+
     unsafe {
-        devicesCount = 1;
-        let proc_id = install_dummy_process();
-        assert_eq!(proc_id, 0);
-        assert_eq!(validateStartedDevice(NONE_PROC_ID - 1, 0), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(validateStartedDevice(NONE_PROC_ID, 0), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(validateStartedDevice(KERNEL_PROC_ID, 0), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(validateStartedDevice(1, 0), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(validateStartedDevice(MAX_PROC - 1, 0), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(validateStartedDevice(MAX_PROC, 0), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(validateStartedDevice(MAX_PROC + 1, 0), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        
         devices[0].holder = NONE_PROC_ID;
-        devices[0].started = false;
-        assert_eq!(validateStartedDevice(0, 1), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(validateStartedDevice(0, 0), gnwDeviceError::GDE_HANDLE_INVALID);
-        devices[0].holder = 0;
-        assert_eq!(validateStartedDevice(0, 0), gnwDeviceError::GDE_INVALID_DEVICE_STATE);
     }
-    log("validateStartedDevice_checkIncorrect end\n\0");
+
+    validateStartedDevice_expect(NONE_PROC_ID - 1, 0, gnwDeviceError::GDE_UNKNOWN, true);
+    validateStartedDevice_expect(NONE_PROC_ID, 0, gnwDeviceError::GDE_UNKNOWN, true);
+    validateStartedDevice_expect(KERNEL_PROC_ID, 0, gnwDeviceError::GDE_UNKNOWN, true);
+    validateStartedDevice_expect(1, 0, gnwDeviceError::GDE_UNKNOWN, true);
+    validateStartedDevice_expect(MAX_PROC - 1, 0, gnwDeviceError::GDE_UNKNOWN, true);
+    validateStartedDevice_expect(MAX_PROC, 0, gnwDeviceError::GDE_UNKNOWN, true);
+    validateStartedDevice_expect(MAX_PROC + 1, 0, gnwDeviceError::GDE_UNKNOWN, true);
+
+    log("validateStartedDevice_checkIncorrect_noHolderProcId end\n\0");
+}
+
+#[test_case]
+fn validateStartedDevice_checkIncorrect_deviceIdInvalid() {
+    log("validateStartedDevice_checkIncorrect_deviceIdInvalid start\n\0");
+
+    validateStartedDevice_preconditions!();
+
+    validateStartedDevice_expect(0, 1, gnwDeviceError::GDE_UNKNOWN, false);
+    validateStartedDevice_expect(0, MAX_DEVICES - 1, gnwDeviceError::GDE_UNKNOWN, false);
+    validateStartedDevice_expect(0, MAX_DEVICES, gnwDeviceError::GDE_UNKNOWN, false);
+    validateStartedDevice_expect(0, MAX_DEVICES + 1, gnwDeviceError::GDE_UNKNOWN, false);
+
+    log("validateStartedDevice_checkIncorrect_deviceIdInvalid end\n\0");
+}
+
+#[test_case]
+fn validateStartedDevice_checkIncorrect_handleInvalid() {
+    log("validateStartedDevice_checkIncorrect_handleInvalid start\n\0");
+
+    validateStartedDevice_preconditions!();
+
+    unsafe {
+        devices[0].holder = NONE_PROC_ID;
+    }
+
+    validateStartedDevice_expect(0, 0, gnwDeviceError::GDE_HANDLE_INVALID, false);
+
+    log("validateStartedDevice_checkIncorrect_handleInvalid end\n\0");
+}
+
+#[test_case]
+fn validateStartedDevice_checkIncorrect_deviceNotStarted() {
+    log("validateStartedDevice_checkIncorrect_deviceNotStarted start\n\0");
+
+    validateStartedDevice_preconditions!();
+
+    unsafe {
+        devices[0].started = false;
+    }
+
+    validateStartedDevice_expect(0, 0, gnwDeviceError::GDE_INVALID_DEVICE_STATE, false);
+
+    log("validateStartedDevice_checkIncorrect_deviceNotStarted end\n\0");
 }
 
 /*
@@ -2217,7 +2280,6 @@ fn k_dev_emit_checkIncorrect_eventDataTooLarge() {
 //         }
 //     }
 // }
-
 
 // #[macro_export]
 // macro_rules! my_test_case {
