@@ -2075,6 +2075,53 @@ fn k_dev_emit_checkIncorrect_devIdPtrNull() {
 fn k_dev_emit_checkIncorrect_deviceIdInvalid() {
     log("k_dev_emit_checkIncorrect_deviceIdInvalid start\n\0");
 
+    let mut device_id: size_t = 0;
+    let proc_id: procId_t = install_dummy_process();
+    assert_eq!(proc_id, 0);
+    install_dummy_device(&device_id, true);
+    assert_eq!(device_id, 0);
+    install_dummy_device_listener(device_id, proc_id);
+    let mut data: u8 = 96;
+    let event = gnwDeviceEvent {
+        r#type: 69,
+        data: &mut data,
+        dataSizeBytes: 1,
+    };
+    
+    unsafe {
+        isrStackHeight = 1;
+        pTab[0].lockMask = k_proc_lockType::PLT_EVENT as i32 |
+                           k_proc_lockType::PLT_IPC as i32;
+        queueRunning = true;
+        assert_eq!(KERNEL_PANIC_FLAG, false);
+        device_id = 1;
+        k_hal_servicedDevIdPtr = &device_id;
+        assert_eq!(k_dev_emit(&event), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        device_id = MAX_DEVICES - 1;
+        k_hal_servicedDevIdPtr = &device_id;
+        assert_eq!(k_dev_emit(&event), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        device_id = MAX_DEVICES;
+        k_hal_servicedDevIdPtr = &device_id;
+        assert_eq!(k_dev_emit(&event), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+        KERNEL_PANIC_FLAG = false;
+        device_id = MAX_DEVICES + 1;
+        k_hal_servicedDevIdPtr = &device_id;
+        assert_eq!(k_dev_emit(&event), gnwDeviceError::GDE_UNKNOWN);
+        assert_eq!(KERNEL_PANIC_FLAG, true);
+    }
+    
+    log("k_dev_emit_checkIncorrect_deviceIdInvalid end\n\0");
+}
+
+#[test_case]
+fn k_dev_emit_checkIncorrect_deviceNotStarted() {
+    log("k_dev_emit_checkIncorrect_deviceNotStarted start\n\0");
+
     let device_id: size_t = 0;
     let proc_id: procId_t = install_dummy_process();
     assert_eq!(proc_id, 0);
@@ -2095,59 +2142,10 @@ fn k_dev_emit_checkIncorrect_deviceIdInvalid() {
         k_hal_servicedDevIdPtr = &device_id;
         queueRunning = true;
         assert_eq!(KERNEL_PANIC_FLAG, false);
-        device_id = 1;
-        assert_eq!(k_dev_emit(&event), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        device_id = MAX_DEVICES - 1;
-        assert_eq!(k_dev_emit(&event), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        device_id = MAX_DEVICES;
-        assert_eq!(k_dev_emit(&event), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        device_id = MAX_DEVICES + 1;
-        assert_eq!(k_dev_emit(&event), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
+        devices[device_id as usize].started = false;
+        assert_eq!(k_dev_emit(&event), gnwDeviceError::GDE_INVALID_DEVICE_STATE);
+        assert_eq!(KERNEL_PANIC_FLAG, false);
     }
-    
-    log("k_dev_emit_checkIncorrect_deviceIdInvalid end\n\0");
-}
-
-#[test_case]
-fn k_dev_emit_checkIncorrect_deviceNotStarted() {
-    log("k_dev_emit_checkIncorrect_deviceNotStarted start\n\0");
-
-    /*
-        Can it be checked?
-    */
-
-    assert_eq!(1,0);
-
-    // let device_id: size_t = 0;
-    // let proc_id: procId_t = install_dummy_process();
-    // assert_eq!(proc_id, 0);
-    // install_dummy_device(&device_id, true);
-    // assert_eq!(device_id, 0);
-    // install_dummy_device_listener(device_id, proc_id);
-    // let mut data: u8 = 96;
-    // let event = gnwDeviceEvent {
-    //     r#type: 69,
-    //     data: &mut data,
-    //     dataSizeBytes: 1,
-    // };
-    
-    // unsafe {
-    //     isrStackHeight = 1;
-    //     pTab[0].lockMask = k_proc_lockType::PLT_EVENT as i32 |
-    //                        k_proc_lockType::PLT_IPC as i32;
-    //     k_hal_servicedDevIdPtr = &device_id;
-    //     let index: u32 = 1;
-    //     assert_eq!(KERNEL_PANIC_FLAG, false);
-    //     assert_eq!(k_dev_emit(null()), gnwDeviceError::GDE_UNKNOWN);
-    //     assert_eq!(KERNEL_PANIC_FLAG, true);
-    // }
     
     log("k_dev_emit_checkIncorrect_deviceNotStarted end\n\0");
 }
