@@ -1963,34 +1963,41 @@ fn validateListenerInvocation_checkIncorrect_noHolderProcId() {
     enum gnwDeviceError k_dev_emit(const struct gnwDeviceEvent * const eventPtr)
 */
 
+macro_rules! k_dev_emit_preconditions {
+    ($device_id:ident, $proc_id:ident, $data:ident, $event:ident) => {
+        let mut $device_id: size_t = 0;
+        let mut $proc_id: procId_t = 0;
+        let mut $data: u8 = 96;
+        let mut $event: gnwDeviceEvent = gnwDeviceEvent {
+            r#type: 69,
+            data: null_mut(),
+            dataSizeBytes: 1,
+        };
+        $event.data = &mut $data;
+        install_dummy_emitter_device(&mut $device_id, &mut $proc_id);
+    };
+}
+
+fn k_dev_emit_expect(event: &gnwDeviceEvent, error_code: gnwDeviceError, kernel_panic: bool) {
+    unsafe {
+        assert_eq!(k_dev_emit(event), error_code);
+        assert_eq!(KERNEL_PANIC_FLAG, kernel_panic);
+        KERNEL_PANIC_FLAG = false;
+    }
+}
+
 #[test_case]
 fn k_dev_emit_checkCorrect() {
     log("k_dev_emit_checkCorrect start\n\0");
 
-    let device_id: size_t = 0;
-    let proc_id: procId_t = install_dummy_process();
-    assert_eq!(proc_id, 0);
-    install_dummy_device(&device_id, true);
-    assert_eq!(device_id, 0);
-    install_dummy_device_listener(device_id, proc_id);
-    let mut data: u8 = 96;
-    let event = gnwDeviceEvent {
-        r#type: 69,
-        data: &mut data,
-        dataSizeBytes: 1,
-    };
+    k_dev_emit_preconditions!(device_id, proc_id, data, event);
     
     unsafe {
-        isrStackHeight = 1;
-        pTab[0].lockMask = k_proc_lockType::PLT_EVENT as i32 |
-                           k_proc_lockType::PLT_IPC as i32;
-        k_hal_servicedDevIdPtr = &device_id;
-        queueRunning = true;
         let index: u32 = 1;
         let expected_queue_decoded_data: &[u8] = from_raw_parts((&event as *const gnwDeviceEvent) as *const u8, mem::size_of::<gnwDeviceEvent>());
-        assert_eq!(KERNEL_PANIC_FLAG, false);
-        assert_eq!(k_dev_emit(&event), gnwDeviceError::GDE_NONE);
-        assert_eq!(KERNEL_PANIC_FLAG, false);
+        
+        k_dev_emit_expect(&event, gnwDeviceError::GDE_NONE, false);
+
         assert_eq!(data, 96);
         assert_eq!(rlp_main[proc_id as usize].endIndex, index);
         assert_eq!(rlp_main[proc_id as usize].finishedIndex, index - 1);
@@ -2020,20 +2027,9 @@ fn k_dev_emit_checkCorrect() {
 fn k_dev_emit_checkIncorrect_eventPtrNull() {
     log("k_dev_emit_checkIncorrect_eventPtrNull start\n\0");
 
-    let device_id: size_t = 0;
-    let proc_id: procId_t = install_dummy_process();
-    assert_eq!(proc_id, 0);
-    install_dummy_device(&device_id, true);
-    assert_eq!(device_id, 0);
-    install_dummy_device_listener(device_id, proc_id);
+    k_dev_emit_preconditions!(device_id, proc_id, data, event);
     
     unsafe {
-        isrStackHeight = 1;
-        pTab[0].lockMask = k_proc_lockType::PLT_EVENT as i32 |
-                           k_proc_lockType::PLT_IPC as i32;
-        k_hal_servicedDevIdPtr = &device_id;
-        queueRunning = true;
-        assert_eq!(KERNEL_PANIC_FLAG, false);
         assert_eq!(k_dev_emit(null()), gnwDeviceError::GDE_UNKNOWN);
         assert_eq!(KERNEL_PANIC_FLAG, true);
     }
@@ -2045,28 +2041,13 @@ fn k_dev_emit_checkIncorrect_eventPtrNull() {
 fn k_dev_emit_checkIncorrect_devIdPtrNull() {
     log("k_dev_emit_checkIncorrect_devIdPtrNull start\n\0");
 
-    let device_id: size_t = 0;
-    let proc_id: procId_t = install_dummy_process();
-    assert_eq!(proc_id, 0);
-    install_dummy_device(&device_id, true);
-    assert_eq!(device_id, 0);
-    install_dummy_device_listener(device_id, proc_id);
-    let mut data: u8 = 96;
-    let event = gnwDeviceEvent {
-        r#type: 69,
-        data: &mut data,
-        dataSizeBytes: 1,
-    };
+    k_dev_emit_preconditions!(device_id, proc_id, data, event);
     
     unsafe {
-        isrStackHeight = 1;
-        pTab[0].lockMask = k_proc_lockType::PLT_EVENT as i32 |
-                           k_proc_lockType::PLT_IPC as i32;
-        queueRunning = true;
-        assert_eq!(KERNEL_PANIC_FLAG, false);
-        assert_eq!(k_dev_emit(&event), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
+        k_hal_servicedDevIdPtr = null();
     }
+
+    k_dev_emit_expect(&event, gnwDeviceError::GDE_UNKNOWN, true);
     
     log("k_dev_emit_checkIncorrect_devIdPtrNull end\n\0");
 }
@@ -2075,45 +2056,28 @@ fn k_dev_emit_checkIncorrect_devIdPtrNull() {
 fn k_dev_emit_checkIncorrect_deviceIdInvalid() {
     log("k_dev_emit_checkIncorrect_deviceIdInvalid start\n\0");
 
-    let mut device_id: size_t = 0;
-    let proc_id: procId_t = install_dummy_process();
-    assert_eq!(proc_id, 0);
-    install_dummy_device(&device_id, true);
-    assert_eq!(device_id, 0);
-    install_dummy_device_listener(device_id, proc_id);
-    let mut data: u8 = 96;
-    let event = gnwDeviceEvent {
-        r#type: 69,
-        data: &mut data,
-        dataSizeBytes: 1,
-    };
-    
+    k_dev_emit_preconditions!(device_id, proc_id, data, event);
+
     unsafe {
-        isrStackHeight = 1;
-        pTab[0].lockMask = k_proc_lockType::PLT_EVENT as i32 |
-                           k_proc_lockType::PLT_IPC as i32;
-        queueRunning = true;
-        assert_eq!(KERNEL_PANIC_FLAG, false);
         device_id = 1;
         k_hal_servicedDevIdPtr = &device_id;
-        assert_eq!(k_dev_emit(&event), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
+    }
+    k_dev_emit_expect(&event, gnwDeviceError::GDE_UNKNOWN, true);
+    unsafe {
         device_id = MAX_DEVICES - 1;
         k_hal_servicedDevIdPtr = &device_id;
-        assert_eq!(k_dev_emit(&event), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
+    }
+    k_dev_emit_expect(&event, gnwDeviceError::GDE_UNKNOWN, true);
+    unsafe {
         device_id = MAX_DEVICES;
         k_hal_servicedDevIdPtr = &device_id;
-        assert_eq!(k_dev_emit(&event), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
+    }
+    k_dev_emit_expect(&event, gnwDeviceError::GDE_UNKNOWN, true);
+    unsafe {
         device_id = MAX_DEVICES + 1;
         k_hal_servicedDevIdPtr = &device_id;
-        assert_eq!(k_dev_emit(&event), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
     }
+    k_dev_emit_expect(&event, gnwDeviceError::GDE_UNKNOWN, true);
     
     log("k_dev_emit_checkIncorrect_deviceIdInvalid end\n\0");
 }
@@ -2122,59 +2086,127 @@ fn k_dev_emit_checkIncorrect_deviceIdInvalid() {
 fn k_dev_emit_checkIncorrect_deviceNotStarted() {
     log("k_dev_emit_checkIncorrect_deviceNotStarted start\n\0");
 
-    let device_id: size_t = 0;
-    let proc_id: procId_t = install_dummy_process();
-    assert_eq!(proc_id, 0);
-    install_dummy_device(&device_id, true);
-    assert_eq!(device_id, 0);
-    install_dummy_device_listener(device_id, proc_id);
-    let mut data: u8 = 96;
-    let event = gnwDeviceEvent {
-        r#type: 69,
-        data: &mut data,
-        dataSizeBytes: 1,
-    };
+    k_dev_emit_preconditions!(device_id, proc_id, data, event);
     
     unsafe {
-        isrStackHeight = 1;
-        pTab[0].lockMask = k_proc_lockType::PLT_EVENT as i32 |
-                           k_proc_lockType::PLT_IPC as i32;
-        k_hal_servicedDevIdPtr = &device_id;
-        queueRunning = true;
-        assert_eq!(KERNEL_PANIC_FLAG, false);
         devices[device_id as usize].started = false;
-        assert_eq!(k_dev_emit(&event), gnwDeviceError::GDE_INVALID_DEVICE_STATE);
-        assert_eq!(KERNEL_PANIC_FLAG, false);
     }
+
+    k_dev_emit_expect(&event, gnwDeviceError::GDE_INVALID_DEVICE_STATE, false);
     
     log("k_dev_emit_checkIncorrect_deviceNotStarted end\n\0");
 }
 
-// enum gnwDeviceError k_dev_emit(const struct gnwDeviceEvent * const eventPtr) {
-//     err = validateListenerInvocation(*k_hal_servicedDevIdPtr);
-//     if (err != GDE_NONE) {
-//         return err;
-//     }
+#[test_case]
+fn k_dev_emit_checkIncorrect_listenerNull() {
+    log("k_dev_emit_checkIncorrect_listenerNull start\n\0");
 
-//     struct device *dev = &devices[*k_hal_servicedDevIdPtr];
-//     enum k_proc_error callbackErr = k_proc_callback_invoke_ptr(dev->holder, 
-//                                                                (gnwEventListener_ptr)dev->listener,
-//                                                                (ptr_t)eventPtr,
-//                                                                eventPtr->dataSizeBytes + sizeof(struct gnwDeviceEvent),
-//                                                                sizeof(struct gnwDeviceEvent),
-//                                                                (gnwRunLoopDataEncodingRoutine)gnwDeviceEvent_encode,
-//                                                                (gnwRunLoopDataEncodingRoutine)dev->decoder);
-//     switch (callbackErr) {
-//     case PE_NONE:
-//         return GDE_NONE;
-//     case PE_IGNORED:
-//         return GDE_HANDLE_INVALID;
-//     case PE_ACCESS_VIOLATION:
-//         return GDE_LISTENER_INVALID;
-//     default:
-//         return GDE_UNKNOWN;
-//     }
-// }
+    k_dev_emit_preconditions!(device_id, proc_id, data, event);
+    
+    unsafe {
+        devices[device_id as usize].listener = None;
+    }
+
+    k_dev_emit_expect(&event, gnwDeviceError::GDE_NOT_FOUND, false);
+    
+    log("k_dev_emit_checkIncorrect_listenerNull end\n\0");
+}
+
+#[test_case]
+fn k_dev_emit_checkIncorrect_decoderNull() {
+    log("k_dev_emit_checkIncorrect_decoderNull start\n\0");
+
+    k_dev_emit_preconditions!(device_id, proc_id, data, event);
+    
+    unsafe {
+        devices[device_id as usize].decoder = None;
+    }
+
+    k_dev_emit_expect(&event, gnwDeviceError::GDE_UNKNOWN, true);
+    
+    log("k_dev_emit_checkIncorrect_decoderNull end\n\0");
+}
+
+#[test_case]
+fn k_dev_emit_checkIncorrect_holderProcessIdInvalid() {
+    log("k_dev_emit_checkIncorrect_holderProcessIdInvalid start\n\0");
+
+    k_dev_emit_preconditions!(device_id, proc_id, data, event);
+
+    unsafe {
+        devices[device_id as usize].holder = NONE_PROC_ID - 1;
+    }
+    k_dev_emit_expect(&event, gnwDeviceError::GDE_UNKNOWN, true);
+    unsafe {
+        devices[device_id as usize].holder = NONE_PROC_ID;
+    }
+    k_dev_emit_expect(&event, gnwDeviceError::GDE_UNKNOWN, true);
+    unsafe {
+        devices[device_id as usize].holder = KERNEL_PROC_ID;
+    }
+    k_dev_emit_expect(&event, gnwDeviceError::GDE_UNKNOWN, true);
+    unsafe {
+        devices[device_id as usize].holder = 1;
+    }
+    k_dev_emit_expect(&event, gnwDeviceError::GDE_UNKNOWN, true);
+    unsafe {
+        devices[device_id as usize].holder = MAX_PROC - 1;
+    }
+    k_dev_emit_expect(&event, gnwDeviceError::GDE_UNKNOWN, true);
+    unsafe {
+        devices[device_id as usize].holder = MAX_PROC;
+    }
+    k_dev_emit_expect(&event, gnwDeviceError::GDE_UNKNOWN, true);
+    unsafe {
+        devices[device_id as usize].holder = MAX_PROC + 1;
+    }
+    k_dev_emit_expect(&event, gnwDeviceError::GDE_UNKNOWN, true);
+    
+    log("k_dev_emit_checkIncorrect_holderProcessIdInvalid end\n\0");
+}
+
+#[test_case]
+fn k_dev_emit_checkIncorrect_holderProcessFinished() {
+    log("k_dev_emit_checkIncorrect_holderProcessFinished start\n\0");
+
+    k_dev_emit_preconditions!(device_id, proc_id, data, event);
+
+    unsafe {
+        pTab[proc_id as usize].info.state = k_proc_state::PS_FINISHED;
+    }
+
+    k_dev_emit_expect(&event, gnwDeviceError::GDE_HANDLE_INVALID, false);
+
+    log("k_dev_emit_checkIncorrect_holderProcessFinished end\n\0");
+}
+
+#[test_case]
+fn k_dev_emit_checkIncorrect_runLoopFull() {
+    log("k_dev_emit_checkIncorrect_runLoopFull start\n\0");
+
+    k_dev_emit_preconditions!(device_id, proc_id, data, event);
+
+    unsafe {
+        rlp_main[proc_id as usize].queue[1].reserved = true;
+    }
+
+    k_dev_emit_expect(&event, gnwDeviceError::GDE_UNKNOWN, false);
+
+    log("k_dev_emit_checkIncorrect_runLoopFull end\n\0");
+}
+
+#[test_case]
+fn k_dev_emit_checkIncorrect_eventDataTooLarge() {
+    log("k_dev_emit_checkIncorrect_eventDataTooLarge start\n\0");
+
+    k_dev_emit_preconditions!(device_id, proc_id, data, event);
+
+    event.dataSizeBytes = DISPATCH_MAX_DATA_SIZE_BYTES - (core::mem::size_of::<gnwDeviceEvent>() as u32) + 1;
+
+    k_dev_emit_expect(&event, gnwDeviceError::GDE_UNKNOWN, true);
+
+    log("k_dev_emit_checkIncorrect_eventDataTooLarge end\n\0");
+}
 
 // void k_dev_procCleanup(const procId_t procId) {
 //     for (size_t devId = 0; devId < MAX_DEVICES; ++devId) {

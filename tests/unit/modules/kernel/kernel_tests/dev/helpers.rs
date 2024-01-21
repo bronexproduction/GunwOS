@@ -1,4 +1,5 @@
 use kernel_symbols::*;
+use utils::KERNEL_PANIC_FLAG;
 
 pub static mut DRIVER_INIT_CALLED: bool = false;
 pub static mut DRIVER_START_CALLED: bool = false;
@@ -340,4 +341,21 @@ pub fn install_dummy_writable_device(id: &size_t, proc_id: &mut procId_t) {
     assert_eq!(*id, 0);
     assert_eq!(*proc_id, 0);
     install_dummy_device_holder(*id, *proc_id);
+}
+
+pub fn install_dummy_emitter_device(device_id: &mut size_t, proc_id: &mut procId_t) {
+    *proc_id = install_dummy_process();
+    assert_eq!(*proc_id, 0);
+    install_dummy_device(device_id, true);
+    assert_eq!(*device_id, 0);
+    install_dummy_device_listener(*device_id, *proc_id);
+    
+    unsafe {
+        isrStackHeight = 1;
+        pTab[0].lockMask = k_proc_lockType::PLT_EVENT as i32 |
+                           k_proc_lockType::PLT_IPC as i32;
+        k_hal_servicedDevIdPtr = device_id;
+        queueRunning = true;
+        assert_eq!(KERNEL_PANIC_FLAG, false);
+    }
 }
