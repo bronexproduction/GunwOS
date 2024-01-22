@@ -273,7 +273,7 @@ pub struct gnwDeviceUHA_event {
 }
 
 #[repr(C)]
-#[derive(PartialEq, Debug, Default)]
+#[derive(PartialEq, Debug, Copy, Clone, Default)]
 pub struct gnwDeviceUHADesc {
     pub identifier: u32,
     pub r#type: u32, /* gnwDeviceType bitmask */

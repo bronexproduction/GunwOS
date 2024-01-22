@@ -372,7 +372,6 @@ macro_rules! k_dev_start_preconditions {
     };
 }
 
-#[allow(non_snake_case)]
 fn k_dev_start_expect(device_id: size_t, error: gnwDriverError, kernel_panic: bool) {
     unsafe {
         assert_eq!(k_dev_start(device_id), error);
@@ -442,7 +441,7 @@ fn k_dev_start_checkIncorrect_deviceStartFailed() {
 macro_rules! k_dev_getById_preconditions {
     ($device_id:ident, $uha_descriptor:ident, $device_descriptor:ident, $expected_uha_descriptor:ident, $install:expr) => {
         let $device_id: size_t = 0;
-        let $uha_descriptor: gnwDeviceUHADesc = Default::default();
+        #[allow(unused)] let $uha_descriptor: gnwDeviceUHADesc = Default::default();
         let $device_descriptor = create_valid_device_desc_complex();
         #[allow(unused)] let mut $expected_uha_descriptor: gnwDeviceUHADesc = Default::default();
         unsafe {
@@ -456,16 +455,26 @@ macro_rules! k_dev_getById_preconditions {
     };
 }
 
+#[allow(non_snake_case)]
+fn k_dev_getById_expect(device_id: size_t, uha_descriptor: Option<&gnwDeviceUHADesc>, error: gnwDeviceError, kernel_panic: bool) {
+    unsafe {
+        match uha_descriptor {
+            Some(desc) => assert_eq!(k_dev_getById(device_id, desc), error),
+            None       => assert_eq!(k_dev_getById(device_id, null()), error),
+        }
+        assert_eq!(KERNEL_PANIC_FLAG, kernel_panic);
+        KERNEL_PANIC_FLAG = false;
+    }
+}
+
 #[test_case]
 fn k_dev_getById_checkCorrect() {
     log("k_dev_getById_checkCorrect start\n\0");
 
     k_dev_getById_preconditions!(device_id, uha_descriptor, device_descriptor, expected_uha_descriptor, true);
     
-    unsafe {
-        assert_eq!(k_dev_getById(device_id, &uha_descriptor), gnwDeviceError::GDE_NONE);
-        assert_eq!(uha_descriptor, expected_uha_descriptor);
-    }
+    k_dev_getById_expect(device_id, Some(&uha_descriptor), gnwDeviceError::GDE_NONE, false);
+    assert_eq!(uha_descriptor, expected_uha_descriptor);
     
     log("k_dev_getById_checkCorrect end\n\0");
 }
@@ -476,11 +485,7 @@ fn k_dev_getById_checkIncorrect_deviceNotInstalled() {
 
     k_dev_getById_preconditions!(device_id, uha_descriptor, device_descriptor, expected_uha_descriptor, false);
 
-    unsafe {
-        assert_eq!(k_dev_getById(device_id, &uha_descriptor), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-    }
+    k_dev_getById_expect(device_id, Some(&uha_descriptor), gnwDeviceError::GDE_UNKNOWN, true);
     
     log("k_dev_getById_checkIncorrect_deviceNotInstalled end\n\0");
 }
@@ -491,15 +496,10 @@ fn k_dev_getById_checkIncorrect_idInvalid() {
 
     k_dev_getById_preconditions!(device_id, uha_descriptor, device_descriptor, expected_uha_descriptor, true);
 
-    unsafe {
-        assert_eq!(k_dev_getById(1, &uha_descriptor), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-    }
-    unsafe {
-        assert_eq!(k_dev_getById(MAX_DEVICES, &uha_descriptor), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-    }
+    k_dev_getById_expect(1, Some(&uha_descriptor), gnwDeviceError::GDE_UNKNOWN, true);
+    k_dev_getById_expect(MAX_DEVICES - 1, Some(&uha_descriptor), gnwDeviceError::GDE_UNKNOWN, true);
+    k_dev_getById_expect(MAX_DEVICES, Some(&uha_descriptor), gnwDeviceError::GDE_UNKNOWN, true);
+    k_dev_getById_expect(MAX_DEVICES + 1, Some(&uha_descriptor), gnwDeviceError::GDE_UNKNOWN, true);
     
     log("k_dev_getById_checkIncorrect_idInvalid end\n\0");
 }
@@ -508,13 +508,9 @@ fn k_dev_getById_checkIncorrect_idInvalid() {
 fn k_dev_getById_checkIncorrect_descNull() {
     log("k_dev_getById_checkIncorrect_descNull start\n\0");
 
-    let id: size_t = 0;
-    install_dummy_device(&id, true);
-    assert_eq!(id, 0);
-    unsafe {
-        assert_eq!(k_dev_getById(id, null()), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-    }
+    k_dev_getById_preconditions!(device_id, _uha_descriptor, device_descriptor, expected_uha_descriptor, true);
+
+    k_dev_getById_expect(device_id, None, gnwDeviceError::GDE_UNKNOWN, true);
     
     log("k_dev_getById_checkIncorrect_descNull end\n\0");
 }
@@ -523,21 +519,56 @@ fn k_dev_getById_checkIncorrect_descNull() {
     enum gnwDeviceError k_dev_getByType(const enum gnwDeviceType type, struct gnwDeviceUHADesc * const desc)
 */
 
+macro_rules! k_dev_getByType_preconditions {
+    ($device_id:ident, $uha_descriptor:ident, $device_descriptor:ident, $expected_uha_descriptor:ident, $complex:expr) => {
+        let $device_id: size_t = 0;
+        #[allow(unused)] let $uha_descriptor: gnwDeviceUHADesc = Default::default();
+        let $device_descriptor = if ($complex) {
+            create_valid_device_desc_complex()
+        } else {
+            create_valid_device_desc_minimal()
+        };
+        #[allow(unused)] let mut $expected_uha_descriptor: gnwDeviceUHADesc = Default::default();
+        unsafe {
+            #[allow(unused_assignments)]
+            $expected_uha_descriptor = uhaGetDesc($device_id, $device_descriptor.r#type, $device_descriptor.api);
+        }
+        install_device(&$device_id, $device_descriptor);
+        assert_eq!($device_id, 0);
+    };
+}
+
+#[allow(non_snake_case)]
+fn k_dev_getByType_expect(r#type: gnwDeviceType, 
+                          uha_descriptor: Option<&gnwDeviceUHADesc>,
+                          error: gnwDeviceError, 
+                          expected_uha_descriptor: Option<gnwDeviceUHADesc>, 
+                          kernel_panic: bool) {
+    unsafe {
+        match uha_descriptor {
+            Some(desc) => {
+                assert_eq!(k_dev_getByType(r#type as u32, desc), error);
+                assert_eq!(*desc, expected_uha_descriptor.unwrap());
+            },
+            None => {
+                assert_eq!(k_dev_getByType(r#type as u32, null()), error);
+            },
+        }
+        
+        assert_eq!(KERNEL_PANIC_FLAG, kernel_panic);
+        KERNEL_PANIC_FLAG = false;
+    }
+}
+
 #[test_case]
 fn k_dev_getByType_checkCorrect_minimal() {
     log("k_dev_getByType_checkCorrect_minimal start\n\0");
 
-    let id: size_t = 0;
-    let uha_descriptor: gnwDeviceUHADesc = Default::default();
-    let expected_descriptor = create_valid_device_desc_minimal();
-    install_device(&id, expected_descriptor);
-    unsafe {
-        let expected_api_desc = uhaGetDesc(id, expected_descriptor.r#type, expected_descriptor.api);
-        assert_eq!(k_dev_getByType(gnwDeviceType::DEV_TYPE_FDC as u32, &uha_descriptor), gnwDeviceError::GDE_NOT_FOUND);
-        assert_eq!(k_dev_getByType(gnwDeviceType::DEV_TYPE_MEM as u32, &uha_descriptor), gnwDeviceError::GDE_NOT_FOUND);
-        assert_eq!(k_dev_getByType(gnwDeviceType::DEV_TYPE_SYSTEM as u32, &uha_descriptor), gnwDeviceError::GDE_NONE);
-        assert_eq!(uha_descriptor, expected_api_desc);
-    }
+    k_dev_getByType_preconditions!(device_id, uha_descriptor, device_descriptor, expected_uha_descriptor, false);
+
+    k_dev_getByType_expect(gnwDeviceType::DEV_TYPE_FDC, Some(&uha_descriptor), gnwDeviceError::GDE_NOT_FOUND, Some(Default::default()), false);
+    k_dev_getByType_expect(gnwDeviceType::DEV_TYPE_MEM, Some(&uha_descriptor), gnwDeviceError::GDE_NOT_FOUND, Some(Default::default()), false);
+    k_dev_getByType_expect(gnwDeviceType::DEV_TYPE_SYSTEM, Some(&uha_descriptor), gnwDeviceError::GDE_NONE, Some(expected_uha_descriptor), false);
     
     log("k_dev_getByType_checkCorrect_minimal end\n\0");
 }
@@ -546,19 +577,11 @@ fn k_dev_getByType_checkCorrect_minimal() {
 fn k_dev_getByType_checkCorrect_complex() {
     log("k_dev_getByType_checkCorrect_complex start\n\0");
 
-    let id: size_t = 0;
-    let uha_descriptor: gnwDeviceUHADesc = Default::default();
-    let expected_descriptor = create_valid_device_desc_complex();
-    install_device(&id, expected_descriptor);
-    unsafe {
-        let expected_api_desc = uhaGetDesc(id, expected_descriptor.r#type, expected_descriptor.api);
-        assert_eq!(k_dev_getByType(gnwDeviceType::DEV_TYPE_FDC as u32, &uha_descriptor), gnwDeviceError::GDE_NONE);
-        assert_eq!(uha_descriptor, expected_api_desc);
-        assert_eq!(k_dev_getByType(gnwDeviceType::DEV_TYPE_MEM as u32, &uha_descriptor), gnwDeviceError::GDE_NONE);
-        assert_eq!(uha_descriptor, expected_api_desc);
-        assert_eq!(k_dev_getByType(gnwDeviceType::DEV_TYPE_SYSTEM as u32, &uha_descriptor), gnwDeviceError::GDE_NONE);
-        assert_eq!(uha_descriptor, expected_api_desc);
-    }
+    k_dev_getByType_preconditions!(device_id, uha_descriptor, device_descriptor, expected_uha_descriptor, true);
+
+    k_dev_getByType_expect(gnwDeviceType::DEV_TYPE_FDC, Some(&uha_descriptor), gnwDeviceError::GDE_NONE, Some(expected_uha_descriptor), false);
+    k_dev_getByType_expect(gnwDeviceType::DEV_TYPE_MEM, Some(&uha_descriptor), gnwDeviceError::GDE_NONE, Some(expected_uha_descriptor), false);
+    k_dev_getByType_expect(gnwDeviceType::DEV_TYPE_SYSTEM, Some(&uha_descriptor), gnwDeviceError::GDE_NONE, Some(expected_uha_descriptor), false);
     
     log("k_dev_getByType_checkCorrect_complex end\n\0");
 }
@@ -567,10 +590,9 @@ fn k_dev_getByType_checkCorrect_complex() {
 fn k_dev_getByType_checkIncorrect_descNull() {
     log("k_dev_getByType_checkIncorrect_descNull start\n\0");
 
-    unsafe {
-        assert_eq!(k_dev_getByType(gnwDeviceType::DEV_TYPE_SYSTEM as u32, null()), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-    }
+    k_dev_getByType_preconditions!(device_id, uha_descriptor, device_descriptor, expected_uha_descriptor, true);
+
+    k_dev_getByType_expect(gnwDeviceType::DEV_TYPE_SYSTEM, None, gnwDeviceError::GDE_UNKNOWN, None, true);
     
     log("k_dev_getByType_checkIncorrect_descNull end\n\0");
 }
