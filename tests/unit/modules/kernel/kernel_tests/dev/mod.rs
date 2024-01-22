@@ -183,15 +183,21 @@ fn validateStartedDevice_checkIncorrect_deviceNotStarted() {
     enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescriptor * const descriptor)
 */
 
+macro_rules! k_dev_install_preconditions {
+    ($device_id:ident, $device_desc:ident, $device_desc_creator:ident) => {
+        #[allow(unused_mut)] let mut $device_id: size_t = 0;
+        #[allow(unused_mut)] let mut $device_desc = $device_desc_creator();
+    };
+}
+
 #[test_case]
 fn k_dev_install_checkCorrect_simple() {
     log("k_dev_install_checkCorrect_simple start\n\0");
 
-    let id: size_t = 0;
-    let device_descriptor = create_valid_device_desc_minimal();
+    k_dev_install_preconditions!(device_id, dev_desc, create_valid_device_desc_minimal);
 
     unsafe {
-        assert_eq!(k_dev_install(&id, &device_descriptor), gnwDriverError::GDRE_NONE);
+        assert_eq!(k_dev_install(&device_id, &dev_desc), gnwDriverError::GDRE_NONE);
     }
 
     log("k_dev_install_checkCorrect_simple end\n\0");
@@ -201,23 +207,20 @@ fn k_dev_install_checkCorrect_simple() {
 fn k_dev_install_checkCorrect_complex() {
     log("k_dev_install_checkCorrect_complex start\n\0");
 
-    let expected_device_id = MAX_DEVICES - 1;
-    let expected_device_count = MAX_DEVICES;
-    unsafe {
-        devicesCount = expected_device_id;
-    }
+    k_dev_install_preconditions!(device_id, dev_desc, create_valid_device_desc_complex);
 
-    let id: size_t = 0;
-    let device_descriptor = create_valid_device_desc_complex();
+    /*
+        Additional verification - installing the last device
+    */
     unsafe {
-        DRIVER_INIT_CALLED = false;
+        devicesCount = MAX_DEVICES - 1;
     }
     
     unsafe {
         /*
             Check install
         */
-        assert_eq!(k_dev_install(&id, &device_descriptor), gnwDriverError::GDRE_NONE);
+        assert_eq!(k_dev_install(&device_id, &dev_desc), gnwDriverError::GDRE_NONE);
         
         /*
             Check driver init called
@@ -227,25 +230,25 @@ fn k_dev_install_checkCorrect_complex() {
         /*
             Check device count
         */
-        assert_eq!(devicesCount, expected_device_count);
+        assert_eq!(devicesCount, MAX_DEVICES);
         
         /*
             Check devices array
         */
-        assert_eq!(devices[id as usize].desc, device_descriptor);
-        assert_eq!(devices[id as usize].initialized, true);
-        assert_eq!(devices[id as usize].started, false);
-        assert_eq!(devices[id as usize].holder, NONE_PROC_ID);
-        assert_eq!(devices[id as usize].listener, None);
-        assert_eq!(devices[id as usize].decoder, None);
+        assert_eq!(devices[device_id as usize].desc, dev_desc);
+        assert_eq!(devices[device_id as usize].initialized, true);
+        assert_eq!(devices[device_id as usize].started, false);
+        assert_eq!(devices[device_id as usize].holder, NONE_PROC_ID);
+        assert_eq!(devices[device_id as usize].listener, None);
+        assert_eq!(devices[device_id as usize].decoder, None);
+        
+        /*
+            Check device identifier
+        */            
+        assert_eq!(device_id, MAX_DEVICES - 1);
     }
 
-    /*
-        Check device identifier
-    */    
-    assert_eq!(id, expected_device_id);
-    
-    // check k_hal_install outcome - not applicable as long as ISR check is disabled    
+    // check k_hal_install outcome - not applicable as long as ISR check is disabled
     
     log("k_dev_install_checkCorrect_complex end\n\0");
 }
@@ -265,12 +268,13 @@ fn k_dev_install_checkIncorrect_idNull() {
 fn k_dev_install_checkIncorrect_deviceLimitReached() {
     log("k_dev_install_checkIncorrect_deviceLimitReached start\n\0");
 
-    let id: size_t = 0;
+    k_dev_install_preconditions!(device_id, _unused, create_empty_device_desc);
+
     unsafe {
         devicesCount = MAX_DEVICES;
-        assert_eq!(k_dev_install(&id, core::ptr::null()), gnwDriverError::GDRE_LIMIT_REACHED);
+        assert_eq!(k_dev_install(&device_id, core::ptr::null()), gnwDriverError::GDRE_LIMIT_REACHED);
         devicesCount = MAX_DEVICES + 1;
-        assert_eq!(k_dev_install(&id, core::ptr::null()), gnwDriverError::GDRE_LIMIT_REACHED);
+        assert_eq!(k_dev_install(&device_id, core::ptr::null()), gnwDriverError::GDRE_LIMIT_REACHED);
     }
 
     log("k_dev_install_checkIncorrect_deviceLimitReached end\n\0");
@@ -280,9 +284,10 @@ fn k_dev_install_checkIncorrect_deviceLimitReached() {
 fn k_dev_install_checkIncorrect_nullDescriptor() {
     log("k_dev_install_checkIncorrect_nullDescriptor start\n\0");
 
-    let id: size_t = 0;
+    k_dev_install_preconditions!(device_id, _unused, create_empty_device_desc);
+
     unsafe {
-        assert_eq!(k_dev_install(&id, core::ptr::null()), gnwDriverError::GDRE_INVALID_DESCRIPTOR);
+        assert_eq!(k_dev_install(&device_id, core::ptr::null()), gnwDriverError::GDRE_INVALID_DESCRIPTOR);
     }
 
     log("k_dev_install_checkIncorrect_nullDescriptor end\n\0");
@@ -292,10 +297,10 @@ fn k_dev_install_checkIncorrect_nullDescriptor() {
 fn k_dev_install_checkIncorrect_invalidDescriptor() {
     log("k_dev_install_checkIncorrect_invalidDescriptor start\n\0");
 
-    let id: size_t = 0;
-    let device_descriptor = create_empty_device_desc();
+    k_dev_install_preconditions!(device_id, dev_desc, create_empty_device_desc);
+
     unsafe {
-        assert_eq!(k_dev_install(&id, &device_descriptor), gnwDriverError::GDRE_INVALID_DESCRIPTOR);
+        assert_eq!(k_dev_install(&device_id, &dev_desc), gnwDriverError::GDRE_INVALID_DESCRIPTOR);
     }
 
     log("k_dev_install_checkIncorrect_invalidDescriptor end\n\0");
@@ -305,15 +310,15 @@ fn k_dev_install_checkIncorrect_invalidDescriptor() {
 fn k_dev_install_checkIncorrect_invalidIrq() {
     log("k_dev_install_checkIncorrect_invalidIrq start\n\0");
 
-    let id: size_t = 0;
-    let mut device_descriptor = create_valid_device_desc_minimal();
-    device_descriptor.driver.descriptor.irq = DEV_IRQ_LIMIT;
+    k_dev_install_preconditions!(device_id, dev_desc, create_valid_device_desc_minimal);
+
+    dev_desc.driver.descriptor.irq = DEV_IRQ_LIMIT;
     unsafe {
-        assert_eq!(k_dev_install(&id, &device_descriptor), gnwDriverError::GDRE_IRQ_INVALID);
+        assert_eq!(k_dev_install(&device_id, &dev_desc), gnwDriverError::GDRE_IRQ_INVALID);
     }
-    device_descriptor.driver.descriptor.irq = DEV_IRQ_LIMIT + 1;
+    dev_desc.driver.descriptor.irq = DEV_IRQ_LIMIT + 1;
     unsafe {
-        assert_eq!(k_dev_install(&id, &device_descriptor), gnwDriverError::GDRE_IRQ_INVALID);
+        assert_eq!(k_dev_install(&device_id, &dev_desc), gnwDriverError::GDRE_IRQ_INVALID);
     }
 
     log("k_dev_install_checkIncorrect_invalidIrq end\n\0");
@@ -323,14 +328,17 @@ fn k_dev_install_checkIncorrect_invalidIrq() {
 fn k_dev_install_checkIncorrect_irqConflict() {
     log("k_dev_install_checkIncorrect_irqConflict start\n\0");
 
-    let id: size_t = 0;
-    let mut device_descriptor = create_valid_device_desc_minimal();
-    extern "C" fn isr() {}
-    device_descriptor.driver.descriptor.isr = Some(isr);
+    k_dev_install_preconditions!(device_id, dev_desc, create_valid_device_desc_minimal);
 
+    extern "C" fn isr() {}
+    dev_desc.driver.descriptor.isr = Some(isr);
     unsafe {
         isrReg[0].routine = Some(isr);
-        assert_eq!(k_dev_install(&id, &device_descriptor), gnwDriverError::GDRE_IRQ_CONFLICT);
+    }
+
+    unsafe {
+        
+        assert_eq!(k_dev_install(&device_id, &dev_desc), gnwDriverError::GDRE_IRQ_CONFLICT);
     }
     
     log("k_dev_install_checkIncorrect_irqConflict end\n\0");
@@ -340,13 +348,13 @@ fn k_dev_install_checkIncorrect_irqConflict() {
 fn k_dev_install_checkIncorrect_initFailure() {
     log("k_dev_install_checkIncorrect_initFailure start\n\0");
 
-    let id: size_t = 0;
-    let mut device_descriptor = create_valid_device_desc_minimal();
+    k_dev_install_preconditions!(device_id, dev_desc, create_valid_device_desc_minimal);
+    
     extern "C" fn init() -> bool { return false; }
-    device_descriptor.driver.descriptor.init = Some(init);
+    dev_desc.driver.descriptor.init = Some(init);
 
     unsafe {
-        assert_eq!(k_dev_install(&id, &device_descriptor), gnwDriverError::GDRE_UNINITIALIZED);
+        assert_eq!(k_dev_install(&device_id, &dev_desc), gnwDriverError::GDRE_UNINITIALIZED);
     }
     
     log("k_dev_install_checkIncorrect_initFailure end\n\0");
