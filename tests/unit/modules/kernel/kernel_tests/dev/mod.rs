@@ -686,105 +686,106 @@ fn k_dev_getUHAForId_checkIncorrect_descNull() {
     enum gnwDeviceError k_dev_acquireHold(const procId_t processId, const size_t deviceId)
 */
 
+macro_rules! k_dev_acquireHold_preconditions {
+    ($device_id:ident, $proc_id:ident, $install_device:expr, $install_process:expr) => {
+        let $device_id: size_t = 0;
+        let $proc_id: procId_t = if ($install_process) {
+            install_dummy_process()
+        } else { 0 };
+        assert_eq!($proc_id, 0);
+        if ($install_device) {
+            install_dummy_device(&$device_id, true);
+            assert_eq!($device_id, 0);
+        }
+    };
+}
+
+#[allow(non_snake_case)]
+fn k_dev_acquireHold_expect(device_id: size_t, 
+                            proc_id: procId_t,
+                            error: gnwDeviceError, 
+                            kernel_panic: bool) {
+    unsafe {
+        assert_eq!(k_dev_acquireHold(proc_id, device_id), error);
+        assert_eq!(KERNEL_PANIC_FLAG, kernel_panic);
+        KERNEL_PANIC_FLAG = false;
+    }
+}
+
 #[test_case]
 fn k_dev_acquireHold_checkCorrect() {
     log("k_dev_acquireHold_checkCorrect start\n\0");
 
-    let id: size_t = 0;
-    let proc_id: procId_t = install_dummy_process();
-    install_dummy_device(&id, true);
-    assert_eq!(id, 0);
-    assert_eq!(proc_id, 0);
+    k_dev_acquireHold_preconditions!(device_id, proc_id, true, true);
 
+    k_dev_acquireHold_expect(device_id, proc_id, gnwDeviceError::GDE_NONE, false);
     unsafe {
-        assert_eq!(k_dev_acquireHold(proc_id, id), gnwDeviceError::GDE_NONE);
-        assert_eq!(devices[id as usize].holder, proc_id);
+        assert_eq!(devices[device_id as usize].holder, proc_id);
     }
     
     log("k_dev_acquireHold_checkCorrect end\n\0");
 }
 
 #[test_case]
+fn k_dev_acquireHold_checkIncorrect_deviceNotInstalled() {
+    log("k_dev_acquireHold_checkIncorrect_deviceNotInstalled start\n\0");
+
+    k_dev_acquireHold_preconditions!(device_id, proc_id, false, true);
+    
+    k_dev_acquireHold_expect(0, proc_id, gnwDeviceError::GDE_UNKNOWN, true);
+    k_dev_acquireHold_expect(1, proc_id, gnwDeviceError::GDE_UNKNOWN, true);
+    k_dev_acquireHold_expect(MAX_DEVICES - 1, proc_id, gnwDeviceError::GDE_UNKNOWN, true);
+    k_dev_acquireHold_expect(MAX_DEVICES, proc_id, gnwDeviceError::GDE_UNKNOWN, true);
+    k_dev_acquireHold_expect(MAX_DEVICES + 1, proc_id, gnwDeviceError::GDE_UNKNOWN, true);
+
+    log("k_dev_acquireHold_checkIncorrect_deviceNotInstalled end\n\0");
+}
+
+#[test_case]
 fn k_dev_acquireHold_checkIncorrect_deviceIdInvalid() {
     log("k_dev_acquireHold_checkIncorrect_deviceIdInvalid start\n\0");
 
-    unsafe {
-        assert_eq!(k_dev_acquireHold(0, 0), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(k_dev_acquireHold(0, 1), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(k_dev_acquireHold(0, MAX_DEVICES - 1), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(k_dev_acquireHold(0, MAX_DEVICES), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(k_dev_acquireHold(0, MAX_DEVICES + 1), gnwDeviceError::GDE_UNKNOWN);
-    }
-    let id: size_t = 0;
-    install_dummy_device(&id, true);
-    assert_eq!(id, 0);
-    unsafe {
-        assert_eq!(k_dev_acquireHold(0, 1), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(k_dev_acquireHold(0, MAX_DEVICES - 1), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(k_dev_acquireHold(0, MAX_DEVICES), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(k_dev_acquireHold(0, MAX_DEVICES + 1), gnwDeviceError::GDE_UNKNOWN);
-    }
+    k_dev_acquireHold_preconditions!(device_id, proc_id, true, true);
+    
+    k_dev_acquireHold_expect(1, proc_id, gnwDeviceError::GDE_UNKNOWN, true);
+    k_dev_acquireHold_expect(MAX_DEVICES - 1, proc_id, gnwDeviceError::GDE_UNKNOWN, true);
+    k_dev_acquireHold_expect(MAX_DEVICES, proc_id, gnwDeviceError::GDE_UNKNOWN, true);
+    k_dev_acquireHold_expect(MAX_DEVICES + 1, proc_id, gnwDeviceError::GDE_UNKNOWN, true);
 
     log("k_dev_acquireHold_checkIncorrect_deviceIdInvalid end\n\0");
+}
+
+#[test_case]
+fn k_dev_acquireHold_checkIncorrect_processNotExisting() {
+    log("k_dev_acquireHold_checkIncorrect_processNotExisting start\n\0");
+
+    k_dev_acquireHold_preconditions!(device_id, proc_id, true, false);
+
+    k_dev_acquireHold_expect(device_id, NONE_PROC_ID - 1, gnwDeviceError::GDE_UNKNOWN, true);
+    k_dev_acquireHold_expect(device_id, NONE_PROC_ID, gnwDeviceError::GDE_UNKNOWN, true);
+    k_dev_acquireHold_expect(device_id, KERNEL_PROC_ID, gnwDeviceError::GDE_UNKNOWN, true);
+    k_dev_acquireHold_expect(device_id, 0, gnwDeviceError::GDE_UNKNOWN, true);
+    k_dev_acquireHold_expect(device_id, 1, gnwDeviceError::GDE_UNKNOWN, true);
+    k_dev_acquireHold_expect(device_id, MAX_PROC - 1, gnwDeviceError::GDE_UNKNOWN, true);
+    k_dev_acquireHold_expect(device_id, MAX_PROC, gnwDeviceError::GDE_UNKNOWN, true);
+    k_dev_acquireHold_expect(device_id, MAX_PROC + 1, gnwDeviceError::GDE_UNKNOWN, true);
+    
+    log("k_dev_acquireHold_checkIncorrect_processNotExisting end\n\0");
 }
 
 #[test_case]
 fn k_dev_acquireHold_checkIncorrect_processIdInvalid() {
     log("k_dev_acquireHold_checkIncorrect_processIdInvalid start\n\0");
 
-    let id: size_t = 0;
-    install_dummy_device(&id, true);
-    assert_eq!(id, 0);
-    unsafe {
-        assert_eq!(k_dev_acquireHold(NONE_PROC_ID - 1, id), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_acquireHold(NONE_PROC_ID, id), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_acquireHold(KERNEL_PROC_ID, id), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_acquireHold(0, id), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_acquireHold(1, id), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_acquireHold(MAX_PROC - 1, id), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_acquireHold(MAX_PROC, id), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_acquireHold(MAX_PROC + 1, id), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-    }
-    let proc_id = install_dummy_process();
-    assert_eq!(proc_id, 0);
-    unsafe {
-        assert_eq!(k_dev_acquireHold(NONE_PROC_ID - 1, id), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_acquireHold(NONE_PROC_ID, id), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_acquireHold(KERNEL_PROC_ID, id), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_acquireHold(1, id), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_acquireHold(MAX_PROC - 1, id), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_acquireHold(MAX_PROC, id), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_acquireHold(MAX_PROC + 1, id), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-    }
+    k_dev_acquireHold_preconditions!(device_id, proc_id, true, true);
+
+    k_dev_acquireHold_expect(device_id, NONE_PROC_ID - 1, gnwDeviceError::GDE_UNKNOWN, true);
+    k_dev_acquireHold_expect(device_id, NONE_PROC_ID, gnwDeviceError::GDE_UNKNOWN, true);
+    k_dev_acquireHold_expect(device_id, KERNEL_PROC_ID, gnwDeviceError::GDE_UNKNOWN, true);
+    k_dev_acquireHold_expect(device_id, 1, gnwDeviceError::GDE_UNKNOWN, true);
+    k_dev_acquireHold_expect(device_id, MAX_PROC - 1, gnwDeviceError::GDE_UNKNOWN, true);
+    k_dev_acquireHold_expect(device_id, MAX_PROC, gnwDeviceError::GDE_UNKNOWN, true);
+    k_dev_acquireHold_expect(device_id, MAX_PROC + 1, gnwDeviceError::GDE_UNKNOWN, true);
 
     log("k_dev_acquireHold_checkIncorrect_processIdInvalid end\n\0");
 }
@@ -793,17 +794,16 @@ fn k_dev_acquireHold_checkIncorrect_processIdInvalid() {
 fn k_dev_acquireHold_checkIncorrect_alreadyHeld() {
     log("k_dev_acquireHold_checkIncorrect_alreadyHeld start\n\0");
 
-    let id: size_t = 0;
-    let proc_id: procId_t = install_dummy_process();
-    install_dummy_device(&id, true);
-    assert_eq!(id, 0);
-    assert_eq!(proc_id, 0);
+    k_dev_acquireHold_preconditions!(device_id, proc_id, true, true);
+
     unsafe {
-        devices[id as usize].holder = 0;
-        assert_eq!(k_dev_acquireHold(proc_id, id), gnwDeviceError::GDE_ALREADY_HELD);
-        devices[id as usize].holder = 1;
-        assert_eq!(k_dev_acquireHold(proc_id, id), gnwDeviceError::GDE_ALREADY_HELD);
+        devices[device_id as usize].holder = 0;
     }
+    k_dev_acquireHold_expect(device_id, proc_id, gnwDeviceError::GDE_ALREADY_HELD, false);
+    unsafe {
+        devices[device_id as usize].holder = 1;
+    }
+    k_dev_acquireHold_expect(device_id, proc_id, gnwDeviceError::GDE_ALREADY_HELD, false);
     
     log("k_dev_acquireHold_checkIncorrect_alreadyHeld end\n\0");
 }
@@ -834,8 +834,8 @@ fn k_dev_releaseHold_checkCorrect() {
 }
 
 #[test_case]
-fn k_dev_releaseHold_checkIncorrect_deviceIdInvalid() {
-    log("k_dev_releaseHold_checkIncorrect_deviceIdInvalid start\n\0");
+fn k_dev_releaseHold_checkIncorrect_deviceNotInstalled() {
+    log("k_dev_releaseHold_checkIncorrect_deviceNotInstalled start\n\0");
 
     unsafe {
         k_dev_releaseHold(0, 0);
@@ -854,6 +854,14 @@ fn k_dev_releaseHold_checkIncorrect_deviceIdInvalid() {
         assert_eq!(KERNEL_PANIC_FLAG, true);
         KERNEL_PANIC_FLAG = false;
     }
+    
+    log("k_dev_releaseHold_checkIncorrect_deviceNotInstalled end\n\0");
+}
+
+#[test_case]
+fn k_dev_releaseHold_checkIncorrect_deviceIdInvalid() {
+    log("k_dev_releaseHold_checkIncorrect_deviceIdInvalid start\n\0");
+
     let id: size_t = 0;
     install_dummy_device(&id, true);
     assert_eq!(id, 0);
