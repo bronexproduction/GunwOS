@@ -8,6 +8,22 @@ use core::ptr::null_mut;
 use core::slice::from_raw_parts;
 use core::mem;
 
+static PID_LIST: [procId_t; 8] = [NONE_PROC_ID - 1,
+                                  NONE_PROC_ID,
+                                  KERNEL_PROC_ID,
+                                  0,
+                                  1,
+                                  MAX_PROC - 1,
+                                  MAX_PROC,
+                                  MAX_PROC + 1];
+static INVALID_PID_LIST: [procId_t; 7] = [NONE_PROC_ID - 1,
+                                          NONE_PROC_ID,
+                                          KERNEL_PROC_ID,
+                                          1,
+                                          MAX_PROC - 1,
+                                          MAX_PROC,
+                                          MAX_PROC + 1];
+
 /*
     PRIVATE bool validateId(size_t id)
 */
@@ -761,14 +777,9 @@ fn k_dev_acquireHold_checkIncorrect_processNotExisting() {
 
     k_dev_acquireHold_preconditions!(device_id, proc_id, true, false);
 
-    k_dev_acquireHold_expect(device_id, NONE_PROC_ID - 1, gnwDeviceError::GDE_UNKNOWN, true);
-    k_dev_acquireHold_expect(device_id, NONE_PROC_ID, gnwDeviceError::GDE_UNKNOWN, true);
-    k_dev_acquireHold_expect(device_id, KERNEL_PROC_ID, gnwDeviceError::GDE_UNKNOWN, true);
-    k_dev_acquireHold_expect(device_id, 0, gnwDeviceError::GDE_UNKNOWN, true);
-    k_dev_acquireHold_expect(device_id, 1, gnwDeviceError::GDE_UNKNOWN, true);
-    k_dev_acquireHold_expect(device_id, MAX_PROC - 1, gnwDeviceError::GDE_UNKNOWN, true);
-    k_dev_acquireHold_expect(device_id, MAX_PROC, gnwDeviceError::GDE_UNKNOWN, true);
-    k_dev_acquireHold_expect(device_id, MAX_PROC + 1, gnwDeviceError::GDE_UNKNOWN, true);
+    for pid in PID_LIST {
+        k_dev_acquireHold_expect(device_id, pid, gnwDeviceError::GDE_UNKNOWN, true);
+    }
     
     log("k_dev_acquireHold_checkIncorrect_processNotExisting end\n\0");
 }
@@ -779,13 +790,9 @@ fn k_dev_acquireHold_checkIncorrect_processIdInvalid() {
 
     k_dev_acquireHold_preconditions!(device_id, proc_id, true, true);
 
-    k_dev_acquireHold_expect(device_id, NONE_PROC_ID - 1, gnwDeviceError::GDE_UNKNOWN, true);
-    k_dev_acquireHold_expect(device_id, NONE_PROC_ID, gnwDeviceError::GDE_UNKNOWN, true);
-    k_dev_acquireHold_expect(device_id, KERNEL_PROC_ID, gnwDeviceError::GDE_UNKNOWN, true);
-    k_dev_acquireHold_expect(device_id, 1, gnwDeviceError::GDE_UNKNOWN, true);
-    k_dev_acquireHold_expect(device_id, MAX_PROC - 1, gnwDeviceError::GDE_UNKNOWN, true);
-    k_dev_acquireHold_expect(device_id, MAX_PROC, gnwDeviceError::GDE_UNKNOWN, true);
-    k_dev_acquireHold_expect(device_id, MAX_PROC + 1, gnwDeviceError::GDE_UNKNOWN, true);
+    for pid in INVALID_PID_LIST {
+        k_dev_acquireHold_expect(device_id, pid, gnwDeviceError::GDE_UNKNOWN, true);
+    }
 
     log("k_dev_acquireHold_checkIncorrect_processIdInvalid end\n\0");
 }
@@ -812,22 +819,45 @@ fn k_dev_acquireHold_checkIncorrect_alreadyHeld() {
     void k_dev_releaseHold(const procId_t processId, const size_t deviceId)
 */
 
+macro_rules! k_dev_releaseHold_preconditions {
+    ($device_id:ident, $proc_id:ident, $install_device:expr, $install_holder:expr) => {
+        let $device_id: size_t = 0;
+        let $proc_id: procId_t = install_dummy_process();
+        assert_eq!($proc_id, 0);
+
+        if ($install_device) {
+            install_dummy_device(&$device_id, true);
+            assert_eq!($device_id, 0);
+        }
+        if ($install_holder) {
+            install_dummy_device_holder($device_id, $proc_id);
+        }
+    };
+}
+
+#[allow(non_snake_case)]
+fn k_dev_releaseHold_expect(device_id: size_t, 
+                            proc_id: procId_t, 
+                            kernel_panic: bool) {
+    unsafe {
+        k_dev_releaseHold(proc_id, device_id);
+        assert_eq!(KERNEL_PANIC_FLAG, kernel_panic);
+        KERNEL_PANIC_FLAG = false;
+    }
+}
+
 #[test_case]
 fn k_dev_releaseHold_checkCorrect() {
     log("k_dev_releaseHold_checkCorrect start\n\0");
 
-    let id: size_t = 0;
-    let proc_id: procId_t = install_dummy_process();
-    install_dummy_device(&id, true);
-    assert_eq!(id, 0);
-    assert_eq!(proc_id, 0);
-    install_dummy_device_holder(id, proc_id);
+    k_dev_releaseHold_preconditions!(device_id, proc_id, true, true);
+    
+    k_dev_releaseHold_expect(device_id, proc_id, false);
+    
     unsafe {
-        k_dev_releaseHold(proc_id, id);
-        assert_eq!(KERNEL_PANIC_FLAG, false);
-        assert_eq!(devices[id as usize].holder, NONE_PROC_ID);
-        assert_eq!(devices[id as usize].listener, None);
-        assert_eq!(devices[id as usize].decoder, None);
+        assert_eq!(devices[device_id as usize].holder, NONE_PROC_ID);
+        assert_eq!(devices[device_id as usize].listener, None);
+        assert_eq!(devices[device_id as usize].decoder, None);
     }
     
     log("k_dev_releaseHold_checkCorrect end\n\0");
@@ -837,23 +867,13 @@ fn k_dev_releaseHold_checkCorrect() {
 fn k_dev_releaseHold_checkIncorrect_deviceNotInstalled() {
     log("k_dev_releaseHold_checkIncorrect_deviceNotInstalled start\n\0");
 
-    unsafe {
-        k_dev_releaseHold(0, 0);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        k_dev_releaseHold(0, 1);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        k_dev_releaseHold(0, MAX_DEVICES - 1);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        k_dev_releaseHold(0, MAX_DEVICES);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        k_dev_releaseHold(0, MAX_DEVICES + 1);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-    }
+    k_dev_releaseHold_preconditions!(device_id, proc_id, false, false);
+
+    k_dev_releaseHold_expect(0, proc_id, true);
+    k_dev_releaseHold_expect(1, proc_id, true);
+    k_dev_releaseHold_expect(MAX_DEVICES - 1, proc_id, true);
+    k_dev_releaseHold_expect(MAX_DEVICES, proc_id, true);
+    k_dev_releaseHold_expect(MAX_DEVICES + 1, proc_id, true);
     
     log("k_dev_releaseHold_checkIncorrect_deviceNotInstalled end\n\0");
 }
@@ -862,22 +882,12 @@ fn k_dev_releaseHold_checkIncorrect_deviceNotInstalled() {
 fn k_dev_releaseHold_checkIncorrect_deviceIdInvalid() {
     log("k_dev_releaseHold_checkIncorrect_deviceIdInvalid start\n\0");
 
-    let id: size_t = 0;
-    install_dummy_device(&id, true);
-    assert_eq!(id, 0);
-    unsafe {
-        k_dev_releaseHold(0, 1);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        k_dev_releaseHold(0, MAX_DEVICES - 1);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        k_dev_releaseHold(0, MAX_DEVICES);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        k_dev_releaseHold(0, MAX_DEVICES + 1);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-    }
+    k_dev_releaseHold_preconditions!(device_id, proc_id, true, true);
+
+    k_dev_releaseHold_expect(1, proc_id, true);
+    k_dev_releaseHold_expect(MAX_DEVICES - 1, proc_id, true);
+    k_dev_releaseHold_expect(MAX_DEVICES, proc_id, true);
+    k_dev_releaseHold_expect(MAX_DEVICES + 1, proc_id, true);
     
     log("k_dev_releaseHold_checkIncorrect_deviceIdInvalid end\n\0");
 }
@@ -886,28 +896,14 @@ fn k_dev_releaseHold_checkIncorrect_deviceIdInvalid() {
 fn k_dev_releaseHold_checkIncorrect_processIdInvalid() {
     log("k_dev_releaseHold_checkIncorrect_deviceIdInvalid start\n\0");
     
-    let id: size_t = 0;
-    let proc_id = install_dummy_process();
-    install_dummy_device(&id, true);
-    assert_eq!(id, 0);
-    assert_eq!(proc_id, 0);
-    install_dummy_device_holder(id, proc_id);
+    k_dev_releaseHold_preconditions!(device_id, proc_id, true, true);
+    
     unsafe {
-        let expected_device = devices[0];
-        k_dev_releaseHold(NONE_PROC_ID - 1, 0);
-        assert_eq!(devices[0], expected_device);
-        k_dev_releaseHold(NONE_PROC_ID, 0);
-        assert_eq!(devices[0], expected_device);
-        k_dev_releaseHold(KERNEL_PROC_ID, 0);
-        assert_eq!(devices[0], expected_device);
-        k_dev_releaseHold(1, 0);
-        assert_eq!(devices[0], expected_device);
-        k_dev_releaseHold(MAX_PROC - 1, 0);
-        assert_eq!(devices[0], expected_device);
-        k_dev_releaseHold(MAX_PROC, 0);
-        assert_eq!(devices[0], expected_device);
-        k_dev_releaseHold(MAX_PROC + 1, 0);
-        assert_eq!(devices[0], expected_device);
+        let expected_device = devices[device_id as usize];
+        for pid in INVALID_PID_LIST {
+            k_dev_releaseHold_expect(device_id, pid, false);
+            assert_eq!(devices[device_id as usize], expected_device);    
+        }
     }
     
     log("k_dev_releaseHold_checkIncorrect_deviceIdInvalid end\n\0");
@@ -1021,26 +1017,11 @@ fn k_dev_writeMem_checkIncorrect_processIdInvalid() {
     };
 
     unsafe {
-        assert_eq!(k_dev_writeMem(NONE_PROC_ID - 1, id, &mut buffer, input_range), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_writeMem(NONE_PROC_ID, id, &mut buffer, input_range), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_writeMem(KERNEL_PROC_ID, id, &mut buffer, input_range), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_writeMem(1, id, &mut buffer, input_range), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_writeMem(MAX_PROC - 1, id, &mut buffer, input_range), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_writeMem(MAX_PROC, id, &mut buffer, input_range), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_writeMem(MAX_PROC + 1, id, &mut buffer, input_range), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
+        for pid in INVALID_PID_LIST {
+            assert_eq!(k_dev_writeMem(pid, id, &mut buffer, input_range), gnwDeviceError::GDE_UNKNOWN);
+            assert_eq!(KERNEL_PANIC_FLAG, true);
+            KERNEL_PANIC_FLAG = false;
+        }
     }
     
     log("k_dev_writeMem_checkIncorrect_processIdInvalid end\n\0");
@@ -1258,26 +1239,11 @@ fn k_dev_writeChar_checkIncorrect_processIdInvalid() {
     install_dummy_writable_device(&id, &mut proc_id);
 
     unsafe {
-        assert_eq!(k_dev_writeChar(NONE_PROC_ID - 1, id, 0), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_writeChar(NONE_PROC_ID, id, 0), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_writeChar(KERNEL_PROC_ID, id, 0), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_writeChar(1, id, 0), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_writeChar(MAX_PROC - 1, id, 0), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_writeChar(MAX_PROC, id, 0), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_writeChar(MAX_PROC + 1, id, 0), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
+        for pid in INVALID_PID_LIST {
+            assert_eq!(k_dev_writeChar(pid, id, 0), gnwDeviceError::GDE_UNKNOWN);
+            assert_eq!(KERNEL_PANIC_FLAG, true);
+            KERNEL_PANIC_FLAG = false;
+        }
     }
     
     log("k_dev_writeChar_checkIncorrect_processIdInvalid end\n\0");
@@ -1501,26 +1467,11 @@ fn k_dev_listen_checkIncorrect_processIdInvalid() {
     extern "C" fn decoder(_: ptr_t, _: *const gnwDeviceEvent) {}
 
     unsafe {
-        assert_eq!(k_dev_listen(NONE_PROC_ID - 1, device_id, Some(listener), Some(decoder)), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_listen(NONE_PROC_ID, device_id, Some(listener), Some(decoder)), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_listen(KERNEL_PROC_ID, device_id, Some(listener), Some(decoder)), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_listen(1, device_id, Some(listener), Some(decoder)), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_listen(MAX_PROC - 1, device_id, Some(listener), Some(decoder)), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_listen(MAX_PROC, device_id, Some(listener), Some(decoder)), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_listen(MAX_PROC + 1, device_id, Some(listener), Some(decoder)), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
+        for pid in INVALID_PID_LIST {
+            assert_eq!(k_dev_listen(pid, device_id, Some(listener), Some(decoder)), gnwDeviceError::GDE_UNKNOWN);
+            assert_eq!(KERNEL_PANIC_FLAG, true);
+            KERNEL_PANIC_FLAG = false;
+        }
     }
     
     log("k_dev_listen_checkIncorrect_processIdInvalid end\n\0");
@@ -1822,26 +1773,11 @@ fn k_dev_setParam_checkIncorrect_processIdInvalid() {
     };
 
     unsafe {
-        assert_eq!(k_dev_setParam(NONE_PROC_ID - 1, device_id, param_descriptor, 0), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_setParam(NONE_PROC_ID, device_id, param_descriptor, 0), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_setParam(KERNEL_PROC_ID, device_id, param_descriptor, 0), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_setParam(1, device_id, param_descriptor, 0), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_setParam(MAX_PROC - 1, device_id, param_descriptor, 0), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_setParam(MAX_PROC, device_id, param_descriptor, 0), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        assert_eq!(k_dev_setParam(MAX_PROC + 1, device_id, param_descriptor, 0), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
+        for pid in INVALID_PID_LIST {
+            assert_eq!(k_dev_setParam(pid, device_id, param_descriptor, 0), gnwDeviceError::GDE_UNKNOWN);
+            assert_eq!(KERNEL_PANIC_FLAG, true);
+            KERNEL_PANIC_FLAG = false;
+        }
     }
     
     log("k_dev_setParam_checkIncorrect_processIdInvalid end\n\0");
@@ -2289,33 +2225,11 @@ fn k_dev_emit_checkIncorrect_holderProcessIdInvalid() {
     k_dev_emit_preconditions!(device_id, proc_id, data, event);
 
     unsafe {
-        devices[device_id as usize].holder = NONE_PROC_ID - 1;
+        for pid in INVALID_PID_LIST {
+            devices[device_id as usize].holder = pid;
+            k_dev_emit_expect(&event, gnwDeviceError::GDE_UNKNOWN, true);
+        }
     }
-    k_dev_emit_expect(&event, gnwDeviceError::GDE_UNKNOWN, true);
-    unsafe {
-        devices[device_id as usize].holder = NONE_PROC_ID;
-    }
-    k_dev_emit_expect(&event, gnwDeviceError::GDE_UNKNOWN, true);
-    unsafe {
-        devices[device_id as usize].holder = KERNEL_PROC_ID;
-    }
-    k_dev_emit_expect(&event, gnwDeviceError::GDE_UNKNOWN, true);
-    unsafe {
-        devices[device_id as usize].holder = 1;
-    }
-    k_dev_emit_expect(&event, gnwDeviceError::GDE_UNKNOWN, true);
-    unsafe {
-        devices[device_id as usize].holder = MAX_PROC - 1;
-    }
-    k_dev_emit_expect(&event, gnwDeviceError::GDE_UNKNOWN, true);
-    unsafe {
-        devices[device_id as usize].holder = MAX_PROC;
-    }
-    k_dev_emit_expect(&event, gnwDeviceError::GDE_UNKNOWN, true);
-    unsafe {
-        devices[device_id as usize].holder = MAX_PROC + 1;
-    }
-    k_dev_emit_expect(&event, gnwDeviceError::GDE_UNKNOWN, true);
     
     log("k_dev_emit_checkIncorrect_holderProcessIdInvalid end\n\0");
 }
