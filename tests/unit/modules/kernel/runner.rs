@@ -3,6 +3,7 @@
 #![feature(custom_test_frameworks)]
 #![test_runner(kernel_test_runner)]
 #![reexport_test_harness_main = "test_main"]
+#![feature(stmt_expr_attributes)]
 
 mod kernel_symbols;
 mod kernel_tests;

@@ -922,7 +922,7 @@ macro_rules! k_dev_writeMem_preconditions {
         let mut $proc_id: procId_t = 0;
         install_dummy_writable_device(&$device_id, &mut $proc_id);
         #[allow(unused, unused_mut)] let mut $buffer: u8 = 0;
-        let $input_range = range_addr_t {
+        #[allow(unused)] let $input_range = range_addr_t {
             offset: 0,
             sizeBytes: 1,
         };
@@ -1004,19 +1004,10 @@ fn k_dev_writeMem_checkIncorrect_deviceNotInstalled() {
 fn k_dev_writeMem_checkIncorrect_deviceIdInvalid() {
     log("k_dev_writeMem_checkIncorrect_deviceIdInvalid start\n\0");
     
-    let id: size_t = 0;
-    let mut proc_id: procId_t = 0;
-    install_dummy_writable_device(&id, &mut proc_id);
-    let mut buffer: u8 = 0;
-    let input_range = range_addr_t {
-        offset: 0,
-        sizeBytes: 1,
-    };
+    k_dev_writeMem_preconditions!(device_id, proc_id, buffer, input_range);
 
-    unsafe {
-        for did in INVALID_DEVICE_ID_LIST {
-            assert_eq!(k_dev_writeMem(proc_id, did, &mut buffer, input_range), gnwDeviceError::GDE_UNKNOWN);
-        }
+    for did in INVALID_DEVICE_ID_LIST {
+        k_dev_writeMem_expect(did, proc_id, &mut buffer, input_range, gnwDeviceError::GDE_UNKNOWN, false, false);
     }
     
     log("k_dev_writeMem_checkIncorrect_deviceIdInvalid end\n\0");
@@ -1026,21 +1017,10 @@ fn k_dev_writeMem_checkIncorrect_deviceIdInvalid() {
 fn k_dev_writeMem_checkIncorrect_processIdInvalid() {
     log("k_dev_writeMem_checkIncorrect_processIdInvalid start\n\0");
 
-    let id: size_t = 0;
-    let mut proc_id: procId_t = 0;
-    install_dummy_writable_device(&id, &mut proc_id);
-    let mut buffer: u8 = 0;
-    let input_range = range_addr_t {
-        offset: 0,
-        sizeBytes: 1,
-    };
+    k_dev_writeMem_preconditions!(device_id, proc_id, buffer, input_range);
 
-    unsafe {
-        for pid in INVALID_PID_LIST {
-            assert_eq!(k_dev_writeMem(pid, id, &mut buffer, input_range), gnwDeviceError::GDE_UNKNOWN);
-            assert_eq!(KERNEL_PANIC_FLAG, true);
-            KERNEL_PANIC_FLAG = false;
-        }
+    for pid in INVALID_PID_LIST {
+        k_dev_writeMem_expect(device_id, pid, &mut buffer, input_range, gnwDeviceError::GDE_UNKNOWN, true, false);
     }
     
     log("k_dev_writeMem_checkIncorrect_processIdInvalid end\n\0");
@@ -1050,19 +1030,13 @@ fn k_dev_writeMem_checkIncorrect_processIdInvalid() {
 fn k_dev_writeMem_checkIncorrect_deviceHandleInvalid() {
     log("k_dev_writeMem_checkIncorrect_deviceHandleInvalid start\n\0");
 
-    let id: size_t = 0;
-    let mut proc_id: procId_t = 0;
-    install_dummy_writable_device(&id, &mut proc_id);
-    let mut buffer: u8 = 0;
-    let input_range = range_addr_t {
-        offset: 0,
-        sizeBytes: 1,
-    };
-    
+    k_dev_writeMem_preconditions!(device_id, proc_id, buffer, input_range);
+
     unsafe {
-        devices[id as usize].holder = NONE_PROC_ID;
-        assert_eq!(k_dev_writeMem(0, id, &mut buffer, input_range), gnwDeviceError::GDE_HANDLE_INVALID);
+        devices[device_id as usize].holder = NONE_PROC_ID;
     }
+
+    k_dev_writeMem_expect(device_id, proc_id, &mut buffer, input_range, gnwDeviceError::GDE_HANDLE_INVALID, false, false);
     
     log("k_dev_writeMem_checkIncorrect_deviceHandleInvalid end\n\0");
 }
@@ -1071,19 +1045,13 @@ fn k_dev_writeMem_checkIncorrect_deviceHandleInvalid() {
 fn k_dev_writeMem_checkIncorrect_deviceNotStarted() {
     log("k_dev_writeMem_checkIncorrect_deviceNotStarted start\n\0");
 
-    let id: size_t = 0;
-    let mut proc_id: procId_t = 0;
-    install_dummy_writable_device(&id, &mut proc_id);
-    let mut buffer: u8 = 0;
-    let input_range = range_addr_t {
-        offset: 0,
-        sizeBytes: 1,
-    };
+    k_dev_writeMem_preconditions!(device_id, proc_id, buffer, input_range);
     
     unsafe {
-        devices[id as usize].started = false;
-        assert_eq!(k_dev_writeMem(0, id, &mut buffer, input_range), gnwDeviceError::GDE_INVALID_DEVICE_STATE);
+        devices[device_id as usize].started = false;
     }
+
+    k_dev_writeMem_expect(device_id, proc_id, &mut buffer, input_range, gnwDeviceError::GDE_INVALID_DEVICE_STATE, false, false);
     
     log("k_dev_writeMem_checkIncorrect_deviceNotStarted end\n\0");
 }
@@ -1092,19 +1060,13 @@ fn k_dev_writeMem_checkIncorrect_deviceNotStarted() {
 fn k_dev_writeMem_checkIncorrect_deviceInputSizeBytesNull() {
     log("k_dev_writeMem_checkIncorrect_deviceInputSizeBytesNull start\n\0");
 
-    let id: size_t = 0;
-    let mut proc_id: procId_t = 0;
-    install_dummy_writable_device(&id, &mut proc_id);
-    let mut buffer: u8 = 0;
-    let input_range = range_addr_t {
-        offset: 0,
-        sizeBytes: 1,
-    };
+    k_dev_writeMem_preconditions!(device_id, proc_id, buffer, input_range);
     
     unsafe {
-        devices[id as usize].desc.api.mem.desc.maxInputSizeBytes = 0;
-        assert_eq!(k_dev_writeMem(proc_id, id, &mut buffer, input_range), gnwDeviceError::GDE_INVALID_OPERATION);
+        devices[device_id as usize].desc.api.mem.desc.maxInputSizeBytes = 0;
     }
+
+    k_dev_writeMem_expect(device_id, proc_id, &mut buffer, input_range, gnwDeviceError::GDE_INVALID_OPERATION, false, false);
     
     log("k_dev_writeMem_checkIncorrect_deviceInputSizeBytesNull end\n\0");
 }
@@ -1113,10 +1075,8 @@ fn k_dev_writeMem_checkIncorrect_deviceInputSizeBytesNull() {
 fn k_dev_writeMem_checkIncorrect_inputRangeExceeded() {
     log("k_dev_writeMem_checkIncorrect_inputRangeExceeded start\n\0");
 
-    let id: size_t = 0;
-    let mut proc_id: procId_t = 0;
-    install_dummy_writable_device(&id, &mut proc_id);
-    let mut buffer: u8 = 0;
+    k_dev_writeMem_preconditions!(device_id, proc_id, buffer, input_range);
+
     let empty_input_range = range_addr_t {
         offset: 0,
         sizeBytes: 0,
@@ -1141,10 +1101,6 @@ fn k_dev_writeMem_checkIncorrect_inputRangeExceeded() {
         offset: 0,
         sizeBytes: 2,
     };
-    let input_range_too_large_2 = range_addr_t {
-        offset: 0,
-        sizeBytes: 2,
-    };
     let offset_input_range_too_large = range_addr_t {
         offset: 1,
         sizeBytes: 2,
@@ -1154,17 +1110,14 @@ fn k_dev_writeMem_checkIncorrect_inputRangeExceeded() {
         sizeBytes: 2,
     };
     
-    unsafe {
-        assert_eq!(k_dev_writeMem(0, id, &mut buffer, empty_input_range), gnwDeviceError::GDE_INVALID_PARAMETER);
-        assert_eq!(k_dev_writeMem(0, id, &mut buffer, offset_empty_input_range), gnwDeviceError::GDE_INVALID_PARAMETER);
-        assert_eq!(k_dev_writeMem(0, id, &mut buffer, offset_outside_empty_input_range), gnwDeviceError::GDE_INVALID_PARAMETER);
-        assert_eq!(k_dev_writeMem(0, id, &mut buffer, offset_input_range), gnwDeviceError::GDE_INVALID_PARAMETER);
-        assert_eq!(k_dev_writeMem(0, id, &mut buffer, offset_outside_input_range), gnwDeviceError::GDE_INVALID_PARAMETER);
-        assert_eq!(k_dev_writeMem(0, id, &mut buffer, input_range_too_large), gnwDeviceError::GDE_INVALID_PARAMETER);
-        assert_eq!(k_dev_writeMem(0, id, &mut buffer, input_range_too_large_2), gnwDeviceError::GDE_INVALID_PARAMETER);
-        assert_eq!(k_dev_writeMem(0, id, &mut buffer, offset_input_range_too_large), gnwDeviceError::GDE_INVALID_PARAMETER);
-        assert_eq!(k_dev_writeMem(0, id, &mut buffer, offset_outside_input_range_too_large), gnwDeviceError::GDE_INVALID_PARAMETER);
-    }
+    k_dev_writeMem_expect(device_id, proc_id, &mut buffer, empty_input_range, gnwDeviceError::GDE_INVALID_PARAMETER, false, false);
+    k_dev_writeMem_expect(device_id, proc_id, &mut buffer, offset_empty_input_range, gnwDeviceError::GDE_INVALID_PARAMETER, false, false);
+    k_dev_writeMem_expect(device_id, proc_id, &mut buffer, offset_outside_empty_input_range, gnwDeviceError::GDE_INVALID_PARAMETER, false, false);
+    k_dev_writeMem_expect(device_id, proc_id, &mut buffer, offset_input_range, gnwDeviceError::GDE_INVALID_PARAMETER, false, false);
+    k_dev_writeMem_expect(device_id, proc_id, &mut buffer, offset_outside_input_range, gnwDeviceError::GDE_INVALID_PARAMETER, false, false);
+    k_dev_writeMem_expect(device_id, proc_id, &mut buffer, input_range_too_large, gnwDeviceError::GDE_INVALID_PARAMETER, false, false);
+    k_dev_writeMem_expect(device_id, proc_id, &mut buffer, offset_input_range_too_large, gnwDeviceError::GDE_INVALID_PARAMETER, false, false);
+    k_dev_writeMem_expect(device_id, proc_id, &mut buffer, offset_outside_input_range_too_large, gnwDeviceError::GDE_INVALID_PARAMETER, false, false);
     
     log("k_dev_writeMem_checkIncorrect_inputRangeExceeded end\n\0");
 }
@@ -1173,19 +1126,13 @@ fn k_dev_writeMem_checkIncorrect_inputRangeExceeded() {
 fn k_dev_writeMem_checkIncorrect_writeNotSupported() {
     log("k_dev_writeMem_checkIncorrect_writeNotSupported start\n\0");
 
-    let id: size_t = 0;
-    let mut proc_id: procId_t = 0;
-    install_dummy_writable_device(&id, &mut proc_id);
-    let mut buffer: u8 = 0;
-    let input_range = range_addr_t {
-        offset: 0,
-        sizeBytes: 1,
-    };
+    k_dev_writeMem_preconditions!(device_id, proc_id, buffer, input_range);
     
     unsafe {
-        devices[id as usize].desc.api.mem.routine.write = None;
-        assert_eq!(k_dev_writeMem(proc_id, id, &mut buffer, input_range), gnwDeviceError::GDE_INVALID_OPERATION);
+        devices[device_id as usize].desc.api.mem.routine.write = None;
     }
+
+    k_dev_writeMem_expect(device_id, proc_id, &mut buffer, input_range, gnwDeviceError::GDE_INVALID_OPERATION, false, false);
     
     log("k_dev_writeMem_checkIncorrect_writeNotSupported end\n\0");
 }
