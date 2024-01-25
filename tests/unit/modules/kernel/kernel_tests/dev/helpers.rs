@@ -1,9 +1,15 @@
 use kernel_symbols::*;
 use utils::KERNEL_PANIC_FLAG;
+use core::ptr::null_mut;
 
 pub static mut DRIVER_INIT_CALLED: bool = false;
 pub static mut DRIVER_START_CALLED: bool = false;
 pub static mut DEV_WRITE_CALLED: bool = false;
+pub static mut DEV_WRITE_PARAM_BUFFER: ptr_t = null_mut();
+pub static mut DEV_WRITE_PARAM_RANGE: range_addr_t = range_addr_t {
+    offset: 0,
+    sizeBytes: 0,
+};
 pub static mut DEV_CHAR_WRITE_CALLED: bool = false;
 pub static mut DEV_GET_PARAM_CALLED: bool = false;
 pub static mut DEV_SET_PARAM_CALLED: bool = false;
@@ -15,6 +21,8 @@ pub fn dev_clear() {
         DRIVER_INIT_CALLED = false;
         DRIVER_START_CALLED = false;
         DEV_WRITE_CALLED = false;
+        DEV_WRITE_PARAM_BUFFER = null_mut();
+        DEV_WRITE_PARAM_RANGE = Default::default();
         DEV_CHAR_WRITE_CALLED = false;
         DEV_GET_PARAM_CALLED = false;
         DEV_SET_PARAM_CALLED = false;
@@ -211,9 +219,11 @@ pub fn create_valid_device_desc_complex() -> gnwDeviceDescriptor {
         offset: 0x69,
         sizeBytes: 0x69,
     };
-    extern "C" fn mem_write(_: *mut u8, _: range_addr_t) {
+    extern "C" fn mem_write(buffer: *mut u8, range: range_addr_t) {
         unsafe {
             DEV_WRITE_CALLED = true;
+            DEV_WRITE_PARAM_BUFFER = buffer;
+            DEV_WRITE_PARAM_RANGE = range; 
         }
     }
     device_descriptor.api.mem.routine.write = Some(mem_write);

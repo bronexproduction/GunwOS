@@ -23,6 +23,15 @@ static INVALID_PID_LIST: [procId_t; 7] = [NONE_PROC_ID - 1,
                                           MAX_PROC - 1,
                                           MAX_PROC,
                                           MAX_PROC + 1];
+static DEVICE_ID_LIST: [size_t; 5] = [0,
+                                      1,
+                                      MAX_DEVICES - 1,
+                                      MAX_DEVICES,
+                                      MAX_DEVICES + 1];
+static INVALID_DEVICE_ID_LIST: [size_t; 4] = [1,
+                                              MAX_DEVICES - 1,
+                                              MAX_DEVICES,
+                                              MAX_DEVICES + 1];
 
 /*
     PRIVATE bool validateId(size_t id)
@@ -157,10 +166,9 @@ fn validateStartedDevice_checkIncorrect_deviceIdInvalid() {
 
     validateStartedDevice_preconditions!();
 
-    validateStartedDevice_expect(0, 1, gnwDeviceError::GDE_UNKNOWN, false);
-    validateStartedDevice_expect(0, MAX_DEVICES - 1, gnwDeviceError::GDE_UNKNOWN, false);
-    validateStartedDevice_expect(0, MAX_DEVICES, gnwDeviceError::GDE_UNKNOWN, false);
-    validateStartedDevice_expect(0, MAX_DEVICES + 1, gnwDeviceError::GDE_UNKNOWN, false);
+    for did in INVALID_DEVICE_ID_LIST {
+        validateStartedDevice_expect(0, did, gnwDeviceError::GDE_UNKNOWN, false);
+    }
 
     log("validateStartedDevice_checkIncorrect_deviceIdInvalid end\n\0");
 }
@@ -512,10 +520,9 @@ fn k_dev_getById_checkIncorrect_idInvalid() {
 
     k_dev_getById_preconditions!(device_id, uha_descriptor, device_descriptor, expected_uha_descriptor, true);
 
-    k_dev_getById_expect(1, Some(&uha_descriptor), gnwDeviceError::GDE_UNKNOWN, true);
-    k_dev_getById_expect(MAX_DEVICES - 1, Some(&uha_descriptor), gnwDeviceError::GDE_UNKNOWN, true);
-    k_dev_getById_expect(MAX_DEVICES, Some(&uha_descriptor), gnwDeviceError::GDE_UNKNOWN, true);
-    k_dev_getById_expect(MAX_DEVICES + 1, Some(&uha_descriptor), gnwDeviceError::GDE_UNKNOWN, true);
+    for did in INVALID_DEVICE_ID_LIST {
+        k_dev_getById_expect(did, Some(&uha_descriptor), gnwDeviceError::GDE_UNKNOWN, true);
+    }
     
     log("k_dev_getById_checkIncorrect_idInvalid end\n\0");
 }
@@ -679,10 +686,9 @@ fn k_dev_getUHAForId_checkIncorrect_idInvalid() {
 
     k_dev_getUHAForId_preconditions!(device_id, device_uha, device_descriptor, true);
 
-    k_dev_getUHAForId_expect(1, Some(&device_uha), gnwDeviceError::GDE_UNKNOWN, true);
-    k_dev_getUHAForId_expect(MAX_DEVICES - 1, Some(&device_uha), gnwDeviceError::GDE_UNKNOWN, true);
-    k_dev_getUHAForId_expect(MAX_DEVICES, Some(&device_uha), gnwDeviceError::GDE_UNKNOWN, true);
-    k_dev_getUHAForId_expect(MAX_DEVICES + 1, Some(&device_uha), gnwDeviceError::GDE_UNKNOWN, true);
+    for did in INVALID_DEVICE_ID_LIST {
+        k_dev_getUHAForId_expect(did, Some(&device_uha), gnwDeviceError::GDE_UNKNOWN, true);
+    }
     
     log("k_dev_getUHAForId_checkIncorrect_idInvalid end\n\0");
 }
@@ -748,11 +754,9 @@ fn k_dev_acquireHold_checkIncorrect_deviceNotInstalled() {
 
     k_dev_acquireHold_preconditions!(device_id, proc_id, false, true);
     
-    k_dev_acquireHold_expect(0, proc_id, gnwDeviceError::GDE_UNKNOWN, true);
-    k_dev_acquireHold_expect(1, proc_id, gnwDeviceError::GDE_UNKNOWN, true);
-    k_dev_acquireHold_expect(MAX_DEVICES - 1, proc_id, gnwDeviceError::GDE_UNKNOWN, true);
-    k_dev_acquireHold_expect(MAX_DEVICES, proc_id, gnwDeviceError::GDE_UNKNOWN, true);
-    k_dev_acquireHold_expect(MAX_DEVICES + 1, proc_id, gnwDeviceError::GDE_UNKNOWN, true);
+    for did in DEVICE_ID_LIST {
+        k_dev_acquireHold_expect(did, proc_id, gnwDeviceError::GDE_UNKNOWN, true);
+    }
 
     log("k_dev_acquireHold_checkIncorrect_deviceNotInstalled end\n\0");
 }
@@ -763,10 +767,9 @@ fn k_dev_acquireHold_checkIncorrect_deviceIdInvalid() {
 
     k_dev_acquireHold_preconditions!(device_id, proc_id, true, true);
     
-    k_dev_acquireHold_expect(1, proc_id, gnwDeviceError::GDE_UNKNOWN, true);
-    k_dev_acquireHold_expect(MAX_DEVICES - 1, proc_id, gnwDeviceError::GDE_UNKNOWN, true);
-    k_dev_acquireHold_expect(MAX_DEVICES, proc_id, gnwDeviceError::GDE_UNKNOWN, true);
-    k_dev_acquireHold_expect(MAX_DEVICES + 1, proc_id, gnwDeviceError::GDE_UNKNOWN, true);
+    for did in INVALID_DEVICE_ID_LIST {
+        k_dev_acquireHold_expect(did, proc_id, gnwDeviceError::GDE_UNKNOWN, true);
+    }
 
     log("k_dev_acquireHold_checkIncorrect_deviceIdInvalid end\n\0");
 }
@@ -869,11 +872,9 @@ fn k_dev_releaseHold_checkIncorrect_deviceNotInstalled() {
 
     k_dev_releaseHold_preconditions!(device_id, proc_id, false, false);
 
-    k_dev_releaseHold_expect(0, proc_id, true);
-    k_dev_releaseHold_expect(1, proc_id, true);
-    k_dev_releaseHold_expect(MAX_DEVICES - 1, proc_id, true);
-    k_dev_releaseHold_expect(MAX_DEVICES, proc_id, true);
-    k_dev_releaseHold_expect(MAX_DEVICES + 1, proc_id, true);
+    for did in DEVICE_ID_LIST {
+        k_dev_releaseHold_expect(did, proc_id, true);
+    }
     
     log("k_dev_releaseHold_checkIncorrect_deviceNotInstalled end\n\0");
 }
@@ -884,10 +885,9 @@ fn k_dev_releaseHold_checkIncorrect_deviceIdInvalid() {
 
     k_dev_releaseHold_preconditions!(device_id, proc_id, true, true);
 
-    k_dev_releaseHold_expect(1, proc_id, true);
-    k_dev_releaseHold_expect(MAX_DEVICES - 1, proc_id, true);
-    k_dev_releaseHold_expect(MAX_DEVICES, proc_id, true);
-    k_dev_releaseHold_expect(MAX_DEVICES + 1, proc_id, true);
+    for did in INVALID_DEVICE_ID_LIST {
+        k_dev_releaseHold_expect(did, proc_id, true);
+    }
     
     log("k_dev_releaseHold_checkIncorrect_deviceIdInvalid end\n\0");
 }
@@ -916,25 +916,60 @@ fn k_dev_releaseHold_checkIncorrect_processIdInvalid() {
                                        const range_addr_t devMemRange)
 */
 
+macro_rules! k_dev_writeMem_preconditions {
+    ($device_id:ident, $proc_id:ident, $buffer:ident, $input_range:ident) => {
+        let $device_id: size_t = 0;
+        let mut $proc_id: procId_t = 0;
+        install_dummy_writable_device(&$device_id, &mut $proc_id);
+        #[allow(unused, unused_mut)] let mut $buffer: u8 = 0;
+        let $input_range = range_addr_t {
+            offset: 0,
+            sizeBytes: 1,
+        };
+
+        unsafe {
+            devices[0].started = true;
+        }
+    };
+}
+
+#[allow(non_snake_case)]
+fn k_dev_writeMem_expect(device_id: size_t,
+                         proc_id: procId_t,
+                         buffer: ptr_t,
+                         input_range: range_addr_t,
+                         error: gnwDeviceError,
+                         kernel_panic: bool,
+                         write_called: bool) {
+    unsafe {
+        assert_eq!(k_dev_writeMem(proc_id, device_id, buffer, input_range), error);
+        assert_eq!(KERNEL_PANIC_FLAG, kernel_panic);
+        KERNEL_PANIC_FLAG = false;
+    }
+
+    if kernel_panic {
+        return;
+    }
+
+    if write_called {
+        unsafe {
+            assert_eq!(DEV_WRITE_CALLED, true);
+            assert_eq!(DEV_WRITE_PARAM_BUFFER, buffer);
+            assert_eq!(DEV_WRITE_PARAM_RANGE, input_range);
+            DEV_WRITE_CALLED = false;
+            DEV_WRITE_PARAM_BUFFER = null_mut();
+            DEV_WRITE_PARAM_RANGE = Default::default();
+        }
+    }
+}
+
 #[test_case]
 fn k_dev_writeMem_checkCorrect() {
     log("k_dev_writeMem_checkCorrect start\n\0");
 
-    let id: size_t = 0;
-    let mut proc_id: procId_t = 0;
-    install_dummy_writable_device(&id, &mut proc_id);
-    let mut buffer: u8 = 0;
-    let input_range = range_addr_t {
-        offset: 0,
-        sizeBytes: 1,
-    };
+    k_dev_writeMem_preconditions!(device_id, proc_id, buffer, input_range);
 
-    unsafe {
-        devices[0].started = true;
-        assert_eq!(k_dev_writeMem(proc_id, id, &mut buffer, input_range), gnwDeviceError::GDE_NONE);
-        assert_eq!(DEV_WRITE_CALLED, true);
-        DEV_WRITE_CALLED = false;
-    }
+    k_dev_writeMem_expect(device_id, proc_id, &mut buffer, input_range, gnwDeviceError::GDE_NONE, false, true);
     
     log("k_dev_writeMem_checkCorrect end\n\0");
 }
@@ -943,18 +978,9 @@ fn k_dev_writeMem_checkCorrect() {
 fn k_dev_writeMem_checkIncorrect_nullBuffer() {
     log("k_dev_writeMem_checkIncorrect_nullBuffer start\n\0");
 
-    let id: size_t = 0;
-    let mut proc_id: procId_t = 0;
-    install_dummy_writable_device(&id, &mut proc_id);
-    let input_range = range_addr_t {
-        offset: 0,
-        sizeBytes: 1,
-    };
+    k_dev_writeMem_preconditions!(device_id, proc_id, buffer, input_range);
 
-    unsafe {
-        assert_eq!(k_dev_writeMem(proc_id, id, null_mut(), input_range), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-    }
+    k_dev_writeMem_expect(device_id, proc_id, null_mut(), input_range, gnwDeviceError::GDE_UNKNOWN, true, false);
     
     log("k_dev_writeMem_checkIncorrect_nullBuffer end\n\0");
 }
@@ -963,19 +989,13 @@ fn k_dev_writeMem_checkIncorrect_nullBuffer() {
 fn k_dev_writeMem_checkIncorrect_deviceNotInstalled() {
     log("k_dev_writeMem_checkIncorrect_deviceNotInstalled start\n\0");
     
-    let id: size_t = 0;
-    let mut proc_id: procId_t = 0;
-    install_dummy_writable_device(&id, &mut proc_id);
-    let mut buffer: u8 = 0;
-    let input_range = range_addr_t {
-        offset: 0,
-        sizeBytes: 1,
-    };
+    k_dev_writeMem_preconditions!(device_id, proc_id, buffer, input_range);
 
     unsafe {
         devicesCount = 0;
-        assert_eq!(k_dev_writeMem(proc_id, id, &mut buffer, input_range), gnwDeviceError::GDE_UNKNOWN);
     }
+
+    k_dev_writeMem_expect(device_id, proc_id, &mut buffer, input_range, gnwDeviceError::GDE_UNKNOWN, false, false);
     
     log("k_dev_writeMem_checkIncorrect_deviceNotInstalled end\n\0");
 }
@@ -994,10 +1014,9 @@ fn k_dev_writeMem_checkIncorrect_deviceIdInvalid() {
     };
 
     unsafe {
-        assert_eq!(k_dev_writeMem(proc_id, 1, &mut buffer, input_range), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(k_dev_writeMem(proc_id, MAX_DEVICES - 1, &mut buffer, input_range), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(k_dev_writeMem(proc_id, MAX_DEVICES, &mut buffer, input_range), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(k_dev_writeMem(proc_id, MAX_DEVICES + 1, &mut buffer, input_range), gnwDeviceError::GDE_UNKNOWN);
+        for did in INVALID_DEVICE_ID_LIST {
+            assert_eq!(k_dev_writeMem(proc_id, did, &mut buffer, input_range), gnwDeviceError::GDE_UNKNOWN);
+        }
     }
     
     log("k_dev_writeMem_checkIncorrect_deviceIdInvalid end\n\0");
@@ -1221,10 +1240,9 @@ fn k_dev_writeChar_checkIncorrect_deviceIdInvalid() {
     assert_eq!(proc_id, 0);
 
     unsafe {
-        assert_eq!(k_dev_writeChar(proc_id, 1, 0), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(k_dev_writeChar(proc_id, MAX_DEVICES - 1, 0), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(k_dev_writeChar(proc_id, MAX_DEVICES, 0), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(k_dev_writeChar(proc_id, MAX_DEVICES + 1, 0), gnwDeviceError::GDE_UNKNOWN);
+        for did in INVALID_DEVICE_ID_LIST {
+            assert_eq!(k_dev_writeChar(proc_id, did, 0), gnwDeviceError::GDE_UNKNOWN);
+        }
     }
     
     log("k_dev_writeChar_checkIncorrect_deviceIdInvalid end\n\0");
@@ -1444,10 +1462,9 @@ fn k_dev_listen_checkIncorrect_deviceIdInvalid() {
     extern "C" fn decoder(_: ptr_t, _: *const gnwDeviceEvent) {}
 
     unsafe {
-        assert_eq!(k_dev_listen(proc_id, 1, Some(listener), Some(decoder)), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(k_dev_listen(proc_id, MAX_DEVICES - 1, Some(listener), Some(decoder)), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(k_dev_listen(proc_id, MAX_DEVICES, Some(listener), Some(decoder)), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(k_dev_listen(proc_id, MAX_DEVICES + 1, Some(listener), Some(decoder)), gnwDeviceError::GDE_UNKNOWN);
+        for did in INVALID_DEVICE_ID_LIST {
+            assert_eq!(k_dev_listen(proc_id, did, Some(listener), Some(decoder)), gnwDeviceError::GDE_UNKNOWN);
+        }
     }
     
     log("k_dev_listen_checkIncorrect_deviceIdInvalid end\n\0");
@@ -1624,10 +1641,9 @@ fn k_dev_getParam_checkIncorrect_deviceIdInvalid() {
     };
 
     unsafe {
-        assert_eq!(k_dev_getParam(1, param_descriptor, &abs_result), gnwDeviceError::GDE_ID_INVALID);
-        assert_eq!(k_dev_getParam(MAX_DEVICES - 1, param_descriptor, &abs_result), gnwDeviceError::GDE_ID_INVALID);
-        assert_eq!(k_dev_getParam(MAX_DEVICES, param_descriptor, &abs_result), gnwDeviceError::GDE_ID_INVALID);
-        assert_eq!(k_dev_getParam(MAX_DEVICES + 1, param_descriptor, &abs_result), gnwDeviceError::GDE_ID_INVALID);
+        for did in INVALID_DEVICE_ID_LIST {
+            assert_eq!(k_dev_getParam(did, param_descriptor, &abs_result), gnwDeviceError::GDE_ID_INVALID);
+        }
     }
     
     log("k_dev_getParam_checkIncorrect_deviceIdInvalid end\n\0");
@@ -1747,10 +1763,9 @@ fn k_dev_setParam_checkIncorrect_deviceIdInvalid() {
     };
 
     unsafe {
-        assert_eq!(k_dev_setParam(proc_id, 1, param_descriptor, 0), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(k_dev_setParam(proc_id, MAX_DEVICES - 1, param_descriptor, 0), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(k_dev_setParam(proc_id, MAX_DEVICES, param_descriptor, 0), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(k_dev_setParam(proc_id, MAX_DEVICES + 1, param_descriptor, 0), gnwDeviceError::GDE_UNKNOWN);
+        for did in INVALID_DEVICE_ID_LIST {
+            assert_eq!(k_dev_setParam(proc_id, did, param_descriptor, 0), gnwDeviceError::GDE_UNKNOWN);
+        }
     }
     
     log("k_dev_setParam_checkIncorrect_deviceIdInvalid end\n\0");
@@ -1920,31 +1935,18 @@ fn validateEmitter_checkIncorrect_devIdPtrNull() {
 fn validateEmitter_checkIncorrect_deviceIdInvalid() {
     log("validateEmitter_checkIncorrect_deviceIdInvalid start\n\0");
 
-    let mut 
-    device_id: size_t = 0;
+    let mut device_id: size_t = 0;
     install_dummy_device(&device_id, true);
     assert_eq!(device_id, 0);
 
     unsafe {
-        device_id = 1;
-        assert_eq!(validateEmitter(&device_id), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(device_id, 1);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        device_id = MAX_DEVICES - 1;
-        assert_eq!(validateEmitter(&device_id), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(device_id, MAX_DEVICES - 1);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        device_id = MAX_DEVICES;
-        assert_eq!(validateEmitter(&device_id), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(device_id, MAX_DEVICES);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-        device_id = MAX_DEVICES + 1;
-        assert_eq!(validateEmitter(&device_id), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(device_id, MAX_DEVICES + 1);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
+        for did in INVALID_DEVICE_ID_LIST {
+            device_id = did;
+            assert_eq!(validateEmitter(&did), gnwDeviceError::GDE_UNKNOWN);
+            assert_eq!(did, device_id);
+            assert_eq!(KERNEL_PANIC_FLAG, true);
+            KERNEL_PANIC_FLAG = false;
+        }
     }
     
     log("validateEmitter_checkIncorrect_deviceIdInvalid end\n\0");
@@ -2149,26 +2151,12 @@ fn k_dev_emit_checkIncorrect_deviceIdInvalid() {
 
     k_dev_emit_preconditions!(device_id, proc_id, data, event);
 
-    unsafe {
-        device_id = 1;
-        k_hal_servicedDevIdPtr = &device_id;
+    for did in INVALID_DEVICE_ID_LIST {
+       unsafe {
+            k_hal_servicedDevIdPtr = &did;
+        }
+        k_dev_emit_expect(&event, gnwDeviceError::GDE_UNKNOWN, true);
     }
-    k_dev_emit_expect(&event, gnwDeviceError::GDE_UNKNOWN, true);
-    unsafe {
-        device_id = MAX_DEVICES - 1;
-        k_hal_servicedDevIdPtr = &device_id;
-    }
-    k_dev_emit_expect(&event, gnwDeviceError::GDE_UNKNOWN, true);
-    unsafe {
-        device_id = MAX_DEVICES;
-        k_hal_servicedDevIdPtr = &device_id;
-    }
-    k_dev_emit_expect(&event, gnwDeviceError::GDE_UNKNOWN, true);
-    unsafe {
-        device_id = MAX_DEVICES + 1;
-        k_hal_servicedDevIdPtr = &device_id;
-    }
-    k_dev_emit_expect(&event, gnwDeviceError::GDE_UNKNOWN, true);
     
     log("k_dev_emit_checkIncorrect_deviceIdInvalid end\n\0");
 }
