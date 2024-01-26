@@ -1352,21 +1352,47 @@ fn k_dev_writeChar_checkIncorrect_writeFailed() {
                                      const gnwDeviceEventDecoder decoder)
 */
 
+macro_rules! k_dev_listen_preconditions {
+    ($device_id:ident, $proc_id:ident, $listener:ident, $decoder:ident, $install:expr) => {
+        let $proc_id: procId_t = install_dummy_process();
+        assert_eq!($proc_id, 0);
+        let $device_id: size_t = 0;
+
+        if $install {
+            install_dummy_device(&$device_id, false);
+            assert_eq!($device_id, 0);
+            install_dummy_device_holder($device_id, $proc_id);
+        }
+
+        #[allow(unused)] extern "cdecl" fn $listener(_unused: *const gnwDeviceEvent) {}
+        #[allow(unused)] extern "C" fn $decoder(_: ptr_t, _: *const gnwDeviceEvent) {}
+    };
+}
+
+#[allow(non_snake_case)]
+fn k_dev_listen_expect(device_id: size_t,
+                       proc_id: procId_t,
+                       listener: Option<extern "cdecl" fn (*const gnwDeviceEvent)>,
+                       decoder: Option<extern "C" fn (ptr_t, *const gnwDeviceEvent)>,
+                       error: gnwDeviceError,
+                       kernel_panic: bool) {
+
+    unsafe {
+        assert_eq!(k_dev_listen(proc_id, device_id, listener, decoder), error);
+        assert_eq!(KERNEL_PANIC_FLAG, kernel_panic);
+        KERNEL_PANIC_FLAG = false;
+    }
+}
+
 #[test_case]
 fn k_dev_listen_checkCorrect() {
     log("k_dev_listen_checkCorrect start\n\0");
 
-    let proc_id: procId_t = install_dummy_process();
-    assert_eq!(proc_id, 0);
-    let device_id: size_t = 0;
-    install_dummy_device(&device_id, false);
-    assert_eq!(device_id, 0);
-    install_dummy_device_holder(device_id, proc_id);
-    extern "cdecl" fn listener(_unused: *const gnwDeviceEvent) {}
-    extern "C" fn decoder(_: ptr_t, _: *const gnwDeviceEvent) {}
+    k_dev_listen_preconditions!(device_id, proc_id, listener, decoder, true);
 
-    unsafe {
-        assert_eq!(k_dev_listen(proc_id, device_id, Some(listener), Some(decoder)), gnwDeviceError::GDE_NONE);
+    k_dev_listen_expect(device_id, proc_id, Some(listener), Some(decoder), gnwDeviceError::GDE_NONE, false);
+    
+    unsafe {    
         assert!(devices[device_id as usize].listener == Some(listener));
         assert!(devices[device_id as usize].decoder == Some(decoder));
     }
@@ -1378,17 +1404,9 @@ fn k_dev_listen_checkCorrect() {
 fn k_dev_listen_checkIncorrect_listenerNull() {
     log("k_dev_listen_checkIncorrect_listenerNull start\n\0");
 
-    let proc_id: procId_t = install_dummy_process();
-    assert_eq!(proc_id, 0);
-    let device_id: size_t = 0;
-    install_dummy_device(&device_id, false);
-    assert_eq!(device_id, 0);
-    install_dummy_device_holder(device_id, proc_id);
-    extern "C" fn decoder(_: ptr_t, _: *const gnwDeviceEvent) {}
+    k_dev_listen_preconditions!(device_id, proc_id, listener, decoder, true);
 
-    unsafe {
-        assert_eq!(k_dev_listen(proc_id, device_id, None, Some(decoder)), gnwDeviceError::GDE_LISTENER_INVALID);
-    }
+    k_dev_listen_expect(device_id, proc_id, None, Some(decoder), gnwDeviceError::GDE_LISTENER_INVALID, false);
     
     log("k_dev_listen_checkIncorrect_listenerNull end\n\0");
 }
@@ -1397,17 +1415,9 @@ fn k_dev_listen_checkIncorrect_listenerNull() {
 fn k_dev_listen_checkIncorrect_decoderNull() {
     log("k_dev_listen_checkIncorrect_decoderNull start\n\0");
 
-    let proc_id: procId_t = install_dummy_process();
-    assert_eq!(proc_id, 0);
-    let device_id: size_t = 0;
-    install_dummy_device(&device_id, false);
-    assert_eq!(device_id, 0);
-    install_dummy_device_holder(device_id, proc_id);
-    extern "cdecl" fn listener(_unused: *const gnwDeviceEvent) {}
+    k_dev_listen_preconditions!(device_id, proc_id, listener, decoder, true);
 
-    unsafe {
-        assert_eq!(k_dev_listen(proc_id, device_id, Some(listener), None), gnwDeviceError::GDE_DECODER_INVALID);
-    }
+    k_dev_listen_expect(device_id, proc_id, Some(listener), None, gnwDeviceError::GDE_DECODER_INVALID, false);
     
     log("k_dev_listen_checkIncorrect_decoderNull end\n\0");
 }
@@ -1416,16 +1426,9 @@ fn k_dev_listen_checkIncorrect_decoderNull() {
 fn k_dev_listen_checkIncorrect_deviceNotInstalled() {
     log("k_dev_listen_checkIncorrect_deviceNotInstalled start\n\0");
 
-    let proc_id: procId_t = install_dummy_process();
-    assert_eq!(proc_id, 0);
-    let device_id: size_t = 0;
-    install_dummy_device_holder(device_id, proc_id);
-    extern "cdecl" fn listener(_unused: *const gnwDeviceEvent) {}
-    extern "C" fn decoder(_: ptr_t, _: *const gnwDeviceEvent) {}
+    k_dev_listen_preconditions!(device_id, proc_id, listener, decoder, false);
 
-    unsafe {
-        assert_eq!(k_dev_listen(proc_id, device_id, Some(listener), Some(decoder)), gnwDeviceError::GDE_UNKNOWN);
-    }
+    k_dev_listen_expect(device_id, proc_id, Some(listener), Some(decoder), gnwDeviceError::GDE_UNKNOWN, false);
     
     log("k_dev_listen_checkIncorrect_deviceNotInstalled end\n\0");
 }
@@ -1434,19 +1437,10 @@ fn k_dev_listen_checkIncorrect_deviceNotInstalled() {
 fn k_dev_listen_checkIncorrect_deviceIdInvalid() {
     log("k_dev_listen_checkIncorrect_deviceIdInvalid start\n\0");
 
-    let proc_id: procId_t = install_dummy_process();
-    assert_eq!(proc_id, 0);
-    let device_id: size_t = 0;
-    install_dummy_device(&device_id, false);
-    assert_eq!(device_id, 0);
-    install_dummy_device_holder(device_id, proc_id);
-    extern "cdecl" fn listener(_unused: *const gnwDeviceEvent) {}
-    extern "C" fn decoder(_: ptr_t, _: *const gnwDeviceEvent) {}
+    k_dev_listen_preconditions!(device_id, proc_id, listener, decoder, true);
 
-    unsafe {
-        for did in INVALID_DEVICE_ID_LIST {
-            assert_eq!(k_dev_listen(proc_id, did, Some(listener), Some(decoder)), gnwDeviceError::GDE_UNKNOWN);
-        }
+    for did in INVALID_DEVICE_ID_LIST {
+        k_dev_listen_expect(did, proc_id, Some(listener), Some(decoder), gnwDeviceError::GDE_UNKNOWN, false);
     }
     
     log("k_dev_listen_checkIncorrect_deviceIdInvalid end\n\0");
@@ -1456,21 +1450,10 @@ fn k_dev_listen_checkIncorrect_deviceIdInvalid() {
 fn k_dev_listen_checkIncorrect_processIdInvalid() {
     log("k_dev_listen_checkIncorrect_processIdInvalid start\n\0");
 
-    let proc_id: procId_t = install_dummy_process();
-    assert_eq!(proc_id, 0);
-    let device_id: size_t = 0;
-    install_dummy_device(&device_id, false);
-    assert_eq!(device_id, 0);
-    install_dummy_device_holder(device_id, proc_id);
-    extern "cdecl" fn listener(_unused: *const gnwDeviceEvent) {}
-    extern "C" fn decoder(_: ptr_t, _: *const gnwDeviceEvent) {}
+    k_dev_listen_preconditions!(device_id, proc_id, listener, decoder, true);
 
-    unsafe {
-        for pid in INVALID_PID_LIST {
-            assert_eq!(k_dev_listen(pid, device_id, Some(listener), Some(decoder)), gnwDeviceError::GDE_UNKNOWN);
-            assert_eq!(KERNEL_PANIC_FLAG, true);
-            KERNEL_PANIC_FLAG = false;
-        }
+    for pid in INVALID_PID_LIST {
+        k_dev_listen_expect(device_id, pid, Some(listener), Some(decoder), gnwDeviceError::GDE_UNKNOWN, true);
     }
     
     log("k_dev_listen_checkIncorrect_processIdInvalid end\n\0");
@@ -1480,19 +1463,13 @@ fn k_dev_listen_checkIncorrect_processIdInvalid() {
 fn k_dev_listen_checkIncorrect_deviceHandleInvalid() {
     log("k_dev_listen_checkIncorrect_deviceHandleInvalid start\n\0");
 
-    let proc_id: procId_t = install_dummy_process();
-    assert_eq!(proc_id, 0);
-    let device_id: size_t = 0;
-    install_dummy_device(&device_id, false);
-    assert_eq!(device_id, 0);
-    install_dummy_device_holder(device_id, proc_id);
-    extern "cdecl" fn listener(_unused: *const gnwDeviceEvent) {}
-    extern "C" fn decoder(_: ptr_t, _: *const gnwDeviceEvent) {}
+    k_dev_listen_preconditions!(device_id, proc_id, listener, decoder, true);
 
     unsafe {
         devices[device_id as usize].holder = NONE_PROC_ID;
-        assert_eq!(k_dev_listen(proc_id, device_id, Some(listener), Some(decoder)), gnwDeviceError::GDE_HANDLE_INVALID);
     }
+
+    k_dev_listen_expect(device_id, proc_id, Some(listener), Some(decoder), gnwDeviceError::GDE_HANDLE_INVALID, false);
     
     log("k_dev_listen_checkIncorrect_deviceHandleInvalid end\n\0");
 }
@@ -1501,19 +1478,13 @@ fn k_dev_listen_checkIncorrect_deviceHandleInvalid() {
 fn k_dev_listen_checkIncorrect_deviceNotStarted() {
     log("k_dev_listen_checkIncorrect_deviceNotStarted start\n\0");
 
-    let proc_id: procId_t = install_dummy_process();
-    assert_eq!(proc_id, 0);
-    let device_id: size_t = 0;
-    install_dummy_device(&device_id, false);
-    assert_eq!(device_id, 0);
-    install_dummy_device_holder(device_id, proc_id);
-    extern "cdecl" fn listener(_unused: *const gnwDeviceEvent) {}
-    extern "C" fn decoder(_: ptr_t, _: *const gnwDeviceEvent) {}
+    k_dev_listen_preconditions!(device_id, proc_id, listener, decoder, true);
 
     unsafe {
         devices[device_id as usize].started = false;
-        assert_eq!(k_dev_listen(proc_id, device_id, Some(listener), Some(decoder)), gnwDeviceError::GDE_INVALID_DEVICE_STATE);
     }
+
+    k_dev_listen_expect(device_id, proc_id, Some(listener), Some(decoder), gnwDeviceError::GDE_INVALID_DEVICE_STATE, false);
     
     log("k_dev_listen_checkIncorrect_deviceNotStarted end\n\0");
 }
@@ -1522,19 +1493,13 @@ fn k_dev_listen_checkIncorrect_deviceNotStarted() {
 fn k_dev_listen_checkIncorrect_listenerAlreadySet() {
     log("k_dev_listen_checkIncorrect_listenerAlreadySet start\n\0");
 
-    let proc_id: procId_t = install_dummy_process();
-    assert_eq!(proc_id, 0);
-    let device_id: size_t = 0;
-    install_dummy_device(&device_id, false);
-    assert_eq!(device_id, 0);
-    install_dummy_device_holder(device_id, proc_id);
-    extern "cdecl" fn listener(_unused: *const gnwDeviceEvent) {}
-    extern "C" fn decoder(_: ptr_t, _: *const gnwDeviceEvent) {}
+    k_dev_listen_preconditions!(device_id, proc_id, listener, decoder, true);
 
     unsafe {
         devices[device_id as usize].listener = Some(listener);
-        assert_eq!(k_dev_listen(proc_id, device_id, Some(listener), Some(decoder)), gnwDeviceError::GDE_ALREADY_SET);
     }
+
+    k_dev_listen_expect(device_id, proc_id, Some(listener), Some(decoder), gnwDeviceError::GDE_ALREADY_SET, false);
     
     log("k_dev_listen_checkIncorrect_listenerAlreadySet end\n\0");
 }
