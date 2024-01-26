@@ -1510,22 +1510,49 @@ fn k_dev_listen_checkIncorrect_listenerAlreadySet() {
                                        size_t * const absResult)
 */
 
+macro_rules! k_dev_getParam_preconditions {
+    ($device_id:ident, $param_descriptor:ident, $abs_result:ident, $install:expr) => {
+        let $device_id: size_t = 0;
+        let $param_descriptor = gnwDeviceParamDescriptor {
+            param: 0,
+            subParam: 0,
+            paramIndex: 0,
+        };
+        #[allow(unused)] let mut $abs_result: size_t = 0;
+
+        if $install {
+            install_dummy_device(&$device_id, true);
+            assert_eq!($device_id, 0);
+        }
+    };
+}
+
+#[allow(non_snake_case)]
+fn k_dev_getParam_expect(device_id: size_t,
+                         param_descriptor: gnwDeviceParamDescriptor,
+                         abs_result: Option<&size_t>,
+                         error: gnwDeviceError,
+                         kernel_panic: bool) {
+
+    unsafe {
+        match abs_result {
+            Some(result) => assert_eq!(k_dev_getParam(device_id, param_descriptor, result), error),
+            None       => assert_eq!(k_dev_getParam(device_id, param_descriptor, null()), error),
+        }
+        assert_eq!(KERNEL_PANIC_FLAG, kernel_panic);
+        KERNEL_PANIC_FLAG = false;
+    }
+}
+
 #[test_case]
 fn k_dev_getParam_checkCorrect() {
     log("k_dev_getParam_checkCorrect start\n\0");
 
-    let device_id: size_t = 0;
-    install_dummy_device(&device_id, true);
-    assert_eq!(device_id, 0);
-    let abs_result: size_t = 0;
-    let param_descriptor = gnwDeviceParamDescriptor {
-        param: 0,
-        subParam: 0,
-        paramIndex: 0,
-    };
+    k_dev_getParam_preconditions!(device_id, param_descriptor, abs_result, true);
+
+    k_dev_getParam_expect(device_id, param_descriptor, Some(&abs_result), gnwDeviceError::GDE_NONE, false);
 
     unsafe {
-        assert_eq!(k_dev_getParam(device_id, param_descriptor, &abs_result), gnwDeviceError::GDE_NONE);
         assert_eq!(DEV_GET_PARAM_CALLED, true);
         DEV_GET_PARAM_CALLED = false;
     }
@@ -1537,20 +1564,9 @@ fn k_dev_getParam_checkCorrect() {
 fn k_dev_getParam_checkIncorrect_absResultNull() {
     log("k_dev_getParam_checkIncorrect_absResultNull start\n\0");
 
-    let device_id: size_t = 0;
-    install_dummy_device(&device_id, true);
-    assert_eq!(device_id, 0);
-    let param_descriptor = gnwDeviceParamDescriptor {
-        param: 0,
-        subParam: 0,
-        paramIndex: 0,
-    };
+    k_dev_getParam_preconditions!(device_id, param_descriptor, abs_result, true);
 
-    unsafe {
-        assert_eq!(k_dev_getParam(device_id, param_descriptor, null()), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
-    }
+    k_dev_getParam_expect(device_id, param_descriptor, None, gnwDeviceError::GDE_UNKNOWN, true);
     
     log("k_dev_getParam_checkIncorrect_absResultNull end\n\0");
 }
@@ -1559,17 +1575,10 @@ fn k_dev_getParam_checkIncorrect_absResultNull() {
 fn k_dev_getParam_checkIncorrect_deviceNotInstalled() {
     log("k_dev_getParam_checkIncorrect_deviceNotInstalled start\n\0");
 
-    let abs_result: size_t = 0;
-    let param_descriptor = gnwDeviceParamDescriptor {
-        param: 0,
-        subParam: 0,
-        paramIndex: 0,
-    };
+    k_dev_getParam_preconditions!(device_id, param_descriptor, abs_result, false);
 
-    unsafe {
-        assert_eq!(k_dev_getParam(0, param_descriptor, &abs_result), gnwDeviceError::GDE_ID_INVALID);
-    }
-    
+    k_dev_getParam_expect(device_id, param_descriptor, Some(&abs_result), gnwDeviceError::GDE_ID_INVALID, false);
+
     log("k_dev_getParam_checkIncorrect_deviceNotInstalled end\n\0");
 }
 
@@ -1577,20 +1586,10 @@ fn k_dev_getParam_checkIncorrect_deviceNotInstalled() {
 fn k_dev_getParam_checkIncorrect_deviceIdInvalid() {
     log("k_dev_getParam_checkIncorrect_deviceIdInvalid start\n\0");
 
-    let device_id: size_t = 0;
-    install_dummy_device(&device_id, true);
-    assert_eq!(device_id, 0);
-    let abs_result: size_t = 0;
-    let param_descriptor = gnwDeviceParamDescriptor {
-        param: 0,
-        subParam: 0,
-        paramIndex: 0,
-    };
+    k_dev_getParam_preconditions!(device_id, param_descriptor, abs_result, true);
 
-    unsafe {
-        for did in INVALID_DEVICE_ID_LIST {
-            assert_eq!(k_dev_getParam(did, param_descriptor, &abs_result), gnwDeviceError::GDE_ID_INVALID);
-        }
+    for did in INVALID_DEVICE_ID_LIST {
+        k_dev_getParam_expect(did, param_descriptor, Some(&abs_result), gnwDeviceError::GDE_ID_INVALID, false);
     }
     
     log("k_dev_getParam_checkIncorrect_deviceIdInvalid end\n\0");
@@ -1600,20 +1599,13 @@ fn k_dev_getParam_checkIncorrect_deviceIdInvalid() {
 fn k_dev_getParam_checkIncorrect_getParamNotSupported() {
     log("k_dev_getParam_checkIncorrect_getParamNotSupported start\n\0");
 
-    let device_id: size_t = 0;
-    install_dummy_device(&device_id, true);
-    assert_eq!(device_id, 0);
-    let abs_result: size_t = 0;
-    let param_descriptor = gnwDeviceParamDescriptor {
-        param: 0,
-        subParam: 0,
-        paramIndex: 0,
-    };
+    k_dev_getParam_preconditions!(device_id, param_descriptor, abs_result, true);
 
     unsafe {
         devices[device_id as usize].desc.api.system.routine.getParam = None;
-        assert_eq!(k_dev_getParam(device_id, param_descriptor, &abs_result), gnwDeviceError::GDE_INVALID_OPERATION);
     }
+
+    k_dev_getParam_expect(device_id, param_descriptor, Some(&abs_result), gnwDeviceError::GDE_INVALID_OPERATION, false);
     
     log("k_dev_getParam_checkIncorrect_getParamNotSupported end\n\0");
 }
@@ -1622,21 +1614,14 @@ fn k_dev_getParam_checkIncorrect_getParamNotSupported() {
 fn k_dev_getParam_checkIncorrect_getParamReturnsFalse() {
     log("k_dev_getParam_checkIncorrect_getParamReturnsFalse start\n\0");
 
-    let device_id: size_t = 0;
-    install_dummy_device(&device_id, true);
-    assert_eq!(device_id, 0);
-    let abs_result: size_t = 0;
-    let param_descriptor = gnwDeviceParamDescriptor {
-        param: 0,
-        subParam: 0,
-        paramIndex: 0,
-    };
-    extern "C" fn get_param(_: u32, _: u32, _: u32, _: *mut u32) -> bool { return false; }
+    k_dev_getParam_preconditions!(device_id, param_descriptor, abs_result, true);
 
+    extern "C" fn get_param(_: u32, _: u32, _: u32, _: *mut u32) -> bool { return false; }
     unsafe {
         devices[device_id as usize].desc.api.system.routine.getParam = Some(get_param);
-        assert_eq!(k_dev_getParam(device_id, param_descriptor, &abs_result), gnwDeviceError::GDE_OPERATION_FAILED);
     }
+
+    k_dev_getParam_expect(device_id, param_descriptor, Some(&abs_result), gnwDeviceError::GDE_OPERATION_FAILED, false);
     
     log("k_dev_getParam_checkIncorrect_getParamReturnsFalse end\n\0");
 }
