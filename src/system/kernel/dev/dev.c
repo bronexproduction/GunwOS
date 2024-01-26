@@ -68,6 +68,13 @@ PRIVATE bool validateId(size_t id) {
     return id < MAX_DEVICES;
 }
 
+void k_dev_init() {
+    memzero(devices, sizeof(struct device) * MAX_DEVICES);
+    for (size_t i = 0; i < MAX_DEVICES; ++i) {
+        devices[i].holder = NONE_PROC_ID;
+    }
+}
+
 PRIVATE bool validateInstalledId(size_t id) {
     return id < MAX_DEVICES && id < devicesCount;
 }
@@ -176,9 +183,6 @@ enum gnwDriverError k_dev_start(size_t id) {
     }
 
     return GDRE_NONE;
-}
-
-void k_dev_init() {
 }
 
 enum gnwDeviceError k_dev_getById(const size_t id, struct gnwDeviceUHADesc * const desc) {

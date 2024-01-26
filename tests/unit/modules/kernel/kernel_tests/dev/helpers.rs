@@ -38,6 +38,8 @@ pub fn dev_clear() {
         DEV_SET_PARAM_PARAM_VALUE = 0;
         DEV_EVENT_LISTENER_CALLED = false;
         DEV_EVENT_DECODER_CALLED = false;
+
+        k_dev_init();
     }
 }
 
@@ -320,10 +322,14 @@ pub fn install_device(id: &size_t, descriptor: gnwDeviceDescriptor) {
 }
 
 pub fn install_dummy_process() -> procId_t {
-    unsafe {
-        pTab[0].info.state = k_proc_state::PS_RUNNING;
-    }
+    install_process(0);
     return 0;
+}
+
+pub fn install_process(pid: procId_t) {
+    unsafe {
+        pTab[pid as usize].info.state = k_proc_state::PS_RUNNING;
+    }
 }
 
 pub fn install_dummy_device_holder(device_id: size_t, proc_id: procId_t) {

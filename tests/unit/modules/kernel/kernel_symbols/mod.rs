@@ -542,6 +542,7 @@ extern "C" {
 
     pub static mut devicesCount: u32;
     pub static mut devices: [device; MAX_DEVICES as usize];
+    pub fn k_dev_init();
     pub fn validateId(id: size_t) -> bool;
     pub fn validateInstalledId(id: size_t) -> bool;
     pub fn validateStartedDevice(procId: procId_t, devId: size_t) -> gnwDeviceError;

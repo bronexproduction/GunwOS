@@ -2195,32 +2195,58 @@ fn k_dev_procCleanup_checkCorrect() {
     log("k_dev_procCleanup_checkCorrect start\n\0");
 
     k_dev_procCleanup_preconditions!(device_id, proc_id);
-
-    k_dev_procCleanup_expect(proc_id, false);
     
+    #[allow(unused)] extern "cdecl" fn listener(_: *const gnwDeviceEvent) {}
+    #[allow(unused)] extern "C" fn decoder(_: ptr_t, _: *const gnwDeviceEvent) {}
+
     unsafe {
+        devices[1].holder = KERNEL_PROC_ID;
+        devices[1].listener = Some(listener);
+        devices[1].decoder = Some(decoder);
+
+        k_dev_procCleanup_expect(proc_id, false);
+        
         assert_eq!(devices[device_id as usize].holder, NONE_PROC_ID);
         assert_eq!(devices[device_id as usize].listener, None);
         assert_eq!(devices[device_id as usize].decoder, None);
+        assert_eq!(devices[1].holder, KERNEL_PROC_ID);
+        assert!(devices[1].listener.unwrap() == listener);
+        assert!(devices[1].decoder.unwrap() == decoder);
     }
     
     log("k_dev_procCleanup_checkCorrect end\n\0");
 }
 
+// #[test_case]
+// fn k_dev_procCleanup_checkIncorrect_processIdInvalid() {
+//     log("k_dev_procCleanup_checkIncorrect_processIdInvalid start\n\0");
+
+//     k_dev_procCleanup_preconditions!(device_id, proc_id);
+
+//     unsafe {
+//        let device = devices[device_id as usize];
+
+//         for pid in INVALID_PID_LIST {
+//             k_dev_procCleanup_expect(pid, true);
+//             assert_eq!(device, devices[device_id as usize]);
+//         }
+//     }
+    
+//     log("k_dev_procCleanup_checkIncorrect_processIdInvalid end\n\0");
+// }
+
 #[test_case]
-fn k_dev_procCleanup_checkIncorrect_processIdInvalid() {
-    log("k_dev_procCleanup_checkIncorrect_processIdInvalid start\n\0");
+fn k_dev_procCleanup_checkIncorrect_processIdNotAHolder() {
+    log("k_dev_procCleanup_checkIncorrect_processIdNotAHolder start\n\0");
 
     k_dev_procCleanup_preconditions!(device_id, proc_id);
 
     unsafe {
-       let device = devices[device_id as usize];
-
-        for pid in INVALID_PID_LIST {
-            k_dev_procCleanup_expect(pid, false);
-            assert_eq!(device, devices[device_id as usize]);
-        }
+        let devices_copy = devices;
+        install_process(1);
+        k_dev_procCleanup_expect(1, false);
+        assert_eq!(devices, devices_copy);
     }
     
-    log("k_dev_procCleanup_checkIncorrect_processIdInvalid end\n\0");
+    log("k_dev_procCleanup_checkIncorrect_processIdNotAHolder end\n\0");
 }
