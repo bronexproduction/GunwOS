@@ -1143,19 +1143,56 @@ fn k_dev_writeMem_checkIncorrect_writeNotSupported() {
                                         const char character)
 */
 
+macro_rules! k_dev_writeChar_preconditions {
+    ($device_id:ident, $proc_id:ident) => {
+        let $device_id: size_t = 0;
+        let mut $proc_id: procId_t = 0;
+        install_dummy_writable_device(&$device_id, &mut $proc_id);
+
+        assert_eq!($device_id, 0);
+        assert_eq!($proc_id, 0);
+
+        unsafe {
+            devices[0].started = true;
+        }
+    };
+}
+
+#[allow(non_snake_case)]
+fn k_dev_writeChar_expect(device_id: size_t,
+                          proc_id: procId_t,
+                          character: i8,
+                          error: gnwDeviceError,
+                          kernel_panic: bool,
+                          write_called: bool) {
+
+    unsafe {
+        assert_eq!(k_dev_writeChar(proc_id, device_id, character), error);
+        assert_eq!(KERNEL_PANIC_FLAG, kernel_panic);
+        KERNEL_PANIC_FLAG = false;
+    }
+
+    if kernel_panic {
+        return;
+    }
+
+    if write_called {
+        unsafe {
+            assert_eq!(DEV_CHAR_WRITE_CALLED, true);
+            assert_eq!(DEV_CHAR_WRITE_PARAM_CHARACTER, 69);
+            DEV_CHAR_WRITE_CALLED = false;
+            DEV_CHAR_WRITE_PARAM_CHARACTER = 0;
+        }
+    }
+}
+
 #[test_case]
 fn k_dev_writeChar_checkCorrect() {
     log("k_dev_writeChar_checkCorrect start\n\0");
 
-    let id: size_t = 0;
-    let mut proc_id: procId_t = 0;
-    install_dummy_writable_device(&id, &mut proc_id);
+    k_dev_writeChar_preconditions!(device_id, proc_id);
 
-    unsafe {
-        assert_eq!(k_dev_writeChar(proc_id, id, 0), gnwDeviceError::GDE_NONE);
-        assert_eq!(DEV_CHAR_WRITE_CALLED, true);
-        DEV_CHAR_WRITE_CALLED = false;
-    }
+    k_dev_writeChar_expect(device_id, proc_id, 69, gnwDeviceError::GDE_NONE, false, true);
     
     log("k_dev_writeChar_checkCorrect end\n\0");
 }
@@ -1163,33 +1200,41 @@ fn k_dev_writeChar_checkCorrect() {
 #[test_case]
 fn k_dev_writeChar_checkIncorrect_deviceNotInstalled() {
     log("k_dev_writeChar_checkIncorrect_deviceNotInstalled start\n\0");
-    
-    let id: size_t = 0;
-    let mut proc_id: procId_t = 0;
-    install_dummy_writable_device(&id, &mut proc_id);
+
+    k_dev_writeChar_preconditions!(device_id, proc_id);
 
     unsafe {
         devicesCount = 0;
-        assert_eq!(k_dev_writeChar(proc_id, id, 0), gnwDeviceError::GDE_UNKNOWN);
     }
+
+    k_dev_writeChar_expect(device_id, proc_id, 69, gnwDeviceError::GDE_UNKNOWN, false, false);
     
     log("k_dev_writeChar_checkIncorrect_deviceNotInstalled end\n\0");
+}
+
+#[test_case]
+fn k_dev_writeChar_checkIncorrect_deviceNotStarted() {
+    log("k_dev_writeChar_checkIncorrect_deviceNotStarted start\n\0");
+    
+    k_dev_writeChar_preconditions!(device_id, proc_id);
+
+    unsafe {
+        devices[device_id as usize].started = false;
+    }
+
+    k_dev_writeChar_expect(device_id, proc_id, 69, gnwDeviceError::GDE_INVALID_DEVICE_STATE, false, false);
+    
+    log("k_dev_writeChar_checkIncorrect_deviceNotStarted end\n\0");
 }
 
 #[test_case]
 fn k_dev_writeChar_checkIncorrect_deviceIdInvalid() {
     log("k_dev_writeChar_checkIncorrect_deviceIdInvalid start\n\0");
     
-    let id: size_t = 0;
-    let mut proc_id: procId_t = 0;
-    install_dummy_writable_device(&id, &mut proc_id);
-    assert_eq!(id, 0);
-    assert_eq!(proc_id, 0);
+    k_dev_writeChar_preconditions!(device_id, proc_id);
 
-    unsafe {
-        for did in INVALID_DEVICE_ID_LIST {
-            assert_eq!(k_dev_writeChar(proc_id, did, 0), gnwDeviceError::GDE_UNKNOWN);
-        }
+    for did in INVALID_DEVICE_ID_LIST {
+        k_dev_writeChar_expect(did, proc_id, 69, gnwDeviceError::GDE_UNKNOWN, false, false);
     }
     
     log("k_dev_writeChar_checkIncorrect_deviceIdInvalid end\n\0");
@@ -1199,16 +1244,10 @@ fn k_dev_writeChar_checkIncorrect_deviceIdInvalid() {
 fn k_dev_writeChar_checkIncorrect_processIdInvalid() {
     log("k_dev_writeChar_checkIncorrect_processIdInvalid start\n\0");
 
-    let id: size_t = 0;
-    let mut proc_id: procId_t = 0;
-    install_dummy_writable_device(&id, &mut proc_id);
+    k_dev_writeChar_preconditions!(device_id, proc_id);
 
-    unsafe {
-        for pid in INVALID_PID_LIST {
-            assert_eq!(k_dev_writeChar(pid, id, 0), gnwDeviceError::GDE_UNKNOWN);
-            assert_eq!(KERNEL_PANIC_FLAG, true);
-            KERNEL_PANIC_FLAG = false;
-        }
+    for pid in INVALID_PID_LIST {
+        k_dev_writeChar_expect(device_id, pid, 69, gnwDeviceError::GDE_UNKNOWN, true, false);
     }
     
     log("k_dev_writeChar_checkIncorrect_processIdInvalid end\n\0");
@@ -1218,14 +1257,13 @@ fn k_dev_writeChar_checkIncorrect_processIdInvalid() {
 fn k_dev_writeChar_checkIncorrect_deviceHandleInvalid() {
     log("k_dev_writeChar_checkIncorrect_deviceHandleInvalid start\n\0");
 
-    let id: size_t = 0;
-    let mut proc_id: procId_t = 0;
-    install_dummy_writable_device(&id, &mut proc_id);
+    k_dev_writeChar_preconditions!(device_id, proc_id);
     
     unsafe {
-        devices[id as usize].holder = NONE_PROC_ID;
-        assert_eq!(k_dev_writeChar(0, id, 0), gnwDeviceError::GDE_HANDLE_INVALID);
+        devices[device_id as usize].holder = NONE_PROC_ID;
     }
+
+    k_dev_writeChar_expect(device_id, proc_id, 69, gnwDeviceError::GDE_HANDLE_INVALID, false, false);
     
     log("k_dev_writeChar_checkIncorrect_deviceHandleInvalid end\n\0");
 }
@@ -1234,14 +1272,13 @@ fn k_dev_writeChar_checkIncorrect_deviceHandleInvalid() {
 fn k_dev_writeChar_checkIncorrect_deviceNotStarted() {
     log("k_dev_writeChar_checkIncorrect_deviceNotStarted start\n\0");
 
-    let id: size_t = 0;
-    let mut proc_id: procId_t = 0;
-    install_dummy_writable_device(&id, &mut proc_id);
+    k_dev_writeChar_preconditions!(device_id, proc_id);
     
     unsafe {
-        devices[id as usize].started = false;
-        assert_eq!(k_dev_writeChar(0, id, 0), gnwDeviceError::GDE_INVALID_DEVICE_STATE);
+        devices[device_id as usize].started = false;
     }
+    
+    k_dev_writeChar_expect(device_id, proc_id, 69, gnwDeviceError::GDE_INVALID_DEVICE_STATE, false, false);
     
     log("k_dev_writeChar_checkIncorrect_deviceNotStarted end\n\0");
 }
@@ -1250,14 +1287,13 @@ fn k_dev_writeChar_checkIncorrect_deviceNotStarted() {
 fn k_dev_writeChar_checkIncorrect_isReadyNotSupported() {
     log("k_dev_writeChar_checkIncorrect_isReadyNotSupported start\n\0");
 
-    let id: size_t = 0;
-    let mut proc_id: procId_t = 0;
-    install_dummy_writable_device(&id, &mut proc_id);
+    k_dev_writeChar_preconditions!(device_id, proc_id);
     
     unsafe {
-        devices[id as usize].desc.api.charOut.routine.isReadyToWrite = None;
-        assert_eq!(k_dev_writeChar(proc_id, id, 0), gnwDeviceError::GDE_INVALID_OPERATION);
+        devices[device_id as usize].desc.api.charOut.routine.isReadyToWrite = None;
     }
+
+    k_dev_writeChar_expect(device_id, proc_id, 69, gnwDeviceError::GDE_INVALID_OPERATION, false, false);
     
     log("k_dev_writeChar_checkIncorrect_isReadyNotSupported end\n\0");
 }
@@ -1266,14 +1302,14 @@ fn k_dev_writeChar_checkIncorrect_isReadyNotSupported() {
 fn k_dev_writeChar_checkIncorrect_deviceNotReady() {
     log("k_dev_writeChar_checkIncorrect_deviceNotReady start\n\0");
 
-    let id: size_t = 0;
-    let mut proc_id: procId_t = 0;
-    install_dummy_writable_device(&id, &mut proc_id);
+    k_dev_writeChar_preconditions!(device_id, proc_id);
+
     extern "C" fn char_out_is_ready_to_write() -> bool { return false; }
     unsafe {
-        devices[id as usize].desc.api.charOut.routine.isReadyToWrite = Some(char_out_is_ready_to_write);
-        assert_eq!(k_dev_writeChar(proc_id, id, 0), gnwDeviceError::GDE_INVALID_DEVICE_STATE);
+        devices[device_id as usize].desc.api.charOut.routine.isReadyToWrite = Some(char_out_is_ready_to_write);
     }
+
+    k_dev_writeChar_expect(device_id, proc_id, 69, gnwDeviceError::GDE_INVALID_DEVICE_STATE, false, false);
     
     log("k_dev_writeChar_checkIncorrect_deviceNotReady end\n\0");
 }
@@ -1282,14 +1318,13 @@ fn k_dev_writeChar_checkIncorrect_deviceNotReady() {
 fn k_dev_writeChar_checkIncorrect_writeNotSupported() {
     log("k_dev_writeChar_checkIncorrect_writeNotSupported start\n\0");
 
-    let id: size_t = 0;
-    let mut proc_id: procId_t = 0;
-    install_dummy_writable_device(&id, &mut proc_id);
+    k_dev_writeChar_preconditions!(device_id, proc_id);
     
     unsafe {
-        devices[id as usize].desc.api.charOut.routine.write = None;
-        assert_eq!(k_dev_writeChar(proc_id, id, 0), gnwDeviceError::GDE_INVALID_OPERATION);
+        devices[device_id as usize].desc.api.charOut.routine.write = None;
     }
+
+    k_dev_writeChar_expect(device_id, proc_id, 69, gnwDeviceError::GDE_INVALID_OPERATION, false, false);
     
     log("k_dev_writeChar_checkIncorrect_writeNotSupported end\n\0");
 }
@@ -1298,14 +1333,14 @@ fn k_dev_writeChar_checkIncorrect_writeNotSupported() {
 fn k_dev_writeChar_checkIncorrect_writeFailed() {
     log("k_dev_writeChar_checkIncorrect_writeFailed start\n\0");
 
-    let id: size_t = 0;
-    let mut proc_id: procId_t = 0;
-    install_dummy_writable_device(&id, &mut proc_id);
+    k_dev_writeChar_preconditions!(device_id, proc_id);
+
     extern "C" fn char_out_write(_: i8) -> bool { return false; }
     unsafe {
-        devices[id as usize].desc.api.charOut.routine.write = Some(char_out_write);
-        assert_eq!(k_dev_writeChar(proc_id, id, 0), gnwDeviceError::GDE_OPERATION_FAILED);
+        devices[device_id as usize].desc.api.charOut.routine.write = Some(char_out_write);
     }
+
+    k_dev_writeChar_expect(device_id, proc_id, 69, gnwDeviceError::GDE_OPERATION_FAILED, false, false);
     
     log("k_dev_writeChar_checkIncorrect_writeFailed end\n\0");
 }

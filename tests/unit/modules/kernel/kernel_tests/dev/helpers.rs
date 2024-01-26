@@ -11,6 +11,7 @@ pub static mut DEV_WRITE_PARAM_RANGE: range_addr_t = range_addr_t {
     sizeBytes: 0,
 };
 pub static mut DEV_CHAR_WRITE_CALLED: bool = false;
+pub static mut DEV_CHAR_WRITE_PARAM_CHARACTER: i8 = 0;
 pub static mut DEV_GET_PARAM_CALLED: bool = false;
 pub static mut DEV_SET_PARAM_CALLED: bool = false;
 pub static mut DEV_EVENT_LISTENER_CALLED: bool = false;
@@ -24,6 +25,7 @@ pub fn dev_clear() {
         DEV_WRITE_PARAM_BUFFER = null_mut();
         DEV_WRITE_PARAM_RANGE = Default::default();
         DEV_CHAR_WRITE_CALLED = false;
+        DEV_CHAR_WRITE_PARAM_CHARACTER = 0;
         DEV_GET_PARAM_CALLED = false;
         DEV_SET_PARAM_CALLED = false;
         DEV_EVENT_LISTENER_CALLED = false;
@@ -237,9 +239,10 @@ pub fn create_valid_device_desc_complex() -> gnwDeviceDescriptor {
 
     extern "C" fn char_out_is_ready_to_write() -> bool { return true; }
     device_descriptor.api.charOut.routine.isReadyToWrite = Some(char_out_is_ready_to_write);
-    extern "C" fn char_out_write(_: i8) -> bool { 
+    extern "C" fn char_out_write(character: i8) -> bool { 
         unsafe {
             DEV_CHAR_WRITE_CALLED = true;
+            DEV_CHAR_WRITE_PARAM_CHARACTER = character;
         }
         return true;
     }
