@@ -560,6 +560,7 @@ extern "C" {
     pub fn validateEmitter(devIdPtr: *const size_t) -> gnwDeviceError;
     pub fn validateListenerInvocation(deviceId: size_t) -> gnwDeviceError;
     pub fn k_dev_emit(eventPtr: *const gnwDeviceEvent) -> gnwDeviceError;
+    pub fn k_dev_procCleanup(procId: procId_t);
 
     // hal
 

@@ -2161,34 +2161,66 @@ fn k_dev_emit_checkIncorrect_eventDataTooLarge() {
     log("k_dev_emit_checkIncorrect_eventDataTooLarge end\n\0");
 }
 
-// void k_dev_procCleanup(const procId_t procId) {
-//     for (size_t devId = 0; devId < MAX_DEVICES; ++devId) {
-//         if (devices[devId].holder == procId) {
-//             CRITICAL_SECTION(
-//                 k_dev_releaseHold(procId, devId);
-//             )
-//         }
-//     }
-// }
+/*
+    void k_dev_procCleanup(const procId_t procId)
+*/
 
-// #[macro_export]
-// macro_rules! my_test_case {
-//     ($function_name:ident, $test_name:ident, $body:block) => {
-//         concat_idents!(test_name = $function_name, _, $test_name {
-//             #[test_case]
-//             fn test_name() {
-//                 //   log("Start {}, $test_name);
-//                 $body
-//                 //   log("Finished {}, $test_name);
-//             }
-//         });            
-//     }
-// }
+macro_rules! k_dev_procCleanup_preconditions {
+    ($device_id:ident, $proc_id:ident) => {
+        let $proc_id: procId_t = install_dummy_process();
+        assert_eq!($proc_id, 0);
+        let $device_id: size_t = 0;
 
-// my_test_case! { dick, checkCorrect, {
-//     assert_eq!(0,0);
-// }}
+        install_dummy_device(&$device_id, false);
+        assert_eq!($device_id, 0);
+        install_dummy_device_listener($device_id, $proc_id);
 
-// my_test_case! { dick, checkIncorrect, {
-//     assert_eq!(1,1);
-// }}
+        unsafe {
+            isrStackHeight = 1;
+        }
+    };
+}
+
+#[allow(non_snake_case)]
+fn k_dev_procCleanup_expect(proc_id: procId_t, kernel_panic: bool) {
+    unsafe {
+        k_dev_procCleanup(proc_id);
+        assert_eq!(KERNEL_PANIC_FLAG, kernel_panic);
+        KERNEL_PANIC_FLAG = false;
+    }
+}
+
+#[test_case]
+fn k_dev_procCleanup_checkCorrect() {
+    log("k_dev_procCleanup_checkCorrect start\n\0");
+
+    k_dev_procCleanup_preconditions!(device_id, proc_id);
+
+    k_dev_procCleanup_expect(proc_id, false);
+    
+    unsafe {
+        assert_eq!(devices[device_id as usize].holder, NONE_PROC_ID);
+        assert_eq!(devices[device_id as usize].listener, None);
+        assert_eq!(devices[device_id as usize].decoder, None);
+    }
+    
+    log("k_dev_procCleanup_checkCorrect end\n\0");
+}
+
+#[test_case]
+fn k_dev_procCleanup_checkIncorrect_processIdInvalid() {
+    log("k_dev_procCleanup_checkIncorrect_processIdInvalid start\n\0");
+
+    k_dev_procCleanup_preconditions!(device_id, proc_id);
+
+    unsafe {
+       let device = devices[device_id as usize];
+
+        for pid in INVALID_PID_LIST {
+            k_dev_procCleanup_expect(pid, false);
+            assert_eq!(device, devices[device_id as usize]);
+        }
+    }
+    
+    log("k_dev_procCleanup_checkIncorrect_processIdInvalid end\n\0");
+}
