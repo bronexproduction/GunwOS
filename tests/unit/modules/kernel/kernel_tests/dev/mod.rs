@@ -2217,23 +2217,23 @@ fn k_dev_procCleanup_checkCorrect() {
     log("k_dev_procCleanup_checkCorrect end\n\0");
 }
 
-// #[test_case]
-// fn k_dev_procCleanup_checkIncorrect_processIdInvalid() {
-//     log("k_dev_procCleanup_checkIncorrect_processIdInvalid start\n\0");
+#[test_case]
+fn k_dev_procCleanup_checkIncorrect_processIdInvalid() {
+    log("k_dev_procCleanup_checkIncorrect_processIdInvalid start\n\0");
 
-//     k_dev_procCleanup_preconditions!(device_id, proc_id);
+    k_dev_procCleanup_preconditions!(device_id, proc_id);
 
-//     unsafe {
-//        let device = devices[device_id as usize];
+    unsafe {
+       let device = devices[device_id as usize];
 
-//         for pid in INVALID_PID_LIST {
-//             k_dev_procCleanup_expect(pid, true);
-//             assert_eq!(device, devices[device_id as usize]);
-//         }
-//     }
+        for pid in INVALID_PID_LIST {
+            k_dev_procCleanup_expect(pid, pid == NONE_PROC_ID);
+            assert_eq!(device, devices[device_id as usize]);
+        }
+    }
     
-//     log("k_dev_procCleanup_checkIncorrect_processIdInvalid end\n\0");
-// }
+    log("k_dev_procCleanup_checkIncorrect_processIdInvalid end\n\0");
+}
 
 #[test_case]
 fn k_dev_procCleanup_checkIncorrect_processIdNotAHolder() {
