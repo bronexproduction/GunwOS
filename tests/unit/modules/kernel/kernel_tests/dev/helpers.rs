@@ -14,6 +14,10 @@ pub static mut DEV_CHAR_WRITE_CALLED: bool = false;
 pub static mut DEV_CHAR_WRITE_PARAM_CHARACTER: i8 = 0;
 pub static mut DEV_GET_PARAM_CALLED: bool = false;
 pub static mut DEV_SET_PARAM_CALLED: bool = false;
+pub static mut DEV_SET_PARAM_PARAM_PARAM: size_t = 0;
+pub static mut DEV_SET_PARAM_PARAM_SUB_PARAM: size_t = 0;
+pub static mut DEV_SET_PARAM_PARAM_PARAM_INDEX: size_t = 0;
+pub static mut DEV_SET_PARAM_PARAM_VALUE: size_t = 0;
 pub static mut DEV_EVENT_LISTENER_CALLED: bool = false;
 pub static mut DEV_EVENT_DECODER_CALLED: bool = false;
 
@@ -28,6 +32,10 @@ pub fn dev_clear() {
         DEV_CHAR_WRITE_PARAM_CHARACTER = 0;
         DEV_GET_PARAM_CALLED = false;
         DEV_SET_PARAM_CALLED = false;
+        DEV_SET_PARAM_PARAM_PARAM = 0;
+        DEV_SET_PARAM_PARAM_SUB_PARAM = 0;
+        DEV_SET_PARAM_PARAM_PARAM_INDEX = 0;
+        DEV_SET_PARAM_PARAM_VALUE = 0;
         DEV_EVENT_LISTENER_CALLED = false;
         DEV_EVENT_DECODER_CALLED = false;
     }
@@ -209,9 +217,13 @@ pub fn create_valid_device_desc_complex() -> gnwDeviceDescriptor {
         return true;
     }
     device_descriptor.api.system.routine.getParam = Some(system_get_param);
-    extern "C" fn system_set_param(_: u32, _: u32, _: u32, _: u32) -> bool {
+    extern "C" fn system_set_param(param: u32, sub_param: u32, param_index: u32, value: u32) -> bool {
         unsafe {
             DEV_SET_PARAM_CALLED = true;
+            DEV_SET_PARAM_PARAM_PARAM = param;
+            DEV_SET_PARAM_PARAM_SUB_PARAM = sub_param;
+            DEV_SET_PARAM_PARAM_PARAM_INDEX = param_index;
+            DEV_SET_PARAM_PARAM_VALUE = value;
         }
         return true;
     }
