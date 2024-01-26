@@ -1869,20 +1869,36 @@ fn validateEmitter_checkIncorrect_deviceNotStarted() {
     PRIVATE enum gnwDeviceError validateListenerInvocation(const size_t deviceId)
 */
 
+macro_rules! validateListenerInvocation_preconditions {
+    ($device_id:ident) => {
+        #[allow(unused_mut)] let mut $device_id: size_t = 0;
+        install_dummy_device(&$device_id, true);
+        let proc_id: procId_t = install_dummy_process();
+        assert_eq!($device_id, 0);
+        assert_eq!(proc_id, 0);
+        install_dummy_device_listener($device_id, proc_id);
+    };
+}
+
+#[allow(non_snake_case)]
+fn validateListenerInvocation_expect(device_id: size_t,
+                                     error: gnwDeviceError,
+                                     kernel_panic: bool) {
+
+    unsafe {
+        assert_eq!(validateListenerInvocation(device_id), error);
+        assert_eq!(KERNEL_PANIC_FLAG, kernel_panic);
+        KERNEL_PANIC_FLAG = false;
+    }
+}
+
 #[test_case]
 fn validateListenerInvocation_checkCorrect() {
     log("validateListenerInvocation_checkCorrect start\n\0");
 
-    let device_id: size_t = 0;
-    install_dummy_device(&device_id, true);
-    let proc_id: procId_t = install_dummy_process();
-    assert_eq!(device_id, 0);
-    assert_eq!(proc_id, 0);
-    install_dummy_device_listener(device_id, proc_id);
+    validateListenerInvocation_preconditions!(device_id);
     
-    unsafe {
-        assert_eq!(validateListenerInvocation(device_id), gnwDeviceError::GDE_NONE);
-    }
+    validateListenerInvocation_expect(device_id, gnwDeviceError::GDE_NONE, false);
     
     log("validateListenerInvocation_checkCorrect end\n\0");
 }
@@ -1891,17 +1907,13 @@ fn validateListenerInvocation_checkCorrect() {
 fn validateListenerInvocation_checkIncorrect_listenerNull() {
     log("validateListenerInvocation_checkIncorrect_listenerNull start\n\0");
 
-    let device_id: size_t = 0;
-    install_dummy_device(&device_id, true);
-    let proc_id: procId_t = install_dummy_process();
-    assert_eq!(device_id, 0);
-    assert_eq!(proc_id, 0);
-    install_dummy_device_listener(device_id, proc_id);
+    validateListenerInvocation_preconditions!(device_id);
     
     unsafe {
         devices[device_id as usize].listener = None;
-        assert_eq!(validateListenerInvocation(device_id), gnwDeviceError::GDE_NOT_FOUND);
     }
+
+    validateListenerInvocation_expect(device_id, gnwDeviceError::GDE_NOT_FOUND, false);
     
     log("validateListenerInvocation_checkIncorrect_listenerNull end\n\0");
 }
@@ -1910,19 +1922,13 @@ fn validateListenerInvocation_checkIncorrect_listenerNull() {
 fn validateListenerInvocation_checkIncorrect_decoderNull() {
     log("validateListenerInvocation_checkIncorrect_decoderNull start\n\0");
 
-    let device_id: size_t = 0;
-    install_dummy_device(&device_id, true);
-    let proc_id: procId_t = install_dummy_process();
-    assert_eq!(device_id, 0);
-    assert_eq!(proc_id, 0);
-    install_dummy_device_listener(device_id, proc_id);
+    validateListenerInvocation_preconditions!(device_id);
     
     unsafe {
         devices[device_id as usize].decoder = None;
-        assert_eq!(validateListenerInvocation(device_id), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
     }
+
+    validateListenerInvocation_expect(device_id, gnwDeviceError::GDE_UNKNOWN, true);
     
     log("validateListenerInvocation_checkIncorrect_decoderNull end\n\0");
 }
@@ -1931,19 +1937,13 @@ fn validateListenerInvocation_checkIncorrect_decoderNull() {
 fn validateListenerInvocation_checkIncorrect_noHolderProcId() {
     log("validateListenerInvocation_checkIncorrect_noHolderProcId start\n\0");
 
-    let device_id: size_t = 0;
-    install_dummy_device(&device_id, true);
-    let proc_id: procId_t = install_dummy_process();
-    assert_eq!(device_id, 0);
-    assert_eq!(proc_id, 0);
-    install_dummy_device_listener(device_id, proc_id);
+    validateListenerInvocation_preconditions!(device_id);
     
     unsafe {
         devices[device_id as usize].holder = NONE_PROC_ID;
-        assert_eq!(validateListenerInvocation(device_id), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-        KERNEL_PANIC_FLAG = false;
     }
+
+    validateListenerInvocation_expect(device_id, gnwDeviceError::GDE_UNKNOWN, true);
     
     log("validateListenerInvocation_checkIncorrect_noHolderProcId end\n\0");
 }
