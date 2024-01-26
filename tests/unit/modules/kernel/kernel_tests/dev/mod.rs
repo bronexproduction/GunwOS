@@ -1790,18 +1790,38 @@ fn k_dev_setParam_checkIncorrect_getParamReturnsFalse() {
     PRIVATE enum gnwDeviceError validateEmitter(const size_t * const devIdPtr)
 */
 
+macro_rules! validateEmitter_preconditions {
+    ($device_id:ident) => {
+        #[allow(unused_mut)] let mut $device_id: size_t = 0;
+        install_dummy_device(&$device_id, true);
+        assert_eq!($device_id, 0);
+    };
+}
+
+#[allow(non_snake_case)]
+fn validateEmitter_expect(device_id: Option<size_t>,
+                          error: gnwDeviceError,
+                          kernel_panic: bool) {
+
+    unsafe {
+        let did = device_id;
+        match device_id {
+            Some(dev_id) => assert_eq!(validateEmitter(&dev_id), error),
+            None         => assert_eq!(validateEmitter(null()), error),
+        }
+        assert_eq!(KERNEL_PANIC_FLAG, kernel_panic);
+        KERNEL_PANIC_FLAG = false;
+        assert_eq!(device_id, did);
+    }
+}
+
 #[test_case]
 fn validateEmitter_checkCorrect() {
     log("validateEmitter_checkCorrect start\n\0");
 
-    let device_id: size_t = 0;
-    install_dummy_device(&device_id, true);
-    assert_eq!(device_id, 0);
+    validateEmitter_preconditions!(device_id);
     
-    unsafe {
-        assert_eq!(validateEmitter(&device_id), gnwDeviceError::GDE_NONE);
-        assert_eq!(device_id, 0);
-    }
+    validateEmitter_expect(Some(device_id), gnwDeviceError::GDE_NONE, false);
     
     log("validateEmitter_checkCorrect end\n\0");
 }
@@ -1810,14 +1830,9 @@ fn validateEmitter_checkCorrect() {
 fn validateEmitter_checkIncorrect_devIdPtrNull() {
     log("validateEmitter_checkIncorrect_devIdPtrNull start\n\0");
 
-    let device_id: size_t = 0;
-    install_dummy_device(&device_id, true);
-    assert_eq!(device_id, 0);
+    validateEmitter_preconditions!(device_id);
     
-    unsafe {
-        assert_eq!(validateEmitter(null()), gnwDeviceError::GDE_UNKNOWN);
-        assert_eq!(KERNEL_PANIC_FLAG, true);
-    }
+    validateEmitter_expect(None, gnwDeviceError::GDE_UNKNOWN, true);
     
     log("validateEmitter_checkIncorrect_devIdPtrNull end\n\0");
 }
@@ -1826,18 +1841,10 @@ fn validateEmitter_checkIncorrect_devIdPtrNull() {
 fn validateEmitter_checkIncorrect_deviceIdInvalid() {
     log("validateEmitter_checkIncorrect_deviceIdInvalid start\n\0");
 
-    let mut device_id: size_t = 0;
-    install_dummy_device(&device_id, true);
-    assert_eq!(device_id, 0);
+    validateEmitter_preconditions!(device_id);
 
-    unsafe {
-        for did in INVALID_DEVICE_ID_LIST {
-            device_id = did;
-            assert_eq!(validateEmitter(&did), gnwDeviceError::GDE_UNKNOWN);
-            assert_eq!(did, device_id);
-            assert_eq!(KERNEL_PANIC_FLAG, true);
-            KERNEL_PANIC_FLAG = false;
-        }
+    for did in INVALID_DEVICE_ID_LIST {
+        validateEmitter_expect(Some(did), gnwDeviceError::GDE_UNKNOWN, true);
     }
     
     log("validateEmitter_checkIncorrect_deviceIdInvalid end\n\0");
@@ -1847,15 +1854,13 @@ fn validateEmitter_checkIncorrect_deviceIdInvalid() {
 fn validateEmitter_checkIncorrect_deviceNotStarted() {
     log("validateEmitter_checkIncorrect_deviceNotStarted start\n\0");
 
-    let device_id: size_t = 0;
-    install_dummy_device(&device_id, true);
-    assert_eq!(device_id, 0);
+    validateEmitter_preconditions!(device_id);
     
     unsafe {
         devices[device_id as usize].started = false;
-        assert_eq!(validateEmitter(&device_id), gnwDeviceError::GDE_INVALID_DEVICE_STATE);
-        assert_eq!(device_id, 0);
     }
+
+    validateEmitter_expect(Some(device_id), gnwDeviceError::GDE_INVALID_DEVICE_STATE, false);
     
     log("validateEmitter_checkIncorrect_deviceNotStarted end\n\0");
 }
