@@ -17,12 +17,10 @@
 enum gnwIpcError k_ipc_reply(const procId_t procId,
                              const struct gnwIpcReplyInfo * const absInfoPtr) {
     if (!absInfoPtr) {
-        OOPS("Null reply info pointer");
-        return GIPCE_UNKNOWN;
+        OOPS("Null reply info pointer", GIPCE_UNKNOWN);
     }
     if (!absInfoPtr->data.ptr) {
-        OOPS("Null reply buffer pointer");
-        return GIPCE_UNKNOWN;
+        OOPS("Null reply buffer pointer", GIPCE_UNKNOWN);
     }
     if (!absInfoPtr->data.bytes) {
         return GIPCE_INVALID_PARAMETER;
@@ -47,17 +45,14 @@ enum gnwIpcError k_ipc_reply(const procId_t procId,
         return GIPCE_INVALID_PARAMETER;
     }
     if (!reply->absReplyErrorPtr) {
-        OOPS("Unexpected reply error nullptr");
-        return GIPCE_UNKNOWN;
+        OOPS("Unexpected reply error nullptr", GIPCE_UNKNOWN);
     }
     if (!reply->absReplyBufferData.ptr) {
-        OOPS("Unexpected reply buffer nullptr");
-        return GIPCE_UNKNOWN;
+        OOPS("Unexpected reply buffer nullptr", GIPCE_UNKNOWN);
     }
     const procId_t senderProcId = reply->senderProcId;
     if (senderProcId <= KERNEL_PROC_ID) {
-        OOPS("Unexpected sender process ID on IPC reply");
-        return GIPCE_UNKNOWN;
+        OOPS("Unexpected sender process ID on IPC reply", GIPCE_UNKNOWN);
     }
 
     enum gnwIpcError e = GIPCE_NONE;

@@ -17,14 +17,15 @@
     Device driver error codes
 */
 enum gnwDriverError {
-    NO_ERROR        = 0,
-    UNINITIALIZED   = 1,        // Driver initialization failed or driver expected to be initialized before requested operation
-    START_FAILED    = 2,        // Driver start failed
-    IRQ_CONFLICT    = 3,        // Driver caused IRQ conflict with another driver previously installed
-    IRQ_INVALID     = 4,
-    LIMIT_REACHED   = 5,
-    ISR_MISSING     = 6,
-    UNKNOWN         = -1
+    GDRE_NONE               = 0,
+    GDRE_UNINITIALIZED      = 1,        // Driver initialization failed or driver expected to be initialized before requested operation
+    GDRE_START_FAILED       = 2,        // Driver start failed
+    GDRE_IRQ_CONFLICT       = 3,        // Driver caused IRQ conflict with another driver previously installed
+    GDRE_IRQ_INVALID        = 4,
+    GDRE_LIMIT_REACHED      = 5,
+    GDRE_ISR_MISSING        = 6,
+    GDRE_INVALID_DESCRIPTOR = 7,
+    GDRE_UNKNOWN            = -1
 };
 
 /*  Device driver configuration

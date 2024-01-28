@@ -6,6 +6,7 @@
 //
 
 #include "mem.h"
+#include <mem.h>
 #include <hal/proc/proc.h>
 #include <error/panic.h>
 
@@ -17,12 +18,13 @@ struct k_mem_zone {
 
 static struct k_mem_zone zoneForProc(const procId_t procId) {
     struct k_proc_process proc = k_proc_getInfo(procId);
-    
-    if (proc.state == PS_NONE) {
-        OOPS("Invalid process state");
-    }
-
     struct k_mem_zone result;
+    memzero(&result, sizeof(struct k_mem_zone));
+
+    if (proc.state == PS_NONE) {
+        OOPS("Invalid process state", result);
+    }
+    
     switch (proc.dpl) { 
         case DPL_0:
             result.startPtr = GDT_SEGMENT_START(r0data);
@@ -35,9 +37,7 @@ static struct k_mem_zone zoneForProc(const procId_t procId) {
             result.sizeBytes = GDT_LIMIT_BYTES(r3data);
             break;
         default:
-            result.startPtr = 0;
-            result.endPtr = 0;
-            result.sizeBytes = 0;
+            break;
     }
 
     return result;
@@ -45,7 +45,7 @@ static struct k_mem_zone zoneForProc(const procId_t procId) {
 
 ptr_t k_mem_absForProc(const procId_t procId, const ptr_t relPtr) {
     if (!relPtr) {
-        OOPS("Invalid pointer");
+        OOPS("Invalid pointer", nullptr);
     }
 
     return relPtr + (addr_t)zoneForProc(procId).startPtr;

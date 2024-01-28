@@ -93,8 +93,7 @@ static uint_16 divider() {
 static uint_8 init() {
 
     if (!k_pit_routine) {
-        OOPS("PIT routine unavailable");
-        return 0;
+        OOPS("PIT routine unavailable", 0);
     }
     
     uint_16 div = divider();

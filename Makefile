@@ -43,7 +43,7 @@ SYSTEM_SRC_DIR="$(SRC_DIR)/system"
 API_DIR="$(SYSTEM_SRC_DIR)/api"
 export APP_API_SRC_DIR="$(API_DIR)/app"
 export DRIVER_API_SRC_DIR="$(API_DIR)/driver"
-KERNEL_SRC_DIR="$(SYSTEM_SRC_DIR)/kernel"
+export KERNEL_SRC_DIR="$(SYSTEM_SRC_DIR)/kernel"
 APPS_SRC_DIR="$(SYSTEM_SRC_DIR)/user"
 TESTS_SRC_DIR="$(CUR_DIR)/tests"
 TESTS_BLACKBOX_DIR="$(TESTS_SRC_DIR)/blackbox"
@@ -78,7 +78,7 @@ export STDGUNW_LIB="$(LIB_BUILD_DIR)/stdgunw.o"
 WARN_PARAMS=-Wall -Wextra -Werror -Wno-error=cpp -Wno-error=unused-parameter
 export CFLAGS_GLOBAL=-m$(TARGET_BITS) -fdebug-prefix-map=$(BUILD_DIR)=. $(WARN_PARAMS)
 export CXXFLAGS_GLOBAL=$(CFLAGS_GLOBAL)
-RSFLAGS_GLOBAL=-g --target=$(SPEC_DIR)/$(TARGET_MACHINE)-$(TARGET_VENDOR)-$(TARGET_OS).json
+RSFLAGS_GLOBAL=-g --target=$(SPEC_DIR)/$(TARGET_MACHINE)-$(TARGET_VENDOR)-$(TARGET_OS).json --deny warnings
 export RSFLAGS_OBJECT=$(RSFLAGS_GLOBAL) --emit=obj --crate-type=lib
 export RSFLAGS_STATICLIB=$(RSFLAGS_GLOBAL) --crate-type=staticlib -Clinker=$(L) -C lto -O \
 	-Clink-arg=-L$(GCC_DIR)/lib/gcc/$(TARGET_MACHINE)-$(L_BINFORMAT)/$(GCC_VERSION) \
@@ -108,7 +108,7 @@ boot.gfb: pre_build
 	make -C $(SRC_DIR)/bootloader/preloader
 
 kernel.gfb: kernel.elf
-# Remove bytes before .text section
+# Remove bytes before .start section
 # TO BE IMPROVED - no fixed offset, removing debug data
 	dd if="$(KERNEL_BUILD_DIR)/kernel.elf" of="$(KERNEL_BUILD_DIR)/$@" bs=4096 skip=1
 

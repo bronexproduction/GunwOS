@@ -35,8 +35,7 @@ static bool init() {
 
         present = false;
         driveCount = 0;
-        OOPS("82077AA Driver initialization failed: controller not ready");
-        return false;
+        OOPS("82077AA Driver initialization failed: controller not ready", false);
     }
 
     uint_8 version;
@@ -48,8 +47,7 @@ static bool init() {
 
         present = false;
         driveCount = 0;
-        OOPS("82077AA Driver initialization failed: controller version check error");
-        return false;
+        OOPS("82077AA Driver initialization failed: controller version check error", false);
     }
     if (version != FDC_VERSION_82077AA) {
     
@@ -57,8 +55,7 @@ static bool init() {
 
         present = false;
         driveCount = 0;
-        OOPS("82077AA Driver initialization failed: controller not supported");
-        return false;
+        OOPS("82077AA Driver initialization failed: controller not supported", false);
     }
 
     present = true;

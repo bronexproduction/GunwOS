@@ -53,7 +53,7 @@ void sequencerSetMode(const enum modeOfOperation mode, uint_8 * const regContext
         // reg.memoryMode = BRS_MEMMODEREG_EXTENDED_MEMORY;
     } break;
     default: {
-        OOPS("Unsupported video mode");
+        OOPS("Unsupported video mode",);
     } break;
     }
 

@@ -104,8 +104,7 @@ static void bindingDestroyNotify(const struct binding * const bindingPtr, const 
             int2str(e, logMsg + 42);
             LOG(logMsg);
         }
-        OOPS("Unexpected kernel event broadcast error");
-        return;
+        OOPS("Unexpected kernel event broadcast error",);
     }
 }
 

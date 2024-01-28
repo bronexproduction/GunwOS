@@ -45,7 +45,20 @@
         {
             "label": "Build and run unit tests (QEMU)",
             "type": "shell",
-            "command": "bash scripts/qemu_run.sh build/gunwos.img test_unit",
+            "command": "bash scripts/qemu_run.sh build/gunwos.img test_unit build/kernel/test_unit.gfb",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "dependsOn": [
+                "Build for unit tests and image"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Build and debug unit tests (QEMU)",
+            "type": "shell",
+            "command": "bash scripts/qemu_run.sh build/gunwos.img test_unit_debug build/kernel/test_unit.gfb",
             "group": {
                 "kind": "build",
                 "isDefault": false

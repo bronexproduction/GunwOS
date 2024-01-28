@@ -28,13 +28,13 @@ static void loadDevice(struct gnwDeviceDescriptor (*descProvider)(),
     size_t id;
     const struct gnwDeviceDescriptor desc = descProvider();
     e = k_dev_install(&id, &desc);
-    if (e != NO_ERROR) { 
-        OOPS(installFailureMsg); 
+    if (e != GDRE_NONE) { 
+        OOPS(installFailureMsg,); 
     }
 
     e = k_dev_start(id);
-    if (e != NO_ERROR) { 
-        OOPS(startFailureMsg);
+    if (e != GDRE_NONE) { 
+        OOPS(startFailureMsg,);
     }
 }
 
@@ -44,7 +44,7 @@ static void loadFileSystem(struct gnwFileSystemDescriptor (*descProvider)(),
     const struct gnwFileSystemDescriptor desc = descProvider();
     e = k_stor_fileSys_install(&desc);
     if (e != SE_NONE) { 
-        OOPS(installFailureMsg);
+        OOPS(installFailureMsg,);
     }
 }
 

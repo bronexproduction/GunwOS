@@ -50,7 +50,7 @@ struct dispatchEntry {
 
 static struct dispatchEntry queue[MAX_QUEUE_LENGTH];
 struct dispatchEntry *k_que_currentDispatchEntry = 0;
-static bool running = 0;
+PRIVATE bool queueRunning = 0;
 
 static void dispatch(const ptr_t funcPtr,
                      const enum dispatchFuncType type, 
@@ -59,9 +59,8 @@ static void dispatch(const ptr_t funcPtr,
     
     #warning how to avoid duplicates?
 
-    if (!running) {
-        OOPS("Running queue required to dispatch items - aborting");
-        return;
+    if (!queueRunning) {
+        OOPS("Running queue required to dispatch items - aborting",);
     }
 
     size_t i;
@@ -74,8 +73,7 @@ static void dispatch(const ptr_t funcPtr,
     }
     
     if (i >= MAX_QUEUE_LENGTH) {
-        OOPS("Run queue capacity exceeded");
-        return;
+        OOPS("Run queue capacity exceeded",);
     }
 
     queue[i].func.type = type;
@@ -93,8 +91,7 @@ static void dispatch(const ptr_t funcPtr,
         queue[i].func.params[1].pArch = p1.pArch;
         break;
     default:
-        OOPS("Unexpected dispatched function type");
-        return;
+        OOPS("Unexpected dispatched function type",);
     }
     queue[i].next = 0;
 
@@ -123,7 +120,7 @@ void k_que_dispatch_arch_arch(const fPtr_arch_arch func, const addr_t p0, const 
 }
 
 void k_que_start() {
-    running = true;
+    queueRunning = true;
     while (1) {
         struct dispatchEntry *enqueued;
         CRITICAL_SECTION_BEGIN {
@@ -137,12 +134,10 @@ void k_que_start() {
         }
         
         if (!enqueued->reserved) {
-            OOPS("Enqueued item disabled");
-            return;
+            OOPS("Enqueued item disabled",);
         }
         if (!enqueued->func.ptr.f) {
-            OOPS("Null pointer queued");
-            return;
+            OOPS("Null pointer queued",);
         }
 
         switch (enqueued->func.type) {
@@ -157,8 +152,7 @@ void k_que_start() {
                                            enqueued->func.params[1].pArch);
             break;
         default:
-            OOPS("Unexpected queued function type");
-            return;
+            OOPS("Unexpected queued function type",);
         }
 
         CRITICAL_SECTION (

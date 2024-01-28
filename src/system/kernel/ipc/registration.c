@@ -46,8 +46,7 @@ enum gnwIpcError k_ipc_register(const procId_t procId,
         return GIPCE_INVALID_PARAMETER;
     }
     if (!absPathData.ptr) {
-        OOPS("Nullptr");
-        return GIPCE_UNKNOWN;
+        OOPS("Nullptr", GIPCE_UNKNOWN);
     }
     if (!absPathData.bytes || absPathData.bytes > GNW_PATH_IPC_MAX_LENGTH) {
         return GIPCE_INVALID_PATH;
@@ -96,8 +95,7 @@ enum gnwIpcError k_ipc_register(const procId_t procId,
 
     size_t index = freeListenerIndex();
     if (index >= MAX_IPC_LISTENER) {
-        OOPS("IPC listener limit reached");
-        return GIPCE_UNKNOWN;
+        OOPS("IPC listener limit reached", GIPCE_UNKNOWN);
     }
 
     ipcListenerRegister[index].procId = procId;

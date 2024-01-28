@@ -1163,12 +1163,12 @@ struct fdc_fddConfig {
     /*
         FDC base bus address
     */
-    const uint_16 base;
+    uint_16 base;
 
     /*
         FDC drive address
     */
-    const uint_8 drive;
+    uint_8 drive;
 
     /*
         Multi-track
@@ -1176,7 +1176,7 @@ struct fdc_fddConfig {
         1 - enabled
         0 - disabled
     */
-    const uint_8 mt;
+    uint_8 mt;
 
     /*
         Modified frequency modulation encoding used
@@ -1184,17 +1184,17 @@ struct fdc_fddConfig {
         1 - enabled (double-density)
         2 - disabled (single-density)
     */
-    const uint_8 mfm;
+    uint_8 mfm;
 
     /*
         FDD performance/reliability configuration
     */
-    const struct fdc_fddPerf perf;
+    struct fdc_fddPerf perf;
 
     /*
         Drive format information
     */
-    const struct fdc_fddFormat format;
+    struct fdc_fddFormat format;
 };
 
 /*

@@ -64,8 +64,8 @@ void k_pic_configure() {
 
 void k_pic_enableIRQ(const enum k_dev_irq num) {
 
-    if (num > 15) OOPS("Attempt to enable IRQ above supported range");
-    if (num > 7) OOPS("IRQ range not implemented yet");
+    if (num > 15) OOPS("Attempt to enable IRQ above supported range",);
+    if (num > 7) OOPS("IRQ range not implemented yet",);
 
     #warning IRQ > 7 not supported
     uint_16 port = BUS_PIC_MASTER_DATA;

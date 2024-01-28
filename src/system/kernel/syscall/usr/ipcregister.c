@@ -14,12 +14,8 @@
 enum gnwIpcError k_scr_usr_ipcRegister(const struct gnwIpcHandlerDescriptor * descPtr) {
 
     const procId_t procId = k_proc_getCurrentId();
-    SCLF_GET_VALID_ABS(const struct gnwIpcHandlerDescriptor *, descPtr, sizeof(struct gnwIpcHandlerDescriptor), {
-        return GIPCE_UNKNOWN;
-    });
-    SCLF_GET_VALID_ABS_NAMED(const gnwIpcPath, pathPtr, abs_descPtr->pathData.ptr, abs_descPtr->pathData.bytes, {
-        return GIPCE_UNKNOWN;
-    });
+    SCLF_GET_VALID_ABS(const struct gnwIpcHandlerDescriptor *, descPtr, sizeof(struct gnwIpcHandlerDescriptor), {}, GIPCE_UNKNOWN);
+    SCLF_GET_VALID_ABS_NAMED(const gnwIpcPath, pathPtr, abs_descPtr->pathData.ptr, abs_descPtr->pathData.bytes, {}, GIPCE_UNKNOWN);
     
     data_t absPathData;
     absPathData.ptr = (ptr_t)abs_pathPtr;

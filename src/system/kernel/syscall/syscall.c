@@ -72,7 +72,7 @@ __attribute__((naked, unused)) static void k_scl_syscall() {
     Handling error - Syscall function number over limit
 */
 __attribute__((naked, unused)) static void k_scl_syscall_functionOverLimitFailure() {
-    OOPS("Requested syscall function code over limit");
+    OOPS_NBR("Requested syscall function code over limit");
     __asm__ volatile ("jmp k_scl_syscall_end");
 }
 
@@ -80,7 +80,7 @@ __attribute__((naked, unused)) static void k_scl_syscall_functionOverLimitFailur
     Handling error - Syscall service routine unavailable 
 */
 __attribute__((naked, unused)) static void k_scl_syscall_serviceRoutineUnavailable() {
-    OOPS("Syscall function code unavailable");
+    OOPS_NBR("Syscall function code unavailable");
     __asm__ volatile ("jmp k_scl_syscall_end");
 }
 

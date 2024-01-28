@@ -11,6 +11,6 @@
     Callable variants of bus input/output functions
 */
 
-void outb(uint_16 port, uint_8 val) {
+void bus_outb(uint_16 port, uint_8 val) {
     k_bus_outb(port, val);
 }

@@ -33,7 +33,7 @@ void externalSetMode(const enum modeOfOperation mode, uint_8 * const regContext)
         //                BRE_MOR_IO_ADDRESS_SELECT; /* 0x23 (with ENABLE_RAM) */
     } break;
     default: {
-        OOPS("Unsupported video mode");
+        OOPS("Unsupported video mode",);
     } break;
     }
 

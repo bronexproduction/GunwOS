@@ -15,8 +15,7 @@
 
 static void clearListener(const size_t entryId) {
     if (entryId >= MAX_IPC_LISTENER) {
-        OOPS("Listener index out of bounds");
-        return;
+        OOPS("Listener index out of bounds",);
     }
     
     memzero(&ipcListenerRegister[entryId], sizeof(struct ipcListener));
@@ -31,23 +30,19 @@ void k_ipc_init() {
 
 static void failReply(const size_t token) {
     if (token >= MAX_IPC_TOKEN) {
-        OOPS("Unexpected IPC token on error");
-        return;
+        OOPS("Unexpected IPC token on error",);
     }
 
     const struct ipcReply * const reply = &ipcReplyRegister[token];
     if (reply->handlerProcId == NONE_PROC_ID) {
-        OOPS("Unexpected empty IPC slot on error");
-        return;
+        OOPS("Unexpected empty IPC slot on error",);
     }
     if (!reply->absReplyErrorPtr) {
-        OOPS("Unexpected reply error nullptr");
-        return;
+        OOPS("Unexpected reply error nullptr",);
     }
     const procId_t senderProcId = reply->senderProcId;
     if (senderProcId <= KERNEL_PROC_ID) {
-        OOPS("Unexpected sender process ID on IPC reply");
-        return;
+        OOPS("Unexpected sender process ID on IPC reply",);
     }
 
     *(reply->absReplyErrorPtr) = GIPCE_IGNORED;

@@ -27,12 +27,10 @@ static size_t freeReplyIndex() {
 
 static enum gnwIpcError validateQuery(const struct gnwIpcSenderQuery absQuery) {
     if (!absQuery.pathData.ptr) {
-        OOPS("IPC path nullptr");
-        return GIPCE_UNKNOWN;
+        OOPS("IPC path nullptr", GIPCE_UNKNOWN);
     }
     if ((absQuery.data.ptr != nullptr) != (absQuery.data.bytes != 0)) {
-        OOPS("IPC query data inconsistency");
-        return GIPCE_UNKNOWN;
+        OOPS("IPC query data inconsistency", GIPCE_UNKNOWN);
     }
     if (!absQuery.pathData.bytes || absQuery.pathData.bytes > GNW_PATH_IPC_MAX_LENGTH) {
         return GIPCE_INVALID_PATH;
@@ -145,18 +143,15 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
 
     if (endpointQuery.replySizeBytes) {
         if (!absQuery.replyData.ptr) {
-            OOPS("Unexpected null pointer to IPC reply data");
-            return GIPCE_UNKNOWN;
+            OOPS("Unexpected null pointer to IPC reply data", GIPCE_UNKNOWN);
         }
         if (!absQuery.replyErrPtr) {
-            OOPS("Unexpected null pointer to IPC reply error");
-            return GIPCE_UNKNOWN;
+            OOPS("Unexpected null pointer to IPC reply error", GIPCE_UNKNOWN);
         }
 
         endpointQuery.token = freeReplyIndex();
         if (endpointQuery.token >= MAX_IPC_TOKEN) {
-            OOPS("IPC reply table full");
-            return GIPCE_UNKNOWN;
+            OOPS("IPC reply table full", GIPCE_UNKNOWN);
         }
 
         ipcReplyRegister[endpointQuery.token].senderProcId = procId;

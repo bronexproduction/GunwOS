@@ -94,8 +94,7 @@ bool k_ipc_utl_pathNotificationValidate(data_t absPathData) {
 
 void k_ipc_utl_clearReply(const size_t entryId) {
     if (entryId >= MAX_IPC_TOKEN) {
-        OOPS("Reply index out of bounds");
-        return;
+        OOPS("Reply index out of bounds",);
     }
     
     memzero(&ipcReplyRegister[entryId], sizeof(struct ipcReply));

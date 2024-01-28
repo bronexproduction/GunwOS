@@ -1,7 +1,7 @@
-ENTRY("__kernel_start")
+ENTRY("_test_entry")
 
 SECTIONS {
-    . = 0x00010000;
+    . = 0x00400000;
 
     .start : {
         *(.start)
@@ -18,13 +18,4 @@ SECTIONS {
     .data ALIGN (0x1000) : {
         *(.data)
     }
-
-    . = 0x00100000;
-    .bss : {
-_BSS_START_ = .;
-   *(.bss .bss.*)
-   *(COMMON)
-_BSS_END_ = .;
-    }
-    . = 0x00200000;
 }

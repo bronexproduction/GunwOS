@@ -16,21 +16,22 @@
 #include "../proc/proc.h"
 
 struct fdc_fddConfig configFor(const uint_32 driveID) {
+    struct fdc_fddConfig result;
+    memzero(&result, sizeof(struct fdc_fddConfig));
+
     if (driveID >= FDC_FDD_SUPPORT_COUNT) {
-        OOPS("Drive identifier over limit");
-        __builtin_unreachable();
+        OOPS("Drive identifier over limit", result);
     }
 
-    uint_16 base = FDC_BUS_BASE;
-    uint_8 drive = driveID % FDC_FDD_SUPPORT_COUNT;
-    uint_8 mt = BIT_MT;
-    uint_8 mfm = BIT_MFM;
-    struct fdc_fddPerf drivePerf = perf[driveID];
-    struct fdc_fddFormat format;
-    format.gpl = 0x1b;
-    format.sys = driveGeometry(driveID);
+    result.base = FDC_BUS_BASE;
+    result.drive = driveID % FDC_FDD_SUPPORT_COUNT;
+    result.mt = BIT_MT;
+    result.mfm = BIT_MFM;
+    result.perf = perf[driveID];
+    result.format.gpl = 0x1b;
+    result.format.sys = driveGeometry(driveID);
 
-    return (struct fdc_fddConfig) { base, drive, mt, mfm, drivePerf, format };
+    return result;
 
     #warning not implemented yet
 }

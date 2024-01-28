@@ -63,7 +63,7 @@ void graphicsSetMode(const enum modeOfOperation mode) {
         reg.colorDontCare = 0x00;
     } break;
     default: {
-        OOPS("Unsupported video mode");
+        OOPS("Unsupported video mode",);
     } break;
     }
 

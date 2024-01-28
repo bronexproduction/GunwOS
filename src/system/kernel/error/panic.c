@@ -117,4 +117,5 @@ void __attribute__((cdecl)) k_oops(const char *reason, uint_32 errCode) {
     } 
 
     k_cpu_halt();
+    __builtin_unreachable();
 }

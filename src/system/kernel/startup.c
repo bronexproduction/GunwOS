@@ -33,6 +33,6 @@ void k_startup() {
     START("0:GNWSH.ELF");       /* Command line     - process ID: 3 */
 
     if (err != GCE_NONE) {
-        OOPS("Unable to start core modules");
+        OOPS("Unable to start core modules",);
     }
 }

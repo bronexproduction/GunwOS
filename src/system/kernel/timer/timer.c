@@ -75,7 +75,7 @@ time_t k_tmr_getMs() {
 void k_tmr_regMsHandler(void (*handler)()) {
     CHECKPTR(handler);
     if (msHandlerCount >= MAX_MS_HANDLERS) {
-        OOPS("Max auxiliary tick handler count reached");
+        OOPS("Max auxiliary tick handler count reached",);
     }
 
     auxMsHandlers[msHandlerCount++] = handler;

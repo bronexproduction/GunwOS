@@ -118,8 +118,7 @@ enum fdc_opStatus proc_recalibrate(const uint_16 base, const uint_8 drive) {
 
     if (!waitForInterrupt(FDC_IRQDELAY_DEFAULT)) {
         proc_stopMotor(base, drive);
-        OOPS("recalibrate: wait for interrupt failed");
-        return OPSTATUS_INTEXP;
+        OOPS("recalibrate: wait for interrupt failed", OPSTATUS_INTEXP);
     }
 
     uint_8 sr0, pcn;
