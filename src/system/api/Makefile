@@ -1,45 +1,26 @@
-CFLAGS=-std=c11 -c -ffreestanding -mno-red-zone -ggdb -I $(STDGUNW_INCLUDE_DIR) -I $(API_INCLUDE_DIR) $(CFLAGS_GLOBAL)
-CXXFLAGS=-std=c++11 -c -ffreestanding -mno-red-zone -ggdb $(CXXFLAGS_GLOBAL)
-RSFLAGS=$(RSFLAGS_GLOBAL)
+.PHONY: all clean
 
-CFLAGS_APP=$(CFLAGS)
-CXXFLAGS_APP=$(CXXFLAGS)
-RSFLAGS_APP=$(RSFLAGS)
+all: gunwapi_driver gunwapi_driver_kernel gunwapi_app gunwapi_app_kernel
 
-CFLAGS_KERNEL=$(CFLAGS) -D_GUNWAPI_KERNEL
-CXXFLAGS_KERNEL=$(CXXFLAGS) -D_GUNWAPI_KERNEL
-RSFLAGS_KERNEL=$(RSFLAGS)
+gunwapi_driver:
+ifeq ("$(wildcard $(LIB_BUILD_DIR)/lib$@.a)","")
+	make -C $(DRIVER_API_SRC_DIR) driver
+	mv $(DRIVER_API_SRC_DIR)/$@.o $(DRIVER_API_SRC_DIR)/lib$@.a $(LIB_BUILD_DIR)/
+endif
 
-LFLAGS=-m$(L_OUTFORMAT) -i
-
-O_APP_DIR_LISTING=find . -name '*_app.o' -type f
-O_KERNEL_DIR_LISTING=find . -name '*_kernel.o' -type f
-EXEC_TERMINATOR=\;
-
-TARGET_O=gunwapi
-
-.PHONY: all app kernel
-
-all: app kernel clean_o
-
-app: $(TARGET_O)_app.o
-kernel: $(TARGET_O)_kernel.o
-
-$(TARGET_O)_app.o: build_app_o
-	$(L) $(LFLAGS) -o $@ $(shell $(O_APP_DIR_LISTING))
+gunwapi_driver_kernel:
+	make -C $(DRIVER_API_SRC_DIR) kernel
+	mv $(DRIVER_API_SRC_DIR)/$@.o $(LIB_BUILD_DIR)/
 	
-$(TARGET_O)_kernel.o: build_kernel_o
-	$(L) $(LFLAGS) -o $@ $(shell $(O_KERNEL_DIR_LISTING))
+gunwapi_app:
+ifeq ("$(wildcard $(LIB_BUILD_DIR)/lib$@.a)","")
+	make -C $(APP_API_SRC_DIR) app
+	mv $(APP_API_SRC_DIR)/$@.o $(APP_API_SRC_DIR)/lib$@.a $(LIB_BUILD_DIR)/
+endif
 
-build_app_o:
-	$(C_DIR_LISTING) -exec $(C) $(CFLAGS_APP) -o {}_app.o {} $(EXEC_TERMINATOR)
-	$(CXX_DIR_LISTING) -exec $(CXX) $(CXXFLAGS_APP) -o {}_app.o {} $(EXEC_TERMINATOR)
-	$(RS_DIR_LISTING) -exec $(RUSTC) $(RSFLAGS_APP) -o {}_app.o {} $(EXEC_TERMINATOR)
+gunwapi_app_kernel:
+	make -C $(APP_API_SRC_DIR) kernel
+	mv $(APP_API_SRC_DIR)/$@.o $(LIB_BUILD_DIR)/
 
-build_kernel_o:
-	$(C_DIR_LISTING) -exec $(C) $(CFLAGS_KERNEL) -o {}_kernel.o {} $(EXEC_TERMINATOR)
-	$(CXX_DIR_LISTING) -exec $(CXX) $(CXXFLAGS_KERNEL) -o {}_kernel.o {} $(EXEC_TERMINATOR)
-	$(RS_DIR_LISTING) -exec $(RUSTC) $(RSFLAGS_KERNEL) -o {}_kernel.o {} $(EXEC_TERMINATOR)
-
-clean_o:
-	find . -type f -name '*.o' ! -name '$(TARGET_O)_app.o' -delete ! -name '$(TARGET_O)_kernel.o' -delete
+clean:
+	find $(SRC_DIR)/ -type f -name '*.o' -delete

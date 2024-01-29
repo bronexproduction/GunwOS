@@ -9,12 +9,12 @@
 #define PROC_H
 
 #include <types.h>
+#include <proc.h>
 #include <hal/cpu/cpu.h>
 #include <hal/gdt/gdt.h>
 #include <src/_gunwrlp.h>
 
-#define MAX_PROC 16
-#define NONE_PROC_ID -2
+#define MAX_PROC 5
 #define KERNEL_PROC_ID -1
 
 struct k_proc_descriptor {
@@ -28,6 +28,7 @@ enum k_proc_error {
     PE_LIMIT_REACHED,
     PE_ACCESS_VIOLATION,
     PE_OPERATION_FAILED,
+    PE_INVALID_PARAMETER,
     PE_IGNORED,
     PE_UNKNOWN
 };
@@ -39,6 +40,11 @@ enum k_proc_state {
     PS_RUNNING,
     PS_BLOCKED,
     PS_FINISHED
+};
+
+enum k_proc_lockType {
+    PLT_EVENT   = 1 << 0,
+    PLT_IPC     = 1 << 1
 };
 
 struct k_proc_process {
@@ -61,6 +67,11 @@ struct k_proc_process {
 procId_t k_proc_getCurrentId();
 
 /*
+    Returns whether the process identifier belongs to an user process
+*/
+bool k_proc_idIsUser(const procId_t procId);
+
+/*
     Returns information about the process with given procId
 */
 struct k_proc_process k_proc_getInfo(const procId_t procId);
@@ -76,8 +87,18 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const);
 
     Params:
     * procId - Identifier of the process
+    * lockType - type/source of the lock
 */
-void k_proc_lockIfNeeded(const procId_t procId);
+void k_proc_lock(const procId_t procId, const enum k_proc_lockType lockType);
+
+/*
+    Removing a lock from the process and resuming alive process if able
+
+    Params:
+    * procId - identifier of the process to be resumed
+    * lockType - type of lock to be released
+*/
+void k_proc_unlock(const procId_t procId, const enum k_proc_lockType lockType);
 
 /*
     Stopping and cleaning up after running process
@@ -109,13 +130,24 @@ void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const procId_t currentP
 
     Params:
     * procId - identifier of the process funPtr() is going to be executed in
-    * runLoop - pointer to the process' run loop relative to procId process memory
     * funPtr - function pointer relative to procId process memory
     * p* - parameters of various sizes
+    * pSizeBytes - buffer size in bytes (in case p is a pointer)
+    * pDecodedSizeBytes - size in bytes of the decoded object 
+                          (can be smaller than pSizeBytes, as decoded object fields may point directly to buffer offsets)
+    * encoder - function converting object pointed by 'p' to a bytes array of 'pSizeBytes' bytes
+    * decoder - function converting array of bytes of 'pSizeBytes' bytes to an object (reverse encoder)
+    
+    Note: encoder/decoder has to align object pointers after copying data to the new location
     
     Return value: enum k_proc_error - PE_NONE on success
 */
-enum k_proc_error k_proc_callback_invoke_32(const procId_t procId, const struct gnwRunLoop * const runLoop, void (* const funPtr)(int_32), const int_32 p0);
-enum k_proc_error k_proc_callback_invoke_32_8(const procId_t procId, const struct gnwRunLoop * const runLoop, void (* const funPtr)(int_32, int_8), const int_32 p0, const int_8 p1);
+enum k_proc_error k_proc_callback_invoke_ptr(const procId_t procId,
+                                             void (* const funPtr)(ptr_t),
+                                             const ptr_t p,
+                                             const size_t pSizeBytes,
+                                             const size_t pDecodedSizeBytes,
+                                             const gnwRunLoopDataEncodingRoutine encoder,
+                                             const gnwRunLoopDataEncodingRoutine decoder);
 
 #endif // PROC_H

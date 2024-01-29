@@ -10,9 +10,9 @@
 //  
 //
 
-#include <driver/gunwbus.h>
-#include <driver/gunwdrv.h>
-#include <driver/gunwdevemitter.h>
+#include <gunwbus.h>
+#include <gunwdrv.h>
+#include <gunwdevemitter.h>
 #include <gunwkeyboard.h>
 
 #include <driver/driver.h>
@@ -88,10 +88,23 @@
 #define KBD_STAT_TIM        0x40    /* Timeout bit (TIM) */
 #define KBD_STAT_PARERR     0x80    /* Parity error bit (PARE) */
 
+static void emitEvent(const int_32 type, const char data) {
+    enum gnwDeviceError err;
+    struct gnwDeviceEvent event;
+    event.type = type;
+    event.data = (ptr_t)&data;
+    event.dataSizeBytes = sizeof(char);
+
+    err = emit(&event);
+    if (err != GDE_NONE) {
+        OOPS("Error emitting keyboard event",);
+    }
+}
+
 ISR(
     /* Checking output buffer status */
     if (!rdb(KBD_BUS_STATUS) & KBD_STAT_OUTB) {
-        OOPS("Keyboard output buffer empty on keyboard interrupt");
+        OOPS_NBR("Keyboard output buffer empty on keyboard interrupt");
         ISR_END
     }
 
@@ -103,15 +116,11 @@ ISR(
 
         MSB contains information whether key was pressed or released
     */
-    enum gnwDeviceError err;
     if (c & 0b10000000) {
-        err = emit_u8(GKEC_KEY_UP, c & 0b01111111);
+        emitEvent(GKEC_KEY_UP, c & 0b01111111);
     }
     else {
-        err = emit_u8(GKEC_KEY_DOWN, c);
-    }
-    if (err != GDE_NONE) {
-        OOPS("Error emitting keyboard event");
+        emitEvent(GKEC_KEY_DOWN, c);
     }
 )
 
@@ -120,9 +129,7 @@ static struct gnwDriverConfig desc() {
 }
 
 static struct gnwDeviceUHA uha() {
-    struct gnwDeviceUHA uha;
-
-    uha.event.desc.eventDataFormat = GEF_U32_U8;
+    struct gnwDeviceUHA uha = { 0 };
 
     return uha;
 }

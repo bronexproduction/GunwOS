@@ -78,6 +78,24 @@
     "executor": "c",
     "memory_resource": "c",
     "scoped_allocator": "c",
-    "rope": "c"
-  }
+    "rope": "c",
+    "filesystem": "c",
+    "fstream": "c",
+    "deque": "c",
+    "map": "c",
+    "unordered_map": "c",
+    "future": "c",
+    "queue": "c",
+    "stack": "c",
+    "__hash_table": "c",
+    "__tree": "c",
+    "charconv": "c",
+    "forward_list": "c",
+    "ranges": "c",
+    "span": "c",
+    "numbers": "c",
+    "__node_handle": "c",
+    "__memory": "c"
+  },
+  "cmake.configureOnOpen": false
 }

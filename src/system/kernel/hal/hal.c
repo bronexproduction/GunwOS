@@ -21,7 +21,7 @@ extern void k_pic_configure();
 extern void k_idt_loadDefault();
 extern void k_proc_init();
 
-static struct isrEntry {
+PRIVATE struct isrEntry {
     size_t devId;
     void (*routine)();
 } isrReg[DEV_IRQ_LIMIT];
@@ -29,7 +29,7 @@ static struct isrEntry {
 const size_t *k_hal_servicedDevIdPtr;
 
 void k_hal_init() {
-    memnull(isrReg, sizeof(struct isrEntry) * DEV_IRQ_LIMIT);
+    memzero(isrReg, sizeof(struct isrEntry) * DEV_IRQ_LIMIT);
 
     k_cpu_init();
 
@@ -57,10 +57,10 @@ bool k_hal_isIRQRegistered(uint_8 num) {
 
 enum gnwDriverError k_hal_install(const size_t devId, const struct gnwDriverConfig driver) {
     if (!driver.isr) {
-        return ISR_MISSING;
+        return GDRE_ISR_MISSING;
     }
     if (k_hal_isIRQRegistered(driver.irq)) {
-        return IRQ_CONFLICT;
+        return GDRE_IRQ_CONFLICT;
     }
 
     isrReg[driver.irq].devId = devId;
@@ -69,7 +69,7 @@ enum gnwDriverError k_hal_install(const size_t devId, const struct gnwDriverConf
     extern void k_pic_enableIRQ(const enum k_dev_irq);
     k_pic_enableIRQ(driver.irq);
     
-    return NO_ERROR;
+    return GDRE_NONE;
 }
 
 enum failReason_t {
@@ -82,11 +82,11 @@ enum failReason_t {
 static void fail(const enum failReason_t reason) {
     switch (reason) {
     case FAIL_REASON_IRQ_NOT_FOUND:
-        OOPS("Driver for specified IRQ not found"); break;
+        OOPS("Driver for specified IRQ not found",); break;
     case FAIL_REASON_IRQ_ABOVE_LIMIT:
-        OOPS("Requested service of IRQ above limit"); break;
+        OOPS("Requested service of IRQ above limit",); break;
     default:
-        OOPS("Unknown IRQ handling failure"); break;
+        OOPS("Unknown IRQ handling failure",); break;
     }
 }
 

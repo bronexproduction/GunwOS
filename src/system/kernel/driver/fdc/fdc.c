@@ -10,7 +10,7 @@
 //
 
 #include <gunwdev.h>
-#include <driver/gunwdrv.h>
+#include <gunwdrv.h>
 #include "common/data.h"
 #include "common/io.h"
 #include "cmd/cmd.h"
@@ -35,8 +35,7 @@ static bool init() {
 
         present = false;
         driveCount = 0;
-        OOPS("82077AA Driver initialization failed: controller not ready");
-        return false;
+        OOPS("82077AA Driver initialization failed: controller not ready", false);
     }
 
     uint_8 version;
@@ -48,8 +47,7 @@ static bool init() {
 
         present = false;
         driveCount = 0;
-        OOPS("82077AA Driver initialization failed: controller version check error");
-        return false;
+        OOPS("82077AA Driver initialization failed: controller version check error", false);
     }
     if (version != FDC_VERSION_82077AA) {
     
@@ -57,8 +55,7 @@ static bool init() {
 
         present = false;
         driveCount = 0;
-        OOPS("82077AA Driver initialization failed: controller not supported");
-        return false;
+        OOPS("82077AA Driver initialization failed: controller not supported", false);
     }
 
     present = true;
@@ -108,10 +105,12 @@ static struct gnwDriverConfig desc() {
 static struct gnwDeviceUHA uha() {
     struct gnwDeviceUHA uha;
 
-    uha.fdc.routine.drivePresent = uha_drivePresent;
-    uha.fdc.routine.driveGeometry = uha_driveGeometry;
-    
-    uha.storage.routine.read = uha_read;
+    uha.storCtrl.routine.drivePresent = uha_drivePresent;
+    uha.storCtrl.routine.driveGeometry = uha_driveGeometry;
+    uha.storCtrl.routine.read = uha_read;
+    uha.storCtrl.desc.driveCount = FDC_FDD_PER_CONTROLLER;
+    uha.storCtrl.desc.removable = false;
+    uha.storCtrl.desc.removableMedia = true;
 
     return uha;
 }

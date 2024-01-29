@@ -6,14 +6,13 @@
 //
 
 #include <syscall/func.h>
+#include <hal/proc/proc.h>
 #include <dev/dev.h>
-#include <error/panic.h>
 
-enum gnwDeviceError k_scr_usr_devGetByType(const enum gnwDeviceType deviceType, struct gnwDeviceUHADesc * const descriptor) {
-    const ptr_t absDescriptorPtr = k_scl_func_getValidAbsoluteForCurrentProc((const ptr_t)descriptor, sizeof(struct gnwDeviceUHADesc));
-    if (!absDescriptorPtr) {
-        OOPS("Invalid parameter");
-    }
+enum gnwDeviceError k_scr_usr_devGetByType(const enum gnwDeviceType deviceType, struct gnwDeviceUHADesc * const descriptorPtr) {
+    const procId_t procId = k_proc_getCurrentId();
+    
+    SCLF_GET_VALID_ABS(const ptr_t, descriptorPtr, sizeof(struct gnwDeviceUHADesc), {}, GDE_UNKNOWN);
 
-    return k_dev_getByType(deviceType, (struct gnwDeviceUHADesc * const)absDescriptorPtr);
+    return k_dev_getByType(deviceType, (struct gnwDeviceUHADesc * const)abs_descriptorPtr);
 }

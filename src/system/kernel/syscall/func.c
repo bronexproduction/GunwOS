@@ -12,18 +12,14 @@
 
 ptr_t k_scl_func_getValidAbsoluteForProc(const procId_t procId, const ptr_t relPtr, const size_t refSize) {
     if (!relPtr) {
-        OOPS("Null pointer referenced");
+        OOPS("Null pointer referenced", nullptr);
     }
 
     const ptr_t absPtr = k_mem_absForProc(procId, (const ptr_t)relPtr);
     
     if (!k_mem_bufInZoneForProc(procId, absPtr, refSize)) {
-        OOPS("Access violation");
+        OOPS("Access violation", nullptr);
     }
 
     return absPtr;
-}
-
-ptr_t k_scl_func_getValidAbsoluteForCurrentProc(const ptr_t relPtr, const size_t refSize) {
-    return k_scl_func_getValidAbsoluteForProc(k_proc_getCurrentId(), relPtr, refSize);
 }

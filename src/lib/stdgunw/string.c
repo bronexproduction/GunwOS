@@ -40,7 +40,7 @@ void strprefix(const char * const s, size_t l, char * const out) {
         return;
     }
 
-    memnull(out, (l + 1) * sizeof(char));
+    memzero(out, (l + 1) * sizeof(char));
 
     for (size_t i = 0; i < l; ++i) {
         if (s[i]) {
@@ -49,18 +49,61 @@ void strprefix(const char * const s, size_t l, char * const out) {
     }
 }
 
-void strreplace(char * s, char bef, char aft) {
-    while (*s) (*s == bef) ? *(s++) = aft : *++s;
+void strreplace(char * const s, const char bef, const char aft) {
+    strreplacel(s, strlen(s), bef, aft);
 }
 
-int_32 str2int(const char * const c, uint_8 * const err) {
-    size_t len = -1;        // number length
+void strreplacel(char * const s, const size_t sLen, const char bef, const char aft) {
+    for (size_t i = 0; i < sLen; ++i) {
+        if (*(s + i) == bef) {
+            *(s + i) = aft;
+        }
+    }
+}
+
+int_32 strfindl(const char * const where, const int_32 whereLen, const char * const what, const int_32 whatLen) {
+    if ((whereLen <= 0) || (whatLen <= 0) || (whatLen > whereLen)) {
+        return STR_NOT_FOUND;
+    }
+    
+    int_32 whatLookup = 0;
+    int_32 currentIndex = 0;
+    const int_32 indexOfLastHope = whereLen - whatLen;
+
+    for (; (currentIndex < whereLen) && (whatLookup != whatLen); ++currentIndex) {
+        if (where[currentIndex] == what[whatLookup]) {
+            ++whatLookup;
+        } else {
+            if (whatLookup) --currentIndex;
+            if (currentIndex >= indexOfLastHope) break;
+            whatLookup = 0;
+        }
+    }
+
+    return (whatLookup == whatLen) ? (currentIndex - whatLen) : STR_NOT_FOUND;
+}
+
+int_32 str2int(const char * const c, bool * const err) {
+    return str2intl(c, strlen(c), err);
+}
+
+int_32 str2intl(const char * const s, const size_t sLen, bool * const err) {
+    if (!sLen) {
+        if (err) {
+            *err = true;
+        }
+        return 0;
+    }
+
     int_8 negative = 0;     // is negative
     size_t offset = 0;      // offset from start where the actual number begins
     uint_8 base;            // numeral system base
 
     char prefixBuffer[3];
-    strprefix(c, 2, prefixBuffer);
+    memzero(prefixBuffer, 3);
+    if (sLen >= 2) {
+        strprefix(s, 2, prefixBuffer);
+    }
 
     if (!strcmp(prefixBuffer, "0x")) {            // Hex
         base = 16;
@@ -69,7 +112,7 @@ int_32 str2int(const char * const c, uint_8 * const err) {
         base = 2;
         offset = 2;
     } else {                                        // Decimal
-        if (*c == '-') {                            // Negative decimal
+        if (*s == '-') {                            // Negative decimal
            offset = 1;
            negative = 1;
         }
@@ -77,11 +120,10 @@ int_32 str2int(const char * const c, uint_8 * const err) {
         base = 10;
     }
 
-    while ((c+offset)[++len]);      // Calculate number length
-
+    size_t len = sLen - offset;     // number length
     if (!len) {                     // if there is no number
         if (err) {                  // and if error pointer is set
-            *err = 1;               // set error flag
+            *err = true;            // set error flag
         }
 
         return 0;
@@ -90,11 +132,11 @@ int_32 str2int(const char * const c, uint_8 * const err) {
     int_32 result = 0;
 
     for (size_t i = 0; i < len; i++) {
-        char curr = (c+offset)[i];
+        char curr = (s+offset)[i];
         
         if (!charisnum(curr, base)) {   // Check if character is correct numeral
             if (err) {                  // if not and if error pointer is set
-                *err = 1;               // set error flag
+                *err = true;               // set error flag
             }
             
             return 0;
@@ -104,7 +146,7 @@ int_32 str2int(const char * const c, uint_8 * const err) {
     }
 
     if (err) {
-        *err = 0;
+        *err = false;
     }
 
     return negative ? -result : result;

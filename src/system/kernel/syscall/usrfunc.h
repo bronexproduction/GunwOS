@@ -8,11 +8,12 @@
 #ifndef USRFUNC_H
 #define USRFUNC_H
 
-#include <driver/gunwdrv.h>
+#include <gunwdrv.h>
 #include <gunwdev.h>
-#include <gunwfug.h>
-#include <gunwctrl.h>
+#include <src/_gunwipc.h>
+#include <src/_gunwctrl.h>
 #include <src/_gunwrlp.h>
+#include <gunwfug.h>
 
 /*
     User-level system calls
@@ -22,15 +23,14 @@
     Code - 0x00
     Function - START
 */
-__attribute__((naked)) enum gnwCtrlError k_scr_start(const char * const path,
-                                                     const size_t pathLen);
+__attribute__((naked)) void k_scr_start(const struct gnwCtrlStartDescriptor * const);
 
 /*
     Code - 0x01
-    Function - DEBUG_PRINT
+    Function - LOG
 */
-__attribute__((naked)) void k_scr_debugPrint(const char * const buffer,
-                                             const size_t bufLen);
+__attribute__((naked)) void k_scr_log(const char * const msg,
+                                      const size_t bytes);
 
 /*
     Code - 0x02
@@ -49,13 +49,25 @@ __attribute__((naked)) void k_scr_exit(const int_32 status);
     Code - 0x04
     Function - WAIT_FOR_EVENT
 */
-__attribute__((naked)) void k_scr_waitForEvent(const struct gnwRunLoop * const runLoop);
+__attribute__((naked)) void k_scr_waitForEvent();
 
 /*
     Code - 0x05
     Function - TIME_MS
 */
 __attribute__((naked)) time_t k_scr_timeMs();
+
+/*
+    Code - 0x06
+    Function - IPC_SEND
+*/
+__attribute__((naked)) enum gnwIpcError k_scr_ipcSend(const struct gnwIpcSenderQuery * const queryPtr);
+
+/*
+    Code - 0x07
+    Function - IPC_REGISTER
+*/
+__attribute__((naked)) enum gnwIpcError k_scr_ipcRegister(const struct gnwIpcHandlerDescriptor * const desc);
 
 /*
     Code - 0x08
@@ -86,7 +98,8 @@ __attribute__((naked)) void k_scr_devRelease(const uint_32);
     Function - DEV_MEM_WRITE
 */
 __attribute__((naked)) enum gnwDeviceError k_scr_devMemWrite(const size_t,
-                                                             const void * const);
+                                                             const ptr_t,
+                                                             const range_addr_t * const);
 
 /*
     Code - 0x0d
@@ -99,7 +112,47 @@ __attribute__((naked)) void k_scr_fug(const enum gnwFugCode);
     Function - DEV_LISTEN
 */
 __attribute__((naked)) enum gnwDeviceError k_scr_devListen(const size_t identifier,
-                                                           const union gnwEventListener listener,
-                                                           const struct gnwRunLoop * const runLoop);
+                                                           const gnwDeviceEventListener listener,
+                                                           const gnwDeviceEventDecoder decoder);
+
+/*
+    Code - 0x0f
+    Function - DEV_GET_PARAM
+*/
+__attribute__((naked)) enum gnwDeviceError k_scr_devGetParam(const size_t deviceId,
+                                                             const struct gnwDeviceParamDescriptor * const paramDescriptor,
+                                                             size_t * const result);
+
+/*
+    Code - 0x10
+    Function - DEV_SET_PARAM
+*/
+__attribute__((naked)) enum gnwDeviceError k_scr_devSetParam(const size_t deviceId,
+                                                             const struct gnwDeviceParamDescriptor * const paramDescriptor,
+                                                             const size_t value);
+
+/*
+    Code - 0x11
+    Function - RUNLOOP_GET_ITEM
+*/
+__attribute__((naked)) enum gnwRunLoopError k_scr_runLoopGetItem(struct gnwRunLoopDispatchItem * const itemPtr);
+
+/*
+    Code - 0x12
+    Function - RUNLOOP_GET_DATA
+*/
+__attribute__((naked)) enum gnwRunLoopError k_scr_runLoopGetData(ptr_t dataBufferPtr);
+
+/*
+    Code - 0x13
+    Function - IPC_REPLY
+*/
+__attribute__((naked)) enum gnwIpcError k_scr_ipcReply(const ptr_t replyBufferPtr, const size_t replySizeBytes, const struct gnwIpcReplyInfo * infoPtr);
+
+/*
+    Code - 0x14
+    Function - YIELD
+*/
+__attribute__((naked)) void k_scr_yield();
 
 #endif // USRFUNC_H

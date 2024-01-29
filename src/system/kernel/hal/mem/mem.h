@@ -11,10 +11,10 @@
 #include <defs.h>
 #include <types.h>
 
-#define MEM_XMS_START               MiB(1)
-#define MEM_KERNEL_START            MEM_XMS_START
-#define MEM_KERNEL_RESERVED_BYTES   MiB(2)
-#define MEM_MMIO_RESERVED_BYTES     MiB(256)
+#define MEM_XMS_START                   MiB(1)
+#define MEM_KERNEL_XMS_START            MEM_XMS_START
+#define MEM_KERNEL_XMS_RESERVED_BYTES   MiB(3)
+#define MEM_MMIO_RESERVED_BYTES         MiB(256)
 
 /*
     Returns absolute memory address 

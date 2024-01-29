@@ -8,7 +8,7 @@
 #ifndef DRVFUNC_H
 #define DRVFUNC_H
 
-#include <driver/gunwdrv.h>
+#include <gunwdrv.h>
 #include <gunwfug.h>
 
 /*
@@ -31,12 +31,6 @@ __attribute__((naked)) void k_scr_wrb(const int_8 data);
     Code - 0x02
     Function - EMIT_VOID
 */
-__attribute__((naked)) enum gnwDeviceError k_scr_emit_void(const int_32 type);
-
-/*
-    Code - 0x03
-    Function - EMIT_U8
-*/
-__attribute__((naked)) enum gnwDeviceError k_scr_emit_u8(const int_32 type, const uint_8 data);
+__attribute__((naked)) enum gnwDeviceError k_scr_emit(const struct gnwDeviceEvent * const event);
 
 #endif // DRVFUNC_H

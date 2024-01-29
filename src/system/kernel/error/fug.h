@@ -9,7 +9,8 @@
 #define FUG_H
 
 #include <gunwfug.h>
+#include <types.h>
 
-void k_err_fug(enum gnwFugCode code);
+void k_err_fug(const procId_t procId, enum gnwFugCode code);
 
 #endif // FUG_H

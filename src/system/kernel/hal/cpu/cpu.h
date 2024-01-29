@@ -93,8 +93,11 @@ struct k_cpu_state {
 
 /*
     Task State Segment
+
+    See:
+    INTEL 80386 PROGRAMMER'S REFERENCE MANUAL 1986
+    Figure 7-1. 80386 32-Bit Task State Segment
 */
-#warning LINK TO THE DOCUMENTATION
 struct __attribute__((packed)) k_cpu_tss {
     uint_16 prevTss;
     const uint_16 _res0;
@@ -146,5 +149,10 @@ void k_cpu_init();
     Loads segment selector field of the task register
 */
 void k_cpu_loadTaskRegister();
+
+/*
+    Halts the CPU
+*/
+void k_cpu_halt();
 
 #endif // CPU_H

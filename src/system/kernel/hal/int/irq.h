@@ -8,7 +8,7 @@
 #ifndef IRQ_H
 #define IRQ_H
 
-#define DEV_IRQ_LIMIT 16
+#define DEV_IRQ_LIMIT 8
 
 enum k_dev_irq {
                         // PIC      80368   Description

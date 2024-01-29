@@ -7,6 +7,7 @@
 
 #include <string.h>
 #include <utils.h>
+#include <hal/cpu/cpu.h>
 
 typedef enum k_vid_charColor {
     Black = 0,
@@ -115,5 +116,6 @@ void __attribute__((cdecl)) k_oops(const char *reason, uint_32 errCode) {
         // user_cli_putc(' ');
     } 
 
-    while(1);
+    k_cpu_halt();
+    __builtin_unreachable();
 }

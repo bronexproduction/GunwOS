@@ -50,6 +50,7 @@ XCOMP_INSTALL_DIR_NAME="rust-${RUST_VERSION}"
 RUST_SRC_DIR="$WORKSPACE_DIR/$XCOMP_INSTALL_DIR_NAME"
 XCOMP_INSTALL_DIR="$TOOLS_DIR/$XCOMP_INSTALL_DIR_NAME"
 TEMP_XCOMP_INSTALL_DIR="$WORKSPACE_DIR/temp-$XCOMP_INSTALL_DIR_NAME"
+TEMP_XCOMP_SYSCONFDIR_DIR="$WORKSPACE_DIR/temp-$XCOMP_INSTALL_DIR_NAME-sysconf"
 
 git clone --depth 1 --branch "$RUST_VERSION" "$RUST_GIT" "$RUST_SRC_DIR"
 
@@ -57,7 +58,7 @@ git clone --depth 1 --branch "$RUST_VERSION" "$RUST_GIT" "$RUST_SRC_DIR"
 echo "Step 4: Creating Rust configuration"
 mkdir "$XCOMP_BUILD_DIR" && cd "$XCOMP_BUILD_DIR"
 "$RUST_SRC_DIR/configure" --prefix="$TEMP_XCOMP_INSTALL_DIR" --target="$TARGET" \
-    --disable-docs
+    --sysconfdir="$TEMP_XCOMP_INSTALL_DIR" --disable-docs
 
 # Build
 echo "Step 5: Building and installing"

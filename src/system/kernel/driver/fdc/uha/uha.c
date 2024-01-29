@@ -29,7 +29,6 @@ struct gnwStorGeometry uha_driveGeometry(const uint_8 index) {
 static size_t readSector(const struct fdc_fddConfig config,
                          const enum fdc_sectSize sectSize,
                          const size_t lba,
-                         const size_t count,
                          uint_8 * const buffer,
                          struct gnwStorError * const error) {
     
@@ -77,14 +76,13 @@ static size_t readSector(const struct fdc_fddConfig config,
                                    config.format.gpl,
                                    0xFF);
     if (s != OPSTATUS_OK) {
-        OOPS("readSector: read failed");
         error->code = GSEC_COMMAND_FAILED;
         error->internalCode = s;
-        return 0;
+        OOPS("readSector: read failed", 0);
     }
 
     size_t currentBytes = 0;
-    size_t demandedBytes = config.format.sys.sectSizeBytes * count;
+    size_t demandedBytes = config.format.sys.sectSizeBytes;
 
     /*
         Wait for command result
@@ -92,11 +90,9 @@ static size_t readSector(const struct fdc_fddConfig config,
 
     do {
         if (!waitForInterrupt(FDC_IRQDELAY_DEFAULT)) {
-            OOPS("readSector: wait for interrupt failed");
             error->code = GSEC_COMMAND_FAILED;
             error->internalCode = OPSTATUS_INTEXP;
-
-            return 0;
+            OOPS("readSector: wait for interrupt failed", 0);
         }
 
         /*
@@ -119,10 +115,9 @@ static size_t readSector(const struct fdc_fddConfig config,
             
             s = pullData(config.base, dstBuffer);
             if (s != OPSTATUS_OK) {
-                OOPS("readSector: pull data failed");
                 error->code = GSEC_COMMAND_FAILED;
                 error->internalCode = s;
-                return 0;
+                OOPS("readSector: pull data failed", 0);
             }
 
             ++currentBytes;
@@ -132,39 +127,61 @@ static size_t readSector(const struct fdc_fddConfig config,
     uint_8 sr0;
     s = pullData(config.base, &sr0);
     if (s != OPSTATUS_OK) {
-        OOPS("readSector: pull sr0 failed");
         error->code = GSEC_COMMAND_FAILED;
         error->internalCode = s;
-
-        return 0;
+        OOPS("readSector: pull sr0 failed", 0);
+    }
+    uint_8 sr1;
+    s = pullData(config.base, &sr1);
+    if (s != OPSTATUS_OK) {
+        error->code = GSEC_COMMAND_FAILED;
+        error->internalCode = s;
+        OOPS("readSector: pull sr1 failed", 0);
     }
 
-    if ((sr0 & RANGE_SR0_IC) == 0x40) {
-        OOPS("readSector: IC failed");
+    switch (sr0 & RANGE_SR0_IC) {
+    case 0x00:
+        /*
+            Normal termination
+        */
+        error->code = GSEC_NONE;
+        error->internalCode = 0;
+        break;
+    case 0x40:
+        /*
+            Abnormal termination
+        */
+        switch (sr1) {
+        case BIT_SR1_EN:
+            error->code = GSEC_MEDIA_NOT_PRESENT;
+            error->internalCode = OPSTATUS_END_OF_CYLINDER;
+            break;
+        default:
+            error->code = GSEC_COMMAND_FAILED;
+            error->internalCode = OPSTATUS_ABNORMAL_TERM;
+            OOPS("readSector: IC failed", 0);
+            break;
+        }
+        break;
+    default:
         error->code = GSEC_COMMAND_FAILED;
         error->internalCode = OPSTATUS_ABNORMAL_TERM;
-
-        return 0;
+        OOPS("readSector: IC failed", 0);
+        break;
     }
 
     uint_8 data;
-    
-    for (int i = 0; i < 6; ++i) {
-        // read ST 1, ST 2, C, H, R, N
+    for (int i = 0; i < 5; ++i) {
+        // read ST 2, C, H, R, N
         s = pullData(config.base, &data);
         if (s != OPSTATUS_OK) {
-            OOPS("readSector: pull register failed");
             error->code = GSEC_COMMAND_FAILED;
             error->internalCode = s;
-
-            return 0;
+            OOPS("readSector: pull register failed", 0);
         }
     }
 
-    error->code = 0;
-    error->internalCode = 0;
-
-    return MIN(currentBytes, demandedBytes);
+    return (error->code == GSEC_NONE) ? MIN(currentBytes, demandedBytes) : 0;
 }
 
 size_t uha_read(const uint_8 index,
@@ -194,10 +211,9 @@ size_t uha_read(const uint_8 index,
 
     enum fdc_opStatus s = proc_prepare(config);
     if (s != OPSTATUS_OK) {        
-        OOPS("fdc_uha_read: prepare failed");
         error->code = GSEC_COMMAND_FAILED;
         error->internalCode = s;
-        return 0;
+        OOPS("fdc_uha_read: prepare failed", 0);
     }
 
     /*
@@ -207,7 +223,8 @@ size_t uha_read(const uint_8 index,
     size_t totalBytes = 0;
     for (size_t currentSector = 0; currentSector < count; ++currentSector) {
         uint_8 localBuffer[config.format.sys.sectSizeBytes];
-        size_t bytes = readSector(config, sectSize, lba, count, localBuffer, error);
+
+        size_t bytes = readSector(config, sectSize, lba + currentSector, localBuffer, error);
         if (error->code) {
             proc_stopMotor(config.base, config.drive);
             return 0;
@@ -228,7 +245,9 @@ size_t uha_read(const uint_8 index,
     */
 
     proc_stopMotor(config.base, config.drive);
+    
     error->code = 0;
     error->internalCode = 0;
+
     return totalBytes;
 }

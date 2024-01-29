@@ -8,11 +8,10 @@
 //  https://wiki.osdev.org/Programmable_Interval_Timer
 //
 
-#include <driver/gunwbus.h>
-#include <driver/gunwdrv.h>
+#include <gunwbus.h>
+#include <gunwdrv.h>
 
 #include <driver/driver.h>
-#include <hal/io/io.h>
 #include <error/panic.h>
 
 #define PIT_BUS_DATA_CH0    0x40    // Channel 0 (read/write)
@@ -94,17 +93,13 @@ static uint_16 divider() {
 static uint_8 init() {
 
     if (!k_pit_routine) {
-        OOPS("PIT routine unavailable");
-        return 0;
+        OOPS("PIT routine unavailable", 0);
     }
     
     uint_16 div = divider();
     wrb(PIT_BUS_COMMAND, PIT_CMD_CSB_CH0 | PIT_CMD_ACC_LOHI | PIT_CMD_MOD_3 | PIT_CMD_CRF_BINARY);
-    k_io_wait();
     wrb(PIT_BUS_DATA_CH0, div & 0xFF);
-    k_io_wait();
     wrb(PIT_BUS_DATA_CH0, div >> 8);
-    k_io_wait();
 
     return 1;
 }

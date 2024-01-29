@@ -5,7 +5,7 @@
 //  Created by Artur Danielewski on 12.03.2023.
 //
 
-#include <gunwctrl.h>
+#include <src/_gunwctrl.h>
 #include <types.h>
 #include <string.h>
 #include <mem.h>
@@ -13,6 +13,9 @@
 #include <hal/mem/mem.h>
 #include <hal/proc/proc.h>
 #include <error/panic.h>
+#include <log/log.h>
+#include <storage/file.h>
+#include "../func.h"
 
 enum gnwCtrlError loadElf(const ptr_t filePtr, 
                           const size_t fileSizeBytes, 
@@ -20,10 +23,10 @@ enum gnwCtrlError loadElf(const ptr_t filePtr,
                           size_t * const memBytes, 
                           addr_t * const entry) {
     if (!memBytes) {
-        OOPS("Unexpected nullptr");
+        OOPS("Unexpected nullptr", GCE_UNKNOWN);
     }
     if (!entry) {
-        OOPS("Unexpected nullptr");
+        OOPS("Unexpected nullptr", GCE_UNKNOWN);
     }
     addr_t vMemLow;
     *memBytes = elfAllocBytes(filePtr, fileSizeBytes, &vMemLow);
@@ -39,11 +42,11 @@ enum gnwCtrlError loadElf(const ptr_t filePtr,
     #warning check memory limits
     #warning how to handle section flags?
 
-    memnull(destPtr, *memBytes);
+    memzero(destPtr, *memBytes);
     for (size_t index = 0; index < elfGetSectionHeaderEntryCount(filePtr); ++index) {
         const struct elfSectionHeaderEntry32 * const entry = elfGetSectionHeaderEntry(filePtr, index, fileSizeBytes); 
         if (!entry) {
-            OOPS("Unexpected nullptr");
+            OOPS("Unexpected nullptr", GCE_UNKNOWN);
         }
         if (!(entry->attributes & ESECATTR_ALLOC &&
               entry->type == ESECTYPE_PROGBITS)) {
@@ -55,7 +58,7 @@ enum gnwCtrlError loadElf(const ptr_t filePtr,
         /*
             Verify memory constraints
         */
-        if (sectionVMemHigh <= sectionVMemLow ||
+        if (sectionVMemHigh < sectionVMemLow ||
             sectionVMemLow < vMemLow ||
             sectionVMemHigh > vMemHigh) {
             return GCE_HEADER_INVALID;
@@ -83,27 +86,78 @@ enum gnwCtrlError loadElf(const ptr_t filePtr,
     return GCE_NONE;
 }
 
-enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen) {
-    if (!path) {
-        return GCE_INVALID_ARGUMENT;
-    }
+#define LOG_CODE(MSG, CODE) {                                           \
+    LOG_START;                                                          \
+    k_log_logd((data_t){ (ptr_t)abs_pathPtr, abs_descPtr->pathLen });   \
+    LOG_NBR(" - ");                                                     \
+    LOG_NBR(MSG);                                                       \
+    if (CODE) {                                                         \
+        char loc_code_str[10] = { 0 };                                  \
+        int2str(CODE, loc_code_str);                                    \
+        LOG_NBR(", code ");                                             \
+        k_log_logd((data_t){ (ptr_t)loc_code_str, 10 });                \
+    }                                                                   \
+    LOG_END;                                                            \
+}
 
-    procId_t procId = k_proc_getCurrentId();
-    ptr_t absPathPtr = k_mem_absForProc(procId, (const ptr_t)path);
+void k_scr_usr_start(const procId_t procId, const struct gnwCtrlStartDescriptor * const descPtr) {
+    SCLF_GET_VALID_ABS(const struct gnwCtrlStartDescriptor * const, descPtr, sizeof(struct gnwCtrlStartDescriptor), {},);
+    SCLF_GET_VALID_ABS_NAMED(enum gnwCtrlError * const, errorPtr, abs_descPtr->errorPtr, sizeof(enum gnwCtrlError), {},);
+    SCLF_GET_VALID_ABS_NAMED(const char * const, pathPtr, abs_descPtr->pathPtr, abs_descPtr->pathLen, {
+        *abs_errorPtr = GCE_INVALID_ARGUMENT;
+    },);
 
-    if (!k_mem_bufInZoneForProc(procId, absPathPtr, pathLen)) {
-        return GCE_INVALID_ARGUMENT;
-    }
-
-#warning what stage should be queued?
-
-    ptr_t filePtr;
     size_t fileSizeBytes;
-    if (pathLen == 3 && !strcmpl("cli", (const char *)absPathPtr, pathLen)) {
-        filePtr = (ptr_t)0x50000;
-        fileSizeBytes = 0x10814;
-    } else {
-        return GCE_NOT_FOUND;
+    
+    /*
+        Get file info
+    */
+
+    {
+        LOG_START;
+        LOG_NBR("Loading file ");
+        k_log_logd((data_t){ (ptr_t)abs_pathPtr, abs_descPtr->pathLen });
+        LOG_END;
+    }
+    
+    struct gnwFileInfo fileInfo; {
+        const enum gnwFileErrorCode err = k_stor_file_getInfo(abs_pathPtr, abs_descPtr->pathLen, &fileInfo);
+        if (err != GFEC_NONE) {
+            switch (err) {
+            case GFEC_NOT_FOUND:
+                *abs_errorPtr = GCE_NOT_FOUND;
+                LOG_CODE("File not found", err);
+                return;
+            default:
+                *abs_errorPtr = GCE_UNKNOWN;
+                LOG_CODE("File info error", err);
+                return;
+            }
+        }
+        if (!fileInfo.sizeBytes) {
+            *abs_errorPtr = GCE_OPERATION_FAILED;
+            LOG_CODE("Unexpected empty file size", 0);
+            return;
+        }
+    }
+
+    /*
+        Allocate memory 
+    */
+
+    fileSizeBytes = fileInfo.sizeBytes;
+    ptr_t filePtr = (ptr_t)0x00300001; /* YOLO */ {
+
+        /*
+            Load file
+        */
+
+        const enum gnwFileErrorCode err = k_stor_file_load(abs_pathPtr, abs_descPtr->pathLen, filePtr);
+        if (err != GFEC_NONE) {
+            *abs_errorPtr = GCE_UNKNOWN;
+            LOG_CODE("Storage error", err);
+            return;
+        }
     }
 
     /* 
@@ -121,19 +175,21 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
     exp.architecture = 3;
 
     if (!elfValidate(filePtr, fileSizeBytes, &exp)) {
-        return GCE_HEADER_INVALID;
+        *abs_errorPtr = GCE_HEADER_INVALID;
+        LOG_CODE("ELF header validation failure", 0);
+        return;
     }
     
     /* 
         Allocate process memory 
     */
 
-    const size_t index = 0;
-    const size_t processBinBytes = MiB(1);
-    const size_t processStackBytes = KiB(512);
-    const size_t processExtraBytes = KiB(512);
+    static size_t index = 0;
+    const size_t processBinBytes = KiB(512);
+    const size_t processStackBytes = KiB(256);
+    const size_t processExtraBytes = KiB(256);
     const size_t processMemTotalBytes = processBinBytes + processStackBytes + processExtraBytes;
-    const ptr_t dstPtr = GDT_SEGMENT_START(r3code) + (index * processMemTotalBytes) + MiB(1);
+    const ptr_t dstPtr = GDT_SEGMENT_START(r3code) + (++index * processMemTotalBytes);
 
     /* 
         Load executable 
@@ -141,10 +197,13 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
     
     enum gnwCtrlError err;
     size_t memBytes;
-    addr_t entry; 
+    addr_t entry;
+
     err = loadElf(filePtr, fileSizeBytes, dstPtr, &memBytes, &entry);
     if (err != GCE_NONE) {
-        return err;
+        *abs_errorPtr = err;
+        LOG_CODE("Failed to load ELF", err);
+        return;
     }
 
     /* 
@@ -159,8 +218,11 @@ enum gnwCtrlError k_scr_usr_start(const char * const path, const size_t pathLen)
 
     enum k_proc_error procErr = k_proc_spawn(&desc);
     if (procErr != PE_NONE) {
-        return GCE_OPERATION_FAILED;
+        *abs_errorPtr = GCE_OPERATION_FAILED;
+        LOG_CODE("Failed to spawn process", procErr);
+        return;
     }
 
-    return GCE_NONE;
+    *abs_errorPtr = GCE_NONE;
+    return;
 }

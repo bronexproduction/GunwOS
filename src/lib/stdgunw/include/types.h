@@ -43,6 +43,21 @@ typedef struct {
     int x, y;
 } point_t;
 
+typedef struct {
+    size_t offset;
+    size_t length;
+} range_size_t;
+
+typedef struct {
+    addr_t offset;
+    size_t sizeBytes;
+} range_addr_t;
+
+typedef struct {
+    ptr_t ptr;
+    size_t bytes;
+} data_t;
+
 #ifndef __cplusplus
     #define true  1
     #define false 0

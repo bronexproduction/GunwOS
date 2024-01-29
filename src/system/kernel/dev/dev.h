@@ -9,7 +9,7 @@
 #define DEV_H
 
 #include <gunwdev.h>
-#include <driver/gunwdrv.h>
+#include <gunwdrv.h>
 #include <src/_gunwrlp.h>
 
 enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescriptor * const descriptor);
@@ -18,24 +18,33 @@ enum gnwDriverError k_dev_start(size_t id);
 enum gnwDeviceError k_dev_getById(const size_t id, struct gnwDeviceUHADesc * const desc);
 enum gnwDeviceError k_dev_getByType(const enum gnwDeviceType type, struct gnwDeviceUHADesc * const desc);
 
+enum gnwDeviceError k_dev_getUHAForId(const size_t id, struct gnwDeviceUHA * const uha);
+
 enum gnwDeviceError k_dev_acquireHold(const procId_t processId, const size_t deviceId);
 void k_dev_releaseHold(const procId_t processId, const size_t deviceId);
 
 enum gnwDeviceError k_dev_writeMem(const procId_t processId, 
                                    const size_t deviceId,
-                                   const void * const buffer);
+                                   const ptr_t absBuffer,
+                                   const range_addr_t devMemRange);
 enum gnwDeviceError k_dev_writeChar(const procId_t processId, 
                                     const size_t deviceId,
                                     const char character);
 
 enum gnwDeviceError k_dev_listen(const procId_t processId, 
                                  const size_t deviceId, 
-                                 const union gnwEventListener listener,
-                                 struct gnwRunLoop * const runLoopPtr);
+                                 const gnwDeviceEventListener listener,
+                                 const gnwDeviceEventDecoder decoder);
 
-enum gnwDeviceError k_dev_emit_void(const int_32 type);
-enum gnwDeviceError k_dev_emit_u8(const int_32 type,
-                                  const int_8 data);
+enum gnwDeviceError k_dev_getParam(const size_t deviceId,
+                                   const struct gnwDeviceParamDescriptor paramDescriptor,
+                                   size_t * const absResult);
+enum gnwDeviceError k_dev_setParam(const procId_t procId,
+                                   const size_t deviceId,
+                                   const struct gnwDeviceParamDescriptor paramDescriptor,
+                                   const size_t value);
+
+enum gnwDeviceError k_dev_emit(const struct gnwDeviceEvent * const eventPtr);
 
 void k_dev_procCleanup(const procId_t procId);
 

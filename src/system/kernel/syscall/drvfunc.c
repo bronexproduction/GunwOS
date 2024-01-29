@@ -50,38 +50,19 @@ SCR(wrb,
 
 /*
     Code - 0x02
-    Function - EMIT_VOID
+    Function - EMIT
 
     Params:
-        * EBX - driver-specific event type
+        * EBX - struct gnwDeviceEvent pointer relative to caller process memory
+                (to be implemented when drivers moved to process space)
         
     Return:
         * EAX - error code if any, otherwise GDE_NONE (see enum gnwDeviceError)
 */
-SCR(emit_void,
-    REG(32, type, ebx)
+SCR(emit,
+    REG(32, eventPtr, ebx)
 
     REG_RET(32, err)
 
-    err = k_dev_emit_void(type);
-)
-
-/*
-    Code - 0x03
-    Function - EMIT_U8
-
-    Params:
-        * EBX - driver-specific event type
-        * CL - event data
-        
-    Return:
-        * EAX - error code if any, otherwise GDE_NONE (see enum gnwDeviceError)
-*/
-SCR(emit_u8,
-    REG(32, type, ebx)
-    REG(8, data, cl)
-
-    REG_RET(32, err)
-
-    err = k_dev_emit_u8(type, data);
+    err = k_dev_emit((struct gnwDeviceEvent *)eventPtr);
 )

@@ -14,7 +14,7 @@ void memset(void *ptr, const uint_8 val, size_t bytes) {
     }
 }
 
-void memnull(void *ptr, size_t bytes) {
+void memzero(void *ptr, size_t bytes) {
     memset(ptr, 0, bytes);
 }
 

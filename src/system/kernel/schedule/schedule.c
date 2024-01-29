@@ -13,7 +13,7 @@
 
 #define GRANULARITY_MS  30000
 
-static size_t executionTimeCounter = GRANULARITY_MS;
+PRIVATE size_t executionTimeCounter = GRANULARITY_MS;
 
 /*
     Process identifiers (last, next)
@@ -59,10 +59,10 @@ void k_proc_schedule_onKernelHandlingFinished() {
 
 void k_proc_schedule_didSpawn(const procId_t procId) {
     if (procId < 0 || procId >= MAX_PROC) {
-        OOPS("Invalid spawned process id");
+        OOPS("Invalid spawned process id",);
     }
     if (k_proc_getInfo(procId).state != PS_READY) {
-        OOPS("Unexpected process state");
+        OOPS("Unexpected process state",);
     }
     
     if (nextProcId < 0) {
