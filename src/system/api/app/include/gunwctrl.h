@@ -33,7 +33,7 @@ extern void start(const char * const path, enum gnwCtrlError * const error);
 /*
     Ends process execution
 */
-extern void exit(const int_32 status);
+extern void bye(const int_32 status);
 
 /*
     Suspends process execution until an event is received

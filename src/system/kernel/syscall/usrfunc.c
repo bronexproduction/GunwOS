@@ -74,17 +74,17 @@ SCR(devCharWrite,
 
 /*
     Code - 0x03
-    Function - EXIT
+    Function - BYE
 
     Params:
         * EBX - status
 
 */
-SCR(exit,
+SCR(bye,
     REG(32, status, ebx)
     
-    extern void k_scr_usr_exit(procId_t, int_32);
-    k_scr_usr_exit(k_proc_getCurrentId(), status);
+    extern void k_scr_usr_bye(procId_t, int_32);
+    k_scr_usr_bye(k_proc_getCurrentId(), status);
 )
 
 /*

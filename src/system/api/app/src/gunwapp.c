@@ -13,7 +13,7 @@ extern void dupa();
 
 void _start() {
     dupa();
-    exit(0);
+    bye(0);
 }
 
 #endif // _GUNWAPI_KERNEL
