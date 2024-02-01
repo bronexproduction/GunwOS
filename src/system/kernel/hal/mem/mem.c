@@ -16,6 +16,9 @@ struct k_mem_zone {
     size_t sizeBytes;
 };
 
+void k_mem_init() {
+}
+
 static struct k_mem_zone zoneForProc(const procId_t procId) {
     struct k_proc_process proc = k_proc_getInfo(procId);
     struct k_mem_zone result;

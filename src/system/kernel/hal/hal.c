@@ -13,6 +13,7 @@
 #include "gdt/gdt.h"
 #include "int/irq.h"
 #include "io/bus.h"
+#include "mem/mem.h"
 #include "pic/pic.h"
 
 #include <error/panic.h>
@@ -20,6 +21,7 @@
 extern void k_pic_configure();
 extern void k_idt_loadDefault();
 extern void k_proc_init();
+extern void k_mem_init();
 
 PRIVATE struct isrEntry {
     size_t devId;
@@ -40,6 +42,7 @@ void k_hal_init() {
     k_pic_configure();
 
     k_proc_init();
+    k_mem_init();
 
     __asm__ volatile ("sti");
 }
