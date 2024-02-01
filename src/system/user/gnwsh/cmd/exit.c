@@ -11,5 +11,5 @@
 void cmd_exit(const char * const params) {
     CMD_NOPARAM
 
-    exit(69);
+    bye(69);
 }

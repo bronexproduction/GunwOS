@@ -18,6 +18,6 @@ void k_err_fug(const procId_t procId, enum gnwFugCode code) {
     
     LOG(log);
     
-    extern void k_scr_usr_exit(procId_t, int_32);
-    k_scr_usr_exit(procId, code);
+    extern void k_scr_usr_bye(procId_t, int_32);
+    k_scr_usr_bye(procId, code);
 }

@@ -28,10 +28,10 @@ void start(const char * const path, enum gnwCtrlError * const error) {
     SYSCALL_USER_INT;
 }
 
-void exit(const int_32 status) {
+void bye(const int_32 status) {
     SYSCALL_PAR1(status);
 
-    SYSCALL_USER_FUNC(EXIT);
+    SYSCALL_USER_FUNC(BYE);
     SYSCALL_USER_INT;
 }
 
