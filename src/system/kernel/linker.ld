@@ -19,12 +19,15 @@ SECTIONS {
         *(.data)
     }
 
+    /*
+        1 MB
+    */
     . = 0x00100000;
+    
     .bss : {
 _BSS_START_ = .;
    *(.bss .bss.*)
    *(COMMON)
 _BSS_END_ = .;
     }
-    . = 0x00200000;
 }

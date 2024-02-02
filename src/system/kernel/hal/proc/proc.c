@@ -23,22 +23,34 @@
 register const uint_32 cur_esp __asm__ ("esp");
 #define STACK_VAL(REFESP, SIZE, OFFSET) (*(uint_ ## SIZE *)(REFESP + OFFSET))
 
-PRIVATE struct process {
+PRIVATE struct process_kernel {
     /*
         Process info
     */
     struct k_proc_process info;
 
     /*
-        Lock mask (if BLOCKED)
+        Process CPU state
     */
-    enum k_proc_lockType lockMask;
+    struct k_cpu_state cpuState;
+} kernelProc;
+
+PRIVATE struct process_user {
+    /*
+        Process info
+    */
+    struct k_proc_process info;
 
     /*
         Process CPU state
     */
     struct k_cpu_state cpuState;
-} kernelProc, pTab[MAX_PROC];
+
+    /*
+        Lock mask (if BLOCKED)
+    */
+    enum k_proc_lockType lockMask;
+} pTab[MAX_PROC];
 
 static procId_t procCurrent = KERNEL_PROC_ID;
 
@@ -181,7 +193,7 @@ static void procCleanup(const procId_t procId) {
         OOPS("Unexpected process state during cleanup",);
     }
 
-    memzero(&pTab[procId], sizeof(struct process));
+    memzero(&pTab[procId], sizeof(struct process_user));
     k_mem_procCleanup(procId);
 }
 
@@ -467,7 +479,7 @@ enum k_proc_error k_proc_callback_invoke_ptr(const procId_t procId,
 }
 
 static void k_proc_prepareKernelProc() {
-    memset(&kernelProc, 0, sizeof(struct k_proc_process));
+    memset(&kernelProc, 0, sizeof(struct process_kernel));
     kernelProc.info.state = PS_RUNNING;
 }
 
