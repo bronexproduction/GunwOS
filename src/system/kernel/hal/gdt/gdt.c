@@ -65,7 +65,7 @@ void k_gdt_init() {
     /*
         Ring 3 memory base and limit
     */
-    const size_t r3baseBytes = MEM_RESERVED_VIRTUAL_KERNEL_MEM;
+    const size_t r3baseBytes = MEM_VIRTUAL_RESERVED_KERNEL_MEM;
     const size_t r3limit = (0 - r3baseBytes) / KiB(4);
 
     /*
