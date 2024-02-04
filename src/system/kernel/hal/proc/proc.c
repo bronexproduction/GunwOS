@@ -46,11 +46,6 @@ PRIVATE struct process_user {
     struct k_cpu_state cpuState;
 
     /*
-        Process memory paging information
-    */
-    struct k_virtual_paging_info_t pagingInfo;
-
-    /*
         Lock mask (if BLOCKED)
     */
     enum k_proc_lockType lockMask;
