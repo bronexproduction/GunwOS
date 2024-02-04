@@ -110,17 +110,6 @@ void k_paging_init() {
         // initalize process table data
     }
 
-    /*
-    * A page directory must contain present PDEs for at least the page table(s) that cover
-      the pages containing the page fault handler.
-    * The page fault handler must be present in physical memory; its presence must be reflected
-      in the page table(s) that map its addresses.
-    * Entry 14 of the IDT must contain a descriptor (normally a trap gate) that points to the
-      page fault handler.
-    * The code and data that enable paging must be in present pages and their linear addresses
-      must be equal to their physical addresses; that is, they must identify mapped. 
-    */
-
     register __attribute__((unused)) addr_t dupa __asm__ ("eax") = (addr_t)&(pagingInfo[0].pageDirectory);
     __asm__ volatile ("mov %eax, %cr3");
     __asm__ volatile ("mov %cr0, %eax");
