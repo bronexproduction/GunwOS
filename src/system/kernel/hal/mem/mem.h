@@ -11,32 +11,8 @@
 #include <defs.h>
 #include <types.h>
 
-/*
-    Hardware constraints
-*/
-#define MEM_PAGE_SIZE_BYTES                             KiB(4)
-#define MEM_MAX_DIR_ENTRY                               (1 << 10)
-#define MEM_MAX_PAGE_ENTRY                              (1 << 10)
-#define MEM_SPACE_PER_DIR_ENTRY                         (MEM_PAGE_SIZE_BYTES * MEM_MAX_PAGE_ENTRY)
-
-/*
-    Physical memory
-*/
 #define MEM_PHYSICAL_ADDRESSABLE_MEM                    MiB(16)
-#define MEM_PHYSICAL_PAGE_TABLE_COUNT                   (MEM_PHYSICAL_ADDRESSABLE_MEM / MEM_SPACE_PER_DIR_ENTRY)
-
-/*
-    Virtual memory
-*/
 #define MEM_VIRTUAL_RESERVED_KERNEL_MEM                 MiB(4)
-#define MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT    (MEM_VIRTUAL_RESERVED_KERNEL_MEM / MEM_SPACE_PER_DIR_ENTRY)
-#define MEM_VIRTUAL_USER_MAX_PAGE_TABLE_COUNT           (MEM_MAX_DIR_ENTRY - MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT)
-#define MEM_VIRTUAL_USER_PAGE_TABLE_COUNT               MEM_PHYSICAL_PAGE_TABLE_COUNT
-
-_Static_assert(!(MEM_PHYSICAL_ADDRESSABLE_MEM % MEM_SPACE_PER_DIR_ENTRY), "MEM_PHYSICAL_ADDRESSABLE_MEM not aligned to addressable space unit");
-_Static_assert(!(MEM_VIRTUAL_RESERVED_KERNEL_MEM % MEM_SPACE_PER_DIR_ENTRY), "MEM_VIRTUAL_RESERVED_KERNEL_MEM not aligned to addressable space unit");
-_Static_assert(MEM_PHYSICAL_PAGE_TABLE_COUNT <= MEM_MAX_DIR_ENTRY, "MEM_PHYSICAL_PAGE_TABLE_COUNT exceeds MEM_MAX_DIR_ENTRY");
-
 typedef struct __attribute__((packed)) k_virtual_page_specifier_t {
     bool present            :1;
     bool writable           :1;
