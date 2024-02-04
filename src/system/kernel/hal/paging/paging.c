@@ -98,6 +98,53 @@ void k_paging_init() {
     for (size_t proc = 0; proc < MAX_PROC; ++proc) {
         struct k_virtual_page_specifier_t * kernelDir = pagingInfo[proc].pageDirectory.reserved.kernel;
 
+        /*
+            Clear user pages
+
+            Funny info:
+
+            Manipulation
+The CR3 value, that is, the value containing the address of the page directory, is in physical form. Once, then, the computer is in paging mode, only recognizing those virtual addresses mapped into the paging tables, how can the tables be edited and dynamically changed?
+
+Many prefer to map the last PDE to itself. The page directory will look like a page table to the system. To get the physical address of any virtual address in the range 0x00000000-0xFFFFF000 is then just a matter of:
+
+void *get_physaddr(void *virtualaddr) {
+    unsigned long pdindex = (unsigned long)virtualaddr >> 22;
+    unsigned long ptindex = (unsigned long)virtualaddr >> 12 & 0x03FF;
+ 
+    unsigned long *pd = (unsigned long *)0xFFFFF000;
+    // Here you need to check whether the PD entry is present.
+ 
+    unsigned long *pt = ((unsigned long *)0xFFC00000) + (0x400 * pdindex);
+    // Here you need to check whether the PT entry is present.
+ 
+    return (void *)((pt[ptindex] & ~0xFFF) + ((unsigned long)virtualaddr & 0xFFF));
+}
+To map a virtual address to a physical address can be done as follows:
+
+void map_page(void *physaddr, void *virtualaddr, unsigned int flags) {
+    // Make sure that both addresses are page-aligned.
+ 
+    unsigned long pdindex = (unsigned long)virtualaddr >> 22;
+    unsigned long ptindex = (unsigned long)virtualaddr >> 12 & 0x03FF;
+ 
+    unsigned long *pd = (unsigned long *)0xFFFFF000;
+    // Here you need to check whether the PD entry is present.
+    // When it is not present, you need to create a new empty PT and
+    // adjust the PDE accordingly.
+ 
+    unsigned long *pt = ((unsigned long *)0xFFC00000) + (0x400 * pdindex);
+    // Here you need to check whether the PT entry is present.
+    // When it is, then there is already a mapping present. What do you do now?
+ 
+    pt[ptindex] = ((unsigned long)physaddr) | (flags & 0xFFF) | 0x01; // Present
+ 
+    // Now you need to flush the entry in the TLB
+    // or you might not notice the change.
+}
+Unmapping an entry is essentially the same as above, but instead of assigning the pt[ptindex] a value, you set it to 0x00000000 (i.e. not present). When the entire page table is empty, you may want to remove it and mark the page directory entry 'not present'. Of course you don't need the 'flags' or 'physaddr' for unmapping.
+        */
+
         for (size_t dirEntryIndex = 0; dirEntryIndex < MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT; ++dirEntryIndex) {
             struct k_virtual_page_specifier_t * dirEntry = &kernelDir[dirEntryIndex];
 
