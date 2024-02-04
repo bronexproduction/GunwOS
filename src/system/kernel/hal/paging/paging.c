@@ -52,7 +52,7 @@ typedef struct __attribute__((packed)) k_virtual_page_specifier_t {
 } k_virtual_page_table_t[MEM_MAX_PAGE_ENTRY];
 
 struct {
-    struct __attribute__((packed)) {
+    struct __attribute__((packed, aligned(MEM_PAGE_SIZE_BYTES))) {
         /*
             Lower memory addresses (TEMPORARY - to be swapped with user pages)
         */
@@ -106,9 +106,6 @@ void k_paging_init() {
             dirEntry->writable = true;
             dirEntry->user = false;
         }
-        // pagingInfo[proc].pageDirectory.reserved.kernel[0].frameAddress = ((addr_t)&(kernelPageTables[0])) & 0xFFFFF000;
-        
-        
         
         // initalize process table data
     }
@@ -124,13 +121,11 @@ void k_paging_init() {
       must be equal to their physical addresses; that is, they must identify mapped. 
     */
 
-    __attribute__((unused)) addr_t exampleEntry = (addr_t)*(addr_t *)(&(pagingInfo[0].pageDirectory));
-
     register __attribute__((unused)) addr_t dupa __asm__ ("eax") = (addr_t)&(pagingInfo[0].pageDirectory);
-    __asm__ volatile ("mov %cr3, %eax");
-    __asm__ volatile ("mov %eax, %cr0");
-    __asm__ volatile ("or %eax, " STR(CR0_PAGING_ENABLE_BIT));
+    __asm__ volatile ("mov %eax, %cr3");
     __asm__ volatile ("mov %cr0, %eax");
+    __asm__ volatile ("or $" STR(CR0_PAGING_ENABLE_BIT) ", %eax");
+    __asm__ volatile ("mov %eax, %cr0");
     __asm__ volatile ("jmp k_paging_init_end");
     __asm__ volatile ("k_paging_init_end:");
 }
