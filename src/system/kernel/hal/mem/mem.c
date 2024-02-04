@@ -10,8 +10,6 @@
 #include <hal/proc/proc.h>
 #include <error/panic.h>
 
-static k_virtual_page_table_t kernelPageTables[MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT];
-
 struct k_mem_zone {
     ptr_t startPtr;
     ptr_t endPtr;
