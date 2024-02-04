@@ -11,6 +11,7 @@
 #include <mem.h>
 #include "cpu/cpu.h"
 #include "gdt/gdt.h"
+#include "paging/paging.h"
 #include "int/irq.h"
 #include "io/bus.h"
 #include "mem/mem.h"
@@ -34,10 +35,11 @@ void k_hal_init() {
     memzero(isrReg, sizeof(struct isrEntry) * DEV_IRQ_LIMIT);
 
     k_cpu_init();
-
     k_gdt_init();
     k_cpu_loadTaskRegister();
     k_idt_loadDefault();
+
+    k_paging_init();
 
     k_pic_configure();
 
