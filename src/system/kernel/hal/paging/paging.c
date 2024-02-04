@@ -76,4 +76,61 @@ struct {
 static __attribute__((aligned(MEM_PAGE_SIZE_BYTES))) k_virtual_page_table_t kernelPageTables[MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT];
 
 void k_paging_init() {
+    /*
+        Initialize kernel page tables
+    */
+    for (size_t tableIndex = 0; tableIndex < MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT; ++tableIndex) {
+        k_virtual_page_table_t * table = &kernelPageTables[tableIndex];
+        
+        for (size_t pageIndex = 0; pageIndex < MEM_MAX_PAGE_ENTRY; ++pageIndex) {
+            struct k_virtual_page_specifier_t * page = &(*table)[pageIndex];
+
+            page->frameAddress = (tableIndex << 10) | pageIndex;
+            page->present = true;
+            page->writable = true;
+            page->user = false;
+        }
+    }
+
+    /*
+        Initialize paging info
+    */
+    for (size_t proc = 0; proc < MAX_PROC; ++proc) {
+        struct k_virtual_page_specifier_t * kernelDir = pagingInfo[proc].pageDirectory.reserved.kernel;
+
+        for (size_t dirEntryIndex = 0; dirEntryIndex < MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT; ++dirEntryIndex) {
+            struct k_virtual_page_specifier_t * dirEntry = &kernelDir[dirEntryIndex];
+
+            dirEntry->frameAddress = (addr_t)&kernelPageTables[dirEntryIndex] >> 12;
+            dirEntry->present = true;
+            dirEntry->writable = true;
+            dirEntry->user = false;
+        }
+        // pagingInfo[proc].pageDirectory.reserved.kernel[0].frameAddress = ((addr_t)&(kernelPageTables[0])) & 0xFFFFF000;
+        
+        
+        
+        // initalize process table data
+    }
+
+    /*
+    * A page directory must contain present PDEs for at least the page table(s) that cover
+      the pages containing the page fault handler.
+    * The page fault handler must be present in physical memory; its presence must be reflected
+      in the page table(s) that map its addresses.
+    * Entry 14 of the IDT must contain a descriptor (normally a trap gate) that points to the
+      page fault handler.
+    * The code and data that enable paging must be in present pages and their linear addresses
+      must be equal to their physical addresses; that is, they must identify mapped. 
+    */
+
+    __attribute__((unused)) addr_t exampleEntry = (addr_t)*(addr_t *)(&(pagingInfo[0].pageDirectory));
+
+    register __attribute__((unused)) addr_t dupa __asm__ ("eax") = (addr_t)&(pagingInfo[0].pageDirectory);
+    __asm__ volatile ("mov %cr3, %eax");
+    __asm__ volatile ("mov %eax, %cr0");
+    __asm__ volatile ("or %eax, " STR(CR0_PAGING_ENABLE_BIT));
+    __asm__ volatile ("mov %cr0, %eax");
+    __asm__ volatile ("jmp k_paging_init_end");
+    __asm__ volatile ("k_paging_init_end:");
 }
