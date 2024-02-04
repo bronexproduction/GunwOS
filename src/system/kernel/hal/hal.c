@@ -35,6 +35,7 @@ void k_hal_init() {
     memzero(isrReg, sizeof(struct isrEntry) * DEV_IRQ_LIMIT);
 
     k_cpu_init();
+
     k_gdt_init();
     k_cpu_loadTaskRegister();
     k_idt_loadDefault();
