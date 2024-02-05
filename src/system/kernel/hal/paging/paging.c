@@ -53,23 +53,11 @@ typedef struct __attribute__((packed)) k_virtual_page_specifier_t {
 
 struct {
     struct __attribute__((packed, aligned(MEM_PAGE_SIZE_BYTES))) {
-        /*
-            Lower memory addresses (TEMPORARY - to be swapped with user pages)
-        */
         struct __attribute__((packed)) {
             struct k_virtual_page_specifier_t kernel[MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT];
         } reserved;
-        /*
-            Topmost memory address range (TEMPORARY - to be swapped with kernel pages)
-        */
         struct k_virtual_page_specifier_t user[MEM_VIRTUAL_USER_MAX_PAGE_TABLE_COUNT];
     } pageDirectory;
-    
-    /*
-        CHECK ALIGNMENT
-
-        NOTE: Must be 4KiB-aligned due to the PDE addressing scheme
-    */
     __attribute__((aligned(MEM_PAGE_SIZE_BYTES))) k_virtual_page_table_t pageTables[MEM_VIRTUAL_USER_PAGE_TABLE_COUNT];
 } pagingInfo[MAX_PROC];
 
@@ -78,6 +66,8 @@ static __attribute__((aligned(MEM_PAGE_SIZE_BYTES))) k_virtual_page_table_t kern
 void k_paging_init() {
     /*
         Initialize kernel page tables
+
+        TODO: Initialize as many pages as needed after startup (definetely less than 4MiB)
     */
     for (size_t tableIndex = 0; tableIndex < MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT; ++tableIndex) {
         k_virtual_page_table_t * table = &kernelPageTables[tableIndex];
