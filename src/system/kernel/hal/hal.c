@@ -8,7 +8,6 @@
 #include "hal.h"
 
 #include <defs.h>
-#include <mem.h>
 #include "cpu/cpu.h"
 #include "gdt/gdt.h"
 #include "int/irq.h"
@@ -31,8 +30,6 @@ PRIVATE struct isrEntry {
 const size_t *k_hal_servicedDevIdPtr;
 
 void k_hal_init() {
-    memzero(isrReg, sizeof(struct isrEntry) * DEV_IRQ_LIMIT);
-
     k_cpu_init();
 
     k_gdt_init();
