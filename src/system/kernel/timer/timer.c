@@ -55,9 +55,9 @@ void k_tmr_init() {
     extern uint_16 k_pit_evFreq;
     extern void (*k_pit_routine)();
     
-    k_pit_routine = k_tmr_tick;
     k_pit_evFreq = 1000;
     pitDrift = k_pit_freq % k_pit_evFreq;
+    k_pit_routine = k_tmr_tick;
 }
 
 time_t k_tmr_getTicks() {

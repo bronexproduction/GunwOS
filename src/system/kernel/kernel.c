@@ -33,8 +33,8 @@ PRIVATE void k_purge() {
 void __attribute__((fastcall, section(".start"))) __kernel_start(const struct k_krn_bootData * const bootData) {
     k_purge();
 
-    k_tmr_init();
     k_hal_init();
+    k_tmr_init();
     k_ipc_init();
     k_dev_init();
     k_log_init();
