@@ -53,10 +53,10 @@ typedef struct __attribute__((packed)) k_virtual_page_specifier_t {
 
 struct {
     struct __attribute__((packed, aligned(MEM_PAGE_SIZE_BYTES))) {
+        struct k_virtual_page_specifier_t user[MEM_VIRTUAL_USER_MAX_PAGE_TABLE_COUNT];
         struct __attribute__((packed)) {
             struct k_virtual_page_specifier_t kernel[MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT];
         } reserved;
-        struct k_virtual_page_specifier_t user[MEM_VIRTUAL_USER_MAX_PAGE_TABLE_COUNT];
     } pageDirectory;
     __attribute__((aligned(MEM_PAGE_SIZE_BYTES))) k_virtual_page_table_t pageTables[MEM_VIRTUAL_USER_PAGE_TABLE_COUNT];
 } pagingInfo[MAX_PROC];
