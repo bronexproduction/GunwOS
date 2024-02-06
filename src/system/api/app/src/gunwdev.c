@@ -17,11 +17,7 @@ enum gnwDeviceError devGetById(const size_t deviceId,
                                struct gnwDeviceUHADesc * const desc) {
     CHECKPTR(desc);
 
-    SYSCALL_PAR1(deviceId);
-    SYSCALL_PAR2(desc);
-
-    SYSCALL_USER_FUNC(DEV_GET_BY_ID);
-    SYSCALL_USER_INT;
+    SYSCALL_USER_CALL(DEV_GET_BY_ID, deviceId, desc, 0);
 
     SYSCALL_RETVAL(32);
 }
@@ -30,11 +26,7 @@ enum gnwDeviceError devGetByType(const enum gnwDeviceType type,
                                  struct gnwDeviceUHADesc * const desc) {
     CHECKPTR(desc);
 
-    SYSCALL_PAR1(type);
-    SYSCALL_PAR2(desc);
-
-    SYSCALL_USER_FUNC(DEV_GET_BY_TYPE);
-    SYSCALL_USER_INT;
+    SYSCALL_USER_CALL(DEV_GET_BY_TYPE, type, desc, 0);
 
     SYSCALL_RETVAL(32);
 }
@@ -45,12 +37,7 @@ enum gnwDeviceError devGetParam(const size_t deviceId,
     CHECKPTR(paramDescriptor);
     CHECKPTR(result);
 
-    SYSCALL_PAR1(deviceId);
-    SYSCALL_PAR2(paramDescriptor);
-    SYSCALL_PAR3(result);
-
-    SYSCALL_USER_FUNC(DEV_GET_PARAM);
-    SYSCALL_USER_INT;
+    SYSCALL_USER_CALL(DEV_GET_PARAM, deviceId, paramDescriptor, result);
 
     SYSCALL_RETVAL(32);
 }
@@ -60,39 +47,24 @@ enum gnwDeviceError devSetParam(const size_t deviceId,
                                 const size_t value) {
     CHECKPTR(paramDescriptor);
 
-    SYSCALL_PAR1(deviceId);
-    SYSCALL_PAR2(paramDescriptor);
-    SYSCALL_PAR3(value);
-
-    SYSCALL_USER_FUNC(DEV_SET_PARAM);
-    SYSCALL_USER_INT;
+    SYSCALL_USER_CALL(DEV_SET_PARAM, deviceId, paramDescriptor, value);
 
     SYSCALL_RETVAL(32);
 }
 
 enum gnwDeviceError devAcquire(const uint_32 identifier) {
-    SYSCALL_PAR1(identifier);
-
-    SYSCALL_USER_FUNC(DEV_ACQUIRE);
-    SYSCALL_USER_INT;
+    SYSCALL_USER_CALL(DEV_ACQUIRE, identifier, 0, 0);
 
     SYSCALL_RETVAL(32);
 }
 
 void devRelease(const uint_32 identifier) {
-    SYSCALL_PAR1(identifier);
-
-    SYSCALL_USER_FUNC(DEV_RELEASE);
-    SYSCALL_USER_INT;
+    SYSCALL_USER_CALL(DEV_RELEASE, identifier, 0, 0);
 }
 
 enum gnwDeviceError devCharWrite(const uint_32 deviceId, 
                                  const char character) {
-    SYSCALL_PAR1(deviceId);
-    SYSCALL_PAR2(character);
-
-    SYSCALL_USER_FUNC(DEV_CHAR_WRITE);
-    SYSCALL_USER_INT;
+    SYSCALL_USER_CALL(DEV_CHAR_WRITE, deviceId, character, 0);
     
     register enum gnwDeviceError ret __asm__ ("eax");
     return ret;
@@ -103,12 +75,7 @@ enum gnwDeviceError devMemWrite(const size_t identifier,
                                 const range_addr_t * const devInputBufferRange) {
     CHECKPTR(buffer);
 
-    SYSCALL_PAR1(identifier);
-    SYSCALL_PAR2(buffer);
-    SYSCALL_PAR3(devInputBufferRange);
-
-    SYSCALL_USER_FUNC(DEV_MEM_WRITE);
-    SYSCALL_USER_INT;
+    SYSCALL_USER_CALL(DEV_MEM_WRITE, identifier, buffer, devInputBufferRange);
 
     SYSCALL_RETVAL(32);
 }
@@ -117,12 +84,7 @@ enum gnwDeviceError devListen(const size_t identifier,
                               const gnwDeviceEventListener listener) {
     CHECKPTR(listener);
 
-    SYSCALL_PAR1(identifier);
-    SYSCALL_PAR2(listener);
-    SYSCALL_PAR3(gnwDeviceEvent_decode);
-
-    SYSCALL_USER_FUNC(DEV_LISTEN);
-    SYSCALL_USER_INT;
+    SYSCALL_USER_CALL(DEV_LISTEN, identifier, listener, gnwDeviceEvent_decode);
 
     SYSCALL_RETVAL(32);
 }

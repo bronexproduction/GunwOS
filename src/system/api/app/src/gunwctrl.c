@@ -22,27 +22,19 @@ void start(const char * const path, enum gnwCtrlError * const error) {
     desc.pathLen = strlen(path);
     desc.errorPtr = error;
 
-    SYSCALL_PAR1(&desc);
-
-    SYSCALL_USER_FUNC(START);
-    SYSCALL_USER_INT;
+    SYSCALL_USER_CALL(START, &desc, 0, 0);
 }
 
 void bye(const int_32 status) {
-    SYSCALL_PAR1(status);
-
-    SYSCALL_USER_FUNC(BYE);
-    SYSCALL_USER_INT;
+    SYSCALL_USER_CALL(BYE, status, 0, 0);
 }
 
 void waitForEvent() {
-    SYSCALL_USER_FUNC(WAIT_FOR_EVENT);
-    SYSCALL_USER_INT;
+    SYSCALL_USER_CALL(WAIT_FOR_EVENT, 0, 0, 0);
 }
 
 void yield() {
-    SYSCALL_USER_FUNC(YIELD);
-    SYSCALL_USER_INT;
+    SYSCALL_USER_CALL(YIELD, 0, 0, 0);
 }
 
 #endif // _GUNWAPI_KERNEL

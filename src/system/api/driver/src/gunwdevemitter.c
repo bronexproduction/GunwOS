@@ -17,10 +17,7 @@ enum gnwDeviceError emit(const struct gnwDeviceEvent * const event) {
     CHECKPTR(event);
     CHECKPTR(event->data);
 
-    SYSCALL_PAR1(event);
-
-    SYSCALL_DRIVER_FUNC(EMIT);
-    SYSCALL_DRIVER_INT;
+    SYSCALL_DRIVER_CALL(EMIT, event, 0, 0);
     
     SYSCALL_RETVAL(32);
 }

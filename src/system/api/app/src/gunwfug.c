@@ -12,10 +12,7 @@
 #include "scl_user.h"
 
 void fug(enum gnwFugCode code) {
-    SYSCALL_PAR1(code);
-
-    SYSCALL_USER_FUNC(FUG);
-    SYSCALL_USER_INT;
+    SYSCALL_USER_CALL(FUG, code, 0, 0);
 }
 
 #warning commented until drivers running in separate processes
