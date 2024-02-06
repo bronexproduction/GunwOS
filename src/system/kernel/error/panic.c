@@ -108,14 +108,6 @@ void __attribute__((cdecl)) k_oops(const char *reason, uint_32 errCode) {
         }
     }
 
-    // register uint_32 * stackPtr  __asm__ ("esp");
-    for (size_t i = 0; i < 20; ++i) {
-        // uint_32 val = *(stackPtr + sizeof(uint_32 *)*i);
-
-        // user_cli_putin(val);
-        // user_cli_putc(' ');
-    } 
-
     k_cpu_halt();
     __builtin_unreachable();
 }
