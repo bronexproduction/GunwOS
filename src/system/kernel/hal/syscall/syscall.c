@@ -112,7 +112,8 @@ __attribute__((naked)) void k_scl_driverSyscall() {
     /*
         Syscall function number
     */
-    register uint_32 function __asm__ ("eax");
+    register ptr_t stack __asm__ ("esp");
+    uint_32 * function = (uint_32 *)(stack + 56);
 
     __asm__ volatile ("pushl %ebx");
     __asm__ volatile ("pushl %edx");
@@ -124,7 +125,7 @@ __attribute__((naked)) void k_scl_driverSyscall() {
     // /*
     //     Checking if requested syscall function is available
     // */
-    register void (*scr)() __asm__ ("eax") __attribute__((unused)) = driverSyscallReg[function];
+    register void (*scr)() __asm__ ("eax") __attribute__((unused)) = driverSyscallReg[*function];
     __asm__ volatile ("jmp k_scl_syscall");
 }
 
