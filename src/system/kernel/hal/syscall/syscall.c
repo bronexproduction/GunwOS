@@ -13,7 +13,7 @@
 #include "usrfunc.h"
 
 #define DRIVER_SYSCALL_COUNT 3
-#define SYSCALL_COUNT 21
+#define USER_SYSCALL_COUNT 21
 
 /*
     Array of pointers to driver syscall handlers
@@ -31,7 +31,7 @@ static void (*driverSyscallReg[DRIVER_SYSCALL_COUNT])() = {
 
     Array index corresponds to syscall function code
 */
-static void (*userSyscallReg[SYSCALL_COUNT])() = {
+static void (*userSyscallReg[USER_SYSCALL_COUNT])() = {
     /* 0x00 */ (void *)k_scr_start,
     /* 0x01 */ (void *)k_scr_log,
     /* 0x02 */ (void *)k_scr_devCharWrite,
@@ -115,11 +115,7 @@ __attribute__((naked)) void k_scl_driverSyscall() {
     register ptr_t stack __asm__ ("esp");
     uint_32 * function = (uint_32 *)(stack + 56);
 
-    __asm__ volatile ("pushl %ebx");
-    __asm__ volatile ("pushl %edx");
-    __asm__ volatile ("cmp %%ebx, %%eax" : : "b" (SYSCALL_COUNT));
-    __asm__ volatile ("popl %edx");
-    __asm__ volatile ("popl %ebx");
+    __asm__ volatile ("cmp %%ebx, %[mem]" : : "b" (DRIVER_SYSCALL_COUNT), [mem] "m" (*function));
     __asm__ volatile ("jae k_scl_syscall_functionOverLimitFailure");
 
     // /*
@@ -143,7 +139,7 @@ __attribute__((naked)) void k_scl_userSyscall() {
 
     __asm__ volatile ("pushl %ebx");
     __asm__ volatile ("pushl %edx");
-    __asm__ volatile ("cmp %%ebx, %%eax" : : "b" (SYSCALL_COUNT));
+    __asm__ volatile ("cmp %%ebx, %%eax" : : "b" (USER_SYSCALL_COUNT));
     __asm__ volatile ("popl %edx");
     __asm__ volatile ("popl %ebx");
     __asm__ volatile ("jae k_scl_syscall_functionOverLimitFailure");
