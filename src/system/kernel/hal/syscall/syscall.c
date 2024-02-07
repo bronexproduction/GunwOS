@@ -20,7 +20,7 @@
 
     Array index corresponds to syscall function code
 */
-static void (*driverSyscallReg[DRIVER_SYSCALL_COUNT])() = {
+static void (*syscallReg_DRIVER[DRIVER_SYSCALL_COUNT])() = {
     /* 0x00 */ (void *)k_scr_rdb,
     /* 0x01 */ (void *)k_scr_wrb,
     /* 0x02 */ (void *)k_scr_emit
@@ -31,7 +31,7 @@ static void (*driverSyscallReg[DRIVER_SYSCALL_COUNT])() = {
 
     Array index corresponds to syscall function code
 */
-static void (*userSyscallReg[USER_SYSCALL_COUNT])() = {
+static void (*syscallReg_USER[USER_SYSCALL_COUNT])() = {
     /* 0x00 */ (void *)k_scr_start,
     /* 0x01 */ (void *)k_scr_log,
     /* 0x02 */ (void *)k_scr_devCharWrite,
@@ -102,28 +102,22 @@ __attribute__((naked, unused)) static void k_scl_syscall_end() {
     __asm__ volatile ("ret");
 }
 
+#define _SYSCALL_ENTRY(TYPE) __attribute__((naked)) void k_scl_syscall_ ## TYPE () {                    \
+    register ptr_t stack __asm__ ("esp");                                                               \
+    uint_32 * function = (uint_32 *)(stack + 56);                                                       \
+    __asm__ volatile ("cmp %%ebx, %[mem]" : : "b" ( TYPE ## _SYSCALL_COUNT), [mem] "m" (*function));    \
+    __asm__ volatile ("jae k_scl_syscall_functionOverLimitFailure");                                    \
+    register void (*scr)() __asm__ ("eax") __attribute__((unused)) = syscallReg_ ## TYPE [*function];   \
+    __asm__ volatile ("jmp k_scl_syscall");                                                             \
+}
+
 /*
     Driver syscall interrupt (int 0x68) request global service routine
 
     NOTE: Function number has to be put in EAX register
     before making jump to k_scl_driverSyscall label
 */
-__attribute__((naked)) void k_scl_driverSyscall() {
-    /*
-        Syscall function number
-    */
-    register ptr_t stack __asm__ ("esp");
-    uint_32 * function = (uint_32 *)(stack + 56);
-
-    __asm__ volatile ("cmp %%ebx, %[mem]" : : "b" (DRIVER_SYSCALL_COUNT), [mem] "m" (*function));
-    __asm__ volatile ("jae k_scl_syscall_functionOverLimitFailure");
-
-    // /*
-    //     Checking if requested syscall function is available
-    // */
-    register void (*scr)() __asm__ ("eax") __attribute__((unused)) = driverSyscallReg[*function];
-    __asm__ volatile ("jmp k_scl_syscall");
-}
+_SYSCALL_ENTRY(DRIVER);
 
 /*
     User-level syscall interrupt (int 0x69) request global service routine
@@ -131,22 +125,4 @@ __attribute__((naked)) void k_scl_driverSyscall() {
     NOTE: Function number has to be put in EAX register
     before making jump to k_scl_userSyscall label
 */
-__attribute__((naked)) void k_scl_userSyscall() {
-    /*
-        Syscall function number
-    */
-    register uint_32 function __asm__ ("eax");
-
-    __asm__ volatile ("pushl %ebx");
-    __asm__ volatile ("pushl %edx");
-    __asm__ volatile ("cmp %%ebx, %%eax" : : "b" (USER_SYSCALL_COUNT));
-    __asm__ volatile ("popl %edx");
-    __asm__ volatile ("popl %ebx");
-    __asm__ volatile ("jae k_scl_syscall_functionOverLimitFailure");
-
-    // /*
-    //     Checking if requested syscall function is available
-    // */
-    register void (*scr)() __asm__ ("eax") __attribute__((unused)) = userSyscallReg[function];
-    __asm__ volatile ("jmp k_scl_syscall");
-}
+_SYSCALL_ENTRY(USER);
