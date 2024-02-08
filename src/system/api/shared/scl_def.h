@@ -11,7 +11,7 @@
 #include <types.h>
 #include <utils.h>
 
-#define REG_RET(BITS, NAME) REG(BITS, NAME, eax)
+#define REG_RET(BITS, NAME) register uint_ ## BITS NAME __asm__ ("eax"); (void)(NAME);
 #define SYSCALL_RETVAL(BITS) { REG_RET(BITS, _retVal); return _retVal; }
 #define SYSCALL_GET_RETVAL(BITS, NAME) REG_RET(BITS, _retVal); uint_ ## BITS NAME = _retVal;
 
