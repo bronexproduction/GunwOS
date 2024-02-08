@@ -30,10 +30,10 @@
         * EBX - path to start descriptor pointer (struct gnwCtrlStartDescriptor) relative to caller process memory
 */
 SCR(start,
-    REG(32, descPtr, ebx)
+    PAR_PTR_1(descPtr)
 
     extern void k_scr_usr_start(const procId_t, const struct gnwCtrlStartDescriptor * const);
-    k_que_dispatch_arch_arch((fPtr_arch_arch)(ptr_t)k_scr_usr_start, k_proc_getCurrentId(), descPtr);
+    k_que_dispatch_arch_arch((fPtr_arch_arch)(ptr_t)k_scr_usr_start, k_proc_getCurrentId(), *descPtr);
 )
 
 /*
@@ -45,11 +45,11 @@ SCR(start,
         * ECX - message size in bytes
 */
 SCR(log,
-    REG(32, msgPtr, ebx)
-    REG(32, msgBytes, ecx)
+    PAR_PTR_1(msgPtr)
+    PAR_PTR_2(msgBytes)
 
     extern void k_scr_usr_log(const char * const, const size_t);
-    k_scr_usr_log((char *)msgPtr, msgBytes);
+    k_scr_usr_log((char *)*msgPtr, *msgBytes);
 )
 
 /*
@@ -64,12 +64,12 @@ SCR(log,
         * EAX - error code (see enum gnwDeviceError)
 */
 SCR(devCharWrite,
-    REG(32, devId, ebx);
-    REG(8, character, cl);
+    PAR_PTR_1(devId);
+    PAR_PTR_2(character);
 
     REG_RET(32, err)
 
-    err = k_dev_writeChar(k_proc_getCurrentId(), (const size_t)devId, (const char)character);  
+    err = k_dev_writeChar(k_proc_getCurrentId(), (const size_t)*devId, (const char)*character);  
 )
 
 /*
@@ -81,10 +81,10 @@ SCR(devCharWrite,
 
 */
 SCR(bye,
-    REG(32, status, ebx)
+    PAR_PTR_1(status)
     
     extern void k_scr_usr_bye(procId_t, int_32);
-    k_scr_usr_bye(k_proc_getCurrentId(), status);
+    k_scr_usr_bye(k_proc_getCurrentId(), *status);
 )
 
 /*
@@ -121,12 +121,12 @@ SCR(timeMs,
         * EAX - error code on failure, GIPCE_NONE otherwise
 */
 SCR(ipcSend,
-    REG(32, queryPtr, ebx)
+    PAR_PTR_1(queryPtr)
 
     REG_RET(32, err)
 
     extern enum gnwIpcError k_scr_usr_ipcSend(const struct gnwIpcSenderQuery * const);
-    err = k_scr_usr_ipcSend((struct gnwIpcSenderQuery *)queryPtr);
+    err = k_scr_usr_ipcSend((struct gnwIpcSenderQuery *)*queryPtr);
 )
 
 /*
@@ -140,12 +140,12 @@ SCR(ipcSend,
         * EAX - error code on failure, GIPCE_NONE otherwise
 */
 SCR(ipcRegister,
-    REG(32, desc, ebx)
+    PAR_PTR_1(desc)
 
     REG_RET(32, err)
 
     extern enum gnwIpcError k_scr_usr_ipcRegister(const struct gnwIpcHandlerDescriptor * const);
-    err = k_scr_usr_ipcRegister((struct gnwIpcHandlerDescriptor *)desc);
+    err = k_scr_usr_ipcRegister((struct gnwIpcHandlerDescriptor *)*desc);
 )
 
 /*
@@ -160,13 +160,13 @@ SCR(ipcRegister,
         * EAX - error code (enum gnwDeviceError)
 */
 SCR(devGetById,
-    REG(32, id, ebx)
-    REG(32, desc, ecx)
+    PAR_PTR_1(id)
+    PAR_PTR_2(desc)
 
     REG_RET(32, err)
 
     extern enum gnwDeviceError k_scr_usr_devGetById(const size_t, struct gnwDeviceUHADesc * const);
-    err = k_scr_usr_devGetById((size_t)id, (struct gnwDeviceUHADesc *)desc);
+    err = k_scr_usr_devGetById((size_t)*id, (struct gnwDeviceUHADesc *)*desc);
 )
 
 /*
@@ -181,13 +181,13 @@ SCR(devGetById,
         * EAX - error code (enum gnwDeviceError)
 */
 SCR(devGetByType,
-    REG(32, type, ebx)
-    REG(32, desc, ecx)
+    PAR_PTR_1(type)
+    PAR_PTR_2(desc)
 
     REG_RET(32, err)
 
     extern enum gnwDeviceError k_scr_usr_devGetByType(const enum gnwDeviceType, struct gnwDeviceUHADesc * const);
-    err = k_scr_usr_devGetByType((enum gnwDeviceType)type, (struct gnwDeviceUHADesc * const)desc);
+    err = k_scr_usr_devGetByType((enum gnwDeviceType)*type, (struct gnwDeviceUHADesc * const)*desc);
 )
 
 /*
@@ -201,11 +201,11 @@ SCR(devGetByType,
         * EAX - error code (enum gnwDeviceError)
 */
 SCR(devAcquire,
-    REG(32, devId, ebx)
+    PAR_PTR_1(devId)
 
     REG_RET(32, err)
 
-    err = k_dev_acquireHold(k_proc_getCurrentId(), (size_t)devId);
+    err = k_dev_acquireHold(k_proc_getCurrentId(), (size_t)*devId);
 )
 
 /*
@@ -216,9 +216,9 @@ SCR(devAcquire,
         * EBX - device identifier
 */
 SCR(devRelease,
-    REG(32, devId, ebx)
+    PAR_PTR_1(devId)
 
-    k_dev_releaseHold(k_proc_getCurrentId(), (size_t)devId);
+    k_dev_releaseHold(k_proc_getCurrentId(), (size_t)*devId);
 )
 
 /*
@@ -233,14 +233,14 @@ SCR(devRelease,
         * EAX - error code (enum gnwDeviceError)
 */
 SCR(devMemWrite,
-    REG(32, devId, ebx)
-    REG(32, buf, ecx)
-    REG(32, rangePtr, edx)
+    PAR_PTR_1(devId)
+    PAR_PTR_2(buf)
+    PAR_PTR_3(rangePtr)
 
     REG_RET(32, err)
 
     extern enum gnwDeviceError k_scr_usr_devMemWrite(const size_t devId, const ptr_t buf, const range_addr_t * const);
-    err = k_scr_usr_devMemWrite(devId, (ptr_t)buf, (range_addr_t *)rangePtr);
+    err = k_scr_usr_devMemWrite(*devId, (ptr_t)*buf, (range_addr_t *)*rangePtr);
 )
 
 /*
@@ -251,9 +251,9 @@ SCR(devMemWrite,
         * EBX - FUG code
 */
 SCR(fug,
-    REG(32, code, ebx)
+    PAR_PTR_1(code)
 
-    k_err_fug(k_proc_getCurrentId(), code);
+    k_err_fug(k_proc_getCurrentId(), *code);
 )
 
 /*
@@ -269,13 +269,13 @@ SCR(fug,
         * EAX - error code (enum gnwDeviceError)
 */
 SCR(devListen,
-    REG(32, devId, ebx)
-    REG(32, lsnr, ecx)
-    REG(32, decoder, edx)
+    PAR_PTR_1(devId)
+    PAR_PTR_2(lsnr)
+    PAR_PTR_3(decoder)
 
     REG_RET(32, err)
 
-    err = k_dev_listen(k_proc_getCurrentId(), (const size_t)devId, (gnwDeviceEventListener)lsnr, (gnwDeviceEventDecoder)decoder);
+    err = k_dev_listen(k_proc_getCurrentId(), (const size_t)*devId, (gnwDeviceEventListener)*lsnr, (gnwDeviceEventDecoder)*decoder);
 )
 
 /*
@@ -291,14 +291,14 @@ SCR(devListen,
         * EAX - error code (enum gnwDeviceError)
 */
 SCR(devGetParam,
-    REG(32, devId, ebx)
-    REG(32, paramDesc, ecx)
-    REG(32, resultPtr, edx)
+    PAR_PTR_1(devId)
+    PAR_PTR_2(paramDesc)
+    PAR_PTR_3(resultPtr)
 
     REG_RET(32, err)
 
     extern enum gnwDeviceError k_scr_usr_devGetParam(const size_t, const struct gnwDeviceParamDescriptor * const, size_t * const);
-    err = k_scr_usr_devGetParam((size_t)devId, (struct gnwDeviceParamDescriptor *)paramDesc, (size_t *)resultPtr);
+    err = k_scr_usr_devGetParam((size_t)*devId, (struct gnwDeviceParamDescriptor *)*paramDesc, (size_t *)*resultPtr);
 )
 
 /*
@@ -314,14 +314,14 @@ SCR(devGetParam,
         * EAX - error code (enum gnwDeviceError)
 */
 SCR(devSetParam,
-    REG(32, devId, ebx)
-    REG(32, paramDesc, ecx)
-    REG(32, paramVal, edx)
+    PAR_PTR_1(devId)
+    PAR_PTR_2(paramDesc)
+    PAR_PTR_3(paramVal)
 
     REG_RET(32, err)
 
     extern enum gnwDeviceError k_scr_usr_devSetParam(const size_t, const struct gnwDeviceParamDescriptor * const, const size_t);
-    err = k_scr_usr_devSetParam((size_t)devId, (struct gnwDeviceParamDescriptor *)paramDesc, (size_t)paramVal);
+    err = k_scr_usr_devSetParam((size_t)*devId, (struct gnwDeviceParamDescriptor *)*paramDesc, (size_t)*paramVal);
 )
 
 /*
@@ -336,12 +336,12 @@ SCR(devSetParam,
         * EAX - enum gnwRunLoopError value on failure, GRLE_NONE otherwise
 */
 SCR(runLoopGetItem,
-    REG(32, itemPtr, ebx)
+    PAR_PTR_1(itemPtr)
 
     REG_RET(32, err)
 
     extern enum gnwRunLoopError k_scr_usr_runLoopGetItem(struct gnwRunLoopDispatchItem * const);
-    err = k_scr_usr_runLoopGetItem((struct gnwRunLoopDispatchItem *)itemPtr);
+    err = k_scr_usr_runLoopGetItem((struct gnwRunLoopDispatchItem *)*itemPtr);
 )
 
 /*
@@ -356,12 +356,12 @@ SCR(runLoopGetItem,
         * EAX - enum gnwRunLoopError code if any, GRLE_NONE otherwise
 */
 SCR(runLoopGetData,
-    REG(32, dataBufferPtr, ebx)
+    PAR_PTR_1(dataBufferPtr)
 
     REG_RET(32, err)
 
     extern enum gnwRunLoopError k_scr_usr_runLoopGetData(ptr_t);
-    err = k_scr_usr_runLoopGetData((ptr_t)dataBufferPtr);
+    err = k_scr_usr_runLoopGetData((ptr_t)*dataBufferPtr);
 )
 
 /*
@@ -375,12 +375,12 @@ SCR(runLoopGetData,
         * EAX - enum gnwIpcError code if any, GIPCE_NONE otherwise
 */
 SCR(ipcReply,
-    REG(32, infoPtr, ebx)
+    PAR_PTR_1(infoPtr)
 
     REG_RET(32, err)
 
     extern enum gnwIpcError k_scr_usr_ipcReply(const struct gnwIpcReplyInfo * const);
-    err = k_scr_usr_ipcReply((struct gnwIpcReplyInfo *)infoPtr);
+    err = k_scr_usr_ipcReply((struct gnwIpcReplyInfo *)*infoPtr);
 )
 
 /*
