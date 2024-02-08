@@ -27,7 +27,7 @@
     Function - START
 
     Params:
-        * EBX - path to start descriptor pointer (struct gnwCtrlStartDescriptor) relative to caller process memory
+        * PAR_PTR_1 - path to start descriptor pointer (struct gnwCtrlStartDescriptor) relative to caller process memory
 */
 SCR(start,
     PAR_PTR_1(descPtr)
@@ -41,8 +41,8 @@ SCR(start,
     Function - LOG
 
     Params:
-        * EBX - message pointer
-        * ECX - message size in bytes
+        * PAR_PTR_1 - message pointer
+        * PAR_PTR_2 - message size in bytes
 */
 SCR(log,
     PAR_PTR_1(msgPtr)
@@ -57,8 +57,8 @@ SCR(log,
     Function - DEV_CHAR_WRITE
     
     Params:
-        * EBX - character output device identifier
-        * CL - character to be written
+        * PAR_PTR_1 - character output device identifier
+        * PAR_PTR_2 - character to be written
 
     Return:
         * EAX - error code (see enum gnwDeviceError)
@@ -77,7 +77,7 @@ SCR(devCharWrite,
     Function - BYE
 
     Params:
-        * EBX - status
+        * PAR_PTR_1 - status
 
 */
 SCR(bye,
@@ -115,7 +115,7 @@ SCR(timeMs,
     Function - IPC_SEND
 
     Params: 
-        * EBX - IPC sender query pointer relative to caller process memory
+        * PAR_PTR_1 - IPC sender query pointer relative to caller process memory
 
     Return:
         * EAX - error code on failure, GIPCE_NONE otherwise
@@ -134,7 +134,7 @@ SCR(ipcSend,
     Function - IPC_REGISTER
 
     Params:
-        * EBX - IPC handler descriptor pointer (see struct gnwIpcHandlerDescriptor) relative to caller process memory
+        * PAR_PTR_1 - IPC handler descriptor pointer (see struct gnwIpcHandlerDescriptor) relative to caller process memory
 
     Return:
         * EAX - error code on failure, GIPCE_NONE otherwise
@@ -153,8 +153,8 @@ SCR(ipcRegister,
     Function - DEV_GET_BY_ID
 
     Params:
-        * EBX - device identifier
-        * ECX - device descriptor pointer relative to caller process memory (struct gnwDeviceUHADesc *)
+        * PAR_PTR_1 - device identifier
+        * PAR_PTR_2 - device descriptor pointer relative to caller process memory (struct gnwDeviceUHADesc *)
 
     Return:
         * EAX - error code (enum gnwDeviceError)
@@ -174,8 +174,8 @@ SCR(devGetById,
     Function - DEV_GET_BY_TYPE
 
     Params:
-        * EBX - device type (enum gnwDeviceType)
-        * ECX - device descriptor pointer relative to caller process memory (struct gnwDeviceUHADesc *)
+        * PAR_PTR_1 - device type (enum gnwDeviceType)
+        * PAR_PTR_2 - device descriptor pointer relative to caller process memory (struct gnwDeviceUHADesc *)
 
     Return:
         * EAX - error code (enum gnwDeviceError)
@@ -195,7 +195,7 @@ SCR(devGetByType,
     Function - DEV_ACQUIRE
 
     Params:
-        * EBX - device identifier
+        * PAR_PTR_1 - device identifier
 
     Return:
         * EAX - error code (enum gnwDeviceError)
@@ -213,7 +213,7 @@ SCR(devAcquire,
     Function - DEV_RELEASE
 
     Params:
-        * EBX - device identifier
+        * PAR_PTR_1 - device identifier
 */
 SCR(devRelease,
     PAR_PTR_1(devId)
@@ -226,8 +226,9 @@ SCR(devRelease,
     Function - DEV_MEM_WRITE
 
     Params:
-        * EBX - device identifier
-        * ECX - data buffer relative to caller process memory 
+        * PAR_PTR_1 - device identifier
+        * PAR_PTR_2 - data buffer relative to caller process memory 
+        * PAR_PTR_3 - memory range (pointer) relative to device memory 
 
     Return:
         * EAX - error code (enum gnwDeviceError)
@@ -248,7 +249,7 @@ SCR(devMemWrite,
     Function - FUG
 
     Params:
-        * EBX - FUG code
+        * PAR_PTR_1 - FUG code
 */
 SCR(fug,
     PAR_PTR_1(code)
@@ -261,9 +262,9 @@ SCR(fug,
     Function - DEV_LISTEN
 
     Params:
-        * EBX - device identifier
-        * ECX - listener (gnwDeviceEventListener)
-        * EDX - decoder (gnwDeviceEventDecoder)
+        * PAR_PTR_1 - device identifier
+        * PAR_PTR_2 - listener (gnwDeviceEventListener)
+        * PAR_PTR_3 - decoder (gnwDeviceEventDecoder)
     
     Return:
         * EAX - error code (enum gnwDeviceError)
@@ -283,9 +284,9 @@ SCR(devListen,
     Function - DEV_GET_PARAM
 
     Params:
-        * EBX - device identifier
-        * ECX - device parameter descriptor
-        * EDX - result pointer relative to caller process memory
+        * PAR_PTR_1 - device identifier
+        * PAR_PTR_2 - device parameter descriptor
+        * PAR_PTR_3 - result pointer relative to caller process memory
     
     Return:
         * EAX - error code (enum gnwDeviceError)
@@ -306,9 +307,9 @@ SCR(devGetParam,
     Function - DEV_SET_PARAM
 
     Params:
-        * EBX - device identifier
-        * ECX - device parameter descriptor
-        * EDX - parameter value
+        * PAR_PTR_1 - device identifier
+        * PAR_PTR_2 - device parameter descriptor
+        * PAR_PTR_3 - parameter value
     
     Return:
         * EAX - error code (enum gnwDeviceError)
@@ -329,8 +330,8 @@ SCR(devSetParam,
     Function - RUNLOOP_GET_ITEM
 
     Params:
-        * EBX - struct gnwRunLoopDispatchItem pointer relative to caller process memory
-                (to be filled with unhandled entry)
+        * PAR_PTR_1 - struct gnwRunLoopDispatchItem pointer relative to caller process memory
+                      (to be filled with unhandled entry)
     
     Return:
         * EAX - enum gnwRunLoopError value on failure, GRLE_NONE otherwise
@@ -349,8 +350,8 @@ SCR(runLoopGetItem,
     Function - RUNLOOP_GET_DATA
 
     Params:
-        * EBX - pointer to entry buffer data relative to caller process memory
-                (to be filled with unhandled entry data)
+        * PAR_PTR_1 - pointer to entry buffer data relative to caller process memory
+                      (to be filled with unhandled entry data)
     
     Return:
         * EAX - enum gnwRunLoopError code if any, GRLE_NONE otherwise
@@ -369,7 +370,7 @@ SCR(runLoopGetData,
     Function - IPC_REPLY
 
     Params:
-        * EBX - IPC reply info pointer
+        * PAR_PTR_1 - IPC reply info pointer
     
     Return:
         * EAX - enum gnwIpcError code if any, GIPCE_NONE otherwise
