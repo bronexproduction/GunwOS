@@ -42,10 +42,10 @@ SCR(rdb,
 
 */
 SCR(wrb,
-    REG(16, port, bx)
-    REG(8, value, cl)
+    PAR_PTR_1(port);
+    PAR_PTR_2(value);
 
-    k_bus_outb(port, value);
+    k_bus_outb(*port, *value);
 )
 
 /*

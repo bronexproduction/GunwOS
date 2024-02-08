@@ -105,8 +105,9 @@ __attribute__((naked, unused)) static void k_scl_syscall_end() {
 #define _SYSCALL_ENTRY(TYPE) __attribute__((naked)) void k_scl_syscall_ ## TYPE () {                    \
     register ptr_t stack __asm__ ("esp");                                                               \
     uint_32 * function = (uint_32 *)(stack + 56);                                                       \
-    __asm__ volatile ("cmp %%ebx, %[mem]" : : "b" ( TYPE ## _SYSCALL_COUNT), [mem] "m" (*function));    \
-    __asm__ volatile ("jae k_scl_syscall_functionOverLimitFailure");                                    \
+    if (*function >= TYPE ## _SYSCALL_COUNT) {                                                          \
+        __asm__ volatile ("jmp k_scl_syscall_functionOverLimitFailure");                                \
+    }                                                                                                   \
     register void (*scr)() __asm__ ("eax") __attribute__((unused)) = syscallReg_ ## TYPE [*function];   \
     __asm__ volatile ("jmp k_scl_syscall");                                                             \
 }

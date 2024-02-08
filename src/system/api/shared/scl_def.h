@@ -20,9 +20,9 @@
 #define _SYSCALL_REMOVE_PAR { __asm__ volatile ("addl $16, %esp"); }
 
 #define SYSCALL_CALL(INT_CODE, CODE, PAR1, PAR2, PAR3) {\
-    _SYSCALL_PUSH_PAR(PAR1);                            \
-    _SYSCALL_PUSH_PAR(PAR2);                            \
     _SYSCALL_PUSH_PAR(PAR3);                            \
+    _SYSCALL_PUSH_PAR(PAR2);                            \
+    _SYSCALL_PUSH_PAR(PAR1);                            \
     _SYSCALL_PUSH_PAR(CODE);                            \
     _SYSCALL_INT(INT_CODE);                             \
     _SYSCALL_REMOVE_PAR;                                \
