@@ -8,7 +8,6 @@
 #include <defs.h>
 #include <gunwdisplaydrv.h>
 #include <error/panic.h>
-#include <gunwbus.h>
 #include "opmode.h"
 
 static const volatile ptr_t DISPLAY_BUFFER_ADDR_BASIC = (volatile ptr_t)0xb8000;

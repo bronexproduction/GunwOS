@@ -5,9 +5,7 @@
 //  Created by Artur Danielewski on 11.05.2023.
 //
 
-#warning swapped until drivers running in separate processes
-// #ifndef _GUNWAPI_KERNEL
-#ifdef _GUNWAPI_KERNEL
+#ifndef _GUNWAPI_KERNEL
 
 #include "../include/gunwdevemitter.h"
 #include <gunwfug.h>

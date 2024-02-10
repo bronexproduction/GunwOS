@@ -19,13 +19,13 @@
     Code - 0x00
     Function - RDB
 */
-__attribute__((naked)) void k_scr_rdb(); 
+__attribute__((naked)) uint_8 k_scr_rdb(const uint_16 port); 
 
 /*
     Code - 0x01
     Function - WRB
 */
-__attribute__((naked)) void k_scr_wrb(const int_8 data);
+__attribute__((naked)) void k_scr_wrb(const uint_16 port, const uint_8 value);
 
 /*
     Code - 0x02

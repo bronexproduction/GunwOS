@@ -10,13 +10,14 @@
 //  
 //
 
-#include <gunwbus.h>
 #include <gunwdrv.h>
 #include <gunwdevemitter.h>
 #include <gunwkeyboard.h>
 
+#include <dev/dev.h>
 #include <driver/driver.h>
 #include <error/panic.h>
+#include <hal/io/bus.h>
 
 /*
     Keyboard controller data register
@@ -95,7 +96,7 @@ static void emitEvent(const int_32 type, const char data) {
     event.data = (ptr_t)&data;
     event.dataSizeBytes = sizeof(char);
 
-    err = emit(&event);
+    err = k_dev_emit(&event);
     if (err != GDE_NONE) {
         OOPS("Error emitting keyboard event",);
     }
@@ -103,13 +104,13 @@ static void emitEvent(const int_32 type, const char data) {
 
 ISR(
     /* Checking output buffer status */
-    if (!rdb(KBD_BUS_STATUS) & KBD_STAT_OUTB) {
+    if (!k_bus_inb(KBD_BUS_STATUS) & KBD_STAT_OUTB) {
         OOPS_NBR("Keyboard output buffer empty on keyboard interrupt");
         ISR_END
     }
 
     /* Reading keycode */
-    uint_8 c = rdb(KBD_BUS_DATA);
+    uint_8 c = k_bus_inb(KBD_BUS_DATA);
     
     /*
         Extracting exact keycode

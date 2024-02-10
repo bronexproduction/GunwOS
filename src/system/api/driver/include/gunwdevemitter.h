@@ -8,8 +8,7 @@
 #ifndef GUNWOS_GUNWDEVEMITTER_H
 #define GUNWOS_GUNWDEVEMITTER_H
 
-#warning commented until drivers running in separate processes
-// #ifndef _GUNWAPI_KERNEL
+#ifndef _GUNWAPI_KERNEL
 
 #include <gunwdev.h>
 
@@ -24,7 +23,6 @@
 */
 extern enum gnwDeviceError emit(const struct gnwDeviceEvent * const event);
 
-#warning commented until drivers running in separate processes
-// #endif // _GUNWAPI_KERNEL
+#endif // _GUNWAPI_KERNEL
 
 #endif // GUNWOS_GUNWDEVEMITTER_H

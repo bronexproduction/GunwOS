@@ -14,11 +14,11 @@
 
 #include "io.h"
 #include <gunwctrl.h>
-#include <gunwbus.h>
 #include "../utl/utl.h"
+#include <hal/io/bus.h>
 
 void pushReg(const uint_16 base, const enum fdc_bus_regOffset regOffset, const uint_8 data) {
-    wrb(base + regOffset, data);
+    k_bus_outb(base + regOffset, data);
     extern void fdc_sleepms(const size_t);
     fdc_sleepms(1);
 }
@@ -40,6 +40,6 @@ enum fdc_opStatus pullData(const uint_16 base, uint_8 * const data) {
         return OPSTATUS_NOT_READY;
     }
 
-    *data = rdb(base + REG_DATA);
+    *data = k_bus_inb(base + REG_DATA);
     return OPSTATUS_OK;
 }

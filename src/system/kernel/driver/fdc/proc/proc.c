@@ -10,8 +10,8 @@
 
 #include "proc.h"
 #include <error/panic.h>
+#include <hal/io/bus.h>
 #include <gunwctrl.h>
-#include <gunwbus.h>
 #include "../common/io.h"
 #include "../common/data.h"
 #include "../common/strings.h"
@@ -212,7 +212,7 @@ enum fdc_opStatus proc_stopMotor(const uint_16 base, const uint_8 drive) {
         return OPSTATUS_INVPARAM;
     }
 
-    uint_8 dor = rdb(base + REG_DOR) & ~BIT_RANGE_ALIGNED(1 << drive, RANGE_DOR_MC);
+    uint_8 dor = k_bus_inb(base + REG_DOR) & ~BIT_RANGE_ALIGNED(1 << drive, RANGE_DOR_MC);
     pushReg(base, REG_DOR, dor);
 
     return OPSTATUS_OK;
