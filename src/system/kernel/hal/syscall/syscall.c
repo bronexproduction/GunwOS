@@ -55,6 +55,11 @@ static void (*syscallReg_USER[USER_SYSCALL_COUNT])() = {
     /* 0x14 */ (void *)k_scr_yield,
 };
 
+register ptr_t kernelStack __asm__ ("esp");
+#define _USER_STACK_ADDR_PTR ((addr_t *)(kernelStack + 69))
+#define _USER_STACK_PTR (ptr_t)(*_USER_STACK_ADDR_PTR)
+#define _FUNCTION (uint_32 *)(_USER_STACK_PTR + 56)
+
 __attribute__((naked, unused)) static void k_scl_syscall() {
     register void (*scr)() __asm__ ("eax");
     if (!scr) {
@@ -103,8 +108,7 @@ __attribute__((naked, unused)) static void k_scl_syscall_end() {
 }
 
 #define _SYSCALL_ENTRY(TYPE) __attribute__((naked)) void k_scl_syscall_ ## TYPE () {                    \
-    register ptr_t stack __asm__ ("esp");                                                               \
-    uint_32 * function = (uint_32 *)(stack + 56);                                                       \
+    uint_32 * function = _FUNCTION;                                                                     \
     if (*function >= TYPE ## _SYSCALL_COUNT) {                                                          \
         __asm__ volatile ("jmp k_scl_syscall_functionOverLimitFailure");                                \
     }                                                                                                   \
