@@ -8,8 +8,7 @@
 #ifndef GUNWOS_SCL_DRIVER_H
 #define GUNWOS_SCL_DRIVER_H
 
-#warning commented until drivers running in separate processes
-// #ifndef _GUNWAPI_KERNEL
+#ifndef _GUNWAPI_KERNEL
 
 #include <scl_def.h>
 
@@ -22,7 +21,6 @@
 #define SYSCALL_DRIVER_CALL(CODE, PAR1, PAR2, PAR3) \
 SYSCALL_CALL(SYSCALL_DRIVER_INTERRUPT, SYSCALL_DRIVER_FUNCTION_ ## CODE, PAR1, PAR2, PAR3)
 
-#warning commented until drivers running in separate processes
-// #endif // _GUNWAPI_KERNEL
+#endif // _GUNWAPI_KERNEL
 
 #endif // GUNWOS_SCL_DRIVER_H
