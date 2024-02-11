@@ -374,6 +374,8 @@ void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const procId_t currentP
 
         // Save current process CPU state
 
+#warning Syscalls implementation shows that ESP of the calling process is on offset 12, not 52
+
         currentCpuState->edi    = STACK_VAL(refEsp, 32, 0);
         currentCpuState->esi    = STACK_VAL(refEsp, 32, 4);
         currentCpuState->ebp    = STACK_VAL(refEsp, 32, 8);
