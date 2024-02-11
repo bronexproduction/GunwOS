@@ -56,9 +56,10 @@ static void (*syscallReg_USER[USER_SYSCALL_COUNT])() = {
 };
 
 register ptr_t kernelStack __asm__ ("esp");
-#define _USER_STACK_ADDR_PTR ((addr_t *)(kernelStack + 69))
+#define _STACK_REFERENCE_OFFSET 0x2C
+#define _USER_STACK_ADDR_PTR ((addr_t *)(kernelStack + _STACK_REFERENCE_OFFSET + 12))
 #define _USER_STACK_PTR (ptr_t)(*_USER_STACK_ADDR_PTR)
-#define _FUNCTION (uint_32 *)(_USER_STACK_PTR + 56)
+#define _FUNCTION (uint_32 *)(_USER_STACK_PTR + 0)
 
 __attribute__((naked, unused)) static void k_scl_syscall() {
     register void (*scr)() __asm__ ("eax");
