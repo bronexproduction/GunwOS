@@ -21,7 +21,7 @@ static uint_8 init() {
     /*
         ICW1
     */
-	k_bus_outb(BUS_PIC_MASTER_COMMAND, PIC_ICW1_INIT | PIC_ICW1_ICW4);
+    k_bus_outb(BUS_PIC_MASTER_COMMAND, PIC_ICW1_INIT | PIC_ICW1_ICW4);
     k_bus_outb(BUS_PIC_SLAVE_COMMAND, PIC_ICW1_INIT | PIC_ICW1_ICW4);
 
     /*
