@@ -5,6 +5,8 @@
 //  Created by Artur Danielewski on 11.01.2021.
 //
 
+#include "syscall.h"
+
 #include <types.h>
 #include <mem.h>
 #include <error/panic.h>
