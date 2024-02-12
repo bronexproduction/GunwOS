@@ -10,6 +10,10 @@
 
 #include <types.h>
 
+#define CPU_INTERRUPTS_DISABLE __asm__ volatile ("cli");
+#define CPU_INTERRUPTS_ENABLE __asm__ volatile ("sti");
+#define CPU_RETURN __asm__ volatile ("ret");
+
 #define CPU_PUSH { \
     __asm__ volatile ("pushw %ds"); \
     __asm__ volatile ("pushw %es"); \
@@ -33,6 +37,8 @@
     __asm__ volatile ("movw %ax, %fs"); \
     __asm__ volatile ("movw %ax, %gs"); \
 }
+
+register const ptr_t k_cpu_stackPtr __asm__ ("esp");
 
 enum k_cpu_eflags {
     FLAGS_CARRY     = 0x0001,

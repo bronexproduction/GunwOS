@@ -41,7 +41,7 @@ void k_hal_init() {
     k_proc_init();
     k_mem_init();
 
-    __asm__ volatile ("sti");
+    CPU_INTERRUPTS_ENABLE;
 }
 
 bool k_hal_isIRQRegistered(uint_8 num) {
@@ -96,36 +96,20 @@ static void fail(const enum failReason_t reason) {
     NOTE: IRQ number has to be put in EAX register
     before making jump to k_hal_irqHandle label
 */
-__attribute__((naked)) void k_hal_irqHandle() {
+__attribute__((naked, fastcall)) void k_hal_irqHandle(const uint_8 irq) {
     /*
-        IRQ number to be serviced   
+        * Checking if the requested IRQ is within accepted range
+        * Checking if service routine for given IRQ is available
     */
-    register uint_8 irq __asm__ ("eax");
-
-    /*
-        Checking if the requested IRQ is within accepted range
-    */                             
-    __asm__ volatile ("cmp %%ebx, %%eax" : : "b" (DEV_IRQ_LIMIT));
-    __asm__ volatile ("jae k_hal_irqHandle_irqAboveLimitFailure");
-
-    /*
-        Checking if service routine for given IRQ is available
-    */
-    void (*isr)() = isrReg[irq].routine;
-    if (!isr) {
-        __asm__ volatile ("jmp k_hal_irqHandle_irqServiceRoutineUnavailable");
+    if (irq >= DEV_IRQ_LIMIT) {
+        fail(FAIL_REASON_IRQ_ABOVE_LIMIT);
+    } else if (!isrReg[irq].routine) {
+        fail(FAIL_REASON_IRQ_NOT_FOUND);
+    } else {
+        k_hal_servicedDevIdPtr = &isrReg[irq].devId;
+        isrReg[irq].routine();
     }
 
-    /*
-        Setting currently serviced device identifier
-    */
-    k_hal_servicedDevIdPtr = &isrReg[irq].devId;
-
-    /*
-        Calling service routine associated with requested IRQ
-    */
-    __asm__ volatile ("call *%0" : : "r" (isr));
-    
     /*
         Finished servicing
 
@@ -133,8 +117,6 @@ __attribute__((naked)) void k_hal_irqHandle() {
 
         NOTE: service routines MUST end with ret
     */
-
-    __asm__ volatile ("k_hal_irqHandle_end:");
 
     /*
         Clearing currently serviced device identifier
@@ -149,19 +131,5 @@ __attribute__((naked)) void k_hal_irqHandle() {
     }
     k_bus_outb(BUS_PIC_MASTER_COMMAND, PIC_EOI);
 
-    __asm__ volatile ("ret");
-
-    /*
-        Handling IRQ service routine unavailable 
-    */
-    __asm__ volatile ("k_hal_irqHandle_irqServiceRoutineUnavailable:");
-    fail(FAIL_REASON_IRQ_NOT_FOUND);
-    __asm__ volatile ("jmp k_hal_irqHandle_end");
-
-    /*
-        Handling error - IRQ number above limit
-    */
-    __asm__ volatile ("k_hal_irqHandle_irqAboveLimitFailure:");
-    fail(FAIL_REASON_IRQ_ABOVE_LIMIT);
-    __asm__ volatile ("jmp k_hal_irqHandle_end");
+    CPU_RETURN;
 }

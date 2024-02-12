@@ -9,6 +9,9 @@
 
 #include <error/panic.h>
 #include <hal/cpu/cpu.h>
+#include <hal/hal.h>
+#include <hal/syscall/syscall.h>
+#include <schedule/schedule.h>
 
 /*
     ISR stack height counter
@@ -31,7 +34,7 @@ size_t isrStackHeight = 0;
 */
 #warning TO BE IMPLEMENTED - up
 #define ISR_BEGIN   { \
-    __asm__ volatile ("cli"); \
+    CPU_INTERRUPTS_DISABLE; \
     CPU_PUSH \
     CPU_SEG_RESTORE \
     __asm__ volatile ("incl %[mem]" : [mem] "=m" (isrStackHeight)); \
@@ -55,12 +58,10 @@ size_t isrStackHeight = 0;
     __asm__ volatile ("decl %[mem]" : [mem] "=m" (isrStackHeight)); \
     extern ptr_t k_que_currentDispatchEntry; \
     if (!isrStackHeight && k_que_currentDispatchEntry) { \
-        __asm__ volatile ("pushl %esp"); \
-        __asm__ volatile ("call k_proc_schedule_intNeedsKernelHandling"); \
-        __asm__ volatile ("addl $4, %esp"); \
+        k_proc_schedule_intNeedsKernelHandling((uint_32)k_cpu_stackPtr); \
     } \
     CPU_POP \
-    __asm__ volatile ("sti"); \
+    CPU_INTERRUPTS_ENABLE; \
     __asm__ volatile ("iret"); \
 }
 
@@ -78,8 +79,7 @@ size_t isrStackHeight = 0;
 */
 #define ISR_HW(NUM) __attribute__((naked)) void k_isr_picIRQ ## NUM () { \
     ISR_BEGIN \
-    __asm__ volatile ("mov $" STR(NUM) ", %eax"); \
-    __asm__ volatile ("call k_hal_irqHandle"); \
+    k_hal_irqHandle(NUM); \
     ISR_END \
 }
 
@@ -147,7 +147,7 @@ size_t isrStackHeight = 0;
 /* 69 */ __attribute__((naked)) void k_isr_driverSyscall() {
     ISR_BEGIN
     #warning SYSTEM CALLS CAN CAUSE KERNEL LOCKS - to be analysed
-    __asm__ volatile ("call k_scl_syscall_DRIVER");
+    k_scl_syscall_DRIVER();
     /* EAX stored for current process should contain return value (if any) */
     ISR_END
 }
@@ -191,7 +191,7 @@ size_t isrStackHeight = 0;
 /* 105 */ __attribute__((naked)) void k_isr_userSyscall() {
     ISR_BEGIN
     #warning SYSTEM CALLS CAN CAUSE KERNEL LOCKS - to be analysed
-    __asm__ volatile ("call k_scl_syscall_USER");
+    k_scl_syscall_USER();
     /* EAX stored for current process should contain return value (if any) */
     ISR_END
 }

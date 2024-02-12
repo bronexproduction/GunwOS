@@ -10,12 +10,10 @@
 
 #include <types.h>
 
-register ptr_t kernelStack __asm__ ("esp");
-
 #define _STACK_REFERENCE_OFFSET_ENTRY 0x2C
 #define _STACK_REFERENCE_OFFSET_FUNC 0x30
 
-#define _USER_STACK_PTR(LOC) (ptr_t)(*((addr_t *)(kernelStack + _STACK_REFERENCE_OFFSET_ ## LOC + 12)))
+#define _USER_STACK_PTR(LOC) (ptr_t)(*((addr_t *)(k_cpu_stackPtr + _STACK_REFERENCE_OFFSET_ ## LOC + 12)))
 
 #define FUNC_CODE_PTR (addr_t *)(_USER_STACK_PTR(ENTRY) + 0)
 

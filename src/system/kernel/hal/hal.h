@@ -11,6 +11,8 @@
 #include <types.h>
 #include <gunwdrv.h>
 
+__attribute__((naked, fastcall)) void k_hal_irqHandle(const uint_8 irq);
+
 enum gnwDriverError k_hal_install(const size_t devId, const struct gnwDriverConfig driver);
 
 extern const size_t *k_hal_servicedDevIdPtr;

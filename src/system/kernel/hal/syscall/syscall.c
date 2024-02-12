@@ -5,6 +5,8 @@
 //  Created by Artur Danielewski on 11.01.2021.
 //
 
+#include "syscall.h"
+
 #include <types.h>
 #include <mem.h>
 #include <error/panic.h>
@@ -100,7 +102,7 @@ __attribute__((naked, unused)) static void k_scl_syscall_end() {
     */
 
     __asm__ volatile ("movl %eax, 32(%esp)");
-    __asm__ volatile ("ret");
+    CPU_RETURN;
 }
 
 #define _SYSCALL_ENTRY(TYPE) __attribute__((naked)) void k_scl_syscall_ ## TYPE () {                    \
