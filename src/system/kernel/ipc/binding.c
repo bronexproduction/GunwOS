@@ -63,7 +63,10 @@ enum gnwIpcError k_ipc_binding_create(const procId_t sender, const procId_t rece
 }
 
 enum gnwIpcError k_ipc_binding_getPermissions(const procId_t sender, const procId_t receiver, size_t * const permissionsPtr) {
-    CHECKPTR(permissionsPtr);
+    if (!permissionsPtr) {
+        OOPS("Permission pointer nullptr", GIPCE_UNKNOWN);
+    }
+    
     struct binding * bindingPtr = find(sender, receiver);
     if (!bindingPtr) {
         return GIPCE_NOT_FOUND;

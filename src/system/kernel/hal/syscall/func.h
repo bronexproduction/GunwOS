@@ -8,6 +8,8 @@
 #ifndef FUNC_H
 #define FUNC_H
 
+#include "stack.h"
+
 /*
     Syscall service routine macro
 

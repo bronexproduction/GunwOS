@@ -95,7 +95,8 @@
     "span": "c",
     "numbers": "c",
     "__node_handle": "c",
-    "__memory": "c"
+    "__memory": "c",
+    "iterator": "c"
   },
   "cmake.configureOnOpen": false
 }

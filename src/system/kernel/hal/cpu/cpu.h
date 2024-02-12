@@ -27,13 +27,11 @@
 }
 
 #define CPU_SEG_RESTORE { \
-    __asm__ volatile ("pushl %eax"); \
     __asm__ volatile ("movw %ss, %ax"); \
     __asm__ volatile ("movw %ax, %ds"); \
     __asm__ volatile ("movw %ax, %es"); \
     __asm__ volatile ("movw %ax, %fs"); \
     __asm__ volatile ("movw %ax, %gs"); \
-    __asm__ volatile ("popl %eax"); \
 }
 
 enum k_cpu_eflags {

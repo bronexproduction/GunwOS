@@ -6,11 +6,10 @@
 //  
 
 #include "utl.h"
-#include <gunwbus.h>
 #include <gunwctrl.h>
 #include <mem.h>
-#include <gunwbus.h>
 #include <error/panic.h>
+#include <hal/io/bus.h>
 #include "../common/data.h"
 #include "../common/io.h"
 #include "../proc/proc.h"
@@ -85,13 +84,13 @@ uint_8 waitForInterrupt(const time_t ms) {
 }
 
 bool isReadyForNonDMARead(const uint_16 base) {
-    uint_8 msr = rdb(base + REG_MSR);
+    uint_8 msr = k_bus_inb(base + REG_MSR);
     
     return IS_SET(BIT_MSR_RQM, msr) && IS_SET(BIT_MSR_DIO, msr) && IS_SET(BIT_MSR_NDMA, msr);
 }
 
 bool inNonDMAExecutionPhase(const uint_16 base) {
-    uint_8 msr = rdb(base + REG_MSR);
+    uint_8 msr = k_bus_inb(base + REG_MSR);
     
     return IS_SET(BIT_MSR_NDMA, msr);
 }
@@ -108,13 +107,13 @@ bool inPollingMode(const uint_16 base) {
 }
 
 bool inCommandPhase(const uint_16 base) {
-    uint_8 msr = rdb(base + REG_MSR);
+    uint_8 msr = k_bus_inb(base + REG_MSR);
 
     return IS_SET(BIT_MSR_RQM, msr) && IS_NOT_SET(BIT_MSR_DIO, msr);
 }
 
 bool inResultPhase(const uint_16 base) {
-    uint_8 msr = rdb(base + REG_MSR);
+    uint_8 msr = k_bus_inb(base + REG_MSR);
     
     return IS_SET(BIT_MSR_RQM, msr) && IS_SET(BIT_MSR_DIO, msr);
 }

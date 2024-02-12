@@ -19,17 +19,17 @@
     Function - RDB
 
     Params:
-        * BX - port
+        * PAR_PTR_1 - port
         
     Return:
         * AL - value read from bus port
 */
 SCR(rdb,
-    REG(16, port, bx)
+    PAR_PTR_1(port)
 
     REG_RET(8, value)
 
-    value = k_bus_inb(port);
+    value = k_bus_inb(*port);
 )
 
 /*
@@ -37,15 +37,15 @@ SCR(rdb,
     Function - WRB
 
     Params:
-        * BX - port
-        * CL - value
+        * PAR_PTR_1 - port
+        * PAR_PTR_2 - value
 
 */
 SCR(wrb,
-    REG(16, port, bx)
-    REG(8, value, cl)
+    PAR_PTR_1(port);
+    PAR_PTR_2(value);
 
-    k_bus_outb(port, value);
+    k_bus_outb(*port, *value);
 )
 
 /*
@@ -53,16 +53,16 @@ SCR(wrb,
     Function - EMIT
 
     Params:
-        * EBX - struct gnwDeviceEvent pointer relative to caller process memory
-                (to be implemented when drivers moved to process space)
+        * PAR_PTR_1 - struct gnwDeviceEvent pointer relative to caller process memory
+                      (to be implemented when drivers moved to process space)
         
     Return:
         * EAX - error code if any, otherwise GDE_NONE (see enum gnwDeviceError)
 */
 SCR(emit,
-    REG(32, eventPtr, ebx)
+    PAR_PTR_1(eventPtr)
 
     REG_RET(32, err)
 
-    err = k_dev_emit((struct gnwDeviceEvent *)eventPtr);
+    err = k_dev_emit((struct gnwDeviceEvent *)*eventPtr);
 )

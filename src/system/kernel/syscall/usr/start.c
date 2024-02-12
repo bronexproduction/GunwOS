@@ -189,7 +189,7 @@ void k_scr_usr_start(const procId_t procId, const struct gnwCtrlStartDescriptor 
     const size_t processStackBytes = KiB(256);
     const size_t processExtraBytes = KiB(256);
     const size_t processMemTotalBytes = processBinBytes + processStackBytes + processExtraBytes;
-    const ptr_t dstPtr = GDT_SEGMENT_START(r3code) + (++index * processMemTotalBytes);
+    const ptr_t dstPtr = GDT_SEGMENT_START(r3code) + MEM_VIRTUAL_RESERVED_KERNEL_MEM + (++index * processMemTotalBytes);
 
     /* 
         Load executable 

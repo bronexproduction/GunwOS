@@ -11,24 +11,21 @@
 #include <types.h>
 #include <utils.h>
 
-/*
-    Important note:
-
-    When setting syscall parameters
-    remember that
-    SYSCALL_PAR* must be called before SYSCALL_FUNC
-    as EAX register is used as intermediate register
-    and stores the last assigned value
-*/
-#define SYSCALL_FUNC(LEVEL, CODE) REG(32, _code, eax); _code = (uint_32) SYSCALL_ ## LEVEL ## _FUNCTION_ ## CODE ;
-#define SYSCALL_INT(CODE) { __asm__ volatile ("int $" STR(CODE) ); }
-#define REG_RET(BITS, NAME) REG(BITS, NAME, eax)
+#define REG_RET(BITS, NAME) register uint_ ## BITS NAME __asm__ ("eax"); (void)(NAME);
 #define SYSCALL_RETVAL(BITS) { REG_RET(BITS, _retVal); return _retVal; }
 #define SYSCALL_GET_RETVAL(BITS, NAME) REG_RET(BITS, _retVal); uint_ ## BITS NAME = _retVal;
 
-#define SYSCALL_PAR(NAME, VALUE, REG_NAME) REG(32, _param ## NAME , REG_NAME); _param ## NAME = (uint_32) VALUE ;
-#define SYSCALL_PAR1(VALUE) SYSCALL_PAR(1, VALUE, ebx)
-#define SYSCALL_PAR2(VALUE) SYSCALL_PAR(2, VALUE, ecx)
-#define SYSCALL_PAR3(VALUE) SYSCALL_PAR(3, VALUE, edx)
+#define _SYSCALL_PUSH_PAR(PAR) { int_32 par = (int_32)PAR; __asm__ volatile ("pushl %[mem]" : : [mem] "m" (par)); }
+#define _SYSCALL_INT(CODE) { __asm__ volatile ("int $" STR(CODE) ); }
+#define _SYSCALL_REMOVE_PAR { __asm__ volatile ("addl $16, %esp"); }
+
+#define SYSCALL_CALL(INT_CODE, CODE, PAR1, PAR2, PAR3) {\
+    _SYSCALL_PUSH_PAR(PAR3);                            \
+    _SYSCALL_PUSH_PAR(PAR2);                            \
+    _SYSCALL_PUSH_PAR(PAR1);                            \
+    _SYSCALL_PUSH_PAR(CODE);                            \
+    _SYSCALL_INT(INT_CODE);                             \
+    _SYSCALL_REMOVE_PAR;                                \
+}
 
 #endif // GUNWOS_SCL_DEF_H
