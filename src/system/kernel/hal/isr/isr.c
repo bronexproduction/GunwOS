@@ -11,6 +11,7 @@
 #include <hal/cpu/cpu.h>
 #include <hal/hal.h>
 #include <hal/syscall/syscall.h>
+#include <schedule/schedule.h>
 
 /*
     ISR stack height counter
@@ -57,9 +58,7 @@ size_t isrStackHeight = 0;
     __asm__ volatile ("decl %[mem]" : [mem] "=m" (isrStackHeight)); \
     extern ptr_t k_que_currentDispatchEntry; \
     if (!isrStackHeight && k_que_currentDispatchEntry) { \
-        __asm__ volatile ("pushl %esp"); \
-        __asm__ volatile ("call k_proc_schedule_intNeedsKernelHandling"); \
-        __asm__ volatile ("addl $4, %esp"); \
+        k_proc_schedule_intNeedsKernelHandling((uint_32)k_cpu_stackPtr); \
     } \
     CPU_POP \
     CPU_INTERRUPTS_ENABLE; \
