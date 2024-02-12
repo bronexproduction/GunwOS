@@ -20,7 +20,6 @@
 #include <queue/queue.h>
 #include <runloop/runloop.h>
 
-register const uint_32 cur_esp __asm__ ("esp");
 #define STACK_VAL(REFESP, SIZE, OFFSET) (*(uint_ ## SIZE *)(REFESP + OFFSET))
 
 PRIVATE struct process_kernel {
@@ -248,23 +247,23 @@ void k_proc_switch(const procId_t procId) {
     #warning probably a lot of these operations can be removed
     CPU_PUSH
     {
-        kernelProc.cpuState.edi = STACK_VAL(cur_esp, 32, 0);
-        kernelProc.cpuState.esi = STACK_VAL(cur_esp, 32, 4);
-        kernelProc.cpuState.ebp = STACK_VAL(cur_esp, 32, 8);
-        kernelProc.cpuState.ebx = STACK_VAL(cur_esp, 32, 16);
-        kernelProc.cpuState.edx = STACK_VAL(cur_esp, 32, 20);
-        kernelProc.cpuState.ecx = STACK_VAL(cur_esp, 32, 24);
-        kernelProc.cpuState.eax = STACK_VAL(cur_esp, 32, 28);
-        kernelProc.cpuState.gs  = STACK_VAL(cur_esp, 16, 32);
-        kernelProc.cpuState.fs  = STACK_VAL(cur_esp, 16, 34);
-        kernelProc.cpuState.es  = STACK_VAL(cur_esp, 16, 36);
-        kernelProc.cpuState.ds  = STACK_VAL(cur_esp, 16, 38);        
+        kernelProc.cpuState.edi = STACK_VAL(k_cpu_stackPtr, 32, 0);
+        kernelProc.cpuState.esi = STACK_VAL(k_cpu_stackPtr, 32, 4);
+        kernelProc.cpuState.ebp = STACK_VAL(k_cpu_stackPtr, 32, 8);
+        kernelProc.cpuState.ebx = STACK_VAL(k_cpu_stackPtr, 32, 16);
+        kernelProc.cpuState.edx = STACK_VAL(k_cpu_stackPtr, 32, 20);
+        kernelProc.cpuState.ecx = STACK_VAL(k_cpu_stackPtr, 32, 24);
+        kernelProc.cpuState.eax = STACK_VAL(k_cpu_stackPtr, 32, 28);
+        kernelProc.cpuState.gs  = STACK_VAL(k_cpu_stackPtr, 16, 32);
+        kernelProc.cpuState.fs  = STACK_VAL(k_cpu_stackPtr, 16, 34);
+        kernelProc.cpuState.es  = STACK_VAL(k_cpu_stackPtr, 16, 36);
+        kernelProc.cpuState.ds  = STACK_VAL(k_cpu_stackPtr, 16, 38);        
     }
     CPU_POP
 
     extern ptr_t k_proc_kernelRet;
     kernelProc.cpuState.eip = (uint_32)&k_proc_kernelRet;
-    kernelProc.cpuState.esp = cur_esp;
+    kernelProc.cpuState.esp = (uint_32)k_cpu_stackPtr;
     __asm__ volatile ("pushw %cs"); __asm__ volatile ("popw %[mem]" : [mem] "=m" (kernelProc.cpuState.cs));
     __asm__ volatile ("pushfl");    __asm__ volatile ("popl %[mem]" : [mem] "=m" (kernelProc.cpuState.eflags));
     __asm__ volatile ("pushw %ss"); __asm__ volatile ("popw %[mem]" : [mem] "=m" (kernelProc.cpuState.ss));
@@ -274,7 +273,7 @@ void k_proc_switch(const procId_t procId) {
     const struct k_cpu_state * const nextCpuState = &pTab[procId].cpuState;
 
     // Set kernel stack pointer in TSS
-    k_cpu_tss.esp0 = cur_esp;
+    k_cpu_tss.esp0 = (uint_32)k_cpu_stackPtr;
 
     // Prepare IRET stack
     __asm__ volatile ("pushw $0");

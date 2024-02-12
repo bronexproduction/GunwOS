@@ -38,6 +38,8 @@
     __asm__ volatile ("movw %ax, %gs"); \
 }
 
+register const ptr_t k_cpu_stackPtr __asm__ ("esp");
+
 enum k_cpu_eflags {
     FLAGS_CARRY     = 0x0001,
     FLAGS_PARITY    = 0x0004,
