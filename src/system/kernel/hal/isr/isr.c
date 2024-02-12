@@ -33,7 +33,7 @@ size_t isrStackHeight = 0;
 */
 #warning TO BE IMPLEMENTED - up
 #define ISR_BEGIN   { \
-    __asm__ volatile ("cli"); \
+    CPU_INTERRUPTS_DISABLE; \
     CPU_PUSH \
     CPU_SEG_RESTORE \
     __asm__ volatile ("incl %[mem]" : [mem] "=m" (isrStackHeight)); \
@@ -62,7 +62,7 @@ size_t isrStackHeight = 0;
         __asm__ volatile ("addl $4, %esp"); \
     } \
     CPU_POP \
-    __asm__ volatile ("sti"); \
+    CPU_INTERRUPTS_ENABLE; \
     __asm__ volatile ("iret"); \
 }
 

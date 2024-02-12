@@ -9,12 +9,12 @@
 #define CRITICALSEC_H
 
 #define CRITICAL_SECTION_BEGIN {        \
-    __asm__ volatile ("cli");           \
+    CPU_INTERRUPTS_DISABLE;             \
 }
 #define CRITICAL_SECTION_END {          \
     extern const size_t isrStackHeight; \
     if (!isrStackHeight) {              \
-        __asm__ volatile ("sti");       \
+        CPU_INTERRUPTS_ENABLE;          \
     }                                   \
 }
 #define CRITICAL_SECTION(CODE) { CRITICAL_SECTION_BEGIN; { CODE; } CRITICAL_SECTION_END; }

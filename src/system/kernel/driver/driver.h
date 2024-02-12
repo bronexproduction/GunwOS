@@ -8,12 +8,14 @@
 #ifndef DRIVER_H
 #define DRIVER_H
 
+#include <hal/cpu/cpu.h>
+
 /*
     Interrupt service routine macro
 
     Implement functions using this macro to prevent from incidentally forgeting the return label
 */
-#define ISR_END {__asm__ volatile ("ret");};
-#define ISR(CODE) __attribute__((naked)) static void isr() { CODE; ISR_END }
+#define ISR_END { CPU_RETURN; };
+#define ISR(CODE) __attribute__((naked)) static void isr() { CODE; ISR_END; }
 
 #endif // DRIVER_H

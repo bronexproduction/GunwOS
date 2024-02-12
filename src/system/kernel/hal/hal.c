@@ -41,7 +41,7 @@ void k_hal_init() {
     k_proc_init();
     k_mem_init();
 
-    __asm__ volatile ("sti");
+    CPU_INTERRUPTS_ENABLE;
 }
 
 bool k_hal_isIRQRegistered(uint_8 num) {
@@ -131,5 +131,5 @@ __attribute__((naked, fastcall)) void k_hal_irqHandle(const uint_8 irq) {
     }
     k_bus_outb(BUS_PIC_MASTER_COMMAND, PIC_EOI);
 
-    __asm__ volatile ("ret");
+    CPU_RETURN;
 }

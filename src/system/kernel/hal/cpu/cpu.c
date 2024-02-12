@@ -25,6 +25,6 @@ void k_cpu_loadTaskRegister() {
 }
 
 void k_cpu_halt() {
-    __asm__ volatile ("cli");
+    CPU_INTERRUPTS_DISABLE;
     __asm__ volatile ("hlt");
 }
