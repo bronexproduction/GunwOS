@@ -58,60 +58,16 @@ static void (*syscallReg_USER[USER_SYSCALL_COUNT])() = {
     /* 0x14 */ (void *)k_scr_yield,
 };
 
-__attribute__((naked, unused)) static void k_scl_syscall() {
-    register void (*scr)() __asm__ ("eax");
-    if (!scr) {
-        __asm__ volatile ("jmp k_scl_syscall_serviceRoutineUnavailable");
-    }
-
-    /*
-        Calling requested syscall function
-    */
-    __asm__ volatile ("call *%0" : : "r" (scr));
-    __asm__ volatile ("jmp k_scl_syscall_end");
-}
-
-/*
-    Handling error - Syscall function number over limit
-*/
-__attribute__((naked, unused)) static void k_scl_syscall_functionOverLimitFailure() {
-    OOPS_NBR("Requested syscall function code over limit");
-    __asm__ volatile ("jmp k_scl_syscall_end");
-}
-
-/*
-    Handling error - Syscall service routine unavailable 
-*/
-__attribute__((naked, unused)) static void k_scl_syscall_serviceRoutineUnavailable() {
-    OOPS_NBR("Syscall function code unavailable");
-    __asm__ volatile ("jmp k_scl_syscall_end");
-}
-
-/*
-    Finish servicing
-
-    Enables interrupts and returns from interrupt
-
-    NOTE: service routines MUST end with ret
-*/
-__attribute__((naked, unused)) static void k_scl_syscall_end() {
-    /*
-        Replace caller EAX value on the stack with current value
-        
-        It puts the result into the EAX register or just does nothing
-    */
-
-    __asm__ volatile ("movl %eax, 32(%esp)");
-    CPU_RETURN;
-}
-
-#define _SYSCALL_ENTRY(TYPE) __attribute__((naked)) void k_scl_syscall_ ## TYPE () {                    \
-    uint_32 * function = FUNC_CODE_PTR;                                                                     \
-    if (*function >= TYPE ## _SYSCALL_COUNT) {                                                          \
-        __asm__ volatile ("jmp k_scl_syscall_functionOverLimitFailure");                                \
-    }                                                                                                   \
-    register void (*scr)() __asm__ ("eax") __attribute__((unused)) = syscallReg_ ## TYPE [*function];   \
-    __asm__ volatile ("jmp k_scl_syscall");                                                             \
+#define _SYSCALL_ENTRY(TYPE) __attribute__((naked)) void k_scl_syscall_ ## TYPE () {    \
+    if (*FUNC_CODE_PTR >= TYPE ## _SYSCALL_COUNT) {                                     \
+        OOPS_NBR("Requested syscall function code over limit");                         \
+    } else if (!syscallReg_ ## TYPE [*FUNC_CODE_PTR]) {                                 \
+        OOPS_NBR("Syscall function code unavailable");                                  \
+    } else {                                                                            \
+        syscallReg_ ## TYPE [*FUNC_CODE_PTR]();                                         \
+    }                                                                                   \
+    __asm__ volatile ("movl %eax, 32(%esp)");                                           \
+    CPU_RETURN;                                                                         \
 }
 
 /*

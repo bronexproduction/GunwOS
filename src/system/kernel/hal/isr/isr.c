@@ -37,7 +37,7 @@ size_t isrStackHeight = 0;
     CPU_INTERRUPTS_DISABLE; \
     CPU_PUSH \
     CPU_SEG_RESTORE \
-    __asm__ volatile ("incl %[mem]" : [mem] "=m" (isrStackHeight)); \
+    ++isrStackHeight; \
 }
 
 /*
@@ -55,14 +55,14 @@ size_t isrStackHeight = 0;
 */
 #warning TO BE IMPLEMENTED - up
 #define ISR_END { \
-    __asm__ volatile ("decl %[mem]" : [mem] "=m" (isrStackHeight)); \
+    --isrStackHeight; \
     extern ptr_t k_que_currentDispatchEntry; \
     if (!isrStackHeight && k_que_currentDispatchEntry) { \
         k_proc_schedule_intNeedsKernelHandling((uint_32)k_cpu_stackPtr); \
     } \
     CPU_POP \
     CPU_INTERRUPTS_ENABLE; \
-    __asm__ volatile ("iret"); \
+    CPU_INTERRUPT_RETURN; \
 }
 
 /*
