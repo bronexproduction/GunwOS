@@ -96,7 +96,8 @@
     "numbers": "c",
     "__node_handle": "c",
     "__memory": "c",
-    "iterator": "c"
+    "iterator": "c",
+    "__functional_03": "c"
   },
   "cmake.configureOnOpen": false
 }

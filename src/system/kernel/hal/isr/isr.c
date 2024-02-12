@@ -62,7 +62,7 @@ size_t isrStackHeight = 0;
     } \
     CPU_POP \
     CPU_INTERRUPTS_ENABLE; \
-    __asm__ volatile ("iret"); \
+    CPU_INTERRUPT_RETURN; \
 }
 
 /*

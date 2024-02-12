@@ -300,7 +300,7 @@ void k_proc_switch(const procId_t procId) {
     CPU_POP
 
     // Call iret to move to the next process
-    __asm__ volatile ("iret");
+    CPU_INTERRUPT_RETURN;
 
     // Kernel return location
     __asm__ volatile ("k_proc_kernelRet:");
