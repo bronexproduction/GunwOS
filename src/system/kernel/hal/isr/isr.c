@@ -78,7 +78,7 @@ size_t isrStackHeight = 0;
 */
 #define ISR_HW(NUM) __attribute__((naked)) void k_isr_picIRQ ## NUM () { \
     ISR_BEGIN \
-    __asm__ volatile ("mov $" STR(NUM) ", %eax"); \
+    __asm__ volatile ("mov $" STR(NUM) ", %ecx"); \
     __asm__ volatile ("call k_hal_irqHandle"); \
     ISR_END \
 }
