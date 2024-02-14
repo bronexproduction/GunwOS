@@ -7,7 +7,6 @@
 
 #include <hal/io/bus.h>
 #include "func.h"
-#include <scl_def.h>
 #include <dev/dev.h>
 
 /*
