@@ -20,8 +20,7 @@ uint_8 rdb(uint_16 const port) {
 #warning TODO: check if the driver is allowed to access the requested port (driver descriptor)
     SYSCALL_DRIVER_CALL(RDB, port, 0, 0);
     
-    register uint_8 ret __asm__ ("al");
-    return ret;
+    return SYSCALL_RESULT;
 }
 
 /*

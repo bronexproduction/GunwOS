@@ -38,7 +38,7 @@ enum gnwIpcError ipcRegister(const gnwIpcPath path,
 
     SYSCALL_USER_CALL(IPC_REGISTER, &desc, 0, 0);
 
-    SYSCALL_RETVAL(32);
+    return SYSCALL_RESULT;
 }
 
 enum gnwIpcError ipcRegisterNotification(const gnwIpcPath path,
@@ -72,8 +72,7 @@ enum gnwIpcError ipcSendDirect(const procId_t procId,
 
     SYSCALL_USER_CALL(IPC_SEND, &query, 0, 0);
 
-    SYSCALL_GET_RETVAL(32, err);
-    return (replyErr == GIPCE_NONE) ? (enum gnwIpcError)err : replyErr;
+    return (replyErr == GIPCE_NONE) ? (enum gnwIpcError)SYSCALL_RESULT : replyErr;
 }
 
 enum gnwIpcError ipcReply(const data_t replyData,
@@ -89,7 +88,7 @@ enum gnwIpcError ipcReply(const data_t replyData,
 
     SYSCALL_USER_CALL(IPC_REPLY, &info, 0, 0);
 
-    SYSCALL_RETVAL(32);
+    return SYSCALL_RESULT;
 }
 
 void gnwIpcEndpointQuery_decode(const ptr_t absDataPtr, struct gnwIpcEndpointQuery * const absQueryPtr) {

@@ -8,7 +8,7 @@
 #ifndef FUNC_H
 #define FUNC_H
 
-#include "stack.h"
+#include "params.h"
 
 #include <hal/cpu/cpu.h>
 

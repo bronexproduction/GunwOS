@@ -22,14 +22,12 @@
         * PAR_PTR_1 - port
         
     Return:
-        * AL - value read from bus port
+        * RESULT_PTR - value read from bus port
 */
 SCR(rdb,
     PAR_PTR_1(port)
 
-    REG_RET(8, value)
-
-    value = k_bus_inb(*port);
+    *RESULT_PTR = k_bus_inb(*port);
 )
 
 /*
@@ -57,12 +55,10 @@ SCR(wrb,
                       (to be implemented when drivers moved to process space)
         
     Return:
-        * EAX - error code if any, otherwise GDE_NONE (see enum gnwDeviceError)
+        * RESULT_PTR - error code if any, otherwise GDE_NONE (see enum gnwDeviceError)
 */
 SCR(emit,
     PAR_PTR_1(eventPtr)
 
-    REG_RET(32, err)
-
-    err = k_dev_emit((struct gnwDeviceEvent *)*eventPtr);
+    *RESULT_PTR = k_dev_emit((struct gnwDeviceEvent *)*eventPtr);
 )

@@ -1,12 +1,12 @@
 //
-//  stack.h
+//  params.h
 //  GunwOS
 //
 //  Created by Artur Danielewski on 11.02.2024.
 //
 
-#ifndef STACK_H
-#define STACK_H
+#ifndef PARAMS_H
+#define PARAMS_H
 
 #include <types.h>
 
@@ -22,4 +22,6 @@
 #define PAR_PTR_2(NAME) _PAR_PTR(NAME, 8)
 #define PAR_PTR_3(NAME) _PAR_PTR(NAME, 12)
 
-#endif // STACK_H
+#define RESULT_PTR (addr_t *)(_USER_STACK_PTR(FUNC) + 0)
+
+#endif // PARAMS_H

@@ -13,7 +13,7 @@
 
 #include "drvfunc.h"
 #include "usrfunc.h"
-#include "stack.h"
+#include "params.h"
 
 #define DRIVER_SYSCALL_COUNT 3
 #define USER_SYSCALL_COUNT 21
@@ -66,7 +66,6 @@ static void (*syscallReg_USER[USER_SYSCALL_COUNT])() = {
     } else {                                                                            \
         syscallReg_ ## TYPE [*FUNC_CODE_PTR]();                                         \
     }                                                                                   \
-    __asm__ volatile ("movl %eax, 32(%esp)");                                           \
     CPU_RETURN;                                                                         \
 }
 

@@ -22,7 +22,7 @@ static enum gnwRunLoopError runLoopGetItem(struct gnwRunLoopDispatchItem * const
 
     SYSCALL_USER_CALL(RUNLOOP_GET_ITEM, itemPtr, 0, 0);
 
-    SYSCALL_RETVAL(32);
+    return SYSCALL_RESULT;
 }
 
 /*
@@ -33,7 +33,7 @@ static enum gnwRunLoopError runLoopGetData(ptr_t dataBufferPtr) {
 
     SYSCALL_USER_CALL(RUNLOOP_GET_DATA, dataBufferPtr, 0, 0);
 
-    SYSCALL_RETVAL(32);
+    return SYSCALL_RESULT;
 }
 
 static void execute(const union gnwEventListener routine, const ptr_t data) {

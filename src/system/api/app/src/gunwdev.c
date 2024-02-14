@@ -19,7 +19,7 @@ enum gnwDeviceError devGetById(const size_t deviceId,
 
     SYSCALL_USER_CALL(DEV_GET_BY_ID, deviceId, desc, 0);
 
-    SYSCALL_RETVAL(32);
+    return SYSCALL_RESULT;
 }
 
 enum gnwDeviceError devGetByType(const enum gnwDeviceType type,
@@ -28,7 +28,7 @@ enum gnwDeviceError devGetByType(const enum gnwDeviceType type,
 
     SYSCALL_USER_CALL(DEV_GET_BY_TYPE, type, desc, 0);
 
-    SYSCALL_RETVAL(32);
+    return SYSCALL_RESULT;
 }
 
 enum gnwDeviceError devGetParam(const size_t deviceId,
@@ -39,7 +39,7 @@ enum gnwDeviceError devGetParam(const size_t deviceId,
 
     SYSCALL_USER_CALL(DEV_GET_PARAM, deviceId, paramDescriptor, result);
 
-    SYSCALL_RETVAL(32);
+    return SYSCALL_RESULT;
 }
 
 enum gnwDeviceError devSetParam(const size_t deviceId,
@@ -49,13 +49,13 @@ enum gnwDeviceError devSetParam(const size_t deviceId,
 
     SYSCALL_USER_CALL(DEV_SET_PARAM, deviceId, paramDescriptor, value);
 
-    SYSCALL_RETVAL(32);
+    return SYSCALL_RESULT;
 }
 
 enum gnwDeviceError devAcquire(const uint_32 identifier) {
     SYSCALL_USER_CALL(DEV_ACQUIRE, identifier, 0, 0);
 
-    SYSCALL_RETVAL(32);
+    return SYSCALL_RESULT;
 }
 
 void devRelease(const uint_32 identifier) {
@@ -66,8 +66,7 @@ enum gnwDeviceError devCharWrite(const uint_32 deviceId,
                                  const char character) {
     SYSCALL_USER_CALL(DEV_CHAR_WRITE, deviceId, character, 0);
     
-    register enum gnwDeviceError ret __asm__ ("eax");
-    return ret;
+    return SYSCALL_RESULT;
 }
 
 enum gnwDeviceError devMemWrite(const size_t identifier,
@@ -77,7 +76,7 @@ enum gnwDeviceError devMemWrite(const size_t identifier,
 
     SYSCALL_USER_CALL(DEV_MEM_WRITE, identifier, buffer, devInputBufferRange);
 
-    SYSCALL_RETVAL(32);
+    return SYSCALL_RESULT;
 }
 
 enum gnwDeviceError devListen(const size_t identifier,
@@ -86,7 +85,7 @@ enum gnwDeviceError devListen(const size_t identifier,
 
     SYSCALL_USER_CALL(DEV_LISTEN, identifier, listener, gnwDeviceEvent_decode);
 
-    SYSCALL_RETVAL(32);
+    return SYSCALL_RESULT;
 }
 
 void gnwDeviceEvent_decode(const ptr_t absDataPtr, struct gnwDeviceEvent * const absEventPtr) {

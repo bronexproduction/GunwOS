@@ -11,10 +11,6 @@
 #include <types.h>
 #include <utils.h>
 
-#define REG_RET(BITS, NAME) register uint_ ## BITS NAME __asm__ ("eax"); (void)(NAME);
-#define SYSCALL_RETVAL(BITS) { REG_RET(BITS, _retVal); return _retVal; }
-#define SYSCALL_GET_RETVAL(BITS, NAME) REG_RET(BITS, _retVal); uint_ ## BITS NAME = _retVal;
-
 #define _SYSCALL_PUSH_PAR(PAR) { int_32 par = (int_32)PAR; __asm__ volatile ("pushl %[mem]" : : [mem] "m" (par)); }
 #define _SYSCALL_INT(CODE) { __asm__ volatile ("int $" STR(CODE) ); }
 #define _SYSCALL_REMOVE_PAR { __asm__ volatile ("addl $16, %esp"); }
@@ -27,5 +23,7 @@
     _SYSCALL_INT(INT_CODE);                             \
     _SYSCALL_REMOVE_PAR;                                \
 }
+
+#define SYSCALL_RESULT 0
 
 #endif // GUNWOS_SCL_DEF_H

@@ -13,7 +13,7 @@
 time_t timeMs() {
     SYSCALL_USER_CALL(TIME_MS, 0, 0, 0);
     
-    SYSCALL_RETVAL(32);
+    return SYSCALL_RESULT;
 }
 
 #endif // _GUNWAPI_KERNEL
