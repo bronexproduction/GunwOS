@@ -153,7 +153,7 @@ static void cli_init() {
 
 #warning IO_GENERAL_FAILURE not handled at all
 
-    user_cli_puts("GunwOS 0.0.5_DEV started. (C) Bronex Production 2023\n\n");
+    user_cli_puts("GunwOS 0.0.6_DEV started. (C) Bronex Production 2023\n\n");
 
     prompt();
 }
