@@ -17,7 +17,7 @@ enum gnwDeviceError emit(const struct gnwDeviceEvent * const event) {
 
     SYSCALL_DRIVER_CALL(EMIT, event, 0, 0);
     
-    SYSCALL_RETVAL(32);
+    return SYSCALL_RESULT;
 }
 
 #endif // _GUNWAPI_KERNEL
