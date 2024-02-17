@@ -69,17 +69,15 @@ static void (*syscallReg_USER[USER_SYSCALL_COUNT])() = {
 }
 
 /*
-    Driver syscall interrupt (int 0x68) request global service routine
+    Driver syscall interrupt (int 0x45) request global service routine
 
-    NOTE: Function number has to be put in EAX register
-    before making jump to k_scl_driverSyscall label
+    NOTE: Function number has to be put on top of the caller process stack
 */
 _SYSCALL_ENTRY(DRIVER);
 
 /*
     User-level syscall interrupt (int 0x69) request global service routine
 
-    NOTE: Function number has to be put in EAX register
-    before making jump to k_scl_userSyscall label
+    NOTE: Function number has to be put on top of the caller process stack
 */
 _SYSCALL_ENTRY(USER);
