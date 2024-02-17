@@ -10,7 +10,6 @@
 
 #include <gunwdrv.h>
 
-#include <driver/driver.h>
 #include <error/panic.h>
 #include <hal/io/bus.h>
 
@@ -104,9 +103,9 @@ static uint_8 init() {
     return 1;
 }
 
-ISR(
+static void isr() {
     k_pit_routine();
-)
+}
 
 static struct gnwDriverConfig desc() {
     return (struct gnwDriverConfig){ init, 0, isr, 0 };

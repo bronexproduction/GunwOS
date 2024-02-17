@@ -16,7 +16,6 @@
 #include "cmd/cmd.h"
 #include "proc/proc.h"
 #include <error/panic.h>
-#include <driver/driver.h>
 #include "uha/uha.h"
 
 static bool init() {
@@ -94,9 +93,9 @@ static bool start() {
     return true;
 }
 
-ISR(
+static void isr() {
     irqRecv = true;
-)
+}
 
 static struct gnwDriverConfig desc() {
     return (struct gnwDriverConfig){ init, start, isr, 6 };

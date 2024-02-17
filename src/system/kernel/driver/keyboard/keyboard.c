@@ -15,7 +15,6 @@
 #include <gunwkeyboard.h>
 
 #include <dev/dev.h>
-#include <driver/driver.h>
 #include <error/panic.h>
 #include <hal/io/bus.h>
 
@@ -102,11 +101,11 @@ static void emitEvent(const int_32 type, const char data) {
     }
 }
 
-ISR(
+static void isr() {
     /* Checking output buffer status */
     if (!k_bus_inb(KBD_BUS_STATUS) & KBD_STAT_OUTB) {
         OOPS_NBR("Keyboard output buffer empty on keyboard interrupt");
-        ISR_END
+        return;
     }
 
     /* Reading keycode */
@@ -123,7 +122,7 @@ ISR(
     else {
         emitEvent(GKEC_KEY_DOWN, c);
     }
-)
+}
 
 static struct gnwDriverConfig desc() {
     return (struct gnwDriverConfig){ 0, 0, isr, 1 };

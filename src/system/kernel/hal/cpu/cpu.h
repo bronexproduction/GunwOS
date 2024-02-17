@@ -13,7 +13,6 @@
 #define CPU_INTERRUPTS_DISABLE __asm__ volatile ("cli");
 #define CPU_INTERRUPTS_ENABLE __asm__ volatile ("sti");
 #define CPU_INTERRUPT_RETURN __asm__ volatile ("iret");
-#define CPU_RETURN __asm__ volatile ("ret");
 
 #define CPU_PUSH { \
     __asm__ volatile ("pushw %ds"); \
