@@ -147,7 +147,7 @@ size_t isrStackHeight = 0;
 /* 69 */ __attribute__((naked)) void k_isr_driverSyscall() {
     ISR_BEGIN
     #warning SYSTEM CALLS CAN CAUSE KERNEL LOCKS - to be analysed
-    k_scl_syscall_DRIVER();
+    k_scl_syscall_DRIVER(k_cpu_stackPtr);
     /* EAX stored for current process should contain return value (if any) */
     ISR_END
 }
@@ -191,7 +191,7 @@ size_t isrStackHeight = 0;
 /* 105 */ __attribute__((naked)) void k_isr_userSyscall() {
     ISR_BEGIN
     #warning SYSTEM CALLS CAN CAUSE KERNEL LOCKS - to be analysed
-    k_scl_syscall_USER();
+    k_scl_syscall_USER(k_cpu_stackPtr);
     /* EAX stored for current process should contain return value (if any) */
     ISR_END
 }

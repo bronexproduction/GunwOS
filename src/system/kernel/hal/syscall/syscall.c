@@ -58,29 +58,26 @@ static void (*syscallReg_USER[USER_SYSCALL_COUNT])() = {
     /* 0x14 */ (void *)k_scr_yield,
 };
 
-#define _SYSCALL_ENTRY(TYPE) __attribute__((naked)) void k_scl_syscall_ ## TYPE () {    \
-    if (*FUNC_CODE_PTR >= TYPE ## _SYSCALL_COUNT) {                                     \
-        OOPS_NBR("Requested syscall function code over limit");                         \
-    } else if (!syscallReg_ ## TYPE [*FUNC_CODE_PTR]) {                                 \
-        OOPS_NBR("Syscall function code unavailable");                                  \
-    } else {                                                                            \
-        syscallReg_ ## TYPE [*FUNC_CODE_PTR]();                                         \
-    }                                                                                   \
-    CPU_RETURN;                                                                         \
+#define _SYSCALL_ENTRY(TYPE) void k_scl_syscall_ ## TYPE (const ptr_t refEsp) { \
+    if (*FUNC_CODE_PTR >= TYPE ## _SYSCALL_COUNT) {                             \
+        OOPS_NBR("Requested syscall function code over limit");                 \
+    } else if (!syscallReg_ ## TYPE [*FUNC_CODE_PTR]) {                         \
+        OOPS_NBR("Syscall function code unavailable");                          \
+    } else {                                                                    \
+        syscallReg_ ## TYPE [*FUNC_CODE_PTR](refEsp);                           \
+    }                                                                           \
 }
 
 /*
-    Driver syscall interrupt (int 0x68) request global service routine
+    Driver syscall interrupt (int 0x45) request global service routine
 
-    NOTE: Function number has to be put in EAX register
-    before making jump to k_scl_driverSyscall label
+    NOTE: Function number has to be put on top of the caller process stack
 */
 _SYSCALL_ENTRY(DRIVER);
 
 /*
     User-level syscall interrupt (int 0x69) request global service routine
 
-    NOTE: Function number has to be put in EAX register
-    before making jump to k_scl_userSyscall label
+    NOTE: Function number has to be put on top of the caller process stack
 */
 _SYSCALL_ENTRY(USER);

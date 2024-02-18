@@ -92,11 +92,8 @@ static void fail(const enum failReason_t reason) {
 
 /*
     IRQ request global service routine
-
-    NOTE: IRQ number has to be put in EAX register
-    before making jump to k_hal_irqHandle label
 */
-__attribute__((naked, fastcall)) void k_hal_irqHandle(const uint_8 irq) {
+void k_hal_irqHandle(const uint_8 irq) {
     /*
         * Checking if the requested IRQ is within accepted range
         * Checking if service routine for given IRQ is available
@@ -130,6 +127,4 @@ __attribute__((naked, fastcall)) void k_hal_irqHandle(const uint_8 irq) {
         k_bus_outb(BUS_PIC_SLAVE_COMMAND, PIC_EOI);
     }
     k_bus_outb(BUS_PIC_MASTER_COMMAND, PIC_EOI);
-
-    CPU_RETURN;
 }

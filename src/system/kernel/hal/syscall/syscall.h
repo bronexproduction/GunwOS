@@ -8,7 +8,9 @@
 #ifndef SYSCALL_H
 #define SYSCALL_H
 
-__attribute__((naked)) void k_scl_syscall_DRIVER();
-__attribute__((naked)) void k_scl_syscall_USER();
+#include <types.h>
+
+void k_scl_syscall_DRIVER(const ptr_t refEsp);
+void k_scl_syscall_USER(const ptr_t refEsp);
 
 #endif // SYSCALL_H
