@@ -31,13 +31,13 @@ PRIVATE struct isrEntry {
 const size_t *k_hal_servicedDevIdPtr;
 
 void k_hal_init() {
-    k_cpu_init();
+    k_paging_init();
 
     k_gdt_init();
-    k_cpu_loadTaskRegister();
     k_idt_loadDefault();
-
-    k_paging_init();
+    
+    k_cpu_init();
+    k_cpu_loadTaskRegister();
 
     k_pic_configure();
 
