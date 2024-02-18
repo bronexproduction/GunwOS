@@ -26,7 +26,6 @@ KERNEL_LIBS=$(LIB_BUILD_DIR)/stdgunw.o \
 
 export KERNEL_BUILD_CFLAGS=-std=c11 -c -ffreestanding -mno-red-zone -ggdb -D_GUNWAPI_KERNEL $(CFLAGS_GLOBAL)
 CXXFLAGS=-std=c++11 -c -ffreestanding -mno-red-zone -ggdb $(CXXFLAGS_GLOBAL)
-RSFLAGS=$(RSFLAGS_OBJECT)
 
 O_DIR_LISTING=find . -name '*.o' -type f
 
@@ -41,7 +40,6 @@ kernel.elf: kernel.o unit_tests_lib
 kernel.o:
 	$(C_DIR_LISTING) -print0 | xargs -0I{} $(C) $(KERNEL_BUILD_CFLAGS) $(KERNEL_INCLUDE) -o {}.o {}
 	$(CXX_DIR_LISTING) -print0 | xargs -0I{} $(CXX) $(CXXFLAGS) -o {}.o {}
-	$(RS_DIR_LISTING) -print0 | xargs -0I{} $(RUSTC) $(RSFLAGS) -o {}.o {}
 
 unit_tests_bin: kernel.elf
 ifneq ($(GNW_TEST_UNIT),)
