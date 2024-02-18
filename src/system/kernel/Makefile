@@ -1,4 +1,4 @@
-LFLAGS_DEFAULT=-m$(L_OUTFORMAT) -z noexecstack --fatal-warnings -T linker.ld
+LFLAGS_DEFAULT=-m$(L_OUTFORMAT) -pie -z noexecstack --fatal-warnings -T linker.ld
 
 ifneq ($(GNW_TEST_UNIT),)
 KERNEL_TEST_INCLUDE=-include $(TESTS_UNIT_SRC_DIR)/kernel/kernel.pch
