@@ -121,10 +121,8 @@ __attribute__((naked)) void k_paging_start() {
     __asm__ volatile ("or $" STR(CR0_PAGING_ENABLE_BIT) ", %eax");
     __asm__ volatile ("mov %eax, %cr0");
 
-    /*
-        Update ESP
-    */
     k_cpu_stackPtr -= MEM_VIRTUAL_RESERVED_KERNEL_MEM;
+
     extern addr_t k_paging_start_end;
     __asm__ volatile ("jmp %0" : : "r" (k_paging_start_end - MEM_VIRTUAL_RESERVED_KERNEL_MEM));
     __builtin_unreachable();
