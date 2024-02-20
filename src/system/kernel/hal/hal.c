@@ -31,7 +31,6 @@ PRIVATE struct isrEntry {
 const size_t *k_hal_servicedDevIdPtr;
 
 __attribute__((naked)) void k_hal_prepare() {
-    k_idt_loadDefault();
     k_paging_init();
     __asm__ volatile ("jmp k_paging_start");
     __builtin_unreachable();
@@ -43,6 +42,7 @@ __attribute__((naked)) void k_paging_start_end() {
 }
 
 void k_hal_init() {
+    k_idt_loadDefault();
     k_gdt_init();
     k_cpu_init();
     k_cpu_loadTaskRegister();
