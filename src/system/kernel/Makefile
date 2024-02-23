@@ -1,4 +1,4 @@
-LFLAGS_DEFAULT=-m$(L_OUTFORMAT) -z noexecstack --fatal-warnings -T linker.ld
+LFLAGS_DEFAULT=-m$(L_OUTFORMAT) -z noexecstack --fatal-warnings
 
 ifneq ($(GNW_TEST_UNIT),)
 KERNEL_TEST_INCLUDE=-include $(TESTS_UNIT_SRC_DIR)/kernel/kernel.pch
@@ -31,10 +31,17 @@ O_DIR_LISTING=find . -name '*.o' -type f
 
 .PHONY: all unit_tests_bin unit_tests_lib
 
-all: kernel.elf unit_tests_bin clean_o
+all: kernel_paged.elf kernel_paged.ld kernel.elf unit_tests_bin clean_o
 
+kernel_paged.elf: kernel.elf kernel_paged.ld
+	$(L) $(LFLAGS) -T $(KERNEL_BUILD_DIR)/kernel_paged.ld -o $@ $(KERNEL_LIBS) $(shell $(O_DIR_LISTING))
+	mv $@ $(KERNEL_BUILD_DIR)/$@
+
+kernel_paged.ld:
+	cp linker.ld $(KERNEL_BUILD_DIR)/$@
+	
 kernel.elf: kernel.o unit_tests_lib
-	$(L) $(LFLAGS) -o $@ $(KERNEL_LIBS) $(shell $(O_DIR_LISTING))
+	$(L) $(LFLAGS) -T linker.ld -o $@ $(KERNEL_LIBS) $(shell $(O_DIR_LISTING))
 	mv $@ $(KERNEL_BUILD_DIR)/$@
 
 kernel.o:
