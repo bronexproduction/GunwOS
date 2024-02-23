@@ -8,10 +8,11 @@
             "type": "gdb",
             "request": "attach",
             "name": "Attach to gdbserver",
-            "executable": "build/kernel/kernel.elf",
             "target": ":1234",
             "remote": true,
-            "cwd": "${workspaceRoot}"
+            "cwd": "${workspaceRoot}",
+            "debugger_args": ["--init-eval-command", "add-symbol-file build/kernel/kernel_paged.elf",
+                              "--init-eval-command", "add-symbol-file build/kernel/kernel.elf"],
         },
         // {
         //     "type": "gdb",
