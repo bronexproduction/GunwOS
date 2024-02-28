@@ -33,6 +33,9 @@ PRIVATE void k_purge() {
 void __attribute__((fastcall, section(".start"))) __kernel_start(const struct k_krn_bootData * const bootData) {
     k_purge();
 
+    __asm__ volatile ("jmp k_hal_prepare");
+    __asm__ volatile ("__kernel_start_hal_prepare_end:");
+
     k_hal_init();
     k_tmr_init();
     k_ipc_init();
@@ -42,4 +45,9 @@ void __attribute__((fastcall, section(".start"))) __kernel_start(const struct k_
     k_stor_init();
     k_startup();
     k_que_start();
+}
+
+__attribute__((naked)) void k_hal_prepare_end() {
+    __asm__ volatile ("jmp __kernel_start_hal_prepare_end");
+    __builtin_unreachable();
 }
