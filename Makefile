@@ -114,6 +114,7 @@ kernel.gfb: kernel.elf
 
 kernel.elf: libs api
 	make -C $(KERNEL_SRC_DIR)
+	objdump -D $(KERNEL_BUILD_DIR)/$@ > $(KERNEL_BUILD_DIR)/$@.lst
 
 libs: pre_build
 	make -C $(LIB_SRC_DIR)
