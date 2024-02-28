@@ -67,7 +67,7 @@ struct {
 
 static __attribute__((aligned(MEM_PAGE_SIZE_BYTES))) k_virtual_page_table_t kernelPageTables[MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT];
 
-void k_paging_init() {
+void k_paging_prepare() {
     /*
         Initialize kernel page tables to map the lower physical memory
 
@@ -119,12 +119,26 @@ __attribute__((naked)) void k_paging_start() {
     extern addr_t k_paging_start_end;
     ptr_t pagingEndJmp = (ptr_t)&k_paging_start_end - MEM_VIRTUAL_RESERVED_KERNEL_MEM;
 
-    __asm__ volatile ("mov %0, %%cr3" : : "r" (&(pagingInfo[0].pageDirectory)));
-    __asm__ volatile ("mov %eax, %cr3");
+    __asm__ volatile ("mov %0, %%cr3" : : "a" (&(pagingInfo[0].pageDirectory)));
     __asm__ volatile ("mov %cr0, %eax");
     __asm__ volatile ("or $" STR(CR0_PAGING_ENABLE_BIT) ", %eax");
     __asm__ volatile ("mov %eax, %cr0");
 
     __asm__ volatile ("jmp %0" : : "r" (pagingEndJmp));
     __builtin_unreachable();
+}
+
+void k_paging_init() {
+
+    /*
+        Remove 1:1 mapping
+    */
+    memzero(&pagingInfo[0].pageDirectory,
+            sizeof(struct k_virtual_pages_reserved_t));
+    
+    /*
+        Reload paging tables
+    */
+    __asm__ volatile ("mov %cr3, %eax");
+    __asm__ volatile ("mov %eax, %cr3");
 }
