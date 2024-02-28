@@ -115,15 +115,16 @@ void k_paging_init() {
 }
 
 __attribute__((naked)) void k_paging_start() {
+    k_cpu_stackPtr -= MEM_VIRTUAL_RESERVED_KERNEL_MEM;
+    extern addr_t k_paging_start_end;
+    ptr_t pagingEndJmp = (ptr_t)&k_paging_start_end - MEM_VIRTUAL_RESERVED_KERNEL_MEM;
+
     __asm__ volatile ("mov %0, %%cr3" : : "r" (&(pagingInfo[0].pageDirectory)));
     __asm__ volatile ("mov %eax, %cr3");
     __asm__ volatile ("mov %cr0, %eax");
     __asm__ volatile ("or $" STR(CR0_PAGING_ENABLE_BIT) ", %eax");
     __asm__ volatile ("mov %eax, %cr0");
 
-    k_cpu_stackPtr -= MEM_VIRTUAL_RESERVED_KERNEL_MEM;
-
-    extern addr_t k_paging_start_end;
-    __asm__ volatile ("jmp %0" : : "r" ((addr_t)&k_paging_start_end - MEM_VIRTUAL_RESERVED_KERNEL_MEM));
+    __asm__ volatile ("jmp %0" : : "r" (pagingEndJmp));
     __builtin_unreachable();
 }
