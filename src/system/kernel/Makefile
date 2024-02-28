@@ -1,4 +1,4 @@
-LFLAGS_DEFAULT=-m$(L_OUTFORMAT) -z noexecstack --fatal-warnings
+LFLAGS_DEFAULT=-m$(L_OUTFORMAT) -pie -z noexecstack --fatal-warnings
 
 ifneq ($(GNW_TEST_UNIT),)
 KERNEL_TEST_INCLUDE=-include $(TESTS_UNIT_SRC_DIR)/kernel/kernel.pch
@@ -24,7 +24,7 @@ KERNEL_LIBS=$(LIB_BUILD_DIR)/stdgunw.o \
 			$(LIB_BUILD_DIR)/gunwapi_app_kernel.o \
 			$(LIB_BUILD_DIR)/gunwapi_driver_kernel.o
 
-export KERNEL_BUILD_CFLAGS=-std=c11 -c -ffreestanding -mno-red-zone -ggdb -D_GUNWAPI_KERNEL $(CFLAGS_GLOBAL)
+export KERNEL_BUILD_CFLAGS=-std=c11 -c -fpic -ffreestanding -mno-red-zone -ggdb -D_GUNWAPI_KERNEL $(CFLAGS_GLOBAL)
 CXXFLAGS=-std=c++11 -c -ffreestanding -mno-red-zone -ggdb $(CXXFLAGS_GLOBAL)
 
 O_DIR_LISTING=find . -name '*.o' -type f
