@@ -14,6 +14,8 @@
 #define MEM_PHYSICAL_ADDRESSABLE_MEM                    MiB(16)
 #define MEM_VIRTUAL_RESERVED_KERNEL_MEM                 MiB(4)
 
+#define MEM_CONV_ABS(REL)                               (REL - MEM_VIRTUAL_RESERVED_KERNEL_MEM)
+
 /*
     Returns absolute memory address 
     of the pointer relative to process accessible space
