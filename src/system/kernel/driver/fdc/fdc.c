@@ -98,7 +98,11 @@ static void isr() {
 }
 
 static struct gnwDriverConfig desc() {
-    return (struct gnwDriverConfig){ init, start, isr, 6 };
+    const addr_t initAddr = (addr_t)init;
+    const addr_t startAddr = (addr_t)start;
+    const addr_t isrAddr = (addr_t)isr;
+
+    return (struct gnwDriverConfig){ (bool (*)())initAddr, (bool (*)())startAddr, (void (*)())isrAddr, 6 };
 }
 
 static struct gnwDeviceUHA uha() {
