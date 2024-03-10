@@ -146,7 +146,7 @@ void k_scr_usr_start(const procId_t procId, const struct gnwCtrlStartDescriptor 
     */
 
     fileSizeBytes = fileInfo.sizeBytes;
-    ptr_t filePtr = (ptr_t)0x00300001; /* YOLO */ {
+    ptr_t filePtr = (ptr_t)0xfff00001; /* YOLO */ {
 
         /*
             Load file
