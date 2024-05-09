@@ -50,6 +50,10 @@ MSG_IO_DISK_READ_HEAD                       db ', head: ', 0
 MSG_IO_DISK_READ_DRIVE                      db ', drive: ', 0
 MSG_IO_NEWLINE                              db 0xa, 0xd, 0
 
+MSG_MEMORY_ERROR_DETECTION_CONV_MEM         db 'MSG_MEMORY_ERROR_DETECTION_CONV_MEM', 0
+MSG_MEMORY_ERROR_DETECTION_UPPER_MEM_FAIL   db 'MSG_MEMORY_ERROR_DETECTION_UPPER_MEM_FAIL', 0
+MSG_MEMORY_DETECTION_NO_FALLBACK_IMPL       db 'MSG_MEMORY_DETECTION_NO_FALLBACK_IMPL', 0
+
 BITS 32
 
 MSG_PMODE_SWITCH                            db 'Switched to protected mode', 0
