@@ -13,3 +13,4 @@ kernel_data:
 CONV_MEM_AVAILABLE                          dw 0
 kernel_data_e820_entries:
 times E820_MAX_ENTRIES*E820_ENTRY_BYTES     db 0
+kernel_data_e820_entries_end:
