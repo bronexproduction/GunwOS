@@ -53,19 +53,40 @@ detect_upper_memory:
     mov eax, 0xE820
     int 0x15
 
+    ; ---------------------------------------
+    ; Check carry flag
+    ; ---------------------------------------
     jc .detect_upper_memory_fail
+
+    ; ---------------------------------------
+    ; Check 'SMAP' value presence
+    ; ---------------------------------------
     cmp eax, edx
     jne .detect_upper_memory_fail
+
+    ; ---------------------------------------
+    ; Check returned buffer size
+    ; (20 - E820_ENTRY_BYTES)
+    ; ---------------------------------------
     cmp ecx, 20
     jl .detect_upper_memory_fail
     cmp ecx, E820_ENTRY_BYTES
     jg .detect_upper_memory_fail
     
+    ; ---------------------------------------
+    ; No fail detected - mark E820 as present
+    ; ---------------------------------------
     mov byte [E820_PRESENT], 1
 
+    ; ---------------------------------------
+    ; Check continuation value presence
+    ; ---------------------------------------
     cmp ebx, 0
     je .detect_upper_memory_end
 
+    ; ---------------------------------------
+    ; Offset buffer to the next item
+    ; ---------------------------------------
     add di, E820_ENTRY_BYTES
     jmp .detect_upper_memory_loop
 
