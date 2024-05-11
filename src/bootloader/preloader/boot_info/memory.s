@@ -38,9 +38,17 @@ detect_upper_memory:
     mov es, ax
     mov di, kernel_data_e820_entries
     xor ebx, ebx
-    mov edx, 'SMAP'
+    mov edx, 'PAMS'
 
 .detect_upper_memory_loop:
+    ; ---------------------------------------
+    ; Check entries array boundary
+    ; ---------------------------------------
+    mov cx, di
+    add cx, E820_ENTRY_BYTES
+    cmp cx, kernel_data_e820_entries_end
+    jg .detect_upper_memory_fail
+    
     mov ecx, E820_ENTRY_BYTES
     mov eax, 0xE820
     int 0x15
