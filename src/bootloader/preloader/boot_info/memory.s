@@ -14,16 +14,18 @@ detect_lower_memory:
     pusha
     clc
     int 0x12
-    jnc .detect_lower_memory_end
-    mov bx, MSG_MEMORY_ERROR_DETECTION_CONV_MEM
-    call print_str_16
-    cli
-    hlt
+    jc .detect_lower_memory_fail
 
 .detect_lower_memory_end:
     mov [CONV_MEM_AVAILABLE], ax
     popa
     ret
+
+.detect_lower_memory_fail:
+    mov bx, MSG_MEMORY_ERROR_DETECTION_CONV_MEM
+    call print_str_16
+    cli
+    hlt
 
 ; Detect upper memory
 
