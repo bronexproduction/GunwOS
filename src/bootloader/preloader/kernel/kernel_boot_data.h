@@ -1,5 +1,5 @@
 //
-//  kernel_data.h
+//  kernel_boot_data.h
 //  GunwOS Bootloader
 //  Part of GunwOS project
 //
@@ -8,7 +8,7 @@
 
 #include "types.h"
 
-#define E820_MAX_ENTRIES    128
+#define EMS_MAX_ENTRIES    128
 
 enum k_krn_emsMapRangeType {
     EMRT_NONE = 0,
@@ -28,5 +28,5 @@ struct __attribute__((packed)) k_krn_emsMapEntry {
 
 struct __attribute__((packed)) k_krn_bootData {
     uint_16 convMemAvailable;
-    struct k_krn_emsMapEntry emsMap[E820_MAX_ENTRIES];
+    struct k_krn_emsMapEntry emsMap[EMS_MAX_ENTRIES];
 };
