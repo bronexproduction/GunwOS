@@ -5,10 +5,10 @@
 //  Created by Artur Danielewski on 16.01.2018.
 //
 
-#include "../../../bootloader/preloader/kernel/kernel_data.h"
+#include <kernel_boot_data.h>
 
 extern void k_tmr_init();
-extern void k_hal_init();
+extern void k_hal_init(const struct k_krn_emsMapEntry *emsMap);
 extern void k_ipc_init();
 extern void k_dev_init();
 extern void k_log_init();
@@ -36,7 +36,7 @@ void __attribute__((fastcall, section(".start"))) __kernel_start(const struct k_
     __asm__ volatile ("jmp k_hal_prepare");
     __asm__ volatile ("__kernel_start_hal_prepare_end:");
 
-    k_hal_init();
+    k_hal_init(bootData->emsMap);
     k_tmr_init();
     k_ipc_init();
     k_dev_init();
