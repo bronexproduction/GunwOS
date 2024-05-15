@@ -46,6 +46,13 @@ static struct k_mem_zone zoneForProc(const procId_t procId) {
     return result;
 }
 
+ptr_t k_mem_physicalToLinear(const ptr_t physAddr) {
+    if ((addr_t)physAddr >= MEM_VIRTUAL_RESERVED_KERNEL_MEM) {
+        OOPS("Kernel address out of range", nullptr);
+    }
+    return (ptr_t)(MEM_CONV_PTL(physAddr));
+}
+
 ptr_t k_mem_absForProc(const procId_t procId, const ptr_t relPtr) {
     if (!relPtr) {
         OOPS("Invalid pointer", nullptr);

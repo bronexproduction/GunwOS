@@ -8,7 +8,6 @@
 #include "hal.h"
 
 #include <defs.h>
-#include <kernel_boot_data.h>
 #include "cpu/cpu.h"
 #include "gdt/gdt.h"
 #include "paging/paging.h"
@@ -42,8 +41,8 @@ __attribute__((naked)) void k_paging_start_end() {
     __builtin_unreachable();
 }
 
-void k_hal_init(const struct k_krn_emsMapEntry *emsMap) {
-    k_paging_init();
+void k_hal_init(const struct k_krn_memMapEntry *memMap) {
+    k_paging_init(memMap);
     k_idt_loadDefault();
     k_gdt_init();
     k_cpu_init();

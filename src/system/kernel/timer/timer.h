@@ -7,6 +7,8 @@
 
 #include <types.h>
 
+void k_tmr_init();
+
 // TODO: Implement 64-bit counters 
 
 time_t k_tmr_getTicks();
