@@ -124,7 +124,7 @@ __attribute__((naked)) void k_paging_start() {
     __asm__ volatile ("or $" STR(CR0_PAGING_ENABLE_BIT) ", %eax");
     __asm__ volatile ("mov %eax, %cr0");
 
-    __asm__ volatile ("jmp %0" : : "r" (pagingEndJmp));
+    __asm__ volatile ("jmp *%0" : : "r" (pagingEndJmp));
     __builtin_unreachable();
 }
 
@@ -135,7 +135,7 @@ void k_paging_init() {
     */
     memzero(&pagingInfo[0].pageDirectory,
             sizeof(struct k_virtual_pages_reserved_t));
-    
+
     /*
         Reload paging tables
     */
