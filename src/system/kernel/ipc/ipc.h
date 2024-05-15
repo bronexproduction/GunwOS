@@ -10,6 +10,8 @@
 
 #include <src/_gunwipc.h>
 
+void k_ipc_init();
+
 /*
     Handling IPC messages sent by user process
 

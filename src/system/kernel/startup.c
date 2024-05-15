@@ -5,6 +5,7 @@
 //  Created by Artur Danielewski on 11.03.2023.
 //
 
+#include "startup.h"
 #include <string.h>
 #include <src/_gunwctrl.h>
 #include <hal/proc/proc.h>

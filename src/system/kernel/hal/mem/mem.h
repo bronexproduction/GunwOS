@@ -14,7 +14,13 @@
 #define MEM_PHYSICAL_ADDRESSABLE_MEM                    MiB(16)
 #define MEM_VIRTUAL_RESERVED_KERNEL_MEM                 MiB(4)
 
-#define MEM_CONV_ABS(REL)                               (REL - MEM_VIRTUAL_RESERVED_KERNEL_MEM)
+#define MEM_CONV_PTL(REL)                               (((addr_t)REL) - MEM_VIRTUAL_RESERVED_KERNEL_MEM)
+
+/*
+    Returns linear memory address
+    of the physical pointer (kernel only)
+*/
+ptr_t k_mem_physicalToLinear(const ptr_t physAddr);
 
 /*
     Returns absolute memory address 

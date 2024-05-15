@@ -14,6 +14,8 @@ typedef __attribute__((cdecl)) void (*fPtr_void)();
 typedef __attribute__((cdecl)) void (*fPtr_arch)(addr_t);
 typedef __attribute__((cdecl)) void (*fPtr_arch_arch)(addr_t, addr_t);
 
+void k_que_start();
+
 /*
     Functions dedicated for additional time-consuming operations
     interrupt handlers may require to perform to process data
