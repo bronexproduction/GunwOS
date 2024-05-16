@@ -149,6 +149,20 @@ static void initializePhysicalMemoryMap(const struct k_krn_memMapEntry *memMap) 
                    entry->type != MMRT_RESERVED) {
             OOPS("Mem map inconsistency",);
         }
+
+        bool limit = false;
+
+        if (entry->baseAddrHigh) {
+            /*
+                Entry over 4GiB boundary - to be ignored
+            */
+            continue;
+        } else if (entry->lengthHigh || (entry->baseAddrLow + entry->lengthLow) < entry->baseAddrLow) {
+            /*
+                Entry reaches 4GiB boundary - to be limited
+            */
+            limit = true;
+        }
     }
 }
 
