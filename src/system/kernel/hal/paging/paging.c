@@ -27,6 +27,7 @@
 /*
     Physical memory
 */
+#define MEM_PHYSICAL_PAGE_COUNT                         (MEM_PHYSICAL_ADDRESSABLE_MEM / MEM_PAGE_SIZE_BYTES)
 #define MEM_PHYSICAL_PAGE_TABLE_COUNT                   (MEM_PHYSICAL_ADDRESSABLE_MEM / MEM_SPACE_PER_DIR_ENTRY)
 
 /*

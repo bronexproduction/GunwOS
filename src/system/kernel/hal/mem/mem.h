@@ -16,6 +16,8 @@
 
 #define MEM_CONV_PTL(REL)                               (((addr_t)REL) - MEM_VIRTUAL_RESERVED_KERNEL_MEM)
 
+#define MEM_XMS_START                                   MiB(1)
+
 /*
     Returns linear memory address
     of the physical pointer (kernel only)
