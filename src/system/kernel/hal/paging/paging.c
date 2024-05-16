@@ -42,7 +42,7 @@ _Static_assert(MEM_PHYSICAL_PAGE_TABLE_COUNT <= MEM_MAX_DIR_ENTRY, "MEM_PHYSICAL
 
 #define CR0_PAGING_ENABLE_BIT 0x80000000
 
-typedef struct __attribute__((packed)) k_virtual_page_specifier_t {
+typedef struct __attribute__((packed)) virtual_page_specifier_t {
     bool present            :1;
     bool writable           :1;
     bool user               :1;
@@ -52,21 +52,21 @@ typedef struct __attribute__((packed)) k_virtual_page_specifier_t {
     uint_8 _reserved0       :2;
     uint_8 _unused          :3;
     uint_32 frameAddress    :20;
-} k_virtual_page_table_t[MEM_MAX_PAGE_ENTRY];
+} virtual_page_table_t[MEM_MAX_PAGE_ENTRY];
 
-struct __attribute__((packed)) k_virtual_pages_reserved_t {
-    struct k_virtual_page_specifier_t kernel[MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT];
+struct __attribute__((packed)) virtual_pages_reserved_t {
+    struct virtual_page_specifier_t kernel[MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT];
 } reserved;
 
 struct {
     struct __attribute__((packed, aligned(MEM_PAGE_SIZE_BYTES))) {
-        struct k_virtual_page_specifier_t user[MEM_VIRTUAL_USER_MAX_PAGE_TABLE_COUNT];
-        struct k_virtual_pages_reserved_t reserved;
+        struct virtual_page_specifier_t user[MEM_VIRTUAL_USER_MAX_PAGE_TABLE_COUNT];
+        struct virtual_pages_reserved_t reserved;
     } pageDirectory;
-    __attribute__((aligned(MEM_PAGE_SIZE_BYTES))) k_virtual_page_table_t pageTables[MEM_VIRTUAL_USER_PAGE_TABLE_COUNT];
+    __attribute__((aligned(MEM_PAGE_SIZE_BYTES))) virtual_page_table_t pageTables[MEM_VIRTUAL_USER_PAGE_TABLE_COUNT];
 } pagingInfo[MAX_PROC];
 
-static __attribute__((aligned(MEM_PAGE_SIZE_BYTES))) k_virtual_page_table_t kernelPageTables[MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT];
+static __attribute__((aligned(MEM_PAGE_SIZE_BYTES))) virtual_page_table_t kernelPageTables[MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT];
 
 void k_paging_prepare() {
     /*
@@ -75,10 +75,10 @@ void k_paging_prepare() {
         TODO: Initialize as many pages as needed after startup (definetely less than 4MiB)
     */
     for (size_t tableIndex = 0; tableIndex < MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT; ++tableIndex) {
-        k_virtual_page_table_t * table = &kernelPageTables[tableIndex];
+        virtual_page_table_t * table = &kernelPageTables[tableIndex];
         
         for (size_t pageIndex = 0; pageIndex < MEM_MAX_PAGE_ENTRY; ++pageIndex) {
-            struct k_virtual_page_specifier_t * page = &(*table)[pageIndex];
+            struct virtual_page_specifier_t * page = &(*table)[pageIndex];
 
             page->frameAddress = (tableIndex << 10) | pageIndex;
             page->present = true;
@@ -91,14 +91,14 @@ void k_paging_prepare() {
         Initialize paging info
     */
     for (size_t proc = 0; proc < MAX_PROC; ++proc) {
-        struct k_virtual_page_specifier_t * kernelDir = pagingInfo[proc].pageDirectory.reserved.kernel;
+        struct virtual_page_specifier_t * kernelDir = pagingInfo[proc].pageDirectory.reserved.kernel;
 
         /*
             Clear user pages
         */
 
         for (size_t dirEntryIndex = 0; dirEntryIndex < MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT; ++dirEntryIndex) {
-            struct k_virtual_page_specifier_t * dirEntry = &kernelDir[dirEntryIndex];
+            struct virtual_page_specifier_t * dirEntry = &kernelDir[dirEntryIndex];
 
             dirEntry->frameAddress = (addr_t)&kernelPageTables[dirEntryIndex] >> 12;
             dirEntry->present = true;
@@ -112,7 +112,7 @@ void k_paging_prepare() {
     */
     memcopy(&pagingInfo[0].pageDirectory.reserved.kernel, 
             &pagingInfo[0].pageDirectory, 
-            sizeof(struct k_virtual_pages_reserved_t));
+            sizeof(struct virtual_pages_reserved_t));
 }
 
 __attribute__((naked)) void k_paging_start() {
@@ -138,7 +138,7 @@ void k_paging_init(const struct k_krn_memMapEntry *memMap) {
         Remove 1:1 mapping
     */
     memzero(&pagingInfo[0].pageDirectory,
-            sizeof(struct k_virtual_pages_reserved_t));
+            sizeof(struct virtual_pages_reserved_t));
 
     /*
         Reload paging tables
