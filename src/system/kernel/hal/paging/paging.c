@@ -163,6 +163,15 @@ static void initializePhysicalMemoryMap(const struct k_krn_memMapEntry *memMap) 
             */
             limit = true;
         }
+
+        const bool usable = entry->type == MMRT_MEMORY;
+        const addr_t pageAlignedStart = alignedr(entry->baseAddrLow, MEM_PAGE_SIZE_BYTES, usable);
+        if (pageAlignedStart < entry->baseAddrLow && usable) {
+            /*
+                Wraparound
+            */
+            continue;
+        }
     }
 }
 
