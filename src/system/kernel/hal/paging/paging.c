@@ -16,6 +16,9 @@
 #include <hal/proc/proc.h>
 #include <error/panic.h>
 
+#include <string.h>
+#include <log/log.h>
+
 /*
     Hardware constraints
 */
@@ -27,6 +30,7 @@
 /*
     Physical memory
 */
+#define MEM_MAX_PHYSICAL_PAGE_COUNT                     (MEM_MAX_DIR_ENTRY * MEM_MAX_PAGE_ENTRY)
 #define MEM_PHYSICAL_PAGE_COUNT                         (MEM_PHYSICAL_ADDRESSABLE_MEM / MEM_PAGE_SIZE_BYTES)
 #define MEM_PHYSICAL_PAGE_TABLE_COUNT                   (MEM_PHYSICAL_ADDRESSABLE_MEM / MEM_SPACE_PER_DIR_ENTRY)
 
@@ -70,8 +74,9 @@ struct {
 static __attribute__((aligned(MEM_PAGE_SIZE_BYTES))) virtual_page_table_t kernelPageTables[MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT];
 
 struct __attribute__((packed)) physical_page_info_t {
-    bool present    :1;
-    bool used       :1;
+    bool present    :1; // Installed physical RAM
+    bool available  :1; // Available (non-reserved) physical RAM
+    bool free       :1; // Free
 } physicalPages[MEM_PHYSICAL_PAGE_COUNT];
 
 void k_paging_prepare() {
@@ -173,8 +178,16 @@ static void initializePhysicalMemoryMap(const struct k_krn_memMapEntry *memMap) 
             continue;
         }
 
-        const addr_t lengthPages = (pageAlignedStartNext - pageAlignedStart) / MEM_PAGE_SIZE_BYTES;
-        const addr_t startPage = pageAlignedStart / MEM_PAGE_SIZE_BYTES;
+        const addr_t pageAlignedStartNext = limit ? 0 : alignedr(entry->baseAddrLow + entry->lengthLow, MEM_PAGE_SIZE_BYTES, !usable);
+        const bool flat = !pageAlignedStartNext && !pageAlignedStart;
+
+        if (flat) {
+        } else if (pageAlignedStartNext <= pageAlignedStart && !limit) {
+            continue;
+        }
+
+        const addr_t lengthPages = flat ? MEM_MAX_PHYSICAL_PAGE_COUNT : ((pageAlignedStartNext - pageAlignedStart) / MEM_PAGE_SIZE_BYTES);
+        const addr_t startPage = flat ? 0 : (pageAlignedStart / MEM_PAGE_SIZE_BYTES);
         
         for (size_t page = startPage; page < (startPage + lengthPages) && page < MEM_PHYSICAL_PAGE_COUNT; ++page) {
             /*
@@ -182,9 +195,41 @@ static void initializePhysicalMemoryMap(const struct k_krn_memMapEntry *memMap) 
             */
             const bool reserved = (page * MEM_PAGE_SIZE_BYTES) < MEM_VIRTUAL_RESERVED_KERNEL_MEM;
 
-            physicalPages[page].present = usable && !reserved;
+            struct physical_page_info_t * entry = &physicalPages[page];
+            entry->present = true;
+            entry->available = usable;
+            entry->free = entry->available && !reserved;
         }
     }
+
+    /*
+        Debug log
+
+        Available memory bytes
+    */
+
+    char bytesString[11];
+    size_t physicalBytes = 0;
+    for (hugeSize_t page = 0; page < MEM_PHYSICAL_PAGE_COUNT; ++page) {
+        physicalBytes += physicalPages[page].present * MEM_PAGE_SIZE_BYTES;
+    }
+    memzero(bytesString, 11);
+    uint2str(physicalBytes, bytesString, 10);
+    LOG2("Installed memory (bytes): ", bytesString);
+    size_t availableBytes = 0;
+    for (hugeSize_t page = 0; page < MEM_PHYSICAL_PAGE_COUNT; ++page) {
+        availableBytes += physicalPages[page].available * MEM_PAGE_SIZE_BYTES;
+    }
+    memzero(bytesString, 11);
+    uint2str(availableBytes, bytesString, 10);
+    LOG2("Physical memory available (bytes): ", bytesString);
+    size_t freeBytes = 0;
+    for (hugeSize_t page = 0; page < MEM_PHYSICAL_PAGE_COUNT; ++page) {
+        freeBytes += physicalPages[page].free * MEM_PAGE_SIZE_BYTES;
+    }
+    memzero(bytesString, 11);
+    uint2str(freeBytes, bytesString, 10);
+    LOG2("Free memory (bytes): ", bytesString);
 }
 
 void k_paging_init(const struct k_krn_memMapEntry *memMap) {
