@@ -26,5 +26,6 @@
 #define BIT_RANGE_ALIGNED(VALUE, RANGE) (((VALUE) << __builtin_ctz(RANGE)) & (RANGE))
 
 size_t aligned(const size_t value, const size_t alignment);
+size_t alignedr(const size_t value, const size_t alignment, const bool roundUp);
 
 #endif // STDGUNW_UTILS_H
