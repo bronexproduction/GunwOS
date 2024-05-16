@@ -69,6 +69,11 @@ struct {
 
 static __attribute__((aligned(MEM_PAGE_SIZE_BYTES))) virtual_page_table_t kernelPageTables[MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT];
 
+struct __attribute__((packed)) physical_page_info_t {
+    bool present    :1;
+    bool used       :1;
+} physicalPages[MEM_PHYSICAL_PAGE_COUNT];
+
 void k_paging_prepare() {
     /*
         Initialize kernel page tables to map the lower physical memory
