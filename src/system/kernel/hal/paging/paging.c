@@ -172,6 +172,18 @@ static void initializePhysicalMemoryMap(const struct k_krn_memMapEntry *memMap) 
             */
             continue;
         }
+
+        const addr_t lengthPages = (pageAlignedStartNext - pageAlignedStart) / MEM_PAGE_SIZE_BYTES;
+        const addr_t startPage = pageAlignedStart / MEM_PAGE_SIZE_BYTES;
+        
+        for (size_t page = startPage; page < (startPage + lengthPages) && page < MEM_PHYSICAL_PAGE_COUNT; ++page) {
+            /*
+                Kernel reserved area fixed at the moment
+            */
+            const bool reserved = (page * MEM_PAGE_SIZE_BYTES) < MEM_VIRTUAL_RESERVED_KERNEL_MEM;
+
+            physicalPages[page].present = usable && !reserved;
+        }
     }
 }
 
