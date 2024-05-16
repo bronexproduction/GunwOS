@@ -135,6 +135,23 @@ __attribute__((naked)) void k_paging_start() {
     __builtin_unreachable();
 }
 
+static void initializePhysicalMemoryMap(const struct k_krn_memMapEntry *memMap) {
+    
+    /*
+        Prepare usable memory map
+    */
+
+    for (size_t emsIndex = 0; emsIndex < MMAP_MAX_ENTRIES; ++emsIndex) {
+        const struct k_krn_memMapEntry * entry = &memMap[emsIndex];
+        if (entry->type == MMRT_NONE) {
+            break;
+        } else if (entry->type != MMRT_MEMORY &&
+                   entry->type != MMRT_RESERVED) {
+            OOPS("Mem map inconsistency",);
+        }
+    }
+}
+
 void k_paging_init(const struct k_krn_memMapEntry *memMap) {
     if (!memMap) {
         OOPS("Mem map nullptr",);
@@ -152,19 +169,5 @@ void k_paging_init(const struct k_krn_memMapEntry *memMap) {
     __asm__ volatile ("mov %cr3, %eax");
     __asm__ volatile ("mov %eax, %cr3");
 
-    /*
-        Prepare usable memory map
-    */
-    for (size_t emsIndex = 0; emsIndex < MMAP_MAX_ENTRIES; ++emsIndex) {
-        const struct k_krn_memMapEntry * entry = &memMap[emsIndex];
-        if (entry->type == MMRT_NONE) {
-            break;
-        } else if (entry->type == MMRT_RESERVED) {
-            continue;
-        } else if (entry->type != MMRT_MEMORY) {
-            OOPS("Mem map inconsistency",);
-        }
-
-        // Free usable memory - do the job bro
-    }
+    initializePhysicalMemoryMap(memMap);
 }
