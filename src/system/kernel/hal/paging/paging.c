@@ -7,7 +7,6 @@
 
 #include "paging.h"
 
-#include <defs.h>
 #include <types.h>
 #include <utils.h>
 #include <mem.h>
@@ -22,7 +21,6 @@
 /*
     Hardware constraints
 */
-#define MEM_PAGE_SIZE_BYTES                             KiB(4)
 #define MEM_MAX_DIR_ENTRY                               (1 << 10)
 #define MEM_MAX_PAGE_ENTRY                              (1 << 10)
 #define MEM_SPACE_PER_DIR_ENTRY                         (MEM_PAGE_SIZE_BYTES * MEM_MAX_PAGE_ENTRY)
@@ -44,6 +42,7 @@
 _Static_assert(!(MEM_PHYSICAL_ADDRESSABLE_MEM % MEM_SPACE_PER_DIR_ENTRY), "MEM_PHYSICAL_ADDRESSABLE_MEM not aligned to addressable space unit");
 _Static_assert(!(MEM_VIRTUAL_RESERVED_KERNEL_MEM % MEM_SPACE_PER_DIR_ENTRY), "MEM_VIRTUAL_RESERVED_KERNEL_MEM not aligned to addressable space unit");
 _Static_assert(MEM_PHYSICAL_PAGE_TABLE_COUNT <= MEM_MAX_DIR_ENTRY, "MEM_PHYSICAL_PAGE_TABLE_COUNT exceeds MEM_MAX_DIR_ENTRY");
+_Static_assert(MEM_PAGE_SIZE_BYTES >= 2, "MEM_PAGE_SIZE_BYTES cannot be less than 2");
 
 #define CR0_PAGING_ENABLE_BIT 0x80000000
 
@@ -182,6 +181,11 @@ static void initializePhysicalMemoryMap(const struct k_krn_memMapEntry *memMap) 
         const bool flat = !pageAlignedStartNext && !pageAlignedStart;
 
         if (flat) {
+            // All memory mapped
+            // or only a tiny area at the bottom of memory
+            //
+            // First case: allow
+            // Second case: continue;
         } else if (pageAlignedStartNext <= pageAlignedStart && !limit) {
             continue;
         }
@@ -210,23 +214,20 @@ static void initializePhysicalMemoryMap(const struct k_krn_memMapEntry *memMap) 
 
     char bytesString[11];
     size_t physicalBytes = 0;
-    for (hugeSize_t page = 0; page < MEM_PHYSICAL_PAGE_COUNT; ++page) {
+    for (size_t page = 0; page < MEM_PHYSICAL_PAGE_COUNT; ++page) {
         physicalBytes += physicalPages[page].present * MEM_PAGE_SIZE_BYTES;
     }
     memzero(bytesString, 11);
     uint2str(physicalBytes, bytesString, 10);
     LOG2("Installed memory (bytes): ", bytesString);
     size_t availableBytes = 0;
-    for (hugeSize_t page = 0; page < MEM_PHYSICAL_PAGE_COUNT; ++page) {
+    for (size_t page = 0; page < MEM_PHYSICAL_PAGE_COUNT; ++page) {
         availableBytes += physicalPages[page].available * MEM_PAGE_SIZE_BYTES;
     }
     memzero(bytesString, 11);
     uint2str(availableBytes, bytesString, 10);
     LOG2("Physical memory available (bytes): ", bytesString);
-    size_t freeBytes = 0;
-    for (hugeSize_t page = 0; page < MEM_PHYSICAL_PAGE_COUNT; ++page) {
-        freeBytes += physicalPages[page].free * MEM_PAGE_SIZE_BYTES;
-    }
+    size_t freeBytes = k_mem_getFreeBytes();
     memzero(bytesString, 11);
     uint2str(freeBytes, bytesString, 10);
     LOG2("Free memory (bytes): ", bytesString);
@@ -250,4 +251,15 @@ void k_paging_init(const struct k_krn_memMapEntry *memMap) {
     __asm__ volatile ("mov %eax, %cr3");
 
     initializePhysicalMemoryMap(memMap);
+}
+
+size_t k_paging_getFreePages() {
+    size_t freePages = 0;
+    for (size_t page = 0; page < MEM_PHYSICAL_PAGE_COUNT; ++page) {
+        if (physicalPages[page].free) {
+            ++freePages;
+        }
+    }
+
+    return freePages;
 }
