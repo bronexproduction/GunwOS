@@ -91,7 +91,6 @@ enum k_proc_error k_proc_spawn(procId_t * procId) {
         }
 
         pTab[pIndex].info.state = PS_NEW;
-        *procId = pIndex;
         
     } CRITICAL_SECTION_END;
 
@@ -142,6 +141,7 @@ enum k_proc_error k_proc_spawn(procId_t * procId) {
     pTab[pIndex].cpuState.gs = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].info.dpl);
     pTab[pIndex].cpuState.ss = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].info.dpl);
 
+    *procId = pIndex;
     return PE_NONE;
 }
 
