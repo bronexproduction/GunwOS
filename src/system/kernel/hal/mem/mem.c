@@ -8,6 +8,7 @@
 #include "mem.h"
 #include <mem.h>
 #include <hal/proc/proc.h>
+#include <hal/paging/paging.h>
 #include <error/panic.h>
 
 struct k_mem_zone {
@@ -80,4 +81,11 @@ bool k_mem_bufInZoneForProc(const procId_t procId, const ptr_t absPtr, const siz
 
 void k_mem_procCleanup(const procId_t procId) {
     #warning NOTHING TO BE DONE YET
+}
+
+/*
+    Returns the amount of free (allocable) memory (aligned to pages)
+*/
+size_t k_mem_getFreeBytes() {
+    return k_paging_getFreePages() * MEM_PAGE_SIZE_BYTES;
 }

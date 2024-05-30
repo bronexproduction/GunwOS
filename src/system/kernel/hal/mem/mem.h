@@ -40,4 +40,9 @@ bool k_mem_bufInZoneForProc(const procId_t procId, const ptr_t absPtr, const siz
 */
 void k_mem_procCleanup(const procId_t procId);
 
+/*
+    Returns the amount of free (allocable) memory (aligned to pages)
+*/
+size_t k_mem_getFreeBytes();
+
 #endif // MEM_H
