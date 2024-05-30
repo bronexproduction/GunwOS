@@ -142,6 +142,18 @@ void k_scr_usr_start(const procId_t procId, const struct gnwCtrlStartDescriptor 
     }
 
     /*
+        Spawn process
+    */
+
+    procId_t procId;
+    enum k_proc_error procErr = k_proc_spawn(&procId);
+    if (procErr != PE_NONE) {
+        *abs_errorPtr = GCE_OPERATION_FAILED;
+        LOG_CODE("Failed to spawn process", procErr);
+        return;
+    }
+
+    /*
         Allocate memory 
     */
 
@@ -156,6 +168,8 @@ void k_scr_usr_start(const procId_t procId, const struct gnwCtrlStartDescriptor 
         if (err != GFEC_NONE) {
             *abs_errorPtr = GCE_UNKNOWN;
             LOG_CODE("Storage error", err);
+
+            k_proc_procCleanup(procId);
             return;
         }
     }
@@ -177,22 +191,13 @@ void k_scr_usr_start(const procId_t procId, const struct gnwCtrlStartDescriptor 
     if (!elfValidate(filePtr, fileSizeBytes, &exp)) {
         *abs_errorPtr = GCE_HEADER_INVALID;
         LOG_CODE("ELF header validation failure", 0);
+
+        k_proc_procCleanup(procId);
         return;
     }
-    
-    /* 
-        Allocate process memory 
-    */
-
-    static size_t index = 0;
-    const size_t processBinBytes = KiB(512);
-    const size_t processStackBytes = KiB(256);
-    const size_t processExtraBytes = KiB(256);
-    const size_t processMemTotalBytes = processBinBytes + processStackBytes + processExtraBytes;
-    const ptr_t dstPtr = GDT_SEGMENT_START(r3code) + MEM_VIRTUAL_RESERVED_KERNEL_MEM + (++index * processMemTotalBytes);
 
     /* 
-        Load executable 
+        Load executable
     */
     
     enum gnwCtrlError err;
@@ -203,12 +208,20 @@ void k_scr_usr_start(const procId_t procId, const struct gnwCtrlStartDescriptor 
     if (err != GCE_NONE) {
         *abs_errorPtr = err;
         LOG_CODE("Failed to load ELF", err);
+
+        k_proc_procCleanup(procId);
         return;
     }
 
-    /* 
-        Spawn process 
+    /*
+        Hatch process
     */
+
+    const size_t processBinBytes = KiB(512);
+    const size_t processStackBytes = KiB(256);
+    const size_t processExtraBytes = KiB(256);
+    const size_t processMemTotalBytes = processBinBytes + processStackBytes + processExtraBytes;
+    const ptr_t dstPtr = GDT_SEGMENT_START(r3code) + MEM_VIRTUAL_RESERVED_KERNEL_MEM + (processMemTotalBytes);
 
     struct k_proc_descriptor desc;
 
@@ -216,10 +229,12 @@ void k_scr_usr_start(const procId_t procId, const struct gnwCtrlStartDescriptor 
     desc.entry = entry;
     desc.imgBytes = memBytes;
 
-    enum k_proc_error procErr = k_proc_spawn(&desc);
+    procErr = k_proc_hatch(desc, procId);
     if (procErr != PE_NONE) {
         *abs_errorPtr = GCE_OPERATION_FAILED;
-        LOG_CODE("Failed to spawn process", procErr);
+        LOG_CODE("Failed to hatch process", procErr);
+
+        k_proc_procCleanup(procId);
         return;
     }
 
