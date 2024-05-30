@@ -71,7 +71,11 @@ struct k_proc_process k_proc_getInfo(const procId_t procId) {
     return (procId == KERNEL_PROC_ID) ? kernelProc.info : pTab[procId].info;
 }
 
-enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor) {
+enum k_proc_error k_proc_spawn(procId_t * procId) {
+    if (!procId) {
+        OOPS("Nullptr", PE_UNKNOWN);
+    }
+    
     uint_32 pIndex;
     
     CRITICAL_SECTION_BEGIN {
@@ -87,6 +91,7 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
         }
 
         pTab[pIndex].info.state = PS_NEW;
+        *procId = pIndex;
         
     } CRITICAL_SECTION_END;
 
@@ -137,8 +142,19 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
     pTab[pIndex].cpuState.gs = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].info.dpl);
     pTab[pIndex].cpuState.ss = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].info.dpl);
 
-    pTab[pIndex].info.state = PS_READY;
-    k_proc_schedule_didSpawn(pIndex);
+    return PE_NONE;
+}
+
+enum k_proc_error k_proc_hatch(const struct k_proc_descriptor descriptor, const procId_t procId) {
+    if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
+        OOPS("Process id out of range", PE_UNKNOWN);
+    }
+    if (pTab[procId].info.state != PS_NEW) {
+        OOPS("Invalid process state during hatching", PE_INVALID_STATE);
+    }
+
+    pTab[procId].info.state = PS_READY;
+    k_proc_schedule_didHatch(procId);
 
     return PE_NONE;
 }
@@ -184,7 +200,7 @@ static bool isProcessAlive(const procId_t procId) {
            pTab[procId].info.state == PS_BLOCKED;
 }
 
-static void procCleanup(const procId_t procId) {
+void k_proc_procCleanup(const procId_t procId) {
     if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
         OOPS("Process id out of range",);
     }
@@ -205,7 +221,7 @@ void k_proc_stop(const procId_t procId) {
     }
     
     pTab[procId].info.state = PS_FINISHED;
-    k_que_dispatch_arch((fPtr_arch)procCleanup, procId);
+    k_que_dispatch_arch((fPtr_arch)k_proc_procCleanup, procId);
     k_proc_schedule_processStateDidChange();
 }
 
