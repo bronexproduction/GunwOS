@@ -17,6 +17,20 @@
 #include <storage/file.h>
 #include "../func.h"
 
+#define LOG_CODE(MSG, CODE) {                               \
+    LOG_START;                                              \
+    k_log_logd((data_t){ (ptr_t)pathPtr, pathLen });        \
+    LOG_NBR(" - ");                                         \
+    LOG_NBR(MSG);                                           \
+    if (CODE) {                                             \
+        char loc_code_str[10] = { 0 };                      \
+        int2str(CODE, loc_code_str);                        \
+        LOG_NBR(", code ");                                 \
+        k_log_logd((data_t){ (ptr_t)loc_code_str, 10 });    \
+    }                                                       \
+    LOG_END;                                                \
+}
+
 enum gnwCtrlError loadFile(const char * const pathPtr,
                            const size_t pathLen,
                            ptr_t filePtr,
@@ -79,10 +93,47 @@ enum gnwCtrlError loadFile(const char * const pathPtr,
 
 enum gnwCtrlError loadElf(const ptr_t filePtr,
                           const size_t fileSizeBytes,
+                          const procId_t procId,
                           addr_t * const entry) {
+    if (!filePtr) {
+        OOPS("Unexpected nullptr", GCE_UNKNOWN);
+    }
+    if (!fileSizeBytes) {
+        OOPS("Unexpected zero size", GCE_UNKNOWN);
+    }
+    if (!k_proc_idIsUser(procId)) {
+        OOPS("Invalid process ID", GCE_INVALID_ARGUMENT);
+    }
     if (!entry) {
         OOPS("Unexpected nullptr", GCE_UNKNOWN);
     }
+
+#warning TODO BEGIN
+
+
+
+        /*
+            Allocate memory
+        */
+
+        /*
+            Switch to the new process page table (?)
+        */
+
+        /*
+            Load executable
+        */
+
+        /*
+            Revert to old page table (?)
+        */
+
+
+
+
+
+
+
     addr_t vMemLow;
     *memBytes = elfAllocBytes(filePtr, fileSizeBytes, &vMemLow);
     if (!*memBytes) {
@@ -138,21 +189,9 @@ enum gnwCtrlError loadElf(const ptr_t filePtr,
     }
     *entry -= vMemLow;
 
-    return GCE_NONE;
-}
+#warning TODO END
 
-#define LOG_CODE(MSG, CODE) {                                               \
-    LOG_START;                                                              \
-    k_log_logd((data_t){ (ptr_t)(descPtr->pathPtr), descPtr->pathLen });    \
-    LOG_NBR(" - ");                                                         \
-    LOG_NBR(MSG);                                                           \
-    if (CODE) {                                                             \
-        char loc_code_str[10] = { 0 };                                      \
-        int2str(CODE, loc_code_str);                                        \
-        LOG_NBR(", code ");                                                 \
-        k_log_logd((data_t){ (ptr_t)loc_code_str, 10 });                    \
-    }                                                                       \
-    LOG_END;                                                                \
+    return GCE_NONE;
 }
 
 void k_scr_usr_start(const struct gnwCtrlStartDescriptor * const descPtr) {
@@ -171,13 +210,16 @@ void k_scr_usr_start(const struct gnwCtrlStartDescriptor * const descPtr) {
         OOPS("Unexpected length",);
     }
 
+    const char * const pathPtr = descPtr->pathPtr;
+    const size_t pathLen = descPtr->pathLen;
+
     /*
         Load file from storage
     */
     
     ptr_t filePtr = (ptr_t)0xfff00001; /* YOLO */ 
     size_t fileSizeBytes; {
-        const enum gnwCtrlError err = loadFile(descPtr->pathPtr, descPtr->pathLen, filePtr, &fileSizeBytes);
+        const enum gnwCtrlError err = loadFile(pathPtr, pathLen, filePtr, &fileSizeBytes);
         if (err != GCE_NONE) {
             *(descPtr->errorPtr) = err;
             return;
@@ -212,43 +254,19 @@ void k_scr_usr_start(const struct gnwCtrlStartDescriptor * const descPtr) {
         return;
     }
 
-#warning TODO START
-
     /*
-        Allocate memory 
+        Load executable
     */
-
-    /*
-        Prepare process descriptor
-    */
-
-    struct k_proc_descriptor desc; {
-        /*
-            Switch to the new process page table (?)
-        */
-        
-        /*
-            Load executable
-        */
     
-        enum gnwCtrlError err;
-    
-        err = loadElf(filePtr, fileSizeBytes, &desc.entryLinearAddr);
+    struct k_proc_descriptor desc;
+    enum gnwCtrlError err = loadElf(filePtr, fileSizeBytes, procId, &desc.entryLinearAddr);
+    if (err != GCE_NONE) {
+        *(descPtr->errorPtr) = err;
+        LOG_CODE("Failed to load ELF", err);
 
-        /*
-            Revert to old page table (?)
-        */
-
-        if (err != GCE_NONE) {
-            *(descPtr->errorPtr) = err;
-            LOG_CODE("Failed to load ELF", err);
-
-            k_proc_cleanup(procId);
-            return;
-        }
+        k_proc_cleanup(procId);
+        return;
     }
-
-#warning TODO END
 
     /*
         Hatch process
@@ -264,5 +282,4 @@ void k_scr_usr_start(const struct gnwCtrlStartDescriptor * const descPtr) {
     }
 
     *(descPtr->errorPtr) = GCE_NONE;
-    return;
 }

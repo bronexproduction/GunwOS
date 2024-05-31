@@ -13,9 +13,9 @@
 #define STR_(X) #X
 #define STR(X) STR_(X)
 
-#define MAX(A,B) (A > B ? A : B)
-#define MIN(A,B) (A < B ? A : B)
-#define IN_RANGE(B, V, T) (B <= V && V <= T)
+#define MAX(A,B) ((A) > (B) ? (A) : (B))
+#define MIN(A,B) ((A) < (B) ? (A) : (B))
+#define IN_RANGE(B, V, T) ((B) <= (V) && (V) <= (T))
 
 #define SET(BIT) (BIT)
 #define CLEAR(BIT) ((BIT) & 0)
