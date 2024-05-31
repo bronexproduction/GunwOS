@@ -31,8 +31,8 @@
 SCR(start,
     PAR_PTR_1(descPtr)
 
-    extern void k_scr_usr_start(const procId_t, const struct gnwCtrlStartDescriptor * const);
-    k_que_dispatch_arch_arch((fPtr_arch_arch)(ptr_t)k_scr_usr_start, k_proc_getCurrentId(), *descPtr);
+    extern void k_scr_usr_start(const struct gnwCtrlStartDescriptor * const);
+    k_que_dispatch_arch((fPtr_arch)(ptr_t)k_scr_usr_start, *descPtr);
 )
 
 /*
