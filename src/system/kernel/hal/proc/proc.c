@@ -98,6 +98,27 @@ enum k_proc_error k_proc_spawn(procId_t * procId) {
 
     pTab[pIndex].info.dpl = DPL_3;
 
+    pTab[pIndex].cpuState.eflags = FLAGS_INTERRUPT;
+
+    pTab[pIndex].cpuState.cs = (uint_16)(GDT_OFFSET(r3code) | pTab[pIndex].info.dpl);
+    pTab[pIndex].cpuState.ds = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].info.dpl);
+    pTab[pIndex].cpuState.es = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].info.dpl);
+    pTab[pIndex].cpuState.fs = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].info.dpl);
+    pTab[pIndex].cpuState.gs = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].info.dpl);
+    pTab[pIndex].cpuState.ss = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].info.dpl);
+
+    *procId = pIndex;
+    return PE_NONE;
+}
+
+enum k_proc_error k_proc_hatch(const struct k_proc_descriptor descriptor, const procId_t procId) {
+    if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
+        OOPS("Process id out of range", PE_UNKNOWN);
+    }
+    if (pTab[procId].info.state != PS_NEW) {
+        OOPS("Invalid process state during hatching", PE_INVALID_STATE);
+    }
+
     const size_t stackBytes = KiB(512);
     ptr_t codeStartPtr = descriptor->img;
     ptr_t codeEndPtr = codeStartPtr + descriptor->imgBytes - 1;
@@ -132,27 +153,7 @@ enum k_proc_error k_proc_spawn(procId_t * procId) {
 
     pTab[pIndex].cpuState.esp = (uint_32)relativeStackPtr;
     pTab[pIndex].cpuState.eip = (uint_32)relativeEntryPtr;
-    pTab[pIndex].cpuState.eflags = FLAGS_INTERRUPT;
-
-    pTab[pIndex].cpuState.cs = (uint_16)(GDT_OFFSET(r3code) | pTab[pIndex].info.dpl);
-    pTab[pIndex].cpuState.ds = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].info.dpl);
-    pTab[pIndex].cpuState.es = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].info.dpl);
-    pTab[pIndex].cpuState.fs = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].info.dpl);
-    pTab[pIndex].cpuState.gs = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].info.dpl);
-    pTab[pIndex].cpuState.ss = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].info.dpl);
-
-    *procId = pIndex;
-    return PE_NONE;
-}
-
-enum k_proc_error k_proc_hatch(const struct k_proc_descriptor descriptor, const procId_t procId) {
-    if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
-        OOPS("Process id out of range", PE_UNKNOWN);
-    }
-    if (pTab[procId].info.state != PS_NEW) {
-        OOPS("Invalid process state during hatching", PE_INVALID_STATE);
-    }
-
+    
     pTab[procId].info.state = PS_READY;
     k_proc_schedule_didHatch(procId);
 
