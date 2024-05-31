@@ -12,14 +12,14 @@
 #include <log/log.h>
 #include <error/panic.h>
 
-#define START(PATH) if (err == GCE_NONE) {                                                      \
-    LOG(PATH);                                                                                  \
-    struct gnwCtrlStartDescriptor desc;                                                         \
-    desc.pathPtr = PATH;                                                                        \
-    desc.pathLen = strlen(desc.pathPtr);                                                        \
-    desc.errorPtr = &err;                                                                       \
-    extern void k_scr_usr_start(const procId_t, const struct gnwCtrlStartDescriptor * const);   \
-    k_scr_usr_start(KERNEL_PROC_ID, &desc);                                                     \
+#define START(PATH) if (err == GCE_NONE) {                                      \
+    LOG(PATH);                                                                  \
+    struct gnwCtrlStartDescriptor desc;                                         \
+    desc.pathPtr = PATH;                                                        \
+    desc.pathLen = strlen(desc.pathPtr);                                        \
+    desc.errorPtr = &err;                                                       \
+    extern void k_scr_usr_start(const struct gnwCtrlStartDescriptor * const);   \
+    k_scr_usr_start(&desc);                                                     \
 }
 
 void k_startup() {

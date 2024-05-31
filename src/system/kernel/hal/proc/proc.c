@@ -169,7 +169,7 @@ static bool isProcessAlive(const procId_t procId) {
            pTab[procId].info.state == PS_BLOCKED;
 }
 
-void k_proc_procCleanup(const procId_t procId) {
+void k_proc_cleanup(const procId_t procId) {
     if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
         OOPS("Process id out of range",);
     }
@@ -190,7 +190,7 @@ void k_proc_stop(const procId_t procId) {
     }
     
     pTab[procId].info.state = PS_FINISHED;
-    k_que_dispatch_arch((fPtr_arch)k_proc_procCleanup, procId);
+    k_que_dispatch_arch((fPtr_arch)k_proc_cleanup, procId);
     k_proc_schedule_processStateDidChange();
 }
 
