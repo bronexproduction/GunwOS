@@ -119,40 +119,8 @@ enum k_proc_error k_proc_hatch(const struct k_proc_descriptor descriptor, const 
         OOPS("Invalid process state during hatching", PE_INVALID_STATE);
     }
 
-    const size_t stackBytes = KiB(512);
-    ptr_t codeStartPtr = descriptor->img;
-    ptr_t codeEndPtr = codeStartPtr + descriptor->imgBytes - 1;
-    ptr_t dataStartPtr = codeEndPtr + 1;
-    ptr_t dataEndPtr = dataStartPtr + stackBytes - 1;
-
-    if (codeStartPtr < GDT_SEGMENT_START(r3code)) {
-        OOPS("Attempted to spawn process below its code segment", PE_UNKNOWN);
-    }
-    if (codeEndPtr > GDT_SEGMENT_END(r3code)) {
-        OOPS("Attempted to spawn process above its code segment", PE_UNKNOWN);
-    }
-    if (codeEndPtr <= codeStartPtr) {
-        OOPS("Attempted to spawn process outside its code segment", PE_UNKNOWN);
-    }
-    if (dataStartPtr < GDT_SEGMENT_START(r3data)) {
-        OOPS("Attempted to spawn process below its data segment", PE_UNKNOWN);
-    }
-    if (dataEndPtr > GDT_SEGMENT_END(r3data)) {
-        OOPS("Attempted to spawn process above its data segment", PE_UNKNOWN);
-    }
-    if (dataEndPtr <= dataStartPtr) {
-        OOPS("Attempted to spawn process outside its data segment", PE_UNKNOWN);
-    }
-    if (dataEndPtr <= codeStartPtr) {
-        OOPS("Attempted to spawn process outside its segments", PE_UNKNOWN);
-    }
-
-    addr_t relativeImgPtr = codeStartPtr - GDT_SEGMENT_START(r3code);
-    addr_t relativeEntryPtr = relativeImgPtr + descriptor->entry;
-    addr_t relativeStackPtr = dataEndPtr - GDT_SEGMENT_START(r3data);
-
-    pTab[pIndex].cpuState.esp = (uint_32)relativeStackPtr;
-    pTab[pIndex].cpuState.eip = (uint_32)relativeEntryPtr;
+    pTab[procId].cpuState.esp = (uint_32)(0 - MEM_VIRTUAL_RESERVED_KERNEL_MEM);
+    pTab[procId].cpuState.eip = (uint_32)descriptor.entryLinearAddr;
     
     pTab[procId].info.state = PS_READY;
     k_proc_schedule_didHatch(procId);

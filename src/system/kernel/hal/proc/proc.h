@@ -18,9 +18,7 @@
 #define KERNEL_PROC_ID -1
 
 struct k_proc_descriptor {
-    ptr_t img;
-    addr_t entry;
-    size_t imgBytes;
+    addr_t entryLinearAddr;
 };
 
 enum k_proc_error {
