@@ -58,7 +58,7 @@ procId_t k_proc_getCurrentId() {
 }
 
 bool k_proc_idIsUser(const procId_t procId) {
-    return procId >= 0;
+    return IN_RANGE(0, procId, MAX_PROC - 1);
 }
 
 struct k_proc_process k_proc_getInfo(const procId_t procId) {
