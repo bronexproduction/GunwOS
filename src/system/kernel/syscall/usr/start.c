@@ -108,89 +108,51 @@ enum gnwCtrlError loadElf(const ptr_t filePtr,
         OOPS("Unexpected nullptr", GCE_UNKNOWN);
     }
 
-#warning TODO BEGIN
-
-
-
-        /*
-            Allocate memory
-        */
-
-        /*
-            Switch to the new process page table (?)
-        */
-
-        /*
-            Load executable
-        */
-
-        /*
-            Revert to old page table (?)
-        */
-
-
-
-
-
-
-
-    addr_t vMemLow;
-    *memBytes = elfAllocBytes(filePtr, fileSizeBytes, &vMemLow);
-    if (!*memBytes) {
-        return GCE_HEADER_INVALID;
-    }
-    addr_t vMemHigh = vMemLow + *memBytes - 1;
-    if (vMemHigh <= vMemLow) {
-        return GCE_HEADER_INVALID;
-    }
-
-    #warning allocate if possible
-    #warning check memory limits
-    #warning how to handle section flags?
-
-    memzero(destPtr, *memBytes);
     for (size_t index = 0; index < elfGetSectionHeaderEntryCount(filePtr); ++index) {
-        const struct elfSectionHeaderEntry32 * const entry = elfGetSectionHeaderEntry(filePtr, index, fileSizeBytes); 
-        if (!entry) {
+        const struct elfSectionHeaderEntry32 * const sectionHeaderEntry = elfGetSectionHeaderEntry(filePtr, index, fileSizeBytes); 
+        if (!sectionHeaderEntry) {
             OOPS("Unexpected nullptr", GCE_UNKNOWN);
         }
-        if (!(entry->attributes & ESECATTR_ALLOC &&
-              entry->type == ESECTYPE_PROGBITS)) {
+        if (!(sectionHeaderEntry->attributes & ESECATTR_ALLOC)) {
             continue;
         }
 
-        addr_t sectionVMemLow = (addr_t)entry->virtualAddr;
-        addr_t sectionVMemHigh = sectionVMemLow + entry->fileSizeBytes - 1;
         /*
-            Verify memory constraints
+            Assign memory for ALLOC section
         */
-        if (sectionVMemHigh < sectionVMemLow ||
-            sectionVMemLow < vMemLow ||
-            sectionVMemHigh > vMemHigh) {
-            return GCE_HEADER_INVALID;
+
+        enum k_mem_error err = k_mem_gimme(procId,
+                                           (ptr_t)sectionHeaderEntry->virtualAddr,
+                                           sectionHeaderEntry->entrySizeBytes);
+        if (err != ME_NONE) {
+            OOPS("Memory assignment error", GCE_UNKNOWN);
         }
-        /*
-            Verify file constraints
-        */
-        if (entry->offset >= fileSizeBytes ||
-            entry->fileSizeBytes > (fileSizeBytes - entry->offset)) {
-            return GCE_HEADER_INVALID;
+        err = k_mem_zero(procId,
+                         (ptr_t)sectionHeaderEntry->virtualAddr,
+                         sectionHeaderEntry->entrySizeBytes);
+        if (err != ME_NONE) {
+            OOPS("Memory purification error", GCE_UNKNOWN);
         }
 
-        addr_t relVMemAddr = sectionVMemLow - vMemLow;
-        memcopy(filePtr + entry->offset, 
-                destPtr + relVMemAddr, 
-                entry->fileSizeBytes);
+        if (sectionHeaderEntry->type != ESECTYPE_PROGBITS) {
+            continue;
+        }
+
+        /*
+            Copy data for PROGBITS section
+        */
+
+        err = k_mem_copy(KERNEL_PROC_ID,
+                         filePtr + sectionHeaderEntry->offset,
+                         procId,
+                         (ptr_t)sectionHeaderEntry->virtualAddr,
+                         sectionHeaderEntry->fileSizeBytes);
+        if (err != ME_NONE) {
+            OOPS("Memory copying error", GCE_UNKNOWN);
+        }
     }
 
-    *entry = elfGetEntry(filePtr);
-    if (*entry < vMemLow || vMemHigh < *entry) {
-        return GCE_HEADER_INVALID;
-    }
-    *entry -= vMemLow;
-
-#warning TODO END
-
+    *entry = elfGetEntry(filePtr, fileSizeBytes);
     return GCE_NONE;
 }
 

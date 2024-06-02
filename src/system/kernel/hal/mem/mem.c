@@ -11,16 +11,13 @@
 #include <hal/paging/paging.h>
 #include <error/panic.h>
 
-struct k_mem_zone {
+/*__attribute__((deprecated))*/ struct k_mem_zone {
     ptr_t startPtr;
     ptr_t endPtr;
     size_t sizeBytes;
 };
 
-void k_mem_init() {
-}
-
-static struct k_mem_zone zoneForProc(const procId_t procId) {
+/*__attribute__((deprecated))*/ static struct k_mem_zone zoneForProc(const procId_t procId) {
     struct k_proc_process proc = k_proc_getInfo(procId);
     struct k_mem_zone result;
     memzero(&result, sizeof(struct k_mem_zone));
@@ -47,14 +44,7 @@ static struct k_mem_zone zoneForProc(const procId_t procId) {
     return result;
 }
 
-ptr_t k_mem_physicalToLinear(const ptr_t physAddr) {
-    if ((addr_t)physAddr >= MEM_VIRTUAL_RESERVED_KERNEL_MEM) {
-        OOPS("Kernel address out of range", nullptr);
-    }
-    return (ptr_t)(MEM_CONV_PTL(physAddr));
-}
-
-ptr_t k_mem_absForProc(const procId_t procId, const ptr_t relPtr) {
+/*__attribute__((deprecated))*/ ptr_t k_mem_absForProc(const procId_t procId, const ptr_t relPtr) {
     if (!relPtr) {
         OOPS("Invalid pointer", nullptr);
     }
@@ -62,7 +52,7 @@ ptr_t k_mem_absForProc(const procId_t procId, const ptr_t relPtr) {
     return relPtr + (addr_t)zoneForProc(procId).startPtr;
 }
 
-bool k_mem_bufInZoneForProc(const procId_t procId, const ptr_t absPtr, const size_t bufSize) {
+/*__attribute__((deprecated))*/ bool k_mem_bufInZoneForProc(const procId_t procId, const ptr_t absPtr, const size_t bufSize) {
     // check buffer bounds
     // there might be a better way to do it
     // but will do, at least until virtual memory gets implemented
@@ -79,13 +69,40 @@ bool k_mem_bufInZoneForProc(const procId_t procId, const ptr_t absPtr, const siz
     return true;
 }
 
-void k_mem_procCleanup(const procId_t procId) {
-    #warning NOTHING TO BE DONE YET
+void k_mem_init() {
 }
 
-/*
-    Returns the amount of free (allocable) memory (aligned to pages)
-*/
+ptr_t k_mem_physicalToLinear(const ptr_t physAddr) {
+    if ((addr_t)physAddr >= MEM_VIRTUAL_RESERVED_KERNEL_MEM) {
+        OOPS("Kernel address out of range", nullptr);
+    }
+    return (ptr_t)(MEM_CONV_PTL(physAddr));
+}
+
 size_t k_mem_getFreeBytes() {
     return k_paging_getFreePages() * MEM_PAGE_SIZE_BYTES;
+}
+
+enum k_mem_error k_mem_gimme(const procId_t procId,
+                             const ptr_t vPtr,
+                             const size_t sizeBytes) {
+    return ME_UNKNOWN;
+}
+
+enum k_mem_error k_mem_zero(const procId_t procId,
+                            const ptr_t vPtr,
+                            const size_t sizeBytes) {
+    return ME_UNKNOWN;
+}
+
+enum k_mem_error k_mem_copy(const procId_t srcProcId,
+                            const ptr_t srcVPtr,
+                            const procId_t dstProcId,
+                            const ptr_t dstVPtr,
+                            const size_t sizeBytes) {
+    return ME_UNKNOWN;
+}
+
+void k_mem_procCleanup(const procId_t procId) {
+    #warning NOTHING TO BE DONE YET
 }
