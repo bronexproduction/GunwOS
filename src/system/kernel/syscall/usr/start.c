@@ -44,7 +44,7 @@ enum gnwCtrlError loadFile(const char * const pathPtr,
     if (!filePtr) {
         OOPS("Unexpected nullptr", GCE_UNKNOWN);
     }
-    if (fileSizeBytesPtr) {
+    if (!fileSizeBytesPtr) {
         OOPS("Unexpected nullptr", GCE_UNKNOWN);
     }
 
@@ -108,7 +108,8 @@ enum gnwCtrlError loadElf(const ptr_t filePtr,
         OOPS("Unexpected nullptr", GCE_UNKNOWN);
     }
 
-    for (size_t index = 0; index < elfGetSectionHeaderEntryCount(filePtr); ++index) {
+    const size_t sectionHeaderEntryCount = elfGetSectionHeaderEntryCount(filePtr);
+    for (size_t index = 0; index < sectionHeaderEntryCount; ++index) {
         const struct elfSectionHeaderEntry32 * const sectionHeaderEntry = elfGetSectionHeaderEntry(filePtr, index, fileSizeBytes); 
         if (!sectionHeaderEntry) {
             OOPS("Unexpected nullptr", GCE_UNKNOWN);
@@ -123,13 +124,13 @@ enum gnwCtrlError loadElf(const ptr_t filePtr,
 
         enum k_mem_error err = k_mem_gimme(procId,
                                            (ptr_t)sectionHeaderEntry->virtualAddr,
-                                           sectionHeaderEntry->entrySizeBytes);
+                                           sectionHeaderEntry->fileSizeBytes);
         if (err != ME_NONE) {
             OOPS("Memory assignment error", GCE_UNKNOWN);
         }
         err = k_mem_zero(procId,
                          (ptr_t)sectionHeaderEntry->virtualAddr,
-                         sectionHeaderEntry->entrySizeBytes);
+                         sectionHeaderEntry->fileSizeBytes);
         if (err != ME_NONE) {
             OOPS("Memory purification error", GCE_UNKNOWN);
         }
