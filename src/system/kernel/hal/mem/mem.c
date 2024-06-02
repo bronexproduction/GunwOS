@@ -86,6 +86,28 @@ size_t k_mem_getFreeBytes() {
 enum k_mem_error k_mem_gimme(const procId_t procId,
                              const ptr_t vPtr,
                              const size_t sizeBytes) {
+    if (!k_proc_idIsUser(procId)) {
+        return ME_INVALID_ARGUMENT;
+    }
+    
+    size_t vEnd = vPtr + sizeBytes;
+    if (vEnd <= vPtr) {
+        return ME_INVALID_ARGUMENT;
+    }
+    if (vEnd > -MEM_VIRTUAL_RESERVED_KERNEL_MEM) {
+        return ME_INVALID_ARGUMENT;
+    }
+
+#warning check overlap
+
+    for (size_t page = MEM_PAGEOF((addr_t)vPtr); page < MEM_PAGEOF((addr_t)aligned(vEnd, MEM_PAGE_SIZE_BYTES)); ++page) {
+        /*
+            Assign page to the process
+        */
+    }
+
+#warning TODO
+
     return ME_UNKNOWN;
 }
 
@@ -104,5 +126,5 @@ enum k_mem_error k_mem_copy(const procId_t srcProcId,
 }
 
 void k_mem_procCleanup(const procId_t procId) {
-    #warning NOTHING TO BE DONE YET
+    #warning Pages?
 }
