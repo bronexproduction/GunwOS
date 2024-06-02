@@ -89,26 +89,19 @@ enum k_mem_error k_mem_gimme(const procId_t procId,
     if (!k_proc_idIsUser(procId)) {
         return ME_INVALID_ARGUMENT;
     }
-    
-    size_t vEnd = vPtr + sizeBytes;
+
+    ptr_t vEnd = vPtr + sizeBytes;
     if (vEnd <= vPtr) {
         return ME_INVALID_ARGUMENT;
     }
-    if (vEnd > -MEM_VIRTUAL_RESERVED_KERNEL_MEM) {
+    if ((addr_t)vEnd > ((addr_t)0 - MEM_VIRTUAL_RESERVED_KERNEL_MEM)) {
         return ME_INVALID_ARGUMENT;
     }
 
-#warning check overlap
+    size_t startPage = MEM_PAGEOF((addr_t)vPtr);
+    size_t pageCount = MEM_PAGEOF((addr_t)aligned((addr_t)vEnd, MEM_PAGE_SIZE_BYTES)) - startPage;
 
-    for (size_t page = MEM_PAGEOF((addr_t)vPtr); page < MEM_PAGEOF((addr_t)aligned(vEnd, MEM_PAGE_SIZE_BYTES)); ++page) {
-        /*
-            Assign page to the process
-        */
-    }
-
-#warning TODO
-
-    return ME_UNKNOWN;
+    return k_paging_assign(procId, startPage, pageCount);
 }
 
 enum k_mem_error k_mem_zero(const procId_t procId,
@@ -126,5 +119,5 @@ enum k_mem_error k_mem_copy(const procId_t srcProcId,
 }
 
 void k_mem_procCleanup(const procId_t procId) {
-    #warning Pages?
+    k_paging_procCleanup(procId);
 }

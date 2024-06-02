@@ -35,9 +35,15 @@
 /*
     Virtual memory
 */
+#define MEM_MAX_VIRTUAL_PAGE_COUNT                      (MEM_MAX_PHYSICAL_PAGE_COUNT)
 #define MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT    (MEM_VIRTUAL_RESERVED_KERNEL_MEM / MEM_SPACE_PER_DIR_ENTRY)
 #define MEM_VIRTUAL_USER_MAX_PAGE_TABLE_COUNT           (MEM_MAX_DIR_ENTRY - MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT)
 #define MEM_VIRTUAL_USER_PAGE_TABLE_COUNT               MEM_PHYSICAL_PAGE_TABLE_COUNT
+
+/*
+    Helper macros
+*/
+#define MEM_DIROF(PAGE)                                 ((PAGE) / (MEM_MAX_PAGE_ENTRY))
 
 _Static_assert(!(MEM_PHYSICAL_ADDRESSABLE_MEM % MEM_SPACE_PER_DIR_ENTRY), "MEM_PHYSICAL_ADDRESSABLE_MEM not aligned to addressable space unit");
 _Static_assert(!(MEM_VIRTUAL_RESERVED_KERNEL_MEM % MEM_SPACE_PER_DIR_ENTRY), "MEM_VIRTUAL_RESERVED_KERNEL_MEM not aligned to addressable space unit");
@@ -62,11 +68,13 @@ struct __attribute__((packed)) virtual_pages_reserved_t {
     struct virtual_page_specifier_t kernel[MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT];
 } reserved;
 
-struct {
-    struct __attribute__((packed, aligned(MEM_PAGE_SIZE_BYTES))) {
-        struct virtual_page_specifier_t user[MEM_VIRTUAL_USER_MAX_PAGE_TABLE_COUNT];
-        struct virtual_pages_reserved_t reserved;
-    } pageDirectory;
+struct __attribute__((packed)) virtual_page_directory_t {
+    struct virtual_page_specifier_t user[MEM_VIRTUAL_USER_MAX_PAGE_TABLE_COUNT];
+    struct virtual_pages_reserved_t reserved;
+};
+
+struct __attribute__((packed)) virtual_pages_process_t {
+    __attribute__((aligned(MEM_PAGE_SIZE_BYTES))) struct virtual_page_directory_t pageDirectory;
     __attribute__((aligned(MEM_PAGE_SIZE_BYTES))) virtual_page_table_t pageTables[MEM_VIRTUAL_USER_PAGE_TABLE_COUNT];
 } pagingInfo[MAX_PROC];
 
@@ -77,6 +85,37 @@ struct __attribute__((packed)) physical_page_info_t {
     bool available  :1; // Available (non-reserved) physical RAM
     bool free       :1; // Free
 } physicalPages[MEM_PHYSICAL_PAGE_COUNT];
+
+size_t k_paging_getFreePages() {
+    size_t freePages = 0;
+    for (size_t page = 0; page < MEM_PHYSICAL_PAGE_COUNT; ++page) {
+        if (physicalPages[page].free) {
+            ++freePages;
+        }
+    }
+
+    return freePages;
+}
+
+virtual_page_table_t * getFreeTable(const procId_t procId) {
+#warning TODO
+    return nullptr;
+}
+
+void assignDirEntry(struct virtual_page_specifier_t * dirEntryPtr,
+                    const virtual_page_table_t * pageTablePtr,
+                    const bool user) {
+    
+    addr_t frameAddr = ((addr_t)pageTablePtr) >> 12;
+    if ((frameAddr << 12) != (addr_t)pageTablePtr) {
+        OOPS("Unexpected page table address",);
+    }
+
+    dirEntryPtr->frameAddress = frameAddr;
+    dirEntryPtr->present = true;
+    dirEntryPtr->writable = true;
+    dirEntryPtr->user = user;
+}
 
 void k_paging_prepare() {
     /*
@@ -98,27 +137,31 @@ void k_paging_prepare() {
     }
 
     /*
-        Initialize paging info
+        Initialize paging info for each process
     */
-    for (size_t proc = 0; proc < MAX_PROC; ++proc) {
-        struct virtual_page_specifier_t * kernelDir = pagingInfo[proc].pageDirectory.reserved.kernel;
-
+    for (size_t procId = 0; procId < MAX_PROC; ++procId) {
         /*
-            Clear user pages
+            Initialize kernel directory entries
         */
+        struct virtual_page_specifier_t * kernelDir = pagingInfo[procId].pageDirectory.reserved.kernel;
 
         for (size_t dirEntryIndex = 0; dirEntryIndex < MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT; ++dirEntryIndex) {
-            struct virtual_page_specifier_t * dirEntry = &kernelDir[dirEntryIndex];
-
-            dirEntry->frameAddress = (addr_t)&kernelPageTables[dirEntryIndex] >> 12;
-            dirEntry->present = true;
-            dirEntry->writable = true;
-            dirEntry->user = false;
+            assignDirEntry(&kernelDir[dirEntryIndex], &kernelPageTables[dirEntryIndex], false);
         }
+
+        /*
+            Clear user directory entries
+        */
+        memzero(&pagingInfo[procId].pageDirectory.user, sizeof(struct virtual_page_specifier_t) * MEM_VIRTUAL_USER_MAX_PAGE_TABLE_COUNT);
+
+        /*
+            Clear user page tables
+        */
+        memzero(&pagingInfo[procId].pageTables, sizeof(virtual_page_table_t) * MEM_VIRTUAL_USER_PAGE_TABLE_COUNT);
     }
 
     /*
-        Temporary 1:1 mapping
+        Set up temporary 1:1 mapping
     */
     memcopy(&pagingInfo[0].pageDirectory.reserved.kernel, 
             &pagingInfo[0].pageDirectory, 
@@ -253,13 +296,90 @@ void k_paging_init(const struct k_krn_memMapEntry *memMap) {
     initializePhysicalMemoryMap(memMap);
 }
 
-size_t k_paging_getFreePages() {
-    size_t freePages = 0;
-    for (size_t page = 0; page < MEM_PHYSICAL_PAGE_COUNT; ++page) {
-        if (physicalPages[page].free) {
-            ++freePages;
+enum k_mem_error k_paging_assign(const procId_t procId,
+                                 const size_t startPage,
+                                 const size_t pageCount) {
+    if (!k_proc_idIsUser(procId)) {
+        return ME_INVALID_ARGUMENT;
+    }
+    if (!pageCount) {
+        return ME_INVALID_ARGUMENT;
+    }
+    if (startPage >= MEM_MAX_VIRTUAL_PAGE_COUNT ||
+        pageCount >= MEM_MAX_VIRTUAL_PAGE_COUNT ||
+        (startPage + pageCount) >= MEM_MAX_VIRTUAL_PAGE_COUNT) {
+        return ME_INVALID_ARGUMENT;
+    }
+
+    bool newPages = false;
+    bool overlap = false;
+    for (size_t page = startPage; page < startPage + pageCount; ++page) {
+        size_t dirIndex = MEM_DIROF(page);
+        if (dirIndex >= MEM_VIRTUAL_USER_MAX_PAGE_TABLE_COUNT) {
+            return ME_UNAVAILABLE;
+        }
+        
+        struct virtual_page_specifier_t * dirEntry = &pagingInfo[procId].pageDirectory.user[dirIndex];
+
+        /*
+            Check if directory entry for given address exists
+        */
+        if (!dirEntry->present) {
+
+            /*
+                Check for free page tables
+            */
+            const virtual_page_table_t * pageTable = getFreeTable(procId);
+            if (!pageTable) {
+                return ME_OUT_OF_PAGES;
+            }
+
+            /*
+                Assign free page table to directory entry
+            */
+            assignDirEntry(dirEntry, pageTable, true);
+        } else if (!dirEntry->user) {
+            return ME_UNAVAILABLE;
+        }
+
+        #warning TODO
+        struct virtual_page_specifier_t * pageEntry = nullptr;
+        if (!pageEntry) {
+            OOPS("Unexpected page entry nullptr", ME_UNKNOWN);
+        }
+
+        /*
+            Check if requested page is assignable
+        */
+        if (!pageEntry->present) {
+
+        #warning TODO
+            /*
+                Page not assigned
+            */
+
+            /*
+                Check for free physical pages
+            */
+
+            /*
+                If no physical pages available - return error
+            */
+
+            /*
+                Assign virtual page to free physical page
+            */
+        } else if (pageEntry->user) {
+            overlap = true;
+            continue;
+        } else {
+            return ME_UNAVAILABLE;
         }
     }
 
-    return freePages;
+    return overlap ? newPages ? ME_PART_ALREADY_ASSIGNED : ME_ALREADY_ASSIGNED : ME_UNKNOWN;
+}
+
+void k_paging_procCleanup(const procId_t procId) {
+#warning TODO
 }
