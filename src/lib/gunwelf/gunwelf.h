@@ -166,11 +166,6 @@ bool elfValidate(const ptr_t filePtr,
                  const struct elfExpectation * const expectation);
 
 /*
-    Returns required memory size to allocate the binary
-*/
-size_t elfAllocBytes(const ptr_t filePtr, const size_t fileSizeBytes, addr_t * const virtualMemoryLowAddr);
-
-/*
     Returns the number of section header entries
 */
 size_t elfGetSectionHeaderEntryCount(const ptr_t filePtr);
@@ -183,6 +178,6 @@ struct elfSectionHeaderEntry32 * elfGetSectionHeaderEntry(const ptr_t filePtr, c
 /*
     Returns the entry point address
 */
-addr_t elfGetEntry(const ptr_t filePtr);
+addr_t elfGetEntry(const ptr_t filePtr, const size_t fileSizeBytes);
 
 #endif // GUNWELF_H
