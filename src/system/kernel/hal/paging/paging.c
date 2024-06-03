@@ -6,85 +6,21 @@
 //
 
 #include "paging.h"
+#include "data.h"
 
 #include <types.h>
 #include <utils.h>
 #include <mem.h>
 #include <hal/cpu/cpu.h>
-#include <hal/mem/mem.h>
 #include <hal/proc/proc.h>
 #include <error/panic.h>
 
 #include <string.h>
 #include <log/log.h>
 
-/*
-    Hardware constraints
-*/
-#define MEM_MAX_DIR_ENTRY                               (1 << 10)
-#define MEM_MAX_PAGE_ENTRY                              (1 << 10)
-#define MEM_SPACE_PER_DIR_ENTRY                         (MEM_PAGE_SIZE_BYTES * MEM_MAX_PAGE_ENTRY)
-
-/*
-    Physical memory
-*/
-#define MEM_MAX_PHYSICAL_PAGE_COUNT                     (MEM_MAX_DIR_ENTRY * MEM_MAX_PAGE_ENTRY)
-#define MEM_PHYSICAL_PAGE_COUNT                         (MEM_PHYSICAL_ADDRESSABLE_MEM / MEM_PAGE_SIZE_BYTES)
-#define MEM_PHYSICAL_PAGE_TABLE_COUNT                   (MEM_PHYSICAL_ADDRESSABLE_MEM / MEM_SPACE_PER_DIR_ENTRY)
-
-/*
-    Virtual memory
-*/
-#define MEM_MAX_VIRTUAL_PAGE_COUNT                      (MEM_MAX_PHYSICAL_PAGE_COUNT)
-#define MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT    (MEM_VIRTUAL_RESERVED_KERNEL_MEM / MEM_SPACE_PER_DIR_ENTRY)
-#define MEM_VIRTUAL_USER_MAX_PAGE_TABLE_COUNT           (MEM_MAX_DIR_ENTRY - MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT)
-#define MEM_VIRTUAL_USER_PAGE_TABLE_COUNT               MEM_PHYSICAL_PAGE_TABLE_COUNT
-
-/*
-    Helper macros
-*/
-#define MEM_DIROF(PAGE)                                 ((PAGE) / (MEM_MAX_PAGE_ENTRY))
-
-_Static_assert(!(MEM_PHYSICAL_ADDRESSABLE_MEM % MEM_SPACE_PER_DIR_ENTRY), "MEM_PHYSICAL_ADDRESSABLE_MEM not aligned to addressable space unit");
-_Static_assert(!(MEM_VIRTUAL_RESERVED_KERNEL_MEM % MEM_SPACE_PER_DIR_ENTRY), "MEM_VIRTUAL_RESERVED_KERNEL_MEM not aligned to addressable space unit");
-_Static_assert(MEM_PHYSICAL_PAGE_TABLE_COUNT <= MEM_MAX_DIR_ENTRY, "MEM_PHYSICAL_PAGE_TABLE_COUNT exceeds MEM_MAX_DIR_ENTRY");
-_Static_assert(MEM_PAGE_SIZE_BYTES >= 2, "MEM_PAGE_SIZE_BYTES cannot be less than 2");
-
-#define CR0_PAGING_ENABLE_BIT 0x80000000
-
-typedef struct __attribute__((packed)) virtual_page_specifier_t {
-    bool present            :1;
-    bool writable           :1;
-    bool user               :1;
-    uint_8 _reserved1       :2;
-    bool accessed           :1;
-    bool dirty              :1;
-    uint_8 _reserved0       :2;
-    uint_8 _unused          :3;
-    uint_32 frameAddress    :20;
-} virtual_page_table_t[MEM_MAX_PAGE_ENTRY];
-
-struct __attribute__((packed)) virtual_pages_reserved_t {
-    struct virtual_page_specifier_t kernel[MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT];
-} reserved;
-
-struct __attribute__((packed)) virtual_page_directory_t {
-    struct virtual_page_specifier_t user[MEM_VIRTUAL_USER_MAX_PAGE_TABLE_COUNT];
-    struct virtual_pages_reserved_t reserved;
-};
-
-struct __attribute__((packed)) virtual_pages_process_t {
-    __attribute__((aligned(MEM_PAGE_SIZE_BYTES))) struct virtual_page_directory_t pageDirectory;
-    __attribute__((aligned(MEM_PAGE_SIZE_BYTES))) virtual_page_table_t pageTables[MEM_VIRTUAL_USER_PAGE_TABLE_COUNT];
-} pagingInfo[MAX_PROC];
-
+static physical_page_table_t physicalPages;
+static process_page_tables_t processPageTables;
 static __attribute__((aligned(MEM_PAGE_SIZE_BYTES))) virtual_page_table_t kernelPageTables[MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT];
-
-struct __attribute__((packed)) physical_page_info_t {
-    bool present    :1; // Installed physical RAM
-    bool available  :1; // Available (non-reserved) physical RAM
-    bool free       :1; // Free
-} physicalPages[MEM_PHYSICAL_PAGE_COUNT];
 
 size_t k_paging_getFreePages() {
     size_t freePages = 0;
@@ -143,7 +79,7 @@ void k_paging_prepare() {
         /*
             Initialize kernel directory entries
         */
-        struct virtual_page_specifier_t * kernelDir = pagingInfo[procId].pageDirectory.reserved.kernel;
+        struct virtual_page_specifier_t * kernelDir = processPageTables[procId].pageDirectory.kernel;
 
         for (size_t dirEntryIndex = 0; dirEntryIndex < MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT; ++dirEntryIndex) {
             assignDirEntry(&kernelDir[dirEntryIndex], &kernelPageTables[dirEntryIndex], false);
@@ -152,20 +88,20 @@ void k_paging_prepare() {
         /*
             Clear user directory entries
         */
-        memzero(&pagingInfo[procId].pageDirectory.user, sizeof(struct virtual_page_specifier_t) * MEM_VIRTUAL_USER_MAX_PAGE_TABLE_COUNT);
+        memzero(&processPageTables[procId].pageDirectory.user, sizeof(struct virtual_page_specifier_t) * MEM_VIRTUAL_USER_MAX_PAGE_TABLE_COUNT);
 
         /*
             Clear user page tables
         */
-        memzero(&pagingInfo[procId].pageTables, sizeof(virtual_page_table_t) * MEM_VIRTUAL_USER_PAGE_TABLE_COUNT);
+        memzero(&processPageTables[procId].pageTables, sizeof(virtual_page_table_t) * MEM_VIRTUAL_USER_PAGE_TABLE_COUNT);
     }
 
     /*
         Set up temporary 1:1 mapping
     */
-    memcopy(&pagingInfo[0].pageDirectory.reserved.kernel, 
-            &pagingInfo[0].pageDirectory, 
-            sizeof(struct virtual_pages_reserved_t));
+    memcopy(&processPageTables[0].pageDirectory.kernel, 
+            &processPageTables[0].pageDirectory, 
+            sizeof(processPageTables->pageDirectory.kernel));
 }
 
 __attribute__((naked)) void k_paging_start() {
@@ -173,7 +109,7 @@ __attribute__((naked)) void k_paging_start() {
     extern addr_t k_paging_start_end;
     ptr_t pagingEndJmp = (ptr_t)&k_paging_start_end - MEM_VIRTUAL_RESERVED_KERNEL_MEM;
 
-    __asm__ volatile ("mov %0, %%cr3" : : "a" (&(pagingInfo[0].pageDirectory)));
+    __asm__ volatile ("mov %0, %%cr3" : : "a" (&(processPageTables[0].pageDirectory)));
     __asm__ volatile ("mov %cr0, %eax");
     __asm__ volatile ("or $" STR(CR0_PAGING_ENABLE_BIT) ", %eax");
     __asm__ volatile ("mov %eax, %cr0");
@@ -242,7 +178,7 @@ static void initializePhysicalMemoryMap(const struct k_krn_memMapEntry *memMap) 
             */
             const bool reserved = (page * MEM_PAGE_SIZE_BYTES) < MEM_VIRTUAL_RESERVED_KERNEL_MEM;
 
-            struct physical_page_info_t * entry = &physicalPages[page];
+            struct physical_page_specifier_t * entry = &physicalPages[page];
             entry->present = true;
             entry->available = usable;
             entry->free = entry->available && !reserved;
@@ -284,8 +220,8 @@ void k_paging_init(const struct k_krn_memMapEntry *memMap) {
     /*
         Remove 1:1 mapping
     */
-    memzero(&pagingInfo[0].pageDirectory,
-            sizeof(struct virtual_pages_reserved_t));
+    memzero(&processPageTables[0].pageDirectory,
+            sizeof(processPageTables->pageDirectory.kernel));
 
     /*
         Reload paging tables
@@ -319,7 +255,7 @@ enum k_mem_error k_paging_assign(const procId_t procId,
             return ME_UNAVAILABLE;
         }
         
-        struct virtual_page_specifier_t * dirEntry = &pagingInfo[procId].pageDirectory.user[dirIndex];
+        struct virtual_page_specifier_t * dirEntry = &processPageTables[procId].pageDirectory.user[dirIndex];
 
         /*
             Check if directory entry for given address exists
