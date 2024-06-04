@@ -45,6 +45,7 @@ _Static_assert(!(MEM_PHYSICAL_ADDRESSABLE_MEM % MEM_SPACE_PER_DIR_ENTRY), "MEM_P
 _Static_assert(!(MEM_VIRTUAL_RESERVED_KERNEL_MEM % MEM_SPACE_PER_DIR_ENTRY), "MEM_VIRTUAL_RESERVED_KERNEL_MEM not aligned to addressable space unit");
 _Static_assert(MEM_PHYSICAL_PAGE_TABLE_COUNT <= MEM_MAX_DIR_ENTRY, "MEM_PHYSICAL_PAGE_TABLE_COUNT exceeds MEM_MAX_DIR_ENTRY");
 _Static_assert(MEM_PAGE_SIZE_BYTES >= 2, "MEM_PAGE_SIZE_BYTES cannot be less than 2");
+_Static_assert(MEM_VIRTUAL_USER_MAX_PAGE_TABLE_COUNT + MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT == MEM_MAX_DIR_ENTRY, "User and reserved pages count not equal MEM_MAX_VIRTUAL_PAGE_COUNT");
 
 #define CR0_PAGING_ENABLE_BIT 0x80000000
 
@@ -70,13 +71,16 @@ typedef struct __attribute__((packed)) physical_page_specifier_t {
     bool free       :1; // Free
 } physical_page_table_t[MEM_PHYSICAL_PAGE_COUNT];
 
-struct __attribute__((packed)) virtual_page_directory_t {
-    struct virtual_page_specifier_t user[MEM_VIRTUAL_USER_MAX_PAGE_TABLE_COUNT];
-    struct virtual_page_specifier_t kernel[MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT];
+union __attribute__((packed)) virtual_page_directory_t {
+    struct __attribute__((packed)) {
+        struct virtual_page_specifier_t user[MEM_VIRTUAL_USER_MAX_PAGE_TABLE_COUNT];
+        struct virtual_page_specifier_t kernel[MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT];
+    } byArea;
+    struct virtual_page_specifier_t flat[MEM_MAX_DIR_ENTRY];
 };
 
 typedef struct __attribute__((packed)) process_paging_info_t {
-    __attribute__((aligned(MEM_PAGE_SIZE_BYTES))) struct virtual_page_directory_t pageDirectory;
+    __attribute__((aligned(MEM_PAGE_SIZE_BYTES))) union virtual_page_directory_t pageDirectory;
     __attribute__((aligned(MEM_PAGE_SIZE_BYTES))) virtual_page_table_t pageTables[MEM_VIRTUAL_USER_PAGE_TABLE_COUNT];
     __attribute__((aligned(MEM_PAGE_SIZE_BYTES))) struct virtual_page_table_specifier_t pageTableInfo[MEM_VIRTUAL_USER_PAGE_TABLE_COUNT];
 } process_page_tables_t[MAX_PROC];

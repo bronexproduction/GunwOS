@@ -36,6 +36,7 @@ void getFreeTable(const procId_t procId,
         if (!processPageTables[procId].pageTableInfo[table].used) {
             *pageTable = &processPageTables[procId].pageTables[table];
             *pageTableSpecifier = &processPageTables[procId].pageTableInfo[table];
+            return;
         }
     }
 
@@ -44,17 +45,34 @@ void getFreeTable(const procId_t procId,
 }
 
 static struct virtual_page_specifier_t * getPageSpecifier(const procId_t procId, const size_t page) {
+    if (!k_proc_idIsUser(procId)) {
+        OOPS("Illegal process ID", nullptr);
+    }
     if (page >= MEM_MAX_VIRTUAL_PAGE_COUNT) {
         OOPS("Illegal page number", nullptr);
     }
 
+    virtual_page_table_t * const pageTable = (virtual_page_table_t *)(processPageTables[procId].pageDirectory.flat[MEM_DIROF(page)].frameAddress << 12);
+    if (!pageTable) {
+        return nullptr;
+    }
 
-#warning TODO
-    return nullptr;
+    return &(*pageTable)[MEM_PAGEOF(page)];
 }
 
 static enum k_mem_error getFreePhysicalPage(size_t * const pageIndexPtr) {
-#warning TODO
+    if (!pageIndexPtr) {
+        OOPS("Nullptr", ME_UNKNOWN);
+    }
+
+    for (size_t page = 0; page < MEM_PHYSICAL_PAGE_COUNT; ++page) {
+        const struct physical_page_specifier_t * const pageInfo = &physicalPages[page];
+        if (pageInfo->free) {
+            *pageIndexPtr = page;
+            return ME_NONE;
+        }
+    }
+
     return ME_OUT_OF_MEMORY;
 }
 
@@ -71,7 +89,7 @@ static void assignDirEntry(struct virtual_page_specifier_t * const dirEntryPtr,
     
     addr_t frameAddr = ((addr_t)pageTablePtr) >> 12;
     if ((frameAddr << 12) != (addr_t)pageTablePtr) {
-        OOPS("Unexpected page table address",);
+        OOPS("Invalid page table alignment",);
     }
 
     dirEntryPtr->frameAddress = frameAddr;
@@ -221,7 +239,7 @@ void k_paging_prepare() {
         /*
             Initialize kernel directory entries
         */
-        struct virtual_page_specifier_t * kernelDir = processPageTables[procId].pageDirectory.kernel;
+        struct virtual_page_specifier_t * kernelDir = processPageTables[procId].pageDirectory.byArea.kernel;
 
         for (size_t dirEntryIndex = 0; dirEntryIndex < MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT; ++dirEntryIndex) {
             assignDirEntry(&kernelDir[dirEntryIndex], &kernelPageTables[dirEntryIndex], nullptr, false);
@@ -231,9 +249,9 @@ void k_paging_prepare() {
     /*
         Set up temporary 1:1 mapping
     */
-    memcopy(&processPageTables[0].pageDirectory.kernel, 
+    memcopy(&processPageTables[0].pageDirectory.byArea.kernel, 
             &processPageTables[0].pageDirectory, 
-            sizeof(processPageTables->pageDirectory.kernel));
+            sizeof(processPageTables->pageDirectory.byArea.kernel));
 }
 
 __attribute__((naked)) void k_paging_start() {
@@ -259,7 +277,7 @@ void k_paging_init(const struct k_krn_memMapEntry *memMap) {
         Remove 1:1 mapping
     */
     memzero(&processPageTables[0].pageDirectory,
-            sizeof(processPageTables->pageDirectory.kernel));
+            sizeof(processPageTables->pageDirectory.byArea.kernel));
 
     /*
         Reload paging tables
@@ -293,7 +311,7 @@ enum k_mem_error k_paging_assign(const procId_t procId,
             return ME_UNAVAILABLE;
         }
         
-        struct virtual_page_specifier_t * dirEntry = &processPageTables[procId].pageDirectory.user[dirIndex];
+        struct virtual_page_specifier_t * dirEntry = &processPageTables[procId].pageDirectory.byArea.user[dirIndex];
 
         /*
             Check dir entry
