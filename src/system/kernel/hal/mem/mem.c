@@ -98,8 +98,8 @@ enum k_mem_error k_mem_gimme(const procId_t procId,
         return ME_INVALID_ARGUMENT;
     }
 
-    size_t startPage = MEM_PAGEOF((addr_t)vPtr);
-    size_t pageCount = MEM_PAGEOF((addr_t)aligned((addr_t)vEnd, MEM_PAGE_SIZE_BYTES)) - startPage;
+    size_t startPage = MEM_PAGE_OF_ADDR((addr_t)vPtr);
+    size_t pageCount = MEM_PAGE_OF_ADDR((addr_t)aligned((addr_t)vEnd, MEM_PAGE_SIZE_BYTES)) - startPage;
 
     return k_paging_assign(procId, startPage, pageCount);
 }
@@ -107,6 +107,7 @@ enum k_mem_error k_mem_gimme(const procId_t procId,
 enum k_mem_error k_mem_zero(const procId_t procId,
                             const ptr_t vPtr,
                             const size_t sizeBytes) {
+#warning TODO
     return ME_UNKNOWN;
 }
 
@@ -115,6 +116,7 @@ enum k_mem_error k_mem_copy(const procId_t srcProcId,
                             const procId_t dstProcId,
                             const ptr_t dstVPtr,
                             const size_t sizeBytes) {
+#warning TODO
     return ME_UNKNOWN;
 }
 

@@ -52,12 +52,12 @@ static struct virtual_page_specifier_t * getPageSpecifier(const procId_t procId,
         OOPS("Illegal page number", nullptr);
     }
 
-    virtual_page_table_t * const pageTable = (virtual_page_table_t *)(processPageTables[procId].pageDirectory.flat[MEM_DIROF(page)].frameAddress << 12);
+    virtual_page_table_t * const pageTable = (virtual_page_table_t *)(processPageTables[procId].pageDirectory.flat[MEM_DIR_INDEX_OF_PAGE(page)].frameAddress << 12);
     if (!pageTable) {
         return nullptr;
     }
 
-    return &(*pageTable)[MEM_PAGEOF(page)];
+    return &(*pageTable)[MEM_TABLE_INDEX_OF_PAGE(page)];
 }
 
 static enum k_mem_error getFreePhysicalPage(size_t * const pageIndexPtr) {
@@ -76,17 +76,51 @@ static enum k_mem_error getFreePhysicalPage(size_t * const pageIndexPtr) {
     return ME_OUT_OF_MEMORY;
 }
 
+static void unsafe_assignVirtualPage(struct virtual_page_specifier_t * const pageEntryPtr,
+                                     const size_t physicalPageIndex,
+                                     const bool user) {
+    pageEntryPtr->frameAddress = physicalPageIndex;
+    pageEntryPtr->present = true;
+    pageEntryPtr->writable = true;
+    pageEntryPtr->user = user;
+}
+
 static void assignVirtualPage(struct virtual_page_specifier_t * const pageEntryPtr,
                               const size_t physicalPageIndex,
                               const bool user) {
-#warning TODO
+    if (!pageEntryPtr) {
+        OOPS("Nullptr",);
+    }
+    if (physicalPageIndex >= MEM_MAX_PHYSICAL_PAGE_COUNT) {
+        OOPS("Invalid physical page index",);
+    }
+
+    struct physical_page_specifier_t * physicalPageSpecifier = &physicalPages[physicalPageIndex];
+
+    if (!physicalPageSpecifier->present) {
+        OOPS("Page index outside physical memory",);
+    }
+    if (user) {
+        if (!physicalPageSpecifier->available) {
+            OOPS("Physical page unavailable",);
+        }
+        if (!physicalPageSpecifier->free) {
+            OOPS("Physical page already assigned",);
+        }
+    }
+
+    physicalPageSpecifier->free = false;
+    unsafe_assignVirtualPage(pageEntryPtr, physicalPageIndex, user);
 }
 
 static void assignDirEntry(struct virtual_page_specifier_t * const dirEntryPtr,
                            const virtual_page_table_t * const pageTablePtr,
                            struct virtual_page_table_specifier_t * const pageTableInfoPtr,
                            const bool user) {
-    
+    if (!dirEntryPtr || !pageTablePtr) {
+        OOPS("Nullptr",);
+    }
+
     addr_t frameAddr = ((addr_t)pageTablePtr) >> 12;
     if ((frameAddr << 12) != (addr_t)pageTablePtr) {
         OOPS("Invalid page table alignment",);
@@ -215,15 +249,8 @@ void k_paging_prepare() {
         TODO: Initialize as many pages as needed after startup (definetely less than 4MiB)
     */
     for (size_t tableIndex = 0; tableIndex < MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT; ++tableIndex) {
-        virtual_page_table_t * table = &kernelPageTables[tableIndex];
-        
         for (size_t pageIndex = 0; pageIndex < MEM_MAX_PAGE_ENTRY; ++pageIndex) {
-            struct virtual_page_specifier_t * page = &(*table)[pageIndex];
-
-            page->frameAddress = (tableIndex << 10) | pageIndex;
-            page->present = true;
-            page->writable = true;
-            page->user = false;
+            unsafe_assignVirtualPage(&kernelPageTables[tableIndex][pageIndex], (tableIndex << 10) | pageIndex, false);
         }
     }
 
@@ -306,7 +333,7 @@ enum k_mem_error k_paging_assign(const procId_t procId,
     bool newPages = false;
     bool overlap = false;
     for (size_t page = startPage; page < startPage + pageCount; ++page) {
-        size_t dirIndex = MEM_DIROF(page);
+        size_t dirIndex = MEM_DIR_INDEX_OF_PAGE(page);
         if (dirIndex >= MEM_VIRTUAL_USER_MAX_PAGE_TABLE_COUNT) {
             return ME_UNAVAILABLE;
         }
@@ -359,7 +386,7 @@ enum k_mem_error k_paging_assign(const procId_t procId,
         newPages = true;
     }
 
-    return overlap ? newPages ? ME_PART_ALREADY_ASSIGNED : ME_ALREADY_ASSIGNED : ME_UNKNOWN;
+    return overlap ? newPages ? ME_PART_ALREADY_ASSIGNED : ME_ALREADY_ASSIGNED : ME_NONE;
 }
 
 void k_paging_procCleanup(const procId_t procId) {

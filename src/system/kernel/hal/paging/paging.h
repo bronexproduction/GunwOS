@@ -16,7 +16,7 @@
 */
 #define MEM_PAGE_SIZE_BYTES                             KiB(4)
 
-#define MEM_PAGEOF(ADDR)                                ((ADDR) / (MEM_PAGE_SIZE_BYTES))
+#define MEM_PAGE_OF_ADDR(ADDR)                          ((ADDR) / (MEM_PAGE_SIZE_BYTES))
 
 void k_paging_prepare();
 __attribute__((naked)) void k_paging_start();

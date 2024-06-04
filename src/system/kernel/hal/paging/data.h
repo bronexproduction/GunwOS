@@ -38,8 +38,8 @@
 /*
     Helper macros
 */
-#define MEM_DIROF(PAGE)                                 ((PAGE) / (MEM_MAX_PAGE_ENTRY))
-#define MEM_TABLEOF(PAGE)                               ((PAGE) % (MEM_MAX_PAGE_ENTRY))
+#define MEM_DIR_INDEX_OF_PAGE(PAGE)                     ((PAGE) / (MEM_MAX_PAGE_ENTRY))
+#define MEM_TABLE_INDEX_OF_PAGE(PAGE)                   ((PAGE) % (MEM_MAX_PAGE_ENTRY))
 
 _Static_assert(!(MEM_PHYSICAL_ADDRESSABLE_MEM % MEM_SPACE_PER_DIR_ENTRY), "MEM_PHYSICAL_ADDRESSABLE_MEM not aligned to addressable space unit");
 _Static_assert(!(MEM_VIRTUAL_RESERVED_KERNEL_MEM % MEM_SPACE_PER_DIR_ENTRY), "MEM_VIRTUAL_RESERVED_KERNEL_MEM not aligned to addressable space unit");
