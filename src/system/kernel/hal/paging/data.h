@@ -60,6 +60,10 @@ typedef struct __attribute__((packed)) virtual_page_specifier_t {
     uint_32 frameAddress    :20;
 } virtual_page_table_t[MEM_MAX_PAGE_ENTRY];
 
+struct __attribute__((packed)) virtual_page_table_specifier_t {
+    bool used               :1;
+};
+
 typedef struct __attribute__((packed)) physical_page_specifier_t {
     bool present    :1; // Installed physical RAM
     bool available  :1; // Available (non-reserved) physical RAM
@@ -74,6 +78,7 @@ struct __attribute__((packed)) virtual_page_directory_t {
 typedef struct __attribute__((packed)) process_paging_info_t {
     __attribute__((aligned(MEM_PAGE_SIZE_BYTES))) struct virtual_page_directory_t pageDirectory;
     __attribute__((aligned(MEM_PAGE_SIZE_BYTES))) virtual_page_table_t pageTables[MEM_VIRTUAL_USER_PAGE_TABLE_COUNT];
+    __attribute__((aligned(MEM_PAGE_SIZE_BYTES))) struct virtual_page_table_specifier_t pageTableInfo[MEM_VIRTUAL_USER_PAGE_TABLE_COUNT];
 } process_page_tables_t[MAX_PROC];
 
 #endif // DATA_H
