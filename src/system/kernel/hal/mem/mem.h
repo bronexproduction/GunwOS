@@ -15,6 +15,7 @@
 #define MEM_VIRTUAL_RESERVED_KERNEL_MEM                 MiB(4)
 
 #define MEM_CONV_PTL(REL)                               (((addr_t)REL) - MEM_VIRTUAL_RESERVED_KERNEL_MEM)
+#define MEM_CONV_LTP(REL)                               (((addr_t)REL) + MEM_VIRTUAL_RESERVED_KERNEL_MEM)
 
 #define MEM_XMS_START                                   MiB(1)
 

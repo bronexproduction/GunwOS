@@ -107,8 +107,15 @@ enum k_mem_error k_mem_gimme(const procId_t procId,
 enum k_mem_error k_mem_zero(const procId_t procId,
                             const ptr_t vPtr,
                             const size_t sizeBytes) {
-#warning TODO
-    return ME_UNKNOWN;
+    if (!k_proc_idIsUser(procId)) {
+        return ME_INVALID_ARGUMENT;
+    }
+    
+    MEM_ONTABLE(procId, {
+        memzero(vPtr, sizeBytes);
+    });
+
+    return ME_NONE;
 }
 
 enum k_mem_error k_mem_copy(const procId_t srcProcId,
