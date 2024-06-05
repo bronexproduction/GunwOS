@@ -120,15 +120,15 @@ static void assignVirtualPage(struct virtual_page_specifier_t * const pageEntryP
 }
 
 static void assignDirEntry(struct virtual_page_specifier_t * const dirEntryPtr,
-                           const virtual_page_table_t * const pageTablePtr,
+                           const virtual_page_table_t * const physicalPageTablePtr,
                            struct virtual_page_table_specifier_t * const pageTableInfoPtr,
                            const bool user) {
-    if (!dirEntryPtr || !pageTablePtr) {
+    if (!dirEntryPtr || !physicalPageTablePtr) {
         OOPS("Nullptr",);
     }
 
-    addr_t frameAddr = ((addr_t)pageTablePtr) >> 12;
-    if ((frameAddr << 12) != (addr_t)pageTablePtr) {
+    addr_t frameAddr = ((addr_t)physicalPageTablePtr) >> 12;
+    if ((frameAddr << 12) != (addr_t)physicalPageTablePtr) {
         OOPS("Invalid page table alignment",);
     }
 
@@ -377,7 +377,7 @@ enum k_mem_error k_paging_assign(const procId_t procId,
                 return ME_OUT_OF_PAGES;
             }
 
-            assignDirEntry(dirEntry, pageTable, pageTableSpecifier, true);
+            assignDirEntry(dirEntry, (virtual_page_table_t *)MEM_CONV_LTP(pageTable), pageTableSpecifier, true);
         } else if (!dirEntry->user) {
             return ME_UNAVAILABLE;
         }
@@ -386,6 +386,8 @@ enum k_mem_error k_paging_assign(const procId_t procId,
         if (!pageEntry) {
             OOPS("Unexpected page entry nullptr", ME_UNKNOWN);
         }
+        
+        pageEntry = (struct virtual_page_specifier_t *)MEM_CONV_PTL(pageEntry);
 
         /*
             Check page entry
