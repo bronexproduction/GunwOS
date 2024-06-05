@@ -246,10 +246,10 @@ static void unsafe_initializePagingInfo(struct process_paging_info_t * const pag
     /*
         Initialize kernel directory entries
     */
-    struct virtual_page_specifier_t * kernelDir = pagingInfo->pageDirectory.byArea.kernel;
+    struct virtual_page_specifier_t * dir = pagingInfo->pageDirectory.byArea.kernel;
 
-    for (size_t dirEntryIndex = 0; dirEntryIndex < MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT; ++dirEntryIndex) {
-        assignDirEntry(&kernelDir[dirEntryIndex], &pagingInfo->pageTables[dirEntryIndex], nullptr, false);
+    for (size_t entryIndex = 0; entryIndex < MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT; ++entryIndex) {
+        assignDirEntry(&dir[entryIndex], &kernelPagingInfo.pageTables[entryIndex], nullptr, false);
     }
 }
 
@@ -422,14 +422,8 @@ size_t k_paging_switch(const procId_t procId) {
     size_t cr3;
     union virtual_page_directory_t * pageDir = procId == KERNEL_PROC_ID ? &kernelPagingInfo.pageDirectory : &processPageTables[procId].pageDirectory;
 
-#warning TODO - does not work
-
-    CRITICAL_SECTION(
-        __asm__ volatile ("mov %%cr3, %0" : "=r" (cr3) : );
-        __asm__ volatile ("mov %0, %%cr3" : : "r" (MEM_CONV_LTP(pageDir)));
-        __asm__ volatile ("jmp asdf");
-        __asm__ volatile ("asdf:");
-    )
+    __asm__ volatile ("mov %%cr3, %0" : "=r" (cr3) : );
+    __asm__ volatile ("mov %0, %%cr3" : : "r" (MEM_CONV_LTP(pageDir)));
 
     return cr3;
 }
