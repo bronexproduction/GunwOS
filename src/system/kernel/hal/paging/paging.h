@@ -17,6 +17,7 @@
 #define MEM_PAGE_SIZE_BYTES                             KiB(4)
 
 #define MEM_PAGE_OF_ADDR(ADDR)                          ((ADDR) / (MEM_PAGE_SIZE_BYTES))
+#define MEM_ONTABLE(PROC_ID, CODE)                      { const size_t cr3 = k_paging_switch(PROC_ID); { CODE; } k_paging_switchCR3(cr3); }
 
 void k_paging_prepare();
 __attribute__((naked)) void k_paging_start();
@@ -33,6 +34,18 @@ size_t k_paging_getFreePages();
 enum k_mem_error k_paging_assign(const procId_t procId,
                                  const size_t startPage,
                                  const size_t pageCount);
+
+/*
+    Switches to the paging table for given process
+
+    Return value: previous value of CR3 register
+*/
+size_t k_paging_switch(const procId_t procId);
+
+/*
+    Switches to the paging table pointed by CR3 value
+*/
+void k_paging_switchCR3(const size_t cr3);
 
 /*
     Removes any pages assignment to given process

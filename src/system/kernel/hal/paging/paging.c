@@ -14,6 +14,7 @@
 #include <hal/cpu/cpu.h>
 #include <hal/proc/proc.h>
 #include <error/panic.h>
+#include <hal/criticalsec/criticalsec.h>
 
 #include <string.h>
 #include <log/log.h>
@@ -411,6 +412,30 @@ enum k_mem_error k_paging_assign(const procId_t procId,
     }
 
     return overlap ? newPages ? ME_PART_ALREADY_ASSIGNED : ME_ALREADY_ASSIGNED : ME_NONE;
+}
+
+size_t k_paging_switch(const procId_t procId) {
+    if (!k_proc_idIsUser(procId) && procId != KERNEL_PROC_ID) {
+        OOPS("Invalid procId", 0);
+    }
+
+    size_t cr3;
+    union virtual_page_directory_t * pageDir = procId == KERNEL_PROC_ID ? &kernelPagingInfo.pageDirectory : &processPageTables[procId].pageDirectory;
+
+#warning TODO - does not work
+
+    CRITICAL_SECTION(
+        __asm__ volatile ("mov %%cr3, %0" : "=r" (cr3) : );
+        __asm__ volatile ("mov %0, %%cr3" : : "r" (MEM_CONV_LTP(pageDir)));
+        __asm__ volatile ("jmp asdf");
+        __asm__ volatile ("asdf:");
+    )
+
+    return cr3;
+}
+
+void k_paging_switchCR3(const size_t cr3) {
+    __asm__ volatile ("mov %0, %%cr3" : : "r" (cr3));
 }
 
 void k_paging_procCleanup(const procId_t procId) {
