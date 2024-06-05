@@ -22,6 +22,11 @@ static physical_page_table_t physicalPages;
 static process_page_tables_t processPageTables;
 static __attribute__((aligned(MEM_PAGE_SIZE_BYTES))) struct process_paging_info_t kernelPagingInfo;
 
+/*
+    Page table to be loaded at startup
+*/
+static struct process_paging_info_t * const initialPagingInfo = &kernelPagingInfo;
+
 void getFreeTable(const procId_t procId,
                   const virtual_page_table_t * * const pageTable,
                   struct virtual_page_table_specifier_t * * const pageTableSpecifier) {
@@ -295,9 +300,9 @@ void k_paging_prepare() {
     /*
         Set up temporary 1:1 mapping
     */
-    memcopy(&kernelPagingInfo.pageDirectory.byArea.kernel, 
-            &kernelPagingInfo.pageDirectory, 
-            sizeof(kernelPagingInfo.pageDirectory.byArea.kernel));
+    memcopy(&initialPagingInfo->pageDirectory.byArea.kernel, 
+            &initialPagingInfo->pageDirectory, 
+            sizeof(initialPagingInfo->pageDirectory.byArea.kernel));
 }
 
 __attribute__((naked)) void k_paging_start() {
@@ -305,7 +310,7 @@ __attribute__((naked)) void k_paging_start() {
     extern addr_t k_paging_start_end;
     ptr_t pagingEndJmp = (ptr_t)&k_paging_start_end - MEM_VIRTUAL_RESERVED_KERNEL_MEM;
 
-    __asm__ volatile ("mov %0, %%cr3" : : "a" (&(kernelPagingInfo.pageDirectory)));
+    __asm__ volatile ("mov %0, %%cr3" : : "a" (&(initialPagingInfo->pageDirectory)));
     __asm__ volatile ("mov %cr0, %eax");
     __asm__ volatile ("or $" STR(CR0_PAGING_ENABLE_BIT) ", %eax");
     __asm__ volatile ("mov %eax, %cr0");
@@ -322,8 +327,8 @@ void k_paging_init(const struct k_krn_memMapEntry *memMap) {
     /*
         Remove 1:1 mapping
     */
-    memzero(&kernelPagingInfo.pageDirectory,
-            sizeof(kernelPagingInfo.pageDirectory.byArea.kernel));
+    memzero(&initialPagingInfo->pageDirectory,
+            sizeof(initialPagingInfo->pageDirectory.byArea.kernel));
 
     /*
         Reload paging tables
