@@ -20,7 +20,7 @@
 
 static physical_page_table_t physicalPages;
 static process_page_tables_t processPageTables;
-static __attribute__((aligned(MEM_PAGE_SIZE_BYTES))) virtual_page_table_t kernelPageTables[MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT];
+static __attribute__((aligned(MEM_PAGE_SIZE_BYTES))) struct process_paging_info_t kernelPagingInfo;
 
 void getFreeTable(const procId_t procId,
                   const virtual_page_table_t * * const pageTable,
@@ -231,6 +231,22 @@ static void initializePhysicalMemoryMap(const struct k_krn_memMapEntry *memMap) 
     LOG2("Free memory (bytes): ", bytesString);
 }
 
+static void unsafe_initializePagingInfo(struct process_paging_info_t * const pagingInfo) {
+    /*
+        Clear kernel paging info
+    */
+    memzero(pagingInfo, sizeof(struct process_paging_info_t));
+
+    /*
+        Initialize kernel directory entries
+    */
+    struct virtual_page_specifier_t * kernelDir = pagingInfo->pageDirectory.byArea.kernel;
+
+    for (size_t dirEntryIndex = 0; dirEntryIndex < MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT; ++dirEntryIndex) {
+        assignDirEntry(&kernelDir[dirEntryIndex], &pagingInfo->pageTables[dirEntryIndex], nullptr, false);
+    }
+}
+
 size_t k_paging_getFreePages() {
     size_t freePages = 0;
     for (size_t page = 0; page < MEM_PHYSICAL_PAGE_COUNT; ++page) {
@@ -244,41 +260,44 @@ size_t k_paging_getFreePages() {
 
 void k_paging_prepare() {
     /*
+        Initialize kernel paging info
+    */
+    unsafe_initializePagingInfo(&kernelPagingInfo);
+    
+    /*
+        Initialize paging info for each userspace process
+    */
+    for (size_t procId = 0; procId < MAX_PROC; ++procId) {
+        unsafe_initializePagingInfo(&processPageTables[procId]);
+    }
+
+    /*
+        Mark all kernel pages as kernel only
+    */
+    for (size_t table = 0; table < MEM_VIRTUAL_USER_PAGE_TABLE_COUNT; ++table) {
+        for (size_t page = 0; page < MEM_MAX_PAGE_ENTRY; ++page) {
+            kernelPagingInfo.pageTables[table][page].user = false;
+        }
+    }
+    
+    /*
         Initialize kernel page tables to map the lower physical memory
 
         TODO: Initialize as many pages as needed after startup (definetely less than 4MiB)
     */
     for (size_t tableIndex = 0; tableIndex < MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT; ++tableIndex) {
+        kernelPagingInfo.pageTableInfo[tableIndex].used = true;
         for (size_t pageIndex = 0; pageIndex < MEM_MAX_PAGE_ENTRY; ++pageIndex) {
-            unsafe_assignVirtualPage(&kernelPageTables[tableIndex][pageIndex], (tableIndex << 10) | pageIndex, false);
-        }
-    }
-
-    /*
-        Initialize paging info for each process
-    */
-    for (size_t procId = 0; procId < MAX_PROC; ++procId) {
-        /*
-            Clear paging info
-        */
-        memzero(&processPageTables[procId], sizeof(struct process_paging_info_t));
-
-        /*
-            Initialize kernel directory entries
-        */
-        struct virtual_page_specifier_t * kernelDir = processPageTables[procId].pageDirectory.byArea.kernel;
-
-        for (size_t dirEntryIndex = 0; dirEntryIndex < MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT; ++dirEntryIndex) {
-            assignDirEntry(&kernelDir[dirEntryIndex], &kernelPageTables[dirEntryIndex], nullptr, false);
+            unsafe_assignVirtualPage(&kernelPagingInfo.pageTables[tableIndex][pageIndex], (tableIndex << 10) | pageIndex, false);
         }
     }
 
     /*
         Set up temporary 1:1 mapping
     */
-    memcopy(&processPageTables[0].pageDirectory.byArea.kernel, 
-            &processPageTables[0].pageDirectory, 
-            sizeof(processPageTables->pageDirectory.byArea.kernel));
+    memcopy(&kernelPagingInfo.pageDirectory.byArea.kernel, 
+            &kernelPagingInfo.pageDirectory, 
+            sizeof(kernelPagingInfo.pageDirectory.byArea.kernel));
 }
 
 __attribute__((naked)) void k_paging_start() {
@@ -286,7 +305,7 @@ __attribute__((naked)) void k_paging_start() {
     extern addr_t k_paging_start_end;
     ptr_t pagingEndJmp = (ptr_t)&k_paging_start_end - MEM_VIRTUAL_RESERVED_KERNEL_MEM;
 
-    __asm__ volatile ("mov %0, %%cr3" : : "a" (&(processPageTables[0].pageDirectory)));
+    __asm__ volatile ("mov %0, %%cr3" : : "a" (&(kernelPagingInfo.pageDirectory)));
     __asm__ volatile ("mov %cr0, %eax");
     __asm__ volatile ("or $" STR(CR0_PAGING_ENABLE_BIT) ", %eax");
     __asm__ volatile ("mov %eax, %cr0");
@@ -303,8 +322,8 @@ void k_paging_init(const struct k_krn_memMapEntry *memMap) {
     /*
         Remove 1:1 mapping
     */
-    memzero(&processPageTables[0].pageDirectory,
-            sizeof(processPageTables->pageDirectory.byArea.kernel));
+    memzero(&kernelPagingInfo.pageDirectory,
+            sizeof(kernelPagingInfo.pageDirectory.byArea.kernel));
 
     /*
         Reload paging tables
