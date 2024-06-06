@@ -14,6 +14,7 @@
 #include <schedule/schedule.h>
 #include <hal/criticalsec/criticalsec.h>
 #include <hal/mem/mem.h>
+#include <hal/paging/paging.h>
 #include <ipc/ipc.h>
 #include <timer/timer.h>
 #include <error/panic.h>
@@ -259,6 +260,11 @@ void k_proc_switch(const procId_t procId) {
 
     // Set kernel stack pointer in TSS
     k_cpu_tss.esp0 = (uint_32)k_cpu_stackPtr;
+
+    /*
+        Switch to next process page table
+    */
+    k_paging_switch(procId);
 
     // Prepare IRET stack
     __asm__ volatile ("pushw $0");
