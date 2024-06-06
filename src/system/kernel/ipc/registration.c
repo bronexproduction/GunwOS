@@ -54,6 +54,9 @@ enum gnwIpcError k_ipc_register(const procId_t procId,
     if (!handlerRoutine) {
         return GIPCE_INVALID_PARAMETER;
     }
+    if (!decoder) {
+        return GIPCE_INVALID_PARAMETER;
+    }
     if (!bindingRequired && permissionMask) {
         return GIPCE_INVALID_PARAMETER;
     }

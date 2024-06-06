@@ -7,16 +7,19 @@
 
 #include <hal/proc/proc.h>
 #include <ipc/ipc.h>
-#include <syscall/func.h>
+#include <error/panic.h>
 
 enum gnwIpcError k_scr_usr_ipcReply(const struct gnwIpcReplyInfo * const infoPtr) {
 
-    const procId_t procId = k_proc_getCurrentId();
-    SCLF_GET_VALID_ABS(const struct gnwIpcReplyInfo * const, infoPtr, sizeof(struct gnwIpcReplyInfo), {}, GIPCE_UNKNOWN);
-    SCLF_GET_VALID_ABS_NAMED(ptr_t, replyBufferPtr, abs_infoPtr->data.ptr, abs_infoPtr->data.bytes, {}, GIPCE_UNKNOWN);
+    if (!infoPtr) {
+        OOPS("Unexpected null pointer", GIPCE_UNKNOWN);
+    }
+    if (!infoPtr->data.ptr) {
+        OOPS("Unexpected null pointer", GIPCE_UNKNOWN);
+    }
+    if (!infoPtr->data.bytes) {
+        OOPS("Unexpected reply size", GIPCE_UNKNOWN);
+    }
 
-    struct gnwIpcReplyInfo absInfo = *abs_infoPtr;
-    absInfo.data.ptr = abs_replyBufferPtr;
-
-    return k_ipc_reply(procId, &absInfo);
+    return k_ipc_reply(k_proc_getCurrentId(), infoPtr);
 }
