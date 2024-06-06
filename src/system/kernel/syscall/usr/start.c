@@ -15,7 +15,6 @@
 #include <error/panic.h>
 #include <log/log.h>
 #include <storage/file.h>
-#include "../func.h"
 
 #define LOG_CODE(MSG, CODE) {                               \
     LOG_START;                                              \

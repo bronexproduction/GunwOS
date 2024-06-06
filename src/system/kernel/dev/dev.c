@@ -261,9 +261,9 @@ void k_dev_releaseHold(const procId_t processId, const size_t deviceId) {
 
 enum gnwDeviceError k_dev_writeMem(const procId_t processId, 
                                    const size_t deviceId,
-                                   const ptr_t absBuffer,
+                                   const ptr_t bufferPtr,
                                    const range_addr_t devMemRange) {
-    if (!absBuffer) {
+    if (!bufferPtr) {
         OOPS("Buffer cannot be nullptr", GDE_UNKNOWN);
     }
 
@@ -293,7 +293,7 @@ enum gnwDeviceError k_dev_writeMem(const procId_t processId,
         return GDE_INVALID_OPERATION;
     }
     #warning it is more than dangerous to allow the driver to access the buffer directly, moreover it could be even impossible when driver processes are implemented
-    routine->write(absBuffer, devMemRange);
+    routine->write(bufferPtr, devMemRange);
 
     return GDE_NONE;
 }
@@ -351,8 +351,8 @@ enum gnwDeviceError k_dev_listen(const procId_t processId,
 
 enum gnwDeviceError k_dev_getParam(const size_t deviceId,
                                    const struct gnwDeviceParamDescriptor paramDescriptor,
-                                   size_t * const absResult) {
-    if (!absResult) {
+                                   size_t * const resultPtr) {
+    if (!resultPtr) {
         OOPS("Nullptr", GDE_UNKNOWN);
     }
 
@@ -367,7 +367,7 @@ enum gnwDeviceError k_dev_getParam(const size_t deviceId,
     if (!devices[deviceId].desc.api.system.routine.getParam(paramDescriptor.param,
                                                             paramDescriptor.subParam,
                                                             paramDescriptor.paramIndex,
-                                                            absResult)) {
+                                                            resultPtr)) {
         return GDE_OPERATION_FAILED;
     }
 

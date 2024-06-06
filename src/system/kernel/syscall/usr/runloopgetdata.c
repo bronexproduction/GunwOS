@@ -7,9 +7,13 @@
 
 #include <hal/proc/proc.h>
 #include <runloop/runloop.h>
-#include <syscall/func.h>
+#include <error/panic.h>
 
 enum gnwRunLoopError k_scr_usr_runLoopGetData(ptr_t dataBufferPtr) {
+
+    if (!dataBufferPtr) {
+        OOPS("Unexpected null pointer", GRLE_UNKNOWN);
+    }
 
     const procId_t procId = k_proc_getCurrentId();
     size_t dataSizeBytes;
@@ -18,8 +22,6 @@ enum gnwRunLoopError k_scr_usr_runLoopGetData(ptr_t dataBufferPtr) {
     if (err != GRLE_NONE) {
         return err;
     }
-
-    SCLF_GET_VALID_ABS(ptr_t, dataBufferPtr, dataSizeBytes, {}, GRLE_UNKNOWN);
     
-    return k_runloop_getPendingItemData(procId, abs_dataBufferPtr);
+    return k_runloop_getPendingItemData(procId, dataBufferPtr);
 }
