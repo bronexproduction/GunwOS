@@ -20,7 +20,7 @@ void k_ipc_init();
     * Direct
 */
 enum gnwIpcError k_ipc_send(const procId_t procId,
-                            const struct gnwIpcSenderQuery absQuery);
+                            const struct gnwIpcSenderQuery query);
 
 /*
     Handling IPC messages sent by kernel
@@ -28,18 +28,18 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
     Available types:
     * Notification
 */
-enum gnwIpcError k_ipc_notify(const struct gnwIpcSenderQuery absQuery,
+enum gnwIpcError k_ipc_notify(const struct gnwIpcSenderQuery query,
                               const procId_t target);
 
 enum gnwIpcError k_ipc_register(const procId_t procId, 
-                                const data_t absPathData,
+                                const data_t pathData,
                                 const gnwIpcListener handlerRoutine,
                                 const gnwIpcEndpointQueryDecoder decoder,
                                 const bool bindingRequired,
                                 const size_t permissionMask);
 
 enum gnwIpcError k_ipc_reply(const procId_t procId,
-                             const struct gnwIpcReplyInfo * const absInfoPtr);
+                             const struct gnwIpcReplyInfo * const infoPtr);
 
 void k_ipc_procCleanup(const procId_t procId);
 

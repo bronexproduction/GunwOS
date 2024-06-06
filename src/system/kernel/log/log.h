@@ -20,7 +20,7 @@
 
 void k_log_init();
 
-void k_log_log(const char * const absMsgPtr);
-void k_log_logd(const data_t absMsgData);
+void k_log_log(const char * const msgPtr);
+void k_log_logd(const data_t msgData);
 
 #endif // LOG_H

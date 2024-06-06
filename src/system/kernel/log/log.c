@@ -47,24 +47,24 @@ void k_log_init() {
    k_bus_outb(PORT + 4, 0x0F);
 }
 
-void k_log_log(const char * const absMsgPtr) {
-    if (!absMsgPtr) {
+void k_log_log(const char * const msgPtr) {
+    if (!msgPtr) {
       OOPS("log_log: access violation",);
     }
 
-    data_t absData;
-    absData.ptr = (ptr_t)absMsgPtr;
-    absData.bytes = strlen(absMsgPtr);
+    data_t data;
+    data.ptr = (ptr_t)msgPtr;
+    data.bytes = strlen(msgPtr);
 
-    k_log_logd(absData);
+    k_log_logd(data);
 }
 
-void k_log_logd(const data_t absMsgData) {
-   if (!absMsgData.ptr) {
+void k_log_logd(const data_t msgData) {
+   if (!msgData.ptr) {
       OOPS("log_logd: access violation",);
     }
     
-    for (size_t i = 0; i < absMsgData.bytes; ++i) {
-        writeSerial(absMsgData.ptr[i]);
+    for (size_t i = 0; i < msgData.bytes; ++i) {
+        writeSerial(msgData.ptr[i]);
     }
 }
