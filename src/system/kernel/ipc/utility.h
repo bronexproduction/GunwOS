@@ -10,11 +10,11 @@
 
 #include <types.h>
 
-bool k_ipc_utl_pathGlobalValidate(const data_t absPathData);
-bool k_ipc_utl_pathDirectValidate(data_t absPathData);
-bool k_ipc_utl_pathNotificationValidate(data_t absPathData);
+bool k_ipc_utl_pathGlobalValidate(const data_t pathData);
+bool k_ipc_utl_pathDirectValidate(data_t pathData);
+bool k_ipc_utl_pathNotificationValidate(data_t pathData);
 void k_ipc_utl_clearReply(const size_t entryId);
 void k_ipc_utl_unlockIfAble(const procId_t procId);
-size_t k_ipc_utl_nextListenerIndexForPath(const data_t absPathData, const size_t * const after);
+size_t k_ipc_utl_nextListenerIndexForPath(const data_t pathData, const size_t * const after);
 
 #endif // UTILITY_H

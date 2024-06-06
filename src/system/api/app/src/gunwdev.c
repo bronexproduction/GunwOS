@@ -88,18 +88,18 @@ enum gnwDeviceError devListen(const size_t identifier,
     return SYSCALL_RESULT;
 }
 
-void gnwDeviceEvent_decode(const ptr_t absDataPtr, struct gnwDeviceEvent * const absEventPtr) {
-    absEventPtr->type = *(int_32 *)absDataPtr;
-    absEventPtr->dataSizeBytes = *(size_t *)(absDataPtr + sizeof(int_32));
-    absEventPtr->data = absDataPtr + sizeof(int_32) + sizeof(size_t);
+void gnwDeviceEvent_decode(const ptr_t dataPtr, struct gnwDeviceEvent * const eventPtr) {
+    eventPtr->type = *(int_32 *)dataPtr;
+    eventPtr->dataSizeBytes = *(size_t *)(dataPtr + sizeof(int_32));
+    eventPtr->data = dataPtr + sizeof(int_32) + sizeof(size_t);
 }
 
 #else
 
-void gnwDeviceEvent_encode(const struct gnwDeviceEvent * const absEventPtr, ptr_t absDataPtr) {
-    *(int_32 *)absDataPtr = absEventPtr->type;
-    *(size_t *)(absDataPtr + sizeof(int_32)) = absEventPtr->dataSizeBytes;
-    memcopy(absEventPtr->data, absDataPtr + sizeof(int_32) + sizeof(size_t), absEventPtr->dataSizeBytes);
+void gnwDeviceEvent_encode(const struct gnwDeviceEvent * const eventPtr, ptr_t dataPtr) {
+    *(int_32 *)dataPtr = eventPtr->type;
+    *(size_t *)(dataPtr + sizeof(int_32)) = eventPtr->dataSizeBytes;
+    memcopy(eventPtr->data, dataPtr + sizeof(int_32) + sizeof(size_t), eventPtr->dataSizeBytes);
 }
 
 #endif // _GUNWAPI_KERNEL
