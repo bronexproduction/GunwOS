@@ -234,6 +234,24 @@ void k_scr_usr_start(const struct gnwCtrlStartDescriptor * const descPtr) {
     }
 
     /*
+        Allocate memory for process stack
+
+        Note: YOLO
+    */
+
+    const size_t stackSize = KiB(256);
+    enum k_mem_error error = k_mem_gimme(procId,
+                                         (ptr_t)(0 - MEM_VIRTUAL_RESERVED_KERNEL_MEM - stackSize),
+                                         stackSize);
+    if (error != ME_NONE) {
+        *(descPtr->errorPtr) = GCE_OPERATION_FAILED;
+        LOG_CODE("Failed to allocate stack memory", error);
+
+        k_proc_cleanup(procId);
+        return;
+    }
+
+    /*
         Hatch process
     */
 
