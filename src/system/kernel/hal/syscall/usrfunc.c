@@ -5,7 +5,7 @@
 //  Created by Artur Danielewski on 11.01.2021.
 //
 
-#include "params.h"
+#include "func.h"
 #include <src/_gunwctrl.h>
 #include <src/_gunwipc.h>
 #include <error/fug.h>
@@ -29,7 +29,7 @@
         * PAR_PTR_1 - path to start descriptor pointer (struct gnwCtrlStartDescriptor) relative to caller process memory
 */
 void k_scr_start(const ptr_t refEsp) {
-    PAR_PTR_1(descPtr)
+    PAR_PTR_1(descPtr);
 
     extern void k_scr_usr_start(const struct gnwCtrlStartDescriptor * const);
     k_que_dispatch_arch((fPtr_arch)(ptr_t)k_scr_usr_start, *descPtr);
@@ -44,8 +44,8 @@ void k_scr_start(const ptr_t refEsp) {
         * PAR_PTR_2 - message size in bytes
 */
 void k_scr_log(const ptr_t refEsp) {
-    PAR_PTR_1(msgPtr)
-    PAR_PTR_2(msgBytes)
+    PAR_PTR_1(msgPtr);
+    PAR_PTR_2(msgBytes);
 
     extern void k_scr_usr_log(const char * const, const size_t);
     k_scr_usr_log((char *)*msgPtr, *msgBytes);
@@ -78,7 +78,7 @@ void k_scr_devCharWrite(const ptr_t refEsp) {
 
 */
 void k_scr_bye(const ptr_t refEsp) {
-    PAR_PTR_1(status)
+    PAR_PTR_1(status);
     
     extern void k_scr_usr_bye(procId_t, int_32);
     k_scr_usr_bye(k_proc_getCurrentId(), *status);
@@ -116,7 +116,7 @@ void k_scr_timeMs(const ptr_t refEsp) {
         * RESULT_PTR - error code on failure, GIPCE_NONE otherwise
 */
 void k_scr_ipcSend(const ptr_t refEsp) {
-    PAR_PTR_1(queryPtr)
+    PAR_PTR_1(queryPtr);
 
     extern enum gnwIpcError k_scr_usr_ipcSend(const struct gnwIpcSenderQuery * const);
     *RESULT_PTR = k_scr_usr_ipcSend((struct gnwIpcSenderQuery *)*queryPtr);
@@ -133,7 +133,7 @@ void k_scr_ipcSend(const ptr_t refEsp) {
         * RESULT_PTR - error code on failure, GIPCE_NONE otherwise
 */
 void k_scr_ipcRegister(const ptr_t refEsp) {
-    PAR_PTR_1(desc)
+    PAR_PTR_1(desc);
 
     extern enum gnwIpcError k_scr_usr_ipcRegister(const struct gnwIpcHandlerDescriptor * const);
     *RESULT_PTR = k_scr_usr_ipcRegister((struct gnwIpcHandlerDescriptor *)*desc);
@@ -151,8 +151,8 @@ void k_scr_ipcRegister(const ptr_t refEsp) {
         * RESULT_PTR - error code (enum gnwDeviceError)
 */
 void k_scr_devGetById(const ptr_t refEsp) {
-    PAR_PTR_1(id)
-    PAR_PTR_2(desc)
+    PAR_PTR_1(id);
+    PAR_PTR_2(desc);
 
     extern enum gnwDeviceError k_scr_usr_devGetById(const size_t, struct gnwDeviceUHADesc * const);
     *RESULT_PTR = k_scr_usr_devGetById((size_t)*id, (struct gnwDeviceUHADesc *)*desc);
@@ -170,8 +170,8 @@ void k_scr_devGetById(const ptr_t refEsp) {
         * RESULT_PTR - error code (enum gnwDeviceError)
 */
 void k_scr_devGetByType(const ptr_t refEsp) {
-    addr_t * type = (addr_t *)((ptr_t)(*((addr_t *)(refEsp + 0x28 + 12))) + 4);
-    addr_t * desc = (addr_t *)((ptr_t)(*((addr_t *)(refEsp + 0x28 + 12))) + 8);
+    PAR_PTR_1(type);
+    PAR_PTR_2(desc);
     
     extern enum gnwDeviceError k_scr_usr_devGetByType(const enum gnwDeviceType, struct gnwDeviceUHADesc * const);
     *(addr_t *)((ptr_t)(*((addr_t *)(refEsp + 0x28 + 12))) + 0) = k_scr_usr_devGetByType((enum gnwDeviceType)*type, (struct gnwDeviceUHADesc * const)*desc);
@@ -188,7 +188,7 @@ void k_scr_devGetByType(const ptr_t refEsp) {
         * RESULT_PTR - error code (enum gnwDeviceError)
 */
 void k_scr_devAcquire(const ptr_t refEsp) {
-    PAR_PTR_1(devId)
+    PAR_PTR_1(devId);
 
     *RESULT_PTR = k_dev_acquireHold(k_proc_getCurrentId(), (size_t)*devId);
 }
@@ -201,7 +201,7 @@ void k_scr_devAcquire(const ptr_t refEsp) {
         * PAR_PTR_1 - device identifier
 */
 void k_scr_devRelease(const ptr_t refEsp) {
-    PAR_PTR_1(devId)
+    PAR_PTR_1(devId);
 
     k_dev_releaseHold(k_proc_getCurrentId(), (size_t)*devId);
 }
@@ -219,9 +219,9 @@ void k_scr_devRelease(const ptr_t refEsp) {
         * RESULT_PTR - error code (enum gnwDeviceError)
 */
 void k_scr_devMemWrite(const ptr_t refEsp) {
-    PAR_PTR_1(devId)
-    PAR_PTR_2(buf)
-    PAR_PTR_3(rangePtr)
+    PAR_PTR_1(devId);
+    PAR_PTR_2(buf);
+    PAR_PTR_3(rangePtr);
 
     extern enum gnwDeviceError k_scr_usr_devMemWrite(const size_t devId, const ptr_t buf, const range_addr_t * const);
     *RESULT_PTR = k_scr_usr_devMemWrite(*devId, (ptr_t)*buf, (range_addr_t *)*rangePtr);
@@ -235,7 +235,7 @@ void k_scr_devMemWrite(const ptr_t refEsp) {
         * PAR_PTR_1 - FUG code
 */
 void k_scr_fug(const ptr_t refEsp) {
-    PAR_PTR_1(code)
+    PAR_PTR_1(code);
 
     k_err_fug(k_proc_getCurrentId(), *code);
 }
@@ -253,9 +253,9 @@ void k_scr_fug(const ptr_t refEsp) {
         * RESULT_PTR - error code (enum gnwDeviceError)
 */
 void k_scr_devListen(const ptr_t refEsp) {
-    PAR_PTR_1(devId)
-    PAR_PTR_2(lsnr)
-    PAR_PTR_3(decoder)
+    PAR_PTR_1(devId);
+    PAR_PTR_2(lsnr);
+    PAR_PTR_3(decoder);
 
     *RESULT_PTR = k_dev_listen(k_proc_getCurrentId(), (const size_t)*devId, (gnwDeviceEventListener)*lsnr, (gnwDeviceEventDecoder)*decoder);
 }
@@ -273,9 +273,9 @@ void k_scr_devListen(const ptr_t refEsp) {
         * RESULT_PTR - error code (enum gnwDeviceError)
 */
 void k_scr_devGetParam(const ptr_t refEsp) {
-    PAR_PTR_1(devId)
-    PAR_PTR_2(paramDesc)
-    PAR_PTR_3(resultPtr)
+    PAR_PTR_1(devId);
+    PAR_PTR_2(paramDesc);
+    PAR_PTR_3(resultPtr);
 
     extern enum gnwDeviceError k_scr_usr_devGetParam(const size_t, const struct gnwDeviceParamDescriptor * const, size_t * const);
     *RESULT_PTR = k_scr_usr_devGetParam((size_t)*devId, (struct gnwDeviceParamDescriptor *)*paramDesc, (size_t *)*resultPtr);
@@ -294,9 +294,9 @@ void k_scr_devGetParam(const ptr_t refEsp) {
         * RESULT_PTR - error code (enum gnwDeviceError)
 */
 void k_scr_devSetParam(const ptr_t refEsp) {
-    PAR_PTR_1(devId)
-    PAR_PTR_2(paramDesc)
-    PAR_PTR_3(paramVal)
+    PAR_PTR_1(devId);
+    PAR_PTR_2(paramDesc);
+    PAR_PTR_3(paramVal);
 
     extern enum gnwDeviceError k_scr_usr_devSetParam(const size_t, const struct gnwDeviceParamDescriptor * const, const size_t);
     *RESULT_PTR = k_scr_usr_devSetParam((size_t)*devId, (struct gnwDeviceParamDescriptor *)*paramDesc, (size_t)*paramVal);
@@ -314,7 +314,7 @@ void k_scr_devSetParam(const ptr_t refEsp) {
         * RESULT_PTR - enum gnwRunLoopError value on failure, GRLE_NONE otherwise
 */
 void k_scr_runLoopGetItem(const ptr_t refEsp) {
-    PAR_PTR_1(itemPtr)
+    PAR_PTR_1(itemPtr);
 
     extern enum gnwRunLoopError k_scr_usr_runLoopGetItem(struct gnwRunLoopDispatchItem * const);
     *RESULT_PTR = k_scr_usr_runLoopGetItem((struct gnwRunLoopDispatchItem *)*itemPtr);
@@ -332,7 +332,7 @@ void k_scr_runLoopGetItem(const ptr_t refEsp) {
         * RESULT_PTR - enum gnwRunLoopError code if any, GRLE_NONE otherwise
 */
 void k_scr_runLoopGetData(const ptr_t refEsp) {
-    PAR_PTR_1(dataBufferPtr)
+    PAR_PTR_1(dataBufferPtr);
 
     extern enum gnwRunLoopError k_scr_usr_runLoopGetData(ptr_t);
     *RESULT_PTR = k_scr_usr_runLoopGetData((ptr_t)*dataBufferPtr);
@@ -349,7 +349,7 @@ void k_scr_runLoopGetData(const ptr_t refEsp) {
         * RESULT_PTR - enum gnwIpcError code if any, GIPCE_NONE otherwise
 */
 void k_scr_ipcReply(const ptr_t refEsp) {
-    PAR_PTR_1(infoPtr)
+    PAR_PTR_1(infoPtr);
 
     extern enum gnwIpcError k_scr_usr_ipcReply(const struct gnwIpcReplyInfo * const);
     *RESULT_PTR = k_scr_usr_ipcReply((struct gnwIpcReplyInfo *)*infoPtr);
