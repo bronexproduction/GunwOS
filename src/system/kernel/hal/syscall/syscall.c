@@ -9,11 +9,12 @@
 
 #include <types.h>
 #include <mem.h>
+#include <hal/mem/mem.h>
 #include <error/panic.h>
 
 #include "drvfunc.h"
 #include "usrfunc.h"
-#include "params.h"
+#include "func.h"
 
 #define DRIVER_SYSCALL_COUNT 3
 #define USER_SYSCALL_COUNT 21
@@ -23,7 +24,7 @@
 
     Array index corresponds to syscall function code
 */
-static void (*syscallReg_DRIVER[DRIVER_SYSCALL_COUNT])() = {
+static k_scl_function_handler_t syscallReg_DRIVER[DRIVER_SYSCALL_COUNT] = {
     /* 0x00 */ (void *)k_scr_rdb,
     /* 0x01 */ (void *)k_scr_wrb,
     /* 0x02 */ (void *)k_scr_emit
@@ -34,7 +35,7 @@ static void (*syscallReg_DRIVER[DRIVER_SYSCALL_COUNT])() = {
 
     Array index corresponds to syscall function code
 */
-static void (*syscallReg_USER[USER_SYSCALL_COUNT])() = {
+static k_scl_function_handler_t syscallReg_USER[USER_SYSCALL_COUNT] = {
     /* 0x00 */ (void *)k_scr_start,
     /* 0x01 */ (void *)k_scr_log,
     /* 0x02 */ (void *)k_scr_devCharWrite,
@@ -64,15 +65,15 @@ static void (*syscallReg_USER[USER_SYSCALL_COUNT])() = {
     NOTE: Function number has to be put on top of the caller process stack
 */
 void k_scl_syscall_DRIVER(const ptr_t refEsp) {
-    ptr_t functionCodePtr = (ptr_t)FUNC_CODE_PTR;
-    size_t functionCode = *functionCodePtr;
+    size_t functionCode = *(ptr_t)FUNC_CODE_PTR;
     
     if (functionCode >= DRIVER_SYSCALL_COUNT) {
         OOPS_NBR("Requested syscall function code over limit");
     } else if (!syscallReg_DRIVER[functionCode]) {
         OOPS_NBR("Syscall function code unavailable");
     } else {
-        syscallReg_DRIVER[functionCode](refEsp);
+        const k_scl_function_handler_t handler = (k_scl_function_handler_t)MEM_CONV_PTL(syscallReg_DRIVER[functionCode]);
+        handler(refEsp);
     }
 }
 
@@ -82,14 +83,14 @@ void k_scl_syscall_DRIVER(const ptr_t refEsp) {
     NOTE: Function number has to be put on top of the caller process stack
 */
 void k_scl_syscall_USER(const ptr_t refEsp) {
-    ptr_t functionCodePtr = (ptr_t)FUNC_CODE_PTR;
-    size_t functionCode = *functionCodePtr;
+    size_t functionCode = *(ptr_t)FUNC_CODE_PTR;
     
     if (functionCode >= USER_SYSCALL_COUNT) {
         OOPS_NBR("Requested syscall function code over limit");
     } else if (!syscallReg_USER[functionCode]) {
         OOPS_NBR("Syscall function code unavailable");
     } else {
-        syscallReg_USER[functionCode](refEsp);
+        const k_scl_function_handler_t handler = (k_scl_function_handler_t)MEM_CONV_PTL(syscallReg_USER[functionCode]);
+        handler(refEsp);
     }
 }
