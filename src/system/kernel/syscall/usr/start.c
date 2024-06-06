@@ -125,7 +125,9 @@ enum gnwCtrlError loadElf(const ptr_t filePtr,
         enum k_mem_error err = k_mem_gimme(procId,
                                            (ptr_t)sectionHeaderEntry->virtualAddr,
                                            sectionHeaderEntry->fileSizeBytes);
-        if (err != ME_NONE) {
+        if (err != ME_NONE &&
+            err != ME_ALREADY_ASSIGNED &&
+            err != ME_PART_ALREADY_ASSIGNED) {
             OOPS("Memory assignment error", GCE_UNKNOWN);
         }
         err = k_mem_zero(procId,
