@@ -123,8 +123,26 @@ enum k_mem_error k_mem_copy(const procId_t srcProcId,
                             const procId_t dstProcId,
                             const ptr_t dstVPtr,
                             const size_t sizeBytes) {
-#warning TODO
-    return ME_UNKNOWN;
+    if (!srcVPtr || !dstVPtr) {
+        OOPS("Nullptr", ME_INVALID_ARGUMENT);
+    }
+    if (srcProcId != KERNEL_PROC_ID && !k_proc_idIsUser(srcProcId)) {
+        OOPS("Invalid source process ID", ME_INVALID_ARGUMENT);
+    }
+    if (dstProcId != KERNEL_PROC_ID && !k_proc_idIsUser(dstProcId)) {
+        OOPS("Invalid destination process ID", ME_INVALID_ARGUMENT);
+    }
+    
+    const procId_t tableProcId = (srcProcId != KERNEL_PROC_ID && dstProcId != KERNEL_PROC_ID) ? KERNEL_PROC_ID : (srcProcId == KERNEL_PROC_ID) ? dstProcId : srcProcId; 
+    if (tableProcId == KERNEL_PROC_ID) {
+        OOPS("Operation not supported", ME_UNKNOWN);
+    }
+
+    MEM_ONTABLE(tableProcId, {
+        memcopy(srcVPtr, dstVPtr, sizeBytes);
+    });
+
+    return ME_NONE;
 }
 
 void k_mem_procCleanup(const procId_t procId) {
