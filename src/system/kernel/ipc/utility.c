@@ -41,10 +41,10 @@ bool k_ipc_utl_pathGlobalValidate(const data_t pathData) {
     bool hasSeparator = false;
     size_t lastSeparatorIndex = 0;
     for (size_t i = 0; i < pathData.bytes; ++i) {
-        if (!(IN_RANGE('0', pathData.ptr[i], '9')                          ||   /* 0 - 9 */
-              IN_RANGE('A', pathData.ptr[i], 'Z')                          ||   /* A - Z */
-              IN_RANGE('a', pathData.ptr[i], 'z')                          ||   /* a - z */
-              pathData.ptr[i] == GNW_PATH_IPC_COMPONENT_SEPARATOR               /* path separator */)) {
+        if (!(IN_RANGE('0', pathData.ptr[i], '9')                   ||   /* 0 - 9 */
+              IN_RANGE('A', pathData.ptr[i], 'Z')                   ||   /* A - Z */
+              IN_RANGE('a', pathData.ptr[i], 'z')                   ||   /* a - z */
+              pathData.ptr[i] == GNW_PATH_IPC_COMPONENT_SEPARATOR        /* path separator */)) {
             return false;
         }
         if (pathData.ptr[i] != GNW_PATH_IPC_COMPONENT_SEPARATOR) {
