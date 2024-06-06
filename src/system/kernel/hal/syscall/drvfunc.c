@@ -6,7 +6,7 @@
 //
 
 #include <hal/io/bus.h>
-#include "func.h"
+#include "params.h"
 #include <dev/dev.h>
 
 /*
@@ -23,11 +23,11 @@
     Return:
         * RESULT_PTR - value read from bus port
 */
-SCR(rdb,
+void k_scr_rdb(const ptr_t refEsp) {
     PAR_PTR_1(port)
 
     *RESULT_PTR = k_bus_inb(*port);
-)
+}
 
 /*
     Code - 0x01
@@ -38,12 +38,12 @@ SCR(rdb,
         * PAR_PTR_2 - value
 
 */
-SCR(wrb,
+void k_scr_wrb(const ptr_t refEsp) {
     PAR_PTR_1(port);
     PAR_PTR_2(value);
 
     k_bus_outb(*port, *value);
-)
+}
 
 /*
     Code - 0x02
@@ -56,8 +56,8 @@ SCR(wrb,
     Return:
         * RESULT_PTR - error code if any, otherwise GDE_NONE (see enum gnwDeviceError)
 */
-SCR(emit,
+void k_scr_emit(const ptr_t refEsp) {
     PAR_PTR_1(eventPtr)
 
     *RESULT_PTR = k_dev_emit((struct gnwDeviceEvent *)*eventPtr);
-)
+}
