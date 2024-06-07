@@ -28,8 +28,28 @@ size_t k_mem_getFreeBytes() {
 bool k_mem_bufferZoneValidForProc(const procId_t procId,
                                   const ptr_t bufferPtr,
                                   const size_t bufferSizeBytes) {
-#warning TODO
-    return false;
+    if (!bufferSizeBytes) {
+        return true;
+    }
+    if (!bufferPtr) {
+        return false;
+    }
+    if (procId == KERNEL_PROC_ID) {
+        return true;
+    }
+    if (!k_proc_idIsUser(procId)) {
+        OOPS("Invalid process identifier", false);
+    }
+
+    ptr_t bufferEndPtr = bufferPtr + bufferSizeBytes - 1;
+    if (bufferEndPtr < bufferPtr) {
+        return false;
+    }
+    if (bufferEndPtr >= (ptr_t)(0 - MEM_VIRTUAL_RESERVED_KERNEL_MEM)) {
+        return false;
+    }
+
+    return true;
 }
 
 enum k_mem_error k_mem_gimme(const procId_t procId,

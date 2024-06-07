@@ -6,15 +6,19 @@
 //
 
 #include <log/log.h>
+#include <hal/mem/mem.h>
 #include <error/panic.h>
 
-void k_scr_usr_log(const char * const msgPtr, const size_t msgBytes) {
+void k_scr_usr_log(const procId_t procId, const char * const msgPtr, const size_t msgBytes) {
     
     if (!msgPtr) {
         OOPS("Unexpected null pointer",);
     }
     if (!msgBytes) {
         OOPS("Unexpected message size",);
+    }
+    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)msgPtr, msgBytes)) {
+        OOPS("Reserved zone access violation",);
     }
 
     data_t logData;

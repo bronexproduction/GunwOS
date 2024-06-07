@@ -12,15 +12,26 @@
 
 #define _STACK_REFERENCE_OFFSET 0x28
 
-#define _USER_STACK_PTR (ptr_t)(*((addr_t *)(refEsp + _STACK_REFERENCE_OFFSET + 12)))
+#define _USER_STACK_ADDR (*(addr_t *)(refEsp + _STACK_REFERENCE_OFFSET + 12))
 
-#define FUNC_CODE_PTR (addr_t *)(_USER_STACK_PTR + 0)
+/*
+    Important note:
+    
+    While accessing memory _USER_STACK_ADDR
+    bear in mind that it may technically overlap with reserved space
 
-#define _PAR_PTR(NAME, OFFSET) addr_t * NAME = (addr_t *)(_USER_STACK_PTR + OFFSET);
-#define PAR_PTR_1(NAME) _PAR_PTR(NAME, 4)
-#define PAR_PTR_2(NAME) _PAR_PTR(NAME, 8)
-#define PAR_PTR_3(NAME) _PAR_PTR(NAME, 12)
+    Check for potential access violation
+    before dereferencing memory at this address
+*/
 
-#define RESULT_PTR (addr_t *)(_USER_STACK_PTR + 0)
+#define _USER_STACK_PTR (ptr_t)_USER_STACK_ADDR
+
+#define FUNC_CODE_STACK_OFFSET      0
+#define RESULT_STACK_OFFSET         0
+#define PARAMETER_1_STACK_OFFSET    4
+#define PARAMETER_2_STACK_OFFSET    8
+#define PARAMETER_3_STACK_OFFSET    12
+
+void * userStackSafeValuePointer(ptr_t refEsp, addr_t offset);
 
 #endif // PARAMS_H

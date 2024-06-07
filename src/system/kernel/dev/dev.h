@@ -46,7 +46,7 @@ enum gnwDeviceError k_dev_setParam(const procId_t procId,
                                    const struct gnwDeviceParamDescriptor paramDescriptor,
                                    const size_t value);
 
-enum gnwDeviceError k_dev_emit(const struct gnwDeviceEvent * const eventPtr);
+enum gnwDeviceError k_dev_emit(const procId_t procId, const struct gnwDeviceEvent * const eventPtr);
 
 void k_dev_procCleanup(const procId_t procId);
 

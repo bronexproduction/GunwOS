@@ -5,11 +5,12 @@
 //  Created by Artur Danielewski on 16.03.2023.
 //
 
+#include <hal/mem/mem.h>
 #include <hal/proc/proc.h>
 #include <dev/dev.h>
 #include <error/panic.h>
 
-enum gnwDeviceError k_scr_usr_devMemWrite(const size_t devId, const ptr_t bufferPtr, const range_addr_t * const devInputRange) {
+enum gnwDeviceError k_scr_usr_devMemWrite(const procId_t procId, const size_t devId, const ptr_t bufferPtr, const range_addr_t * const devInputRange) {
 
     if (!bufferPtr) {
         OOPS("Unexpected null pointer", GDE_UNKNOWN);
@@ -17,8 +18,14 @@ enum gnwDeviceError k_scr_usr_devMemWrite(const size_t devId, const ptr_t buffer
     if (!devInputRange) {
         OOPS("Unexpected null pointer", GDE_UNKNOWN);
     }
+    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)devInputRange, sizeof(range_addr_t))) {
+        OOPS("Reserved zone access violation", GDE_UNKNOWN);
+    }
     if (!devInputRange->sizeBytes) {
         OOPS("Unexpected buffer size", GDE_UNKNOWN);
+    }
+    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)bufferPtr, devInputRange->sizeBytes)) {
+        OOPS("Reserved zone access violation", GDE_UNKNOWN);
     }
 
     struct gnwDeviceUHADesc desc;
@@ -27,5 +34,5 @@ enum gnwDeviceError k_scr_usr_devMemWrite(const size_t devId, const ptr_t buffer
         return err;
     }
     
-    return k_dev_writeMem(k_proc_getCurrentId(), devId, (ptr_t)bufferPtr, *devInputRange);
+    return k_dev_writeMem(procId, devId, (ptr_t)bufferPtr, *devInputRange);
 }
