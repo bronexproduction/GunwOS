@@ -174,7 +174,7 @@ void k_scr_devGetByType(const ptr_t refEsp) {
     PAR_PTR_2(desc);
     
     extern enum gnwDeviceError k_scr_usr_devGetByType(const enum gnwDeviceType, struct gnwDeviceUHADesc * const);
-    *(addr_t *)((ptr_t)(*((addr_t *)(refEsp + 0x28 + 12))) + 0) = k_scr_usr_devGetByType((enum gnwDeviceType)*type, (struct gnwDeviceUHADesc * const)*desc);
+    *RESULT_PTR = k_scr_usr_devGetByType((enum gnwDeviceType)*type, (struct gnwDeviceUHADesc * const)*desc);
 }
 
 /*
