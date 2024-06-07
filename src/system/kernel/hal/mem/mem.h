@@ -42,6 +42,14 @@ ptr_t k_mem_physicalToLinear(const ptr_t physAddr);
 size_t k_mem_getFreeBytes();
 
 /*
+    Checks if buffer pointer does not reach
+    inaccessible virtual memory areas
+*/
+bool k_mem_bufferZoneValidForProc(const procId_t procId,
+                                  const ptr_t bufferPtr,
+                                  const size_t bufferSizeBytes);
+
+/*
     Reserves memory for given process pointed at by vPtr
 */
 enum k_mem_error k_mem_gimme(const procId_t procId,
