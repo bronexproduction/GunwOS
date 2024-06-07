@@ -25,6 +25,13 @@ size_t k_mem_getFreeBytes() {
     return k_paging_getFreePages() * MEM_PAGE_SIZE_BYTES;
 }
 
+bool k_mem_bufferZoneValidForProc(const procId_t procId,
+                                  const ptr_t bufferPtr,
+                                  const size_t bufferSizeBytes) {
+#warning TODO
+    return false;
+}
+
 enum k_mem_error k_mem_gimme(const procId_t procId,
                              const ptr_t vPtr,
                              const size_t sizeBytes) {
