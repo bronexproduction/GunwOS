@@ -34,6 +34,7 @@ bool k_trm_vid_init() {
         // OOPS("Unsupported display dimensions");
         return false;
     }
+
     if (e != GDE_NONE) {
         fug(FUG_UNDEFINED);
         // OOPS("Error retrieving available text display");
@@ -41,6 +42,7 @@ bool k_trm_vid_init() {
     }
 
     e = attachToTextDisplay(&desc, &displayHandle);
+
     if (e != GDE_NONE) {
         fug(FUG_UNDEFINED);
         // OOPS("Unable to attach display");
