@@ -17,6 +17,7 @@
 #include <dev/dev.h>
 #include <error/panic.h>
 #include <hal/io/bus.h>
+#include <hal/proc/proc.h>
 
 /*
     Keyboard controller data register
@@ -95,7 +96,7 @@ static void emitEvent(const int_32 type, const char data) {
     event.data = (ptr_t)&data;
     event.dataSizeBytes = sizeof(char);
 
-    err = k_dev_emit(&event);
+    err = k_dev_emit(KERNEL_PROC_ID, &event);
     if (err != GDE_NONE) {
         OOPS("Error emitting keyboard event",);
     }

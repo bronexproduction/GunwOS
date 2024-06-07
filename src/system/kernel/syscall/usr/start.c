@@ -158,12 +158,18 @@ enum gnwCtrlError loadElf(const ptr_t filePtr,
     return GCE_NONE;
 }
 
-void k_scr_usr_start(const struct gnwCtrlStartDescriptor * const descPtr) {
+void k_scr_usr_start(const procId_t procId, const struct gnwCtrlStartDescriptor * const descPtr) {
     if (!descPtr) {
         OOPS("Unexpected nullptr",);
     }
+    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)descPtr, sizeof(struct gnwCtrlStartDescriptor))) {
+        OOPS("Reserved zone access violation",);
+    }
     if (!descPtr->errorPtr) {
         OOPS("Unexpected nullptr",);
+    }
+    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)descPtr->errorPtr, sizeof(enum gnwCtrlError))) {
+        OOPS("Reserved zone access violation",);
     }
     if (!descPtr->pathPtr) {
         *(descPtr->errorPtr) = GCE_INVALID_ARGUMENT;
@@ -172,6 +178,9 @@ void k_scr_usr_start(const struct gnwCtrlStartDescriptor * const descPtr) {
     if (!descPtr->pathLen) {
         *(descPtr->errorPtr) = GCE_INVALID_ARGUMENT;
         OOPS("Unexpected length",);
+    }
+    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)descPtr->pathPtr, descPtr->pathLen)) {
+        OOPS("Reserved zone access violation",);
     }
 
     const char * const pathPtr = descPtr->pathPtr;
@@ -210,8 +219,8 @@ void k_scr_usr_start(const struct gnwCtrlStartDescriptor * const descPtr) {
         Spawn process
     */
 
-    procId_t procId;
-    enum k_proc_error procErr = k_proc_spawn(&procId);
+    procId_t spawnedProcId;
+    enum k_proc_error procErr = k_proc_spawn(&spawnedProcId);
     if (procErr != PE_NONE) {
         *(descPtr->errorPtr) = GCE_OPERATION_FAILED;
         LOG_CODE("Failed to spawn process", procErr);
@@ -223,12 +232,12 @@ void k_scr_usr_start(const struct gnwCtrlStartDescriptor * const descPtr) {
     */
     
     struct k_proc_descriptor desc;
-    enum gnwCtrlError err = loadElf(filePtr, fileSizeBytes, procId, &desc.entryLinearAddr);
+    enum gnwCtrlError err = loadElf(filePtr, fileSizeBytes, spawnedProcId, &desc.entryLinearAddr);
     if (err != GCE_NONE) {
         *(descPtr->errorPtr) = err;
         LOG_CODE("Failed to load ELF", err);
 
-        k_proc_cleanup(procId);
+        k_proc_cleanup(spawnedProcId);
         return;
     }
 
@@ -239,14 +248,14 @@ void k_scr_usr_start(const struct gnwCtrlStartDescriptor * const descPtr) {
     */
 
     const size_t stackSize = KiB(256);
-    enum k_mem_error error = k_mem_gimme(procId,
+    enum k_mem_error error = k_mem_gimme(spawnedProcId,
                                          (ptr_t)(0 - MEM_VIRTUAL_RESERVED_KERNEL_MEM - stackSize),
                                          stackSize);
     if (error != ME_NONE) {
         *(descPtr->errorPtr) = GCE_OPERATION_FAILED;
         LOG_CODE("Failed to allocate stack memory", error);
 
-        k_proc_cleanup(procId);
+        k_proc_cleanup(spawnedProcId);
         return;
     }
 
@@ -254,12 +263,12 @@ void k_scr_usr_start(const struct gnwCtrlStartDescriptor * const descPtr) {
         Hatch process
     */
 
-    procErr = k_proc_hatch(desc, procId);
+    procErr = k_proc_hatch(desc, spawnedProcId);
     if (procErr != PE_NONE) {
         *(descPtr->errorPtr) = GCE_OPERATION_FAILED;
         LOG_CODE("Failed to hatch process", procErr);
 
-        k_proc_cleanup(procId);
+        k_proc_cleanup(spawnedProcId);
         return;
     }
 
