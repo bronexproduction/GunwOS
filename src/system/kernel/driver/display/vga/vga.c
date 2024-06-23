@@ -17,7 +17,7 @@ static const volatile ptr_t DISPLAY_BUFFER_ADDR_ENHANCED = ((volatile ptr_t)MEM_
 
 #define BYTES_PER_CHAR 2
 
-#define MEM_CHAR(INDEX) (DISPLAY_BUFFER_ADDR_BASIC + (INDEX * BYTES_PER_CHAR))
+#define MEM_CHAR(INDEX) ((byte_t *)(DISPLAY_BUFFER_ADDR_BASIC + (INDEX * BYTES_PER_CHAR)))
 #define MEM_COLOR(INDEX) (MEM_CHAR(INDEX) + 1)
 
 static point_t dimensions = { -1, -1 };

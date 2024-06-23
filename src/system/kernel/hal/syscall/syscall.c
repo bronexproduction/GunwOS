@@ -67,7 +67,7 @@ static k_scl_function_handler_t syscallReg_USER[USER_SYSCALL_COUNT] = {
     NOTE: Function number has to be put on top of the caller process stack
 */
 void k_scl_syscall_DRIVER(const ptr_t refEsp) {
-    size_t functionCode = *(ptr_t)userStackSafeValuePointer(refEsp, FUNC_CODE_STACK_OFFSET);
+    const size_t functionCode = *(size_t *)userStackSafeValuePointer(refEsp, FUNC_CODE_STACK_OFFSET);
     
     if (functionCode >= DRIVER_SYSCALL_COUNT) {
         OOPS_NBR("Requested syscall function code over limit");
@@ -85,7 +85,7 @@ void k_scl_syscall_DRIVER(const ptr_t refEsp) {
     NOTE: Function number has to be put on top of the caller process stack
 */
 void k_scl_syscall_USER(const ptr_t refEsp) {
-    size_t functionCode = *(ptr_t)userStackSafeValuePointer(refEsp, FUNC_CODE_STACK_OFFSET);
+    const size_t functionCode = *(size_t *)userStackSafeValuePointer(refEsp, FUNC_CODE_STACK_OFFSET);
     
     if (functionCode >= USER_SYSCALL_COUNT) {
         OOPS_NBR("Requested syscall function code over limit");
