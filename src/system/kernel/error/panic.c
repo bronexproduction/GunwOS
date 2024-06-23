@@ -45,11 +45,11 @@ static void switchToVGATextMode() {
     // Not implemented yet
 }
 
-static inline ptr_t charAt(size_t row, size_t col) {
+static inline byte_t * charAt(size_t row, size_t col) {
     return VIDEO_HW_OFFSET(row, col);
 }
 
-static inline ptr_t attrAt(size_t row, size_t col) {
+static inline byte_t * attrAt(size_t row, size_t col) {
     return VIDEO_HW_OFFSET(row, col) + 1;
 }
 
