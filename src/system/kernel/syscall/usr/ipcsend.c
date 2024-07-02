@@ -67,12 +67,12 @@ enum gnwIpcError k_scr_usr_ipcSend(const procId_t procId, const struct gnwIpcSen
     }
     {
         char msg[22] = "  receiver -         ";
-        int2str((addr_t)absoluteQuery.procId, msg + 13);
+        int2str((addr_t)queryPtr->procId, msg + 13);
         LOG(msg);
     }
     {
         char msg[128] = "  path -         ";
-        memcopy(absoluteQuery.pathData.ptr, msg + 9, absoluteQuery.pathData.bytes);
+        memcopy(queryPtr->pathData.ptr, msg + 9, queryPtr->pathData.bytes);
         LOG(msg);
     }
     {
@@ -82,12 +82,12 @@ enum gnwIpcError k_scr_usr_ipcSend(const procId_t procId, const struct gnwIpcSen
     }
     {
         char msg[28] = "  query data ptr -         ";
-        uint2hex((addr_t)absoluteQuery.data.ptr, msg + 19);
+        uint2hex((addr_t)queryPtr->data.ptr, msg + 19);
         LOG(msg);
     }
     {
         char msg[29] = "  query data size -         ";
-        uint2hex((addr_t)absoluteQuery.data.bytes, msg + 20);
+        uint2hex((addr_t)queryPtr->data.bytes, msg + 20);
         LOG(msg);
     }
     {
