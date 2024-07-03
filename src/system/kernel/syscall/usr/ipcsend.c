@@ -69,13 +69,13 @@ enum gnwIpcError k_scr_usr_ipcSend(const struct gnwIpcSenderQuery * const queryP
         LOG(msg);
     }
     {
-        char msg[10] = "  bytes:";
+        char msg[9] = "  bytes:";
         LOG_BLOCK(
             LOG_NBR(msg);
-            for (size_t i = 0; i < absoluteQuery.data.bytes; ++i) {
+            for (size_t i = 0; i < queryPtr->data.bytes; ++i) {
                 char byteString[3] = { 0 };
-                uint2hex((addr_t)absoluteQuery.data.ptr[i], byteString);
-                LOG_NBR(" ");
+                uint2hex((addr_t)queryPtr->data.ptr[i], byteString);
+                LOG_NBR(" ")
                 LOG_NBR(byteString);
             }
         );
