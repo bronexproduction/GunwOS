@@ -35,6 +35,21 @@ static GNW_KEYBOARD_EVENT_LISTENER(onKeyboardEvent) {
     if (!session) {
         return;
     }
+    
+    {
+        char msg[29] = "onKeyboardEvent - new event ";
+        log(msg);
+    }
+    {
+        char msg[24] = "  event code -         ";
+        int2str((addr_t)event->code, msg + 13);
+        log(msg);
+    }
+    {
+        char msg[128] = "  event key -         ";
+        uint2dec((addr_t)event->key, msg + 14);
+        log(msg);
+    }
 
     struct gnwKeyboardManagerEventQuery query;
     query.keyboardEvent = *event;
