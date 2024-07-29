@@ -426,6 +426,9 @@ PRIVATE enum gnwDeviceError validateListenerInvocation(const size_t deviceId) {
     return GDE_NONE;
 }
 
+#include <log/log.h>
+#include <string.h>
+
 enum gnwDeviceError k_dev_emit(const struct gnwDeviceEvent * const eventPtr) {
     if (!eventPtr) {
         OOPS("Nullptr", GDE_UNKNOWN);
@@ -437,6 +440,33 @@ enum gnwDeviceError k_dev_emit(const struct gnwDeviceEvent * const eventPtr) {
     err = validateListenerInvocation(*k_hal_servicedDevIdPtr);
     if (err != GDE_NONE) {
         return err;
+    }
+
+    {
+        char msg[24] = "k_dev_emit - new event ";
+        LOG(msg);
+    }
+    {
+        char msg[22] = "  receiver -         ";
+        int2str((addr_t)k_proc_getCurrentId(), msg + 13);
+        LOG(msg);
+    }
+    {
+        char msg[128] = "  event ptr -         ";
+        uint2hex((addr_t)eventPtr, msg + 14);
+        LOG(msg);
+    }
+    {
+        char msg[9] = "  bytes:";
+        LOG_BLOCK(
+            LOG_NBR(msg);
+            for (size_t i = 0; i < eventPtr->dataSizeBytes; ++i) {
+                char byteString[3] = { 0 };
+                uint2hex((addr_t)((uint_8 *)eventPtr->data)[i], byteString);
+                LOG_NBR(" ")
+                LOG_NBR(byteString);
+            }
+        );
     }
 
     struct device *dev = &devices[*k_hal_servicedDevIdPtr];
