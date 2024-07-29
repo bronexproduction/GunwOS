@@ -53,12 +53,38 @@ enum gnwIpcError ipcSend(const gnwIpcPath path,
     return ipcSendDirect(NONE_PROC_ID, path, data, replyData, bindData);
 }
 
+#include "../include/gunwlog.h"
+
 enum gnwIpcError ipcSendDirect(const procId_t procId,
                                const gnwIpcPath path,
                                const data_t data,
                                const data_t replyData,
                                const struct gnwIpcBindData bindData) {
     CHECKPTR(path);
+
+    {
+        char msg[27] = "ipcSendDirect - new query ";
+        log(msg);
+    }
+    {
+        char msg[22] = "  receiver -         ";
+        int2str((addr_t)procId, msg + 13);
+        log(msg);
+    }
+    {
+        char msg[128] = "  path -         ";
+        memcopy(path, msg + 9, strlen(path));
+        log(msg);
+    }
+    {
+        char msg[9] = "  bytes:";
+        log(msg);
+        for (size_t i = 0; i < data.bytes; ++i) {
+            char byteString[3] = { 0 };
+            uint2hex((addr_t)data.ptr[i], byteString);
+            log(byteString);
+        }
+    }
 
     enum gnwIpcError replyErr = GIPCE_NONE;
     struct gnwIpcSenderQuery query;
