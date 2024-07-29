@@ -462,7 +462,7 @@ enum gnwDeviceError k_dev_emit(const procId_t procId, const struct gnwDeviceEven
     }
     {
         char msg[22] = "  receiver -         ";
-        int2str((addr_t)k_proc_getCurrentId(), msg + 13);
+        int2str((addr_t)procId, msg + 13);
         LOG(msg);
     }
     {
