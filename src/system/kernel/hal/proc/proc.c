@@ -413,6 +413,8 @@ void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const procId_t currentP
     STACK_VAL(refEsp, 16, 56) = kernelProc.cpuState.ss;
 }
 
+#include <log/log.h>
+
 static enum k_proc_error callbackInvoke(const procId_t procId,
                                         const enum gnwEventFormat format, 
                                         const ptr_t funPtr, 
@@ -421,6 +423,64 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
                                         const size_t pDecodedSizeBytes,
                                         const gnwRunLoopDataEncodingRoutine encoder,
                                         const gnwRunLoopDataEncodingRoutine decoder) {
+
+    {
+        char msg[31] = "callbackInvoke - new dispatch ";
+        LOG(msg);
+    }
+    {
+        char msg[32] = "  target proc -         ";
+        uint2dec((addr_t)procId, msg + 16);
+        LOG(msg);
+    }
+    {
+        char msg[27] = "  format -         ";
+        uint2dec((addr_t)procId, msg + 11);
+        LOG(msg);
+    }
+    {
+        char msg[128] = "  dispatched fun ptr -         ";
+        uint2hex((addr_t)funPtr, msg + 23);
+        LOG(msg);
+    }
+    {
+        char msg[128] = "  parameter ptr -         ";
+        uint2hex((addr_t)p, msg + 18);
+        LOG(msg);
+    }
+    {
+        char msg[35] = "  parameter size -         ";
+        uint2dec((addr_t)pSizeBytes, msg + 19);
+        LOG(msg);
+    }
+    {
+        char msg[43] = "  decoded parameter size -         ";
+        uint2dec((addr_t)pDecodedSizeBytes, msg + 27);
+        LOG(msg);
+    }
+    {
+        char msg[128] = "  encoder -         ";
+        uint2hex((addr_t)encoder, msg + 12);
+        LOG(msg);
+    }
+    {
+        char msg[128] = "  decoder -         ";
+        uint2hex((addr_t)decoder, msg + 12);
+        LOG(msg);
+    }
+    {
+        char msg[9] = "  bytes:";
+        LOG_BLOCK(
+            LOG_NBR(msg);
+            for (size_t i = 0; i < pSizeBytes; ++i) {
+                char byteString[3] = { 0 };
+                uint2hex((addr_t)((uint_8 *)p)[i], byteString);
+                LOG_NBR(" ");
+                LOG_NBR(byteString);
+            }
+        );
+    }
+
     if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
         OOPS("Process id out of range", PE_UNKNOWN);
     }
