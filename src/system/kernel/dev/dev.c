@@ -463,7 +463,7 @@ enum gnwDeviceError k_dev_emit(const struct gnwDeviceEvent * const eventPtr) {
             for (size_t i = 0; i < eventPtr->dataSizeBytes; ++i) {
                 char byteString[3] = { 0 };
                 uint2hex((addr_t)((uint_8 *)eventPtr->data)[i], byteString);
-                LOG_NBR(" ")
+                LOG_NBR(" ");
                 LOG_NBR(byteString);
             }
         );
@@ -474,7 +474,7 @@ enum gnwDeviceError k_dev_emit(const struct gnwDeviceEvent * const eventPtr) {
                                                                (gnwEventListener_ptr)dev->listener,
                                                                (ptr_t)eventPtr,
                                                                sizeof(struct gnwDeviceEvent),
-                                                               eventPtr->dataSizeBytes + sizeof(struct gnwDeviceEvent),
+                                                               GNW_DEVICEEVENT_ENCODEDSIZE + eventPtr->dataSizeBytes,
                                                                (gnwRunLoopDataEncodingRoutine)gnwDeviceEvent_encode,
                                                                (gnwRunLoopDataEncodingRoutine)dev->decoder);
     switch (callbackErr) {

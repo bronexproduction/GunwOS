@@ -12,6 +12,8 @@
 
 #ifdef _GUNWAPI_KERNEL
 
+#define GNW_DEVICEEVENT_ENCODEDSIZE (sizeof(struct gnwDeviceEvent) - sizeof(ptr_t))
+
 void gnwDeviceEvent_encode(const struct gnwDeviceEvent * const, ptr_t);
 
 #endif // _GUNWAPI_KERNEL

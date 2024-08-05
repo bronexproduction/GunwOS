@@ -89,15 +89,17 @@ enum gnwDeviceError devListen(const size_t identifier,
 }
 
 void gnwDeviceEvent_decode(const ptr_t absDataPtr, struct gnwDeviceEvent * const absEventPtr) {
-    memcopy(absDataPtr, absEventPtr, sizeof(struct gnwDeviceEvent));
-    absEventPtr->data = absDataPtr + sizeof(struct gnwDeviceEvent);
+    absEventPtr->type = *(int_32 *)absDataPtr;
+    absEventPtr->dataSizeBytes = *(size_t *)(absDataPtr + sizeof(int_32));
+    absEventPtr->data = absDataPtr + sizeof(int_32) + sizeof(size_t);
 }
 
 #else
 
 void gnwDeviceEvent_encode(const struct gnwDeviceEvent * const absEventPtr, ptr_t absDataPtr) {
-    memcopy(absEventPtr, absDataPtr, sizeof(struct gnwDeviceEvent));
-    memcopy(absEventPtr->data, absDataPtr + sizeof(struct gnwDeviceEvent), absEventPtr->dataSizeBytes);
+    *(int_32 *)absDataPtr = absEventPtr->type;
+    *(size_t *)(absDataPtr + sizeof(int_32)) = absEventPtr->dataSizeBytes;
+    memcopy(absEventPtr->data, absDataPtr + sizeof(int_32) + sizeof(size_t), absEventPtr->dataSizeBytes);
 }
 
 #endif // _GUNWAPI_KERNEL
