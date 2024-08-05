@@ -132,11 +132,11 @@ void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const procId_t currentP
     * procId - identifier of the process funPtr() is going to be executed in
     * funPtr - function pointer relative to procId process memory
     * p* - parameters of various sizes
-    * pSizeBytes - buffer size in bytes (in case p is a pointer)
-    * pDecodedSizeBytes - size in bytes of the decoded object 
-                          (can be smaller than pSizeBytes, as decoded object fields may point directly to buffer offsets)
-    * encoder - function converting object pointed by 'p' to a bytes array of 'pSizeBytes' bytes
-    * decoder - function converting array of bytes of 'pSizeBytes' bytes to an object (reverse encoder)
+    * pSizeBytes - size in bytes of the decoded object ('p' if 'p' is a pointer)
+                   (can be smaller than pEncodedSizeBytes, as decoded object fields may point directly to buffer offsets)
+    * pEncodedSizeBytes - encoded data size in bytes    
+    * encoder - function converting object pointed by 'p' to a bytes array of 'pEncodedSizeBytes' bytes
+    * decoder - function converting array of bytes of 'pEncodedSizeBytes' bytes to an object (reverse encoder)
     
     Note: encoder/decoder has to align object pointers after copying data to the new location
     
@@ -146,7 +146,7 @@ enum k_proc_error k_proc_callback_invoke_ptr(const procId_t procId,
                                              void (* const funPtr)(ptr_t),
                                              const ptr_t p,
                                              const size_t pSizeBytes,
-                                             const size_t pDecodedSizeBytes,
+                                             const size_t pEncodedSizeBytes,
                                              const gnwRunLoopDataEncodingRoutine encoder,
                                              const gnwRunLoopDataEncodingRoutine decoder);
 

@@ -64,8 +64,8 @@ static enum gnwIpcError deliver(const struct ipcListener * const listenerPtr,
     const enum k_proc_error err = k_proc_callback_invoke_ptr(listenerPtr->procId,
                                                              (gnwEventListener_ptr)listenerPtr->listener,
                                                              (ptr_t)queryPtr,
-                                                             sizeof(struct gnwIpcEndpointQuery) + queryPtr->data.bytes,
                                                              sizeof(struct gnwIpcEndpointQuery),
+                                                             sizeof(struct gnwIpcEndpointQuery) + queryPtr->data.bytes,
                                                              (gnwRunLoopDataEncodingRoutine)gnwIpcEndpointQuery_encode,
                                                              (gnwRunLoopDataEncodingRoutine)listenerPtr->decoder);
     if (err != PE_NONE) {

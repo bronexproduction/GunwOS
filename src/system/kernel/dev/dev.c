@@ -473,8 +473,8 @@ enum gnwDeviceError k_dev_emit(const struct gnwDeviceEvent * const eventPtr) {
     enum k_proc_error callbackErr = k_proc_callback_invoke_ptr(dev->holder, 
                                                                (gnwEventListener_ptr)dev->listener,
                                                                (ptr_t)eventPtr,
-                                                               eventPtr->dataSizeBytes + sizeof(struct gnwDeviceEvent),
                                                                sizeof(struct gnwDeviceEvent),
+                                                               eventPtr->dataSizeBytes + sizeof(struct gnwDeviceEvent),
                                                                (gnwRunLoopDataEncodingRoutine)gnwDeviceEvent_encode,
                                                                (gnwRunLoopDataEncodingRoutine)dev->decoder);
     switch (callbackErr) {
