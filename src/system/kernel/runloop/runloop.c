@@ -282,6 +282,53 @@ enum gnwRunLoopError k_runloop_getPendingItemData(const procId_t procId, ptr_t a
         return GRLE_INVALID_STATE;
     }
 
+    {
+        char msg[29] = "k_runloop_getPendingItemData";
+        LOG(msg);
+    }
+    {
+        char msg[25] = "  proc -         ";
+        uint2dec((addr_t)procId, msg + 9);
+        LOG(msg);
+    }
+    {
+        char msg[128] = "  data buffer pointer -         ";
+        uint2hex((addr_t)dataBufferPtr, msg + 24);
+        LOG(msg);
+    }
+    {
+        char msg[128] = "  item data ptr -         ";
+        uint2dec((addr_t)item->data, msg + 20);
+        LOG(msg);
+    }
+    {
+        char msg[128] = "  item data size bytes -         ";
+        uint2dec((addr_t)item->item.dataSizeBytes, msg + 38);
+        LOG(msg);
+    }
+    {
+        char msg[128] = "  item decoded data size bytes -         ";
+        uint2dec((addr_t)item->item.decodedDataSizeBytes, msg + 46);
+        LOG(msg);
+    }
+    {
+        char msg[128] = "  item decoder -         ";
+        uint2hex((addr_t)item->item.decode, msg + 17);
+        LOG(msg);
+    }
+    {
+        char msg[27] = "  item encoded data bytes:";
+        LOG_BLOCK(
+            LOG_NBR(msg);
+            for (size_t i = 0; i < item->item.dataSizeBytes; ++i) {
+                char byteString[3] = { 0 };
+                uint2hex((addr_t)((uint_8 *)item->data)[i], byteString);
+                LOG_NBR(" ");
+                LOG_NBR(byteString);
+            }
+        );
+    }
+
     memcopy(item->data, absDataBufferPtr, item->item.dataSizeBytes);
     item->dataHandled = true;
     finishIfNeeded(procId, index);
