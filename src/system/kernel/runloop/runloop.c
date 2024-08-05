@@ -293,7 +293,7 @@ enum gnwRunLoopError k_runloop_getPendingItemData(const procId_t procId, ptr_t a
     }
     {
         char msg[128] = "  data buffer pointer -         ";
-        uint2hex((addr_t)dataBufferPtr, msg + 24);
+        uint2hex((addr_t)absDataBufferPtr, msg + 24);
         LOG(msg);
     }
     {
