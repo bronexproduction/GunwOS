@@ -435,7 +435,7 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
     }
     {
         char msg[27] = "  format -         ";
-        uint2dec((addr_t)procId, msg + 11);
+        uint2dec((addr_t)format, msg + 11);
         LOG(msg);
     }
     {

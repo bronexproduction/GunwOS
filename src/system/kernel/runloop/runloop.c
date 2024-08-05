@@ -109,6 +109,9 @@ static void release(struct dispatchItem * const item) {
     memzero(item, sizeof(struct dispatchItem));
 }
 
+#include <log/log.h>
+#include <string.h>
+
 enum gnwRunLoopError k_runloop_dispatch(const procId_t procId,
                                         const size_t token,
                                         const struct gnwRunLoopDispatchItem item,
@@ -148,8 +151,83 @@ enum gnwRunLoopError k_runloop_dispatch(const procId_t procId,
         queueItem->dataHandled = true;
     }
 
+    {
+        char msg[35] = "k_runloop_dispatch - new dispatch ";
+        LOG(msg);
+    }
+    {
+        char msg[32] = "  target proc -         ";
+        uint2dec((addr_t)procId, msg + 16);
+        LOG(msg);
+    }
+    {
+        char msg[26] = "  token -         ";
+        uint2dec((addr_t)token, msg + 10);
+        LOG(msg);
+    }
+    {
+        char msg[128] = "  item format -         ";
+        uint2dec((addr_t)item.format, msg + 17);
+        LOG(msg);
+    }
+    {
+        char msg[128] = "  item routine -         ";
+        uint2hex((addr_t)item.routine._handle, msg + 17);
+        LOG(msg);
+    }
+    {
+        char msg[128] = "  item data size bytes -         ";
+        uint2dec((addr_t)item.dataSizeBytes, msg + 26);
+        LOG(msg);
+    }
+    {
+        char msg[128] = "  item decoded data size bytes -         ";
+        uint2dec((addr_t)item.decodedDataSizeBytes, msg + 34);
+        LOG(msg);
+    }
+    {
+        char msg[128] = "  item decoder -         ";
+        uint2hex((addr_t)item.decode, msg + 17);
+        LOG(msg);
+    }
+    {
+        char msg[128] = "  data pointer -         ";
+        uint2hex((addr_t)data, msg + 17);
+        LOG(msg);
+    }
+    {
+        char msg[14] = "  data bytes:";
+        LOG_BLOCK(
+            LOG_NBR(msg);
+            for (size_t i = 0; i < item.decodedDataSizeBytes; ++i) {
+                char byteString[3] = { 0 };
+                uint2hex((addr_t)((uint_8 *)data)[i], byteString);
+                LOG_NBR(" ");
+                LOG_NBR(byteString);
+            }
+        );
+    }
+    {
+        char msg[128] = "  data encoder -         ";
+        uint2hex((addr_t)dataEncoder, msg + 17);
+        LOG(msg);
+    }
+
     queueItem->item = item;
     dataEncoder(data, queueItem->data);
+    
+    {
+        char msg[17] = "  encoded bytes:";
+        LOG_BLOCK(
+            LOG_NBR(msg);
+            for (size_t i = 0; i < item.dataSizeBytes; ++i) {
+                char byteString[3] = { 0 };
+                uint2hex((addr_t)((uint_8 *)queueItem->data)[i], byteString);
+                LOG_NBR(" ");
+                LOG_NBR(byteString);
+            }
+        );
+    }
     
     return GRLE_NONE;
 }
