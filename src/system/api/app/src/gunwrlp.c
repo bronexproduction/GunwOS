@@ -102,7 +102,7 @@ void runLoopHandle() {
             }
             {
                 char msg[128] = "  decoded data size bytes -         ";
-                uint2dec((addr_t)currentItem.decodedDataSizeBytes, msg + 41);
+                uint2dec((addr_t)currentItem.decodedDataSizeBytes, msg + 28);
                 log(msg);
             }
             {
