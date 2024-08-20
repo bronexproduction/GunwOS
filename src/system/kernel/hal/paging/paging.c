@@ -28,9 +28,9 @@ static __attribute__((aligned(MEM_PAGE_SIZE_BYTES))) struct process_paging_info_
 */
 static struct process_paging_info_t * const initialPagingInfo = &kernelPagingInfo;
 
-void getFreeTable(const procId_t procId,
-                  const virtual_page_table_t * * const pageTable,
-                  struct virtual_page_table_specifier_t * * const pageTableSpecifier) {
+static void getFreeTable(const procId_t procId,
+                         const virtual_page_table_t * * const pageTable,
+                         struct virtual_page_table_specifier_t * * const pageTableSpecifier) {
     if (!pageTable || !pageTableSpecifier) {
         OOPS("Nullptr", );
     }
@@ -332,10 +332,9 @@ void k_paging_init(const struct k_krn_memMapEntry *memMap) {
             sizeof(initialPagingInfo->pageDirectory.byArea.kernel));
 
     /*
-        Reload paging tables
+        Flush TLB
     */
-    __asm__ volatile ("mov %cr3, %eax");
-    __asm__ volatile ("mov %eax, %cr3");
+    k_cpu_tlbFlush();
 
     initializePhysicalMemoryMap(memMap);
 }
@@ -413,6 +412,10 @@ enum k_mem_error k_paging_assign(const procId_t procId,
         newPages = true;
     }
 
+    if (k_cpu_getCR3() == MEM_CONV_LTP(&processPageTables[procId].pageDirectory)) {
+        k_cpu_tlbFlush();
+    }
+
     return overlap ? newPages ? ME_PART_ALREADY_ASSIGNED : ME_ALREADY_ASSIGNED : ME_NONE;
 }
 
@@ -421,17 +424,13 @@ size_t k_paging_switch(const procId_t procId) {
         OOPS("Invalid procId", 0);
     }
 
-    size_t cr3;
+    
     union virtual_page_directory_t * pageDir = procId == KERNEL_PROC_ID ? &kernelPagingInfo.pageDirectory : &processPageTables[procId].pageDirectory;
+    size_t cr3 = k_cpu_getCR3();
 
-    __asm__ volatile ("mov %%cr3, %0" : "=r" (cr3) : );
-    __asm__ volatile ("mov %0, %%cr3" : : "r" (MEM_CONV_LTP(pageDir)));
+    k_cpu_setCR3(MEM_CONV_LTP(pageDir));
 
     return cr3;
-}
-
-void k_paging_switchCR3(const size_t cr3) {
-    __asm__ volatile ("mov %0, %%cr3" : : "r" (cr3));
 }
 
 void k_paging_procCleanup(const procId_t procId) {
