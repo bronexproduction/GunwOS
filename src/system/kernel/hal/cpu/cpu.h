@@ -159,4 +159,19 @@ void k_cpu_loadTaskRegister();
 */
 void k_cpu_halt();
 
+/*
+    Reads current CR3 register value
+*/
+size_t k_cpu_getCR3();
+
+/*
+    Sets new CR3 register value
+*/
+void k_cpu_setCR3(const size_t cr3);
+
+/*
+    Flushes the TLB
+*/
+void k_cpu_tlbFlush();
+
 #endif // CPU_H
