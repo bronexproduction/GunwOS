@@ -10,17 +10,17 @@
 
 #include <types.h>
 
-#define CPU_INTERRUPTS_DISABLE __asm__ volatile ("cli");
+#define _CPU_INTERRUPTS_DISABLE "cli"
+#define CPU_INTERRUPTS_DISABLE __asm__ volatile (_CPU_INTERRUPTS_DISABLE);
 #define CPU_INTERRUPTS_ENABLE __asm__ volatile ("sti");
 #define CPU_INTERRUPT_RETURN __asm__ volatile ("iret");
 
-#define CPU_PUSH { \
-    __asm__ volatile ("pushw %ds"); \
-    __asm__ volatile ("pushw %es"); \
-    __asm__ volatile ("pushw %fs"); \
-    __asm__ volatile ("pushw %gs"); \
-    __asm__ volatile ("pushal"); \
-}
+#define _CPU_PUSH "pushw %ds" "\n" \
+                  "pushw %es" "\n" \
+                  "pushw %fs" "\n" \
+                  "pushw %gs" "\n" \
+                  "pushal"
+#define CPU_PUSH __asm__ volatile (_CPU_PUSH);
 
 #define CPU_POP { \
     __asm__ volatile ("popal"); \
@@ -30,13 +30,12 @@
     __asm__ volatile ("popw %ds"); \
 }
 
-#define CPU_SEG_RESTORE { \
-    __asm__ volatile ("movw %ss, %ax"); \
-    __asm__ volatile ("movw %ax, %ds"); \
-    __asm__ volatile ("movw %ax, %es"); \
-    __asm__ volatile ("movw %ax, %fs"); \
-    __asm__ volatile ("movw %ax, %gs"); \
-}
+#define _CPU_SEG_RESTORE "movw %ss, %ax" "\n" \
+                         "movw %ax, %ds" "\n" \
+                         "movw %ax, %es" "\n" \
+                         "movw %ax, %fs" "\n" \
+                         "movw %ax, %gs" "\n"
+#define CPU_SEG_RESTORE __asm__ volatile (_CPU_SEG_RESTORE);
 
 register ptr_t k_cpu_stackPtr __asm__ ("esp");
 
