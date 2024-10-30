@@ -51,7 +51,6 @@ static GNW_KEYBOARD_EVENT_LISTENER(onKeyboardEvent) {
         log(msg);
     }
 
-
     struct gnwKeyboardManagerEventQuery query;
     query.keyboardEvent = *event;
 

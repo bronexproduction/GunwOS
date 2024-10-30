@@ -306,17 +306,17 @@ enum gnwRunLoopError k_runloop_getPendingItemData(const procId_t procId, ptr_t d
     }
     {
         char msg[128] = "  item data ptr -         ";
-        uint2dec((addr_t)item->data, msg + 20);
+        uint2hex((addr_t)item->data, msg + 20);
         LOG(msg);
     }
     {
         char msg[128] = "  item data size bytes -         ";
-        uint2dec((addr_t)item->item.dataSizeBytes, msg + 38);
+        uint2dec((addr_t)item->item.dataSizeBytes, msg + 25);
         LOG(msg);
     }
     {
         char msg[128] = "  item decoded data size bytes -         ";
-        uint2dec((addr_t)item->item.decodedDataSizeBytes, msg + 46);
+        uint2dec((addr_t)item->item.decodedDataSizeBytes, msg + 33);
         LOG(msg);
     }
     {
@@ -336,7 +336,6 @@ enum gnwRunLoopError k_runloop_getPendingItemData(const procId_t procId, ptr_t d
             }
         );
     }
-
 
     memcopy(item->data, dataBufferPtr, item->item.dataSizeBytes);
     item->dataHandled = true;

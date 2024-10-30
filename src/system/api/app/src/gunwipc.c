@@ -76,15 +76,15 @@ enum gnwIpcError ipcSendDirect(const procId_t procId,
         memcopy(path, msg + 9, strlen(path));
         log(msg);
     }
-    {
-        char msg[9] = "  bytes:";
-        log(msg);
-        for (size_t i = 0; i < data.bytes; ++i) {
-            char byteString[3] = { 0 };
-            uint2hex((addr_t)data.ptr[i], byteString);
-            log(byteString);
-        }
-    }
+    // {
+    //     char msg[9] = "  bytes:";
+    //     log(msg);
+    //     for (size_t i = 0; i < data.bytes; ++i) {
+    //         char byteString[3] = { 0 };
+    //         uint2hex((addr_t)data.ptr[i], byteString);
+    //         log(byteString);
+    //     }
+    // }
 
     enum gnwIpcError replyErr = GIPCE_NONE;
     struct gnwIpcSenderQuery query;

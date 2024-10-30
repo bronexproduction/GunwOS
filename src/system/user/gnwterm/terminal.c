@@ -53,6 +53,8 @@ static void newline() {
 }
 
 static bool trm_append(const char c) {
+    return true;
+
     if (c == '\n') {
         newline();
     } else if (c == '\b') {
