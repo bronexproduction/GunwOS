@@ -92,6 +92,9 @@ enum k_mem_error k_mem_copy(const procId_t srcProcId,
                             const procId_t dstProcId,
                             const ptr_t dstVPtr,
                             const size_t sizeBytes) {
+
+    #warning TODO - no critical section - but is it necessary?
+
     if (!srcVPtr || !dstVPtr) {
         OOPS("Nullptr", ME_INVALID_ARGUMENT);
     }
@@ -102,14 +105,24 @@ enum k_mem_error k_mem_copy(const procId_t srcProcId,
         OOPS("Invalid destination process ID", ME_INVALID_ARGUMENT);
     }
     
-    const procId_t tableProcId = (srcProcId != KERNEL_PROC_ID && dstProcId != KERNEL_PROC_ID) ? KERNEL_PROC_ID : (srcProcId == KERNEL_PROC_ID) ? dstProcId : srcProcId; 
-    if (tableProcId == KERNEL_PROC_ID) {
-        OOPS("Operation not supported", ME_UNKNOWN);
-    }
+    #warning TODO - check if source/target process exist (if needed, as invalid process access will cause PF to trigger)
 
-    MEM_ONTABLE(tableProcId, {
-        memcopy(srcVPtr, dstVPtr, sizeBytes);
-    });
+    const procId_t tableProcId = (srcProcId != KERNEL_PROC_ID && dstProcId != KERNEL_PROC_ID) ? NONE_PROC_ID : (srcProcId == KERNEL_PROC_ID) ? dstProcId : srcProcId; 
+    if (tableProcId == NONE_PROC_ID) {
+        uint_8 byteBuffer;
+        for (size_t byteIndex = 0; byteIndex < sizeBytes; ++byteIndex) {
+            MEM_ONTABLE(srcProcId, {
+                byteBuffer = *((uint_8 *)srcVPtr + byteIndex);
+            });
+            MEM_ONTABLE(dstProcId, {
+                *((uint_8 *)dstVPtr + byteIndex) = byteBuffer;
+            });
+        }
+    } else {
+        MEM_ONTABLE(tableProcId, {
+            memcopy(srcVPtr, dstVPtr, sizeBytes);
+        });
+    }
 
     return ME_NONE;
 }

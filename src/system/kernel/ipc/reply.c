@@ -10,8 +10,9 @@
 #include "binding.h"
 #include "utility.h"
 #include <src/_gunwipc.h>
-#include <mem.h>
+#include <hal/mem/mem.h>
 #include <hal/proc/proc.h>
+#include <hal/paging/paging.h>
 #include <error/panic.h>
 
 enum gnwIpcError k_ipc_reply(const procId_t procId,
@@ -76,8 +77,13 @@ enum gnwIpcError k_ipc_reply(const procId_t procId,
         return e;
     }
 
-    memcopy(infoPtr->data.ptr, reply->replyBufferData.ptr, infoPtr->data.bytes);
-    *(reply->replyErrorPtr) = GIPCE_NONE;
+    k_mem_copy(procId, infoPtr->data.ptr,
+               senderProcId, reply->replyBufferData.ptr,
+               infoPtr->data.bytes);
+    
+    MEM_ONTABLE(senderProcId, {
+        *(reply->replyErrorPtr) = GIPCE_NONE;
+    });
 
     k_ipc_utl_clearReply(infoPtr->token);
     k_ipc_utl_unlockIfAble(senderProcId);
