@@ -99,9 +99,9 @@ static void append(const char c) {
 
 static void onKeyDown(const uint_8 c) {
     if (!user_cli_kmp_defines(user_cli_kmp_default, c)) {
-        // user_cli_puts("[UNKNOWN SCANCODE: ");
-        // user_cli_putin(c);
-        // user_cli_putc(']');
+        user_cli_puts("[UNKNOWN SCANCODE: ");
+        user_cli_putin(c);
+        user_cli_putc(']');
         return;
     }
 
@@ -132,7 +132,7 @@ static void prompt() {
     memzero(cmdBuf, CMD_LEN_MAX * sizeof(char) + 1);
     cmdBufIndex = 0;
 
-    // user_cli_puts("[GunwSH]: ");
+    user_cli_puts("[GunwSH]: ");
 }
 
 static void onSessionDestroy(const struct gnwIpcEndpointQuery * const query) {
@@ -153,7 +153,7 @@ static void cli_init() {
 
 #warning IO_GENERAL_FAILURE not handled at all
 
-    // user_cli_puts("GunwOS 0.0.6_DEV started. (C) Bronex Production 2023\n\n");
+    user_cli_puts("GunwOS 0.0.6_DEV started. (C) Bronex Production 2023\n\n");
 
     prompt();
 }
