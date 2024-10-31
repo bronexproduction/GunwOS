@@ -22,11 +22,20 @@ extern sessionPtr_t keyboardStack[MAX_SESSION];
 extern struct session sessions[MAX_SESSION];
 extern void sessionClear(const sessionPtr_t sessionPtr);
 
-static GNW_KEYBOARD_EVENT_LISTENER(onKeyboardEvent) {
-    CHECKPTR(event);
+static void onDeviceEvent(const struct gnwDeviceEvent *const deviceEvent) {
+    CHECKPTR(deviceEvent);
+    CHECKPTR(deviceEvent->data);
+    if (deviceEvent->dataSizeBytes != 1) {
+        fug(FUG_INCONSISTENT);
+        return;
+    }
 
-    if (event->code != GKEC_KEY_DOWN &&
-        event->code != GKEC_KEY_UP) {
+    struct gnwKeyboardManagerEventQuery query;
+    query.keyboardEvent.code = deviceEvent->type;
+    query.keyboardEvent.key = *(char *)(deviceEvent->data);
+
+    if (query.keyboardEvent.code != GKEC_KEY_DOWN &&
+        query.keyboardEvent.code != GKEC_KEY_UP) {
         fug(FUG_INCONSISTENT);
         return;
     }
@@ -42,17 +51,14 @@ static GNW_KEYBOARD_EVENT_LISTENER(onKeyboardEvent) {
     }
     {
         char msg[24] = "  event code -         ";
-        int2str((addr_t)event->code, msg + 13);
+        int2str((addr_t)query.keyboardEvent.code, msg + 13);
         log(msg);
     }
     {
         char msg[128] = "  event key -         ";
-        uint2dec(event->key, msg + 14);
+        uint2dec(query.keyboardEvent.key, msg + 14);
         log(msg);
     }
-
-    struct gnwKeyboardManagerEventQuery query;
-    query.keyboardEvent = *event;
 
     const enum gnwIpcError e = ipcSendDirect(session->procId, KBDMGR_PATH_EVENT,
                                              (data_t){ (ptr_t)&query, sizeof(struct gnwKeyboardManagerEventQuery) },
@@ -95,7 +101,7 @@ bool keyboard_init() {
         return false;
     }
 
-    e = devListen(keyboardDesc.identifier, (gnwDeviceEventListener)onKeyboardEvent);
+    e = devListen(keyboardDesc.identifier, onDeviceEvent);
     if (e != GDE_NONE) {
         devRelease(keyboardDesc.identifier);
         fug(FUG_UNDEFINED);
