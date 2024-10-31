@@ -45,21 +45,6 @@ static void onDeviceEvent(const struct gnwDeviceEvent *const deviceEvent) {
         return;
     }
 
-    {
-        char msg[29] = "onKeyboardEvent - new event ";
-        log(msg);
-    }
-    {
-        char msg[24] = "  event code -         ";
-        int2str((addr_t)query.keyboardEvent.code, msg + 13);
-        log(msg);
-    }
-    {
-        char msg[128] = "  event key -         ";
-        uint2dec(query.keyboardEvent.key, msg + 14);
-        log(msg);
-    }
-
     const enum gnwIpcError e = ipcSendDirect(session->procId, KBDMGR_PATH_EVENT,
                                              (data_t){ (ptr_t)&query, sizeof(struct gnwKeyboardManagerEventQuery) },
                                              (data_t){ nullptr, 0 },
