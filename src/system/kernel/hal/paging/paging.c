@@ -32,10 +32,10 @@ static void getFreeTable(const procId_t procId,
                          const virtual_page_table_t * * const pageTable,
                          struct virtual_page_table_specifier_t * * const pageTableSpecifier) {
     if (!pageTable || !pageTableSpecifier) {
-        OOPS("Nullptr", );
+        OOPS("Nullptr",);
     }
     if (!k_proc_idIsUser(procId)) {
-        OOPS("Illegal process ID", );
+        OOPS("Illegal process ID",);
     }
 
     for (size_t table = 0; table < MEM_VIRTUAL_USER_PAGE_TABLE_COUNT; ++table) {
