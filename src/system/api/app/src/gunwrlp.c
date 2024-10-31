@@ -47,9 +47,6 @@ void runLoopStart() {
     }
 }
 
-#include <gunwlog.h>
-#include <string.h>
-
 void runLoopHandle() {
     struct gnwRunLoopDispatchItem currentItem;
     while (1) {
@@ -68,52 +65,8 @@ void runLoopHandle() {
                 fug(FUG_INCONSISTENT);
             }
 
-            {
-                char msg[14] = "runLoopHandle";
-                log(msg);
-            }
-            {
-                char msg[128] = "  data buffer pointer -         ";
-                uint2hex((addr_t)data, msg + 24);
-                log(msg);
-            }
-            {
-                char msg[128] = "  data size bytes -         ";
-                uint2dec((addr_t)currentItem.dataSizeBytes, msg + 20);
-                log(msg);
-            }
-            // {
-            //     char msg[19] = "  item data bytes:";
-            //     log(msg);
-            //     for (size_t i = 0; i < currentItem.dataSizeBytes; ++i) {
-            //         char byteString[3] = { 0 };
-            //         uint2hex((addr_t)((uint_8 *)data)[i], byteString);
-            //         log(byteString);
-            //     }
-            // }
-
             uint_8 decodedData[currentItem.decodedDataSizeBytes];
             currentItem.decode(data, decodedData);
-
-            {
-                char msg[128] = "  decoded data buffer pointer -         ";
-                uint2hex((addr_t)data, msg + 32);
-                log(msg);
-            }
-            {
-                char msg[128] = "  decoded data size bytes -         ";
-                uint2dec((addr_t)currentItem.decodedDataSizeBytes, msg + 28);
-                log(msg);
-            }
-            // {
-            //     char msg[27] = "  item decoded data bytes:";
-            //     log(msg);
-            //     for (size_t i = 0; i < currentItem.decodedDataSizeBytes; ++i) {
-            //         char byteString[3] = { 0 };
-            //         uint2hex((addr_t)((uint_8 *)decodedData)[i], byteString);
-            //         log(byteString);
-            //     }
-            // }
 
             execute(currentItem.routine, decodedData);
         } else {
