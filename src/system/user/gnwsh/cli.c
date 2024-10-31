@@ -120,9 +120,9 @@ static void onKeyDown(const uint_8 c) {
 
 static GNW_KEYBOARD_EVENT_LISTENER(onKeyboardEvent) {
     if (event->code == GKEC_KEY_DOWN) {
-        user_cli_kbf_down(*event->key);
+        user_cli_kbf_down(event->key);
     } else if (event->code == GKEC_KEY_UP) {
-        user_cli_kbf_up(*event->key);
+        user_cli_kbf_up(event->key);
     } else {
         fug(FUG_INCONSISTENT);
     }

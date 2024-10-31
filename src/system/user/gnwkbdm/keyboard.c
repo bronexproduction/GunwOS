@@ -47,7 +47,7 @@ static GNW_KEYBOARD_EVENT_LISTENER(onKeyboardEvent) {
     }
     {
         char msg[128] = "  event key -         ";
-        uint2dec((addr_t)event->key, msg + 14);
+        uint2dec(event->key, msg + 14);
         log(msg);
     }
 
