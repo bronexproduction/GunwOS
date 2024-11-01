@@ -104,8 +104,6 @@ enum k_mem_error k_mem_copy(const procId_t srcProcId,
     if (dstProcId != KERNEL_PROC_ID && !k_proc_idIsUser(dstProcId)) {
         OOPS("Invalid destination process ID", ME_INVALID_ARGUMENT);
     }
-    
-    #warning TODO - check if source/target process exist (if needed, as invalid process access will cause PF to trigger)
 
     const procId_t tableProcId = (srcProcId != KERNEL_PROC_ID && dstProcId != KERNEL_PROC_ID) ? NONE_PROC_ID : (srcProcId == KERNEL_PROC_ID) ? dstProcId : srcProcId; 
     if (tableProcId == NONE_PROC_ID) {
