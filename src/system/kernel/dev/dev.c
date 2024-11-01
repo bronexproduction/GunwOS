@@ -328,11 +328,9 @@ enum gnwDeviceError k_dev_listen(const procId_t processId,
                                  const size_t deviceId, 
                                  const gnwDeviceEventListener listener,
                                  const gnwDeviceEventDecoder decoder) {
-    #warning make sure that kernel does not call listener
     if (!listener) {
         return GDE_LISTENER_INVALID;
     }
-    #warning make sure that kernel does not call decoder
     if (!decoder) {
         return GDE_DECODER_INVALID;
     }
