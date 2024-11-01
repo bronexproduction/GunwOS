@@ -93,8 +93,6 @@ enum k_mem_error k_mem_copy(const procId_t srcProcId,
                             const ptr_t dstVPtr,
                             const size_t sizeBytes) {
 
-    #warning TODO - no critical section - but is it necessary?
-
     if (!srcVPtr || !dstVPtr) {
         OOPS("Nullptr", ME_INVALID_ARGUMENT);
     }
