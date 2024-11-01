@@ -29,11 +29,9 @@ enum gnwIpcError k_scr_usr_ipcRegister(const procId_t procId, const struct gnwIp
     if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)descPtr->pathData.ptr, descPtr->pathData.bytes)) {
         OOPS("Reserved zone access violation", GIPCE_UNKNOWN);
     }
-    #warning make sure handlerRoutine is not called by the kernel
     if (!descPtr->handlerRoutine) {
         OOPS("Unexpected null pointer", GIPCE_UNKNOWN);
     }
-    #warning make sure decoder is not called by the kernel
     if (!descPtr->decoder) {
         OOPS("Unexpected null pointer", GIPCE_UNKNOWN);
     }
