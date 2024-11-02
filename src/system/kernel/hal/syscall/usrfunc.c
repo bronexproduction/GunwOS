@@ -9,7 +9,6 @@
 #include <src/_gunwctrl.h>
 #include <src/_gunwipc.h>
 #include <error/fug.h>
-#include <hal/proc/proc.h>
 #include <schedule/schedule.h>
 #include <dev/dev.h>
 #include <ipc/ipc.h>
@@ -28,11 +27,11 @@
     Params (process stack offset):
         * PARAMETER_1_STACK_OFFSET - path to start descriptor pointer (struct gnwCtrlStartDescriptor) relative to caller process memory
 */
-void k_scr_start(const ptr_t refEsp) {
-    const addr_t * const descPtr = userStackSafeValuePointer(refEsp, PARAMETER_1_STACK_OFFSET);
+void k_scr_start(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(addr_t, descPtr, PARAMETER_1_STACK_OFFSET);
 
     extern void k_scr_usr_start(const procId_t procId, const struct gnwCtrlStartDescriptor * const);
-    k_que_dispatch_arch_arch((fPtr_arch_arch)(ptr_t)k_scr_usr_start, k_proc_getCurrentId(), *descPtr);
+    k_que_dispatch_arch_arch((fPtr_arch_arch)(ptr_t)k_scr_usr_start, procId, *descPtr);
 }
 
 /*
@@ -43,12 +42,12 @@ void k_scr_start(const ptr_t refEsp) {
         * PARAMETER_1_STACK_OFFSET - message pointer
         * PARAMETER_2_STACK_OFFSET - message size in bytes
 */
-void k_scr_log(const ptr_t refEsp) {
-    const char * const * const msgPtr = userStackSafeValuePointer(refEsp, PARAMETER_1_STACK_OFFSET);
-    const size_t * const msgBytes = userStackSafeValuePointer(refEsp, PARAMETER_2_STACK_OFFSET);
+void k_scr_log(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(const char * const, msgPtr, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const size_t, msgBytes, PARAMETER_2_STACK_OFFSET);
 
     extern void k_scr_usr_log(const procId_t, const char * const, const size_t);
-    k_scr_usr_log(k_proc_getCurrentId(), *msgPtr, *msgBytes);
+    k_scr_usr_log(procId, *msgPtr, *msgBytes);
 }
 
 /*
@@ -62,11 +61,11 @@ void k_scr_log(const ptr_t refEsp) {
     Return (process stack offset):
         * RESULT_STACK_OFFSET - error code (see enum gnwDeviceError)
 */
-void k_scr_devCharWrite(const ptr_t refEsp) {
-    const size_t * const devId = userStackSafeValuePointer(refEsp, PARAMETER_1_STACK_OFFSET);
-    const char * const character = userStackSafeValuePointer(refEsp, PARAMETER_2_STACK_OFFSET);
+void k_scr_devCharWrite(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(const size_t, devId, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const char, character, PARAMETER_2_STACK_OFFSET);
 
-    *(addr_t *)userStackSafeValuePointer(refEsp, RESULT_STACK_OFFSET) = k_dev_writeChar(k_proc_getCurrentId(), *devId, *character);  
+    SAFE_STACK_RESULT_ARCH_VAL = k_dev_writeChar(procId, *devId, *character);  
 }
 
 /*
@@ -77,20 +76,20 @@ void k_scr_devCharWrite(const ptr_t refEsp) {
         * PARAMETER_1_STACK_OFFSET - status
 
 */
-void k_scr_bye(const ptr_t refEsp) {
-    const int_32 * const status = userStackSafeValuePointer(refEsp, PARAMETER_1_STACK_OFFSET);
+void k_scr_bye(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(const int_32, status, PARAMETER_1_STACK_OFFSET);
     
     extern void k_scr_usr_bye(procId_t, int_32);
-    k_scr_usr_bye(k_proc_getCurrentId(), *status);
+    k_scr_usr_bye(procId, *status);
 }
 
 /*
     Code - 0x04
     Function - WAIT_FOR_EVENT
 */
-void k_scr_waitForEvent(const ptr_t refEsp) {
+void k_scr_waitForEvent(const procId_t procId, const ptr_t refEsp) {
     extern void k_scr_usr_waitForEvent(procId_t);
-    k_que_dispatch_arch((fPtr_arch)k_scr_usr_waitForEvent, k_proc_getCurrentId());
+    k_que_dispatch_arch((fPtr_arch)k_scr_usr_waitForEvent, procId);
 }
 
 /*
@@ -100,9 +99,9 @@ void k_scr_waitForEvent(const ptr_t refEsp) {
     Return (process stack offset):
         * RESULT_STACK_OFFSET - time in milliseconds
 */
-void k_scr_timeMs(const ptr_t refEsp) {
+void k_scr_timeMs(const procId_t procId, const ptr_t refEsp) {
     extern time_t k_tmr_getMs();
-    *(addr_t *)userStackSafeValuePointer(refEsp, RESULT_STACK_OFFSET) = k_tmr_getMs();
+    SAFE_STACK_RESULT_ARCH_VAL = k_tmr_getMs();
 }
 
 /*
@@ -115,11 +114,11 @@ void k_scr_timeMs(const ptr_t refEsp) {
     Return (process stack offset):
         * RESULT_STACK_OFFSET - error code on failure, GIPCE_NONE otherwise
 */
-void k_scr_ipcSend(const ptr_t refEsp) {
-    const struct gnwIpcSenderQuery * const * const queryPtr = userStackSafeValuePointer(refEsp, PARAMETER_1_STACK_OFFSET);
+void k_scr_ipcSend(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(const struct gnwIpcSenderQuery * const, queryPtr, PARAMETER_1_STACK_OFFSET);
 
     extern enum gnwIpcError k_scr_usr_ipcSend(const procId_t procId, const struct gnwIpcSenderQuery * const);
-    *(addr_t *)userStackSafeValuePointer(refEsp, RESULT_STACK_OFFSET) = k_scr_usr_ipcSend(k_proc_getCurrentId(), *queryPtr);
+    SAFE_STACK_RESULT_ARCH_VAL = k_scr_usr_ipcSend(procId, *queryPtr);
 }
 
 /*
@@ -132,11 +131,11 @@ void k_scr_ipcSend(const ptr_t refEsp) {
     Return (process stack offset):
         * RESULT_STACK_OFFSET - error code on failure, GIPCE_NONE otherwise
 */
-void k_scr_ipcRegister(const ptr_t refEsp) {
-    const struct gnwIpcHandlerDescriptor * const * const desc = userStackSafeValuePointer(refEsp, PARAMETER_1_STACK_OFFSET);
+void k_scr_ipcRegister(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(const struct gnwIpcHandlerDescriptor * const, descPtr, PARAMETER_1_STACK_OFFSET);
 
     extern enum gnwIpcError k_scr_usr_ipcRegister(const procId_t procId, const struct gnwIpcHandlerDescriptor * const);
-    *(addr_t *)userStackSafeValuePointer(refEsp, RESULT_STACK_OFFSET) = k_scr_usr_ipcRegister(k_proc_getCurrentId(), *desc);
+    SAFE_STACK_RESULT_ARCH_VAL = k_scr_usr_ipcRegister(procId, *descPtr);
 }
 
 /*
@@ -150,12 +149,12 @@ void k_scr_ipcRegister(const ptr_t refEsp) {
     Return (process stack offset):
         * RESULT_STACK_OFFSET - error code (enum gnwDeviceError)
 */
-void k_scr_devGetById(const ptr_t refEsp) {
-    const size_t * const id = userStackSafeValuePointer(refEsp, PARAMETER_1_STACK_OFFSET);
-    struct gnwDeviceUHADesc * const * const desc = userStackSafeValuePointer(refEsp, PARAMETER_2_STACK_OFFSET);
+void k_scr_devGetById(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(const size_t, id, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(struct gnwDeviceUHADesc * const, descPtr, PARAMETER_2_STACK_OFFSET);
 
     extern enum gnwDeviceError k_scr_usr_devGetById(const procId_t, const size_t, struct gnwDeviceUHADesc * const);
-    *(addr_t *)userStackSafeValuePointer(refEsp, RESULT_STACK_OFFSET) = k_scr_usr_devGetById(k_proc_getCurrentId(), *id, *desc);
+    SAFE_STACK_RESULT_ARCH_VAL = k_scr_usr_devGetById(procId, *id, *descPtr);
 }
 
 /*
@@ -169,12 +168,12 @@ void k_scr_devGetById(const ptr_t refEsp) {
     Return (process stack offset):
         * RESULT_STACK_OFFSET - error code (enum gnwDeviceError)
 */
-void k_scr_devGetByType(const ptr_t refEsp) {
-    const enum gnwDeviceType * const type = userStackSafeValuePointer(refEsp, PARAMETER_1_STACK_OFFSET);
-    struct gnwDeviceUHADesc * const * const desc = userStackSafeValuePointer(refEsp, PARAMETER_2_STACK_OFFSET);
+void k_scr_devGetByType(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(const enum gnwDeviceType, type, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(struct gnwDeviceUHADesc * const, descPtr, PARAMETER_2_STACK_OFFSET);
     
     extern enum gnwDeviceError k_scr_usr_devGetByType(const procId_t, const enum gnwDeviceType, struct gnwDeviceUHADesc * const);
-    *(addr_t *)userStackSafeValuePointer(refEsp, RESULT_STACK_OFFSET) = k_scr_usr_devGetByType(k_proc_getCurrentId(), *type, *desc);
+    SAFE_STACK_RESULT_ARCH_VAL = k_scr_usr_devGetByType(procId, *type, *descPtr);
 }
 
 /*
@@ -187,10 +186,10 @@ void k_scr_devGetByType(const ptr_t refEsp) {
     Return (process stack offset):
         * RESULT_STACK_OFFSET - error code (enum gnwDeviceError)
 */
-void k_scr_devAcquire(const ptr_t refEsp) {
-    const size_t * const devId = userStackSafeValuePointer(refEsp, PARAMETER_1_STACK_OFFSET);
+void k_scr_devAcquire(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(const size_t, devId, PARAMETER_1_STACK_OFFSET);
 
-    *(addr_t *)userStackSafeValuePointer(refEsp, RESULT_STACK_OFFSET) = k_dev_acquireHold(k_proc_getCurrentId(), *devId);
+    SAFE_STACK_RESULT_ARCH_VAL = k_dev_acquireHold(procId, *devId);
 }
 
 /*
@@ -200,10 +199,10 @@ void k_scr_devAcquire(const ptr_t refEsp) {
     Params (process stack offset):
         * PARAMETER_1_STACK_OFFSET - device identifier
 */
-void k_scr_devRelease(const ptr_t refEsp) {
-    const size_t * const devId = userStackSafeValuePointer(refEsp, PARAMETER_1_STACK_OFFSET);
+void k_scr_devRelease(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(const size_t, devId, PARAMETER_1_STACK_OFFSET);
 
-    k_dev_releaseHold(k_proc_getCurrentId(), *devId);
+    k_dev_releaseHold(procId, *devId);
 }
 
 /*
@@ -218,13 +217,13 @@ void k_scr_devRelease(const ptr_t refEsp) {
     Return (process stack offset):
         * RESULT_STACK_OFFSET - error code (enum gnwDeviceError)
 */
-void k_scr_devMemWrite(const ptr_t refEsp) {
-    const size_t * const devId = userStackSafeValuePointer(refEsp, PARAMETER_1_STACK_OFFSET);
-    const ptr_t * const buf = userStackSafeValuePointer(refEsp, PARAMETER_2_STACK_OFFSET);
-    const range_addr_t * const * const rangePtr = userStackSafeValuePointer(refEsp, PARAMETER_3_STACK_OFFSET);
+void k_scr_devMemWrite(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(const size_t, devId, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const ptr_t, buf, PARAMETER_2_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const range_addr_t * const, rangePtr, PARAMETER_3_STACK_OFFSET);
 
     extern enum gnwDeviceError k_scr_usr_devMemWrite(const procId_t, const size_t devId, const ptr_t buf, const range_addr_t * const);
-    *(addr_t *)userStackSafeValuePointer(refEsp, RESULT_STACK_OFFSET) = k_scr_usr_devMemWrite(k_proc_getCurrentId(), *devId, *buf, *rangePtr);
+    SAFE_STACK_RESULT_ARCH_VAL = k_scr_usr_devMemWrite(procId, *devId, *buf, *rangePtr);
 }
 
 /*
@@ -234,10 +233,10 @@ void k_scr_devMemWrite(const ptr_t refEsp) {
     Params (process stack offset):
         * PARAMETER_1_STACK_OFFSET - FUG code
 */
-void k_scr_fug(const ptr_t refEsp) {
-    const enum gnwFugCode * const code = userStackSafeValuePointer(refEsp, PARAMETER_1_STACK_OFFSET);
+void k_scr_fug(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(const enum gnwFugCode, code, PARAMETER_1_STACK_OFFSET);
 
-    k_err_fug(k_proc_getCurrentId(), *code);
+    k_err_fug(procId, *code);
 }
 
 /*
@@ -252,12 +251,12 @@ void k_scr_fug(const ptr_t refEsp) {
     Return (process stack offset):
         * RESULT_STACK_OFFSET - error code (enum gnwDeviceError)
 */
-void k_scr_devListen(const ptr_t refEsp) {
-    const size_t * const devId = userStackSafeValuePointer(refEsp, PARAMETER_1_STACK_OFFSET);
-    const gnwDeviceEventListener * const lsnr = userStackSafeValuePointer(refEsp, PARAMETER_2_STACK_OFFSET);
-    const gnwDeviceEventDecoder * const decoder = userStackSafeValuePointer(refEsp, PARAMETER_3_STACK_OFFSET);
+void k_scr_devListen(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(const size_t, devId, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const gnwDeviceEventListener, lsnr, PARAMETER_2_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const gnwDeviceEventDecoder, decoder, PARAMETER_3_STACK_OFFSET);
 
-    *(addr_t *)userStackSafeValuePointer(refEsp, RESULT_STACK_OFFSET) = k_dev_listen(k_proc_getCurrentId(), *devId, *lsnr, *decoder);
+    SAFE_STACK_RESULT_ARCH_VAL = k_dev_listen(procId, *devId, *lsnr, *decoder);
 }
 
 /*
@@ -272,13 +271,13 @@ void k_scr_devListen(const ptr_t refEsp) {
     Return (process stack offset):
         * RESULT_STACK_OFFSET - error code (enum gnwDeviceError)
 */
-void k_scr_devGetParam(const ptr_t refEsp) {
-    const size_t * const devId = userStackSafeValuePointer(refEsp, PARAMETER_1_STACK_OFFSET);
-    const struct gnwDeviceParamDescriptor * const * const paramDesc = userStackSafeValuePointer(refEsp, PARAMETER_2_STACK_OFFSET);
-    size_t * const * const resultPtr = userStackSafeValuePointer(refEsp, PARAMETER_3_STACK_OFFSET);
+void k_scr_devGetParam(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(const size_t, devId, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const struct gnwDeviceParamDescriptor * const, paramDesc, PARAMETER_2_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(size_t * const, resultPtr, PARAMETER_3_STACK_OFFSET);
 
     extern enum gnwDeviceError k_scr_usr_devGetParam(const procId_t, const size_t, const struct gnwDeviceParamDescriptor * const, size_t * const);
-    *(addr_t *)userStackSafeValuePointer(refEsp, RESULT_STACK_OFFSET) = k_scr_usr_devGetParam(k_proc_getCurrentId(), *devId, *paramDesc, *resultPtr);
+    SAFE_STACK_RESULT_ARCH_VAL = k_scr_usr_devGetParam(procId, *devId, *paramDesc, *resultPtr);
 }
 
 /*
@@ -293,13 +292,13 @@ void k_scr_devGetParam(const ptr_t refEsp) {
     Return (process stack offset):
         * RESULT_STACK_OFFSET - error code (enum gnwDeviceError)
 */
-void k_scr_devSetParam(const ptr_t refEsp) {
-    const size_t * const devId = userStackSafeValuePointer(refEsp, PARAMETER_1_STACK_OFFSET);
-    const struct gnwDeviceParamDescriptor * const * const paramDesc = userStackSafeValuePointer(refEsp, PARAMETER_2_STACK_OFFSET);
-    const size_t * const paramVal = userStackSafeValuePointer(refEsp, PARAMETER_3_STACK_OFFSET);
+void k_scr_devSetParam(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(const size_t, devId, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const struct gnwDeviceParamDescriptor * const, paramDesc, PARAMETER_2_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const size_t, paramVal, PARAMETER_3_STACK_OFFSET);
 
     extern enum gnwDeviceError k_scr_usr_devSetParam(const procId_t, const size_t, const struct gnwDeviceParamDescriptor * const, const size_t);
-    *(addr_t *)userStackSafeValuePointer(refEsp, RESULT_STACK_OFFSET) = k_scr_usr_devSetParam(k_proc_getCurrentId(), *devId, *paramDesc, *paramVal);
+    SAFE_STACK_RESULT_ARCH_VAL = k_scr_usr_devSetParam(procId, *devId, *paramDesc, *paramVal);
 }
 
 /*
@@ -313,11 +312,11 @@ void k_scr_devSetParam(const ptr_t refEsp) {
     Return (process stack offset):
         * RESULT_STACK_OFFSET - enum gnwRunLoopError value on failure, GRLE_NONE otherwise
 */
-void k_scr_runLoopGetItem(const ptr_t refEsp) {
-    struct gnwRunLoopDispatchItem * const * const itemPtr = userStackSafeValuePointer(refEsp, PARAMETER_1_STACK_OFFSET);
+void k_scr_runLoopGetItem(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(struct gnwRunLoopDispatchItem * const, itemPtr, PARAMETER_1_STACK_OFFSET);
 
     extern enum gnwRunLoopError k_scr_usr_runLoopGetItem(const procId_t, struct gnwRunLoopDispatchItem * const);
-    *(addr_t *)userStackSafeValuePointer(refEsp, RESULT_STACK_OFFSET) = k_scr_usr_runLoopGetItem(k_proc_getCurrentId(), *itemPtr);
+    SAFE_STACK_RESULT_ARCH_VAL = k_scr_usr_runLoopGetItem(procId, *itemPtr);
 }
 
 /*
@@ -331,11 +330,11 @@ void k_scr_runLoopGetItem(const ptr_t refEsp) {
     Return (process stack offset):
         * RESULT_STACK_OFFSET - enum gnwRunLoopError code if any, GRLE_NONE otherwise
 */
-void k_scr_runLoopGetData(const ptr_t refEsp) {
-    const ptr_t * const dataBufferPtr = userStackSafeValuePointer(refEsp, PARAMETER_1_STACK_OFFSET);
+void k_scr_runLoopGetData(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(const ptr_t, dataBufferPtr, PARAMETER_1_STACK_OFFSET);
 
     extern enum gnwRunLoopError k_scr_usr_runLoopGetData(const procId_t, ptr_t);
-    *(addr_t *)userStackSafeValuePointer(refEsp, RESULT_STACK_OFFSET) = k_scr_usr_runLoopGetData(k_proc_getCurrentId(), *dataBufferPtr);
+    SAFE_STACK_RESULT_ARCH_VAL = k_scr_usr_runLoopGetData(procId, *dataBufferPtr);
 }
 
 /*
@@ -348,18 +347,18 @@ void k_scr_runLoopGetData(const ptr_t refEsp) {
     Return (process stack offset):
         * RESULT_STACK_OFFSET - enum gnwIpcError code if any, GIPCE_NONE otherwise
 */
-void k_scr_ipcReply(const ptr_t refEsp) {
-    const struct gnwIpcReplyInfo * const * const infoPtr = userStackSafeValuePointer(refEsp, PARAMETER_1_STACK_OFFSET);
+void k_scr_ipcReply(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(const struct gnwIpcReplyInfo * const, infoPtr, PARAMETER_1_STACK_OFFSET);
 
     extern enum gnwIpcError k_scr_usr_ipcReply(const procId_t, const struct gnwIpcReplyInfo * const);
-    *(addr_t *)userStackSafeValuePointer(refEsp, RESULT_STACK_OFFSET) = k_scr_usr_ipcReply(k_proc_getCurrentId(), *infoPtr);
+    SAFE_STACK_RESULT_ARCH_VAL = k_scr_usr_ipcReply(procId, *infoPtr);
 }
 
 /*
     Code - 0x14
     Function - YIELD
 */
-void k_scr_yield(const ptr_t refEsp) {
+void k_scr_yield(const procId_t procId, const ptr_t refEsp) {
     /*
         Change execution to another process
     */

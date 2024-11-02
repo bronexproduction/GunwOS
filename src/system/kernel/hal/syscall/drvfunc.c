@@ -24,10 +24,10 @@
     Return (process stack offset):
         * RESULT_STACK_OFFSET - value read from bus port
 */
-void k_scr_rdb(const ptr_t refEsp) {
-    const uint_16 * const port = userStackSafeValuePointer(refEsp, PARAMETER_1_STACK_OFFSET);
+void k_scr_rdb(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(const uint_16, port, PARAMETER_1_STACK_OFFSET);
 
-    *(addr_t *)userStackSafeValuePointer(refEsp, RESULT_STACK_OFFSET) = k_bus_inb(*port);
+    SAFE_STACK_RESULT_ARCH_VAL = k_bus_inb(*port);
 }
 
 /*
@@ -39,9 +39,9 @@ void k_scr_rdb(const ptr_t refEsp) {
         * PARAMETER_2_STACK_OFFSET - value
 
 */
-void k_scr_wrb(const ptr_t refEsp) {
-    const uint_16 * const port = userStackSafeValuePointer(refEsp, PARAMETER_1_STACK_OFFSET);
-    const uint_8 * const value = userStackSafeValuePointer(refEsp, PARAMETER_2_STACK_OFFSET);
+void k_scr_wrb(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(const uint_16, port, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const uint_8, value, PARAMETER_2_STACK_OFFSET);
 
     k_bus_outb(*port, *value);
 }
@@ -57,8 +57,8 @@ void k_scr_wrb(const ptr_t refEsp) {
     Return (process stack offset):
         * RESULT_STACK_OFFSET - error code if any, otherwise GDE_NONE (see enum gnwDeviceError)
 */
-void k_scr_emit(const ptr_t refEsp) {
-    const struct gnwDeviceEvent * const * const eventPtr = userStackSafeValuePointer(refEsp, PARAMETER_1_STACK_OFFSET);
+void k_scr_emit(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(const struct gnwDeviceEvent * const, eventPtr, PARAMETER_1_STACK_OFFSET);
 
-    *(addr_t *)userStackSafeValuePointer(refEsp, RESULT_STACK_OFFSET) = k_dev_emit(k_proc_getCurrentId(), *eventPtr);
+    SAFE_STACK_RESULT_ARCH_VAL = k_dev_emit(k_proc_getCurrentId(), *eventPtr);
 }

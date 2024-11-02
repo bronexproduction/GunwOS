@@ -10,6 +10,7 @@
 #include <types.h>
 #include <mem.h>
 #include <hal/mem/mem.h>
+#include <hal/proc/proc.h>
 #include <error/panic.h>
 
 #include "params.h"
@@ -19,7 +20,7 @@
 #define DRIVER_SYSCALL_COUNT 3
 #define USER_SYSCALL_COUNT 21
 
-typedef void (*k_scl_function_handler_t)(const ptr_t refEsp);
+typedef void (*k_scl_function_handler_t)(const procId_t procId, const ptr_t refEsp);
 
 /*
     Array of pointers to driver syscall handlers
@@ -67,7 +68,8 @@ static k_scl_function_handler_t syscallReg_USER[USER_SYSCALL_COUNT] = {
     NOTE: Function number has to be put on top of the caller process stack
 */
 void k_scl_syscall_DRIVER(const ptr_t refEsp) {
-    const size_t functionCode = *(size_t *)userStackSafeValuePointer(refEsp, FUNC_CODE_STACK_OFFSET);
+    const procId_t procId = k_proc_getCurrentId();
+    const size_t functionCode = *(size_t *)userStackSafeValuePointer(procId, refEsp, FUNC_CODE_STACK_OFFSET, sizeof(size_t));
     
     if (functionCode >= DRIVER_SYSCALL_COUNT) {
         OOPS_NBR("Requested syscall function code over limit");
@@ -75,7 +77,7 @@ void k_scl_syscall_DRIVER(const ptr_t refEsp) {
         OOPS_NBR("Syscall function code unavailable");
     } else {
         const k_scl_function_handler_t handler = (k_scl_function_handler_t)MEM_CONV_PTL(syscallReg_DRIVER[functionCode]);
-        handler(refEsp);
+        handler(procId, refEsp);
     }
 }
 
@@ -85,7 +87,8 @@ void k_scl_syscall_DRIVER(const ptr_t refEsp) {
     NOTE: Function number has to be put on top of the caller process stack
 */
 void k_scl_syscall_USER(const ptr_t refEsp) {
-    const size_t functionCode = *(size_t *)userStackSafeValuePointer(refEsp, FUNC_CODE_STACK_OFFSET);
+    const procId_t procId = k_proc_getCurrentId();
+    const size_t functionCode = *(size_t *)userStackSafeValuePointer(procId, refEsp, FUNC_CODE_STACK_OFFSET, sizeof(size_t));
     
     if (functionCode >= USER_SYSCALL_COUNT) {
         OOPS_NBR("Requested syscall function code over limit");
@@ -93,6 +96,6 @@ void k_scl_syscall_USER(const ptr_t refEsp) {
         OOPS_NBR("Syscall function code unavailable");
     } else {
         const k_scl_function_handler_t handler = (k_scl_function_handler_t)MEM_CONV_PTL(syscallReg_USER[functionCode]);
-        handler(refEsp);
+        handler(procId, refEsp);
     }
 }

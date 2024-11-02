@@ -7,7 +7,18 @@
 
 #include "params.h"
 
-void * userStackSafeValuePointer(ptr_t refEsp, addr_t offset) {
-    #warning TO BE GUARDED
-    return _USER_STACK_PTR + offset;
+#include <hal/mem/mem.h>
+#include <error/panic.h>
+
+void * userStackSafeValuePointer(const procId_t procId, 
+                                 const ptr_t refEsp,
+                                 const addr_t offset,
+                                 const size_t bytes) {
+    ptr_t valPtr = _USER_STACK_PTR + offset;
+    
+    if (!k_mem_bufferZoneValidForProc(procId, valPtr, bytes)) {
+        OOPS("Reserved zone stack access violation", nullptr);
+    }
+
+    return valPtr;
 }

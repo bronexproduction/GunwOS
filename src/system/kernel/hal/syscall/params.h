@@ -32,6 +32,14 @@
 #define PARAMETER_2_STACK_OFFSET    8
 #define PARAMETER_3_STACK_OFFSET    12
 
-void * userStackSafeValuePointer(ptr_t refEsp, addr_t offset);
+#define SAFE_STACK_VAL_PTR(TYPE, NAME, OFFSET) \
+    TYPE * const NAME = userStackSafeValuePointer(procId, refEsp, OFFSET, sizeof(TYPE));
+#define SAFE_STACK_RESULT_ARCH_VAL \
+    *(addr_t *)userStackSafeValuePointer(procId, refEsp, RESULT_STACK_OFFSET, sizeof(addr_t))
+
+void * userStackSafeValuePointer(const procId_t procId, 
+                                 const ptr_t refEsp,
+                                 const addr_t offset,
+                                 const size_t bytes);
 
 #endif // PARAMS_H
