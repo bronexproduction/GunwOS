@@ -451,8 +451,30 @@ void k_paging_procCleanup(const procId_t procId) {
         LOG2("  Free memory (bytes) before: ", bytesString);
     }
 
-    #warning TODO: free physical pages used by process
+    /*
+        Free physical pages
+    */
+    for(size_t pageTableIndex = 0; pageTableIndex < MEM_VIRTUAL_USER_PAGE_TABLE_COUNT; ++pageTableIndex) {
+        if (!processPageTables[procId].pageTableInfo[pageTableIndex].used) {
+            continue;
+        }
 
+        virtual_page_table_t * pageTablePtr = &processPageTables[procId].pageTables[pageTableIndex];
+
+        for (size_t pageIndex = 0; pageIndex < MEM_MAX_PAGE_ENTRY; ++pageIndex) {
+            struct virtual_page_specifier_t * page = pageTablePtr[pageIndex];
+            
+            if (!page->present) {
+                continue;
+            }
+            
+            #warning TODO: free associated physical page
+        }
+    }
+
+    /*
+        Clean process paging info
+    */
     memzero(processPageTables[procId].pageDirectory.byArea.user,
      sizeof(processPageTables[procId].pageDirectory.byArea.user));
 
