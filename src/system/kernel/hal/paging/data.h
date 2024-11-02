@@ -69,7 +69,8 @@ struct __attribute__((packed)) virtual_page_table_specifier_t {
 typedef struct __attribute__((packed)) physical_page_specifier_t {
     bool present    :1; // Installed physical RAM
     bool available  :1; // Available (non-reserved) physical RAM
-    bool free       :1; // Free
+    bool reserved   :1; // Reserved for kernel-use only
+    size_t assignCount; // Number of processes already having the page assigned
 } physical_page_table_t[MEM_PHYSICAL_PAGE_COUNT];
 
 union __attribute__((packed)) virtual_page_directory_t {

@@ -66,14 +66,21 @@ static struct virtual_page_specifier_t * getPageSpecifier(const procId_t procId,
     return &(*pageTable)[MEM_TABLE_INDEX_OF_PAGE(page)];
 }
 
-static enum k_mem_error getFreePhysicalPage(size_t * const pageIndexPtr) {
+static bool isPhysicalPageFree(const struct physical_page_specifier_t * const pageInfoPtr) {
+    return pageInfoPtr->present &&
+           pageInfoPtr->available &&
+           !pageInfoPtr->reserved &&
+           !pageInfoPtr->assignCount;
+}
+
+static enum k_mem_error getFreePhysicalPageIndex(size_t * const pageIndexPtr) {
     if (!pageIndexPtr) {
         OOPS("Nullptr", ME_UNKNOWN);
     }
 
     for (size_t page = 0; page < MEM_PHYSICAL_PAGE_COUNT; ++page) {
-        const struct physical_page_specifier_t * const pageInfo = &physicalPages[page];
-        if (pageInfo->free) {
+        const struct physical_page_specifier_t * const pageInfoPtr = &physicalPages[page];
+        if (isPhysicalPageFree(pageInfoPtr)) {
             *pageIndexPtr = page;
             return ME_NONE;
         }
@@ -97,6 +104,9 @@ static void assignVirtualPage(struct virtual_page_specifier_t * const pageEntryP
     if (!pageEntryPtr) {
         OOPS("Nullptr",);
     }
+    if (!physicalPageIndex) {
+        OOPS("Null physical page index",);
+    }
     if (physicalPageIndex >= MEM_MAX_PHYSICAL_PAGE_COUNT) {
         OOPS("Invalid physical page index",);
     }
@@ -106,17 +116,81 @@ static void assignVirtualPage(struct virtual_page_specifier_t * const pageEntryP
     if (!physicalPageSpecifier->present) {
         OOPS("Page index outside physical memory",);
     }
-    if (user) {
-        if (!physicalPageSpecifier->available) {
-            OOPS("Physical page unavailable",);
-        }
-        if (!physicalPageSpecifier->free) {
-            OOPS("Physical page already assigned",);
-        }
+    if (!physicalPageSpecifier->available) {
+        OOPS("Physical page unavailable",);
+    }
+    if (physicalPageSpecifier->reserved) {
+        OOPS("Physical page reserved",);
+    }
+    if (physicalPageSpecifier->assignCount) {
+        OOPS("Physical page already assigned",);
     }
 
-    physicalPageSpecifier->free = false;
+    ++(physicalPageSpecifier->assignCount);
     unsafe_assignVirtualPage(pageEntryPtr, physicalPageIndex, user);
+}
+
+static void unsafe_cleanVirtualPage(struct virtual_page_specifier_t * const pageEntryPtr) {
+    pageEntryPtr->frameAddress = 0;
+    pageEntryPtr->present = false;
+    pageEntryPtr->writable = false;
+    pageEntryPtr->user = false;
+}
+
+static void releaseVirtualPage(const procId_t procId,
+                               const size_t pageTableIndex,
+                               const size_t pageIndex,
+                               const size_t clean) {
+    if (!k_proc_idIsUser(procId)) {
+        OOPS("Illegal process ID",);
+    }
+    if (pageTableIndex > MEM_VIRTUAL_USER_PAGE_TABLE_COUNT) {
+        OOPS("Illegal page table index",);
+    }
+    if (pageIndex > MEM_MAX_PAGE_ENTRY) {
+        OOPS("Illegal page index",);
+    }
+
+    virtual_page_table_t * pageTablePtr = &processPageTables[procId].pageTables[pageTableIndex];
+    struct virtual_page_specifier_t * pageEntryPtr = &(*pageTablePtr)[pageIndex];
+
+    if (!pageEntryPtr->frameAddress) {
+        OOPS("Null physical page index",);
+    }
+    if (pageEntryPtr->frameAddress > MEM_PHYSICAL_PAGE_COUNT) {
+        OOPS("Illegal physical page index",);
+    }
+
+    if (clean) {
+        if (!pageEntryPtr->present) {
+            OOPS("Page not present already",);
+        }
+        if (!pageEntryPtr->user) {
+            OOPS("Page not user accessible",);
+        }
+
+        unsafe_cleanVirtualPage(pageEntryPtr);
+    }
+
+    /*
+        Decrement physical page mapping count
+    */
+    struct physical_page_specifier_t * physicalPageEntry = &physicalPages[pageEntryPtr->frameAddress];
+
+    if (!physicalPageEntry->assignCount) {
+        OOPS("Physical page assign count inconsistency",);
+    }
+    if (physicalPageEntry->reserved) {
+        OOPS("Physical page reserved",);
+    }
+    if (!physicalPageEntry->available) {
+        OOPS("Physical page not available",);
+    }
+    if (!physicalPageEntry->present) {
+        OOPS("Physical page not present",);
+    }
+
+    --(physicalPageEntry->assignCount);
 }
 
 static void assignDirEntry(struct virtual_page_specifier_t * const dirEntryPtr,
@@ -206,7 +280,8 @@ static void initializePhysicalMemoryMap(const struct k_krn_memMapEntry *memMap) 
             struct physical_page_specifier_t * entry = &physicalPages[page];
             entry->present = true;
             entry->available = usable;
-            entry->free = entry->available && !reserved;
+            entry->reserved = reserved;
+            entry->assignCount = reserved;
         }
     }
 
@@ -256,7 +331,8 @@ static void unsafe_initializePagingInfo(struct process_paging_info_t * const pag
 size_t k_paging_getFreePages() {
     size_t freePages = 0;
     for (size_t page = 0; page < MEM_PHYSICAL_PAGE_COUNT; ++page) {
-        if (physicalPages[page].free) {
+        const struct physical_page_specifier_t * const pageInfoPtr = &physicalPages[page];
+        if (isPhysicalPageFree(pageInfoPtr)) {
             ++freePages;
         }
     }
@@ -398,8 +474,8 @@ enum k_mem_error k_paging_assign(const procId_t procId,
             return ME_UNAVAILABLE;
         }
 
-        size_t physicalPage;
-        const enum k_mem_error err = getFreePhysicalPage(&physicalPage);
+        size_t physicalPageIndex;
+        const enum k_mem_error err = getFreePhysicalPageIndex(&physicalPageIndex);
         if (err != ME_NONE) {
             if (err == ME_OUT_OF_MEMORY) {
                 return ME_OUT_OF_MEMORY;
@@ -408,7 +484,7 @@ enum k_mem_error k_paging_assign(const procId_t procId,
             return ME_UNKNOWN;
         }
 
-        assignVirtualPage(pageEntry, physicalPage, true);
+        assignVirtualPage(pageEntry, physicalPageIndex, true);
         newPages = true;
     }
 
@@ -433,6 +509,7 @@ size_t k_paging_switch(const procId_t procId) {
 }
 
 void k_paging_procCleanup(const procId_t procId) {
+
     /*
         Free all the pages taken by the process
     */
@@ -443,6 +520,7 @@ void k_paging_procCleanup(const procId_t procId) {
 
     {
         char bytesString[11];
+        memzero(bytesString, 11);
         uint2str(procId, bytesString, 10);
         LOG3("Process ", bytesString, " cleanup");
         size_t freeBytes = k_mem_getFreeBytes();
@@ -452,9 +530,10 @@ void k_paging_procCleanup(const procId_t procId) {
     }
 
     /*
-        Free physical pages
+        Release virtual pages
     */
-    for(size_t pageTableIndex = 0; pageTableIndex < MEM_VIRTUAL_USER_PAGE_TABLE_COUNT; ++pageTableIndex) {
+
+    for (size_t pageTableIndex = 0; pageTableIndex < MEM_VIRTUAL_USER_PAGE_TABLE_COUNT; ++pageTableIndex) {
         if (!processPageTables[procId].pageTableInfo[pageTableIndex].used) {
             continue;
         }
@@ -462,19 +541,18 @@ void k_paging_procCleanup(const procId_t procId) {
         virtual_page_table_t * pageTablePtr = &processPageTables[procId].pageTables[pageTableIndex];
 
         for (size_t pageIndex = 0; pageIndex < MEM_MAX_PAGE_ENTRY; ++pageIndex) {
-            struct virtual_page_specifier_t * page = pageTablePtr[pageIndex];
-            
-            if (!page->present) {
+            if (!(*pageTablePtr)[pageIndex].present) {
                 continue;
             }
-            
-            #warning TODO: free associated physical page
+
+            releaseVirtualPage(procId, pageTableIndex, pageIndex, false);
         }
     }
 
     /*
         Clean process paging info
     */
+
     memzero(processPageTables[procId].pageDirectory.byArea.user,
      sizeof(processPageTables[procId].pageDirectory.byArea.user));
 
