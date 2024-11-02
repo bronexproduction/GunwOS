@@ -423,7 +423,6 @@ size_t k_paging_switch(const procId_t procId) {
     if (!k_proc_idIsUser(procId) && procId != KERNEL_PROC_ID) {
         OOPS("Invalid procId", 0);
     }
-
     
     union virtual_page_directory_t * pageDir = procId == KERNEL_PROC_ID ? &kernelPagingInfo.pageDirectory : &processPageTables[procId].pageDirectory;
     size_t cr3 = k_cpu_getCR3();
@@ -438,20 +437,36 @@ void k_paging_procCleanup(const procId_t procId) {
         Free all the pages taken by the process
     */
 
+    if (!k_proc_idIsUser(procId)) {
+        OOPS("Invalid paging cleanup procId",);
+    }
 
-    // /*
-    //     Clear user directory entries
-    // */
-    // memzero(&processPageTables[procId].pageDirectory.user, sizeof(struct virtual_page_specifier_t) * MEM_VIRTUAL_USER_MAX_PAGE_TABLE_COUNT);
+    {
+        char bytesString[11];
+        uint2str(procId, bytesString, 10);
+        LOG3("Process ", bytesString, " cleanup");
+        size_t freeBytes = k_mem_getFreeBytes();
+        memzero(bytesString, 11);
+        uint2str(freeBytes, bytesString, 10);
+        LOG2("  Free memory (bytes) before: ", bytesString);
+    }
 
-    // /*
-    //     Clear user page tables
-    // */
-    // memzero(&processPageTables[procId].pageTables, sizeof(virtual_page_table_t) * MEM_VIRTUAL_USER_PAGE_TABLE_COUNT);
-        
-    // /*
-    //     Clear user page table info
-    // */
-    // memzero(&processPageTables[procId].pageTables, sizeof(virtual_page_table_t) * MEM_VIRTUAL_USER_PAGE_TABLE_COUNT);
-#warning TODO
+    #warning TODO: free physical pages used by process
+
+    memzero(processPageTables[procId].pageDirectory.byArea.user,
+     sizeof(processPageTables[procId].pageDirectory.byArea.user));
+
+    memzero(processPageTables[procId].pageTables,
+     sizeof(processPageTables[procId].pageTables));
+
+    memzero(processPageTables[procId].pageTableInfo,
+     sizeof(processPageTables[procId].pageTableInfo));
+
+    {
+        char bytesString[11];
+        size_t freeBytes = k_mem_getFreeBytes();
+        memzero(bytesString, 11);
+        uint2str(freeBytes, bytesString, 10);
+        LOG2("  Free memory (bytes) after: ", bytesString);
+    }
 }
