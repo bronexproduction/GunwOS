@@ -238,7 +238,11 @@ static void initializePhysicalMemoryMap(const struct k_krn_memMapEntry *memMap) 
                 Entry over 4GiB boundary - to be ignored
             */
             continue;
-        } else if (entry->lengthHigh || (entry->baseAddrLow + entry->lengthLow) < entry->baseAddrLow) {
+        } else if (!entry->lengthHigh && !entry->lengthLow) {
+            /*
+                Zero-length region
+            */
+        } else if (entry->lengthHigh || (entry->baseAddrLow + entry->lengthLow) <= entry->baseAddrLow) {
             /*
                 Entry reaches 4GiB boundary - to be limited
             */
@@ -257,14 +261,7 @@ static void initializePhysicalMemoryMap(const struct k_krn_memMapEntry *memMap) 
         const addr_t pageAlignedStartNext = limit ? 0 : alignedr(entry->baseAddrLow + entry->lengthLow, MEM_PAGE_SIZE_BYTES, !usable);
         const bool flat = !pageAlignedStartNext && !pageAlignedStart;
 
-        if (flat) {
-            #warning TODO
-            // All memory mapped
-            // or only a tiny area at the bottom of memory
-            //
-            // First case: allow
-            // Second case: continue;
-        } else if (pageAlignedStartNext <= pageAlignedStart && !limit) {
+        if (pageAlignedStartNext <= pageAlignedStart && !limit) {
             continue;
         }
 
