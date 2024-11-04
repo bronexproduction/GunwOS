@@ -37,7 +37,7 @@ static void failReply(const size_t token) {
     if (reply->handlerProcId == NONE_PROC_ID) {
         OOPS("Unexpected empty IPC slot on error",);
     }
-    if (!reply->absReplyErrorPtr) {
+    if (!reply->replyErrorPtr) {
         OOPS("Unexpected reply error nullptr",);
     }
     const procId_t senderProcId = reply->senderProcId;
@@ -45,7 +45,7 @@ static void failReply(const size_t token) {
         OOPS("Unexpected sender process ID on IPC reply",);
     }
 
-    *(reply->absReplyErrorPtr) = GIPCE_IGNORED;
+    *(reply->replyErrorPtr) = GIPCE_IGNORED;
 
     k_ipc_utl_clearReply(token);
     k_ipc_utl_unlockIfAble(senderProcId);

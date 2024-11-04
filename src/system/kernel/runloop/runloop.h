@@ -18,11 +18,11 @@ enum gnwRunLoopError k_runloop_dispatch(const procId_t procId,
                                         const ptr_t data,
                                         const gnwRunLoopDataEncodingRoutine dataEncoder);
 enum gnwRunLoopError k_runloop_getPendingItem(const procId_t procId,
-                                              struct gnwRunLoopDispatchItem * const absItemPtr);
+                                              struct gnwRunLoopDispatchItem * const itemPtr);
 enum gnwRunLoopError k_runloop_getPendingItemDataSizeBytes(const procId_t procId,
                                                            size_t * const dataSizeBytes);
 enum gnwRunLoopError k_runloop_getPendingItemData(const procId_t procId,
-                                                  ptr_t absDataBufferPtr);
+                                                  ptr_t dataBufferPtr);
 bool k_runloop_isEmpty(const procId_t procId);
 void k_runloop_procCleanup(const procId_t procId);
 

@@ -34,7 +34,7 @@ struct k_vid_character {
     char attr;
 };
 
-static const volatile ptr_t VIDEO_HW_MEM = ((volatile ptr_t)MEM_CONV_ABS(0xb8000));
+static const volatile ptr_t VIDEO_HW_MEM = ((volatile ptr_t)MEM_CONV_PTL(0xb8000));
 #define VIDEO_HW_ROWS   25
 #define VIDEO_HW_COLS   80
 
@@ -45,11 +45,11 @@ static void switchToVGATextMode() {
     // Not implemented yet
 }
 
-static inline ptr_t charAt(size_t row, size_t col) {
+static inline byte_t * charAt(size_t row, size_t col) {
     return VIDEO_HW_OFFSET(row, col);
 }
 
-static inline ptr_t attrAt(size_t row, size_t col) {
+static inline byte_t * attrAt(size_t row, size_t col) {
     return VIDEO_HW_OFFSET(row, col) + 1;
 }
 

@@ -37,7 +37,7 @@ static bool receivesKernelNotifications(const procId_t procId) {
 }
 
 enum gnwIpcError k_ipc_register(const procId_t procId,
-                                const data_t absPathData,
+                                const data_t pathData,
                                 const gnwIpcListener handlerRoutine,
                                 const gnwIpcEndpointQueryDecoder decoder,
                                 const bool bindingRequired,
@@ -45,22 +45,25 @@ enum gnwIpcError k_ipc_register(const procId_t procId,
     if (procId <= KERNEL_PROC_ID) {
         return GIPCE_INVALID_PARAMETER;
     }
-    if (!absPathData.ptr) {
+    if (!pathData.ptr) {
         OOPS("Nullptr", GIPCE_UNKNOWN);
     }
-    if (!absPathData.bytes || absPathData.bytes > GNW_PATH_IPC_MAX_LENGTH) {
+    if (!pathData.bytes || pathData.bytes > GNW_PATH_IPC_MAX_LENGTH) {
         return GIPCE_INVALID_PATH;
     }
     if (!handlerRoutine) {
+        return GIPCE_INVALID_PARAMETER;
+    }
+    if (!decoder) {
         return GIPCE_INVALID_PARAMETER;
     }
     if (!bindingRequired && permissionMask) {
         return GIPCE_INVALID_PARAMETER;
     }
 
-    enum gnwIpcListenerType type = k_ipc_utl_pathGlobalValidate(absPathData) ? GILT_GLOBAL : GILT_NONE;
-    type |= k_ipc_utl_pathDirectValidate(absPathData) ? GILT_DIRECT : GILT_NONE;
-    type |= k_ipc_utl_pathNotificationValidate(absPathData) ? GILT_NOTIFICATION : GILT_NONE;
+    enum gnwIpcListenerType type = k_ipc_utl_pathGlobalValidate(pathData) ? GILT_GLOBAL : GILT_NONE;
+    type |= k_ipc_utl_pathDirectValidate(pathData) ? GILT_DIRECT : GILT_NONE;
+    type |= k_ipc_utl_pathNotificationValidate(pathData) ? GILT_NOTIFICATION : GILT_NONE;
 
     if (__builtin_popcount(type) != 1) {
         return GIPCE_INVALID_PATH;
@@ -89,7 +92,7 @@ enum gnwIpcError k_ipc_register(const procId_t procId,
         Check if global listener already exists
     */
 
-    if ((type == GILT_GLOBAL) && k_ipc_utl_nextListenerIndexForPath(absPathData, nullptr) < MAX_IPC_LISTENER) {
+    if ((type == GILT_GLOBAL) && k_ipc_utl_nextListenerIndexForPath(pathData, nullptr) < MAX_IPC_LISTENER) {
         return GIPCE_ALREADY_EXISTS;
     }
 
@@ -99,7 +102,7 @@ enum gnwIpcError k_ipc_register(const procId_t procId,
     }
 
     ipcListenerRegister[index].procId = procId;
-    memcopy(absPathData.ptr, ipcListenerRegister[index].path, absPathData.bytes);
+    memcopy(pathData.ptr, ipcListenerRegister[index].path, pathData.bytes);
     ipcListenerRegister[index].type = type;
     ipcListenerRegister[index].listener = handlerRoutine;
     ipcListenerRegister[index].decoder = decoder;

@@ -43,7 +43,7 @@ enum gnwDeviceError attachToTextDisplay(const struct gnwDisplayDescriptor * cons
 
     enum gnwDeviceError e = attachToDisplay(TEXT, displayDescriptor);
     
-    if (e) {
+    if (e != GDE_NONE) {
         return e;
     }
 

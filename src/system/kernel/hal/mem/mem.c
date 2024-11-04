@@ -8,69 +8,121 @@
 #include "mem.h"
 #include <mem.h>
 #include <hal/proc/proc.h>
+#include <hal/paging/paging.h>
 #include <error/panic.h>
-
-struct k_mem_zone {
-    ptr_t startPtr;
-    ptr_t endPtr;
-    size_t sizeBytes;
-};
 
 void k_mem_init() {
 }
 
-static struct k_mem_zone zoneForProc(const procId_t procId) {
-    struct k_proc_process proc = k_proc_getInfo(procId);
-    struct k_mem_zone result;
-    memzero(&result, sizeof(struct k_mem_zone));
-
-    if (proc.state == PS_NONE) {
-        OOPS("Invalid process state", result);
+ptr_t k_mem_physicalToLinear(const ptr_t physAddr) {
+    if ((addr_t)physAddr >= MEM_VIRTUAL_RESERVED_KERNEL_MEM) {
+        OOPS("Kernel address out of range", nullptr);
     }
-    
-    switch (proc.dpl) { 
-        case DPL_0:
-            result.startPtr = GDT_SEGMENT_START(r0data);
-            result.endPtr = GDT_SEGMENT_END(r0data);
-            result.sizeBytes = GDT_LIMIT_BYTES(r0data);
-            break;
-        case DPL_3:
-            result.startPtr = GDT_SEGMENT_START(r3data);
-            result.endPtr = GDT_SEGMENT_END(r3data);
-            result.sizeBytes = GDT_LIMIT_BYTES(r3data);
-            break;
-        default:
-            break;
-    }
-
-    return result;
+    return (ptr_t)(MEM_CONV_PTL(physAddr));
 }
 
-ptr_t k_mem_absForProc(const procId_t procId, const ptr_t relPtr) {
-    if (!relPtr) {
-        OOPS("Invalid pointer", nullptr);
-    }
-
-    return relPtr + (addr_t)zoneForProc(procId).startPtr;
+size_t k_mem_getFreeBytes() {
+    return k_paging_getFreePages() * MEM_PAGE_SIZE_BYTES;
 }
 
-bool k_mem_bufInZoneForProc(const procId_t procId, const ptr_t absPtr, const size_t bufSize) {
-    // check buffer bounds
-    // there might be a better way to do it
-    // but will do, at least until virtual memory gets implemented
-    const struct k_mem_zone procZone = zoneForProc(procId);
-    if (absPtr < procZone.startPtr || procZone.endPtr < absPtr) {
+bool k_mem_bufferZoneValidForProc(const procId_t procId,
+                                  const ptr_t bufferPtr,
+                                  const size_t bufferSizeBytes) {
+    if (!bufferSizeBytes) {
+        return true;
+    }
+    if (!bufferPtr) {
         return false;
     }
-    
-    const size_t trailingBytes = procZone.endPtr - absPtr + 1;
-    if (bufSize > trailingBytes) {
+    if (procId == KERNEL_PROC_ID) {
+        return true;
+    }
+    if (!k_proc_idIsUser(procId)) {
+        OOPS("Invalid process identifier", false);
+    }
+
+    ptr_t bufferEndPtr = bufferPtr + bufferSizeBytes - 1;
+    if (bufferEndPtr < bufferPtr) {
+        return false;
+    }
+    if (bufferEndPtr >= (ptr_t)(0 - MEM_VIRTUAL_RESERVED_KERNEL_MEM)) {
         return false;
     }
 
     return true;
 }
 
+enum k_mem_error k_mem_gimme(const procId_t procId,
+                             const ptr_t vPtr,
+                             const size_t sizeBytes) {
+    if (!k_proc_idIsUser(procId)) {
+        return ME_INVALID_ARGUMENT;
+    }
+
+    ptr_t vEnd = vPtr + sizeBytes;
+    if (vEnd <= vPtr) {
+        return ME_INVALID_ARGUMENT;
+    }
+    if ((addr_t)vEnd > ((addr_t)0 - MEM_VIRTUAL_RESERVED_KERNEL_MEM)) {
+        return ME_INVALID_ARGUMENT;
+    }
+
+    size_t startPage = MEM_PAGE_OF_ADDR((addr_t)vPtr);
+    size_t pageCount = MEM_PAGE_OF_ADDR((addr_t)aligned((addr_t)vEnd, MEM_PAGE_SIZE_BYTES)) - startPage;
+
+    return k_paging_assign(procId, startPage, pageCount);
+}
+
+enum k_mem_error k_mem_zero(const procId_t procId,
+                            const ptr_t vPtr,
+                            const size_t sizeBytes) {
+    if (!k_proc_idIsUser(procId)) {
+        return ME_INVALID_ARGUMENT;
+    }
+    
+    MEM_ONTABLE(procId, {
+        memzero(vPtr, sizeBytes);
+    });
+
+    return ME_NONE;
+}
+
+enum k_mem_error k_mem_copy(const procId_t srcProcId,
+                            const ptr_t srcVPtr,
+                            const procId_t dstProcId,
+                            const ptr_t dstVPtr,
+                            const size_t sizeBytes) {
+
+    if (!srcVPtr || !dstVPtr) {
+        OOPS("Nullptr", ME_INVALID_ARGUMENT);
+    }
+    if (srcProcId != KERNEL_PROC_ID && !k_proc_idIsUser(srcProcId)) {
+        OOPS("Invalid source process ID", ME_INVALID_ARGUMENT);
+    }
+    if (dstProcId != KERNEL_PROC_ID && !k_proc_idIsUser(dstProcId)) {
+        OOPS("Invalid destination process ID", ME_INVALID_ARGUMENT);
+    }
+
+    const procId_t tableProcId = (srcProcId != KERNEL_PROC_ID && dstProcId != KERNEL_PROC_ID) ? NONE_PROC_ID : (srcProcId == KERNEL_PROC_ID) ? dstProcId : srcProcId; 
+    if (tableProcId == NONE_PROC_ID) {
+        uint_8 byteBuffer;
+        for (size_t byteIndex = 0; byteIndex < sizeBytes; ++byteIndex) {
+            MEM_ONTABLE(srcProcId, {
+                byteBuffer = *((uint_8 *)srcVPtr + byteIndex);
+            });
+            MEM_ONTABLE(dstProcId, {
+                *((uint_8 *)dstVPtr + byteIndex) = byteBuffer;
+            });
+        }
+    } else {
+        MEM_ONTABLE(tableProcId, {
+            memcopy(srcVPtr, dstVPtr, sizeBytes);
+        });
+    }
+
+    return ME_NONE;
+}
+
 void k_mem_procCleanup(const procId_t procId) {
-    #warning NOTHING TO BE DONE YET
+    k_paging_procCleanup(procId);
 }

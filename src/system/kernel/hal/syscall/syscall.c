@@ -9,21 +9,25 @@
 
 #include <types.h>
 #include <mem.h>
+#include <hal/mem/mem.h>
+#include <hal/proc/proc.h>
 #include <error/panic.h>
 
+#include "params.h"
 #include "drvfunc.h"
 #include "usrfunc.h"
-#include "params.h"
 
 #define DRIVER_SYSCALL_COUNT 3
 #define USER_SYSCALL_COUNT 21
+
+typedef void (*k_scl_function_handler_t)(const procId_t procId, const ptr_t refEsp);
 
 /*
     Array of pointers to driver syscall handlers
 
     Array index corresponds to syscall function code
 */
-static void (*syscallReg_DRIVER[DRIVER_SYSCALL_COUNT])() = {
+static k_scl_function_handler_t syscallReg_DRIVER[DRIVER_SYSCALL_COUNT] = {
     /* 0x00 */ (void *)k_scr_rdb,
     /* 0x01 */ (void *)k_scr_wrb,
     /* 0x02 */ (void *)k_scr_emit
@@ -34,7 +38,7 @@ static void (*syscallReg_DRIVER[DRIVER_SYSCALL_COUNT])() = {
 
     Array index corresponds to syscall function code
 */
-static void (*syscallReg_USER[USER_SYSCALL_COUNT])() = {
+static k_scl_function_handler_t syscallReg_USER[USER_SYSCALL_COUNT] = {
     /* 0x00 */ (void *)k_scr_start,
     /* 0x01 */ (void *)k_scr_log,
     /* 0x02 */ (void *)k_scr_devCharWrite,
@@ -58,26 +62,40 @@ static void (*syscallReg_USER[USER_SYSCALL_COUNT])() = {
     /* 0x14 */ (void *)k_scr_yield,
 };
 
-#define _SYSCALL_ENTRY(TYPE) void k_scl_syscall_ ## TYPE (const ptr_t refEsp) { \
-    if (*FUNC_CODE_PTR >= TYPE ## _SYSCALL_COUNT) {                             \
-        OOPS_NBR("Requested syscall function code over limit");                 \
-    } else if (!syscallReg_ ## TYPE [*FUNC_CODE_PTR]) {                         \
-        OOPS_NBR("Syscall function code unavailable");                          \
-    } else {                                                                    \
-        syscallReg_ ## TYPE [*FUNC_CODE_PTR](refEsp);                           \
-    }                                                                           \
-}
-
 /*
     Driver syscall interrupt (int 0x45) request global service routine
 
     NOTE: Function number has to be put on top of the caller process stack
 */
-_SYSCALL_ENTRY(DRIVER);
+void k_scl_syscall_DRIVER(const ptr_t refEsp) {
+    const procId_t procId = k_proc_getCurrentId();
+    const size_t functionCode = *(size_t *)userStackSafeValuePointer(procId, refEsp, FUNC_CODE_STACK_OFFSET, sizeof(size_t));
+    
+    if (functionCode >= DRIVER_SYSCALL_COUNT) {
+        OOPS_NBR("Requested syscall function code over limit");
+    } else if (!syscallReg_DRIVER[functionCode]) {
+        OOPS_NBR("Syscall function code unavailable");
+    } else {
+        const k_scl_function_handler_t handler = (k_scl_function_handler_t)MEM_CONV_PTL(syscallReg_DRIVER[functionCode]);
+        handler(procId, refEsp);
+    }
+}
 
 /*
     User-level syscall interrupt (int 0x69) request global service routine
 
     NOTE: Function number has to be put on top of the caller process stack
 */
-_SYSCALL_ENTRY(USER);
+void k_scl_syscall_USER(const ptr_t refEsp) {
+    const procId_t procId = k_proc_getCurrentId();
+    const size_t functionCode = *(size_t *)userStackSafeValuePointer(procId, refEsp, FUNC_CODE_STACK_OFFSET, sizeof(size_t));
+    
+    if (functionCode >= USER_SYSCALL_COUNT) {
+        OOPS_NBR("Requested syscall function code over limit");
+    } else if (!syscallReg_USER[functionCode]) {
+        OOPS_NBR("Syscall function code unavailable");
+    } else {
+        const k_scl_function_handler_t handler = (k_scl_function_handler_t)MEM_CONV_PTL(syscallReg_USER[functionCode]);
+        handler(procId, refEsp);
+    }
+}

@@ -10,6 +10,7 @@ endif
 
 KERNEL_INCLUDE=-include kernel.pch \
 			   $(KERNEL_TEST_INCLUDE) \
+			   -I $(BOOTLOADER_INCLUDE_DIR) \
 			   -I $(STDGUNW_INCLUDE_DIR) \
 			   -I $(APP_API_INCLUDE_DIR) \
 			   -I $(DRIVER_API_INCLUDE_DIR) \

@@ -33,12 +33,24 @@ size_t isrStackHeight = 0;
     Note: Syscall interrupts do not disable maskable interrupts - to be implemented
 */
 #warning TO BE IMPLEMENTED - up
-#define ISR_BEGIN   { \
-    CPU_INTERRUPTS_DISABLE; \
-    CPU_PUSH \
-    CPU_SEG_RESTORE \
+#define _ISR_BEGIN_PROLOGUE \
+    _CPU_INTERRUPTS_DISABLE "\n" \
+    _CPU_PUSH "\n" \
+    _CPU_SEG_RESTORE   
+#define ISR_BEGIN { \
     ++isrStackHeight; \
 }
+#define _ISR(NAME, HANDLING_CODE) \
+    __asm__ ( \
+        ".global " STR(NAME) "\n" \
+        STR(NAME) ":" "\n" \
+        _ISR_BEGIN_PROLOGUE "\n" \
+    ); \
+    static __attribute__((naked, unused)) void NAME ## _handler() { \
+        ISR_BEGIN; \
+        { HANDLING_CODE; } \
+        ISR_END; \
+    }
 
 /*
     Interrupt service routine handling end
@@ -77,11 +89,15 @@ size_t isrStackHeight = 0;
         - Enable interrupts
         - Return from interrupt
 */
-#define ISR_HW(NUM) __attribute__((naked)) void k_isr_picIRQ ## NUM () { \
-    ISR_BEGIN \
+#define ISR_HW(NUM) _ISR(k_isr_picIRQ ## NUM, { \
     k_hal_irqHandle(NUM); \
-    ISR_END \
-}
+})
+
+#warning SYSTEM CALLS CAN CAUSE KERNEL LOCKS - to be analysed
+#define ISR_SYSCALL(TYPE) _ISR(k_isr_syscall ## TYPE, { \
+    k_scl_syscall_ ## TYPE (k_cpu_stackPtr); \
+    /* EAX stored for current process should contain return value (if any) */ \
+})
 
 /* 0 */ __attribute__((naked)) void k_isr_divErr() {        CPU_SEG_RESTORE; OOPS_NBR("Division by zero interrupt triggered"); k_cpu_halt(); }
 /* 1 */ __attribute__((naked)) void k_isr_dbgExc() {        CPU_SEG_RESTORE; OOPS_NBR("Debug exceptions interrupt triggered"); k_cpu_halt(); }
@@ -143,15 +159,7 @@ size_t isrStackHeight = 0;
 // 66
 // 67
 // 68
-
-/* 69 */ __attribute__((naked)) void k_isr_driverSyscall() {
-    ISR_BEGIN
-    #warning SYSTEM CALLS CAN CAUSE KERNEL LOCKS - to be analysed
-    k_scl_syscall_DRIVER(k_cpu_stackPtr);
-    /* EAX stored for current process should contain return value (if any) */
-    ISR_END
-}
-
+/* 69 */ ISR_SYSCALL(DRIVER)
 // 70
 // 71
 // 72
@@ -187,13 +195,5 @@ size_t isrStackHeight = 0;
 // 102
 // 103
 // 104
-
-/* 105 */ __attribute__((naked)) void k_isr_userSyscall() {
-    ISR_BEGIN
-    #warning SYSTEM CALLS CAN CAUSE KERNEL LOCKS - to be analysed
-    k_scl_syscall_USER(k_cpu_stackPtr);
-    /* EAX stored for current process should contain return value (if any) */
-    ISR_END
-}
-
+/* 105 */ ISR_SYSCALL(USER)
 // 106 - 255

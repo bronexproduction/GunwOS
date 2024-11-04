@@ -10,26 +10,27 @@
 #include "binding.h"
 #include "utility.h"
 #include <src/_gunwipc.h>
-#include <mem.h>
+#include <hal/mem/mem.h>
 #include <hal/proc/proc.h>
+#include <hal/paging/paging.h>
 #include <error/panic.h>
 
 enum gnwIpcError k_ipc_reply(const procId_t procId,
-                             const struct gnwIpcReplyInfo * const absInfoPtr) {
-    if (!absInfoPtr) {
+                             const struct gnwIpcReplyInfo * const infoPtr) {
+    if (!infoPtr) {
         OOPS("Null reply info pointer", GIPCE_UNKNOWN);
     }
-    if (!absInfoPtr->data.ptr) {
+    if (!infoPtr->data.ptr) {
         OOPS("Null reply buffer pointer", GIPCE_UNKNOWN);
     }
-    if (!absInfoPtr->data.bytes) {
+    if (!infoPtr->data.bytes) {
         return GIPCE_INVALID_PARAMETER;
     }
-    if (absInfoPtr->token >= MAX_IPC_TOKEN) {
+    if (infoPtr->token >= MAX_IPC_TOKEN) {
         return GIPCE_INVALID_PARAMETER;
     }
 
-    const struct ipcReply * const reply = &ipcReplyRegister[absInfoPtr->token];
+    const struct ipcReply * const reply = &ipcReplyRegister[infoPtr->token];
     if (reply->handlerProcId == NONE_PROC_ID) {
         /*
             Empty slot
@@ -41,13 +42,13 @@ enum gnwIpcError k_ipc_reply(const procId_t procId,
     if (reply->handlerProcId != procId) {
         return GIPCE_FORBIDDEN;
     }
-    if (reply->absReplyBufferData.bytes != absInfoPtr->data.bytes) {
+    if (reply->replyBufferData.bytes != infoPtr->data.bytes) {
         return GIPCE_INVALID_PARAMETER;
     }
-    if (!reply->absReplyErrorPtr) {
+    if (!reply->replyErrorPtr) {
         OOPS("Unexpected reply error nullptr", GIPCE_UNKNOWN);
     }
-    if (!reply->absReplyBufferData.ptr) {
+    if (!reply->replyBufferData.ptr) {
         OOPS("Unexpected reply buffer nullptr", GIPCE_UNKNOWN);
     }
     const procId_t senderProcId = reply->senderProcId;
@@ -56,15 +57,15 @@ enum gnwIpcError k_ipc_reply(const procId_t procId,
     }
 
     enum gnwIpcError e = GIPCE_NONE;
-    switch (absInfoPtr->bindData.flag) {
+    switch (infoPtr->bindData.flag) {
         case GIBF_BIND:
-            e = k_ipc_binding_create(senderProcId, procId, absInfoPtr->bindData.permissions);
+            e = k_ipc_binding_create(senderProcId, procId, infoPtr->bindData.permissions);
             if (e == GIPCE_ALREADY_EXISTS) {
                 e = GIPCE_NONE;
             }
             break;
         case GIBF_UPDATE:
-            e = k_ipc_binding_update(senderProcId, procId, absInfoPtr->bindData.permissions);
+            e = k_ipc_binding_update(senderProcId, procId, infoPtr->bindData.permissions);
             break;
         case GIBF_UNBIND:
             e = k_ipc_binding_destroy(senderProcId, procId, procId);
@@ -76,10 +77,15 @@ enum gnwIpcError k_ipc_reply(const procId_t procId,
         return e;
     }
 
-    memcopy(absInfoPtr->data.ptr, reply->absReplyBufferData.ptr, absInfoPtr->data.bytes);
-    *(reply->absReplyErrorPtr) = GIPCE_NONE;
+    k_mem_copy(procId, infoPtr->data.ptr,
+               senderProcId, reply->replyBufferData.ptr,
+               infoPtr->data.bytes);
+    
+    MEM_ONTABLE(senderProcId, {
+        *(reply->replyErrorPtr) = GIPCE_NONE;
+    });
 
-    k_ipc_utl_clearReply(absInfoPtr->token);
+    k_ipc_utl_clearReply(infoPtr->token);
     k_ipc_utl_unlockIfAble(senderProcId);
 
     return GIPCE_NONE;

@@ -44,6 +44,7 @@ API_DIR="$(SYSTEM_SRC_DIR)/api"
 export APP_API_SRC_DIR="$(API_DIR)/app"
 export DRIVER_API_SRC_DIR="$(API_DIR)/driver"
 export KERNEL_SRC_DIR="$(SYSTEM_SRC_DIR)/kernel"
+BOOTLOADER_DIR="$(SRC_DIR)/bootloader"
 APPS_SRC_DIR="$(SYSTEM_SRC_DIR)/user"
 TESTS_SRC_DIR="$(CUR_DIR)/tests"
 TESTS_BLACKBOX_DIR="$(TESTS_SRC_DIR)/blackbox"
@@ -56,6 +57,7 @@ export TEST_BLACKBOX_SHARED_DIR="$(TESTS_BLACKBOX_DIR)/shared"
 
 # Header include paths
 
+export BOOTLOADER_INCLUDE_DIR="$(BOOTLOADER_DIR)/preloader/kernel"
 export STDGUNW_INCLUDE_DIR="$(LIB_SRC_DIR)/stdgunw/include"
 export APP_API_INCLUDE_DIR="$(APP_API_SRC_DIR)/include"
 export DRIVER_API_INCLUDE_DIR="$(DRIVER_API_SRC_DIR)/include"
@@ -102,10 +104,10 @@ pre_build:
 	mkdir -p $(BUILD_DIR) $(KERNEL_BUILD_DIR) $(LIB_BUILD_DIR) $(APP_BUILD_DIR)
 
 boot.bin: pre_build
-	make -C $(SRC_DIR)/bootloader/boot
+	make -C $(BOOTLOADER_DIR)/boot
 
 boot.gfb: pre_build
-	make -C $(SRC_DIR)/bootloader/preloader
+	make -C $(BOOTLOADER_DIR)/preloader
 
 kernel.gfb: kernel.elf
 # Remove bytes before .start section

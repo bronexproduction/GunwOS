@@ -151,88 +151,17 @@ enum gnwRunLoopError k_runloop_dispatch(const procId_t procId,
         queueItem->dataHandled = true;
     }
 
-    {
-        char msg[35] = "k_runloop_dispatch - new dispatch ";
-        LOG(msg);
-    }
-    {
-        char msg[32] = "  target proc -         ";
-        uint2dec((addr_t)procId, msg + 16);
-        LOG(msg);
-    }
-    {
-        char msg[26] = "  token -         ";
-        uint2dec((addr_t)token, msg + 10);
-        LOG(msg);
-    }
-    {
-        char msg[128] = "  item format -         ";
-        uint2dec((addr_t)item.format, msg + 17);
-        LOG(msg);
-    }
-    {
-        char msg[128] = "  item routine -         ";
-        uint2hex((addr_t)item.routine._handle, msg + 17);
-        LOG(msg);
-    }
-    {
-        char msg[128] = "  item data size bytes -         ";
-        uint2dec((addr_t)item.dataSizeBytes, msg + 26);
-        LOG(msg);
-    }
-    {
-        char msg[128] = "  item decoded data size bytes -         ";
-        uint2dec((addr_t)item.decodedDataSizeBytes, msg + 34);
-        LOG(msg);
-    }
-    {
-        char msg[128] = "  item decoder -         ";
-        uint2hex((addr_t)item.decode, msg + 17);
-        LOG(msg);
-    }
-    {
-        char msg[128] = "  data pointer -         ";
-        uint2hex((addr_t)data, msg + 17);
-        LOG(msg);
-    }
-    {
-        char msg[14] = "  data bytes:";
-        LOG_BLOCK(
-            LOG_NBR(msg);
-            for (size_t i = 0; i < item.decodedDataSizeBytes; ++i) {
-                char byteString[3] = { 0 };
-                uint2hex((addr_t)((uint_8 *)data)[i], byteString);
-                LOG_NBR(" ");
-                LOG_NBR(byteString);
-            }
-        );
-    }
-    {
-        char msg[128] = "  data encoder -         ";
-        uint2hex((addr_t)dataEncoder, msg + 17);
-        LOG(msg);
-    }
-
     queueItem->item = item;
     dataEncoder(data, queueItem->data);
-    
-    {
-        char msg[17] = "  encoded bytes:";
-        LOG_BLOCK(
-            LOG_NBR(msg);
-            for (size_t i = 0; i < item.dataSizeBytes; ++i) {
-                char byteString[3] = { 0 };
-                uint2hex((addr_t)((uint_8 *)queueItem->data)[i], byteString);
-                LOG_NBR(" ");
-                LOG_NBR(byteString);
-            }
-        );
-    }
     
     return GRLE_NONE;
 }
 
-enum gnwRunLoopError k_runloop_getPendingItem(const procId_t procId, struct gnwRunLoopDispatchItem * const absItemPtr) {
+enum gnwRunLoopError k_runloop_getPendingItem(const procId_t procId, struct gnwRunLoopDispatchItem * const itemPtr) {
+    if (!itemPtr) {
+        OOPS("Nullptr", GRLE_UNKNOWN);
+    }
+
     struct dispatchItem * item;
     size_t index;
     const enum gnwRunLoopError err = getPendingDispatchItem(procId, &item, &index);
@@ -243,7 +172,7 @@ enum gnwRunLoopError k_runloop_getPendingItem(const procId_t procId, struct gnwR
         return GRLE_INVALID_STATE;
     }
 
-    *absItemPtr = item->item;
+    *itemPtr = item->item;
     item->handled = true;
     finishIfNeeded(procId, index);
 
@@ -268,7 +197,11 @@ enum gnwRunLoopError k_runloop_getPendingItemDataSizeBytes(const procId_t procId
     return GRLE_NONE;
 }
 
-enum gnwRunLoopError k_runloop_getPendingItemData(const procId_t procId, ptr_t absDataBufferPtr) {
+enum gnwRunLoopError k_runloop_getPendingItemData(const procId_t procId, ptr_t dataBufferPtr) {
+    if (!dataBufferPtr) {
+        OOPS("Nullptr", GRLE_UNKNOWN);
+    }
+
     struct dispatchItem * item;
     size_t index;
     const enum gnwRunLoopError err = getPendingDispatchItem(procId, &item, &index);
@@ -282,54 +215,7 @@ enum gnwRunLoopError k_runloop_getPendingItemData(const procId_t procId, ptr_t a
         return GRLE_INVALID_STATE;
     }
 
-    {
-        char msg[29] = "k_runloop_getPendingItemData";
-        LOG(msg);
-    }
-    {
-        char msg[25] = "  proc -         ";
-        uint2dec((addr_t)procId, msg + 9);
-        LOG(msg);
-    }
-    {
-        char msg[128] = "  data buffer pointer -         ";
-        uint2hex((addr_t)absDataBufferPtr, msg + 24);
-        LOG(msg);
-    }
-    {
-        char msg[128] = "  item data ptr -         ";
-        uint2dec((addr_t)item->data, msg + 20);
-        LOG(msg);
-    }
-    {
-        char msg[128] = "  item data size bytes -         ";
-        uint2dec((addr_t)item->item.dataSizeBytes, msg + 38);
-        LOG(msg);
-    }
-    {
-        char msg[128] = "  item decoded data size bytes -         ";
-        uint2dec((addr_t)item->item.decodedDataSizeBytes, msg + 46);
-        LOG(msg);
-    }
-    {
-        char msg[128] = "  item decoder -         ";
-        uint2hex((addr_t)item->item.decode, msg + 17);
-        LOG(msg);
-    }
-    {
-        char msg[27] = "  item encoded data bytes:";
-        LOG_BLOCK(
-            LOG_NBR(msg);
-            for (size_t i = 0; i < item->item.dataSizeBytes; ++i) {
-                char byteString[3] = { 0 };
-                uint2hex((addr_t)((uint_8 *)item->data)[i], byteString);
-                LOG_NBR(" ");
-                LOG_NBR(byteString);
-            }
-        );
-    }
-
-    memcopy(item->data, absDataBufferPtr, item->item.dataSizeBytes);
+    memcopy(item->data, dataBufferPtr, item->item.dataSizeBytes);
     item->dataHandled = true;
     finishIfNeeded(procId, index);
     return GRLE_NONE;

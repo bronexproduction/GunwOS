@@ -5,14 +5,18 @@
 //  Created by Artur Danielewski on 16.03.2023.
 //
 
-#include <syscall/func.h>
-#include <hal/proc/proc.h>
 #include <dev/dev.h>
+#include <hal/mem/mem.h>
+#include <error/panic.h>
 
-enum gnwDeviceError k_scr_usr_devGetByType(const enum gnwDeviceType deviceType, struct gnwDeviceUHADesc * const descriptorPtr) {
-    const procId_t procId = k_proc_getCurrentId();
+enum gnwDeviceError k_scr_usr_devGetByType(const procId_t procId, const enum gnwDeviceType deviceType, struct gnwDeviceUHADesc * const descriptorPtr) {
     
-    SCLF_GET_VALID_ABS(const ptr_t, descriptorPtr, sizeof(struct gnwDeviceUHADesc), {}, GDE_UNKNOWN);
+    if (!descriptorPtr) {
+        OOPS("Unexpected null pointer", GDE_UNKNOWN);
+    }
+    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)descriptorPtr, sizeof(struct gnwDeviceUHADesc))) {
+        OOPS("Reserved zone access violation", GDE_UNKNOWN);
+    }
 
-    return k_dev_getByType(deviceType, (struct gnwDeviceUHADesc * const)abs_descriptorPtr);
+    return k_dev_getByType(deviceType, descriptorPtr);
 }

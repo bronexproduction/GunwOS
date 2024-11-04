@@ -92,18 +92,18 @@ enum gnwIpcError ipcReply(const data_t replyData,
     return SYSCALL_RESULT;
 }
 
-void gnwIpcEndpointQuery_decode(const ptr_t absDataPtr, struct gnwIpcEndpointQuery * const absQueryPtr) {
-    memcopy(absDataPtr, absQueryPtr, sizeof(struct gnwIpcEndpointQuery));
-    absQueryPtr->data.ptr = absDataPtr + sizeof(struct gnwIpcEndpointQuery);
+void gnwIpcEndpointQuery_decode(const ptr_t dataPtr, struct gnwIpcEndpointQuery * const queryPtr) {
+    memcopy(dataPtr, queryPtr, sizeof(struct gnwIpcEndpointQuery));
+    queryPtr->data.ptr = dataPtr + sizeof(struct gnwIpcEndpointQuery);
 }
 
 #else
 
-void gnwIpcEndpointQuery_encode(const struct gnwIpcEndpointQuery * const absQueryPtr, ptr_t absDataPtr) {
-    memcopy(absQueryPtr, absDataPtr, sizeof(struct gnwIpcEndpointQuery));
+void gnwIpcEndpointQuery_encode(const struct gnwIpcEndpointQuery * const queryPtr, ptr_t dataPtr) {
+    memcopy(queryPtr, dataPtr, sizeof(struct gnwIpcEndpointQuery));
     size_t offset = sizeof(struct gnwIpcEndpointQuery);
-    memcopy(absQueryPtr->data.ptr, absDataPtr + offset, absQueryPtr->data.bytes);
-    offset += absQueryPtr->data.bytes;
+    memcopy(queryPtr->data.ptr, dataPtr + offset, queryPtr->data.bytes);
+    offset += queryPtr->data.bytes;
 }
 
 #endif // _GUNWAPI_KERNEL
