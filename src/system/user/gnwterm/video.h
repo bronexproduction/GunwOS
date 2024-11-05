@@ -12,6 +12,8 @@
 #include <utils.h>
 #include <types.h>
 
+struct gnwTextDisplayHandle displayHandle;
+
 typedef enum k_vid_charColor {
     Black = 0,
     Blue = 1,
@@ -30,8 +32,6 @@ typedef enum k_vid_charColor {
     Yellow = 14,
     White = 15
 } VideoCharColor;
-
-extern point_t k_vid_dimensions;
 
 bool k_trm_vid_init();
 

@@ -6,30 +6,48 @@
 //
 
 #include "../include/gunwmem.h"
+#include <defs.h>
 #include "../include/gunwfug.h"
 #include "scl_user.h"
 
 #ifndef _GUNWAPI_KERNEL
 
-enum gnwMemoryError memplz(const size_t pageCount, addr_t * const start) {
-    CHECKPTR(start);
+#define PAGE_SIZE KiB(4)
 
-    SYSCALL_PAR1(pageCount);
-    SYSCALL_PAR2(start);
+ptr_t dynamicMemStart = (ptr_t)0xB00B5000;
 
-    SYSCALL_USER_FUNC(MEM_PLZ);
-    SYSCALL_USER_INT;
+ptr_t memPlz(const size_t sizeBytes) {
+    const enum gnwMemoryError error = memPagePlz(aligned(sizeBytes, PAGE_SIZE) / PAGE_SIZE, dynamicMemStart);
 
-    SYSCALL_RETVAL(32);
+    if (error != GME_NONE) {
+        fug(FUG_NULLPTR);
+        return nullptr;
+    }
+    
+    const ptr_t result = dynamicMemStart;
+    dynamicMemStart += aligned(sizeBytes, PAGE_SIZE);
+
+    return result;
 }
 
-enum gnwMemoryError memthx(const addr_t start) {
-    SYSCALL_PAR1(start);
+void memThx(const ptr_t ptr) {
+    #warning TODO
+}
 
-    SYSCALL_USER_FUNC(MEM_THX);
-    SYSCALL_USER_INT;
+enum gnwMemoryError memPagePlz(const size_t pageCount, addr_t * const start) {
+    CHECKPTR(start);
 
-    SYSCALL_RETVAL(32);
+    SYSCALL_USER_CALL(MEM_PLZ, pageCount, start, 0);
+
+    return SYSCALL_RESULT;
+}
+
+enum gnwMemoryError memPageThx(const addr_t start) {
+    CHECKPTR(start);
+
+    SYSCALL_USER_CALL(MEM_THX, start, 0, 0);
+
+    return SYSCALL_RESULT;
 }
 
 #endif // _GUNWAPI_KERNEL

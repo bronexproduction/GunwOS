@@ -21,6 +21,24 @@ enum gnwMemoryError {
 };
 
 /*
+    Allocates and returns a contiguous memory space of 'sizeBytes' bytes in size
+
+    Params:
+        * sizeBytes - size of the requested memory space
+
+    Return: Pointer to the newly allocated memory or nullptr if anything went wrong
+*/
+extern ptr_t memPlz(const size_t sizeBytes);
+
+/*
+    Releases previously allocated memory region
+
+    Params:
+        * ptr - pointer to already allocated region
+*/
+extern void memThx(const ptr_t ptr);
+
+/*
     Requests additional memory pages to be assigned to the caller process
 
     Kernel will try to assign a contiguous virtual memory address space of size PAGE_SIZE * pageCount
@@ -32,7 +50,7 @@ enum gnwMemoryError {
 
     Return: GME_NONE on success, error code otherwise
 */
-extern enum gnwMemoryError memplz(const size_t pageCount, addr_t * const start);
+extern enum gnwMemoryError memPagePlz(const size_t pageCount, addr_t * const start);
 
 /*
     Relinquishes memory page starting at given virtual memory address
@@ -42,6 +60,6 @@ extern enum gnwMemoryError memplz(const size_t pageCount, addr_t * const start);
 
     Return: GME_NONE on success, error code otherwise
 */
-extern enum gnwMemoryError memthx(const addr_t addr);
+extern enum gnwMemoryError memPageThx(const addr_t addr);
 
 #endif // GUNWOS_GUNWMEM_H
