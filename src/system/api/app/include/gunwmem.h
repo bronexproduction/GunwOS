@@ -50,7 +50,7 @@ extern void memThx(const ptr_t ptr);
 
     Return: GME_NONE on success, error code otherwise
 */
-extern enum gnwMemoryError memPagePlz(const size_t pageCount, addr_t * const start);
+extern enum gnwMemoryError memPagePlz(const size_t pageCount, const addr_t start);
 
 /*
     Relinquishes memory page starting at given virtual memory address

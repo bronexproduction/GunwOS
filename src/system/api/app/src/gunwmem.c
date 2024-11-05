@@ -14,7 +14,7 @@
 
 #define PAGE_SIZE KiB(4)
 
-ptr_t dynamicMemStart = (ptr_t)0xB00B5000;
+addr_t dynamicMemStart = 0xB00B5000;
 
 ptr_t memPlz(const size_t sizeBytes) {
     const enum gnwMemoryError error = memPagePlz(aligned(sizeBytes, PAGE_SIZE) / PAGE_SIZE, dynamicMemStart);
@@ -24,7 +24,7 @@ ptr_t memPlz(const size_t sizeBytes) {
         return nullptr;
     }
     
-    const ptr_t result = dynamicMemStart;
+    const ptr_t result = (ptr_t)dynamicMemStart;
     dynamicMemStart += aligned(sizeBytes, PAGE_SIZE);
 
     return result;
@@ -34,7 +34,7 @@ void memThx(const ptr_t ptr) {
     #warning TODO
 }
 
-enum gnwMemoryError memPagePlz(const size_t pageCount, addr_t * const start) {
+enum gnwMemoryError memPagePlz(const size_t pageCount, const addr_t start) {
     CHECKPTR(start);
 
     SYSCALL_USER_CALL(MEM_PLZ, pageCount, start, 0);

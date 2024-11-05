@@ -364,3 +364,41 @@ void k_scr_yield(const procId_t procId, const ptr_t refEsp) {
     */
     k_proc_schedule_processStateDidChange();
 }
+
+/*
+    Code - 0x15
+    Function - MEM_PLZ
+
+    Params (process stack offset):
+        * PARAMETER_1_STACK_OFFSET - number of pages requested
+        * PARAMETER_2_STACK_OFFSET - virtual memory start address (must be aligned to page size)
+    
+    Return (process stack offset):
+        * RESULT_STACK_OFFSET - enum gnwMemoryError code if any, GME_NONE otherwise
+*/
+void k_scr_memPlz(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(const size_t, pageCount, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const addr_t, vStart, PARAMETER_2_STACK_OFFSET);
+
+    #warning TODO
+
+    SAFE_STACK_RESULT_ARCH_VAL = 0;
+}
+
+/*
+    Code - 0x15
+    Function - MEM_THX
+
+    Params (process stack offset):
+        * PARAMETER_1_STACK_OFFSET - virtual memory page start address (must be aligned to page size)
+
+    Return (process stack offset):
+        * RESULT_STACK_OFFSET - enum gnwMemoryError code if any, GME_NONE otherwise
+*/
+void k_scr_memThx(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(const addr_t, vStart, PARAMETER_1_STACK_OFFSET);
+
+    #warning TODO
+
+    SAFE_STACK_RESULT_ARCH_VAL = 0;
+}

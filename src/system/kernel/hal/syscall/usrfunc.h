@@ -155,4 +155,16 @@ enum gnwIpcError k_scr_ipcReply(const ptr_t replyBufferPtr, const size_t replySi
 */
 void k_scr_yield();
 
+/*
+    Code - 0x15
+    Function - MEM_PLZ
+*/
+enum gnwMemoryError k_scr_memPlz(const size_t pageCount, const addr_t vStart);
+
+/*
+    Code - 0x15
+    Function - MEM_THX
+*/
+enum gnwMemoryError k_scr_memThx(const addr_t vStart);
+
 #endif // USRFUNC_H
