@@ -8,6 +8,7 @@
 #include "params.h"
 #include <src/_gunwctrl.h>
 #include <src/_gunwipc.h>
+#include <src/_gunwmem.h>
 #include <error/fug.h>
 #include <schedule/schedule.h>
 #include <dev/dev.h>
@@ -380,9 +381,8 @@ void k_scr_memPlz(const procId_t procId, const ptr_t refEsp) {
     SAFE_STACK_VAL_PTR(const size_t, pageCount, PARAMETER_1_STACK_OFFSET);
     SAFE_STACK_VAL_PTR(const addr_t, vStart, PARAMETER_2_STACK_OFFSET);
 
-    #warning TODO
-
-    SAFE_STACK_RESULT_ARCH_VAL = 0;
+    extern enum gnwMemoryError k_scr_usr_memPlz(const procId_t, const size_t, const addr_t);
+    SAFE_STACK_RESULT_ARCH_VAL = k_scr_usr_memPlz(procId, *pageCount, *vStart);
 }
 
 /*
@@ -398,7 +398,6 @@ void k_scr_memPlz(const procId_t procId, const ptr_t refEsp) {
 void k_scr_memThx(const procId_t procId, const ptr_t refEsp) {
     SAFE_STACK_VAL_PTR(const addr_t, vStart, PARAMETER_1_STACK_OFFSET);
 
-    #warning TODO
-
-    SAFE_STACK_RESULT_ARCH_VAL = 0;
+    extern enum gnwMemoryError k_scr_usr_memThx(const procId_t, const addr_t);
+    SAFE_STACK_RESULT_ARCH_VAL = k_scr_usr_memThx(procId, *vStart);
 }

@@ -10,15 +10,7 @@
 
 #include <types.h>
 #include <defs.h>
-
-/*
-    Memory error codes
-*/
-enum gnwMemoryError {
-    GME_NONE = 0,
-    GME_OUT_OF_MEMORY,
-    GME_UNKNOWN = -1
-};
+#include "gunwmemtypes.h"
 
 /*
     Allocates and returns a contiguous memory space of 'sizeBytes' bytes in size
@@ -46,11 +38,11 @@ extern void memThx(const ptr_t ptr);
 
     Params:
         * pageCount - number of pages requested by the caller process
-        * start - pointer to the result start address
+        * addr - page start address (must be aligned to page size)
 
     Return: GME_NONE on success, error code otherwise
 */
-extern enum gnwMemoryError memPagePlz(const size_t pageCount, const addr_t start);
+extern enum gnwMemoryError memPagePlz(const size_t pageCount, const addr_t addr);
 
 /*
     Relinquishes memory page starting at given virtual memory address
