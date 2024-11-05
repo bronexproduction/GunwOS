@@ -7,7 +7,6 @@
 
 #include <gunwevent.h>
 #include <ipc/ipc.h>
-#include <hal/proc/proc.h>
 #include <hal/mem/mem.h>
 #include <src/_gunwipc.h>
 #include <error/panic.h>
@@ -36,7 +35,7 @@ enum gnwIpcError k_scr_usr_ipcRegister(const procId_t procId, const struct gnwIp
         OOPS("Unexpected null pointer", GIPCE_UNKNOWN);
     }
 
-    return k_ipc_register(k_proc_getCurrentId(),
+    return k_ipc_register(procId,
                           descPtr->pathData,
                           descPtr->handlerRoutine,
                           descPtr->decoder,

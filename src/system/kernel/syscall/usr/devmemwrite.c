@@ -6,7 +6,6 @@
 //
 
 #include <hal/mem/mem.h>
-#include <hal/proc/proc.h>
 #include <dev/dev.h>
 #include <error/panic.h>
 
