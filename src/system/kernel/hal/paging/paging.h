@@ -36,6 +36,12 @@ enum k_mem_error k_paging_assign(const procId_t procId,
                                  const size_t pageCount);
 
 /*
+    Releases memory page assigned to the process
+*/
+enum k_mem_error k_paging_release(const procId_t procId,
+                                  const size_t page);
+
+/*
     Switches to the paging table for given process
 
     Return value: previous value of CR3 register

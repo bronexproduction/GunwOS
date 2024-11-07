@@ -12,6 +12,8 @@ enum gnwMemoryError k_scr_usr_memThx(const procId_t procId, const addr_t addr) {
         return GME_ADDRESS_ALIGNMENT;
     }
 
+    const enum k_mem_error error = k_mem_thanksPage(procId, addr / MEM_PAGE_SIZE_BYTES);
+    
     OOPS("Not implemented yet", GME_UNKNOWN);
 }
 
