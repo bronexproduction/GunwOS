@@ -492,6 +492,26 @@ enum k_mem_error k_paging_assign(const procId_t procId,
     return overlap ? newPages ? ME_PART_ALREADY_ASSIGNED : ME_ALREADY_ASSIGNED : ME_NONE;
 }
 
+enum k_mem_error k_paging_release(const procId_t procId,
+                                  const size_t page) {
+    if (!k_proc_idIsUser(procId)) {
+        OOPS("Invalid page release procId", ME_UNKNOWN);
+    }
+    if (!page || page >= MEM_MAX_VIRTUAL_PAGE_COUNT) {
+        OOPS("Invalid page release id", ME_UNKNOWN);
+    }
+
+    const size_t dirIndex = page / MEM_MAX_PAGE_ENTRY;
+    if (dirIndex >= MEM_VIRTUAL_USER_MAX_PAGE_TABLE_COUNT) {
+        OOPS("Invalid page release directory index", ME_UNKNOWN);
+    }
+    
+    // const size_t pageTableIndex = processPageTables[procId].pageDirectory.byArea.user[dirIndex];
+    const size_t pageIndex = page % MEM_MAX_PAGE_ENTRY;
+
+    releaseVirtualPage(procId, pageTableIndex, pageIndex, false);
+}
+
 size_t k_paging_switch(const procId_t procId) {
     if (!k_proc_idIsUser(procId) && procId != KERNEL_PROC_ID) {
         OOPS("Invalid procId", 0);
