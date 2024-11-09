@@ -162,7 +162,7 @@ void k_scr_yield();
 enum gnwMemoryError k_scr_memPlz(const size_t pageCount, const addr_t vStart);
 
 /*
-    Code - 0x15
+    Code - 0x16
     Function - MEM_THX
 */
 enum gnwMemoryError k_scr_memThx(const addr_t vStart);
