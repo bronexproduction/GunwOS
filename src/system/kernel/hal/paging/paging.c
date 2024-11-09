@@ -161,6 +161,11 @@ static void releaseVirtualPage(const procId_t procId,
         OOPS("Illegal physical page index",);
     }
 
+    /*
+        Store physical page entry addr for further use
+    */
+    struct physical_page_specifier_t * physicalPageEntry = &physicalPages[pageEntryPtr->frameAddress];
+
     if (clean) {
         if (!pageEntryPtr->present) {
             OOPS("Page not present already",);
@@ -175,7 +180,6 @@ static void releaseVirtualPage(const procId_t procId,
     /*
         Decrement physical page mapping count
     */
-    struct physical_page_specifier_t * physicalPageEntry = &physicalPages[pageEntryPtr->frameAddress];
 
     if (!physicalPageEntry->assignCount) {
         OOPS("Physical page assign count inconsistency",);
@@ -501,15 +505,20 @@ enum k_mem_error k_paging_release(const procId_t procId,
         OOPS("Invalid page release id", ME_UNKNOWN);
     }
 
-    const size_t dirIndex = page / MEM_MAX_PAGE_ENTRY;
+    const size_t dirIndex = MEM_DIR_INDEX_OF_PAGE(page);
     if (dirIndex >= MEM_VIRTUAL_USER_MAX_PAGE_TABLE_COUNT) {
         OOPS("Invalid page release directory index", ME_UNKNOWN);
     }
     
-    // const size_t pageTableIndex = processPageTables[procId].pageDirectory.byArea.user[dirIndex];
-    const size_t pageIndex = page % MEM_MAX_PAGE_ENTRY;
+    const addr_t startTableAddr = MEM_CONV_LTP(&processPageTables[procId].pageTables);
+    const addr_t pageTableAddr = processPageTables[procId].pageDirectory.byArea.user[dirIndex].frameAddress << 12;
 
-    releaseVirtualPage(procId, pageTableIndex, pageIndex, false);
+    const size_t pageIndex = page % MEM_MAX_PAGE_ENTRY;
+    size_t pageTableIndex = (pageTableAddr - startTableAddr) / sizeof(virtual_page_table_t);
+
+    releaseVirtualPage(procId, pageTableIndex, pageIndex, true);
+
+    return ME_NONE;
 }
 
 size_t k_paging_switch(const procId_t procId) {
