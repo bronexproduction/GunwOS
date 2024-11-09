@@ -73,6 +73,18 @@ enum k_mem_error k_mem_gimme(const procId_t procId,
     return k_paging_assign(procId, startPage, pageCount);
 }
 
+enum k_mem_error k_mem_thanksPage(const procId_t procId,
+                                  const size_t page) {
+    if (!k_proc_idIsUser(procId)) {
+        return ME_INVALID_ARGUMENT;
+    }
+    if (!page) {
+        return ME_INVALID_ARGUMENT;
+    }
+
+    return k_paging_release(procId, page);
+}
+
 enum k_mem_error k_mem_zero(const procId_t procId,
                             const ptr_t vPtr,
                             const size_t sizeBytes) {

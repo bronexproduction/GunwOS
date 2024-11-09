@@ -57,6 +57,12 @@ enum k_mem_error k_mem_gimme(const procId_t procId,
                              const size_t sizeBytes);
 
 /*
+    Releases memory page from given process
+*/
+enum k_mem_error k_mem_thanksPage(const procId_t procId,
+                                  const size_t page);
+
+/*
     Zeroes memory of given process pointed at by vPtr
 */
 enum k_mem_error k_mem_zero(const procId_t procId,
