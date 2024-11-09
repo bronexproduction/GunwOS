@@ -386,7 +386,7 @@ void k_scr_memPlz(const procId_t procId, const ptr_t refEsp) {
 }
 
 /*
-    Code - 0x15
+    Code - 0x16
     Function - MEM_THX
 
     Params (process stack offset):
