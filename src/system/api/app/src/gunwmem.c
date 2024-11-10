@@ -14,18 +14,18 @@
 
 #define PAGE_SIZE KiB(4)
 
-addr_t dynamicMemStart = 0xB00B5000;
+addr_t _heap;
 
 ptr_t memPlz(const size_t sizeBytes) {
-    const enum gnwMemoryError error = memPagePlz(aligned(sizeBytes, PAGE_SIZE) / PAGE_SIZE, dynamicMemStart);
+    const enum gnwMemoryError error = memPagePlz(aligned(sizeBytes, PAGE_SIZE) / PAGE_SIZE, _heap);
 
     if (error != GME_NONE) {
         fug(FUG_NULLPTR);
         return nullptr;
     }
     
-    const ptr_t result = (ptr_t)dynamicMemStart;
-    dynamicMemStart += aligned(sizeBytes, PAGE_SIZE);
+    const ptr_t result = (ptr_t)_heap;
+    _heap += aligned(sizeBytes, PAGE_SIZE);
 
     return result;
 }
