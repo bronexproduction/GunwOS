@@ -54,6 +54,22 @@ PRIVATE struct process_user {
 
 static procId_t procCurrent = KERNEL_PROC_ID;
 
+static void unsafe_addProcParam(const procId_t procId, const addr_t param) {
+    pTab[procId].cpuState.esp -= sizeof(addr_t);
+    MEM_ONTABLE(procId, {
+        *(addr_t *)(pTab[procId].cpuState.esp) = param;
+    })
+}
+
+static void unsafe_setProcParams(const procId_t procId, const addr_t heap) {
+    unsafe_addProcParam(procId, heap);
+    
+    /*
+        Set some padding for unknown reason
+    */
+    pTab[procId].cpuState.esp -= sizeof(addr_t);
+}
+
 procId_t k_proc_getCurrentId() {
     return procCurrent;
 }
@@ -119,10 +135,18 @@ enum k_proc_error k_proc_hatch(const struct k_proc_descriptor descriptor, const 
     if (pTab[procId].info.state != PS_NEW) {
         OOPS("Invalid process state during hatching", PE_INVALID_STATE);
     }
+    if (!descriptor.entryLinearAddr) {
+        OOPS("Invalid linear entry address", PE_INVALID_PARAMETER);
+    }
+    if (!descriptor.heapLinearAddr) {
+        OOPS("Invalid linear heap address", PE_INVALID_PARAMETER);
+    }
 
     pTab[procId].cpuState.esp = (uint_32)(0 - MEM_VIRTUAL_RESERVED_KERNEL_MEM);
     pTab[procId].cpuState.eip = (uint_32)descriptor.entryLinearAddr;
     
+    unsafe_setProcParams(procId, descriptor.heapLinearAddr);
+
     pTab[procId].info.state = PS_READY;
     k_proc_schedule_didHatch(procId);
 
