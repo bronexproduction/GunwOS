@@ -90,10 +90,11 @@ enum gnwCtrlError loadFile(const char * const pathPtr,
     return GCE_NONE;
 }
 
-enum gnwCtrlError loadElf(const ptr_t filePtr,
-                          const size_t fileSizeBytes,
-                          const procId_t procId,
-                          addr_t * const entry) {
+static enum gnwCtrlError loadElf(const ptr_t filePtr,
+                                 const size_t fileSizeBytes,
+                                 const procId_t procId,
+                                 addr_t * const entry,
+                                 addr_t * const heap) {
     if (!filePtr) {
         OOPS("Unexpected nullptr", GCE_UNKNOWN);
     }
@@ -106,6 +107,11 @@ enum gnwCtrlError loadElf(const ptr_t filePtr,
     if (!entry) {
         OOPS("Unexpected nullptr", GCE_UNKNOWN);
     }
+    if (!heap) {
+        OOPS("Unexpected nullptr", GCE_UNKNOWN);
+    }
+
+    *heap = 0;
 
     const size_t sectionHeaderEntryCount = elfGetSectionHeaderEntryCount(filePtr);
     for (size_t index = 0; index < sectionHeaderEntryCount; ++index) {
@@ -129,6 +135,9 @@ enum gnwCtrlError loadElf(const ptr_t filePtr,
             err != ME_PART_ALREADY_ASSIGNED) {
             OOPS("Memory assignment error", GCE_UNKNOWN);
         }
+        
+        *heap = MAX(*heap, sectionHeaderEntry->virtualAddr + sectionHeaderEntry->fileSizeBytes);
+
         err = k_mem_zero(procId,
                          (ptr_t)sectionHeaderEntry->virtualAddr,
                          sectionHeaderEntry->fileSizeBytes);
@@ -232,7 +241,11 @@ void k_scr_usr_start(const procId_t procId, const struct gnwCtrlStartDescriptor 
     */
     
     struct k_proc_descriptor desc;
-    enum gnwCtrlError err = loadElf(filePtr, fileSizeBytes, spawnedProcId, &desc.entryLinearAddr);
+    enum gnwCtrlError err = loadElf(filePtr, 
+                                    fileSizeBytes,
+                                    spawnedProcId,
+                                    &desc.entryLinearAddr,
+                                    &desc.heapLinearAddr);
     if (err != GCE_NONE) {
         *(descPtr->errorPtr) = err;
         LOG_CODE("Failed to load ELF", err);

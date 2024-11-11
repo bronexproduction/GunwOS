@@ -19,6 +19,7 @@
 
 struct k_proc_descriptor {
     addr_t entryLinearAddr;
+    addr_t heapLinearAddr;
 };
 
 enum k_proc_error {
