@@ -14,20 +14,81 @@
 
 #define PAGE_SIZE KiB(4)
 
-addr_t _heap;
+static struct heapMetadataEntry {
+    addr_t addr;
+    size_t size;
+    struct heapMetadataEntry * next;
+} *heapMetadataStartEntry;
+
+addr_t _heapStart;
+
+static ptr_t allocate(struct heapMetadataEntry * prev, 
+                      struct heapMetadataEntry * next,
+                      const size_t sizeBytes) {
+
+
+    // #warning TODO
+    
+    // const enum gnwMemoryError error = memPagePlz(aligned(sizeBytes, PAGE_SIZE) / PAGE_SIZE, _heap);
+
+    // if (error != GME_NONE) {
+    //     fug(FUG_NULLPTR);
+    //     return nullptr;
+    // }
+    
+    // const ptr_t result = (ptr_t)_heap;
+    // _heap += aligned(sizeBytes, PAGE_SIZE);
+
+    // return result;
+}
 
 ptr_t memPlz(const size_t sizeBytes) {
-    const enum gnwMemoryError error = memPagePlz(aligned(sizeBytes, PAGE_SIZE) / PAGE_SIZE, _heap);
 
-    if (error != GME_NONE) {
-        fug(FUG_NULLPTR);
+    if (!sizeBytes) {
+        fug(FUG_UNDEFINED);
+        return nullptr;
+    }
+
+    size_t allocSize = sizeBytes + sizeof(struct heapMetadataEntry);
+
+    if (_heapStart + allocSize <= _heapStart) {
+        fug(FUG_OUT_OF_MEMORY);
         return nullptr;
     }
     
-    const ptr_t result = (ptr_t)_heap;
-    _heap += aligned(sizeBytes, PAGE_SIZE);
+    if (!heapMetadataStartEntry) {
+        /*
+            Alloc as heap start
+        */
+        return allocate(nullptr, nullptr, allocSize);
+    } else if (_heapStart + allocSize <= heapMetadataStartEntry->addr) {
+        /*
+            Alloc at the beginning
+        */
+        return allocate(nullptr, heapMetadataStartEntry, allocSize);
+    } else {
+        /*
+            Find item to alloc after
+        */
+        struct heapMetadataEntry * entry = heapMetadataStartEntry;
 
-    return result;
+        while (entry->next) {
+            addr_t gapStart = entry->addr + entry->size;
+            addr_t nextUnit = gapStart + allocSize;
+
+            if (nextUnit <= gapStart) {
+                fug(FUG_OUT_OF_MEMORY);
+                return nullptr;
+            }
+            if (nextUnit <= entry->next->addr) {
+                break;
+            }
+
+            entry = entry->next;
+        }
+
+        return allocate(entry, entry->next, allocSize);
+    }
 }
 
 void memThx(const ptr_t ptr) {
