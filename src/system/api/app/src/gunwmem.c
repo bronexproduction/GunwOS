@@ -34,8 +34,12 @@ static ptr_t allocate(struct heapMetadataEntry * prev,
     */
 
     addr_t startPageAddr = alignedr((size_t)newEntry, PAGE_SIZE, false);
-    addr_t followingPageAddress = alignedr((size_t)newEntry + sizeof(struct heapMetadataEntry) + dataSizeBytes, PAGE_SIZE, true);
-    size_t pageCount = (followingPageAddress - startPageAddr) / PAGE_SIZE;
+    addr_t followingPageAddr = alignedr((size_t)newEntry + sizeof(struct heapMetadataEntry) + dataSizeBytes, PAGE_SIZE, true);
+    if (followingPageAddr < startPageAddr) {
+        fug(FUG_OUT_OF_MEMORY);
+        return nullptr;
+    }
+    size_t pageCount = (followingPageAddr - startPageAddr) / PAGE_SIZE;
 
     const enum gnwMemoryError error = memPagePlz(pageCount, startPageAddr);
     if (error == GME_OUT_OF_MEMORY) {
