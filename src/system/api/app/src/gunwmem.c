@@ -118,7 +118,38 @@ ptr_t memPlz(const size_t sizeBytes) {
 }
 
 void memThx(const ptr_t ptr) {
+    CHECKPTR(ptr);
+
+    /*
+        Find related entry
+    */
+    struct heapMetadataEntry * entry = heapMetadataStartEntry;
+    while (entry) {
+        if (entry + sizeof(struct heapMetadataEntry) == ptr) {
+            break;
+        }
+
+        entry = entry->next;
+    }
+
+    if (!entry) {
+        fug(FUG_INCONSISTENT);
+        return;
+    }
+
     #warning TODO
+
+    /*
+        Remove entry
+    */
+
+    /*
+        Release pages
+    */
+
+    /*
+        Release overlapping pages if not used
+    */
 }
 
 enum gnwMemoryError memPagePlz(const size_t pageCount, const addr_t start) {
