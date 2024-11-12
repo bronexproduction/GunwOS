@@ -15,8 +15,7 @@
 #define PAGE_SIZE KiB(4)
 
 static struct heapMetadataEntry {
-    addr_t addr;
-    size_t size;
+    size_t dataSizeBytes;
     struct heapMetadataEntry * next;
 } *heapMetadataStartEntry;
 
@@ -24,22 +23,41 @@ addr_t _heapStart;
 
 static ptr_t allocate(struct heapMetadataEntry * prev, 
                       struct heapMetadataEntry * next,
-                      const size_t sizeBytes) {
+                      const size_t dataSizeBytes) {
 
+    struct heapMetadataEntry * newEntry = (struct heapMetadataEntry *)(
+        prev ? ((addr_t)prev + sizeof(struct heapMetadataEntry) + prev->dataSizeBytes) : _heapStart
+    );
 
-    // #warning TODO
+    /*
+        Ask system for pages
+    */
+
+    addr_t startPageAddr = alignedr((size_t)newEntry, PAGE_SIZE, false);
+    addr_t followingPageAddress = alignedr((size_t)newEntry + sizeof(struct heapMetadataEntry) + dataSizeBytes, PAGE_SIZE, true);
+    size_t pageCount = (followingPageAddress - startPageAddr) / PAGE_SIZE;
+
+    const enum gnwMemoryError error = memPagePlz(pageCount, startPageAddr);
+    if (error == GME_OUT_OF_MEMORY) {
+        fug(FUG_OUT_OF_MEMORY);
+        return nullptr;
+    } else if (error != GME_NONE) {
+        fug(FUG_UNDEFINED);
+        return nullptr;
+    }
+
+    /*
+        Update list
+    */
+
+    newEntry->next = next;
+    newEntry->dataSizeBytes = dataSizeBytes;
     
-    // const enum gnwMemoryError error = memPagePlz(aligned(sizeBytes, PAGE_SIZE) / PAGE_SIZE, _heap);
+    if (prev) {
+        prev->next = newEntry;
+    }
 
-    // if (error != GME_NONE) {
-    //     fug(FUG_NULLPTR);
-    //     return nullptr;
-    // }
-    
-    // const ptr_t result = (ptr_t)_heap;
-    // _heap += aligned(sizeBytes, PAGE_SIZE);
-
-    // return result;
+    return (ptr_t)(newEntry + sizeof(struct heapMetadataEntry));
 }
 
 ptr_t memPlz(const size_t sizeBytes) {
@@ -50,6 +68,10 @@ ptr_t memPlz(const size_t sizeBytes) {
     }
 
     size_t allocSize = sizeBytes + sizeof(struct heapMetadataEntry);
+    if (allocSize < sizeBytes || !allocSize) {
+        fug(FUG_UNDEFINED);
+        return nullptr;
+    }
 
     if (_heapStart + allocSize <= _heapStart) {
         fug(FUG_OUT_OF_MEMORY);
@@ -60,12 +82,12 @@ ptr_t memPlz(const size_t sizeBytes) {
         /*
             Alloc as heap start
         */
-        return allocate(nullptr, nullptr, allocSize);
-    } else if (_heapStart + allocSize <= heapMetadataStartEntry->addr) {
+        return allocate(nullptr, nullptr, sizeBytes);
+    } else if (_heapStart + allocSize <= (addr_t)heapMetadataStartEntry) {
         /*
             Alloc at the beginning
         */
-        return allocate(nullptr, heapMetadataStartEntry, allocSize);
+        return allocate(nullptr, heapMetadataStartEntry, sizeBytes);
     } else {
         /*
             Find item to alloc after
@@ -73,21 +95,21 @@ ptr_t memPlz(const size_t sizeBytes) {
         struct heapMetadataEntry * entry = heapMetadataStartEntry;
 
         while (entry->next) {
-            addr_t gapStart = entry->addr + entry->size;
+            addr_t gapStart = (addr_t)entry + sizeof(struct heapMetadataEntry) + entry->dataSizeBytes;
             addr_t nextUnit = gapStart + allocSize;
 
             if (nextUnit <= gapStart) {
                 fug(FUG_OUT_OF_MEMORY);
                 return nullptr;
             }
-            if (nextUnit <= entry->next->addr) {
+            if (nextUnit <= (addr_t)entry->next) {
                 break;
             }
 
             entry = entry->next;
         }
 
-        return allocate(entry, entry->next, allocSize);
+        return allocate(entry, entry->next, sizeBytes);
     }
 }
 
