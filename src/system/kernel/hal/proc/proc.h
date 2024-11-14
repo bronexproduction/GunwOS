@@ -18,9 +18,8 @@
 #define KERNEL_PROC_ID -1
 
 struct k_proc_descriptor {
-    ptr_t img;
-    addr_t entry;
-    size_t imgBytes;
+    addr_t entryLinearAddr;
+    addr_t heapLinearAddr;
 };
 
 enum k_proc_error {
@@ -29,6 +28,7 @@ enum k_proc_error {
     PE_ACCESS_VIOLATION,
     PE_OPERATION_FAILED,
     PE_INVALID_PARAMETER,
+    PE_INVALID_STATE,
     PE_IGNORED,
     PE_UNKNOWN
 };
@@ -78,8 +78,20 @@ struct k_proc_process k_proc_getInfo(const procId_t procId);
 
 /*
     Spawning new userland processes
+
+    Params:
+    * procId - Memory pointer where spawned process ID will be set (out param)
 */
-enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const);
+enum k_proc_error k_proc_spawn(procId_t * procId);
+
+/*
+    Hatching previously spawned userland processes
+
+    Params:
+    * descriptor - Process descriptor
+    * procId - Process identifier (must be previously spawned)
+*/
+enum k_proc_error k_proc_hatch(const struct k_proc_descriptor descriptor, const procId_t procId);
 
 /*
     Blocking the process
@@ -99,6 +111,14 @@ void k_proc_lock(const procId_t procId, const enum k_proc_lockType lockType);
     * lockType - type of lock to be released
 */
 void k_proc_unlock(const procId_t procId, const enum k_proc_lockType lockType);
+
+/*
+    Cleaning up process corpse
+
+    Params:
+    * procId - Identifier of the process
+*/
+void k_proc_cleanup(const procId_t procId);
 
 /*
     Stopping and cleaning up after running process

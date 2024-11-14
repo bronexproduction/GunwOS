@@ -8,8 +8,11 @@
 #ifndef HAL_H
 #define HAL_H
 
+#include <kernel_boot_data.h>
 #include <types.h>
 #include <gunwdrv.h>
+
+void k_hal_init(const struct k_krn_memMapEntry *memMap);
 
 void k_hal_irqHandle(const uint_8 irq);
 

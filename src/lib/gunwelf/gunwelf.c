@@ -92,37 +92,6 @@ static bool validateSectionHeaderEntry(const struct elfSectionHeaderEntry32 * co
     return true;
 }
 
-static size_t totalAllocBytes(const struct elfHeader32 * const headerPtr,
-                              const size_t fileSizeBytes,
-                              addr_t * const virtualMemoryLowAddr) {
-    addr_t lowVAddr = 0;
-    addr_t highVAddr = 0;
-
-    for (int index = 0; index < headerPtr->sectionHeaderEntries; ++index) {
-        const struct elfSectionHeaderEntry32 * const entry = (struct elfSectionHeaderEntry32 *)((ptr_t)headerPtr + SECTION_HEADER_ENTRY_OFFSET_32(index, headerPtr, fileSizeBytes));
-        if (entry->attributes & ESECATTR_ALLOC) {
-            addr_t low = entry->virtualAddr;
-            addr_t high = low + entry->fileSizeBytes;
-            if ((low && low < lowVAddr) || !lowVAddr) {
-                lowVAddr = low;
-            }
-            if (high > highVAddr) {
-                highVAddr = high;
-            }      
-        }
-    }
-
-    if (lowVAddr > highVAddr) {
-        return 0;
-    }
-
-    if (virtualMemoryLowAddr) {
-        *virtualMemoryLowAddr = lowVAddr;
-    }
-
-    return lowVAddr ? (highVAddr - lowVAddr) : 0;
-}
-
 bool elfValidate(const ptr_t filePtr,
                  const size_t fileSizeBytes, 
                  const struct elfExpectation * const expectation) {
@@ -184,10 +153,6 @@ bool elfValidate(const ptr_t filePtr,
     return true;
 }
 
-size_t elfAllocBytes(const ptr_t filePtr, const size_t fileSizeBytes, addr_t * const virtualMemoryLowAddr) {
-    return (size_t)totalAllocBytes((struct elfHeader32 *)filePtr, fileSizeBytes, virtualMemoryLowAddr);
-}
-
 size_t elfGetSectionHeaderEntryCount(const ptr_t filePtr) {
     const struct elfHeader32 * const headerPtr = (struct elfHeader32 *)filePtr;
     return headerPtr->sectionHeaderEntries;
@@ -201,7 +166,14 @@ struct elfSectionHeaderEntry32 * elfGetSectionHeaderEntry(const ptr_t filePtr, c
     return (struct elfSectionHeaderEntry32 *)(filePtr + SECTION_HEADER_ENTRY_OFFSET_32(index, headerPtr, fileSizeBytes));
 }
 
-addr_t elfGetEntry(const ptr_t filePtr) {
+addr_t elfGetEntry(const ptr_t filePtr, const size_t fileSizeBytes) {
+    if (!filePtr) {
+        return NULL;
+    }
+    if (fileSizeBytes < sizeof(struct elfHeader32)) {
+        return NULL;
+    }
+    
     const struct elfHeader32 * const headerPtr = (struct elfHeader32 *)filePtr;
     return headerPtr->entry;
 }

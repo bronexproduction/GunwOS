@@ -17,4 +17,6 @@ enum k_stor_error {
     SE_UNKNOWN
 };
 
+void k_stor_init();
+
 #endif // STORAGE_H

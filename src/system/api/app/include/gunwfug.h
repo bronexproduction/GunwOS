@@ -10,7 +10,8 @@
 enum gnwFugCode {
     FUG_NULLPTR         = 1,    /* Requested memory access at invalid address - 0 */
     FUG_INCONSISTENT    = 2,    /* Data consistency error */
-    FUG_UNDEFINED       = 3,    /* Undefined error */
+    FUG_OUT_OF_MEMORY   = 3,    /* Out-of-memory error */
+    FUG_UNDEFINED       = -1,   /* Undefined error */
 };
 
 #ifndef _GUNWAPI_KERNEL

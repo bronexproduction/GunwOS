@@ -14,6 +14,7 @@
 #include <schedule/schedule.h>
 #include <hal/criticalsec/criticalsec.h>
 #include <hal/mem/mem.h>
+#include <hal/paging/paging.h>
 #include <ipc/ipc.h>
 #include <timer/timer.h>
 #include <error/panic.h>
@@ -53,12 +54,28 @@ PRIVATE struct process_user {
 
 static procId_t procCurrent = KERNEL_PROC_ID;
 
+static void unsafe_addProcParam(const procId_t procId, const addr_t param) {
+    pTab[procId].cpuState.esp -= sizeof(addr_t);
+    MEM_ONTABLE(procId, {
+        *(addr_t *)(pTab[procId].cpuState.esp) = param;
+    })
+}
+
+static void unsafe_setProcParams(const procId_t procId, const addr_t heap) {
+    unsafe_addProcParam(procId, heap);
+    
+    /*
+        Set some padding for unknown reason
+    */
+    pTab[procId].cpuState.esp -= sizeof(addr_t);
+}
+
 procId_t k_proc_getCurrentId() {
     return procCurrent;
 }
 
 bool k_proc_idIsUser(const procId_t procId) {
-    return procId >= 0;
+    return IN_RANGE(0, procId, MAX_PROC - 1);
 }
 
 struct k_proc_process k_proc_getInfo(const procId_t procId) {
@@ -71,7 +88,11 @@ struct k_proc_process k_proc_getInfo(const procId_t procId) {
     return (procId == KERNEL_PROC_ID) ? kernelProc.info : pTab[procId].info;
 }
 
-enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor) {
+enum k_proc_error k_proc_spawn(procId_t * procId) {
+    if (!procId) {
+        OOPS("Nullptr", PE_UNKNOWN);
+    }
+    
     uint_32 pIndex;
     
     CRITICAL_SECTION_BEGIN {
@@ -94,40 +115,6 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
 
     pTab[pIndex].info.dpl = DPL_3;
 
-    const size_t stackBytes = KiB(512);
-    ptr_t codeStartPtr = descriptor->img;
-    ptr_t codeEndPtr = codeStartPtr + descriptor->imgBytes - 1;
-    ptr_t dataStartPtr = codeEndPtr + 1;
-    ptr_t dataEndPtr = dataStartPtr + stackBytes - 1;
-
-    if (codeStartPtr < GDT_SEGMENT_START(r3code)) {
-        OOPS("Attempted to spawn process below its code segment", PE_UNKNOWN);
-    }
-    if (codeEndPtr > GDT_SEGMENT_END(r3code)) {
-        OOPS("Attempted to spawn process above its code segment", PE_UNKNOWN);
-    }
-    if (codeEndPtr <= codeStartPtr) {
-        OOPS("Attempted to spawn process outside its code segment", PE_UNKNOWN);
-    }
-    if (dataStartPtr < GDT_SEGMENT_START(r3data)) {
-        OOPS("Attempted to spawn process below its data segment", PE_UNKNOWN);
-    }
-    if (dataEndPtr > GDT_SEGMENT_END(r3data)) {
-        OOPS("Attempted to spawn process above its data segment", PE_UNKNOWN);
-    }
-    if (dataEndPtr <= dataStartPtr) {
-        OOPS("Attempted to spawn process outside its data segment", PE_UNKNOWN);
-    }
-    if (dataEndPtr <= codeStartPtr) {
-        OOPS("Attempted to spawn process outside its segments", PE_UNKNOWN);
-    }
-
-    addr_t relativeImgPtr = codeStartPtr - GDT_SEGMENT_START(r3code);
-    addr_t relativeEntryPtr = relativeImgPtr + descriptor->entry;
-    addr_t relativeStackPtr = dataEndPtr - GDT_SEGMENT_START(r3data);
-
-    pTab[pIndex].cpuState.esp = (uint_32)relativeStackPtr;
-    pTab[pIndex].cpuState.eip = (uint_32)relativeEntryPtr;
     pTab[pIndex].cpuState.eflags = FLAGS_INTERRUPT;
 
     pTab[pIndex].cpuState.cs = (uint_16)(GDT_OFFSET(r3code) | pTab[pIndex].info.dpl);
@@ -137,8 +124,31 @@ enum k_proc_error k_proc_spawn(const struct k_proc_descriptor * const descriptor
     pTab[pIndex].cpuState.gs = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].info.dpl);
     pTab[pIndex].cpuState.ss = (uint_16)(GDT_OFFSET(r3data) | pTab[pIndex].info.dpl);
 
-    pTab[pIndex].info.state = PS_READY;
-    k_proc_schedule_didSpawn(pIndex);
+    *procId = pIndex;
+    return PE_NONE;
+}
+
+enum k_proc_error k_proc_hatch(const struct k_proc_descriptor descriptor, const procId_t procId) {
+    if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
+        OOPS("Process id out of range", PE_UNKNOWN);
+    }
+    if (pTab[procId].info.state != PS_NEW) {
+        OOPS("Invalid process state during hatching", PE_INVALID_STATE);
+    }
+    if (!descriptor.entryLinearAddr) {
+        OOPS("Invalid linear entry address", PE_INVALID_PARAMETER);
+    }
+    if (!descriptor.heapLinearAddr) {
+        OOPS("Invalid linear heap address", PE_INVALID_PARAMETER);
+    }
+
+    pTab[procId].cpuState.esp = (uint_32)(0 - MEM_VIRTUAL_RESERVED_KERNEL_MEM);
+    pTab[procId].cpuState.eip = (uint_32)descriptor.entryLinearAddr;
+    
+    unsafe_setProcParams(procId, descriptor.heapLinearAddr);
+
+    pTab[procId].info.state = PS_READY;
+    k_proc_schedule_didHatch(procId);
 
     return PE_NONE;
 }
@@ -184,7 +194,7 @@ static bool isProcessAlive(const procId_t procId) {
            pTab[procId].info.state == PS_BLOCKED;
 }
 
-static void procCleanup(const procId_t procId) {
+void k_proc_cleanup(const procId_t procId) {
     if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
         OOPS("Process id out of range",);
     }
@@ -205,7 +215,7 @@ void k_proc_stop(const procId_t procId) {
     }
     
     pTab[procId].info.state = PS_FINISHED;
-    k_que_dispatch_arch((fPtr_arch)procCleanup, procId);
+    k_que_dispatch_arch((fPtr_arch)k_proc_cleanup, procId);
     k_proc_schedule_processStateDidChange();
 }
 
@@ -274,6 +284,11 @@ void k_proc_switch(const procId_t procId) {
 
     // Set kernel stack pointer in TSS
     k_cpu_tss.esp0 = (uint_32)k_cpu_stackPtr;
+
+    /*
+        Switch to next process page table
+    */
+    k_paging_switch(procId);
 
     // Prepare IRET stack
     __asm__ volatile ("pushw $0");
@@ -413,8 +428,6 @@ void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const procId_t currentP
     STACK_VAL(refEsp, 16, 56) = kernelProc.cpuState.ss;
 }
 
-#include <log/log.h>
-
 static enum k_proc_error callbackInvoke(const procId_t procId,
                                         const enum gnwEventFormat format, 
                                         const ptr_t funPtr, 
@@ -423,64 +436,6 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
                                         const size_t pEncodedSizeBytes,
                                         const gnwRunLoopDataEncodingRoutine encoder,
                                         const gnwRunLoopDataEncodingRoutine decoder) {
-
-    {
-        char msg[31] = "callbackInvoke - new dispatch ";
-        LOG(msg);
-    }
-    {
-        char msg[32] = "  target proc -         ";
-        uint2dec((addr_t)procId, msg + 16);
-        LOG(msg);
-    }
-    {
-        char msg[27] = "  format -         ";
-        uint2dec((addr_t)format, msg + 11);
-        LOG(msg);
-    }
-    {
-        char msg[128] = "  dispatched fun ptr -         ";
-        uint2hex((addr_t)funPtr, msg + 23);
-        LOG(msg);
-    }
-    {
-        char msg[128] = "  parameter ptr -         ";
-        uint2hex((addr_t)p, msg + 18);
-        LOG(msg);
-    }
-    {
-        char msg[35] = "  parameter size -         ";
-        uint2dec((addr_t)pSizeBytes, msg + 19);
-        LOG(msg);
-    }
-    {
-        char msg[43] = "  encoded parameter size -         ";
-        uint2dec((addr_t)pEncodedSizeBytes, msg + 27);
-        LOG(msg);
-    }
-    {
-        char msg[128] = "  encoder -         ";
-        uint2hex((addr_t)encoder, msg + 12);
-        LOG(msg);
-    }
-    {
-        char msg[128] = "  decoder -         ";
-        uint2hex((addr_t)decoder, msg + 12);
-        LOG(msg);
-    }
-    {
-        char msg[9] = "  bytes:";
-        LOG_BLOCK(
-            LOG_NBR(msg);
-            for (size_t i = 0; i < pSizeBytes; ++i) {
-                char byteString[3] = { 0 };
-                uint2hex((addr_t)((uint_8 *)p)[i], byteString);
-                LOG_NBR(" ");
-                LOG_NBR(byteString);
-            }
-        );
-    }
-
     if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
         OOPS("Process id out of range", PE_UNKNOWN);
     }

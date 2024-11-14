@@ -5,20 +5,27 @@
 //  Created by Artur Danielewski on 21.12.2023.
 //
 
-#include <hal/proc/proc.h>
 #include <log/log.h>
-#include "../func.h"
+#include <hal/mem/mem.h>
+#include <error/panic.h>
 
-void k_scr_usr_log(const char * const msgPtr, const size_t msgBytes) {
+void k_scr_usr_log(const procId_t procId, const char * const msgPtr, const size_t msgBytes) {
     
-    const procId_t procId = k_proc_getCurrentId();
-    SCLF_GET_VALID_ABS(const char * const, msgPtr, msgBytes, {},);
+    if (!msgPtr) {
+        OOPS("Unexpected null pointer",);
+    }
+    if (!msgBytes) {
+        OOPS("Unexpected message size",);
+    }
+    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)msgPtr, msgBytes)) {
+        OOPS("Reserved zone access violation",);
+    }
 
-    data_t absLogData;
-    absLogData.ptr = (ptr_t)abs_msgPtr;
-    absLogData.bytes = msgBytes;
+    data_t logData;
+    logData.ptr = (ptr_t)msgPtr;
+    logData.bytes = msgBytes;
 
     LOG_START;
-    k_log_logd(absLogData);
+    k_log_logd(logData);
     LOG_END;
 }

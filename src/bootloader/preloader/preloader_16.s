@@ -15,6 +15,7 @@ jmp preloader_start
 
 %include "a20/a20_16.s"
 %include "read_kernel.s"
+%include "boot_info/prepare_boot_info.s"
 
 BITS 16
 
@@ -30,6 +31,12 @@ preloader_start:
     call a20_16
 
     ; ---------------------------------------
+    ; Prepare kernel boot information
+    ; ---------------------------------------
+
+    call prepare_boot_info
+
+    ; ---------------------------------------
     ; Load kernel binary
     ;
     ; NOTE:
@@ -38,7 +45,7 @@ preloader_start:
     ; (starting from 0x1000:0x0 up to 640K)
     ; Which gives 576K for kernel binary
     ; ---------------------------------------
-    
+
     call read_kernel
 
     ; ---------------------------------------

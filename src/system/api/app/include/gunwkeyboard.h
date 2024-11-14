@@ -31,7 +31,7 @@ _Static_assert(sizeof(enum gnwKeyboardEventCode) == sizeof(int_32), "Unexpected 
 */
 struct gnwKeyboardEvent {
     enum gnwKeyboardEventCode code;
-    char *key;
+    char key;
 };
 
 /*

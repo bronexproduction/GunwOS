@@ -205,7 +205,7 @@ enum gnwFileErrorCode k_stor_file_getInfo(const char * const path,
 
 enum gnwFileErrorCode k_stor_file_load(const char * const path,
                                        const size_t pathLen,
-                                       const ptr_t dst) {
+                                       ptr_t dst) {
     if (!path || !dst) {
         OOPS("Nullptr access", GFEC_UNKNOWN);
     }

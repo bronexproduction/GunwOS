@@ -5,13 +5,16 @@
 //  Created by Artur Danielewski on 08.05.2023.
 //
 
-#include <hal/proc/proc.h>
 #include <runloop/runloop.h>
-#include <syscall/func.h>
+#include <hal/mem/mem.h>
+#include <error/panic.h>
 
-enum gnwRunLoopError k_scr_usr_runLoopGetData(ptr_t dataBufferPtr) {
+enum gnwRunLoopError k_scr_usr_runLoopGetData(const procId_t procId, ptr_t dataBufferPtr) {
 
-    const procId_t procId = k_proc_getCurrentId();
+    if (!dataBufferPtr) {
+        OOPS("Unexpected null pointer", GRLE_UNKNOWN);
+    }
+
     size_t dataSizeBytes;
 
     enum gnwRunLoopError err = k_runloop_getPendingItemDataSizeBytes(procId, &dataSizeBytes);
@@ -19,7 +22,9 @@ enum gnwRunLoopError k_scr_usr_runLoopGetData(ptr_t dataBufferPtr) {
         return err;
     }
 
-    SCLF_GET_VALID_ABS(ptr_t, dataBufferPtr, dataSizeBytes, {}, GRLE_UNKNOWN);
+    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)dataBufferPtr, dataSizeBytes)) {
+        OOPS("Reserved zone access violation", GRLE_UNKNOWN);
+    }
     
-    return k_runloop_getPendingItemData(procId, abs_dataBufferPtr);
+    return k_runloop_getPendingItemData(procId, dataBufferPtr);
 }

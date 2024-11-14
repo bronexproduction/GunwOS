@@ -11,9 +11,14 @@
 
 extern void dupa();
 
-void _start() {
+__attribute__((cdecl)) void _start(const addr_t heap) {
+
+    extern addr_t _heapStart;
+    _heapStart = heap;
+    
     dupa();
     bye(0);
+    __builtin_unreachable();
 }
 
 #endif // _GUNWAPI_KERNEL

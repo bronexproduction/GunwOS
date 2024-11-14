@@ -21,8 +21,8 @@ struct k_trm_terminal {
 } termData;
 
 static void lineShift() {
-    uint_8 columns = k_vid_dimensions.x;
-    uint_8 rows = k_vid_dimensions.y;
+    uint_8 columns = displayHandle.descriptor.dimensions.x;
+    uint_8 rows = displayHandle.descriptor.dimensions.y;
     point_t lastRowBegin = (point_t){ 0, rows - 1 };
     point_t lastRowEnd = (point_t){ columns - 1, rows - 1 };
     
@@ -37,7 +37,7 @@ static void lineShift() {
 static void back() {
     if (!(termData.cursorX)) {
         --(termData.cursorY);
-        termData.cursorX = k_vid_dimensions.x - 1;
+        termData.cursorX = displayHandle.descriptor.dimensions.x - 1;
     } else {
         --(termData.cursorX);
     }
@@ -47,7 +47,7 @@ static void newline() {
     termData.cursorX = 0;
     ++(termData.cursorY);
 
-    while (termData.cursorY == k_vid_dimensions.y) {
+    while (termData.cursorY == displayHandle.descriptor.dimensions.y) {
         lineShift();
     }
 }
@@ -67,12 +67,14 @@ static bool trm_append(const char c) {
         }
         back();
     } else {
-        const struct gnwDeviceUHA_display_character vChar = {TERMINAL_BG_COLOR_DFLT, TERMINAL_CHAR_COLOR_DFLT, c};
+        const struct gnwDeviceUHA_display_character vChar = {
+            TERMINAL_BG_COLOR_DFLT, TERMINAL_CHAR_COLOR_DFLT, c
+        };
         k_trm_vid_draw(vChar, termData.cursorX, termData.cursorY);
     
         termData.cursorX++;
         
-        if (termData.cursorX >= k_vid_dimensions.x) {
+        if (termData.cursorX >= displayHandle.descriptor.dimensions.x) {
             newline();
         }
     }

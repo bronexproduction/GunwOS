@@ -7,22 +7,27 @@
         {
             "type": "gdb",
             "request": "attach",
-            "name": "Attach to gdbserver",
+            "name": "Build and debug",
             "target": ":1234",
             "remote": true,
             "cwd": "${workspaceRoot}",
             "debugger_args": ["--init-eval-command", "add-symbol-file build/kernel/kernel_paged.elf",
                               "--init-eval-command", "add-symbol-file build/kernel/kernel.elf"],
+            "preLaunchTask": "Build and debug (QEMU)",
         },
-        // {
-        //     "type": "gdb",
-        //     "request": "launch",
-        //     "name": "Build and debug",
-        //     "executable": "build/kernel/kernel.elf",
-        //     "target": ":1234",
-        //     "remote": true,
-        //     "cwd": "${workspaceRoot}",
-        //     "preLaunchTask": "Build and debug (QEMU - detached)"
-        // },
+        {
+            "type": "gdb",
+            "request": "attach",
+            "name": "Attach to gdbserver",
+            "target": ":1234",
+            "remote": true,
+            "cwd": "${workspaceRoot}",
+            "debugger_args": ["--init-eval-command", "add-symbol-file build/kernel/kernel_paged.elf",
+                              "--init-eval-command", "add-symbol-file build/kernel/kernel.elf",
+                              "--init-eval-command", "add-symbol-file build/app/gnwdispm.elf",
+                              "--init-eval-command", "add-symbol-file build/app/gnwkbdm.elf",
+                              "--init-eval-command", "add-symbol-file build/app/gnwterm.elf",
+                              "--init-eval-command", "add-symbol-file build/app/gnwsh.elf"],
+        },
     ]
 }

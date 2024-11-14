@@ -28,8 +28,9 @@ _Static_assert(sizeof(uint_32) == 4, "Unexpected uint_32 size");
 _Static_assert(sizeof(int_64) == 8, "Unexpected int_64 size");
 _Static_assert(sizeof(uint_64) == 8, "Unexpected uint_64 size");
 
+typedef uint_8 byte_t;
 typedef uint_32 addr_t;
-typedef uint_8* ptr_t;
+typedef void * ptr_t;
 typedef uint_32 size_t;
 typedef uint_64 hugeSize_t;
 // TODO move to 64-bit time
@@ -54,7 +55,7 @@ typedef struct {
 } range_addr_t;
 
 typedef struct {
-    ptr_t ptr;
+    byte_t * ptr;
     size_t bytes;
 } data_t;
 

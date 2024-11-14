@@ -11,7 +11,9 @@ APPS=$(shell $(APP_DIR_LISTING))
 
 all: $(APPS)
 	mv *.elf $(APP_BUILD_DIR)/
+	mv *.lst $(APP_BUILD_DIR)/
 
 $(APPS):
 	make -C $@
 	mv $@/$@.elf $@.elf
+	objdump -D $@.elf > $@.lst
