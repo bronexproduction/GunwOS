@@ -122,14 +122,14 @@ ptr_t memPlz(const size_t sizeBytes) {
 
 void memThx(const ptr_t ptr) {
     CHECKPTR(ptr);
-    if (ptr < sizeof(struct heapMetadataEntry)) {
+    if ((addr_t)ptr < sizeof(struct heapMetadataEntry)) {
         fug(FUG_UNDEFINED);
         return;
     }
 
     struct heapMetadataEntry * entry = heapMetadataStartEntry;
     struct heapMetadataEntry * prevEntry = nullptr;
-    const size_t leadingEntryPage = PAGE_OF_ADDR(ptr);
+    const size_t leadingEntryPage = PAGE_OF_ADDR((addr_t)ptr);
     bool leadingEntryPageShared = false;
 
     while (entry) {
@@ -138,7 +138,7 @@ void memThx(const ptr_t ptr) {
                 Item found
             */
             break;
-        } else if (!leadingEntryPageShared && (PAGE_OF_ADDR(LAST_BYTE_ADDR(entry)) == leadingEntryPage)) {
+        } else if (!leadingEntryPageShared && (PAGE_OF_ADDR(LAST_BYTE_ADDR((addr_t)entry)) == leadingEntryPage)) {
             /*
                 Leading page shared use found
             */
@@ -154,9 +154,9 @@ void memThx(const ptr_t ptr) {
         return;
     }
 
-    const size_t trailingEntryPage = PAGE_OF_ADDR(LAST_BYTE_ADDR(entry));
+    const size_t trailingEntryPage = PAGE_OF_ADDR(LAST_BYTE_ADDR((addr_t)entry));
     bool trailingEntryPageShared = false;
-    if (entry->next && (PAGE_OF_ADDR(entry->next) == trailingEntryPage)) {
+    if (entry->next && (PAGE_OF_ADDR((addr_t)entry->next) == trailingEntryPage)) {
         trailingEntryPageShared = true;
     }
 
@@ -164,7 +164,11 @@ void memThx(const ptr_t ptr) {
         Remove entry
     */
 
-    (prevEntry ? prevEntry->next : heapMetadataStartEntry) = entry->next;
+    if (prevEntry) {
+        prevEntry->next = entry->next;
+    } else {
+        heapMetadataStartEntry = entry->next;
+    }
 
     /*
         Release pages
