@@ -13,6 +13,9 @@
 #ifndef _GUNWAPI_KERNEL
 
 #define PAGE_SIZE KiB(4)
+#define PAGE_OF_ADDR(ADDR)      ((ADDR) / (PAGE_SIZE))
+#define ADDR_OF_PAGE(PAGE)      ((PAGE) * (PAGE_SIZE))
+#define LAST_BYTE_ADDR(ENTRY)   (ENTRY + sizeof(struct heapMetadataEntry) + ENTRY->dataSizeBytes - 1)
 
 static struct heapMetadataEntry {
     size_t dataSizeBytes;
@@ -119,37 +122,63 @@ ptr_t memPlz(const size_t sizeBytes) {
 
 void memThx(const ptr_t ptr) {
     CHECKPTR(ptr);
+    if (ptr < sizeof(struct heapMetadataEntry)) {
+        fug(FUG_UNDEFINED);
+        return;
+    }
 
-    /*
-        Find related entry
-    */
     struct heapMetadataEntry * entry = heapMetadataStartEntry;
+    struct heapMetadataEntry * prevEntry = nullptr;
+    const size_t leadingEntryPage = PAGE_OF_ADDR(ptr);
+    bool leadingEntryPageShared = false;
+
     while (entry) {
         if (entry + sizeof(struct heapMetadataEntry) == ptr) {
+            /*
+                Item found
+            */
             break;
+        } else if (!leadingEntryPageShared && (PAGE_OF_ADDR(LAST_BYTE_ADDR(entry)) == leadingEntryPage)) {
+            /*
+                Leading page shared use found
+            */
+            leadingEntryPageShared = true;
         }
 
+        prevEntry = entry;
         entry = entry->next;
     }
 
     if (!entry) {
-        fug(FUG_INCONSISTENT);
+        fug(FUG_UNDEFINED);
         return;
     }
 
-    #warning TODO
+    const size_t trailingEntryPage = PAGE_OF_ADDR(LAST_BYTE_ADDR(entry));
+    bool trailingEntryPageShared = false;
+    if (entry->next && (PAGE_OF_ADDR(entry->next) == trailingEntryPage)) {
+        trailingEntryPageShared = true;
+    }
 
     /*
         Remove entry
     */
 
+    (prevEntry ? prevEntry->next : heapMetadataStartEntry) = entry->next;
+
     /*
         Release pages
     */
 
-    /*
-        Release overlapping pages if not used
-    */
+    if (!leadingEntryPageShared) {
+        memPageThx(ADDR_OF_PAGE(leadingEntryPage));
+    }
+    for (size_t page = leadingEntryPage + 1; page < trailingEntryPage; ++page) {
+        memPageThx(ADDR_OF_PAGE(page));
+    }
+    if (!trailingEntryPageShared) {
+        memPageThx(ADDR_OF_PAGE(trailingEntryPage));
+    }
 }
 
 enum gnwMemoryError memPagePlz(const size_t pageCount, const addr_t start) {
