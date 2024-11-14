@@ -13,8 +13,8 @@ extern void dupa();
 
 __attribute__((cdecl)) void _start(const addr_t heap) {
 
-    extern addr_t _heap;
-    _heap = heap;
+    extern addr_t _heapStart;
+    _heapStart = heap;
     
     dupa();
     bye(0);
