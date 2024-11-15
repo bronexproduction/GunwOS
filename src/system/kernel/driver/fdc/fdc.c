@@ -16,7 +16,6 @@
 #include "cmd/cmd.h"
 #include "proc/proc.h"
 #include <error/panic.h>
-#include <driver/driver.h>
 #include "uha/uha.h"
 
 static bool init() {
@@ -94,12 +93,16 @@ static bool start() {
     return true;
 }
 
-ISR(
+static void isr() {
     irqRecv = true;
-)
+}
 
 static struct gnwDriverConfig desc() {
-    return (struct gnwDriverConfig){ init, start, isr, 6 };
+    const addr_t initAddr = (addr_t)init;
+    const addr_t startAddr = (addr_t)start;
+    const addr_t isrAddr = (addr_t)isr;
+
+    return (struct gnwDriverConfig){ (bool (*)())initAddr, (bool (*)())startAddr, (void (*)())isrAddr, 6 };
 }
 
 static struct gnwDeviceUHA uha() {

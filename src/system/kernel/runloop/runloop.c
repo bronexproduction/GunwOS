@@ -109,6 +109,9 @@ static void release(struct dispatchItem * const item) {
     memzero(item, sizeof(struct dispatchItem));
 }
 
+#include <log/log.h>
+#include <string.h>
+
 enum gnwRunLoopError k_runloop_dispatch(const procId_t procId,
                                         const size_t token,
                                         const struct gnwRunLoopDispatchItem item,
@@ -154,7 +157,11 @@ enum gnwRunLoopError k_runloop_dispatch(const procId_t procId,
     return GRLE_NONE;
 }
 
-enum gnwRunLoopError k_runloop_getPendingItem(const procId_t procId, struct gnwRunLoopDispatchItem * const absItemPtr) {
+enum gnwRunLoopError k_runloop_getPendingItem(const procId_t procId, struct gnwRunLoopDispatchItem * const itemPtr) {
+    if (!itemPtr) {
+        OOPS("Nullptr", GRLE_UNKNOWN);
+    }
+
     struct dispatchItem * item;
     size_t index;
     const enum gnwRunLoopError err = getPendingDispatchItem(procId, &item, &index);
@@ -165,7 +172,7 @@ enum gnwRunLoopError k_runloop_getPendingItem(const procId_t procId, struct gnwR
         return GRLE_INVALID_STATE;
     }
 
-    *absItemPtr = item->item;
+    *itemPtr = item->item;
     item->handled = true;
     finishIfNeeded(procId, index);
 
@@ -190,7 +197,11 @@ enum gnwRunLoopError k_runloop_getPendingItemDataSizeBytes(const procId_t procId
     return GRLE_NONE;
 }
 
-enum gnwRunLoopError k_runloop_getPendingItemData(const procId_t procId, ptr_t absDataBufferPtr) {
+enum gnwRunLoopError k_runloop_getPendingItemData(const procId_t procId, ptr_t dataBufferPtr) {
+    if (!dataBufferPtr) {
+        OOPS("Nullptr", GRLE_UNKNOWN);
+    }
+
     struct dispatchItem * item;
     size_t index;
     const enum gnwRunLoopError err = getPendingDispatchItem(procId, &item, &index);
@@ -204,7 +215,7 @@ enum gnwRunLoopError k_runloop_getPendingItemData(const procId_t procId, ptr_t a
         return GRLE_INVALID_STATE;
     }
 
-    memcopy(item->data, absDataBufferPtr, item->item.dataSizeBytes);
+    memcopy(item->data, dataBufferPtr, item->item.dataSizeBytes);
     item->dataHandled = true;
     finishIfNeeded(procId, index);
     return GRLE_NONE;

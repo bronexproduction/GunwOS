@@ -17,26 +17,18 @@ enum gnwDeviceError devGetById(const size_t deviceId,
                                struct gnwDeviceUHADesc * const desc) {
     CHECKPTR(desc);
 
-    SYSCALL_PAR1(deviceId);
-    SYSCALL_PAR2(desc);
+    SYSCALL_USER_CALL(DEV_GET_BY_ID, deviceId, desc, 0);
 
-    SYSCALL_USER_FUNC(DEV_GET_BY_ID);
-    SYSCALL_USER_INT;
-
-    SYSCALL_RETVAL(32);
+    return SYSCALL_RESULT;
 }
 
 enum gnwDeviceError devGetByType(const enum gnwDeviceType type,
                                  struct gnwDeviceUHADesc * const desc) {
     CHECKPTR(desc);
 
-    SYSCALL_PAR1(type);
-    SYSCALL_PAR2(desc);
+    SYSCALL_USER_CALL(DEV_GET_BY_TYPE, type, desc, 0);
 
-    SYSCALL_USER_FUNC(DEV_GET_BY_TYPE);
-    SYSCALL_USER_INT;
-
-    SYSCALL_RETVAL(32);
+    return SYSCALL_RESULT;
 }
 
 enum gnwDeviceError devGetParam(const size_t deviceId,
@@ -45,14 +37,9 @@ enum gnwDeviceError devGetParam(const size_t deviceId,
     CHECKPTR(paramDescriptor);
     CHECKPTR(result);
 
-    SYSCALL_PAR1(deviceId);
-    SYSCALL_PAR2(paramDescriptor);
-    SYSCALL_PAR3(result);
+    SYSCALL_USER_CALL(DEV_GET_PARAM, deviceId, paramDescriptor, result);
 
-    SYSCALL_USER_FUNC(DEV_GET_PARAM);
-    SYSCALL_USER_INT;
-
-    SYSCALL_RETVAL(32);
+    return SYSCALL_RESULT;
 }
 
 enum gnwDeviceError devSetParam(const size_t deviceId,
@@ -60,42 +47,26 @@ enum gnwDeviceError devSetParam(const size_t deviceId,
                                 const size_t value) {
     CHECKPTR(paramDescriptor);
 
-    SYSCALL_PAR1(deviceId);
-    SYSCALL_PAR2(paramDescriptor);
-    SYSCALL_PAR3(value);
+    SYSCALL_USER_CALL(DEV_SET_PARAM, deviceId, paramDescriptor, value);
 
-    SYSCALL_USER_FUNC(DEV_SET_PARAM);
-    SYSCALL_USER_INT;
-
-    SYSCALL_RETVAL(32);
+    return SYSCALL_RESULT;
 }
 
 enum gnwDeviceError devAcquire(const uint_32 identifier) {
-    SYSCALL_PAR1(identifier);
+    SYSCALL_USER_CALL(DEV_ACQUIRE, identifier, 0, 0);
 
-    SYSCALL_USER_FUNC(DEV_ACQUIRE);
-    SYSCALL_USER_INT;
-
-    SYSCALL_RETVAL(32);
+    return SYSCALL_RESULT;
 }
 
 void devRelease(const uint_32 identifier) {
-    SYSCALL_PAR1(identifier);
-
-    SYSCALL_USER_FUNC(DEV_RELEASE);
-    SYSCALL_USER_INT;
+    SYSCALL_USER_CALL(DEV_RELEASE, identifier, 0, 0);
 }
 
 enum gnwDeviceError devCharWrite(const uint_32 deviceId, 
                                  const char character) {
-    SYSCALL_PAR1(deviceId);
-    SYSCALL_PAR2(character);
-
-    SYSCALL_USER_FUNC(DEV_CHAR_WRITE);
-    SYSCALL_USER_INT;
+    SYSCALL_USER_CALL(DEV_CHAR_WRITE, deviceId, character, 0);
     
-    register enum gnwDeviceError ret __asm__ ("eax");
-    return ret;
+    return SYSCALL_RESULT;
 }
 
 enum gnwDeviceError devMemWrite(const size_t identifier,
@@ -103,40 +74,32 @@ enum gnwDeviceError devMemWrite(const size_t identifier,
                                 const range_addr_t * const devInputBufferRange) {
     CHECKPTR(buffer);
 
-    SYSCALL_PAR1(identifier);
-    SYSCALL_PAR2(buffer);
-    SYSCALL_PAR3(devInputBufferRange);
+    SYSCALL_USER_CALL(DEV_MEM_WRITE, identifier, buffer, devInputBufferRange);
 
-    SYSCALL_USER_FUNC(DEV_MEM_WRITE);
-    SYSCALL_USER_INT;
-
-    SYSCALL_RETVAL(32);
+    return SYSCALL_RESULT;
 }
 
 enum gnwDeviceError devListen(const size_t identifier,
                               const gnwDeviceEventListener listener) {
     CHECKPTR(listener);
 
-    SYSCALL_PAR1(identifier);
-    SYSCALL_PAR2(listener);
-    SYSCALL_PAR3(gnwDeviceEvent_decode);
+    SYSCALL_USER_CALL(DEV_LISTEN, identifier, listener, gnwDeviceEvent_decode);
 
-    SYSCALL_USER_FUNC(DEV_LISTEN);
-    SYSCALL_USER_INT;
-
-    SYSCALL_RETVAL(32);
+    return SYSCALL_RESULT;
 }
 
-void gnwDeviceEvent_decode(const ptr_t absDataPtr, struct gnwDeviceEvent * const absEventPtr) {
-    memcopy(absDataPtr, absEventPtr, sizeof(struct gnwDeviceEvent));
-    absEventPtr->data = absDataPtr + sizeof(struct gnwDeviceEvent);
+void gnwDeviceEvent_decode(const ptr_t dataPtr, struct gnwDeviceEvent * const eventPtr) {
+    eventPtr->type = *(int_32 *)dataPtr;
+    eventPtr->dataSizeBytes = *(size_t *)(dataPtr + sizeof(int_32));
+    eventPtr->data = dataPtr + sizeof(int_32) + sizeof(size_t);
 }
 
 #else
 
-void gnwDeviceEvent_encode(const struct gnwDeviceEvent * const absEventPtr, ptr_t absDataPtr) {
-    memcopy(absEventPtr, absDataPtr, sizeof(struct gnwDeviceEvent));
-    memcopy(absEventPtr->data, absDataPtr + sizeof(struct gnwDeviceEvent), absEventPtr->dataSizeBytes);
+void gnwDeviceEvent_encode(const struct gnwDeviceEvent * const eventPtr, ptr_t dataPtr) {
+    *(int_32 *)dataPtr = eventPtr->type;
+    *(size_t *)(dataPtr + sizeof(int_32)) = eventPtr->dataSizeBytes;
+    memcopy(eventPtr->data, dataPtr + sizeof(int_32) + sizeof(size_t), eventPtr->dataSizeBytes);
 }
 
 #endif // _GUNWAPI_KERNEL

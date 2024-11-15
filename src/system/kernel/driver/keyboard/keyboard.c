@@ -10,13 +10,14 @@
 //  
 //
 
-#include <gunwbus.h>
 #include <gunwdrv.h>
 #include <gunwdevemitter.h>
 #include <gunwkeyboard.h>
 
-#include <driver/driver.h>
+#include <dev/dev.h>
 #include <error/panic.h>
+#include <hal/io/bus.h>
+#include <hal/proc/proc.h>
 
 /*
     Keyboard controller data register
@@ -95,21 +96,21 @@ static void emitEvent(const int_32 type, const char data) {
     event.data = (ptr_t)&data;
     event.dataSizeBytes = sizeof(char);
 
-    err = emit(&event);
+    err = k_dev_emit(KERNEL_PROC_ID, &event);
     if (err != GDE_NONE) {
         OOPS("Error emitting keyboard event",);
     }
 }
 
-ISR(
+static void isr() {
     /* Checking output buffer status */
-    if (!rdb(KBD_BUS_STATUS) & KBD_STAT_OUTB) {
+    if (!k_bus_inb(KBD_BUS_STATUS) & KBD_STAT_OUTB) {
         OOPS_NBR("Keyboard output buffer empty on keyboard interrupt");
-        ISR_END
+        return;
     }
 
     /* Reading keycode */
-    uint_8 c = rdb(KBD_BUS_DATA);
+    uint_8 c = k_bus_inb(KBD_BUS_DATA);
     
     /*
         Extracting exact keycode
@@ -122,10 +123,12 @@ ISR(
     else {
         emitEvent(GKEC_KEY_DOWN, c);
     }
-)
+}
 
 static struct gnwDriverConfig desc() {
-    return (struct gnwDriverConfig){ 0, 0, isr, 1 };
+    const addr_t isrAddr = (addr_t)isr;
+
+    return (struct gnwDriverConfig){ 0, 0, (void (*)())isrAddr, 1 };
 }
 
 static struct gnwDeviceUHA uha() {

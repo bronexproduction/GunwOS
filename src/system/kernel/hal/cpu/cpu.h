@@ -10,13 +10,17 @@
 
 #include <types.h>
 
-#define CPU_PUSH { \
-    __asm__ volatile ("pushw %ds"); \
-    __asm__ volatile ("pushw %es"); \
-    __asm__ volatile ("pushw %fs"); \
-    __asm__ volatile ("pushw %gs"); \
-    __asm__ volatile ("pushal"); \
-}
+#define _CPU_INTERRUPTS_DISABLE "cli"
+#define CPU_INTERRUPTS_DISABLE __asm__ volatile (_CPU_INTERRUPTS_DISABLE);
+#define CPU_INTERRUPTS_ENABLE __asm__ volatile ("sti");
+#define CPU_INTERRUPT_RETURN __asm__ volatile ("iret");
+
+#define _CPU_PUSH "pushw %ds" "\n" \
+                  "pushw %es" "\n" \
+                  "pushw %fs" "\n" \
+                  "pushw %gs" "\n" \
+                  "pushal"
+#define CPU_PUSH __asm__ volatile (_CPU_PUSH);
 
 #define CPU_POP { \
     __asm__ volatile ("popal"); \
@@ -26,15 +30,14 @@
     __asm__ volatile ("popw %ds"); \
 }
 
-#define CPU_SEG_RESTORE { \
-    __asm__ volatile ("pushl %eax"); \
-    __asm__ volatile ("movw %ss, %ax"); \
-    __asm__ volatile ("movw %ax, %ds"); \
-    __asm__ volatile ("movw %ax, %es"); \
-    __asm__ volatile ("movw %ax, %fs"); \
-    __asm__ volatile ("movw %ax, %gs"); \
-    __asm__ volatile ("popl %eax"); \
-}
+#define _CPU_SEG_RESTORE "movw %ss, %ax" "\n" \
+                         "movw %ax, %ds" "\n" \
+                         "movw %ax, %es" "\n" \
+                         "movw %ax, %fs" "\n" \
+                         "movw %ax, %gs" "\n"
+#define CPU_SEG_RESTORE __asm__ volatile (_CPU_SEG_RESTORE);
+
+register ptr_t k_cpu_stackPtr __asm__ ("esp");
 
 enum k_cpu_eflags {
     FLAGS_CARRY     = 0x0001,
@@ -154,5 +157,20 @@ void k_cpu_loadTaskRegister();
     Halts the CPU
 */
 void k_cpu_halt();
+
+/*
+    Reads current CR3 register value
+*/
+size_t k_cpu_getCR3();
+
+/*
+    Sets new CR3 register value
+*/
+void k_cpu_setCR3(const size_t cr3);
+
+/*
+    Flushes the TLB
+*/
+void k_cpu_tlbFlush();
 
 #endif // CPU_H

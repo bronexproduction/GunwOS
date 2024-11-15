@@ -1,4 +1,4 @@
-LFLAGS_DEFAULT=-m$(L_OUTFORMAT) -z noexecstack --fatal-warnings -T linker.ld
+LFLAGS_DEFAULT=-m$(L_OUTFORMAT) -pie -z noexecstack --fatal-warnings
 
 ifneq ($(GNW_TEST_UNIT),)
 KERNEL_TEST_INCLUDE=-include $(TESTS_UNIT_SRC_DIR)/kernel/kernel.pch
@@ -10,6 +10,7 @@ endif
 
 KERNEL_INCLUDE=-include kernel.pch \
 			   $(KERNEL_TEST_INCLUDE) \
+			   -I $(BOOTLOADER_INCLUDE_DIR) \
 			   -I $(STDGUNW_INCLUDE_DIR) \
 			   -I $(APP_API_INCLUDE_DIR) \
 			   -I $(DRIVER_API_INCLUDE_DIR) \
@@ -22,27 +23,29 @@ KERNEL_INCLUDE=-include kernel.pch \
 KERNEL_LIBS=$(LIB_BUILD_DIR)/stdgunw.o \
 			$(LIB_BUILD_DIR)/gunwelf.o \
 			$(LIB_BUILD_DIR)/gunwapi_app_kernel.o \
-			$(LIB_BUILD_DIR)/gunwapi_driver_kernel.o \
-			$(LIB_BUILD_DIR)/gunwapi_driver.o
+			$(LIB_BUILD_DIR)/gunwapi_driver_kernel.o
 
-export KERNEL_BUILD_CFLAGS=-std=c11 -c -ffreestanding -mno-red-zone -ggdb -D_GUNWAPI_KERNEL $(CFLAGS_GLOBAL)
+export KERNEL_BUILD_CFLAGS=-std=c11 -c -fpic -ffreestanding -mno-red-zone -ggdb -D_GUNWAPI_KERNEL $(CFLAGS_GLOBAL)
 CXXFLAGS=-std=c++11 -c -ffreestanding -mno-red-zone -ggdb $(CXXFLAGS_GLOBAL)
-RSFLAGS=$(RSFLAGS_OBJECT)
 
 O_DIR_LISTING=find . -name '*.o' -type f
 
 .PHONY: all unit_tests_bin unit_tests_lib
 
-all: kernel.elf unit_tests_bin clean_o
+all: kernel_paged.elf kernel_paged.ld kernel.elf unit_tests_bin clean_o
 
+kernel_paged.elf: kernel.elf kernel_paged.ld
+	$(L) $(LFLAGS) -T $(KERNEL_BUILD_DIR)/kernel_paged.ld -o $(KERNEL_BUILD_DIR)/$@ $(KERNEL_LIBS) $(shell $(O_DIR_LISTING))
+
+kernel_paged.ld:
+	cp linker_paged.ld $(KERNEL_BUILD_DIR)/$@
+	
 kernel.elf: kernel.o unit_tests_lib
-	$(L) $(LFLAGS) -o $@ $(KERNEL_LIBS) $(shell $(O_DIR_LISTING))
-	mv $@ $(KERNEL_BUILD_DIR)/$@
+	$(L) $(LFLAGS) -T linker.ld -o $(KERNEL_BUILD_DIR)/$@ $(KERNEL_LIBS) $(shell $(O_DIR_LISTING))
 
 kernel.o:
 	$(C_DIR_LISTING) -print0 | xargs -0I{} $(C) $(KERNEL_BUILD_CFLAGS) $(KERNEL_INCLUDE) -o {}.o {}
 	$(CXX_DIR_LISTING) -print0 | xargs -0I{} $(CXX) $(CXXFLAGS) -o {}.o {}
-	$(RS_DIR_LISTING) -print0 | xargs -0I{} $(RUSTC) $(RSFLAGS) -o {}.o {}
 
 unit_tests_bin: kernel.elf
 ifneq ($(GNW_TEST_UNIT),)

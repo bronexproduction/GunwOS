@@ -155,9 +155,9 @@ int_32 str2intl(const char * const s, const size_t sLen, bool * const err) {
 size_t uint2str(const uint_32 i, char * const s, const uint_8 base) {
     if (!s) return 0;
 
-    int length = 0;
-    int b = i;
-    int exp = -1;
+    uint_32 length = 0;
+    uint_32 b = i;
+    int_32 exp = -1;
 
     do {
         b /= base;

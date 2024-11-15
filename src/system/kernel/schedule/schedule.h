@@ -25,10 +25,10 @@ void __attribute__((cdecl)) k_proc_schedule_intNeedsKernelHandling(const uint_32
 void k_proc_schedule_onKernelHandlingFinished();
 
 /*
-    Called by the k_proc_spawn
-    in case a new process got spawned
+    Called by the k_proc_hatch
+    in case a new process got hatched
 */
-void k_proc_schedule_didSpawn(const procId_t procId);
+void k_proc_schedule_didHatch(const procId_t procId);
 
 /*
     Notifies scheduler about active process state change

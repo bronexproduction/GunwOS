@@ -25,6 +25,23 @@ void k_cpu_loadTaskRegister() {
 }
 
 void k_cpu_halt() {
-    __asm__ volatile ("cli");
+    CPU_INTERRUPTS_DISABLE;
     __asm__ volatile ("hlt");
+}
+
+size_t k_cpu_getCR3() {
+    size_t cr3;
+    
+    __asm__ volatile ("mov %%cr3, %0" : "=r" (cr3) : );
+
+    return cr3;
+}
+
+void k_cpu_setCR3(const size_t cr3) {
+    __asm__ volatile ("mov %0, %%cr3" : : "r" (cr3));
+}
+
+void k_cpu_tlbFlush() {
+    __asm__ volatile ("mov %cr3, %eax");
+    __asm__ volatile ("mov %eax, %cr3");
 }

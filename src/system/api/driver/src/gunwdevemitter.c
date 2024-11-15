@@ -5,9 +5,7 @@
 //  Created by Artur Danielewski on 11.05.2023.
 //
 
-#warning swapped until drivers running in separate processes
-// #ifndef _GUNWAPI_KERNEL
-#ifdef _GUNWAPI_KERNEL
+#ifndef _GUNWAPI_KERNEL
 
 #include "../include/gunwdevemitter.h"
 #include <gunwfug.h>
@@ -17,12 +15,9 @@ enum gnwDeviceError emit(const struct gnwDeviceEvent * const event) {
     CHECKPTR(event);
     CHECKPTR(event->data);
 
-    SYSCALL_PAR1(event);
-
-    SYSCALL_DRIVER_FUNC(EMIT);
-    SYSCALL_DRIVER_INT;
+    SYSCALL_DRIVER_CALL(EMIT, event, 0, 0);
     
-    SYSCALL_RETVAL(32);
+    return SYSCALL_RESULT;
 }
 
 #endif // _GUNWAPI_KERNEL

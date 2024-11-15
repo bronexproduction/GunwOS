@@ -8,11 +8,10 @@
 //  https://wiki.osdev.org/Programmable_Interval_Timer
 //
 
-#include <gunwbus.h>
 #include <gunwdrv.h>
 
-#include <driver/driver.h>
 #include <error/panic.h>
+#include <hal/io/bus.h>
 
 #define PIT_BUS_DATA_CH0    0x40    // Channel 0 (read/write)
 #define PIT_BUS_DATA_CH1    0x41    // Channel 1 (read/write)
@@ -97,19 +96,22 @@ static uint_8 init() {
     }
     
     uint_16 div = divider();
-    wrb(PIT_BUS_COMMAND, PIT_CMD_CSB_CH0 | PIT_CMD_ACC_LOHI | PIT_CMD_MOD_3 | PIT_CMD_CRF_BINARY);
-    wrb(PIT_BUS_DATA_CH0, div & 0xFF);
-    wrb(PIT_BUS_DATA_CH0, div >> 8);
+    k_bus_outb(PIT_BUS_COMMAND, PIT_CMD_CSB_CH0 | PIT_CMD_ACC_LOHI | PIT_CMD_MOD_3 | PIT_CMD_CRF_BINARY);
+    k_bus_outb(PIT_BUS_DATA_CH0, div & 0xFF);
+    k_bus_outb(PIT_BUS_DATA_CH0, div >> 8);
 
     return 1;
 }
 
-ISR(
+static void isr() {
     k_pit_routine();
-)
+}
 
 static struct gnwDriverConfig desc() {
-    return (struct gnwDriverConfig){ init, 0, isr, 0 };
+    const addr_t initAddr = (addr_t)init;
+    const addr_t isrAddr = (addr_t)isr;
+
+    return (struct gnwDriverConfig){ (bool (*)())initAddr, 0, (void (*)())isrAddr, 0 };
 }
 
 static struct gnwDeviceUHA uha() {

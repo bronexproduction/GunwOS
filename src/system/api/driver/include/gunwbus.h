@@ -8,8 +8,7 @@
 #ifndef GUNWOS_GUNWBUS_H
 #define GUNWOS_GUNWBUS_H
 
-#warning commented until drivers running in separate processes
-// #ifndef _GUNWAPI_KERNEL
+#ifndef _GUNWAPI_KERNEL
 
 #include <types.h>
 
@@ -29,7 +28,6 @@ extern uint_8 rdb(uint_16 const port);
 */
 extern void wrb(uint_16 const port, uint_8 const val);
 
-#warning commented until drivers running in separate processes
-// #endif // _GUNWAPI_KERNEL
+#endif // _GUNWAPI_KERNEL
 
 #endif // GUNWOS_GUNWBUS_H

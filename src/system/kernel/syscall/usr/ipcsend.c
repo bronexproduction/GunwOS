@@ -5,30 +5,56 @@
 //  Created by Artur Danielewski on 15.04.2023.
 //
 
-#include <syscall/func.h>
 #include <ipc/ipc.h>
-#include <hal/proc/proc.h>
+#include <hal/mem/mem.h>
 #include <defs.h>
+#include <error/panic.h>
 
-enum gnwIpcError k_scr_usr_ipcSend(const struct gnwIpcSenderQuery * const queryPtr) {
+#include <string.h>
+#include <mem.h>
+#include <log/log.h>
 
-    const procId_t procId = k_proc_getCurrentId();
-    SCLF_GET_VALID_ABS(const struct gnwIpcSenderQuery * const, queryPtr, sizeof(struct gnwIpcSenderQuery), {}, GIPCE_UNKNOWN);
-    SCLF_GET_VALID_ABS_NAMED(const gnwIpcPath, pathPtr, abs_queryPtr->pathData.ptr, abs_queryPtr->pathData.bytes, {}, GIPCE_UNKNOWN);
-    SCLF_GET_VALID_NULLABLE_ABS_NAMED(const ptr_t, dataPtr, abs_queryPtr->data.ptr, abs_queryPtr->data.bytes, {}, GIPCE_UNKNOWN);
-    SCLF_GET_VALID_ABS_NAMED(enum gnwIpcError * const, replyErrPtr, abs_queryPtr->replyErrPtr, sizeof(enum gnwIpcError), {}, GIPCE_UNKNOWN);
-    SCLF_GET_VALID_NULLABLE_ABS_NAMED(const ptr_t, replyPtr, abs_queryPtr->replyData.ptr, abs_queryPtr->replyData.bytes, {}, GIPCE_UNKNOWN);
+enum gnwIpcError k_scr_usr_ipcSend(const procId_t procId, const struct gnwIpcSenderQuery * const queryPtr) {
 
-    struct gnwIpcSenderQuery absoluteQuery;
-    absoluteQuery.procId = abs_queryPtr->procId;
-    absoluteQuery.pathData.ptr = (ptr_t)abs_pathPtr;
-    absoluteQuery.pathData.bytes = abs_queryPtr->pathData.bytes;
-    absoluteQuery.data.ptr = abs_dataPtr;
-    absoluteQuery.data.bytes = abs_queryPtr->data.bytes;
-    absoluteQuery.replyErrPtr = abs_replyErrPtr;
-    absoluteQuery.replyData.ptr = abs_replyPtr;
-    absoluteQuery.replyData.bytes = abs_queryPtr->replyData.bytes;
-    absoluteQuery.bindData = abs_queryPtr->bindData;
-
-    return k_ipc_send(procId, absoluteQuery);
+    if (!queryPtr) {
+        OOPS("Unexpected null pointer", GIPCE_UNKNOWN);
+    }
+    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)queryPtr, sizeof(struct gnwIpcSenderQuery))) {
+        OOPS("Reserved zone access violation", GIPCE_UNKNOWN);
+    }
+    if (!queryPtr->pathData.ptr) {
+        OOPS("Unexpected null pointer", GIPCE_UNKNOWN);
+    }
+    if (!queryPtr->pathData.bytes) {
+        OOPS("Unexpected path length", GIPCE_UNKNOWN);
+    }
+    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)queryPtr->pathData.ptr, queryPtr->pathData.bytes)) {
+        OOPS("Reserved zone access violation", GIPCE_UNKNOWN);
+    }
+    if (!queryPtr->data.ptr && queryPtr->data.bytes) {
+        OOPS("Unexpected null pointer", GIPCE_UNKNOWN);
+    }
+    if (queryPtr->data.ptr && !queryPtr->data.bytes) {
+        OOPS("Unexpected data length", GIPCE_UNKNOWN);
+    }
+    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)queryPtr->data.ptr, queryPtr->data.bytes)) {
+        OOPS("Reserved zone access violation", GIPCE_UNKNOWN);
+    }
+    if (!queryPtr->replyErrPtr) {
+        OOPS("Unexpected null pointer", GIPCE_UNKNOWN);
+    }
+    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)queryPtr->replyErrPtr, sizeof(enum gnwIpcError))) {
+        OOPS("Reserved zone access violation", GIPCE_UNKNOWN);
+    }
+    if (!queryPtr->replyData.ptr && queryPtr->replyData.bytes) {
+        OOPS("Unexpected null pointer", GIPCE_UNKNOWN);
+    }
+    if (queryPtr->replyData.ptr && !queryPtr->replyData.bytes) {
+        OOPS("Unexpected reply data length", GIPCE_UNKNOWN);
+    }
+    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)queryPtr->replyData.ptr, queryPtr->replyData.bytes)) {
+        OOPS("Reserved zone access violation", GIPCE_UNKNOWN);
+    }
+    
+    return k_ipc_send(procId, *queryPtr);
 }

@@ -120,9 +120,9 @@ static void onKeyDown(const uint_8 c) {
 
 static GNW_KEYBOARD_EVENT_LISTENER(onKeyboardEvent) {
     if (event->code == GKEC_KEY_DOWN) {
-        user_cli_kbf_down(*event->key);
+        user_cli_kbf_down(event->key);
     } else if (event->code == GKEC_KEY_UP) {
-        user_cli_kbf_up(*event->key);
+        user_cli_kbf_up(event->key);
     } else {
         fug(FUG_INCONSISTENT);
     }
@@ -153,7 +153,7 @@ static void cli_init() {
 
 #warning IO_GENERAL_FAILURE not handled at all
 
-    user_cli_puts("GunwOS 0.0.5_DEV started. (C) Bronex Production 2023\n\n");
+    user_cli_puts("GunwOS 0.0.6_DEV started. (C) Bronex Production 2023\n\n");
 
     prompt();
 }

@@ -9,6 +9,9 @@
 
 #include <error/panic.h>
 #include <hal/cpu/cpu.h>
+#include <hal/hal.h>
+#include <hal/syscall/syscall.h>
+#include <schedule/schedule.h>
 
 /*
     ISR stack height counter
@@ -30,12 +33,24 @@ size_t isrStackHeight = 0;
     Note: Syscall interrupts do not disable maskable interrupts - to be implemented
 */
 #warning TO BE IMPLEMENTED - up
-#define ISR_BEGIN   { \
-    __asm__ volatile ("cli"); \
-    CPU_PUSH \
-    CPU_SEG_RESTORE \
-    __asm__ volatile ("incl %[mem]" : [mem] "=m" (isrStackHeight)); \
+#define _ISR_BEGIN_PROLOGUE \
+    _CPU_INTERRUPTS_DISABLE "\n" \
+    _CPU_PUSH "\n" \
+    _CPU_SEG_RESTORE   
+#define ISR_BEGIN { \
+    ++isrStackHeight; \
 }
+#define _ISR(NAME, HANDLING_CODE) \
+    __asm__ ( \
+        ".global " STR(NAME) "\n" \
+        STR(NAME) ":" "\n" \
+        _ISR_BEGIN_PROLOGUE "\n" \
+    ); \
+    static __attribute__((naked, unused)) void NAME ## _handler() { \
+        ISR_BEGIN; \
+        { HANDLING_CODE; } \
+        ISR_END; \
+    }
 
 /*
     Interrupt service routine handling end
@@ -52,16 +67,14 @@ size_t isrStackHeight = 0;
 */
 #warning TO BE IMPLEMENTED - up
 #define ISR_END { \
-    __asm__ volatile ("decl %[mem]" : [mem] "=m" (isrStackHeight)); \
+    --isrStackHeight; \
     extern ptr_t k_que_currentDispatchEntry; \
     if (!isrStackHeight && k_que_currentDispatchEntry) { \
-        __asm__ volatile ("pushl %esp"); \
-        __asm__ volatile ("call k_proc_schedule_intNeedsKernelHandling"); \
-        __asm__ volatile ("addl $4, %esp"); \
+        k_proc_schedule_intNeedsKernelHandling((uint_32)k_cpu_stackPtr); \
     } \
     CPU_POP \
-    __asm__ volatile ("sti"); \
-    __asm__ volatile ("iret"); \
+    CPU_INTERRUPTS_ENABLE; \
+    CPU_INTERRUPT_RETURN; \
 }
 
 /*
@@ -76,12 +89,15 @@ size_t isrStackHeight = 0;
         - Enable interrupts
         - Return from interrupt
 */
-#define ISR_HW(NUM) __attribute__((naked)) void k_isr_picIRQ ## NUM () { \
-    ISR_BEGIN \
-    __asm__ volatile ("mov $" STR(NUM) ", %eax"); \
-    __asm__ volatile ("call k_hal_irqHandle"); \
-    ISR_END \
-}
+#define ISR_HW(NUM) _ISR(k_isr_picIRQ ## NUM, { \
+    k_hal_irqHandle(NUM); \
+})
+
+#warning SYSTEM CALLS CAN CAUSE KERNEL LOCKS - to be analysed
+#define ISR_SYSCALL(TYPE) _ISR(k_isr_syscall ## TYPE, { \
+    k_scl_syscall_ ## TYPE (k_cpu_stackPtr); \
+    /* EAX stored for current process should contain return value (if any) */ \
+})
 
 /* 0 */ __attribute__((naked)) void k_isr_divErr() {        CPU_SEG_RESTORE; OOPS_NBR("Division by zero interrupt triggered"); k_cpu_halt(); }
 /* 1 */ __attribute__((naked)) void k_isr_dbgExc() {        CPU_SEG_RESTORE; OOPS_NBR("Debug exceptions interrupt triggered"); k_cpu_halt(); }
@@ -143,15 +159,7 @@ size_t isrStackHeight = 0;
 // 66
 // 67
 // 68
-
-/* 69 */ __attribute__((naked)) void k_isr_driverSyscall() {
-    ISR_BEGIN
-    #warning SYSTEM CALLS CAN CAUSE KERNEL LOCKS - to be analysed
-    __asm__ volatile ("call k_scl_driverSyscall");
-    /* EAX stored for current process should contain return value (if any) */
-    ISR_END
-}
-
+/* 69 */ ISR_SYSCALL(DRIVER)
 // 70
 // 71
 // 72
@@ -187,13 +195,5 @@ size_t isrStackHeight = 0;
 // 102
 // 103
 // 104
-
-/* 105 */ __attribute__((naked)) void k_isr_userSyscall() {
-    ISR_BEGIN
-    #warning SYSTEM CALLS CAN CAUSE KERNEL LOCKS - to be analysed
-    __asm__ volatile ("call k_scl_userSyscall");
-    /* EAX stored for current process should contain return value (if any) */
-    ISR_END
-}
-
+/* 105 */ ISR_SYSCALL(USER)
 // 106 - 255

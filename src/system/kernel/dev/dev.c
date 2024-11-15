@@ -261,9 +261,9 @@ void k_dev_releaseHold(const procId_t processId, const size_t deviceId) {
 
 enum gnwDeviceError k_dev_writeMem(const procId_t processId, 
                                    const size_t deviceId,
-                                   const ptr_t absBuffer,
+                                   const ptr_t bufferPtr,
                                    const range_addr_t devMemRange) {
-    if (!absBuffer) {
+    if (!bufferPtr) {
         OOPS("Buffer cannot be nullptr", GDE_UNKNOWN);
     }
 
@@ -293,7 +293,7 @@ enum gnwDeviceError k_dev_writeMem(const procId_t processId,
         return GDE_INVALID_OPERATION;
     }
     #warning it is more than dangerous to allow the driver to access the buffer directly, moreover it could be even impossible when driver processes are implemented
-    routine->write(absBuffer, devMemRange);
+    routine->write(bufferPtr, devMemRange);
 
     return GDE_NONE;
 }
@@ -351,8 +351,8 @@ enum gnwDeviceError k_dev_listen(const procId_t processId,
 
 enum gnwDeviceError k_dev_getParam(const size_t deviceId,
                                    const struct gnwDeviceParamDescriptor paramDescriptor,
-                                   size_t * const absResult) {
-    if (!absResult) {
+                                   size_t * const resultPtr) {
+    if (!resultPtr) {
         OOPS("Nullptr", GDE_UNKNOWN);
     }
 
@@ -367,7 +367,7 @@ enum gnwDeviceError k_dev_getParam(const size_t deviceId,
     if (!devices[deviceId].desc.api.system.routine.getParam(paramDescriptor.param,
                                                             paramDescriptor.subParam,
                                                             paramDescriptor.paramIndex,
-                                                            absResult)) {
+                                                            resultPtr)) {
         return GDE_OPERATION_FAILED;
     }
 
@@ -426,9 +426,21 @@ PRIVATE enum gnwDeviceError validateListenerInvocation(const size_t deviceId) {
     return GDE_NONE;
 }
 
-enum gnwDeviceError k_dev_emit(const struct gnwDeviceEvent * const eventPtr) {
+enum gnwDeviceError k_dev_emit(const procId_t procId, const struct gnwDeviceEvent * const eventPtr) {
     if (!eventPtr) {
         OOPS("Nullptr", GDE_UNKNOWN);
+    }
+    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)eventPtr, sizeof(struct gnwDeviceEvent))) {
+        OOPS("Reserved zone access violation", GDE_UNKNOWN);
+    }
+    if (!eventPtr->data) {
+        OOPS("Nullptr", GDE_UNKNOWN);
+    }
+    if (!eventPtr->dataSizeBytes) {
+        OOPS("Unexpected event data size", GDE_UNKNOWN);
+    }
+    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)eventPtr->data, eventPtr->dataSizeBytes)) {
+        OOPS("Reserved zone access violation", GDE_UNKNOWN);
     }
     enum gnwDeviceError err = validateEmitter(k_hal_servicedDevIdPtr);
     if (err) {
@@ -443,8 +455,8 @@ enum gnwDeviceError k_dev_emit(const struct gnwDeviceEvent * const eventPtr) {
     enum k_proc_error callbackErr = k_proc_callback_invoke_ptr(dev->holder, 
                                                                (gnwEventListener_ptr)dev->listener,
                                                                (ptr_t)eventPtr,
-                                                               eventPtr->dataSizeBytes + sizeof(struct gnwDeviceEvent),
                                                                sizeof(struct gnwDeviceEvent),
+                                                               GNW_DEVICEEVENT_ENCODEDSIZE + eventPtr->dataSizeBytes,
                                                                (gnwRunLoopDataEncodingRoutine)gnwDeviceEvent_encode,
                                                                (gnwRunLoopDataEncodingRoutine)dev->decoder);
     switch (callbackErr) {

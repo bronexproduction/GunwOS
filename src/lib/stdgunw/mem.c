@@ -8,7 +8,7 @@
 #include "include/mem.h"
 
 void memset(void *ptr, const uint_8 val, size_t bytes) {
-    uint_8 *p = (uint_8 *)ptr;
+    byte_t *p = (byte_t *)ptr;
     while (bytes--) {
         *(p++) = val;
     }
@@ -20,6 +20,6 @@ void memzero(void *ptr, size_t bytes) {
 
 void memcopy(const void * const src, void *dst, size_t count) {
     while (count--) {
-        ((uint_8 *)dst)[count] = ((uint_8 *)src)[count];
+        ((byte_t *)dst)[count] = ((byte_t *)src)[count];
     }
 }
