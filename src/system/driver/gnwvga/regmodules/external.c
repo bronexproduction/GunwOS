@@ -14,7 +14,7 @@
 
 #include "external.h"
 #include "../vga_bus.h"
-#include <error/panic.h>
+#include <gunwsheit.h>
 
 void externalDisable() {
     #warning verify
@@ -33,7 +33,8 @@ void externalSetMode(const enum modeOfOperation mode, uint_8 * const regContext)
         //                BRE_MOR_IO_ADDRESS_SELECT; /* 0x23 (with ENABLE_RAM) */
     } break;
     default: {
-        OOPS("Unsupported video mode",);
+        sheit(SHEIT_NOT_SUPPORTED);
+        return;
     } break;
     }
 

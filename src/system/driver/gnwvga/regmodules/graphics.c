@@ -14,7 +14,7 @@
 
 #include "graphics.h"
 #include "../vga_bus.h"
-#include <error/panic.h>
+#include <gunwsheit.h>
 
 struct registers {
     uint_8 setReset;
@@ -63,7 +63,8 @@ void graphicsSetMode(const enum modeOfOperation mode) {
         reg.colorDontCare = 0x00;
     } break;
     default: {
-        OOPS("Unsupported video mode",);
+        sheit(SHEIT_NOT_SUPPORTED);
+        return;
     } break;
     }
 

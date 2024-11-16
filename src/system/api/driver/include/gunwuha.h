@@ -8,7 +8,7 @@
 #ifndef GUNWOS_GUNWUHA_H
 #define GUNWOS_GUNWUHA_H
 
-#include <gunwuhadesc.h>
+#include "../../app/include/gunwuhadesc.h"
 #include "uha/gunwuha_system.h"
 #include "uha/gunwuha_mem.h"
 #include "uha/gunwuha_keyboard.h"

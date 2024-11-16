@@ -9,7 +9,7 @@
 #ifndef GUNWOS_GUNWUHA_MEM_H
 #define GUNWOS_GUNWUHA_MEM_H
 
-#include <uha/gunwuha_mem_desc.h>
+#include "../../../app/include/uha/gunwuha_mem_desc.h"
 
 struct gnwDeviceUHA_mem_routine {
     /*

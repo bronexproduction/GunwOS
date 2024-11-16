@@ -15,7 +15,7 @@
 #include "crt.h"
 #include <utils.h>
 #include "../vga_bus.h"
-#include <error/panic.h>
+#include <gunwsheit.h>
 
 enum resolution {
     RES_320_200,
@@ -210,7 +210,8 @@ void crtSetMode(const enum modeOfOperation mode, uint_8 * const regContextMCR, u
         *regContextMCR |= BRC_MCR_ADDRESS_WRAP | BRC_MCR_SELECT_ROW_SCAN_COUNTER;
     } break;
     default: {
-        OOPS("Unsupported video mode",);
+        sheit(SHEIT_NOT_SUPPORTED);
+        return;
     } break;
     }
 

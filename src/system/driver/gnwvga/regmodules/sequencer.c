@@ -13,8 +13,9 @@
 //
 
 #include "sequencer.h"
+#include <utils.h>
 #include "../vga_bus.h"
-#include <error/panic.h>
+#include <gunwsheit.h>
 
 struct registers {
     uint_8 mapMask;
@@ -53,7 +54,8 @@ void sequencerSetMode(const enum modeOfOperation mode, uint_8 * const regContext
         // reg.memoryMode = BRS_MEMMODEREG_EXTENDED_MEMORY;
     } break;
     default: {
-        OOPS("Unsupported video mode",);
+        sheit(SHEIT_NOT_SUPPORTED);
+        return;
     } break;
     }
 

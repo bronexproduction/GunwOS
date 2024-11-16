@@ -6,11 +6,11 @@
 //
 
 #include "vga_bus.h"
-#include <error/panic.h>
-#include <hal/io/bus.h>
+#include <gunwbus.h>
+#include <gunwsheit.h>
 
 static void vga_wrb(uint_16 const port, uint_8 const val) {
-    k_bus_outb(port, val);
+    wrb(port, val);
     extern void vga_sleepms();
     vga_sleepms();
 }
@@ -19,7 +19,7 @@ static uint_8 busReadLSI(const uint_16 addrAddr,
                          const uint_16 dataAddr,
                          const uint_8 index) {
     vga_wrb(addrAddr, index);
-    return k_bus_inb(dataAddr);
+    return rdb(dataAddr);
 }
 
 static void busWriteLSI(const uint_16 addrAddr, 
@@ -34,10 +34,11 @@ uint_8 busReadExternal(const enum bus_reg_external reg) {
     if (reg != BRE_INPUT_STATUS_0 &&
         reg != BRE_INPUT_STATUS_1) {
         /* Write-only registers */
-        OOPS("Invalid driver operation", 0);
+        sheit(SHEIT_INVALID_OPERATION);
+        return 0;
     }
 
-    return k_bus_inb(reg);
+    return rdb(reg);
 }
 
 uint_8 busReadCRT(const enum bus_reg_crt_index index) {
@@ -48,7 +49,8 @@ uint_8 busReadCRT(const enum bus_reg_crt_index index) {
         index != BRCI_LIGHT_PEN_HIGH &&
         index != BRCI_LIGHT_PEN_LOW) {
         /* Write-only registers */
-        OOPS("Invalid driver operation", 0);
+        sheit(SHEIT_INVALID_OPERATION);
+        return 0;
     }
 
     return busReadLSI(BRC_ADDRESS, BRC_DATA, index);
@@ -57,7 +59,8 @@ uint_8 busReadCRT(const enum bus_reg_crt_index index) {
 void busWriteExternal(const enum bus_reg_external reg, const uint_8 data) {
     if (reg == BRE_INPUT_STATUS_1) {
         /* Read-only register addresses */
-        OOPS("Invalid driver operation",);
+        sheit(SHEIT_INVALID_OPERATION);
+        return;
     }
 
     vga_wrb(reg, data);
@@ -84,7 +87,7 @@ void busWriteAttribute(const enum bus_reg_attr_index index, const uint_8 data) {
     /*
         Reading port 0x3DA will reset the attribute register flip-flop to address mode
     */
-    (void)k_bus_inb(BRE_FEATURE_CTRL);
+    (void)rdb(BRE_FEATURE_CTRL);
     busWriteLSI(BRA_ADDRESS, BRA_DATA, index, data);
 }
 
@@ -92,6 +95,6 @@ void busWriteAttributeAddr(const uint_8 data) {
     /*
         Reading port 0x3DA will reset the attribute register flip-flop to address mode
     */
-    (void)k_bus_inb(BRE_FEATURE_CTRL);
+    (void)rdb(BRE_FEATURE_CTRL);
     vga_wrb(BRA_ADDRESS, data);
 }

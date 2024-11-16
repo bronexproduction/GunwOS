@@ -18,7 +18,7 @@
 #include "regmodules/crt.h"
 #include "regmodules/graphics.h"
 #include "regmodules/attribute.h"
-#include <error/panic.h>
+#include <gunwsheit.h>
 
 void setMode(const enum modeOfOperation mode) {
     switch(mode) {
@@ -54,7 +54,7 @@ void setMode(const enum modeOfOperation mode) {
         attributeEnable();
     } break;
     default:
-        OOPS("Unsupported display mode",);
+        sheit(SHEIT_INVALID_OPERATION);
         return;
     }
 }

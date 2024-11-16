@@ -9,8 +9,8 @@
 #ifndef GUNWOS_GUNWUHA_STORCTRL_H
 #define GUNWOS_GUNWUHA_STORCTRL_H
 
-#include <uha/gunwuha_storctrl_desc.h>
-#include <gunwstor.h>
+#include "../../../app/include/uha/gunwuha_storctrl_desc.h"
+#include "../../../app/include/gunwstor.h"
 
 struct gnwDeviceUHA_storCtrl_routine {
     /*

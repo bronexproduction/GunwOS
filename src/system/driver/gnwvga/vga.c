@@ -7,8 +7,7 @@
 
 #include <defs.h>
 #include <gunwdisplaydrv.h>
-#include <error/panic.h>
-#include <hal/mem/mem.h>
+#include <gunwsheit.h>
 
 #include "opmode.h"
 
@@ -73,7 +72,8 @@ bool setFormat(const enum gnwDeviceUHA_display_format format) {
 
 static void update(const ptr_t buffer, const range_addr_t inputBufferRange) {
     if (!buffer) {
-        OOPS("Unexpected nullptr in buffer reference",);
+        sheit(SHEIT_NULLPTR);
+        return;
     }
 
     const struct gnwDeviceUHA_display_character * const charBuffer = (struct gnwDeviceUHA_display_character *)buffer;
