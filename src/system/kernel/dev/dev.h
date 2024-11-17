@@ -10,7 +10,7 @@
 
 #include <gunwdev.h>
 #include <gunwdrv.h>
-#include <src/_gunwrlp.h>
+#include <_gunwrlp.h>
 
 void k_dev_init();
 

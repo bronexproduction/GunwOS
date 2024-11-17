@@ -5,7 +5,7 @@
 //  Created by Artur Danielewski on 12.03.2023.
 //
 
-#include <src/_gunwctrl.h>
+#include <_gunwctrl.h>
 #include <types.h>
 #include <string.h>
 #include <mem.h>

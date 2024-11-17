@@ -5,7 +5,7 @@
 //  Created by Artur Danielewski on 08.05.2023.
 //
 
-#include "_gunwipc.h"
+#include "../_include/_gunwipc.h"
 #include <mem.h>
 
 #ifndef _GUNWAPI_KERNEL

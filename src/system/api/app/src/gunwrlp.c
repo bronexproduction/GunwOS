@@ -7,7 +7,7 @@
 
 #ifndef _GUNWAPI_KERNEL
 
-#include "_gunwrlp.h"
+#include "../_include/_gunwrlp.h"
 #include <defs.h>
 #include "../include/gunwctrl.h"
 #include "../include/gunwfug.h"

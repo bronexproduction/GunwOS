@@ -9,7 +9,7 @@
 
 #include "../include/gunwdevemitter.h"
 #include <gunwfug.h>
-#include "scl_driver.h"
+#include <scl_driver.h>
 
 enum gnwDeviceError emit(const struct gnwDeviceEvent * const event) {
     CHECKPTR(event);
