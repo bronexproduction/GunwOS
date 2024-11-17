@@ -9,7 +9,7 @@
 #ifndef GUNWOS_GUNWUHA_SYSTEM_H
 #define GUNWOS_GUNWUHA_SYSTEM_H
 
-#include "../../../app/include/uha/gunwuha_system_desc.h"
+#include <uha/gunwuha_system_desc.h>
 
 struct gnwDeviceUHA_system_routine {
     /*

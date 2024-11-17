@@ -18,7 +18,7 @@
 #include "regmodules/crt.h"
 #include "regmodules/graphics.h"
 #include "regmodules/attribute.h"
-#include <gunwsheit.h>
+#include <gunwfug.h>
 
 void setMode(const enum modeOfOperation mode) {
     switch(mode) {
@@ -54,7 +54,7 @@ void setMode(const enum modeOfOperation mode) {
         attributeEnable();
     } break;
     default:
-        sheit(SHEIT_INVALID_OPERATION);
+        fug(FUG_INVALID_OPERATION);
         return;
     }
 }

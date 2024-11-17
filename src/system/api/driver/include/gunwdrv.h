@@ -10,8 +10,8 @@
 
 #include <types.h>
 #include <defs.h>
-#include "../../app/include/gunwdev.h"
-#include "../include/gunwuha.h"
+#include <gunwdev.h>
+#include "gunwuha.h"
 
 /*
     Device driver error codes

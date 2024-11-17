@@ -9,8 +9,8 @@
 #ifndef GUNWOS_GUNWUHA_EVENT_H
 #define GUNWOS_GUNWUHA_EVENT_H
 
-#include "../../../app/include/uha/gunwuha_event_desc.h"
-#include "../../../app/include/gunwevent.h"
+#include <uha/gunwuha_event_desc.h>
+#include <gunwevent.h>
 
 /*
     Event emitting device routines

@@ -9,7 +9,7 @@
 #ifndef GUNWOS_GUNWUHA_MOUSE_H
 #define GUNWOS_GUNWUHA_MOUSE_H
 
-#include "../../../app/include/uha/gunwuha_mouse_desc.h"
+#include <uha/gunwuha_mouse_desc.h>
 
 struct gnwDeviceUHA_mouse_routine {
     void (*_unused)();

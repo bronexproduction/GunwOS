@@ -15,7 +15,7 @@
 #include "sequencer.h"
 #include <utils.h>
 #include "../vga_bus.h"
-#include <gunwsheit.h>
+#include <gunwfug.h>
 
 struct registers {
     uint_8 mapMask;
@@ -54,7 +54,7 @@ void sequencerSetMode(const enum modeOfOperation mode, uint_8 * const regContext
         // reg.memoryMode = BRS_MEMMODEREG_EXTENDED_MEMORY;
     } break;
     default: {
-        sheit(SHEIT_NOT_SUPPORTED);
+        fug(FUG_NOT_SUPPORTED);
         return;
     } break;
     }

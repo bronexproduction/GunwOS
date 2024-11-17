@@ -9,7 +9,7 @@
 #ifndef GUNWOS_GUNWUHA_DISPLAY_H
 #define GUNWOS_GUNWUHA_DISPLAY_H
 
-#include "../../../app/include/uha/gunwuha_display_desc.h"
+#include <uha/gunwuha_display_desc.h>
 
 struct gnwDeviceUHA_display_routine {
     void (*_unused);

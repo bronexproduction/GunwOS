@@ -7,7 +7,7 @@
 
 #include "vga_bus.h"
 #include <gunwbus.h>
-#include <gunwsheit.h>
+#include <gunwfug.h>
 
 static void vga_wrb(uint_16 const port, uint_8 const val) {
     wrb(port, val);
@@ -34,7 +34,7 @@ uint_8 busReadExternal(const enum bus_reg_external reg) {
     if (reg != BRE_INPUT_STATUS_0 &&
         reg != BRE_INPUT_STATUS_1) {
         /* Write-only registers */
-        sheit(SHEIT_INVALID_OPERATION);
+        fug(FUG_INVALID_OPERATION);
         return 0;
     }
 
@@ -49,7 +49,7 @@ uint_8 busReadCRT(const enum bus_reg_crt_index index) {
         index != BRCI_LIGHT_PEN_HIGH &&
         index != BRCI_LIGHT_PEN_LOW) {
         /* Write-only registers */
-        sheit(SHEIT_INVALID_OPERATION);
+        fug(FUG_INVALID_OPERATION);
         return 0;
     }
 
@@ -59,7 +59,7 @@ uint_8 busReadCRT(const enum bus_reg_crt_index index) {
 void busWriteExternal(const enum bus_reg_external reg, const uint_8 data) {
     if (reg == BRE_INPUT_STATUS_1) {
         /* Read-only register addresses */
-        sheit(SHEIT_INVALID_OPERATION);
+        fug(FUG_INVALID_OPERATION);
         return;
     }
 

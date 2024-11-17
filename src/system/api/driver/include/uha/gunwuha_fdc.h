@@ -9,8 +9,8 @@
 #ifndef GUNWOS_GUNWUHA_FDC_H
 #define GUNWOS_GUNWUHA_FDC_H
 
-#include "../../../app/include/uha/gunwuha_fdc_desc.h"
-#include "../../../app/include/gunwstor.h"
+#include <uha/gunwuha_fdc_desc.h>
+#include <gunwstor.h>
 
 struct gnwDeviceUHA_fdc_routine {
     void (*_unused)();

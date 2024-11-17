@@ -14,7 +14,7 @@
 
 #include "graphics.h"
 #include "../vga_bus.h"
-#include <gunwsheit.h>
+#include <gunwfug.h>
 
 struct registers {
     uint_8 setReset;
@@ -63,7 +63,7 @@ void graphicsSetMode(const enum modeOfOperation mode) {
         reg.colorDontCare = 0x00;
     } break;
     default: {
-        sheit(SHEIT_NOT_SUPPORTED);
+        fug(FUG_NOT_SUPPORTED);
         return;
     } break;
     }

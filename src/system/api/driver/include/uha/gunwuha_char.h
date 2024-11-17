@@ -9,7 +9,7 @@
 #ifndef GUNWOS_GUNWUHA_CHAR_H
 #define GUNWOS_GUNWUHA_CHAR_H
 
-#include "../../../app/include/uha/gunwuha_char_desc.h"
+#include <uha/gunwuha_char_desc.h>
 
 /*
     Character input device

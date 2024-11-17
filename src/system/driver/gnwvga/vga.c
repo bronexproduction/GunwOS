@@ -7,7 +7,7 @@
 
 #include <defs.h>
 #include <gunwdisplaydrv.h>
-#include <gunwsheit.h>
+#include <gunwfug.h>
 
 #include "opmode.h"
 
@@ -72,7 +72,7 @@ bool setFormat(const enum gnwDeviceUHA_display_format format) {
 
 static void update(const ptr_t buffer, const range_addr_t inputBufferRange) {
     if (!buffer) {
-        sheit(SHEIT_NULLPTR);
+        fug(FUG_NULLPTR);
         return;
     }
 
