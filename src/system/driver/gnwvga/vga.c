@@ -8,11 +8,12 @@
 #include <defs.h>
 #include <gunwdisplaydrv.h>
 #include <gunwfug.h>
+#include <gunwmmio.h>
 
 #include "opmode.h"
 
-static const volatile ptr_t DISPLAY_BUFFER_ADDR_BASIC = ((volatile ptr_t)MEM_CONV_PTL(0xb8000));
-static const volatile ptr_t DISPLAY_BUFFER_ADDR_ENHANCED = ((volatile ptr_t)MEM_CONV_PTL(0xa0000));
+static volatile ptr_t DISPLAY_BUFFER_ADDR_BASIC;
+static volatile ptr_t DISPLAY_BUFFER_ADDR_ENHANCED;
 
 #define BYTES_PER_CHAR 2
 
@@ -84,9 +85,17 @@ static void update(const ptr_t buffer, const range_addr_t inputBufferRange) {
     }
 }
 
+
+static bool init() {
+    DISPLAY_BUFFER_ADDR_BASIC = mmioPlz(BYTES_PER_CHAR * 80 * 25, 0xb8000);
+    DISPLAY_BUFFER_ADDR_ENHANCED = mmioPlz(64, 0xa0000);
+
+    return true;
+}
+
 static struct gnwDriverConfig desc() {
     return (struct gnwDriverConfig){ 
-        /* init */ nullptr,
+        /* init */ init,
         /* start */ nullptr,
         /* isr */ nullptr,
         /* IRQ */ NULL
