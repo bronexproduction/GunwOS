@@ -29,8 +29,14 @@ void k_scr_wrb(const uint_16 port, const uint_8 value);
 
 /*
     Code - 0x02
-    Function - EMIT_VOID
+    Function - EMIT
 */
 enum gnwDeviceError k_scr_emit(const struct gnwDeviceEvent * const event);
+
+/*
+    Code - 0x03
+    Function - MMIO_PLZ
+*/
+enum gnwDeviceError k_scr_mmioPlz(const size_t sizeBytes, const addr_t physMemStart);
 
 #endif // DRVFUNC_H

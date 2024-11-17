@@ -85,21 +85,11 @@ static void update(const ptr_t buffer, const range_addr_t inputBufferRange) {
     }
 }
 
-
 static bool init() {
     DISPLAY_BUFFER_ADDR_BASIC = mmioPlz(BYTES_PER_CHAR * 80 * 25, 0xb8000);
     DISPLAY_BUFFER_ADDR_ENHANCED = mmioPlz(64, 0xa0000);
 
     return true;
-}
-
-static struct gnwDriverConfig desc() {
-    return (struct gnwDriverConfig){ 
-        /* init */ init,
-        /* start */ nullptr,
-        /* isr */ nullptr,
-        /* IRQ */ NULL
-    };
 }
 
 static struct gnwDeviceUHA uha() {
@@ -118,16 +108,19 @@ static struct gnwDeviceUHA uha() {
     return uha;
 }
 
-struct gnwDeviceDescriptor k_drv_display_vga_descriptor() {
-    return (struct gnwDeviceDescriptor) {
-        /* type */ DEV_TYPE_DISPLAY | DEV_TYPE_MEM,
-        /* api */ uha(),
-        /* driver */ (struct gnwDeviceDriver) {
-            /* io */ (struct gnwDeviceIO) {
-                /* busBase */ 0x3B2,
-            },
-            /* descriptor */ desc()
+struct gnwDeviceDescriptor _gnw_device_descriptor = (struct gnwDeviceDescriptor) {
+    /* type */ DEV_TYPE_DISPLAY | DEV_TYPE_MEM,
+    /* api */ uha(),
+    /* driver */ (const struct gnwDeviceDriver) {
+        /* io */ (const struct gnwDeviceIO) {
+            /* busBase */ 0x3B2,
         },
-        /* name */ "Default VGA display"
-    };
-}
+        /* descriptor */ (const struct gnwDriverConfig) {
+            /* init */ init,
+            /* start */ nullptr,
+            /* isr */ nullptr,
+            /* IRQ */ NULL
+        }
+    },
+    /* name */ "Default VGA display"
+};
