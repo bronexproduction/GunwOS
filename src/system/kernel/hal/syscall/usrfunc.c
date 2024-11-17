@@ -401,3 +401,17 @@ void k_scr_memThx(const procId_t procId, const ptr_t refEsp) {
     extern enum gnwMemoryError k_scr_usr_memThx(const procId_t, const addr_t);
     SAFE_STACK_RESULT_ARCH_VAL = k_scr_usr_memThx(procId, *vStart);
 }
+
+/*
+    Code - 0x17
+    Function - DEV_INSTALL
+
+    Params (process stack offset):
+        * PARAMETER_1_STACK_OFFSET - path to device install descriptor pointer (struct gnwDeviceInstallDescriptor) relative to caller process memory
+*/
+void k_scr_devInstall(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(addr_t, descPtr, PARAMETER_1_STACK_OFFSET);
+
+    extern void k_scr_usr_devInstall(const procId_t procId, const struct gnwDeviceInstallDescriptor * const);
+    k_que_dispatch_arch_arch((fPtr_arch_arch)(ptr_t)k_scr_usr_devInstall, procId, *descPtr);
+}

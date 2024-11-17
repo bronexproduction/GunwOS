@@ -10,6 +10,7 @@
 #include "../include/gunwfug.h"
 #include "scl_user.h"
 #include <mem.h>
+#include <string.h>
 
 #ifndef _GUNWAPI_KERNEL
 
@@ -86,6 +87,18 @@ enum gnwDeviceError devListen(const size_t identifier,
     SYSCALL_USER_CALL(DEV_LISTEN, identifier, listener, gnwDeviceEvent_decode);
 
     return SYSCALL_RESULT;
+}
+
+void devInstall(const char * const path, enum gnwDeviceInstallError * const error) {
+    CHECKPTR(path);
+    CHECKPTR(error);
+
+    struct gnwDeviceInstallDescriptor desc;
+    desc.pathPtr = path;
+    desc.pathLen = strlen(path);
+    desc.errorPtr = error;
+
+    SYSCALL_USER_CALL(DEV_INSTALL, &desc, 0, 0);
 }
 
 void gnwDeviceEvent_decode(const ptr_t dataPtr, struct gnwDeviceEvent * const eventPtr) {

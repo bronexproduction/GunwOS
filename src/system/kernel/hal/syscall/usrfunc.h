@@ -167,4 +167,10 @@ enum gnwMemoryError k_scr_memPlz(const size_t pageCount, const addr_t vStart);
 */
 enum gnwMemoryError k_scr_memThx(const addr_t vStart);
 
+/*
+    Code - 0x17
+    Function - DEV_INSTALL
+*/
+void k_scr_devInstall(const struct gnwDeviceInstallDescriptor * const);
+
 #endif // USRFUNC_H

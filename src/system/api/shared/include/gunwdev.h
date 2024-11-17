@@ -147,6 +147,15 @@ extern enum gnwDeviceError devMemWrite(const size_t identifier,
 extern enum gnwDeviceError devListen(const size_t identifier,
                                      const gnwDeviceEventListener listener);
 
+/*
+    Installs device driver
+
+    Params:
+    * path - path to the driver file
+    * error - result error pointer
+*/
+extern void devInstall(const char * const path, enum gnwDeviceInstallError * const error);
+
 #endif // _GUNWAPI_KERNEL
 
 #endif // GUNWOS_GUNWDEV_H
