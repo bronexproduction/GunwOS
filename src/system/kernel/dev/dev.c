@@ -8,7 +8,7 @@
 #include "dev.h"
 #include <mem.h>
 #include <gunwdev.h>
-#include <src/_gunwdrv.h>
+#include <_gunwdrv.h>
 #include <hal/hal.h>
 #include <hal/int/irq.h>
 #include <hal/proc/proc.h>
@@ -16,7 +16,7 @@
 #include <error/panic.h>
 #include <hal/criticalsec/criticalsec.h>
 #include <log/log.h>
-#include <src/_gunwdev.h>
+#include <_gunwdev.h>
 
 #define MAX_DEVICES 8
 

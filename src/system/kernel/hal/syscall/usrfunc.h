@@ -10,9 +10,9 @@
 
 #include <gunwdrv.h>
 #include <gunwdev.h>
-#include <src/_gunwipc.h>
-#include <src/_gunwctrl.h>
-#include <src/_gunwrlp.h>
+#include <_gunwipc.h>
+#include <_gunwctrl.h>
+#include <_gunwrlp.h>
 #include <gunwfug.h>
 
 /*

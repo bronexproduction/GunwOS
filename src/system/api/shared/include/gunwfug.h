@@ -8,10 +8,12 @@
 #define GUNWOS_GUNWFUG_H
 
 enum gnwFugCode {
-    FUG_NULLPTR         = 1,    /* Requested memory access at invalid address - 0 */
-    FUG_INCONSISTENT    = 2,    /* Data consistency error */
-    FUG_OUT_OF_MEMORY   = 3,    /* Out-of-memory error */
-    FUG_UNDEFINED       = -1,   /* Undefined error */
+    FUG_NULLPTR             = 1,    /* Requested memory access at invalid address - 0 */
+    FUG_INCONSISTENT        = 2,    /* Data consistency error */
+    FUG_OUT_OF_MEMORY       = 3,    /* Out-of-memory error */
+    FUG_NOT_SUPPORTED       = 4,    /* Operation not supported error */
+    FUG_INVALID_OPERATION   = 5,    /* Invalid operation error */
+    FUG_UNDEFINED           = -1,   /* Undefined error */
 };
 
 #ifndef _GUNWAPI_KERNEL

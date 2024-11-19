@@ -7,7 +7,7 @@
 
 #include "startup.h"
 #include <string.h>
-#include <src/_gunwctrl.h>
+#include <_gunwctrl.h>
 #include <hal/proc/proc.h>
 #include <log/log.h>
 #include <error/panic.h>

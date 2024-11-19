@@ -9,7 +9,7 @@
 // #ifndef _GUNWAPI_KERNEL
 #ifdef _GUNWAPI_KERNEL
 
-#include <uha/gunwuha_display_desc.h>
+#include "../include/uha/gunwuha_display_desc.h"
 
 bool uhaGetParam_display(const size_t paramVal,
                          const size_t subParamVal,

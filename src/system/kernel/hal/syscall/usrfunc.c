@@ -6,9 +6,9 @@
 //
 
 #include "params.h"
-#include <src/_gunwctrl.h>
-#include <src/_gunwipc.h>
-#include <src/_gunwmem.h>
+#include <_gunwctrl.h>
+#include <_gunwipc.h>
+#include <_gunwmem.h>
 #include <error/fug.h>
 #include <schedule/schedule.h>
 #include <dev/dev.h>

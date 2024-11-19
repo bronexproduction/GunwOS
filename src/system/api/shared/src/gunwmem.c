@@ -8,7 +8,7 @@
 #include "../include/gunwmem.h"
 #include <defs.h>
 #include "../include/gunwfug.h"
-#include "scl_user.h"
+#include "../_include/scl_user.h"
 
 #ifndef _GUNWAPI_KERNEL
 

@@ -9,7 +9,7 @@
 #include "data.h"
 #include "binding.h"
 #include "utility.h"
-#include <src/_gunwipc.h>
+#include <_gunwipc.h>
 #include <hal/mem/mem.h>
 #include <hal/proc/proc.h>
 #include <hal/paging/paging.h>

@@ -12,7 +12,7 @@
 #include <proc.h>
 #include <hal/cpu/cpu.h>
 #include <hal/gdt/gdt.h>
-#include <src/_gunwrlp.h>
+#include <_gunwrlp.h>
 
 #define MAX_PROC 5
 #define KERNEL_PROC_ID -1

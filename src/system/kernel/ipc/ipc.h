@@ -8,7 +8,7 @@
 #ifndef IPC_H
 #define IPC_H
 
-#include <src/_gunwipc.h>
+#include <_gunwipc.h>
 
 void k_ipc_init();
 

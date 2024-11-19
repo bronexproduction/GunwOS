@@ -8,7 +8,7 @@
 #ifndef RUNLOOP_H
 #define RUNLOOP_H
 
-#include <src/_gunwrlp.h>
+#include <_gunwrlp.h>
 
 enum gnwRunLoopError k_runloop_reserve(const procId_t procId,
                                        size_t * const token);

@@ -1,4 +1,4 @@
-CFLAGS=-std=c11 -c -fpic -ffreestanding -mno-red-zone -ggdb -I $(STDGUNW_INCLUDE_DIR) -I $(API_SHARED_INCLUDE_DIR) -I $(API_SYS_DIR)/dispmgr/include -I $(API_SYS_DIR)/kbdmgr/include -I ./include $(CFLAGS_GLOBAL)
+CFLAGS=-std=c11 -c -fpic -ffreestanding -mno-red-zone -ggdb -I $(STDGUNW_INCLUDE_DIR) -I $(SHARED_API_PRV_INCLUDE_DIR) -I $(SHARED_API_INCLUDE_DIR) -I $(API_SYS_DIR)/dispmgr/include -I $(API_SYS_DIR)/kbdmgr/include -I ./include $(CFLAGS_GLOBAL)
 CXXFLAGS=-std=c++11 -c -fpic -ffreestanding -mno-red-zone -ggdb $(CXXFLAGS_GLOBAL)
 
 CFLAGS_APP=$(CFLAGS)

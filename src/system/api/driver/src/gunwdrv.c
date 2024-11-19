@@ -7,7 +7,7 @@
 
 #ifdef _GUNWAPI_KERNEL
 
-#include "_gunwdrv.h"
+#include "../_include/_gunwdrv.h"
 
 static bool validateDeviceUHA_system(const struct gnwDeviceUHA * const uha) {
     return true;

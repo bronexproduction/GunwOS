@@ -1,6 +1,12 @@
 .PHONY: all clean
 
-all: gunwapi_driver gunwapi_driver_kernel gunwapi_app gunwapi_app_kernel
+all: gunwapi_shared gunwapi_driver gunwapi_driver_kernel gunwapi_app gunwapi_app_kernel
+
+gunwapi_shared:
+ifeq ("$(wildcard $(LIB_BUILD_DIR)/lib$@.a)","")
+	make -C $(SHARED_API_SRC_DIR) shared
+	mv $(SHARED_API_SRC_DIR)/$@.o $(SHARED_API_SRC_DIR)/lib$@.a $(LIB_BUILD_DIR)/
+endif
 
 gunwapi_driver:
 ifeq ("$(wildcard $(LIB_BUILD_DIR)/lib$@.a)","")

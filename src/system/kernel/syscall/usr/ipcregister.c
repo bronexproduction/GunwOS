@@ -8,7 +8,7 @@
 #include <gunwevent.h>
 #include <ipc/ipc.h>
 #include <hal/mem/mem.h>
-#include <src/_gunwipc.h>
+#include <_gunwipc.h>
 #include <error/panic.h>
 
 enum gnwIpcError k_scr_usr_ipcRegister(const procId_t procId, const struct gnwIpcHandlerDescriptor * descPtr) {
