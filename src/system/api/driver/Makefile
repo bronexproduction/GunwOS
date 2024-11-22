@@ -1,5 +1,5 @@
-CFLAGS=-std=c11 -c -fpic -ffreestanding -mno-red-zone -ggdb -I $(STDGUNW_INCLUDE_DIR) -I $(SHARED_API_PRV_INCLUDE_DIR) -I $(SHARED_API_INCLUDE_DIR) $(CFLAGS_GLOBAL)
-CXXFLAGS=-std=c++11 -c -fpic -ffreestanding -mno-red-zone -ggdb $(CXXFLAGS_GLOBAL)
+CFLAGS=-std=c17 -c -fpic -ffreestanding -mno-red-zone -ggdb -I $(STDGUNW_INCLUDE_DIR) -I $(SHARED_API_PRV_INCLUDE_DIR) -I $(SHARED_API_INCLUDE_DIR) $(CFLAGS_GLOBAL)
+CXXFLAGS=-std=c++17 -c -fpic -ffreestanding -mno-red-zone -ggdb $(CXXFLAGS_GLOBAL)
 
 CFLAGS_DRIVER=$(CFLAGS)
 CXXFLAGS_DRIVER=$(CXXFLAGS)
