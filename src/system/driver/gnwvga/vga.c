@@ -108,7 +108,7 @@ static struct gnwDeviceUHA uha() {
     return uha;
 }
 
-struct gnwDeviceDescriptor _gnw_device_descriptor = (struct gnwDeviceDescriptor) {
+const struct gnwDeviceDescriptor _gnw_device_descriptor = (struct gnwDeviceDescriptor) {
     /* type */ DEV_TYPE_DISPLAY | DEV_TYPE_MEM,
     /* api */ uha(),
     /* driver */ (const struct gnwDeviceDriver) {

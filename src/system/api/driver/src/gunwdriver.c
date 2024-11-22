@@ -9,10 +9,10 @@
 
 #include "../include/gunwdrv.h"
 
-extern struct gnwDeviceDescriptor _gnw_device_descriptor;
+extern const struct gnwDeviceDescriptor _gnw_device_descriptor;
 
 void _require_external_dependencies() {
-    void* device_descriptor_unused = &_gnw_device_descriptor; (void)device_descriptor_unused;
+    const void * device_descriptor_unused = &_gnw_device_descriptor; (void)device_descriptor_unused;
 }
 
 #endif // _GUNWAPI_KERNEL
