@@ -12,6 +12,13 @@
 #include <uha/gunwuha_storctrl_desc.h>
 #include <gunwstor.h>
 
+#ifndef _GUNWAPI_KERNEL
+
+#define GNW_UHA_NO_STORCTRL GNW_UHA_EMPTY(STORCTRL)
+#define GNW_UHA_STORCTRL_ROUTINE_EMPTY { 0 }
+
+#endif // _GUNWAPI_KERNEL
+
 struct gnwDeviceUHA_storCtrl_routine {
     /*
         Check for drive presence

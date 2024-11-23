@@ -12,6 +12,12 @@
 #include <types.h>
 #include "../gunwevent.h"
 
+#ifndef _GUNWAPI_KERNEL
+
+#define GNW_UHA_EVENT_DESC_EMPTY { 0 }
+
+#endif // _GUNWAPI_KERNEL
+
 /*
     Event emitting device descriptor
 */

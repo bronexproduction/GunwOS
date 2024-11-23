@@ -6,18 +6,21 @@
 //
 
 #include <defs.h>
+#include <gunwdrv.h>
 #include <gunwdisplaydrv.h>
 #include <gunwfug.h>
 #include <gunwmmio.h>
 
 #include "opmode.h"
 
-static volatile ptr_t DISPLAY_BUFFER_ADDR_BASIC;
-static volatile ptr_t DISPLAY_BUFFER_ADDR_ENHANCED;
+static const addr_t DISPLAY_BUFFER_ADDR_BASIC = 0xb8000;
+static const addr_t DISPLAY_BUFFER_ADDR_ENHANCED = 0xa0000;
+static volatile ptr_t DISPLAY_BUFFER_PTR_BASIC;
+static volatile ptr_t DISPLAY_BUFFER_PTR_ENHANCED;
 
 #define BYTES_PER_CHAR 2
 
-#define MEM_CHAR(INDEX) ((byte_t *)(DISPLAY_BUFFER_ADDR_BASIC + (INDEX * BYTES_PER_CHAR)))
+#define MEM_CHAR(INDEX) ((byte_t *)(DISPLAY_BUFFER_PTR_BASIC + (INDEX * BYTES_PER_CHAR)))
 #define MEM_COLOR(INDEX) (MEM_CHAR(INDEX) + 1)
 
 static point_t dimensions = { -1, -1 };
@@ -86,36 +89,53 @@ static void update(const ptr_t buffer, const range_addr_t inputBufferRange) {
 }
 
 static bool init() {
-    DISPLAY_BUFFER_ADDR_BASIC = mmioPlz(BYTES_PER_CHAR * 80 * 25, 0xb8000);
-    DISPLAY_BUFFER_ADDR_ENHANCED = mmioPlz(64, 0xa0000);
+    DISPLAY_BUFFER_PTR_BASIC = mmioPlz(BYTES_PER_CHAR * 80 * 25, DISPLAY_BUFFER_ADDR_BASIC);
+    DISPLAY_BUFFER_PTR_ENHANCED = mmioPlz(64, DISPLAY_BUFFER_ADDR_ENHANCED);
 
     return true;
 }
 
-static struct gnwDeviceUHA uha() {
-    struct gnwDeviceUHA uha;
-
-    uha.system.routine.getParam = uhaGetParam_display;
-    uha.system.routine.setParam = uhaSetParam_display;
-    uha.display.desc.supportedFormatCount = 2;
-    uha.mem.desc.bytesRange.offset = (addr_t)DISPLAY_BUFFER_ADDR_ENHANCED;
-    uha.mem.desc.bytesRange.sizeBytes = KiB(64 + 32 + 16);
-    uha.mem.desc.maxInputSizeBytes = 320 * 
-                                     200 * 
-                                     sizeof(struct gnwDeviceUHA_display_pixel);
-    uha.mem.routine.write = update;
-
-    return uha;
-}
-
-const struct gnwDeviceDescriptor _gnw_device_descriptor = (struct gnwDeviceDescriptor) {
+const struct gnwDeviceDescriptor _gnw_device_descriptor = {
     /* type */ DEV_TYPE_DISPLAY | DEV_TYPE_MEM,
-    /* api */ uha(),
-    /* driver */ (const struct gnwDeviceDriver) {
-        /* io */ (const struct gnwDeviceIO) {
+    /* api */ { 
+        /* system */ {
+            /* desc */ { 0 },
+            /* routine */ {
+                /* getParam */ uhaGetParam_display,
+                /* setParam */ uhaSetParam_display
+            }
+        },
+        /* mem */ { 
+            /* desc */ {
+                /* bytesRange */ {
+                    /* offset */ (addr_t)DISPLAY_BUFFER_ADDR_ENHANCED,
+                    /* sizeBytes */ KiB(64 + 32 + 16)
+                },
+                /* maxInputSizeBytes */ 320 * 200 * sizeof(struct gnwDeviceUHA_display_pixel)
+                },
+            /* routine */ {
+                /* write */ update
+            }
+        },
+        GNW_UHA_NO_KEYBOARD,
+        GNW_UHA_NO_MOUSE,
+        GNW_UHA_NO_FDC,
+        GNW_UHA_NO_STORCTRL,
+        GNW_UHA_NO_CHAR_IN,
+        GNW_UHA_NO_CHAR_OUT,
+        /* display */ {
+            /* desc */ {
+                /* supportedFormatCount */ 2
+            },
+            /* routine */ { 0 }
+        },
+        GNW_UHA_NO_EVENT
+    },
+    /* driver */ {
+        /* io */ {
             /* busBase */ 0x3B2,
         },
-        /* descriptor */ (const struct gnwDriverConfig) {
+        /* descriptor */ {
             /* init */ init,
             /* start */ nullptr,
             /* isr */ nullptr,

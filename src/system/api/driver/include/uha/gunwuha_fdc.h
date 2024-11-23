@@ -12,6 +12,13 @@
 #include <uha/gunwuha_fdc_desc.h>
 #include <gunwstor.h>
 
+#ifndef _GUNWAPI_KERNEL
+
+#define GNW_UHA_NO_FDC GNW_UHA_EMPTY(FDC)
+#define GNW_UHA_FDC_ROUTINE_EMPTY { 0 }
+
+#endif // _GUNWAPI_KERNEL
+
 struct gnwDeviceUHA_fdc_routine {
     void (*_unused)();
 };

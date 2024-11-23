@@ -11,6 +11,15 @@
 
 #include <uha/gunwuha_char_desc.h>
 
+#ifndef _GUNWAPI_KERNEL
+
+#define GNW_UHA_NO_CHAR_IN GNW_UHA_EMPTY(CHAR_IN)
+#define GNW_UHA_NO_CHAR_OUT GNW_UHA_EMPTY(CHAR_OUT)
+#define GNW_UHA_CHAR_IN_ROUTINE_EMPTY { 0 }
+#define GNW_UHA_CHAR_OUT_ROUTINE_EMPTY { 0 }
+
+#endif // _GUNWAPI_KERNEL
+
 /*
     Character input device
 */

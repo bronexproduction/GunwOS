@@ -11,6 +11,13 @@
 
 #include <uha/gunwuha_system_desc.h>
 
+#ifndef _GUNWAPI_KERNEL
+
+#define GNW_UHA_NO_SYSTEM GNW_UHA_EMPTY(SYSTEM)
+#define GNW_UHA_SYSTEM_ROUTINE_EMPTY { 0 }
+
+#endif // _GUNWAPI_KERNEL
+
 struct gnwDeviceUHA_system_routine {
     /*
         Retrieves the value of the parameter with given description

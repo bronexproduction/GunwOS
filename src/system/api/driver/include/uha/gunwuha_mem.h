@@ -11,6 +11,13 @@
 
 #include <uha/gunwuha_mem_desc.h>
 
+#ifndef _GUNWAPI_KERNEL
+
+#define GNW_UHA_NO_MEM GNW_UHA_EMPTY(MEM)
+#define GNW_UHA_MEM_ROUTINE_EMPTY { 0 }
+
+#endif // _GUNWAPI_KERNEL
+
 struct gnwDeviceUHA_mem_routine {
     /*
         Update the memory

@@ -11,6 +11,12 @@
 
 #include <types.h>
 
+#ifndef _GUNWAPI_KERNEL
+
+#define GNW_UHA_MEM_DESC_EMPTY { { 0 }, 0 }
+
+#endif // _GUNWAPI_KERNEL
+
 struct gnwDeviceUHA_mem_desc {
     /*
         Range of mapped memory in bytes

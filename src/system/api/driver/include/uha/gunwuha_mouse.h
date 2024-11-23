@@ -11,6 +11,13 @@
 
 #include <uha/gunwuha_mouse_desc.h>
 
+#ifndef _GUNWAPI_KERNEL
+
+#define GNW_UHA_NO_MOUSE GNW_UHA_EMPTY(MOUSE)
+#define GNW_UHA_MOUSE_ROUTINE_EMPTY { 0 }
+
+#endif // _GUNWAPI_KERNEL
+
 struct gnwDeviceUHA_mouse_routine {
     void (*_unused)();
 };

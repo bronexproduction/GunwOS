@@ -11,6 +11,12 @@
 
 #include <types.h>
 
+#ifndef _GUNWAPI_KERNEL
+
+#define GNW_UHA_STORCTRL_DESC_EMPTY { 0 }
+
+#endif // _GUNWAPI_KERNEL
+
 struct gnwDeviceUHA_storCtrl_desc {
     /*
         Total number of supported drives

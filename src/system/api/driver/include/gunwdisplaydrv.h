@@ -10,7 +10,7 @@
 
 #ifndef _GUNWAPI_KERNEL
 
-#include <gunwdrv.h>
+#include <types.h>
 
 extern bool uhaGetParam_display(const size_t paramVal,
                                 const size_t subParamVal,

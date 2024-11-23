@@ -11,6 +11,13 @@
 
 #include <uha/gunwuha_display_desc.h>
 
+#ifndef _GUNWAPI_KERNEL
+
+#define GNW_UHA_NO_DISPLAY GNW_UHA_EMPTY(DISPLAY)
+#define GNW_UHA_DISPLAY_ROUTINE_EMPTY { 0 }
+
+#endif // _GUNWAPI_KERNEL
+
 struct gnwDeviceUHA_display_routine {
     void (*_unused);
 };

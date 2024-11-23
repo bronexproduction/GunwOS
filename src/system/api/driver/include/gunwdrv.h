@@ -13,6 +13,12 @@
 #include <gunwdev.h>
 #include "gunwuha.h"
 
+#ifndef _GUNWAPI_KERNEL
+
+#define GNW_UHA_EMPTY(TYPE) { GNW_UHA_ ## TYPE ## _DESC_EMPTY, GNW_UHA_ ## TYPE ## _ROUTINE_EMPTY }
+
+#endif // _GUNWAPI_KERNEL
+
 /*
     Device driver error codes
 */

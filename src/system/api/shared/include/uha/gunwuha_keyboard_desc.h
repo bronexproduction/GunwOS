@@ -11,6 +11,12 @@
 
 #include <types.h>
 
+#ifndef _GUNWAPI_KERNEL
+
+#define GNW_UHA_KEYBOARD_DESC_EMPTY { 0 }
+
+#endif // _GUNWAPI_KERNEL
+
 struct gnwDeviceUHA_keyboard_desc {
     uint_32 _unused;
 };
