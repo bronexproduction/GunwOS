@@ -10,6 +10,7 @@
 
 #include "gunwuhadesc.h"
 #include "gunwevent.h"
+#include "gunwctrltypes.h"
 
 struct gnwDeviceEvent {
     /*
@@ -152,9 +153,12 @@ extern enum gnwDeviceError devListen(const size_t identifier,
 
     Params:
     * path - path to the driver file
-    * error - result error pointer
+    * ctrlError - result error pointer (errors related to file operations)
+    * installError - result error pointer (errors related to device operations)
 */
-extern void devInstall(const char * const path, enum gnwDeviceInstallError * const error);
+extern void devInstall(const char * const path,
+                       enum gnwCtrlError * ctrlError,
+                       enum gnwDeviceInstallError * const installError);
 
 #endif // _GUNWAPI_KERNEL
 

@@ -8,32 +8,42 @@
 #include "startup.h"
 #include <string.h>
 #include <_gunwctrl.h>
+#include <_gunwdev.h>
 #include <hal/proc/proc.h>
 #include <log/log.h>
 #include <error/panic.h>
 #include <gunwdevtypes.h>
 
-#define LOAD(TYPE, PATH, DESC, NONE_ERROR) if (err == NONE_ERROR) {                                                   \
+#define INSTALL(PATH) if (installErr == GDIE_NONE && ctrlErr == GCE_NONE) {                             \
     LOG(PATH);                                                                                          \
-    struct gnw ## DESC ## Descriptor desc;                                                              \
-    desc.pathPtr = PATH;                                                                                \
-    desc.pathLen = strlen(desc.pathPtr);                                                                \
-    desc.errorPtr = &err;                                                                               \
-    extern void k_scr_usr_ ## TYPE (const procId_t, const struct gnw ## DESC ## Descriptor * const);    \
-    k_scr_usr_ ## TYPE (KERNEL_PROC_ID, &desc);                                                         \
+    struct gnwDeviceInstallDescriptor desc;                                                             \
+    desc.ctrlDesc.pathPtr = PATH;                                                                       \
+    desc.ctrlDesc.pathLen = strlen(desc.ctrlDesc.pathPtr);                                              \
+    desc.ctrlDesc.errorPtr = &ctrlErr;                                                                  \
+    desc.errorPtr = &installErr;                                                                        \
+    extern void k_scr_usr_devInstall(const procId_t, const struct gnwDeviceInstallDescriptor * const);  \
+    k_scr_usr_devInstall(KERNEL_PROC_ID, &desc);                                                        \
 }
 
-#define INSTALL(PATH) LOAD(devInstall, PATH, DeviceInstall, GDIE_NONE)
-#define START(PATH) LOAD(start, PATH, CtrlStart, GCE_NONE)
+#define START(PATH) if (err == GCE_NONE) {                                                      \
+    LOG(PATH);                                                                                  \
+    struct gnwCtrlStartDescriptor desc;                                                         \
+    desc.pathPtr = PATH;                                                                        \
+    desc.pathLen = strlen(desc.pathPtr);                                                        \
+    desc.errorPtr = &err;                                                                       \
+    extern void k_scr_usr_start(const procId_t, const struct gnwCtrlStartDescriptor * const);   \
+    k_scr_usr_start(KERNEL_PROC_ID, &desc);                                                     \
+}
 
 static void installCoreDrivers() {
     LOG("Installing core device drivers");
     
-    enum gnwDeviceInstallError err = GDIE_NONE;
+    enum gnwDeviceInstallError installErr = GDIE_NONE;
+    enum gnwCtrlError ctrlErr = GCE_NONE;
 
     INSTALL("0:GNWVGA.GDV");    /* Display driver - process ID: 0 */
 
-    if (err != GDIE_NONE) {
+    if (installErr != GDIE_NONE || ctrlErr != GCE_NONE) {
         OOPS("Unable to install core drivers",);
     }
 }

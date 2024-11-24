@@ -89,14 +89,19 @@ enum gnwDeviceError devListen(const size_t identifier,
     return SYSCALL_RESULT;
 }
 
-void devInstall(const char * const path, enum gnwDeviceInstallError * const error) {
+void devInstall(const char * const path,
+                enum gnwCtrlError * ctrlError,
+                enum gnwDeviceInstallError * const installError) {
+                    #warning TODO
     CHECKPTR(path);
-    CHECKPTR(error);
+    CHECKPTR(ctrlError);
+    CHECKPTR(installError);
 
     struct gnwDeviceInstallDescriptor desc;
-    desc.pathPtr = path;
-    desc.pathLen = strlen(path);
-    desc.errorPtr = error;
+    desc.ctrlDesc.pathPtr = path;
+    desc.ctrlDesc.pathLen = strlen(path);
+    desc.ctrlDesc.errorPtr = ctrlError;
+    desc.errorPtr = installError;
 
     SYSCALL_USER_CALL(DEV_INSTALL, &desc, 0, 0);
 }

@@ -30,10 +30,10 @@
     LOG_END;                                                \
 }
 
-enum gnwCtrlError loadFile(const char * const pathPtr,
-                           const size_t pathLen,
-                           ptr_t filePtr,
-                           size_t * fileSizeBytesPtr) {
+static enum gnwCtrlError loadFile(const char * const pathPtr,
+                                  const size_t pathLen,
+                                  ptr_t filePtr,
+                                  size_t * fileSizeBytesPtr) {
     if (!pathPtr) {
         OOPS("Unexpected nullptr", GCE_UNKNOWN);
     }

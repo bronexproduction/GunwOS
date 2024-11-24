@@ -9,6 +9,7 @@
 #include <_gunwctrl.h>
 #include <_gunwipc.h>
 #include <_gunwmem.h>
+#include <_gunwdev.h>
 #include <error/fug.h>
 #include <schedule/schedule.h>
 #include <dev/dev.h>

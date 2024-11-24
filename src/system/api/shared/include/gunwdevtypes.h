@@ -52,12 +52,6 @@ enum gnwDeviceInstallError {
 };
 _Static_assert(sizeof(enum gnwDeviceInstallError) == sizeof(int_32), "Unexpected enum gnwDeviceInstallError size");
 
-struct gnwDeviceInstallDescriptor {
-    const char * pathPtr;
-    size_t pathLen;
-    enum gnwDeviceInstallError * errorPtr;
-};
-
 struct gnwDeviceParamDescriptor {
     size_t param;
     size_t subParam;

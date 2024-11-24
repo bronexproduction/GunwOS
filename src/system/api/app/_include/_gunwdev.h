@@ -9,6 +9,12 @@
 #define GUNWOS__GUNWDEV_H
 
 #include "../include/gunwdev.h"
+#include "../_include/_gunwctrl.h"
+
+struct gnwDeviceInstallDescriptor {
+    struct gnwCtrlStartDescriptor ctrlDesc;
+    enum gnwDeviceInstallError * errorPtr;
+};
 
 #ifdef _GUNWAPI_KERNEL
 

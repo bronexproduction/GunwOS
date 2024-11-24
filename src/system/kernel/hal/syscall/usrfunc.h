@@ -12,6 +12,7 @@
 #include <gunwdev.h>
 #include <_gunwipc.h>
 #include <_gunwctrl.h>
+#include <_gunwdev.h>
 #include <_gunwrlp.h>
 #include <gunwfug.h>
 
@@ -73,13 +74,15 @@ enum gnwIpcError k_scr_ipcRegister(const struct gnwIpcHandlerDescriptor * const 
     Code - 0x08
     Function - DEV_GET_BY_ID
 */
-enum gnwDeviceError k_scr_devGetById(const size_t id, struct gnwDeviceUHADesc * const);
+enum gnwDeviceError k_scr_devGetById(const size_t id,
+                                     struct gnwDeviceUHADesc * const);
 
 /*
     Code - 0x09
     Function - DEV_GET_BY_TYPE
 */
-enum gnwDeviceError k_scr_devGetByType(const enum gnwDeviceType, struct gnwDeviceUHADesc * const);
+enum gnwDeviceError k_scr_devGetByType(const enum gnwDeviceType,
+                                       struct gnwDeviceUHADesc * const);
 
 /*
     Code - 0x0a
@@ -147,7 +150,9 @@ enum gnwRunLoopError k_scr_runLoopGetData(ptr_t dataBufferPtr);
     Code - 0x13
     Function - IPC_REPLY
 */
-enum gnwIpcError k_scr_ipcReply(const ptr_t replyBufferPtr, const size_t replySizeBytes, const struct gnwIpcReplyInfo * infoPtr);
+enum gnwIpcError k_scr_ipcReply(const ptr_t replyBufferPtr,
+                                const size_t replySizeBytes,
+                                const struct gnwIpcReplyInfo * infoPtr);
 
 /*
     Code - 0x14

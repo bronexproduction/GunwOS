@@ -8,18 +8,10 @@
 #ifndef GUNWOS_GUNWCTRL_H
 #define GUNWOS_GUNWCTRL_H
 
-#include <types.h>
-
-enum gnwCtrlError {
-    GCE_NONE = 0,
-    GCE_INVALID_ARGUMENT,
-    GCE_HEADER_INVALID,
-    GCE_NOT_FOUND,
-    GCE_OPERATION_FAILED,
-    GCE_UNKNOWN
-};
-
 #ifndef _GUNWAPI_KERNEL
+
+#include <types.h>
+#include <gunwctrltypes.h>
 
 /*
     Starts program
