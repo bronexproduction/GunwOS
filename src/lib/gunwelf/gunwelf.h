@@ -161,8 +161,7 @@ struct elfExpectation {
     uint_16 architecture;
 };
 
-bool elfValidate(const ptr_t filePtr, 
-                 const size_t fileSizeBytes, 
+bool elfValidate(const data_t fileData, 
                  const struct elfExpectation * const expectation);
 
 /*
@@ -173,11 +172,25 @@ size_t elfGetSectionHeaderEntryCount(const ptr_t filePtr);
 /*
     Returns the section header entry at given index
 */
-struct elfSectionHeaderEntry32 * elfGetSectionHeaderEntry(const ptr_t filePtr, const size_t index, const size_t fileSizeBytes);
+struct elfSectionHeaderEntry32 * elfGetSectionHeaderEntryAtIndex(const data_t fileData,
+                                                                 const size_t index);
+
+/*
+    Returns the section header entry with given name
+*/
+struct elfSectionHeaderEntry32 * elfGetSectionHeaderEntryNamed(const data_t fileData,
+                                                               const char * const sectionName);
 
 /*
     Returns the entry point address
 */
-addr_t elfGetEntry(const ptr_t filePtr, const size_t fileSizeBytes);
+addr_t elfGetEntry(const data_t fileData);
+
+/*
+    Returns the (virtual) address of given symbol
+*/
+addr_t elfGetSymbol(const data_t fileData,
+                    const char * const sectionName,
+                    const char * const symbolName);
 
 #endif // GUNWELF_H

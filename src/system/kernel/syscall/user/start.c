@@ -90,15 +90,14 @@ static enum gnwCtrlError loadFile(const char * const pathPtr,
     return GCE_NONE;
 }
 
-static enum gnwCtrlError loadElf(const ptr_t filePtr,
-                                 const size_t fileSizeBytes,
+static enum gnwCtrlError loadElf(const data_t fileData,
                                  const procId_t procId,
                                  addr_t * const entry,
                                  addr_t * const heap) {
-    if (!filePtr) {
+    if (!fileData.ptr) {
         OOPS("Unexpected nullptr", GCE_UNKNOWN);
     }
-    if (!fileSizeBytes) {
+    if (!fileData.bytes) {
         OOPS("Unexpected zero size", GCE_UNKNOWN);
     }
     if (!k_proc_idIsUser(procId)) {
@@ -113,9 +112,9 @@ static enum gnwCtrlError loadElf(const ptr_t filePtr,
 
     *heap = 0;
 
-    const size_t sectionHeaderEntryCount = elfGetSectionHeaderEntryCount(filePtr);
+    const size_t sectionHeaderEntryCount = elfGetSectionHeaderEntryCount(fileData.ptr);
     for (size_t index = 0; index < sectionHeaderEntryCount; ++index) {
-        const struct elfSectionHeaderEntry32 * const sectionHeaderEntry = elfGetSectionHeaderEntry(filePtr, index, fileSizeBytes); 
+        const struct elfSectionHeaderEntry32 * const sectionHeaderEntry = elfGetSectionHeaderEntryAtIndex(fileData, index); 
         if (!sectionHeaderEntry) {
             OOPS("Unexpected nullptr", GCE_UNKNOWN);
         }
@@ -154,7 +153,7 @@ static enum gnwCtrlError loadElf(const ptr_t filePtr,
         */
 
         err = k_mem_copy(KERNEL_PROC_ID,
-                         filePtr + sectionHeaderEntry->offset,
+                         fileData.ptr + sectionHeaderEntry->offset,
                          procId,
                          (ptr_t)sectionHeaderEntry->virtualAddr,
                          sectionHeaderEntry->fileSizeBytes);
@@ -163,7 +162,7 @@ static enum gnwCtrlError loadElf(const ptr_t filePtr,
         }
     }
 
-    *entry = elfGetEntry(filePtr, fileSizeBytes);
+    *entry = elfGetEntry(fileData);
     return GCE_NONE;
 }
 
@@ -212,13 +211,15 @@ void k_scr_usr_start(const procId_t procId, const struct gnwCtrlStartDescriptor 
         Verify header 
     */
 
+    const data_t fileData = { filePtr, fileSizeBytes };
+
     struct elfExpectation exp;
     exp.class = ECLASS_32;
     exp.endianess = EENDIAN_LITTLE;
     exp.type = ETYPE_EXEC;
     exp.architecture = 3;
 
-    if (!elfValidate(filePtr, fileSizeBytes, &exp)) {
+    if (!elfValidate(fileData, &exp)) {
         *(descPtr->errorPtr) = GCE_HEADER_INVALID;
         LOG_CODE("ELF header validation failure", 0);
         return;
@@ -241,8 +242,7 @@ void k_scr_usr_start(const procId_t procId, const struct gnwCtrlStartDescriptor 
     */
     
     struct k_proc_descriptor desc;
-    enum gnwCtrlError err = loadElf(filePtr, 
-                                    fileSizeBytes,
+    enum gnwCtrlError err = loadElf(fileData,
                                     spawnedProcId,
                                     &desc.entryLinearAddr,
                                     &desc.heapLinearAddr);

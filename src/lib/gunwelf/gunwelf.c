@@ -92,14 +92,13 @@ static bool validateSectionHeaderEntry(const struct elfSectionHeaderEntry32 * co
     return true;
 }
 
-bool elfValidate(const ptr_t filePtr,
-                 const size_t fileSizeBytes, 
+bool elfValidate(const data_t fileData, 
                  const struct elfExpectation * const expectation) {
-    if (!filePtr) {
+    if (!fileData.ptr) {
         return false;
     }
 
-    const struct elfHeader32 * const headerPtr = (struct elfHeader32 *)filePtr;
+    const struct elfHeader32 * const headerPtr = (struct elfHeader32 *)fileData.ptr;
 
     if (!validateIdentifier(&headerPtr->identifier)) {
         return false;
@@ -130,7 +129,7 @@ bool elfValidate(const ptr_t filePtr,
         return false;
     }
 
-    if (fileSizeBytes < (ELF_HEADER_SIZE_32 + (headerPtr->programHeaderEntries * ELF_PROGRAM_ENTRY_SIZE_32) + (headerPtr->sectionHeaderEntries * ELF_SECTION_ENTRY_SIZE_32))) {
+    if (fileData.bytes < (ELF_HEADER_SIZE_32 + (headerPtr->programHeaderEntries * ELF_PROGRAM_ENTRY_SIZE_32) + (headerPtr->sectionHeaderEntries * ELF_SECTION_ENTRY_SIZE_32))) {
         return false;
     }
     for (size_t index = 0; index < headerPtr->programHeaderEntries; ++index) {
@@ -140,7 +139,7 @@ bool elfValidate(const ptr_t filePtr,
         }
     }
     for (size_t entry = 0; entry < headerPtr->sectionHeaderEntries; ++entry) {
-        const struct elfSectionHeaderEntry32 * const entryPtr = (struct elfSectionHeaderEntry32 *)(filePtr + SECTION_HEADER_ENTRY_OFFSET_32(entry, headerPtr, fileSizeBytes));
+        const struct elfSectionHeaderEntry32 * const entryPtr = (struct elfSectionHeaderEntry32 *)(fileData.ptr + SECTION_HEADER_ENTRY_OFFSET_32(entry, headerPtr, fileData.bytes));
         if (!validateSectionHeaderEntry(entryPtr)) {
             return false;
         }
@@ -158,22 +157,116 @@ size_t elfGetSectionHeaderEntryCount(const ptr_t filePtr) {
     return headerPtr->sectionHeaderEntries;
 }
 
-struct elfSectionHeaderEntry32 * elfGetSectionHeaderEntry(const ptr_t filePtr, const size_t index, const size_t fileSizeBytes) {
-    const struct elfHeader32 * const headerPtr = (struct elfHeader32 *)filePtr;
+struct elfSectionHeaderEntry32 * elfGetSectionHeaderEntryAtIndex(const data_t fileData,
+                                                                 const size_t index) {
+    const struct elfHeader32 * const headerPtr = (struct elfHeader32 *)fileData.ptr;
     if (index >= headerPtr->sectionHeaderEntries) {
         return nullptr;
     }
-    return (struct elfSectionHeaderEntry32 *)(filePtr + SECTION_HEADER_ENTRY_OFFSET_32(index, headerPtr, fileSizeBytes));
+    return (struct elfSectionHeaderEntry32 *)(fileData.ptr + SECTION_HEADER_ENTRY_OFFSET_32(index, headerPtr, fileData.bytes));
 }
 
-addr_t elfGetEntry(const ptr_t filePtr, const size_t fileSizeBytes) {
-    if (!filePtr) {
+struct elfSectionHeaderEntry32 * elfGetSectionHeaderEntryNamed(const data_t fileData,
+                                                               const char * const sectionName) {
+    if (!fileData.ptr) {
+        return nullptr;
+    }
+    if (fileData.bytes < sizeof(struct elfHeader32)) {
+        return nullptr;
+    }
+    if (!sectionName) {
+        return nullptr;
+    }
+    
+    const size_t sectionHeaderEntryCount = elfGetSectionHeaderEntryCount(fileData.ptr);
+    for (size_t index = 0; index < sectionHeaderEntryCount; ++index) {
+        const struct elfSectionHeaderEntry32 * const sectionHeaderEntry = elfGetSectionHeaderEntryAtIndex(fileData, index); 
+        if (!sectionHeaderEntry) {
+            return nullptr;
+        }
+    }
+
+#warning TODO
+
+    return nullptr;
+}
+
+addr_t elfGetEntry(const data_t fileData) {
+    if (!fileData.ptr) {
         return NULL;
     }
-    if (fileSizeBytes < sizeof(struct elfHeader32)) {
+    if (fileData.bytes < sizeof(struct elfHeader32)) {
         return NULL;
     }
     
-    const struct elfHeader32 * const headerPtr = (struct elfHeader32 *)filePtr;
+    const struct elfHeader32 * const headerPtr = (struct elfHeader32 *)fileData.ptr;
+    return headerPtr->entry;
+}
+
+addr_t elfGetSymbol(const data_t fileData,
+                    const char * const sectionName,
+                    const char * const symbolName) {
+    if (!fileData.ptr) {
+        return NULL;
+    }
+    if (fileData.bytes < sizeof(struct elfHeader32)) {
+        return NULL;
+    }
+    if (!sectionName) {
+        return NULL;
+    }
+    if (!symbolName) {
+        return NULL;
+    }
+
+    const struct elfSectionHeaderEntry32 * const section = elfGetSectionHeaderEntryNamed(fileData, sectionName);
+    (void)section;
+        // sectionHeaderEntry.
+        // if (!(sectionHeaderEntry->attributes & ESECATTR_ALLOC)) {
+        //     continue;
+        // }
+
+        // /*
+        //     Assign memory for ALLOC section
+        // */
+
+        // enum k_mem_error err = k_mem_gimme(procId,
+        //                                    (ptr_t)sectionHeaderEntry->virtualAddr,
+        //                                    sectionHeaderEntry->fileSizeBytes);
+        // if (err != ME_NONE &&
+        //     err != ME_ALREADY_ASSIGNED &&
+        //     err != ME_PART_ALREADY_ASSIGNED) {
+        //     OOPS("Memory assignment error", GCE_UNKNOWN);
+        // }
+        
+        // *heap = MAX(*heap, sectionHeaderEntry->virtualAddr + sectionHeaderEntry->fileSizeBytes);
+
+        // err = k_mem_zero(procId,
+        //                  (ptr_t)sectionHeaderEntry->virtualAddr,
+        //                  sectionHeaderEntry->fileSizeBytes);
+        // if (err != ME_NONE) {
+        //     OOPS("Memory purification error", GCE_UNKNOWN);
+        // }
+
+        // if (sectionHeaderEntry->type != ESECTYPE_PROGBITS) {
+        //     continue;
+        // }
+
+        // /*
+        //     Copy data for PROGBITS section
+        // */
+
+        // err = k_mem_copy(KERNEL_PROC_ID,
+        //                  filePtr + sectionHeaderEntry->offset,
+        //                  procId,
+        //                  (ptr_t)sectionHeaderEntry->virtualAddr,
+        //                  sectionHeaderEntry->fileSizeBytes);
+        // if (err != ME_NONE) {
+        //     OOPS("Memory copying error", GCE_UNKNOWN);
+        // }
+    
+    #warning TODO
+
+    const struct elfHeader32 * const headerPtr = (struct elfHeader32 *)fileData.ptr;
     return headerPtr->entry;
 }
