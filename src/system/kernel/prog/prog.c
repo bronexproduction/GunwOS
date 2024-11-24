@@ -1,21 +1,18 @@
 //
-//  devinstall.c
+//  prog.c
 //  GunwOS
 //
-//  Created by Artur Danielewski on 17.11.2024.
+//  Created by Artur Danielewski on 24.11.2024.
 //
 
-#include <_gunwdev.h>
-#include <error/panic.h>
-#include <hal/mem/mem.h>
-#include <log/log.h>
 #include <gunwctrltypes.h>
+#include <log/log.h>
 #include <storage/file.h>
 #include <string.h>
 #include <gunwelf.h>
+#include <hal/mem/mem.h>
 #include <hal/proc/proc.h>
-#include <gunwdrv.h>
-#include <dev/dev.h>
+#include <error/panic.h>
 
 #define LOG_CODE(MSG, CODE) {                                       \
     LOG_START;                                                      \
@@ -29,6 +26,64 @@
         k_log_logd((data_t){ (ptr_t)loc_code_str, 10 });            \
     }                                                               \
     LOG_END;                                                        \
+}
+
+static enum gnwCtrlError loadFile(const data_t pathData,
+                                  data_t * const fileData) {
+    if (!pathData.ptr) {
+        OOPS("Unexpected nullptr", GCE_UNKNOWN);
+    }
+    if (!pathData.bytes) {
+        OOPS("Unexpected length", GCE_UNKNOWN);
+    }
+    if (!fileData) {
+        OOPS("Unexpected nullptr", GCE_UNKNOWN);
+    }
+    if (!fileData->ptr) {
+        OOPS("Unexpected nullptr", GCE_UNKNOWN);
+    }
+
+    {
+        LOG_START;
+        LOG_NBR("Loading file ");
+        k_log_logd((data_t){ (ptr_t)pathData.ptr, pathData.bytes });
+        LOG_END;
+    }
+
+    /*
+        Get file info
+    */
+    
+    struct gnwFileInfo fileInfo; {
+        const enum gnwFileErrorCode err = k_stor_file_getInfo(pathData, &fileInfo);
+        if (err != GFEC_NONE) {
+            switch (err) {
+            case GFEC_NOT_FOUND:
+                LOG_CODE("File not found", err);
+                return GCE_NOT_FOUND;
+            default:
+                LOG_CODE("File info error", err);
+                return GCE_UNKNOWN;
+            }
+        }
+        if (!fileInfo.sizeBytes) {
+            LOG_CODE("Unexpected empty file size", 0);
+            return GCE_OPERATION_FAILED;
+        }
+    }
+
+    /*
+        Load file from storage
+    */
+
+    const enum gnwFileErrorCode err = k_stor_file_load(pathData, fileData->ptr);
+    if (err != GFEC_NONE) {
+        LOG_CODE("Storage error", err);
+        return GCE_UNKNOWN;
+    }
+
+    fileData->bytes = fileInfo.sizeBytes;
+    return GCE_NONE;
 }
 
 static enum gnwCtrlError loadElf(const data_t fileData,
@@ -107,122 +162,21 @@ static enum gnwCtrlError loadElf(const data_t fileData,
     return GCE_NONE;
 }
 
-static enum gnwCtrlError loadFile(const data_t pathData,
-                                  ptr_t filePtr,
-                                  size_t * fileSizeBytesPtr) {
-    if (!pathData.ptr) {
-        OOPS("Unexpected nullptr", GCE_UNKNOWN);
-    }
-    if (!pathData.bytes) {
-        OOPS("Unexpected length", GCE_UNKNOWN);
-    }
-    if (!filePtr) {
-        OOPS("Unexpected nullptr", GCE_UNKNOWN);
-    }
-    if (!fileSizeBytesPtr) {
-        OOPS("Unexpected nullptr", GCE_UNKNOWN);
-    }
-
-    {
-        LOG_START;
-        LOG_NBR("Loading file ");
-        k_log_logd((data_t){ (ptr_t)pathData.ptr, pathData.bytes });
-        LOG_END;
-    }
-
-    /*
-        Get file info
-    */
-    
-    struct gnwFileInfo fileInfo; {
-        const enum gnwFileErrorCode err = k_stor_file_getInfo(pathData, &fileInfo);
-        if (err != GFEC_NONE) {
-            switch (err) {
-            case GFEC_NOT_FOUND:
-                LOG_CODE("File not found", err);
-                return GCE_NOT_FOUND;
-            default:
-                LOG_CODE("File info error", err);
-                return GCE_UNKNOWN;
-            }
-        }
-        if (!fileInfo.sizeBytes) {
-            LOG_CODE("Unexpected empty file size", 0);
-            return GCE_OPERATION_FAILED;
-        }
-    }
+enum gnwCtrlError k_prog_spawnProgram(const data_t pathData) {
 
     /*
         Load file from storage
     */
 
-    const enum gnwFileErrorCode err = k_stor_file_load(pathData, filePtr);
-    if (err != GFEC_NONE) {
-        LOG_CODE("Storage error", err);
-        return GCE_UNKNOWN;
-    }
-
-    *fileSizeBytesPtr = fileInfo.sizeBytes;
-    return GCE_NONE;
-}
-
-void k_scr_usr_devInstall(const procId_t procId,
-                          const struct gnwDeviceInstallDescriptor * const descPtr) {
-
-#define _FAIL(CTRL_ERROR, DRIVER_ERROR) { *(descPtr->ctrlDesc.errorPtr) = GCE_ ## CTRL_ERROR; *(descPtr->errorPtr) = GDIE_ ## DRIVER_ERROR; }
-
-    if (!descPtr) {
-        OOPS("Unexpected nullptr",);
-    }
-    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)descPtr, sizeof(struct gnwDeviceInstallDescriptor))) {
-        OOPS("Reserved zone access violation",);
-    }
-    if (!descPtr->errorPtr) {
-        OOPS("Unexpected nullptr",);
-    }
-    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)descPtr->errorPtr, sizeof(enum gnwDeviceInstallError))) {
-        OOPS("Reserved zone access violation",);
-    }
-    if (!descPtr->ctrlDesc.errorPtr) {
-        OOPS("Unexpected nullptr",);
-    }
-    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)descPtr->ctrlDesc.errorPtr, sizeof(enum gnwCtrlError))) {
-        OOPS("Reserved zone access violation",);
-    }
-    if (!descPtr->ctrlDesc.pathData.ptr) {
-        _FAIL(INVALID_ARGUMENT, NONE);
-        OOPS("Unexpected nullptr",);
-    }
-    if (!descPtr->ctrlDesc.pathData.bytes) {
-        _FAIL(INVALID_ARGUMENT, NONE);
-        OOPS("Unexpected length",);
-    }
-    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)descPtr->ctrlDesc.pathData.ptr, descPtr->ctrlDesc.pathData.bytes)) {
-        OOPS("Reserved zone access violation",);
-    }
-
-    #warning TODO - pointers accesses as if we're at the process' page (and we might not be)
-
-    /*
-        Load file from storage
-    */
-    
-    ptr_t filePtr = (ptr_t)0xfff00001; /* YOLO */ 
-    size_t fileSizeBytes; {
-        const enum gnwCtrlError err = loadFile(descPtr->ctrlDesc.pathData, filePtr, &fileSizeBytes);
-        if (err != GCE_NONE) {
-            *(descPtr->ctrlDesc.errorPtr) = err;
-            *(descPtr->errorPtr) = GDIE_NONE;
-            return;
-        }
+    data_t fileData = { (ptr_t)0xfff00001 /* YOLO */, 0 };
+    enum gnwCtrlError err = loadFile(pathData, &fileData);
+    if (err != GCE_NONE || !fileData.bytes) {
+        return err;
     }
 
     /* 
         Verify header 
     */
-
-    const data_t fileData = { filePtr, fileSizeBytes };
-    const data_t pathData = descPtr->ctrlDesc.pathData;
 
     struct elfExpectation exp;
     exp.class = ECLASS_32;
@@ -231,20 +185,8 @@ void k_scr_usr_devInstall(const procId_t procId,
     exp.architecture = 3;
 
     if (!elfValidate(fileData, &exp)) {
-        _FAIL(HEADER_INVALID, NONE);
         LOG_CODE("ELF header validation failure", 0);
-        return;
-    }
-
-    /*
-        Get driver descriptor
-    */
-
-    const struct gnwDeviceDescriptor * const deviceDescriptorPtr = (struct gnwDeviceDescriptor *)elfGetSymbol(fileData, ".rodata", "_gnw_device_descriptor");
-    if (!deviceDescriptorPtr) {
-        _FAIL(NOT_FOUND, NONE);
-        LOG_CODE("Device descriptor not found in driver file", 0);
-        return;
+        return GCE_HEADER_INVALID;
     }
 
     /*
@@ -254,9 +196,8 @@ void k_scr_usr_devInstall(const procId_t procId,
     procId_t spawnedProcId;
     enum k_proc_error procErr = k_proc_spawn(&spawnedProcId);
     if (procErr != PE_NONE) {
-        _FAIL(OPERATION_FAILED, NONE);
         LOG_CODE("Failed to spawn process", procErr);
-        return;
+        return GCE_OPERATION_FAILED;
     }
 
     /*
@@ -264,16 +205,15 @@ void k_scr_usr_devInstall(const procId_t procId,
     */
     
     struct k_proc_descriptor desc;
-    enum gnwCtrlError err = loadElf(fileData,
-                                    spawnedProcId,
-                                    &desc.entryLinearAddr,
-                                    &desc.heapLinearAddr);
+    err = loadElf(fileData,
+                  spawnedProcId,
+                  &desc.entryLinearAddr,
+                  &desc.heapLinearAddr);
     if (err != GCE_NONE) {
-        _FAIL(UNKNOWN, NONE);
         LOG_CODE("Failed to load ELF", err);
 
         k_proc_cleanup(spawnedProcId);
-        return;
+        return err;
     }
 
     /*
@@ -287,11 +227,10 @@ void k_scr_usr_devInstall(const procId_t procId,
                                          (ptr_t)(0 - MEM_VIRTUAL_RESERVED_KERNEL_MEM - stackSize),
                                          stackSize);
     if (error != ME_NONE) {
-        _FAIL(OPERATION_FAILED, NONE);
         LOG_CODE("Failed to allocate stack memory", error);
 
         k_proc_cleanup(spawnedProcId);
-        return;
+        return GCE_OPERATION_FAILED;
     }
 
     /*
@@ -300,33 +239,18 @@ void k_scr_usr_devInstall(const procId_t procId,
 
     procErr = k_proc_hatch(desc, spawnedProcId);
     if (procErr != PE_NONE) {
-        _FAIL(OPERATION_FAILED, NONE);
         LOG_CODE("Failed to hatch process", procErr);
 
         k_proc_cleanup(spawnedProcId);
-        return;
+        return GCE_OPERATION_FAILED;
     }
 
-    /* 
-        Perform driver installation and startup
-    */
+    return GCE_NONE;
+}
 
-    enum gnwDriverError e;
-    size_t id;
-    e = k_dev_install(&id, deviceDescriptorPtr);
-    if (e != GDRE_NONE) { 
-        OOPS("Driver installation failed",); 
-    }
-
-    e = k_dev_start(id);
-    if (e != GDRE_NONE) { 
-        OOPS("Driver startup failed",);
-    }
+enum gnwCtrlError k_prog_spawnDriver(const data_t pathData) {
 
     #warning TODO
 
-    *(descPtr->ctrlDesc.errorPtr) = GCE_NONE;
-    *(descPtr->errorPtr) = GDIE_NONE;
-
-#undef _FAIL
+    return GCE_NONE;
 }

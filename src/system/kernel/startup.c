@@ -13,26 +13,18 @@
 #include <log/log.h>
 #include <error/panic.h>
 #include <gunwdevtypes.h>
+#include <prog/prog.h>
 
-#define INSTALL(PATH) if (installErr == GDIE_NONE && ctrlErr == GCE_NONE) {                             \
-    LOG(PATH);                                                                                          \
-    struct gnwDeviceInstallDescriptor desc;                                                             \
-    desc.ctrlDesc.pathPtr = PATH;                                                                       \
-    desc.ctrlDesc.pathLen = strlen(desc.ctrlDesc.pathPtr);                                              \
-    desc.ctrlDesc.errorPtr = &ctrlErr;                                                                  \
-    desc.errorPtr = &installErr;                                                                        \
-    extern void k_scr_usr_devInstall(const procId_t, const struct gnwDeviceInstallDescriptor * const);  \
-    k_scr_usr_devInstall(KERNEL_PROC_ID, &desc);                                                        \
+#define INSTALL(PATH) if (installErr == GDIE_NONE && ctrlErr == GCE_NONE) {                                     \
+    LOG(PATH);                                                                                                  \
+    struct gnwDeviceInstallDescriptor desc = { { { (byte_t *)PATH, strlen(PATH) }, &ctrlErr }, &installErr };   \
+    extern void k_scr_usr_devInstall(const procId_t, struct gnwDeviceInstallDescriptor * const);                \
+    k_scr_usr_devInstall(KERNEL_PROC_ID, &desc);                                                                \
 }
 
-#define START(PATH) if (err == GCE_NONE) {                                                      \
-    LOG(PATH);                                                                                  \
-    struct gnwCtrlStartDescriptor desc;                                                         \
-    desc.pathPtr = PATH;                                                                        \
-    desc.pathLen = strlen(desc.pathPtr);                                                        \
-    desc.errorPtr = &err;                                                                       \
-    extern void k_scr_usr_start(const procId_t, const struct gnwCtrlStartDescriptor * const);   \
-    k_scr_usr_start(KERNEL_PROC_ID, &desc);                                                     \
+#define START(PATH) if (err == GCE_NONE) {                                  \
+    LOG(PATH);                                                              \
+    err = k_prog_spawnProgram((data_t){ (byte_t *)PATH, strlen(PATH) });    \
 }
 
 static void installCoreDrivers() {

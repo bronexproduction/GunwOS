@@ -104,8 +104,7 @@ static enum gnwFileErrorCode loadFile(const size_t volumeId,
 
     Note: assumes pre-validated pointers
 */
-static enum gnwFileErrorCode loadFileChain(const char * const path, 
-                                           const size_t pathLen, 
+static enum gnwFileErrorCode loadFileChain(const data_t pathData, 
                                            struct gnwFileInfo * fileInfo,
                                            const ptr_t dst) {
     /*
@@ -113,16 +112,16 @@ static enum gnwFileErrorCode loadFileChain(const char * const path,
     */
 
     const size_t rootSeparatorLength = strlen(GNW_ROOT_PATH_SEPARATOR);
-    const int_32 idLen = strfindl(path, pathLen, GNW_ROOT_PATH_SEPARATOR, rootSeparatorLength);
+    const int_32 idLen = strfindl((char *)pathData.ptr, pathData.bytes, GNW_ROOT_PATH_SEPARATOR, rootSeparatorLength);
     if (idLen <= 0) {
         return GFEC_INVALID_PATH;
     }
     bool pathErr;
-    size_t volumeId = str2intl(path, idLen, &pathErr);
+    size_t volumeId = str2intl((char *)pathData.ptr, idLen, &pathErr);
     if (pathErr) {
         return GFEC_INVALID_PATH;
     }
-    if (pathLen <= (idLen + rootSeparatorLength)) {
+    if (pathData.bytes <= (idLen + rootSeparatorLength)) {
         return GFEC_INVALID_PATH;
     }
     if (!k_stor_volume_validateId(volumeId)) {
@@ -133,8 +132,8 @@ static enum gnwFileErrorCode loadFileChain(const char * const path,
         Get file name from path
     */
 
-    const size_t filenameBufLength = pathLen - idLen - rootSeparatorLength;
-    const char * const filenameBuf = path + idLen + rootSeparatorLength;
+    const size_t filenameBufLength = pathData.bytes - idLen - rootSeparatorLength;
+    const char * const filenameBuf = (char *)pathData.ptr + idLen + rootSeparatorLength;
 
     size_t fileSysId = k_stor_volumes[volumeId].fileSysId;
     const struct gnwFileSystemDescriptor fsDesc = k_stor_fileSystems[fileSysId].desc;
@@ -193,22 +192,20 @@ static enum gnwFileErrorCode loadFileChain(const char * const path,
     return loadFile(volumeId, headerBytes, fileInfo, fsDesc, dst);
 }
 
-enum gnwFileErrorCode k_stor_file_getInfo(const char * const path, 
-                                          const size_t pathLen, 
+enum gnwFileErrorCode k_stor_file_getInfo(const data_t pathData, 
                                           struct gnwFileInfo * const fileInfo) {
-    if (!path || !fileInfo) {
+    if (!pathData.ptr || !fileInfo) {
         OOPS("Nullptr access", GFEC_UNKNOWN);
     }
 
-    return loadFileChain(path, pathLen, fileInfo, nullptr);
+    return loadFileChain(pathData, fileInfo, nullptr);
 }
 
-enum gnwFileErrorCode k_stor_file_load(const char * const path,
-                                       const size_t pathLen,
+enum gnwFileErrorCode k_stor_file_load(const data_t pathData,
                                        ptr_t dst) {
-    if (!path || !dst) {
+    if (!pathData.ptr || !dst) {
         OOPS("Nullptr access", GFEC_UNKNOWN);
     }
 
-    return loadFileChain(path, pathLen, nullptr, dst);
+    return loadFileChain(pathData, nullptr, dst);
 }

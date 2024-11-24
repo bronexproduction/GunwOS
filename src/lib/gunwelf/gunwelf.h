@@ -187,7 +187,7 @@ struct elfSectionHeaderEntry32 * elfGetSectionHeaderEntryNamed(const data_t file
 addr_t elfGetEntry(const data_t fileData);
 
 /*
-    Returns the (virtual) address of given symbol
+    Returns the address of given symbol inside the file
 */
 addr_t elfGetSymbol(const data_t fileData,
                     const char * const sectionName,

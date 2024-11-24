@@ -11,8 +11,7 @@
 #include <types.h>
 
 struct gnwCtrlStartDescriptor {
-    const char * pathPtr;
-    size_t pathLen;
+    const data_t pathData;
     enum gnwCtrlError * errorPtr;
 };
 

@@ -16,10 +16,7 @@ void start(const char * const path, enum gnwCtrlError * const error) {
     CHECKPTR(path);
     CHECKPTR(error);
 
-    struct gnwCtrlStartDescriptor desc;
-    desc.pathPtr = path;
-    desc.pathLen = strlen(path);
-    desc.errorPtr = error;
+    struct gnwCtrlStartDescriptor desc = { { (byte_t *)path, strlen(path) }, error }; 
 
     SYSCALL_USER_CALL(START, &desc, 0, 0);
 }

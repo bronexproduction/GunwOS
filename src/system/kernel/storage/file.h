@@ -10,12 +10,10 @@
 
 #include <gunwfile.h>
 
-enum gnwFileErrorCode k_stor_file_getInfo(const char * const path, 
-                                          const size_t pathLen, 
+enum gnwFileErrorCode k_stor_file_getInfo(const data_t pathData, 
                                           struct gnwFileInfo * const fileInfo);
 
-enum gnwFileErrorCode k_stor_file_load(const char * const path,
-                                       const size_t pathLen,
+enum gnwFileErrorCode k_stor_file_load(const data_t pathData,
                                        ptr_t dst);
 
 #endif // FILE_H
