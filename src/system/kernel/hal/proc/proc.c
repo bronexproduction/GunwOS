@@ -92,6 +92,9 @@ enum k_proc_error k_proc_spawn(procId_t * procId, const enum k_proc_procType pro
     if (!procId) {
         OOPS("Nullptr", PE_UNKNOWN);
     }
+    if (procType != PT_PROG && procType != PT_DRIVER) {
+        OOPS("Unexpected proc type", PE_UNKNOWN);
+    }
     
     uint_32 pIndex;
     
@@ -113,6 +116,7 @@ enum k_proc_error k_proc_spawn(procId_t * procId, const enum k_proc_procType pro
 
     memzero(&pTab[pIndex].cpuState, sizeof pTab[pIndex].cpuState);
 
+    pTab[pIndex].info.type = procType;
     pTab[pIndex].info.dpl = DPL_3;
 
     pTab[pIndex].cpuState.eflags = FLAGS_INTERRUPT;
@@ -135,7 +139,7 @@ enum k_proc_error k_proc_hatch(const struct k_proc_descriptor descriptor, const 
     if (pTab[procId].info.state != PS_NEW) {
         OOPS("Invalid process state during hatching", PE_INVALID_STATE);
     }
-    if (!descriptor.entryLinearAddr) {
+    if (!descriptor.entryLinearAddr && pTab[procId].info.type != PT_DRIVER) {
         OOPS("Invalid linear entry address", PE_INVALID_PARAMETER);
     }
     if (!descriptor.heapLinearAddr) {

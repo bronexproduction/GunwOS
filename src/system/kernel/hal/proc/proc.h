@@ -54,6 +54,12 @@ enum k_proc_lockType {
 };
 
 struct k_proc_process {
+    
+    /*
+        Process type
+    */
+    enum k_proc_procType type;
+
     /*
         Process state
     */
