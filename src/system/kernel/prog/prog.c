@@ -326,16 +326,16 @@ enum gnwCtrlError k_prog_spawnDriver(const data_t pathData,
         }
     }
 
-//     /*
-//         Get driver descriptor
-//     */
+    /*
+        Get driver descriptor
+    */
 
-//     const struct gnwDeviceDescriptor * const deviceDescriptorPtr = (struct gnwDeviceDescriptor *)elfGetSymbol(fileData, ".rodata", "_gnw_device_descriptor");
-//     if (!deviceDescriptorPtr) {
-//         _FAIL(NOT_FOUND, NONE);
-//         LOG_CODE("Device descriptor not found in driver file", 0);
-//         return;
-//     }
+    const struct gnwDeviceDescriptor * const deviceDescriptorPtr = (struct gnwDeviceDescriptor *)elfGetSymbol(fileData, "_gnw_device_descriptor");
+    if (!deviceDescriptorPtr) {
+        LOG_CODE("Device descriptor not found in driver file", 0);
+        *(installError) = GDIE_INVALID_DESCRIPTOR;
+        return GCE_UNKNOWN;
+    }
 
     /*
         Spawn process
