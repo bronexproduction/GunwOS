@@ -176,12 +176,6 @@ struct elfSectionHeaderEntry32 * elfGetSectionHeaderEntryAtIndex(const data_t fi
                                                                  const size_t index);
 
 /*
-    Returns the section header entry with given name
-*/
-struct elfSectionHeaderEntry32 * elfGetSectionHeaderEntryNamed(const data_t fileData,
-                                                               const char * const sectionName);
-
-/*
     Returns the entry point address
 */
 addr_t elfGetEntry(const data_t fileData);
@@ -190,7 +184,6 @@ addr_t elfGetEntry(const data_t fileData);
     Returns the address of given symbol inside the file
 */
 addr_t elfGetSymbol(const data_t fileData,
-                    const char * const sectionName,
                     const char * const symbolName);
 
 #endif // GUNWELF_H

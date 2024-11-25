@@ -166,31 +166,6 @@ struct elfSectionHeaderEntry32 * elfGetSectionHeaderEntryAtIndex(const data_t fi
     return (struct elfSectionHeaderEntry32 *)(fileData.ptr + SECTION_HEADER_ENTRY_OFFSET_32(index, headerPtr, fileData.bytes));
 }
 
-struct elfSectionHeaderEntry32 * elfGetSectionHeaderEntryNamed(const data_t fileData,
-                                                               const char * const sectionName) {
-    if (!fileData.ptr) {
-        return nullptr;
-    }
-    if (fileData.bytes < sizeof(struct elfHeader32)) {
-        return nullptr;
-    }
-    if (!sectionName) {
-        return nullptr;
-    }
-    
-    const size_t sectionHeaderEntryCount = elfGetSectionHeaderEntryCount(fileData.ptr);
-    for (size_t index = 0; index < sectionHeaderEntryCount; ++index) {
-        const struct elfSectionHeaderEntry32 * const sectionHeaderEntry = elfGetSectionHeaderEntryAtIndex(fileData, index); 
-        if (!sectionHeaderEntry) {
-            return nullptr;
-        }
-    }
-
-#warning TODO
-
-    return nullptr;
-}
-
 addr_t elfGetEntry(const data_t fileData) {
     if (!fileData.ptr) {
         return NULL;
@@ -204,7 +179,6 @@ addr_t elfGetEntry(const data_t fileData) {
 }
 
 addr_t elfGetSymbol(const data_t fileData,
-                    const char * const sectionName,
                     const char * const symbolName) {
     if (!fileData.ptr) {
         return NULL;
@@ -212,15 +186,12 @@ addr_t elfGetSymbol(const data_t fileData,
     if (fileData.bytes < sizeof(struct elfHeader32)) {
         return NULL;
     }
-    if (!sectionName) {
-        return NULL;
-    }
     if (!symbolName) {
         return NULL;
     }
 
-    const struct elfSectionHeaderEntry32 * const section = elfGetSectionHeaderEntryNamed(fileData, sectionName);
-    (void)section;
+    // const struct elfSectionHeaderEntry32 * const section = elfGetSectionHeaderEntryNamed(fileData, sectionName);
+    // (void)section;
         // sectionHeaderEntry.
         // if (!(sectionHeaderEntry->attributes & ESECATTR_ALLOC)) {
         //     continue;
