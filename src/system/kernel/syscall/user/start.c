@@ -10,7 +10,8 @@
 #include <error/panic.h>
 #include <prog/prog.h>
 
-void k_scr_usr_start(const procId_t procId, struct gnwCtrlStartDescriptor * const descPtr) {
+void k_scr_usr_start(const procId_t procId,
+                     struct gnwCtrlStartDescriptor * const descPtr) {
     if (!descPtr) {
         OOPS("Unexpected nullptr",);
     }

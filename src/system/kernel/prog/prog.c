@@ -13,6 +13,7 @@
 #include <hal/mem/mem.h>
 #include <hal/proc/proc.h>
 #include <error/panic.h>
+#include <gunwdevtypes.h>
 
 #define LOG_CODE(MSG, CODE) {                                       \
     LOG_START;                                                      \
@@ -83,6 +84,44 @@ static enum gnwCtrlError loadFile(const data_t pathData,
     }
 
     fileData->bytes = fileInfo.sizeBytes;
+    return GCE_NONE;
+}
+
+static enum gnwCtrlError loadElfFile(const data_t pathData,
+                                     data_t * const fileData) {
+    
+    if (!pathData.ptr || !pathData.bytes) {
+        return GDE_INVALID_PARAMETER;
+    }
+    if (!fileData) {
+        return GDE_INVALID_PARAMETER;
+    }
+
+    /*
+        Load file from storage
+    */
+
+    *fileData = (data_t){ (ptr_t)0xfff00001 /* YOLO */, 0 };
+    enum gnwCtrlError err = loadFile(pathData, fileData);
+    if (err != GCE_NONE || !fileData->bytes) {
+        return err;
+    }
+
+    /* 
+        Verify header 
+    */
+
+    struct elfExpectation exp;
+    exp.class = ECLASS_32;
+    exp.endianess = EENDIAN_LITTLE;
+    exp.type = ETYPE_EXEC;
+    exp.architecture = 3;
+
+    if (!elfValidate(*fileData, &exp)) {
+        LOG_CODE("ELF header validation failure", 0);
+        return GCE_HEADER_INVALID;
+    }
+
     return GCE_NONE;
 }
 
@@ -162,41 +201,19 @@ static enum gnwCtrlError loadElf(const data_t fileData,
     return GCE_NONE;
 }
 
-enum gnwCtrlError k_prog_spawnProgram(const data_t pathData) {
-
-    /*
-        Load file from storage
-    */
-
-    data_t fileData = { (ptr_t)0xfff00001 /* YOLO */, 0 };
-    enum gnwCtrlError err = loadFile(pathData, &fileData);
-    if (err != GCE_NONE || !fileData.bytes) {
-        return err;
-    }
-
-    /* 
-        Verify header 
-    */
-
-    struct elfExpectation exp;
-    exp.class = ECLASS_32;
-    exp.endianess = EENDIAN_LITTLE;
-    exp.type = ETYPE_EXEC;
-    exp.architecture = 3;
-
-    if (!elfValidate(fileData, &exp)) {
-        LOG_CODE("ELF header validation failure", 0);
-        return GCE_HEADER_INVALID;
+static enum gnwCtrlError spawn(const data_t fileData,
+                               procId_t * spawnedProcId) {
+    
+    if (!spawnedProcId) {
+        return GCE_INVALID_ARGUMENT;
     }
 
     /*
         Spawn process
     */
 
-    procId_t spawnedProcId;
-    enum k_proc_error procErr = k_proc_spawn(&spawnedProcId);
+    enum k_proc_error procErr = k_proc_spawn(spawnedProcId);
     if (procErr != PE_NONE) {
-        LOG_CODE("Failed to spawn process", procErr);
         return GCE_OPERATION_FAILED;
     }
 
@@ -205,14 +222,12 @@ enum gnwCtrlError k_prog_spawnProgram(const data_t pathData) {
     */
     
     struct k_proc_descriptor desc;
-    err = loadElf(fileData,
-                  spawnedProcId,
-                  &desc.entryLinearAddr,
-                  &desc.heapLinearAddr);
+    const enum gnwCtrlError err = loadElf(fileData,
+                                          *spawnedProcId,
+                                          &desc.entryLinearAddr,
+                                          &desc.heapLinearAddr);
     if (err != GCE_NONE) {
-        LOG_CODE("Failed to load ELF", err);
-
-        k_proc_cleanup(spawnedProcId);
+        k_proc_cleanup(*spawnedProcId);
         return err;
     }
 
@@ -223,13 +238,11 @@ enum gnwCtrlError k_prog_spawnProgram(const data_t pathData) {
     */
 
     const size_t stackSize = KiB(256);
-    enum k_mem_error error = k_mem_gimme(spawnedProcId,
+    enum k_mem_error error = k_mem_gimme(*spawnedProcId,
                                          (ptr_t)(0 - MEM_VIRTUAL_RESERVED_KERNEL_MEM - stackSize),
                                          stackSize);
     if (error != ME_NONE) {
-        LOG_CODE("Failed to allocate stack memory", error);
-
-        k_proc_cleanup(spawnedProcId);
+        k_proc_cleanup(*spawnedProcId);
         return GCE_OPERATION_FAILED;
     }
 
@@ -237,20 +250,121 @@ enum gnwCtrlError k_prog_spawnProgram(const data_t pathData) {
         Hatch process
     */
 
-    procErr = k_proc_hatch(desc, spawnedProcId);
+    procErr = k_proc_hatch(desc, *spawnedProcId);
     if (procErr != PE_NONE) {
-        LOG_CODE("Failed to hatch process", procErr);
-
-        k_proc_cleanup(spawnedProcId);
+        k_proc_cleanup(*spawnedProcId);
         return GCE_OPERATION_FAILED;
     }
 
     return GCE_NONE;
 }
 
-enum gnwCtrlError k_prog_spawnDriver(const data_t pathData) {
+enum gnwCtrlError k_prog_spawnProgram(const data_t pathData) {
+    
+    if (!pathData.ptr) {
+        OOPS("Path nullptr", GCE_INVALID_ARGUMENT);
+    }
+    if (!pathData.bytes) {
+        OOPS("Zero-length path", GCE_INVALID_ARGUMENT);
+    }
 
-    #warning TODO
+    /*
+        Load file from storage
+    */
+
+    data_t fileData; {
+        const enum gnwCtrlError err = loadElfFile(pathData, &fileData);
+        if (err != GCE_NONE || !fileData.ptr || !fileData.bytes) {
+            return err;
+        }
+    }
+
+    /*
+        Spawn process
+    */
+
+    procId_t spawnedProcId; {
+        const enum gnwCtrlError err = spawn(fileData, &spawnedProcId);
+        if (err != GCE_NONE) {
+            LOG_CODE("Failed to spawn process", err);
+            return err;
+        }
+    }
+
+    return GCE_NONE;
+}
+
+enum gnwCtrlError k_prog_spawnDriver(const data_t pathData,
+                                     enum gnwDeviceInstallError * const installError) {
+
+    if (!pathData.ptr) {
+        OOPS("Path nullptr", GCE_INVALID_ARGUMENT);
+    }
+    if (!pathData.bytes) {
+        OOPS("Zero-length path", GCE_INVALID_ARGUMENT);
+    }
+    if (!installError) {
+        OOPS("Install error nullptr", GCE_INVALID_ARGUMENT);
+    }
+
+    *(installError) = GDIE_NONE;
+
+    #warning TODO - pointers accesses as if we're at the process' page (and we might not be)
+
+    /*
+        Load file from storage
+    */
+
+    data_t fileData; {
+        const enum gnwCtrlError err = loadElfFile(pathData, &fileData);
+        if (err != GCE_NONE || !fileData.ptr || !fileData.bytes) {
+            return err;
+        }
+    }
+
+//     /*
+//         Get driver descriptor
+//     */
+
+//     const struct gnwDeviceDescriptor * const deviceDescriptorPtr = (struct gnwDeviceDescriptor *)elfGetSymbol(fileData, ".rodata", "_gnw_device_descriptor");
+//     if (!deviceDescriptorPtr) {
+//         _FAIL(NOT_FOUND, NONE);
+//         LOG_CODE("Device descriptor not found in driver file", 0);
+//         return;
+//     }
+
+    /*
+        Spawn process
+    */
+
+    procId_t spawnedProcId; {
+        const enum gnwCtrlError err = spawn(fileData, &spawnedProcId);
+        if (err != GCE_NONE) {
+            LOG_CODE("Failed to spawn process", err);
+            return err;
+        }
+    }
+
+    //     /* 
+//         Perform driver installation and startup
+//     */
+
+//     enum gnwDriverError e;
+//     size_t id;
+//     e = k_dev_install(&id, deviceDescriptorPtr);
+//     if (e != GDRE_NONE) { 
+//         OOPS("Driver installation failed",); 
+//     }
+
+//     e = k_dev_start(id);
+//     if (e != GDRE_NONE) { 
+//         OOPS("Driver startup failed",);
+//     }
+
+//     #warning TODO
+
+//     *(descPtr->ctrlDesc.errorPtr) = GCE_NONE;
+//     *(descPtr->errorPtr) = GDIE_NONE;
 
     return GCE_NONE;
 }
