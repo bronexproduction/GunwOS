@@ -202,9 +202,13 @@ static enum gnwCtrlError loadElf(const data_t fileData,
 }
 
 static enum gnwCtrlError spawn(const data_t fileData,
-                               procId_t * spawnedProcId) {
+                               procId_t * spawnedProcId,
+                               const enum k_proc_procType procType) {
     
     if (!spawnedProcId) {
+        return GCE_INVALID_ARGUMENT;
+    }
+    if (procType == PT_NONE) {
         return GCE_INVALID_ARGUMENT;
     }
 
@@ -212,7 +216,7 @@ static enum gnwCtrlError spawn(const data_t fileData,
         Spawn process
     */
 
-    enum k_proc_error procErr = k_proc_spawn(spawnedProcId);
+    enum k_proc_error procErr = k_proc_spawn(spawnedProcId, procType);
     if (procErr != PE_NONE) {
         return GCE_OPERATION_FAILED;
     }
@@ -284,7 +288,7 @@ enum gnwCtrlError k_prog_spawnProgram(const data_t pathData) {
     */
 
     procId_t spawnedProcId; {
-        const enum gnwCtrlError err = spawn(fileData, &spawnedProcId);
+        const enum gnwCtrlError err = spawn(fileData, &spawnedProcId, PT_PROG);
         if (err != GCE_NONE) {
             LOG_CODE("Failed to spawn process", err);
             return err;
@@ -338,7 +342,7 @@ enum gnwCtrlError k_prog_spawnDriver(const data_t pathData,
     */
 
     procId_t spawnedProcId; {
-        const enum gnwCtrlError err = spawn(fileData, &spawnedProcId);
+        const enum gnwCtrlError err = spawn(fileData, &spawnedProcId, PT_DRIVER);
         if (err != GCE_NONE) {
             LOG_CODE("Failed to spawn process", err);
             return err;

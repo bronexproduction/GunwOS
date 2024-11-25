@@ -42,6 +42,12 @@ enum k_proc_state {
     PS_FINISHED
 };
 
+enum k_proc_procType {
+    PT_NONE = 0,
+    PT_PROG,
+    PT_DRIVER
+};
+
 enum k_proc_lockType {
     PLT_EVENT   = 1 << 0,
     PLT_IPC     = 1 << 1
@@ -81,8 +87,9 @@ struct k_proc_process k_proc_getInfo(const procId_t procId);
 
     Params:
     * procId - Memory pointer where spawned process ID will be set (out param)
+    * procType - Type of process to be spawned
 */
-enum k_proc_error k_proc_spawn(procId_t * procId);
+enum k_proc_error k_proc_spawn(procId_t * procId, const enum k_proc_procType procType);
 
 /*
     Hatching previously spawned userland processes

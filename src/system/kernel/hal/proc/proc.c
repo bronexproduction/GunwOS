@@ -88,7 +88,7 @@ struct k_proc_process k_proc_getInfo(const procId_t procId) {
     return (procId == KERNEL_PROC_ID) ? kernelProc.info : pTab[procId].info;
 }
 
-enum k_proc_error k_proc_spawn(procId_t * procId) {
+enum k_proc_error k_proc_spawn(procId_t * procId, const enum k_proc_procType procType) {
     if (!procId) {
         OOPS("Nullptr", PE_UNKNOWN);
     }
