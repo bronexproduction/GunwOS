@@ -16,6 +16,7 @@
 #include <gunwdev.h>
 
 #include <dev/dev.h>
+#include <hal/proc/proc.h>
 #include <storage/filesys.h>
 #include <error/panic.h>
 
@@ -29,7 +30,7 @@ static void loadDevice(struct gnwDeviceDescriptor (*descProvider)(),
     enum gnwDriverError e;
     size_t id;
     const struct gnwDeviceDescriptor desc = descProvider();
-    e = k_dev_install(&id, &desc);
+    e = k_dev_install(&desc, KERNEL_PROC_ID, &id);
     if (e != GDRE_NONE) { 
         OOPS(installFailureMsg,); 
     }

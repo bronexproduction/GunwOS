@@ -203,6 +203,7 @@ addr_t elfGetEntry(const data_t fileData);
     Returns the address of given symbol inside the file
 */
 addr_t elfGetSymbolFileAddr(const data_t fileData,
-                            const char * const symbolName);
+                            const char * const symbolName,
+                            size_t * const symbolSizeBytes);
 
 #endif // GUNWELF_H

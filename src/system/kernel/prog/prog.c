@@ -10,8 +10,10 @@
 #include <storage/file.h>
 #include <string.h>
 #include <gunwelf.h>
+#include <gunwdrv.h>
 #include <hal/mem/mem.h>
 #include <hal/proc/proc.h>
+#include <dev/dev.h>
 #include <error/panic.h>
 #include <gunwdevtypes.h>
 
@@ -330,9 +332,17 @@ enum gnwCtrlError k_prog_spawnDriver(const data_t pathData,
         Get driver descriptor
     */
 
-    const struct gnwDeviceDescriptor * const deviceDescriptorPtr = (struct gnwDeviceDescriptor *)elfGetSymbolFileAddr(fileData, "_gnw_device_descriptor");
-    if (!deviceDescriptorPtr) {
+    size_t deviceDescriptorSizeBytes;
+    const struct gnwDeviceDescriptor * const deviceDescriptorPtr = (struct gnwDeviceDescriptor *)elfGetSymbolFileAddr(fileData,
+                                                                                                                      "_gnw_device_descriptor",
+                                                                                                                      &deviceDescriptorSizeBytes);
+    if (!deviceDescriptorPtr || !deviceDescriptorSizeBytes) {
         LOG_CODE("Device descriptor not found in driver file", 0);
+        *(installError) = GDIE_INVALID_DESCRIPTOR;
+        return GCE_UNKNOWN;
+    }
+    if (deviceDescriptorSizeBytes != sizeof(struct gnwDeviceDescriptor)) {
+        LOG_CODE("Device descriptor size invalid", 0);
         *(installError) = GDIE_INVALID_DESCRIPTOR;
         return GCE_UNKNOWN;
     }
@@ -349,26 +359,23 @@ enum gnwCtrlError k_prog_spawnDriver(const data_t pathData,
         }
     }
 
-    //     /* 
-//         Perform driver installation and startup
-//     */
+    /* 
+        Perform driver installation and startup
+    */
 
-//     enum gnwDriverError e;
-//     size_t id;
-//     e = k_dev_install(&id, deviceDescriptorPtr);
-//     if (e != GDRE_NONE) { 
-//         OOPS("Driver installation failed",); 
-//     }
+    enum gnwDriverError e;
+    size_t deviceId;
+    e = k_dev_install(deviceDescriptorPtr, spawnedProcId, &deviceId);
+    if (e != GDRE_NONE) { 
+        *installError = GDIE_INSTALLATION_FAILED;
+        OOPS("Driver installation failed", GCE_NONE);
+    }
 
-//     e = k_dev_start(id);
-//     if (e != GDRE_NONE) { 
-//         OOPS("Driver startup failed",);
-//     }
-
-//     #warning TODO
-
-//     *(descPtr->ctrlDesc.errorPtr) = GCE_NONE;
-//     *(descPtr->errorPtr) = GDIE_NONE;
+    e = k_dev_start(deviceId);
+    if (e != GDRE_NONE) {
+        *installError = GDIE_STARTUP_FAILED;
+        OOPS("Driver startup failed", GCE_NONE);
+    }
 
     return GCE_NONE;
 }

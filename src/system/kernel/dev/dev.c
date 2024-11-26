@@ -103,8 +103,27 @@ PRIVATE enum gnwDeviceError validateStartedDevice(const procId_t processId, cons
     return GDE_NONE;
 }
 
-enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescriptor * const descriptor) {
-    if (!id) {
+enum gnwDriverError k_dev_install(const struct gnwDeviceDescriptor * const descriptorPtr,
+                                  const procId_t operatorProcId,
+                                  size_t * const deviceIdPtr) {
+    if (operatorProcId != KERNEL_PROC_ID && !k_proc_idIsUser(operatorProcId)) {
+        LOG("Invalid operator process ID");
+        return GDRE_INVALID_ARGUMENT;
+    }
+    if (k_proc_idIsUser(operatorProcId) && k_proc_getInfo(operatorProcId).type != PT_DRIVER) {
+        LOG("Invalid operator process type");
+        return GDRE_INVALID_ARGUMENT;
+    }
+    if (/* operator process already used */ false ) {
+        LOG("Operator process ID already in use");
+        return GDRE_INVALID_ARGUMENT;
+    }
+    if (k_proc_idIsUser(operatorProcId)) {
+        LOG("User process operator not supported");
+        return GDRE_INVALID_ARGUMENT;
+    }
+
+    if (!deviceIdPtr) {
         LOG("ID nullptr not allowed");
         return GDRE_UNKNOWN;
     }
@@ -112,25 +131,25 @@ enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescr
         LOG("Device limit reached");
         return GDRE_LIMIT_REACHED;
     }
-    if (!validateDeviceDescriptor(descriptor)) {
+    if (!validateDeviceDescriptor(descriptorPtr)) {
         LOG("Device descriptor invalid");
         return GDRE_INVALID_DESCRIPTOR;
     }
 
     #warning CHECK MEMORY-MAPPED DEVICES FOR OVERLAPS WITH CURRENTLY INSTALLED ONES
 
-    const struct gnwDriverConfig *driverDesc = &(descriptor->driver.descriptor);
+    const struct gnwDriverConfig *driverDescPtr = &(descriptorPtr->driver.descriptor);
 
-    if (driverDesc->irq >= DEV_IRQ_LIMIT) {
+    if (driverDescPtr->irq >= DEV_IRQ_LIMIT) {
         return GDRE_IRQ_INVALID;
     }
 
-    if (driverDesc->isr && k_hal_isIRQRegistered(driverDesc->irq)) {
+    if (driverDescPtr->isr && k_hal_isIRQRegistered(driverDescPtr->irq)) {
         return GDRE_IRQ_CONFLICT;
     }
 
     struct device dev = { 
-        /* desc */ *descriptor, 
+        /* desc */ *descriptorPtr, 
         /* initialized */ false, 
         /* started */ false, 
         /* holder */ NONE_PROC_ID, 
@@ -138,7 +157,7 @@ enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescr
         /* decoder */ nullptr
     };
 
-    dev.initialized = (driverDesc->init ? driverDesc->init() : 1);
+    dev.initialized = (driverDescPtr->init ? driverDescPtr->init() : 1);
     if (!dev.initialized) {
         LOG("Driver init failed");
         return GDRE_UNINITIALIZED;
@@ -146,10 +165,10 @@ enum gnwDriverError k_dev_install(size_t * const id, const struct gnwDeviceDescr
     
     enum gnwDriverError e = GDRE_NONE;
 
-    *id = devicesCount;
+    *deviceIdPtr = devicesCount;
 
-    if (driverDesc->isr) {
-        e = k_hal_install(*id, descriptor->driver.descriptor);   
+    if (driverDescPtr->isr) {
+        e = k_hal_install(*deviceIdPtr, descriptorPtr->driver.descriptor);   
     }
 
     if (e != GDRE_NONE) {

@@ -31,6 +31,7 @@ enum gnwDriverError {
     GDRE_LIMIT_REACHED      = 5,
     GDRE_ISR_MISSING        = 6,
     GDRE_INVALID_DESCRIPTOR = 7,
+    GDRE_INVALID_ARGUMENT   = 8,
     GDRE_UNKNOWN            = -1
 };
 
