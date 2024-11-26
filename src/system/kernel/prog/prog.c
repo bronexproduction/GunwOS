@@ -367,12 +367,14 @@ enum gnwCtrlError k_prog_spawnDriver(const data_t pathData,
     size_t deviceId;
     e = k_dev_install(deviceDescriptorPtr, spawnedProcId, &deviceId);
     if (e != GDRE_NONE) { 
+        k_proc_cleanup(spawnedProcId);
         *installError = GDIE_INSTALLATION_FAILED;
         OOPS("Driver installation failed", GCE_NONE);
     }
 
     e = k_dev_start(deviceId);
     if (e != GDRE_NONE) {
+        k_proc_cleanup(spawnedProcId);
         *installError = GDIE_STARTUP_FAILED;
         OOPS("Driver startup failed", GCE_NONE);
     }
