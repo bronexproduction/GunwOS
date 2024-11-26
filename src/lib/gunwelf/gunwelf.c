@@ -92,6 +92,70 @@ static bool validateSectionHeaderEntry(const struct elfSectionHeaderEntry32 * co
     return true;
 }
 
+static ptr_t section(const data_t fileData, const enum elfSectionType type, const struct elfSectionHeaderEntry32 * * resultSectionHeaderEntry) {
+    if (!fileData.ptr) {
+        return NULL;
+    }
+    if (!fileData.bytes) {
+        return NULL;
+    }
+
+    const size_t sectionHeaderEntryCount = elfGetSectionHeaderEntryCount(fileData.ptr);
+    const struct elfSectionHeaderEntry32 * sectionHeaderEntry = nullptr;
+    for (size_t index = 0; index < sectionHeaderEntryCount; ++index) {
+        const struct elfSectionHeaderEntry32 * const currentSectionHeaderEntry = elfGetSectionHeaderEntryAtIndex(fileData, index);
+        if (!currentSectionHeaderEntry) {
+            return NULL;
+        } else if (currentSectionHeaderEntry->type == type) {
+            sectionHeaderEntry = currentSectionHeaderEntry;
+            break;
+        }
+    }
+
+    if ((addr_t)fileData.ptr >= (addr_t)fileData.ptr + sectionHeaderEntry->offset + sectionHeaderEntry->fileSizeBytes) {
+        /*
+            Wraparound
+        */
+        return NULL;
+    }
+    if (sectionHeaderEntry->fileSizeBytes % ELF_SYMTAB_SECTION_ENTRY_SIZE_32) {
+        /*
+            Unexpected size
+        */
+        return NULL;
+    }
+
+    if (sectionHeaderEntry) {
+        *resultSectionHeaderEntry = sectionHeaderEntry;
+    }
+    return fileData.ptr + sectionHeaderEntry->offset;
+}
+
+static struct elfSymtabSectionEntry32 * symtab(const data_t fileData, size_t * const entryCount) {
+    if (!entryCount) {
+        return NULL;
+    }
+
+    *entryCount = 0;
+
+    const struct elfSectionHeaderEntry32 * symbolTableSectionHeaderEntry = nullptr;
+    struct elfSymtabSectionEntry32 * const symbolTable = section(fileData, ESECTYPE_SYMTAB, &symbolTableSectionHeaderEntry);
+
+    if (!symbolTableSectionHeaderEntry) {
+        return nullptr;
+    }
+    if (!symbolTable) {
+        return nullptr;
+    }
+
+    *entryCount = symbolTableSectionHeaderEntry->fileSizeBytes / ELF_SYMTAB_SECTION_ENTRY_SIZE_32;
+    return symbolTable;
+}
+
+static ptr_t strtab(const data_t fileData) {
+    return section(fileData, ESECTYPE_STRTAB, nullptr);
+}
+
 bool elfValidate(const data_t fileData, 
                  const struct elfExpectation * const expectation) {
     if (!fileData.ptr) {
@@ -190,52 +254,20 @@ addr_t elfGetSymbol(const data_t fileData,
         return NULL;
     }
 
-    // const struct elfSectionHeaderEntry32 * const section = elfGetSectionHeaderEntryNamed(fileData, sectionName);
-    // (void)section;
-        // sectionHeaderEntry.
-        // if (!(sectionHeaderEntry->attributes & ESECATTR_ALLOC)) {
-        //     continue;
-        // }
+    size_t symbolTableEntryCount;
+    const struct elfSymtabSectionEntry32 * symbolTable = symtab(fileData, &symbolTableEntryCount);
+    const ptr_t strTable = strtab(fileData);
+    if (!symbolTable || !symbolTableEntryCount || !strTable) {
+        return NULL;
+    }
 
-        // /*
-        //     Assign memory for ALLOC section
-        // */
+    for (size_t index = 0; index < symbolTableEntryCount; ++index) {
+        const struct elfSymtabSectionEntry32 * const symbolTableEntry = &symbolTable[index];
+        (void)symbolTableEntry;
 
-        // enum k_mem_error err = k_mem_gimme(procId,
-        //                                    (ptr_t)sectionHeaderEntry->virtualAddr,
-        //                                    sectionHeaderEntry->fileSizeBytes);
-        // if (err != ME_NONE &&
-        //     err != ME_ALREADY_ASSIGNED &&
-        //     err != ME_PART_ALREADY_ASSIGNED) {
-        //     OOPS("Memory assignment error", GCE_UNKNOWN);
-        // }
-        
-        // *heap = MAX(*heap, sectionHeaderEntry->virtualAddr + sectionHeaderEntry->fileSizeBytes);
+        #warning TODO
+    }
 
-        // err = k_mem_zero(procId,
-        //                  (ptr_t)sectionHeaderEntry->virtualAddr,
-        //                  sectionHeaderEntry->fileSizeBytes);
-        // if (err != ME_NONE) {
-        //     OOPS("Memory purification error", GCE_UNKNOWN);
-        // }
-
-        // if (sectionHeaderEntry->type != ESECTYPE_PROGBITS) {
-        //     continue;
-        // }
-
-        // /*
-        //     Copy data for PROGBITS section
-        // */
-
-        // err = k_mem_copy(KERNEL_PROC_ID,
-        //                  filePtr + sectionHeaderEntry->offset,
-        //                  procId,
-        //                  (ptr_t)sectionHeaderEntry->virtualAddr,
-        //                  sectionHeaderEntry->fileSizeBytes);
-        // if (err != ME_NONE) {
-        //     OOPS("Memory copying error", GCE_UNKNOWN);
-        // }
-    
     #warning TODO
 
     const struct elfHeader32 * const headerPtr = (struct elfHeader32 *)fileData.ptr;
