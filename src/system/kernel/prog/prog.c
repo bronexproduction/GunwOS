@@ -330,7 +330,7 @@ enum gnwCtrlError k_prog_spawnDriver(const data_t pathData,
         Get driver descriptor
     */
 
-    const struct gnwDeviceDescriptor * const deviceDescriptorPtr = (struct gnwDeviceDescriptor *)elfGetSymbol(fileData, "_gnw_device_descriptor");
+    const struct gnwDeviceDescriptor * const deviceDescriptorPtr = (struct gnwDeviceDescriptor *)elfGetSymbolFileAddr(fileData, "_gnw_device_descriptor");
     if (!deviceDescriptorPtr) {
         LOG_CODE("Device descriptor not found in driver file", 0);
         *(installError) = GDIE_INVALID_DESCRIPTOR;

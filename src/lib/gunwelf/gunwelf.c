@@ -118,12 +118,6 @@ static ptr_t section(const data_t fileData, const enum elfSectionType type, cons
         */
         return NULL;
     }
-    if (sectionHeaderEntry->fileSizeBytes % ELF_SYMTAB_SECTION_ENTRY_SIZE_32) {
-        /*
-            Unexpected size
-        */
-        return NULL;
-    }
 
     if (sectionHeaderEntry) {
         *resultSectionHeaderEntry = sectionHeaderEntry;
@@ -147,13 +141,48 @@ static struct elfSymtabSectionEntry32 * symtab(const data_t fileData, size_t * c
     if (!symbolTable) {
         return nullptr;
     }
+    if (symbolTableSectionHeaderEntry->entrySizeBytes != ELF_SYMTAB_SECTION_ENTRY_SIZE_32) {
+        /*
+            Unexpected entry size
+        */
+        return nullptr;
+    }
+    if (symbolTableSectionHeaderEntry->fileSizeBytes % ELF_SYMTAB_SECTION_ENTRY_SIZE_32) {
+        /*
+            Unexpected size
+        */
+        return NULL;
+    }
 
     *entryCount = symbolTableSectionHeaderEntry->fileSizeBytes / ELF_SYMTAB_SECTION_ENTRY_SIZE_32;
     return symbolTable;
 }
 
-static ptr_t strtab(const data_t fileData) {
-    return section(fileData, ESECTYPE_STRTAB, nullptr);
+static char * strtab(const data_t fileData, size_t * sizeBytes) {
+    if (!sizeBytes) {
+        return nullptr;
+    }
+
+    *sizeBytes = 0;
+
+    const struct elfSectionHeaderEntry32 * stringTableSectionHeaderEntry = nullptr;
+    char * const stringTable = section(fileData, ESECTYPE_STRTAB, &stringTableSectionHeaderEntry);
+
+    if (!stringTableSectionHeaderEntry) {
+        return nullptr;
+    }
+    if (!stringTable) {
+        return nullptr;
+    }
+    if (stringTable[stringTableSectionHeaderEntry->fileSizeBytes - 1]) {
+        /*
+            String table should be null-terminated
+        */
+        return nullptr;
+    }
+
+    *sizeBytes = stringTableSectionHeaderEntry->fileSizeBytes;
+    return stringTable;
 }
 
 bool elfValidate(const data_t fileData, 
@@ -242,8 +271,8 @@ addr_t elfGetEntry(const data_t fileData) {
     return headerPtr->entry;
 }
 
-addr_t elfGetSymbol(const data_t fileData,
-                    const char * const symbolName) {
+addr_t elfGetSymbolFileAddr(const data_t fileData,
+                            const char * const symbolName) {
     if (!fileData.ptr) {
         return NULL;
     }
@@ -253,23 +282,62 @@ addr_t elfGetSymbol(const data_t fileData,
     if (!symbolName) {
         return NULL;
     }
+    if (fileData.ptr >= fileData.ptr + fileData.bytes) {
+        return NULL;
+    }
 
     size_t symbolTableEntryCount;
+    size_t stringTableSizeBytes;
     const struct elfSymtabSectionEntry32 * symbolTable = symtab(fileData, &symbolTableEntryCount);
-    const ptr_t strTable = strtab(fileData);
-    if (!symbolTable || !symbolTableEntryCount || !strTable) {
+    const char * strTable = strtab(fileData, &stringTableSizeBytes);
+    if (!symbolTable || !symbolTableEntryCount || !strTable || !stringTableSizeBytes) {
         return NULL;
+    }
+    
+    const size_t symbolNameLen = strlen(symbolName);
+    if (symbolNameLen >= stringTableSizeBytes) {
+        return nullptr;
     }
 
     for (size_t index = 0; index < symbolTableEntryCount; ++index) {
         const struct elfSymtabSectionEntry32 * const symbolTableEntry = &symbolTable[index];
-        (void)symbolTableEntry;
+        if (symbolTableEntry->name >= stringTableSizeBytes) {
+            /*
+                ELF data inconsistency
+            */
+            return nullptr;
+        } else if (!symbolTableEntry->name) {
+            continue;
+        } else if ((symbolNameLen + 1) > (stringTableSizeBytes - symbolTableEntry->name)) {
+            continue;
+        }
+        if (symbolTableEntry->value + symbolTableEntry->size <= symbolTableEntry->value) {
+            /*
+                Wraparound - inconsistency
+            */
+            return nullptr;
+        }
 
-        #warning TODO
+        const char * const namePtr = &strTable[symbolTableEntry->name];
+        if (!strcmp(symbolName, namePtr)) {
+            const struct elfSectionHeaderEntry32 * symbolSection = elfGetSectionHeaderEntryAtIndex(fileData, symbolTableEntry->sectionHeaderIndex);
+            if (!symbolSection) {
+                return nullptr;
+            }
+
+            if (symbolTableEntry->value < symbolSection->virtualAddr ||
+                (symbolTableEntry->value + symbolTableEntry->size) > (symbolSection->virtualAddr + symbolSection->fileSizeBytes)) {
+                    return nullptr;
+            }
+
+            
+            /*
+                Got it
+            */
+            #warning TODO
+            return nullptr; //symbolTableEntry->value;
+        }
     }
 
-    #warning TODO
-
-    const struct elfHeader32 * const headerPtr = (struct elfHeader32 *)fileData.ptr;
-    return headerPtr->entry;
+    return nullptr;
 }
