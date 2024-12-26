@@ -90,7 +90,7 @@ enum gnwDeviceError devListen(const size_t identifier,
 }
 
 void devInstall(const char * const path,
-                enum gnwCtrlError * ctrlError,
+                enum gnwCtrlError * const ctrlError,
                 enum gnwDeviceInstallError * const installError) {
     CHECKPTR(path);
     CHECKPTR(ctrlError);

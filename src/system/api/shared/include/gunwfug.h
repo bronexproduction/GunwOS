@@ -13,6 +13,7 @@ enum gnwFugCode {
     FUG_OUT_OF_MEMORY       = 3,    /* Out-of-memory error */
     FUG_NOT_SUPPORTED       = 4,    /* Operation not supported error */
     FUG_INVALID_OPERATION   = 5,    /* Invalid operation error */
+    FUG_OPERATION_FAILED    = 6,    /* Operation failed error */
     FUG_UNDEFINED           = -1,   /* Undefined error */
 };
 

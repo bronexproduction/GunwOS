@@ -1,6 +1,6 @@
-CFLAGS=$(APP_CFLAGS)
+CFLAGS=$(APP_CFLAGS) -I $(API_SYS_DIR)/dispmgr/include
 RSFLAGS=$(APP_RSFLAGS)
-LFLAGS=$(APP_LFLAGS) -Ttext 0x14000000
+LFLAGS=$(APP_LFLAGS) -Ttext 0x10000000
 
 O_DIR_LISTING=find . -name '*.o' -type f
 

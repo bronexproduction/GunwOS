@@ -157,7 +157,7 @@ extern enum gnwDeviceError devListen(const size_t identifier,
     * installError - result error pointer (errors related to device operations)
 */
 extern void devInstall(const char * const path,
-                       enum gnwCtrlError * ctrlError,
+                       enum gnwCtrlError * const ctrlError,
                        enum gnwDeviceInstallError * const installError);
 
 #endif // _GUNWAPI_KERNEL
