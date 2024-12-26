@@ -45,7 +45,8 @@ enum k_proc_state {
 enum k_proc_procType {
     PT_NONE = 0,
     PT_PROG,
-    PT_DRIVER
+    PT_API,
+    PT_INTERRUPT
 };
 
 enum k_proc_lockType {

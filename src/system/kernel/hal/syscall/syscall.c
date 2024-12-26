@@ -73,7 +73,8 @@ static k_scl_function_handler_t syscallReg_USER[USER_SYSCALL_COUNT] = {
 */
 void k_scl_syscall_DRIVER(const ptr_t refEsp) {
     const procId_t procId = k_proc_getCurrentId();
-    if (k_proc_getInfo(procId).type != PT_DRIVER) {
+    if (k_proc_getInfo(procId).type != PT_API &&
+        k_proc_getInfo(procId).type != PT_INTERRUPT) {
         OOPS_NBR("Unauthorized driver syscall access");
     }
     const size_t functionCode = *(size_t *)userStackSafeValuePointer(procId, refEsp, FUNC_CODE_STACK_OFFSET, sizeof(size_t));

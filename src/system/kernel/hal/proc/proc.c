@@ -92,7 +92,9 @@ enum k_proc_error k_proc_spawn(procId_t * procId, const enum k_proc_procType pro
     if (!procId) {
         OOPS("Nullptr", PE_UNKNOWN);
     }
-    if (procType != PT_PROG && procType != PT_DRIVER) {
+    if (procType != PT_PROG &&
+        procType != PT_API &&
+        procType != PT_INTERRUPT) {
         OOPS("Unexpected proc type", PE_UNKNOWN);
     }
     
@@ -139,7 +141,7 @@ enum k_proc_error k_proc_hatch(const struct k_proc_descriptor descriptor, const 
     if (pTab[procId].info.state != PS_NEW) {
         OOPS("Invalid process state during hatching", PE_INVALID_STATE);
     }
-    if (!descriptor.entryLinearAddr && pTab[procId].info.type != PT_DRIVER) {
+    if (!descriptor.entryLinearAddr && pTab[procId].info.type != PT_INTERRUPT) {
         OOPS("Invalid linear entry address", PE_INVALID_PARAMETER);
     }
     if (!descriptor.heapLinearAddr) {

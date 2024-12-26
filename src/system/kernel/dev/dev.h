@@ -15,7 +15,7 @@
 void k_dev_init();
 
 enum gnwDriverError k_dev_install(const struct gnwDeviceDescriptor * const descriptorPtr,
-                                  const procId_t operatorProcId,
+                                  const procId_t apiOperatorProcId,
                                   size_t * const deviceIdPtr);
 enum gnwDriverError k_dev_start(size_t id);
 

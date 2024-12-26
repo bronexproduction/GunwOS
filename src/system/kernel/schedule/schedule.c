@@ -25,7 +25,7 @@ static procId_t nextProcId = KERNEL_PROC_ID;
 
 static bool canSchedule(const procId_t procId) {
     const struct k_proc_process procInfo = k_proc_getInfo(procId);
-    return procInfo.state == PS_READY && procInfo.type != PT_DRIVER;
+    return procInfo.state == PS_READY && procInfo.type != PT_INTERRUPT;
 }
 
 static procId_t procSelect() {

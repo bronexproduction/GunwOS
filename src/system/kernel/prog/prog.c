@@ -348,11 +348,11 @@ enum gnwCtrlError k_prog_spawnDriver(const data_t pathData,
     }
 
     /*
-        Spawn process
+        Spawn API process
     */
 
-    procId_t spawnedProcId; {
-        const enum gnwCtrlError err = spawn(fileData, &spawnedProcId, PT_DRIVER);
+    procId_t spawnedApiProcId; {
+        const enum gnwCtrlError err = spawn(fileData, &spawnedApiProcId, PT_API);
         if (err != GCE_NONE) {
             LOG_CODE("Failed to spawn process", err);
             return err;
@@ -365,16 +365,16 @@ enum gnwCtrlError k_prog_spawnDriver(const data_t pathData,
 
     enum gnwDriverError e;
     size_t deviceId;
-    e = k_dev_install(deviceDescriptorPtr, spawnedProcId, &deviceId);
+    e = k_dev_install(deviceDescriptorPtr, spawnedApiProcId, &deviceId);
     if (e != GDRE_NONE) { 
-        k_proc_cleanup(spawnedProcId);
+        k_proc_cleanup(spawnedApiProcId);
         *installError = GDIE_INSTALLATION_FAILED;
         OOPS("Driver installation failed", GCE_NONE);
     }
 
     e = k_dev_start(deviceId);
     if (e != GDRE_NONE) {
-        k_proc_cleanup(spawnedProcId);
+        k_proc_cleanup(spawnedApiProcId);
         *installError = GDIE_STARTUP_FAILED;
         OOPS("Driver startup failed", GCE_NONE);
     }

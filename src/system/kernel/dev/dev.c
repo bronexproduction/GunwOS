@@ -115,7 +115,7 @@ PRIVATE enum gnwDeviceError validateStartedDevice(const procId_t processId, cons
     if (dev->holder != processId) {
         return GDE_HANDLE_INVALID;
     }
-    if (!k_proc_idIsUser(dev->operator.api)) {
+    if (!k_proc_idIsUser(dev->operator.api) || k_proc_getInfo(dev->operator.api).type != PT_API) {
         return GDE_INVALID_DEVICE_STATE;
     }
     if (!dev->started) {
@@ -126,13 +126,13 @@ PRIVATE enum gnwDeviceError validateStartedDevice(const procId_t processId, cons
 }
 
 enum gnwDriverError k_dev_install(const struct gnwDeviceDescriptor * const descriptorPtr,
-                                  const procId_t operatorProcId,
+                                  const procId_t apiOperatorProcId,
                                   size_t * const deviceIdPtr) {
-    if (operatorProcId != KERNEL_PROC_ID && !k_proc_idIsUser(operatorProcId)) {
+    if (apiOperatorProcId != KERNEL_PROC_ID && !k_proc_idIsUser(apiOperatorProcId)) {
         LOG("Invalid operator process ID");
         return GDRE_INVALID_ARGUMENT;
     }
-    if (k_proc_idIsUser(operatorProcId) && k_proc_getInfo(operatorProcId).type != PT_DRIVER) {
+    if (k_proc_idIsUser(apiOperatorProcId) && k_proc_getInfo(apiOperatorProcId).type != PT_API) {
         LOG("Invalid operator process type");
         return GDRE_INVALID_ARGUMENT;
     }
@@ -140,7 +140,7 @@ enum gnwDriverError k_dev_install(const struct gnwDeviceDescriptor * const descr
         LOG("Operator process ID already in use");
         return GDRE_INVALID_ARGUMENT;
     }
-    if (k_proc_idIsUser(operatorProcId)) {
+    if (k_proc_idIsUser(apiOperatorProcId)) {
         LOG("User process operator not supported");
         return GDRE_INVALID_ARGUMENT;
     }
@@ -176,7 +176,7 @@ enum gnwDriverError k_dev_install(const struct gnwDeviceDescriptor * const descr
         /* started */ false, 
         /* holder */ NONE_PROC_ID, 
         /* operator */ { 
-            /* api */ NONE_PROC_ID,
+            /* api */ apiOperatorProcId,
             /* interrupt */ NONE_PROC_ID
         },
         /* listener */ nullptr,
