@@ -20,6 +20,18 @@
 
 #define MAX_DEVICES 8
 
+struct deviceOperator {
+    /*
+        API calls handler
+    */
+    procId_t api;
+
+    /*
+        Interrupts handler
+    */
+    procId_t interrupt;
+};
+
 PRIVATE struct device {
     /*
         Driver descriptor
@@ -44,6 +56,11 @@ PRIVATE struct device {
         NONE_PROC_ID for none
     */
     procId_t holder;
+
+    /*
+        Device operator info
+    */
+    struct deviceOperator operator;
 
     /*
         Device events listener routine
@@ -72,6 +89,8 @@ void k_dev_init() {
     memzero(devices, sizeof(struct device) * MAX_DEVICES);
     for (size_t i = 0; i < MAX_DEVICES; ++i) {
         devices[i].holder = NONE_PROC_ID;
+        devices[i].operator.api = NONE_PROC_ID;
+        devices[i].operator.interrupt = NONE_PROC_ID;
     }
 }
 
@@ -95,6 +114,9 @@ PRIVATE enum gnwDeviceError validateStartedDevice(const procId_t processId, cons
     struct device *dev = &devices[deviceId];
     if (dev->holder != processId) {
         return GDE_HANDLE_INVALID;
+    }
+    if (!k_proc_idIsUser(dev->operator.api)) {
+        return GDE_INVALID_DEVICE_STATE;
     }
     if (!dev->started) {
         return GDE_INVALID_DEVICE_STATE;
@@ -153,6 +175,10 @@ enum gnwDriverError k_dev_install(const struct gnwDeviceDescriptor * const descr
         /* initialized */ false, 
         /* started */ false, 
         /* holder */ NONE_PROC_ID, 
+        /* operator */ { 
+            /* api */ NONE_PROC_ID,
+            /* interrupt */ NONE_PROC_ID
+        },
         /* listener */ nullptr,
         /* decoder */ nullptr
     };
