@@ -20,18 +20,6 @@
 
 #define MAX_DEVICES 8
 
-struct deviceOperator {
-    /*
-        API calls handler
-    */
-    procId_t api;
-
-    /*
-        Interrupts handler
-    */
-    procId_t interrupt;
-};
-
 PRIVATE struct device {
     /*
         Driver descriptor
@@ -58,9 +46,9 @@ PRIVATE struct device {
     procId_t holder;
 
     /*
-        Device operator info
+        Device operator process identifier
     */
-    struct deviceOperator operator;
+    procId_t operator;
 
     /*
         Device events listener routine
@@ -89,8 +77,7 @@ void k_dev_init() {
     memzero(devices, sizeof(struct device) * MAX_DEVICES);
     for (size_t i = 0; i < MAX_DEVICES; ++i) {
         devices[i].holder = NONE_PROC_ID;
-        devices[i].operator.api = NONE_PROC_ID;
-        devices[i].operator.interrupt = NONE_PROC_ID;
+        devices[i].operator = NONE_PROC_ID;
     }
 }
 
@@ -115,7 +102,7 @@ PRIVATE enum gnwDeviceError validateStartedDevice(const procId_t processId, cons
     if (dev->holder != processId) {
         return GDE_HANDLE_INVALID;
     }
-    if (!k_proc_idIsUser(dev->operator.api) || k_proc_getInfo(dev->operator.api).type != PT_API) {
+    if (!k_proc_idIsUser(dev->operator) || k_proc_getInfo(dev->operator).type != PT_DRIVER) {
         return GDE_INVALID_DEVICE_STATE;
     }
     if (!dev->started) {
@@ -126,13 +113,13 @@ PRIVATE enum gnwDeviceError validateStartedDevice(const procId_t processId, cons
 }
 
 enum gnwDriverError k_dev_install(const struct gnwDeviceDescriptor * const descriptorPtr,
-                                  const procId_t apiOperatorProcId,
+                                  const procId_t operatorProcId,
                                   size_t * const deviceIdPtr) {
-    if (apiOperatorProcId != KERNEL_PROC_ID && !k_proc_idIsUser(apiOperatorProcId)) {
+    if (operatorProcId != KERNEL_PROC_ID && !k_proc_idIsUser(operatorProcId)) {
         LOG("Invalid operator process ID");
         return GDRE_INVALID_ARGUMENT;
     }
-    if (k_proc_idIsUser(apiOperatorProcId) && k_proc_getInfo(apiOperatorProcId).type != PT_API) {
+    if (k_proc_idIsUser(operatorProcId) && k_proc_getInfo(operatorProcId).type != PT_DRIVER) {
         LOG("Invalid operator process type");
         return GDRE_INVALID_ARGUMENT;
     }
@@ -140,7 +127,7 @@ enum gnwDriverError k_dev_install(const struct gnwDeviceDescriptor * const descr
         LOG("Operator process ID already in use");
         return GDRE_INVALID_ARGUMENT;
     }
-    if (k_proc_idIsUser(apiOperatorProcId)) {
+    if (k_proc_idIsUser(operatorProcId)) {
         LOG("User process operator not supported");
         return GDRE_INVALID_ARGUMENT;
     }
@@ -175,10 +162,7 @@ enum gnwDriverError k_dev_install(const struct gnwDeviceDescriptor * const descr
         /* initialized */ false, 
         /* started */ false, 
         /* holder */ NONE_PROC_ID, 
-        /* operator */ { 
-            /* api */ apiOperatorProcId,
-            /* interrupt */ NONE_PROC_ID
-        },
+        /* operator */ operatorProcId,
         /* listener */ nullptr,
         /* decoder */ nullptr
     };
