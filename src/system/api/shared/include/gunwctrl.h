@@ -11,7 +11,7 @@
 #ifndef _GUNWAPI_KERNEL
 
 #include <types.h>
-#include <gunwctrltypes.h>
+#include "gunwctrltypes.h"
 
 /*
     Starts program

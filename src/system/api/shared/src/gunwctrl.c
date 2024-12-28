@@ -8,9 +8,9 @@
 #ifndef _GUNWAPI_KERNEL
 
 #include "../_include/_gunwctrl.h"
+#include "../_include/scl_user.h"
 #include "../include/gunwfug.h"
 #include <string.h>
-#include "scl_user.h"
 
 void start(const char * const path, enum gnwCtrlError * const error) {
     CHECKPTR(path);

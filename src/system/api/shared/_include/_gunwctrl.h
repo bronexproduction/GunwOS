@@ -7,8 +7,8 @@
 #ifndef GUNWOS__GUNWCTRL_H
 #define GUNWOS__GUNWCTRL_H
 
-#include <gunwctrltypes.h>
 #include <types.h>
+#include "../include/gunwctrltypes.h"
 
 struct gnwCtrlStartDescriptor {
     const data_t pathData;
