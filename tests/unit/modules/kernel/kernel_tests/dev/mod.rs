@@ -2005,7 +2005,7 @@ fn k_dev_emit_checkCorrect() {
         for byte_offset in rlp_main[proc_id as usize].queue[index as usize].item.dataSizeBytes..DISPATCH_MAX_DATA_SIZE_BYTES {
             assert_eq!(rlp_main[proc_id as usize].queue[index as usize].data[byte_offset as usize], 0);
         }
-        assert_eq!(pTab[proc_id as usize].lockMask, k_proc_lockType::PLT_IPC as i32);
+        assert_eq!(pTab[proc_id as usize].lockMask, k_proc_lockType::PLT_SYNC as i32);
         assert_eq!(executionTimeCounter, GRANULARITY_MS);
     }
     

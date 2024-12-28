@@ -49,8 +49,8 @@ enum k_proc_procType {
 };
 
 enum k_proc_lockType {
-    PLT_EVENT   = 1 << 0,
-    PLT_IPC     = 1 << 1
+    PLT_ASYNC           = 1 << 0,
+    PLT_SYNC            = 1 << 1
 };
 
 struct k_proc_process {

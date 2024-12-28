@@ -112,28 +112,21 @@ PRIVATE enum gnwDeviceError validateStartedDevice(const procId_t processId, cons
     return GDE_NONE;
 }
 
-enum gnwDriverError k_dev_install(const struct gnwDeviceDescriptor * const descriptorPtr,
-                                  const procId_t operatorProcId,
-                                  size_t * const deviceIdPtr) {
-    if (operatorProcId != KERNEL_PROC_ID && !k_proc_idIsUser(operatorProcId)) {
-        LOG("Invalid operator process ID");
-        return GDRE_INVALID_ARGUMENT;
+PRIVATE enum gnwDriverError devInstallPrepare(const struct gnwDeviceDescriptor * const descriptorPtr,
+                                              const procId_t validOperatorProcId,
+                                              size_t * const deviceIdPtr,
+                                              const struct gnwDriverConfig * * driverDescPtr,
+                                              struct device * dev) {
+    if (!driverDescPtr) {
+        LOG("Driver desc nullptr not allowed");
+        return GDRE_UNKNOWN;
     }
-    if (k_proc_idIsUser(operatorProcId) && k_proc_getInfo(operatorProcId).type != PT_DRIVER) {
-        LOG("Invalid operator process type");
-        return GDRE_INVALID_ARGUMENT;
-    }
-    if (/* operator process already used */ false ) {
-        LOG("Operator process ID already in use");
-        return GDRE_INVALID_ARGUMENT;
-    }
-    if (k_proc_idIsUser(operatorProcId)) {
-        LOG("User process operator not supported");
-        return GDRE_INVALID_ARGUMENT;
-    }
-
     if (!deviceIdPtr) {
         LOG("ID nullptr not allowed");
+        return GDRE_UNKNOWN;
+    }
+    if (!dev) {
+        LOG("Device nullptr not allowed");
         return GDRE_UNKNOWN;
     }
     if (devicesCount >= MAX_DEVICES) {
@@ -147,25 +140,45 @@ enum gnwDriverError k_dev_install(const struct gnwDeviceDescriptor * const descr
 
     #warning CHECK MEMORY-MAPPED DEVICES FOR OVERLAPS WITH CURRENTLY INSTALLED ONES
 
-    const struct gnwDriverConfig *driverDescPtr = &(descriptorPtr->driver.descriptor);
+    *driverDescPtr = &(descriptorPtr->driver.descriptor);
 
-    if (driverDescPtr->irq >= DEV_IRQ_LIMIT) {
+    if ((*driverDescPtr)->irq >= DEV_IRQ_LIMIT) {
         return GDRE_IRQ_INVALID;
     }
 
-    if (driverDescPtr->isr && k_hal_isIRQRegistered(driverDescPtr->irq)) {
+    if ((*driverDescPtr)->isr && k_hal_isIRQRegistered((*driverDescPtr)->irq)) {
         return GDRE_IRQ_CONFLICT;
     }
 
-    struct device dev = { 
+    *dev = (struct device){ 
         /* desc */ *descriptorPtr, 
         /* initialized */ false, 
         /* started */ false, 
         /* holder */ NONE_PROC_ID, 
-        /* operator */ operatorProcId,
+        /* operator */ validOperatorProcId,
         /* listener */ nullptr,
         /* decoder */ nullptr
     };
+
+    return GDRE_NONE;
+}
+
+enum gnwDriverError k_dev_install(const struct gnwDeviceDescriptor * const descriptorPtr,
+                                  size_t * const deviceIdPtr) {
+    const struct gnwDriverConfig * driverDescPtr = nullptr;
+    struct device dev = { 0 };
+    enum gnwDriverError error = devInstallPrepare(descriptorPtr,
+                                                  KERNEL_PROC_ID,
+                                                  deviceIdPtr,
+                                                  &driverDescPtr,
+                                                  &dev);
+    if (error != GDRE_NONE) {
+        return error;
+    }
+    if (!driverDescPtr) {
+        LOG("Unexpected driver desc nullptr");
+        return GDRE_UNKNOWN;
+    }
 
     dev.initialized = (driverDescPtr->init ? driverDescPtr->init() : 1);
     if (!dev.initialized) {
@@ -189,6 +202,42 @@ enum gnwDriverError k_dev_install(const struct gnwDeviceDescriptor * const descr
     devices[devicesCount++] = dev;
 
     return GDRE_NONE;
+}
+
+enum gnwDriverError k_dev_install_async(const struct gnwDeviceDescriptor * const descriptorPtr,
+                                        const procId_t operatorProcId,
+                                        size_t * const deviceIdPtr) {
+    if (!k_proc_idIsUser(operatorProcId)) {
+        LOG("Invalid operator process ID");
+        return GDRE_INVALID_ARGUMENT;
+    }
+    if (k_proc_getInfo(operatorProcId).type != PT_DRIVER) {
+        LOG("Invalid operator process type");
+        return GDRE_INVALID_ARGUMENT;
+    }
+    if (/* operator process already used */ false ) {
+        LOG("Operator process ID already in use");
+        return GDRE_INVALID_ARGUMENT;
+    }
+
+    const struct gnwDriverConfig * driverDescPtr = nullptr;
+    struct device dev = { 0 };
+    enum gnwDriverError error = devInstallPrepare(descriptorPtr,
+                                                  KERNEL_PROC_ID,
+                                                  deviceIdPtr,
+                                                  &driverDescPtr,
+                                                  &dev);
+    if (error != GDRE_NONE) {
+        return error;
+    }
+    if (!driverDescPtr) {
+        LOG("Unexpected driver desc nullptr");
+        return GDRE_UNKNOWN;
+    }
+
+    #warning TODO queue installation and wait for result
+
+    return GDRE_UNKNOWN;
 }
 
 enum gnwDriverError k_dev_start(size_t id) {

@@ -12,6 +12,12 @@
 /*
     IPC path structure:
         
+        * Kernel:
+            GNW_PATH_IPC_KERNEL_PREFIX | GNW_PATH_IPC_COMPONENT_SEPARATOR | pathComponent0 | (GNW_PATH_IPC_COMPONENT_SEPARATOR | pathComponentN) - if needed
+            Examples:
+                * &/banana
+                * &/banana/potato/strawberry/pizza
+
         * Global:
             pathComponent0 | (GNW_PATH_IPC_COMPONENT_SEPARATOR | pathComponentN) - if needed
             Examples:
@@ -32,6 +38,7 @@
     
     Allowed characters: a-z A-Z 0-9
 */
+#define GNW_PATH_IPC_KERNEL_PREFIX '&'
 #define GNW_PATH_IPC_NOTIFICATION_PREFIX '_'
 #define GNW_PATH_IPC_BROADCAST_PREFIX '*'
 #define GNW_PATH_IPC_DIRECT_PREFIX ':'

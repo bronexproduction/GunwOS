@@ -109,7 +109,7 @@ void k_ipc_utl_unlockIfAble(const procId_t procId) {
         }
     }
 
-    k_proc_unlock(procId, PLT_IPC);
+    k_proc_unlock(procId, PLT_SYNC);
 }
 
 size_t k_ipc_utl_nextListenerIndexForPath(const data_t pathData, const size_t * const after) {

@@ -383,8 +383,8 @@ pub fn install_dummy_emitter_device(device_id: &mut size_t, proc_id: &mut procId
     
     unsafe {
         isrStackHeight = 1;
-        pTab[0].lockMask = k_proc_lockType::PLT_EVENT as i32 |
-                           k_proc_lockType::PLT_IPC as i32;
+        pTab[0].lockMask = k_proc_lockType::PLT_ASYNC as i32 |
+                           k_proc_lockType::PLT_SYNC as i32;
         k_hal_servicedDevIdPtr = device_id;
         queueRunning = true;
         assert_eq!(KERNEL_PANIC_FLAG, false);

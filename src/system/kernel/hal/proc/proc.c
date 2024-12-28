@@ -483,7 +483,7 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
         return PE_OPERATION_FAILED;
     }
 
-    k_proc_unlock(procId, PLT_EVENT);
+    k_proc_unlock(procId, PLT_ASYNC);
     k_proc_schedule_processStateDidChange();
 
     return PE_NONE;

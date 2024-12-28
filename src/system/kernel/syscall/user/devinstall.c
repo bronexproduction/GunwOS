@@ -8,6 +8,7 @@
 #include <_gunwdev.h>
 #include <_gunwctrl.h>
 #include <hal/mem/mem.h>
+#include <hal/proc/proc.h>
 #include <error/panic.h>
 #include <prog/prog.h>
 
@@ -46,5 +47,13 @@ void k_scr_usr_devInstall(const procId_t procId,
         OOPS("Reserved zone access violation",);
     }
 
-    *(descPtr->ctrlDesc.errorPtr) = k_prog_spawnDriver(descPtr->ctrlDesc.pathData, descPtr->errorPtr);
+    enum gnwCtrlError ctrlErr = k_prog_spawnDriver(descPtr->ctrlDesc.pathData, descPtr->errorPtr);
+    if (ctrlErr != GCE_NONE) {
+        *(descPtr->ctrlDesc.errorPtr) = ctrlErr;
+        return;
+    }
+    
+    #warning how to store description pointer for further use?
+
+    k_proc_lock(procId, PLT_SYNC);
 }
