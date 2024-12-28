@@ -8,11 +8,11 @@
 #ifndef _GUNWAPI_KERNEL
 
 #include "../_include/_gunwrlp.h"
+#include "../_include/scl_user.h"
 #include <defs.h>
 #include "../include/gunwctrl.h"
 #include "../include/gunwfug.h"
 #include "../include/gunwrlp.h"
-#include "scl_user.h"
 
 /*
     Asks system for the current run loop entry
