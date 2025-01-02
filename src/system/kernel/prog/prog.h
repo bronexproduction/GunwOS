@@ -12,7 +12,9 @@
 #include <gunwdevtypes.h>
 
 enum gnwCtrlError k_prog_spawnProgram(const data_t pathData);
-enum gnwCtrlError k_prog_spawnDriver(const data_t pathData,
-                                     enum gnwDeviceInstallError * const installError);
+void k_prog_spawnDriver(const procId_t procId,
+                        const data_t * const vPathDataPtr,
+                        enum gnwDeviceInstallError * const vInstallErrorPtr,
+                        enum gnwCtrlError * const vCtrlErrorPtr);
 
 #endif // PROG_H

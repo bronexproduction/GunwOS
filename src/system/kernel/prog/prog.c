@@ -16,6 +16,7 @@
 #include <dev/dev.h>
 #include <error/panic.h>
 #include <gunwdevtypes.h>
+#include <hal/paging/paging.h>
 
 #define LOG_CODE(MSG, CODE) {                                       \
     LOG_START;                                                      \
@@ -300,22 +301,43 @@ enum gnwCtrlError k_prog_spawnProgram(const data_t pathData) {
     return GCE_NONE;
 }
 
-enum gnwCtrlError k_prog_spawnDriver(const data_t pathData,
-                                     enum gnwDeviceInstallError * const installError) {
+void k_prog_spawnDriver(const procId_t procId,
+                        const data_t * const vPathDataPtr,
+                        enum gnwDeviceInstallError * const vInstallErrorPtr,
+                        enum gnwCtrlError * const vCtrlErrorPtr) {
 
-    if (!pathData.ptr) {
-        OOPS("Path nullptr", GCE_INVALID_ARGUMENT);
-    }
-    if (!pathData.bytes) {
-        OOPS("Zero-length path", GCE_INVALID_ARGUMENT);
-    }
-    if (!installError) {
-        OOPS("Install error nullptr", GCE_INVALID_ARGUMENT);
+    if (!k_proc_idIsUser(procId)) {
+        OOPS("Invalid process id",);
     }
 
-    *(installError) = GDIE_NONE;
+    data_t pathData;
 
-    #warning TODO - pointers accesses as if we're at the process' page (and we might not be)
+    MEM_ONTABLE(procId, 
+        if (!vCtrlErrorPtr) {
+            OOPS("Ctrl error nullptr",);
+        }
+        if (!vPathDataPtr) {
+            *vCtrlErrorPtr = GCE_INVALID_ARGUMENT;
+            OOPS("Path data nullptr",);
+        }
+        if (!vPathDataPtr->ptr) {
+            *vCtrlErrorPtr = GCE_INVALID_ARGUMENT;
+            OOPS("Path nullptr",);
+        }
+        if (!vPathDataPtr->bytes) {
+            *vCtrlErrorPtr = GCE_INVALID_ARGUMENT;
+            OOPS("Zero-length path",);
+        }
+        if (!vInstallErrorPtr) {
+            *vCtrlErrorPtr = GCE_INVALID_ARGUMENT;
+            OOPS("Install error nullptr",);
+        }
+
+        *(vCtrlErrorPtr) = GCE_NONE;
+        *(vInstallErrorPtr) = GDIE_NONE;
+
+        pathData = *vPathDataPtr;
+    )
 
     /*
         Load file from storage
@@ -324,7 +346,10 @@ enum gnwCtrlError k_prog_spawnDriver(const data_t pathData,
     data_t fileData; {
         const enum gnwCtrlError err = loadElfFile(pathData, &fileData);
         if (err != GCE_NONE || !fileData.ptr || !fileData.bytes) {
-            return err;
+            MEM_ONTABLE(procId, 
+                *vCtrlErrorPtr = err;
+            )
+            return;
         }
     }
 
@@ -338,13 +363,17 @@ enum gnwCtrlError k_prog_spawnDriver(const data_t pathData,
                                                                                                                       &deviceDescriptorSizeBytes);
     if (!deviceDescriptorPtr || !deviceDescriptorSizeBytes) {
         LOG_CODE("Device descriptor not found in driver file", 0);
-        *(installError) = GDIE_INVALID_DESCRIPTOR;
-        return GCE_UNKNOWN;
+        MEM_ONTABLE(procId,
+            *(vInstallErrorPtr) = GDIE_INVALID_DESCRIPTOR;
+        )
+        return;
     }
     if (deviceDescriptorSizeBytes != sizeof(struct gnwDeviceDescriptor)) {
         LOG_CODE("Device descriptor size invalid", 0);
-        *(installError) = GDIE_INVALID_DESCRIPTOR;
-        return GCE_UNKNOWN;
+        MEM_ONTABLE(procId,
+            *(vInstallErrorPtr) = GDIE_INVALID_DESCRIPTOR;
+        )
+        return;
     }
 
     /*
@@ -355,7 +384,10 @@ enum gnwCtrlError k_prog_spawnDriver(const data_t pathData,
         const enum gnwCtrlError err = spawn(fileData, &spawnedProcId, PT_DRIVER);
         if (err != GCE_NONE) {
             LOG_CODE("Failed to spawn process", err);
-            return err;
+            MEM_ONTABLE(procId,
+                *(vCtrlErrorPtr) = err;
+            )
+            return;
         }
     }
 
@@ -368,9 +400,9 @@ enum gnwCtrlError k_prog_spawnDriver(const data_t pathData,
     e = k_dev_install_async(deviceDescriptorPtr, spawnedProcId, &deviceId);
     if (e != GDRE_NONE) { 
         k_proc_stop(spawnedProcId);
-        *installError = GDIE_INSTALLATION_FAILED;
-        OOPS("Driver installation failed", GCE_NONE);
+        MEM_ONTABLE(procId,
+            *(vInstallErrorPtr) = GDIE_INSTALLATION_FAILED;
+        )
+        OOPS("Driver installation failed",);
     }
-
-    return GCE_NONE;
 }

@@ -165,6 +165,7 @@ void k_que_start() {
         case DFE_ARCH2:
             enqueued->func.ptr.f_arch2(enqueued->func.params[0].pArch,
                                        enqueued->func.params[1].pArch);
+            break;
         case DFE_ARCH4:
             enqueued->func.ptr.f_arch4(enqueued->func.params[0].pArch,
                                        enqueued->func.params[1].pArch,

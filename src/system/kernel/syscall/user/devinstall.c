@@ -11,6 +11,7 @@
 #include <hal/proc/proc.h>
 #include <error/panic.h>
 #include <prog/prog.h>
+#include <queue/queue.h>
 
 void k_scr_usr_devInstall(const procId_t procId,
                           const struct gnwDeviceInstallDescriptor * const descPtr) {
@@ -47,13 +48,10 @@ void k_scr_usr_devInstall(const procId_t procId,
         OOPS("Reserved zone access violation",);
     }
 
-    enum gnwCtrlError ctrlErr = k_prog_spawnDriver(descPtr->ctrlDesc.pathData, descPtr->errorPtr);
-    if (ctrlErr != GCE_NONE) {
-        *(descPtr->ctrlDesc.errorPtr) = ctrlErr;
-        return;
-    }
-    
-    #warning how to store description pointer for further use?
-
+    k_que_dispatch_arch4((fPtr_arch4)(void *)k_prog_spawnDriver,
+                         procId,
+                         (addr_t)(&descPtr->ctrlDesc.pathData),
+                         (addr_t)(descPtr->errorPtr),
+                         (addr_t)(descPtr->ctrlDesc.errorPtr));
     k_proc_lock(procId, PLT_SYNC);
 }
