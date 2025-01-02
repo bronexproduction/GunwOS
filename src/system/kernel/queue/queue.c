@@ -130,8 +130,8 @@ void k_que_dispatch_arch2(const fPtr_arch2 func, const addr_t p0, const addr_t p
     dispatch((ptr_t)func, DFE_ARCH2, _PAR(p0), _PAR(p1), _NOPAR, _NOPAR);
 }
 
-void k_que_dispatch_arch4(const fPtr_arch2 func, const addr_t p0, const addr_t p1, const addr_t p2, const addr_t p3) {
-    dispatch((ptr_t)func, DFE_ARCH2, _PAR(p0), _PAR(p1), _PAR(p2), _PAR(p3));
+void k_que_dispatch_arch4(const fPtr_arch4 func, const addr_t p0, const addr_t p1, const addr_t p2, const addr_t p3) {
+    dispatch((ptr_t)func, DFE_ARCH4, _PAR(p0), _PAR(p1), _PAR(p2), _PAR(p3));
 }
 
 void k_que_start() {
