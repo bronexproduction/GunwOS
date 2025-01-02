@@ -33,7 +33,7 @@ void k_scr_start(const procId_t procId, const ptr_t refEsp) {
     SAFE_STACK_VAL_PTR(addr_t, descPtr, PARAMETER_1_STACK_OFFSET);
 
     extern void k_scr_usr_start(const procId_t procId, const struct gnwCtrlStartDescriptor * const);
-    k_que_dispatch_arch_arch((fPtr_arch_arch)(ptr_t)k_scr_usr_start, procId, *descPtr);
+    k_que_dispatch_arch2((fPtr_arch2)(ptr_t)k_scr_usr_start, procId, *descPtr);
 }
 
 /*
@@ -414,5 +414,5 @@ void k_scr_devInstall(const procId_t procId, const ptr_t refEsp) {
     SAFE_STACK_VAL_PTR(addr_t, descPtr, PARAMETER_1_STACK_OFFSET);
 
     extern void k_scr_usr_devInstall(const procId_t procId, const struct gnwDeviceInstallDescriptor * const);
-    k_que_dispatch_arch_arch((fPtr_arch_arch)(ptr_t)k_scr_usr_devInstall, procId, *descPtr);
+    k_que_dispatch_arch2((fPtr_arch2)(ptr_t)k_scr_usr_devInstall, procId, *descPtr);
 }
