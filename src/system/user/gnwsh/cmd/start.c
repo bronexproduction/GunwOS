@@ -12,8 +12,7 @@
 void cmd_start(const char * const params) {
     CMD_PARAM_STRING(0, name, "Program name")
 
-    enum gnwCtrlError err;
-    start(name, &err);
+    enum gnwCtrlError err = start(name);
     switch (err) {
     case GCE_NONE:
         break;

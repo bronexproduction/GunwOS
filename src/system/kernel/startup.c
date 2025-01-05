@@ -11,10 +11,11 @@
 #include <log/log.h>
 #include <error/panic.h>
 #include <prog/prog.h>
+#include <hal/proc/proc.h>
 
-#define START(PATH) if (err == GCE_NONE) {                                  \
-    LOG(PATH);                                                              \
-    err = k_prog_spawnProgram((data_t){ (byte_t *)PATH, strlen(PATH) });    \
+#define START(PATH) if (err == GCE_NONE) {                                                  \
+    LOG(PATH);                                                                              \
+    err = k_prog_spawnProgram(KERNEL_PROC_ID, (data_t){ (byte_t *)PATH, strlen(PATH) });    \
 }
 
 static void launchStartupManager() {

@@ -8,15 +8,9 @@
 #ifndef GUNWOS__GUNWDEV_H
 #define GUNWOS__GUNWDEV_H
 
-#include "../include/gunwdev.h"
-#include "../_include/_gunwctrl.h"
-
-struct gnwDeviceInstallDescriptor {
-    struct gnwCtrlStartDescriptor ctrlDesc;
-    enum gnwDeviceInstallError * errorPtr;
-};
-
 #ifdef _GUNWAPI_KERNEL
+
+#include "../include/gunwdev.h"
 
 #define GNW_DEVICEEVENT_ENCODEDSIZE (sizeof(struct gnwDeviceEvent) - sizeof(ptr_t))
 

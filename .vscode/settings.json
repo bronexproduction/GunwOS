@@ -97,7 +97,10 @@
     "__node_handle": "c",
     "__memory": "c",
     "iterator": "c",
-    "__functional_03": "c"
+    "__functional_03": "c",
+    "expected": "c",
+    "shared_mutex": "c",
+    "format": "c"
   },
   "cmake.configureOnOpen": false
 }

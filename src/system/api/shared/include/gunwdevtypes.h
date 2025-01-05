@@ -46,15 +46,6 @@ enum gnwDeviceError {
 };
 _Static_assert(sizeof(enum gnwDeviceError) == sizeof(int_32), "Unexpected enum gnwDeviceError size");
 
-enum gnwDeviceInstallError {
-    GDIE_NONE = 0,
-    GDIE_INVALID_DESCRIPTOR,
-    GDIE_INSTALLATION_FAILED,
-    GDIE_STARTUP_FAILED,
-    GDIE_UNKNOWN = -1
-};
-_Static_assert(sizeof(enum gnwDeviceInstallError) == sizeof(int_32), "Unexpected enum gnwDeviceInstallError size");
-
 struct gnwDeviceParamDescriptor {
     size_t param;
     size_t subParam;

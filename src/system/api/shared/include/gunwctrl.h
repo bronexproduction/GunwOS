@@ -18,9 +18,12 @@
 
     Params:
     * path - path to the executable
-    * error - result error pointer
+    
+    Returns:
+    * value less than 0 - start error (gnwCtrlError)
+    * value greater or equal 0 - started process ID
 */
-extern void start(const char * const path, enum gnwCtrlError * const error);
+extern procId_t start(const char * const path);
 
 /*
     Ends process execution

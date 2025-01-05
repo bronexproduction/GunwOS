@@ -403,16 +403,35 @@ void k_scr_memThx(const procId_t procId, const ptr_t refEsp) {
     SAFE_STACK_RESULT_ARCH_VAL = k_scr_usr_memThx(procId, *vStart);
 }
 
+
 /*
     Code - 0x17
-    Function - DEV_INSTALL
+    Function - DEV_INIT
 
     Params (process stack offset):
-        * PARAMETER_1_STACK_OFFSET - path to device install descriptor pointer (struct gnwDeviceInstallDescriptor) relative to caller process memory
+        * PARAMETER_1_STACK_OFFSET - device operator process ID
+        * PARAMETER_2_STACK_OFFSET - error pointer (address in caller process space)
 */
-void k_scr_devInstall(const procId_t procId, const ptr_t refEsp) {
-    SAFE_STACK_VAL_PTR(addr_t, descPtr, PARAMETER_1_STACK_OFFSET);
+void k_scr_devInit(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(const procId_t, operatorProcId, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(enum gnwDeviceError *, vErrorPtr, PARAMETER_2_STACK_OFFSET);
 
-    extern void k_scr_usr_devInstall(const procId_t procId, const struct gnwDeviceInstallDescriptor * const);
-    k_que_dispatch_arch2((fPtr_arch2)(ptr_t)k_scr_usr_devInstall, procId, *descPtr);
+    extern void k_scr_usr_devInit(const procId_t procId, const procId_t operatorProcId, enum gnwDeviceError * vErrorPtr);
+    k_que_dispatch_arch3((fPtr_arch3)(ptr_t)k_scr_usr_devInit, procId, *operatorProcId, (addr_t)*vErrorPtr);
+}
+
+/*
+    Code - 0x18
+    Function - DEV_START
+
+    Params (process stack offset):
+        * PARAMETER_1_STACK_OFFSET - device operator process ID
+        * PARAMETER_2_STACK_OFFSET - error pointer (address in caller process space)
+*/
+void k_scr_devStart(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(const procId_t, operatorProcId, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(enum gnwDeviceError *, vErrorPtr, PARAMETER_2_STACK_OFFSET);
+
+    extern void k_scr_usr_devStart(const procId_t procId, const procId_t operatorProcId, enum gnwDeviceError * vErrorPtr);
+    k_que_dispatch_arch3((fPtr_arch3)(ptr_t)k_scr_usr_devStart, procId, *operatorProcId, (addr_t)*vErrorPtr);
 }

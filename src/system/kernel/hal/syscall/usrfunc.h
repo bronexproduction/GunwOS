@@ -174,8 +174,14 @@ enum gnwMemoryError k_scr_memThx(const addr_t vStart);
 
 /*
     Code - 0x17
-    Function - DEV_INSTALL
+    Function - DEV_INIT
 */
-void k_scr_devInstall(const struct gnwDeviceInstallDescriptor * const);
+void k_scr_devInit(const procId_t operatorProcId, enum gnwDeviceError * vErrorPtr);
+
+/*
+    Code - 0x18
+    Function - DEV_START
+*/
+void k_scr_devStart(const procId_t operatorProcId, enum gnwDeviceError * vErrorPtr);
 
 #endif // USRFUNC_H

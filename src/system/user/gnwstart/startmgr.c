@@ -12,10 +12,10 @@
 
 #define START(PATH) if (err == GCE_NONE) {  \
     log(PATH);                              \
-    start(PATH, &err);                      \
+    err = start(PATH);                      \
 }
 
-#define INSTALL(PATH) if (installErr == GDIE_NONE && ctrlErr == GCE_NONE) { \
+#define INSTALL(PATH) if (installErr == GDE_NONE && ctrlErr == GCE_NONE) {  \
     log(PATH);                                                              \
     devInstall(PATH, &ctrlErr, &installErr);                                \
 }
@@ -23,12 +23,12 @@
 static void installCoreDrivers() {
     log("Installing core device drivers");
     
-    enum gnwDeviceInstallError installErr = GDIE_NONE;
+    enum gnwDeviceError installErr = GDE_NONE;
     enum gnwCtrlError ctrlErr = GCE_NONE;
 
     INSTALL("0:GNWVGA.GDV");    /* Display driver - process ID: 1 */
 
-    if (installErr != GDIE_NONE || ctrlErr != GCE_NONE) {
+    if (installErr != GDE_NONE || ctrlErr != GCE_NONE) {
         log("Unable to install core drivers");
         fug(FUG_OPERATION_FAILED);
     }

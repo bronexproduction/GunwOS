@@ -6,9 +6,10 @@
 //
 
 #include "../_include/_gunwdev.h"
+#include "../_include/_gunwctrl.h"
 #include "../include/gunwdev.h"
 #include "../include/gunwfug.h"
-#include "scl_user.h"
+#include "../_include/scl_user.h"
 #include <mem.h>
 #include <string.h>
 
@@ -91,14 +92,37 @@ enum gnwDeviceError devListen(const size_t identifier,
 
 void devInstall(const char * const path,
                 enum gnwCtrlError * const ctrlError,
-                enum gnwDeviceInstallError * const installError) {
+                enum gnwDeviceError * const installError) {
     CHECKPTR(path);
     CHECKPTR(ctrlError);
     CHECKPTR(installError);
 
-    struct gnwDeviceInstallDescriptor desc = { { { (byte_t *)path, strlen(path) }, ctrlError }, installError };
+    *(ctrlError) = GCE_NONE;
+    *(installError) = GDE_NONE;
 
-    SYSCALL_USER_CALL(DEV_INSTALL, &desc, 0, 0);
+    /* Load device driver */
+
+    procId_t deviceOperatorProcId;
+    struct gnwCtrlStartDescriptor desc = { { (byte_t *)path, strlen(path) }, GET_DRIVER, &deviceOperatorProcId }; 
+
+    { SYSCALL_USER_CALL(START, &desc, 0, 0); }
+
+    if (deviceOperatorProcId < 0) {
+        *(ctrlError) = (enum gnwCtrlError)deviceOperatorProcId;
+        return;
+    }
+
+    /* Initialize device */
+    
+    { SYSCALL_USER_CALL(DEV_INIT, deviceOperatorProcId, installError, 0); }
+
+    if (installError != GDE_NONE) {
+        return;
+    }
+    
+    /* Start device */
+
+    { SYSCALL_USER_CALL(DEV_START, deviceOperatorProcId, installError, 0); }
 }
 
 void gnwDeviceEvent_decode(const ptr_t dataPtr, struct gnwDeviceEvent * const eventPtr) {

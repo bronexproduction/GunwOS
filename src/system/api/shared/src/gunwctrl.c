@@ -12,13 +12,15 @@
 #include "../include/gunwfug.h"
 #include <string.h>
 
-void start(const char * const path, enum gnwCtrlError * const error) {
+procId_t start(const char * const path) {
     CHECKPTR(path);
-    CHECKPTR(error);
 
-    struct gnwCtrlStartDescriptor desc = { { (byte_t *)path, strlen(path) }, error }; 
+    procId_t procId;
+    struct gnwCtrlStartDescriptor desc = { { (byte_t *)path, strlen(path) }, GET_PROGRAM, &procId }; 
 
     SYSCALL_USER_CALL(START, &desc, 0, 0);
+
+    return procId;
 }
 
 void bye(const int_32 status) {

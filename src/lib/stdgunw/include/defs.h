@@ -15,4 +15,6 @@
 #define MiB(C) (KiB(C) * 1024)
 #define GiB(C) (MiB(C) * 1024)
 
+#define PATH_LENGTH_LIMIT 255
+
 #endif // STDGUNW_DEFS_H

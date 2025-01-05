@@ -266,7 +266,8 @@ static enum gnwCtrlError spawn(const data_t fileData,
     return GCE_NONE;
 }
 
-enum gnwCtrlError k_prog_spawnProgram(const data_t pathData) {
+procId_t k_prog_spawnProgram(const procId_t procId,
+                             const data_t pathData) {
     
     if (!pathData.ptr) {
         OOPS("Path nullptr", GCE_INVALID_ARGUMENT);
@@ -298,46 +299,18 @@ enum gnwCtrlError k_prog_spawnProgram(const data_t pathData) {
         }
     }
 
-    return GCE_NONE;
+    return spawnedProcId;
 }
 
-void k_prog_spawnDriver(const procId_t procId,
-                        const data_t * const vPathDataPtr,
-                        enum gnwDeviceInstallError * const vInstallErrorPtr,
-                        enum gnwCtrlError * const vCtrlErrorPtr) {
+procId_t k_prog_spawnDriver(const procId_t procId,
+                            const data_t pathData) {
 
-    if (!k_proc_idIsUser(procId)) {
-        OOPS("Invalid process id",);
+    if (!pathData.ptr) {
+        OOPS("Path nullptr", GCE_INVALID_ARGUMENT);
     }
-
-    data_t pathData;
-
-    MEM_ONTABLE(procId, 
-        if (!vCtrlErrorPtr) {
-            OOPS("Ctrl error nullptr",);
-        }
-        if (!vPathDataPtr) {
-            *vCtrlErrorPtr = GCE_INVALID_ARGUMENT;
-            OOPS("Path data nullptr",);
-        }
-        if (!vPathDataPtr->ptr) {
-            *vCtrlErrorPtr = GCE_INVALID_ARGUMENT;
-            OOPS("Path nullptr",);
-        }
-        if (!vPathDataPtr->bytes) {
-            *vCtrlErrorPtr = GCE_INVALID_ARGUMENT;
-            OOPS("Zero-length path",);
-        }
-        if (!vInstallErrorPtr) {
-            *vCtrlErrorPtr = GCE_INVALID_ARGUMENT;
-            OOPS("Install error nullptr",);
-        }
-
-        *(vCtrlErrorPtr) = GCE_NONE;
-        *(vInstallErrorPtr) = GDIE_NONE;
-
-        pathData = *vPathDataPtr;
-    )
+    if (!pathData.bytes) {
+        OOPS("Zero-length path", GCE_INVALID_ARGUMENT);
+    }
 
     /*
         Load file from storage
@@ -346,10 +319,7 @@ void k_prog_spawnDriver(const procId_t procId,
     data_t fileData; {
         const enum gnwCtrlError err = loadElfFile(pathData, &fileData);
         if (err != GCE_NONE || !fileData.ptr || !fileData.bytes) {
-            MEM_ONTABLE(procId, 
-                *vCtrlErrorPtr = err;
-            )
-            return;
+            return err;
         }
     }
 
@@ -363,17 +333,11 @@ void k_prog_spawnDriver(const procId_t procId,
                                                                                                                       &deviceDescriptorSizeBytes);
     if (!deviceDescriptorPtr || !deviceDescriptorSizeBytes) {
         LOG_CODE("Device descriptor not found in driver file", 0);
-        MEM_ONTABLE(procId,
-            *(vInstallErrorPtr) = GDIE_INVALID_DESCRIPTOR;
-        )
-        return;
+        return GCE_HEADER_INVALID;
     }
     if (deviceDescriptorSizeBytes != sizeof(struct gnwDeviceDescriptor)) {
         LOG_CODE("Device descriptor size invalid", 0);
-        MEM_ONTABLE(procId,
-            *(vInstallErrorPtr) = GDIE_INVALID_DESCRIPTOR;
-        )
-        return;
+        return GCE_HEADER_INVALID;
     }
 
     /*
@@ -384,25 +348,9 @@ void k_prog_spawnDriver(const procId_t procId,
         const enum gnwCtrlError err = spawn(fileData, &spawnedProcId, PT_DRIVER);
         if (err != GCE_NONE) {
             LOG_CODE("Failed to spawn process", err);
-            MEM_ONTABLE(procId,
-                *(vCtrlErrorPtr) = err;
-            )
-            return;
+            return err;
         }
     }
 
-    /* 
-        Perform driver installation and startup
-    */
-
-    enum gnwDriverError e;
-    size_t deviceId;
-    e = k_dev_install_async(deviceDescriptorPtr, spawnedProcId, &deviceId);
-    if (e != GDRE_NONE) { 
-        k_proc_stop(spawnedProcId);
-        MEM_ONTABLE(procId,
-            *(vInstallErrorPtr) = GDIE_INSTALLATION_FAILED;
-        )
-        OOPS("Driver installation failed",);
-    }
+    return spawnedProcId;
 }

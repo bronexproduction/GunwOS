@@ -18,7 +18,7 @@
 #include "usrfunc.h"
 
 #define DRIVER_SYSCALL_COUNT 4
-#define USER_SYSCALL_COUNT 24
+#define USER_SYSCALL_COUNT 25
 
 typedef void (*k_scl_function_handler_t)(const procId_t procId, const ptr_t refEsp);
 
@@ -63,7 +63,8 @@ static k_scl_function_handler_t syscallReg_USER[USER_SYSCALL_COUNT] = {
     /* 0x14 */ (void *)k_scr_yield,
     /* 0x15 */ (void *)k_scr_memPlz,
     /* 0x16 */ (void *)k_scr_memThx,
-    /* 0x17 */ (void *)k_scr_devInstall
+    /* 0x17 */ (void *)k_scr_devInit,
+    /* 0x18 */ (void *)k_scr_devStart,
 };
 
 /*
