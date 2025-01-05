@@ -414,9 +414,9 @@ void k_scr_memThx(const procId_t procId, const ptr_t refEsp) {
 */
 void k_scr_devInit(const procId_t procId, const ptr_t refEsp) {
     SAFE_STACK_VAL_PTR(const procId_t, operatorProcId, PARAMETER_1_STACK_OFFSET);
-    SAFE_STACK_VAL_PTR(enum gnwDeviceError *, vErrorPtr, PARAMETER_2_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(enum gnwDriverError *, vErrorPtr, PARAMETER_2_STACK_OFFSET);
 
-    extern void k_scr_usr_devInit(const procId_t procId, const procId_t operatorProcId, enum gnwDeviceError * vErrorPtr);
+    extern void k_scr_usr_devInit(const procId_t procId, const procId_t operatorProcId, enum gnwDriverError * vErrorPtr);
     k_que_dispatch_arch3((fPtr_arch3)(ptr_t)k_scr_usr_devInit, procId, *operatorProcId, (addr_t)*vErrorPtr);
 }
 
@@ -430,8 +430,8 @@ void k_scr_devInit(const procId_t procId, const ptr_t refEsp) {
 */
 void k_scr_devStart(const procId_t procId, const ptr_t refEsp) {
     SAFE_STACK_VAL_PTR(const procId_t, operatorProcId, PARAMETER_1_STACK_OFFSET);
-    SAFE_STACK_VAL_PTR(enum gnwDeviceError *, vErrorPtr, PARAMETER_2_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(enum gnwDriverError *, vErrorPtr, PARAMETER_2_STACK_OFFSET);
 
-    extern void k_scr_usr_devStart(const procId_t procId, const procId_t operatorProcId, enum gnwDeviceError * vErrorPtr);
+    extern void k_scr_usr_devStart(const procId_t procId, const procId_t operatorProcId, enum gnwDriverError * vErrorPtr);
     k_que_dispatch_arch3((fPtr_arch3)(ptr_t)k_scr_usr_devStart, procId, *operatorProcId, (addr_t)*vErrorPtr);
 }

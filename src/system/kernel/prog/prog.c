@@ -341,7 +341,7 @@ procId_t k_prog_spawnDriver(const procId_t procId,
     }
 
     /*
-        Spawn API process
+        Spawn operator process
     */
 
     procId_t spawnedProcId; {
@@ -350,6 +350,19 @@ procId_t k_prog_spawnDriver(const procId_t procId,
             LOG_CODE("Failed to spawn process", err);
             return err;
         }
+    }
+
+    /*
+        Create device stub
+    */
+
+    const enum gnwDriverError installError = k_dev_install_async(deviceDescriptorPtr, spawnedProcId);
+    if (installError != GDRE_NONE) {
+        k_proc_stop(spawnedProcId);
+        
+        #warning TODO find a way to return install error to the caller process
+
+        return GCE_UNKNOWN;
     }
 
     return spawnedProcId;

@@ -10,13 +10,16 @@
 // #include <hal/mem/mem.h>
 #include <hal/proc/proc.h>
 #include <gunwdevtypes.h>
+#include <gunwdrvtypes.h>
 // #include <error/panic.h>
 // #include <prog/prog.h>
 // #include <queue/queue.h>
+#include <log/log.h>
 
 void k_scr_usr_devStart(const procId_t procId,
                         const procId_t operatorProcId,
-                        enum gnwDeviceError * vErrorPtr) {
+                        enum gnwDriverError * vErrorPtr) {
+                        LOG("k_scr_usr_devStart");
     // if (!descPtr) {
     //     OOPS("Unexpected nullptr",);
     // }

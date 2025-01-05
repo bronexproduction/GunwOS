@@ -205,8 +205,8 @@ enum gnwDriverError k_dev_install(const struct gnwDeviceDescriptor * const descr
 }
 
 enum gnwDriverError k_dev_install_async(const struct gnwDeviceDescriptor * const descriptorPtr,
-                                        const procId_t operatorProcId,
-                                        size_t * const deviceIdPtr) {
+                                        const procId_t operatorProcId) {
+
     if (!k_proc_idIsUser(operatorProcId)) {
         LOG("Invalid operator process ID");
         return GDRE_INVALID_ARGUMENT;
@@ -215,6 +215,7 @@ enum gnwDriverError k_dev_install_async(const struct gnwDeviceDescriptor * const
         LOG("Invalid operator process type");
         return GDRE_INVALID_ARGUMENT;
     }
+    #warning TODO operator process check
     if (/* operator process already used */ false ) {
         LOG("Operator process ID already in use");
         return GDRE_INVALID_ARGUMENT;
@@ -222,9 +223,10 @@ enum gnwDriverError k_dev_install_async(const struct gnwDeviceDescriptor * const
 
     const struct gnwDriverConfig * driverDescPtr = nullptr;
     struct device dev = { 0 };
+    size_t deviceId;
     enum gnwDriverError error = devInstallPrepare(descriptorPtr,
                                                   KERNEL_PROC_ID,
-                                                  deviceIdPtr,
+                                                  &deviceId,
                                                   &driverDescPtr,
                                                   &dev);
     if (error != GDRE_NONE) {
@@ -235,9 +237,12 @@ enum gnwDriverError k_dev_install_async(const struct gnwDeviceDescriptor * const
         return GDRE_UNKNOWN;
     }
 
-    #warning TODO queue installation and wait for result
+    #warning TODO set correct dev status
+    #warning it will be nice to somehow return device identifier
 
-    return GDRE_UNKNOWN;
+    devices[devicesCount++] = dev;
+
+    return GDRE_NONE;
 }
 
 enum gnwDriverError k_dev_start(size_t id) {

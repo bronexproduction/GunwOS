@@ -8,7 +8,7 @@
 #ifndef _GUNWAPI_KERNEL
 
 #include "../include/gunwlog.h"
-#include "scl_user.h"
+#include "../_include/scl_user.h"
 #include <string.h>
 
 void log(const char * const msg) {
