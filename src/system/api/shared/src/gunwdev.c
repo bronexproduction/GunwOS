@@ -95,6 +95,7 @@ extern void log(const char * const msg);
 void devInstall(const char * const path,
                 enum gnwCtrlError * const ctrlError,
                 enum gnwDriverError * const installError) {
+
     CHECKPTR(path);
     CHECKPTR(ctrlError);
     CHECKPTR(installError);
@@ -109,29 +110,22 @@ void devInstall(const char * const path,
 
     { SYSCALL_USER_CALL(START, &desc, 0, 0); }
 
-    log("1");
     if (deviceOperatorProcId < 0) {
-        log("2");
         *(ctrlError) = (enum gnwCtrlError)deviceOperatorProcId;
         return;
     }
 
     /* Initialize device */
     
-        log("3");
     { SYSCALL_USER_CALL(DEV_INIT, deviceOperatorProcId, installError, 0); }
-        log("4");
 
-    if (installError != GDRE_NONE) {
-        log("5");
+    if (*(installError) != GDRE_NONE) {
         return;
     }
     
     /* Start device */
 
-        log("6");
     { SYSCALL_USER_CALL(DEV_START, deviceOperatorProcId, installError, 0); }
-        log("7");
 }
 
 void gnwDeviceEvent_decode(const ptr_t dataPtr, struct gnwDeviceEvent * const eventPtr) {
