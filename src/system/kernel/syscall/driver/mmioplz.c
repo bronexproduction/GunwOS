@@ -12,5 +12,5 @@ enum gnwDeviceError k_scr_drv_mmioPlz(const procId_t procId,
                                       const size_t sizeBytes,
                                       const addr_t physMemStart) {
     #warning todo
-    return GDE_UNKNOWN;
+    return GDE_NONE;
 }
