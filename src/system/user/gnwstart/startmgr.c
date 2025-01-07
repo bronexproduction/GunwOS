@@ -15,7 +15,7 @@
     err = start(PATH);                      \
 }
 
-#define INSTALL(PATH) if (installErr == GDRE_NONE && ctrlErr == GCE_NONE) {  \
+#define INSTALL(PATH) if (installErr == GDRE_NONE && ctrlErr == GCE_NONE) { \
     log(PATH);                                                              \
     devInstall(PATH, &ctrlErr, &installErr);                                \
 }

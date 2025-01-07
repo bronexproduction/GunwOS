@@ -17,9 +17,12 @@
 #include "proc/proc.h"
 #include <error/panic.h>
 #include "uha/uha.h"
+#include <hal/proc/proc.h>
+#include <dev/dev.h>
 
-static bool init() {
+size_t k_drv_fdc_deviceId;
 
+static void init() {
     for (int i = 0; i < FDC_FDD_SUPPORT_COUNT; ++i) {
         perf[i] = (struct fdc_fddPerf){ FDC_HUT_DEFAULT, FDC_SRT_DEFAULT, FDC_HLT_DEFAULT };
     }
@@ -34,7 +37,8 @@ static bool init() {
 
         present = false;
         driveCount = 0;
-        OOPS("82077AA Driver initialization failed: controller not ready", false);
+        OOPS("82077AA Driver initialization failed: controller not ready",);
+        k_dev_init_report(KERNEL_PROC_ID, k_drv_fdc_deviceId, false);
     }
 
     uint_8 version;
@@ -46,7 +50,8 @@ static bool init() {
 
         present = false;
         driveCount = 0;
-        OOPS("82077AA Driver initialization failed: controller version check error", false);
+        OOPS("82077AA Driver initialization failed: controller version check error",);
+        k_dev_init_report(KERNEL_PROC_ID, k_drv_fdc_deviceId, false);
     }
     if (version != FDC_VERSION_82077AA) {
     
@@ -54,18 +59,18 @@ static bool init() {
 
         present = false;
         driveCount = 0;
-        OOPS("82077AA Driver initialization failed: controller not supported", false);
+        OOPS("82077AA Driver initialization failed: controller not supported",);
+        k_dev_init_report(KERNEL_PROC_ID, k_drv_fdc_deviceId, false);
     }
 
     present = true;
-
-    return true;
+    k_dev_init_report(KERNEL_PROC_ID, k_drv_fdc_deviceId, true);
 }
 
-static bool start() {
-
+static void start() {
     if (!present) {
-        return false;
+        k_dev_start_report(KERNEL_PROC_ID, k_drv_fdc_deviceId, false);
+        return;
     }
 
     /* Restarting controller */
@@ -73,7 +78,8 @@ static bool start() {
     enum fdc_opStatus s = proc_reset(FDC_BUS_BASE);
     if (s != OPSTATUS_OK) {
         proc_error(FDC_BUS_BASE, s, "Controller reset failed");
-        return false;
+        k_dev_start_report(KERNEL_PROC_ID, k_drv_fdc_deviceId, false);
+        return;
     }
 
     /* Detecting drives */
@@ -84,13 +90,14 @@ static bool start() {
         enum fdc_opStatus s = proc_fdcDetect(FDC_BUS_BASE, i, &present);
         if (s != OPSTATUS_OK && s != OPSTATUS_INVDRIVE) {
             proc_error(FDC_BUS_BASE, s, "Unexpected controller status during drive detection");
-            return false;
+            k_dev_start_report(KERNEL_PROC_ID, k_drv_fdc_deviceId, false);
+            return;
         }
 
         driveCount += (present & 1) << i;
     }
 
-    return true;
+    k_dev_start_report(KERNEL_PROC_ID, k_drv_fdc_deviceId, true);
 }
 
 static void isr() {
@@ -102,7 +109,7 @@ static struct gnwDriverConfig desc() {
     const addr_t startAddr = (addr_t)start;
     const addr_t isrAddr = (addr_t)isr;
 
-    return (struct gnwDriverConfig){ (bool (*)())initAddr, (bool (*)())startAddr, (void (*)())isrAddr, 6 };
+    return (struct gnwDriverConfig){ (void (*)())initAddr, (void (*)())startAddr, (void (*)())isrAddr, 6 };
 }
 
 static struct gnwDeviceUHA uha() {

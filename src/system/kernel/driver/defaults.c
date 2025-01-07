@@ -25,17 +25,22 @@
 #define MSGS_FAIL(NAME) MSG_INSTALL_FAIL(NAME), MSG_START_FAIL(NAME)
 
 static void loadDevice(struct gnwDeviceDescriptor (*descProvider)(),
+                       size_t * const deviceIdPtr,
                        const char * const installFailureMsg,
                        const char * const startFailureMsg) {
+    if (!deviceIdPtr) {
+        OOPS("Device identifier pointer nullptr",);
+        return;
+    }
+
     enum gnwDriverError e;
-    size_t id;
     const struct gnwDeviceDescriptor desc = descProvider();
-    e = k_dev_install(&desc, &id);
+    e = k_dev_install(&desc, deviceIdPtr);
     if (e != GDRE_NONE) { 
         OOPS(installFailureMsg,); 
     }
 
-    e = k_dev_start(id);
+    e = k_dev_start(*(deviceIdPtr));
     if (e != GDRE_NONE) { 
         OOPS(startFailureMsg,);
     }
@@ -53,23 +58,27 @@ static void loadFileSystem(struct gnwFileSystemDescriptor (*descProvider)(),
 
 void k_drv_loadMinimal() {
     
+    size_t dummyDeviceId;
+
     /*
         PIT driver for 8253/8254 chip
     */
     extern struct gnwDeviceDescriptor k_drv_pit_descriptor();
-    loadDevice(k_drv_pit_descriptor, MSGS_FAIL(PIT));
+    extern size_t k_drv_pit_deviceId;
+    loadDevice(k_drv_pit_descriptor, &k_drv_pit_deviceId, MSGS_FAIL(PIT));
 
     /*
         Keyboard controller driver for 8042 PS/2 chip
     */
     extern struct gnwDeviceDescriptor k_drv_keyboard_descriptor();
-    loadDevice(k_drv_keyboard_descriptor, MSGS_FAIL(Keyboard));
+    loadDevice(k_drv_keyboard_descriptor, &dummyDeviceId, MSGS_FAIL(Keyboard));
 
     /*
         82077AA Floppy disk controller
     */
     extern struct gnwDeviceDescriptor k_drv_fdc_descriptor();
-    loadDevice(k_drv_fdc_descriptor, MSGS_FAIL(Floppy disk controller));
+    extern size_t k_drv_fdc_deviceId;
+    loadDevice(k_drv_fdc_descriptor, &k_drv_fdc_deviceId, MSGS_FAIL(Floppy disk controller));
 
     /*
         FAT12 file system

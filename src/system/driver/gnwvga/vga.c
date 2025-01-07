@@ -88,11 +88,11 @@ static void update(const ptr_t buffer, const range_addr_t inputBufferRange) {
     }
 }
 
-static bool init() {
+static void init() {
     DISPLAY_BUFFER_PTR_BASIC = mmioPlz(BYTES_PER_CHAR * 80 * 25, DISPLAY_BUFFER_ADDR_BASIC);
     DISPLAY_BUFFER_PTR_ENHANCED = mmioPlz(64, DISPLAY_BUFFER_ADDR_ENHANCED);
 
-    return true;
+    drvInitReport(true);
 }
 
 const struct gnwDeviceDescriptor _gnw_device_descriptor = {

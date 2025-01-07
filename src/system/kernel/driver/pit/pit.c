@@ -12,6 +12,8 @@
 
 #include <error/panic.h>
 #include <hal/io/bus.h>
+#include <dev/dev.h>
+#include <hal/proc/proc.h>
 
 #define PIT_BUS_DATA_CH0    0x40    // Channel 0 (read/write)
 #define PIT_BUS_DATA_CH1    0x41    // Channel 1 (read/write)
@@ -85,14 +87,16 @@ uint_16 k_pit_evFreq;
 */
 void (*k_pit_routine)();
 
+size_t k_drv_pit_deviceId;
+
 static uint_16 divider() {
     return k_pit_freq / k_pit_evFreq;
 }
 
-static uint_8 init() {
-
+static void init() {
     if (!k_pit_routine) {
-        OOPS("PIT routine unavailable", 0);
+        OOPS("PIT routine unavailable",);
+        k_dev_init_report(KERNEL_PROC_ID, k_drv_pit_deviceId, false);
     }
     
     uint_16 div = divider();
@@ -100,7 +104,7 @@ static uint_8 init() {
     k_bus_outb(PIT_BUS_DATA_CH0, div & 0xFF);
     k_bus_outb(PIT_BUS_DATA_CH0, div >> 8);
 
-    return 1;
+    k_dev_init_report(KERNEL_PROC_ID, k_drv_pit_deviceId, true);
 }
 
 static void isr() {
@@ -111,7 +115,7 @@ static struct gnwDriverConfig desc() {
     const addr_t initAddr = (addr_t)init;
     const addr_t isrAddr = (addr_t)isr;
 
-    return (struct gnwDriverConfig){ (bool (*)())initAddr, 0, (void (*)())isrAddr, 0 };
+    return (struct gnwDriverConfig){ (void (*)())initAddr, 0, (void (*)())isrAddr, 0 };
 }
 
 static struct gnwDeviceUHA uha() {

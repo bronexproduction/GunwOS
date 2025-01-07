@@ -29,18 +29,18 @@ struct gnwDriverConfig {
 
     Called when device is being registered
 
-    Returns 1 on success, 0 otherwise
+    Expected to call drvInitReport on finish
     
     NOTE: In this phase the interrupts are DISABLED */
-    bool (*init)();
+    void (*init)();
 
 /*
     Pointer to device start routine
 
-    Returns 1 on success, 0 otherwise
+    Expected to call drvStartReport on finish
 
     Called after device is being initialized */
-    bool (*start)();
+    void (*start)();
 
 /*  Pointer to device interrupt service routine
 
@@ -101,5 +101,15 @@ struct gnwDeviceDescriptor {
     */
     char *name;
 };
+
+/*
+    Report driver initialization status
+*/
+extern void drvInitReport(bool success);
+
+/*
+    Report driver startup status
+*/
+extern void drvStartReport(bool success);
 
 #endif // GUNWOS_GUNWDRV_H

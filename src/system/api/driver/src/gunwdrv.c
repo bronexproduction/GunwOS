@@ -5,7 +5,19 @@
 //  Created by Artur Danielewski on 12.04.2023.
 //
 
-#ifdef _GUNWAPI_KERNEL
+#ifndef _GUNWAPI_KERNEL
+
+#include <types.h>
+
+void drvInitReport(bool success) {
+    #warning TODO not implemented yet
+}
+
+void drvStartReport(bool success) {
+    #warning TODO not implemented yet
+}
+
+#else
 
 #include "../_include/_gunwdrv.h"
 
