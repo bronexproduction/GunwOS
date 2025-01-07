@@ -175,6 +175,8 @@ void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const procId_t currentP
     
     Return value: enum k_proc_error - PE_NONE on success
 */
+enum k_proc_error k_proc_callback_invoke_void(const procId_t procId,
+                                              void (* const funPtr)(void));
 enum k_proc_error k_proc_callback_invoke_ptr(const procId_t procId,
                                              void (* const funPtr)(ptr_t),
                                              const ptr_t p,

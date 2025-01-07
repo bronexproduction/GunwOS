@@ -21,7 +21,8 @@ enum gnwDriverError {
     GDRE_ISR_MISSING        = -6,
     GDRE_INVALID_DESCRIPTOR = -7,
     GDRE_INVALID_ARGUMENT   = -8,
-    GDRE_UNKNOWN            = -9
+    GDRE_IGNORED            = -9,
+    GDRE_UNKNOWN            = -10
 };
 
 #endif // GUNWOS_GUNWDRVTYPES_H

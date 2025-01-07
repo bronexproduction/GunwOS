@@ -19,11 +19,11 @@ enum gnwDriverError k_dev_install(const struct gnwDeviceDescriptor * const descr
 enum gnwDriverError k_dev_install_async(const struct gnwDeviceDescriptor * const descriptorPtr,
                                         const procId_t operatorProcId);
 
-enum gnwDriverError k_dev_init_async(const procId_t operatorProcId);
+enum gnwDriverError k_dev_init_async(const procId_t operatorProcId, const procId_t requesterProcId, enum gnwDriverError * const vErrPtr);
 void k_dev_init_report(const procId_t operatorProcId, const size_t deviceId, const bool success);
 
 enum gnwDriverError k_dev_start(const size_t id);
-enum gnwDriverError k_dev_start_async(const procId_t operatorProcId);
+enum gnwDriverError k_dev_start_async(const procId_t operatorProcId, const procId_t requesterProcId, enum gnwDriverError * const vErrPtr);
 void k_dev_start_report(const procId_t operatorProcId, const size_t deviceId, const bool success);
 
 enum gnwDeviceError k_dev_getById(const size_t id, struct gnwDeviceUHADesc * const desc);

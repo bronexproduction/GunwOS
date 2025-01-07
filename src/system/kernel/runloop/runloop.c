@@ -152,7 +152,9 @@ enum gnwRunLoopError k_runloop_dispatch(const procId_t procId,
     }
 
     queueItem->item = item;
-    dataEncoder(data, queueItem->data);
+    if (data) {
+        dataEncoder(data, queueItem->data);    
+    }
     
     return GRLE_NONE;
 }

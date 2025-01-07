@@ -17,4 +17,6 @@
 
 #define PATH_LENGTH_LIMIT 255
 
+#define OFFSETOF(TYPE, ELEMENT) ((size_t)&(((TYPE *)0)->ELEMENT))
+
 #endif // STDGUNW_DEFS_H
