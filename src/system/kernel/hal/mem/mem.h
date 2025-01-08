@@ -39,9 +39,9 @@ enum k_mem_error {
 ptr_t k_mem_physicalToLinear(const ptr_t physAddr);
 
 /*
-    Return true if memory address is in non-reserved UMA range
+    Return if buffer defined by physical address and size is in non-reserved UMA range
 */
-bool k_mem_isInUsableUmaRange(const addr_t address);
+bool k_mem_bufferIsInUsableUmaRange(const addr_t physAddress, const size_t size);
 
 /*
     Returns the amount of free (allocable) memory (aligned to pages)

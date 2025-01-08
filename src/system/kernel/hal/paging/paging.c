@@ -329,10 +329,6 @@ static void unsafe_initializePagingInfo(struct process_paging_info_t * const pag
     }
 }
 
-static bool isInUsableUmaRange(const size_t physTable, const size_t physPage) {
-    return k_mem_isInUsableUmaRange(((physTable * MEM_MAX_PAGE_ENTRY) + physPage) * MEM_PAGE_SIZE_BYTES);
-}
-
 size_t k_paging_getFreePages() {
     size_t freePages = 0;
     for (size_t page = 0; page < MEM_PHYSICAL_PAGE_COUNT; ++page) {
@@ -368,13 +364,6 @@ void k_paging_prepare() {
     for (size_t tableIndex = 0; tableIndex < MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT; ++tableIndex) {
         kernelPagingInfo.pageTableInfo[tableIndex].used = true;
         for (size_t pageIndex = 0; pageIndex < MEM_MAX_PAGE_ENTRY; ++pageIndex) {
-            if (isInUsableUmaRange(tableIndex, pageIndex)) {
-                /*
-                    Leave usable UMA area for drivers
-                */
-                continue;
-            }
-            
             unsafe_assignVirtualPage(&kernelPagingInfo.pageTables[tableIndex][pageIndex], (tableIndex << 10) | pageIndex, false);
         }
     }
