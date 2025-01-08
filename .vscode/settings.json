@@ -100,7 +100,9 @@
     "__functional_03": "c",
     "expected": "c",
     "shared_mutex": "c",
-    "format": "c"
+    "format": "c",
+    "source_location": "c",
+    "stacktrace": "c"
   },
   "cmake.configureOnOpen": false
 }

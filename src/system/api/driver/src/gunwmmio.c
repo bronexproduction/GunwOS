@@ -10,11 +10,18 @@
 #include "../include/gunwmmio.h"
 #include <defs.h>
 #include <gunwfug.h>
+#include <scl_driver.h>
 
-extern ptr_t mmioPlz(const size_t sizeBytes, const addr_t physMemStart) {
-    #warning TODO
-    fug(FUG_UNDEFINED);
-    return nullptr;
+ptr_t mmioPlz(const addr_t physMemStart, const size_t sizeBytes, enum gnwDeviceError * const errorPtr) {
+    CHECKPTR(errorPtr);
+    
+    #warning HOW THE MAPPED MEMORY AFFECTS DYNAMIC MEMORY ALLOCATION?
+    #warning possible overlap with current heap (see gunwmem.c)
+    #warning the heap should be moved or some restrictions to be applied
+
+    SYSCALL_DRIVER_CALL(MMIO_PLZ, physMemStart, sizeBytes, errorPtr);
+    
+    return (ptr_t)SYSCALL_RESULT;
 }
 
 #endif // _GUNWAPI_KERNEL

@@ -86,6 +86,7 @@ PRIVATE struct device {
 
         Used for asynchronous initialization and startup
     */
+   #warning TODO to be moved to kernel objects
     struct deviceRequestInfo pendingRequestInfo;
 } devices[MAX_DEVICES];
 
@@ -163,7 +164,7 @@ PRIVATE enum gnwDriverError devInstallPrepare(const struct gnwDeviceDescriptor *
         return GDRE_INVALID_DESCRIPTOR;
     }
 
-    #warning CHECK MEMORY-MAPPED DEVICES FOR OVERLAPS WITH CURRENTLY INSTALLED ONES
+    #warning TODO CHECK MEMORY-MAPPED DEVICES FOR OVERLAPS WITH CURRENTLY INSTALLED ONES AND VALIDATE THE ADDRESS RANGES
 
     *driverDescPtr = &(descriptorPtr->driver.descriptor);
 
@@ -238,6 +239,7 @@ enum gnwDriverError k_dev_install(const struct gnwDeviceDescriptor * const descr
 
     if (devicePtr->status != INITIALIZED) {
         LOG("Driver init failed");
+        devicePtr->status = FAILED;
         return GDRE_UNINITIALIZED;
     }
     
@@ -249,8 +251,11 @@ enum gnwDriverError k_dev_install(const struct gnwDeviceDescriptor * const descr
 
     if (e != GDRE_NONE) {
         LOG("Error: Driver installation failed");
+        devicePtr->status = FAILED;
         return e;
     }
+
+    #warning TODO cleanup failed devices
 
     return GDRE_NONE;
 }
@@ -375,6 +380,8 @@ static bool validateReporter(const procId_t operatorProcId, const size_t deviceI
         OOPS("Unexpected operator", false);
     }
 
+    #warning TODO handle errors and process identifiers
+
     return true;
 }
 
@@ -387,6 +394,8 @@ void k_dev_init_report(const procId_t operatorProcId, const size_t deviceId, con
         OOPS("Unexpected device status",);
         #warning TODO terminate operator process or crash if kernel
     }
+
+    #warning TODO handle errors and process identifiers
 
     devices[deviceId].status = INITIALIZED;
 }
@@ -444,6 +453,8 @@ void k_dev_start_report(const procId_t operatorProcId, const size_t deviceId, co
         OOPS("Unexpected device status",);
         #warning TODO terminate operator process or crash if kernel
     }
+
+    #warning TODO handle errors and process identifiers
 
     devices[deviceId].status = STARTED;
 }

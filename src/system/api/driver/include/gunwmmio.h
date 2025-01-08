@@ -8,17 +8,18 @@
 #ifndef GUNWOS_GUNWMMIO_H
 #define GUNWOS_GUNWMMIO_H
 
-#include <types.h>
+#include <gunwdevtypes.h>
 
 /*
     Returns new virtual memory pointer mapped to requested physical memory address
 
     Params:
-        * sizeBytes - size of the requested memory space
         * physMemStart - physical address of the begginning of the buffer
+        * sizeBytes - size of the requested memory space
+        * errorPtr - enum gnwDeviceError pointer
 
     Return: Pointer to the newly allocated memory or nullptr if anything went wrong
 */
-extern ptr_t mmioPlz(const size_t sizeBytes, const addr_t physMemStart);
+extern ptr_t mmioPlz(const addr_t physMemStart, const size_t sizeBytes, enum gnwDeviceError * const errorPtr);
 
 #endif // GUNWOS_GUNWMMIO_H

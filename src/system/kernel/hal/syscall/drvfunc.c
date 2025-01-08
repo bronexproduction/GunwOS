@@ -74,14 +74,20 @@ void k_scr_emit(const procId_t procId, const ptr_t refEsp) {
     Params (process stack offset):
         * PARAMETER_1_STACK_OFFSET - size of the requested buffer in bytes
         * PARAMETER_2_STACK_OFFSET - physical memory address to be mapped
+        * PARAMETER_3_STACK_OFFSET - error pointer relative to process memory
         
     Return (process stack offset):
-        * RESULT_STACK_OFFSET - error code if any, otherwise GDE_NONE (see enum gnwDeviceError)
+        * RESULT_STACK_OFFSET - linear memory address of the assigned mapping
+                                if nullptr - error pointer is to be set appropriately,
+                                otherwise GDE_NONE (see enum gnwDeviceError)
 */
 void k_scr_mmioPlz(const procId_t procId, const ptr_t refEsp) {
-    SAFE_STACK_VAL_PTR(const size_t, sizeBytes, PARAMETER_1_STACK_OFFSET);
-    SAFE_STACK_VAL_PTR(const addr_t, physMemStart, PARAMETER_2_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const addr_t, physMemStart, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const size_t, sizeBytes, PARAMETER_2_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(enum gnwDeviceError * const, vErrPtr, PARAMETER_3_STACK_OFFSET);
 
-    extern enum gnwDeviceError k_scr_drv_mmioPlz(const procId_t, const size_t, const addr_t);
-    SAFE_STACK_RESULT_ARCH_VAL = k_scr_drv_mmioPlz(procId, *sizeBytes, *physMemStart);
+    #warning TODO gnwMemoryError instead?
+
+    extern ptr_t k_scr_drv_mmioPlz(const procId_t, const addr_t, const size_t, enum gnwDeviceError * const);
+    SAFE_STACK_RESULT_ARCH_VAL = (addr_t)k_scr_drv_mmioPlz(procId, *physMemStart, *sizeBytes, *vErrPtr);
 }
