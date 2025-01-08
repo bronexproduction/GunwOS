@@ -21,6 +21,10 @@ ptr_t k_mem_physicalToLinear(const ptr_t physAddr) {
     return (ptr_t)(MEM_CONV_PTL(physAddr));
 }
 
+bool k_mem_isInUsableUmaRange(const addr_t address) {
+    return false;
+}
+
 size_t k_mem_getFreeBytes() {
     return k_paging_getFreePages() * MEM_PAGE_SIZE_BYTES;
 }

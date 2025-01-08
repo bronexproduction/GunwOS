@@ -315,7 +315,7 @@ static void initializePhysicalMemoryMap(const struct k_krn_memMapEntry *memMap) 
 
 static void unsafe_initializePagingInfo(struct process_paging_info_t * const pagingInfo) {
     /*
-        Clear kernel paging info
+        Clear paging info
     */
     memzero(pagingInfo, sizeof(struct process_paging_info_t));
 
@@ -327,6 +327,10 @@ static void unsafe_initializePagingInfo(struct process_paging_info_t * const pag
     for (size_t entryIndex = 0; entryIndex < MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT; ++entryIndex) {
         assignDirEntry(&dir[entryIndex], &kernelPagingInfo.pageTables[entryIndex], nullptr, false);
     }
+}
+
+static bool isInUsableUmaRange(const size_t physTable, const size_t physPage) {
+    return k_mem_isInUsableUmaRange(((physTable * MEM_MAX_PAGE_ENTRY) + physPage) * MEM_PAGE_SIZE_BYTES);
 }
 
 size_t k_paging_getFreePages() {
@@ -353,24 +357,24 @@ void k_paging_prepare() {
     for (size_t procId = 0; procId < MAX_PROC; ++procId) {
         unsafe_initializePagingInfo(&processPageTables[procId]);
     }
-
-    /*
-        Mark all kernel pages as kernel only
-    */
-    for (size_t table = 0; table < MEM_VIRTUAL_USER_PAGE_TABLE_COUNT; ++table) {
-        for (size_t page = 0; page < MEM_MAX_PAGE_ENTRY; ++page) {
-            kernelPagingInfo.pageTables[table][page].user = false;
-        }
-    }
     
     /*
         Initialize kernel page tables to map the lower physical memory
+
+        Note: Omits lower HMA area
 
         TODO: Initialize as many pages as needed after startup (definetely less than 4MiB)
     */
     for (size_t tableIndex = 0; tableIndex < MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT; ++tableIndex) {
         kernelPagingInfo.pageTableInfo[tableIndex].used = true;
         for (size_t pageIndex = 0; pageIndex < MEM_MAX_PAGE_ENTRY; ++pageIndex) {
+            if (isInUsableUmaRange(tableIndex, pageIndex)) {
+                /*
+                    Leave usable UMA area for drivers
+                */
+                continue;
+            }
+            
             unsafe_assignVirtualPage(&kernelPagingInfo.pageTables[tableIndex][pageIndex], (tableIndex << 10) | pageIndex, false);
         }
     }

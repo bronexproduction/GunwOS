@@ -17,6 +17,8 @@
 #define MEM_CONV_PTL(REL)                               (((addr_t)REL) - MEM_VIRTUAL_RESERVED_KERNEL_MEM)
 #define MEM_CONV_LTP(REL)                               (((addr_t)REL) + MEM_VIRTUAL_RESERVED_KERNEL_MEM)
 
+#define MEM_UMA_START                                   KiB(640)
+#define MEM_UMA_RESERVED_START                          KiB(896)
 #define MEM_XMS_START                                   MiB(1)
 
 enum k_mem_error {
@@ -35,6 +37,11 @@ enum k_mem_error {
     of the physical pointer (kernel only)
 */
 ptr_t k_mem_physicalToLinear(const ptr_t physAddr);
+
+/*
+    Return true if memory address is in non-reserved UMA range
+*/
+bool k_mem_isInUsableUmaRange(const addr_t address);
 
 /*
     Returns the amount of free (allocable) memory (aligned to pages)
