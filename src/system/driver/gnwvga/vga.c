@@ -93,10 +93,12 @@ static void init() {
     DISPLAY_BUFFER_PTR_BASIC = mmioPlz(DISPLAY_BUFFER_ADDR_BASIC, BYTES_PER_CHAR * 80 * 25, &error);
     if (!DISPLAY_BUFFER_PTR_BASIC || error != GDE_NONE) {
         drvInitReport(false);
+        return;
     }
     DISPLAY_BUFFER_PTR_ENHANCED = mmioPlz(DISPLAY_BUFFER_ADDR_ENHANCED, 64 /* to be determined */, &error);
     if (!DISPLAY_BUFFER_PTR_ENHANCED || error != GDE_NONE) {
         drvInitReport(false);
+        return;
     }
 
     drvInitReport(true);
@@ -116,7 +118,7 @@ const struct gnwDeviceDescriptor _gnw_device_descriptor = {
             /* desc */ {
                 /* bytesRange */ {
                     /* offset */ (addr_t)DISPLAY_BUFFER_ADDR_ENHANCED,
-                    /* sizeBytes */ KiB(64 + 32 + 16)
+                    /* sizeBytes */ KiB(96) /* memory between DISPLAY_BUFFER_ADDR_ENHANCED and DISPLAY_BUFFER_ADDR_BASIC */ + KiB(4) /* text mode buffer */
                 },
                 /* maxInputSizeBytes */ 320 * 200 * sizeof(struct gnwDeviceUHA_display_pixel)
                 },

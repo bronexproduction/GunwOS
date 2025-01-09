@@ -11,7 +11,7 @@
 #define NULL 0
 #define nullptr 0
 
-#define KiB(C) (C * 1024)
+#define KiB(C) ((C) * 1024)
 #define MiB(C) (KiB(C) * 1024)
 #define GiB(C) (MiB(C) * 1024)
 

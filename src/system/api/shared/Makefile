@@ -16,7 +16,7 @@ TARGET_O=gunwapi
 
 .PHONY: all shared kernel
 
-all: shared kernel clean_o
+all: shared kernel
 
 shared: $(TARGET_O)_shared
 kernel: $(TARGET_O)_shared_kernel
@@ -35,7 +35,3 @@ build_shared_o:
 build_kernel_o:
 	$(C_DIR_LISTING) -print0 | xargs -0I{} $(C) $(CFLAGS_KERNEL) -o {}_shared_kernel.o {}
 	$(CXX_DIR_LISTING) -print0 | xargs -0I{} $(CXX) $(CXXFLAGS_KERNEL) -o {}_shared_kernel.o {}
-
-clean_o:
-	find . -type f -name '*.o' ! -name '$(TARGET_O)_shared.o' -delete ! -name '$(TARGET_O)_shared_kernel.o' -delete
-	find . -type f -name '*.a' -delete

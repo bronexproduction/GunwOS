@@ -5,7 +5,8 @@ all: gunwapi_shared \
 	 gunwapi_driver \
 	 gunwapi_driver_kernel \
 	 gunwapi_app \
-	 gunwapi_app_kernel
+	 gunwapi_app_kernel \
+	 clean
 
 gunwapi_shared:
 ifeq ("$(wildcard $(LIB_BUILD_DIR)/lib$@.a)","")
@@ -38,4 +39,4 @@ gunwapi_app_kernel:
 	mv $(APP_API_SRC_DIR)/$@.o $(LIB_BUILD_DIR)/
 
 clean:
-	find $(SRC_DIR)/ -type f -name '*.o' -delete
+	find $(API_DIR) -type f -name '*.o' -delete

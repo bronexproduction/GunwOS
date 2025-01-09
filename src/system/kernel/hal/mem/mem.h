@@ -18,7 +18,8 @@
 #define MEM_CONV_LTP(REL)                               (((addr_t)REL) + MEM_VIRTUAL_RESERVED_KERNEL_MEM)
 
 #define MEM_UMA_START                                   KiB(640)
-#define MEM_UMA_RESERVED_START                          KiB(896)
+#define MEM_UMA_RESERVED_START                          KiB(768)
+#define MEM_UMA_USABLE_SIZE                             (MEM_UMA_RESERVED_START - MEM_UMA_START)
 #define MEM_XMS_START                                   MiB(1)
 
 enum k_mem_error {
