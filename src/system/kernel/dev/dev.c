@@ -499,6 +499,27 @@ enum gnwDeviceError k_dev_getUHAForId(const size_t id, struct gnwDeviceUHA * con
     return GDE_NONE;
 }
 
+bool k_dev_mmioRangeAllowed(const procId_t procId, const addr_t physMemStart, const size_t sizeBytes) {
+    const struct device * const devPtr = deviceForOperator(procId);
+    if (!devPtr) {
+        return false;
+    }
+    if (physMemStart < devPtr->desc.api.mem.desc.bytesRange.offset) {
+        return false;
+    }
+    const size_t physMemEnd = physMemStart + sizeBytes;
+    const size_t devMemEnd = devPtr->desc.api.mem.desc.bytesRange.offset + devPtr->desc.api.mem.desc.bytesRange.sizeBytes;
+    if (physMemEnd <= physMemStart) {
+        /* overlap or 0 size */
+        return false;
+    }
+    if (physMemEnd > devMemEnd) {
+        return false;
+    }
+
+    return true;
+}
+
 enum gnwDeviceError k_dev_acquireHold(const procId_t processId, const size_t deviceId) {
     if (!validateInstalledId(deviceId)) {
         OOPS("Device identifier invalid", GDE_UNKNOWN);

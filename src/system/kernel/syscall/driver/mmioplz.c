@@ -5,16 +5,65 @@
 //  Created by Artur Danielewski on 17.04.2023.
 //
 
-#warning to be removed
+#include <defs.h>
 #include <gunwdevtypes.h>
+#include <error/panic.h>
+#include <hal/paging/paging.h>
+#include <hal/mem/mem.h>
+#include <dev/dev.h>
 
 ptr_t k_scr_drv_mmioPlz(const procId_t procId,
                         const addr_t physMemStart,
                         const size_t sizeBytes,
                         enum gnwDeviceError * const vErrPtr) {
+    
+    if (!vErrPtr) {
+        OOPS("Unexpected null pointer", nullptr);
+    }
+    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)vErrPtr, sizeof(enum gnwDeviceError))) {
+        OOPS("Reserved zone access violation", nullptr);
+    }
+    if (!sizeBytes) {   
+        MEM_ONTABLE(procId, 
+            *(vErrPtr) = GDE_INVALID_PARAMETER;
+        )
+    }
+    
+    const size_t pageAlignedPhysMemStart = alignedr(physMemStart, MEM_PAGE_SIZE_BYTES, false);
+    const size_t pageAlignmentStartDiff = physMemStart - pageAlignedPhysMemStart;
+    const size_t pageAlignedSizeBytes = alignedr(sizeBytes + pageAlignmentStartDiff, MEM_PAGE_SIZE_BYTES, true);
+    if (pageAlignedSizeBytes < sizeBytes) {
+        MEM_ONTABLE(procId, 
+            *(vErrPtr) = GDE_INVALID_PARAMETER;
+        )
+        return nullptr;
+    }
 
-    #warning todo
-    return GDE_NONE;
+    MEM_ONTABLE(procId, 
+        *(vErrPtr) = GDE_NONE;
+    )
+
+    if (!k_dev_mmioRangeAllowed(procId, pageAlignedPhysMemStart, pageAlignedSizeBytes)) {
+        MEM_ONTABLE(procId, 
+            *(vErrPtr) = GDE_INVALID_PARAMETER;
+        )
+        return nullptr;   
+    }
+    if (!k_mem_bufferIsInUsableUmaRange(pageAlignedPhysMemStart, pageAlignedSizeBytes)) {
+        MEM_ONTABLE(procId, 
+            *(vErrPtr) = GDE_INVALID_PARAMETER;
+        )
+        return nullptr;   
+    }
+
+    #warning TODO try to map desired memory region
+
+    if (true /* failure */) {
+        MEM_ONTABLE(procId, 
+            *(vErrPtr) = GDE_UNKNOWN;
+        )
+        return nullptr;
+    }
 }
 
 /*

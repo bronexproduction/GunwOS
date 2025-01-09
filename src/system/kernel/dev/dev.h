@@ -31,6 +31,8 @@ enum gnwDeviceError k_dev_getByType(const enum gnwDeviceType type, struct gnwDev
 
 enum gnwDeviceError k_dev_getUHAForId(const size_t id, struct gnwDeviceUHA * const uha);
 
+bool k_dev_mmioRangeAllowed(const procId_t procId, const addr_t physMemStart, const size_t sizeBytes);
+
 enum gnwDeviceError k_dev_acquireHold(const procId_t processId, const size_t deviceId);
 void k_dev_releaseHold(const procId_t processId, const size_t deviceId);
 

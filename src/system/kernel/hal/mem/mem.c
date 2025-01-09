@@ -22,8 +22,20 @@ ptr_t k_mem_physicalToLinear(const ptr_t physAddr) {
 }
 
 bool k_mem_bufferIsInUsableUmaRange(const addr_t address, const size_t size) {
-    #warning TODO
-    return false;
+    if (!size) {
+        return false;   
+    }
+    if (size > MEM_UMA_USABLE_SIZE) {
+        return false;
+    }
+    if (address < MEM_UMA_START || address >= MEM_UMA_RESERVED_START) {
+        return false;
+    }
+    if ((address + size) > MEM_UMA_RESERVED_START) {
+        return false;
+    }
+
+    return true;
 }
 
 size_t k_mem_getFreeBytes() {
