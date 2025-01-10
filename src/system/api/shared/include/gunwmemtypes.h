@@ -15,6 +15,7 @@ enum gnwMemoryError {
     GME_NONE = 0,
     GME_OUT_OF_MEMORY,
     GME_ADDRESS_ALIGNMENT,
+    GME_HEAP_ALREADY_USED,
     GME_UNKNOWN = -1
 };
 

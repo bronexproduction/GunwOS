@@ -69,7 +69,7 @@ enum k_mem_error k_mem_gimme(const procId_t procId,
 */
 enum k_mem_error k_mem_mapme(const procId_t procId,
                              const ptr_t vPtr,
-                             const addr_t physPtr,
+                             const ptr_t pPtr,
                              const size_t sizeBytes);
 
 /*

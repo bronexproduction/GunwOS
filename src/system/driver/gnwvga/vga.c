@@ -89,14 +89,14 @@ static void update(const ptr_t buffer, const range_addr_t inputBufferRange) {
 }
 
 static void init() {
-    enum gnwDeviceError error;
+    enum gnwMemoryError error;
     DISPLAY_BUFFER_PTR_BASIC = mmioPlz(DISPLAY_BUFFER_ADDR_BASIC, BYTES_PER_CHAR * 80 * 25, &error);
-    if (!DISPLAY_BUFFER_PTR_BASIC || error != GDE_NONE) {
+    if (!DISPLAY_BUFFER_PTR_BASIC || error != GME_NONE) {
         drvInitReport(false);
         return;
     }
     DISPLAY_BUFFER_PTR_ENHANCED = mmioPlz(DISPLAY_BUFFER_ADDR_ENHANCED, 64 /* to be determined */, &error);
-    if (!DISPLAY_BUFFER_PTR_ENHANCED || error != GDE_NONE) {
+    if (!DISPLAY_BUFFER_PTR_ENHANCED || error != GME_NONE) {
         drvInitReport(false);
         return;
     }

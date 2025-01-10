@@ -92,9 +92,58 @@ enum k_mem_error k_mem_gimme(const procId_t procId,
 
 enum k_mem_error k_mem_mapme(const procId_t procId,
                              const ptr_t vPtr,
-                             const addr_t physPtr,
+                             const ptr_t pPtr,
                              const size_t sizeBytes) {
+    
+    #warning TODO check if device mapping
+
+/*
+    if (!sizeBytes) {   
+        MEM_ONTABLE(procId, 
+            *(vErrPtr) = GDE_INVALID_PARAMETER;
+        )
+    }
+    
+    const size_t pageAlignedPhysMemStart = alignedr(physMemStart, MEM_PAGE_SIZE_BYTES, false);
+    const size_t pageAlignmentStartDiff = physMemStart - pageAlignedPhysMemStart;
+    const size_t pageAlignedSizeBytes = alignedr(sizeBytes + pageAlignmentStartDiff, MEM_PAGE_SIZE_BYTES, true);
+    if (pageAlignedSizeBytes < sizeBytes) {
+        MEM_ONTABLE(procId, 
+            *(vErrPtr) = GDE_INVALID_PARAMETER;
+        )
+        return nullptr;
+    }
+
+    MEM_ONTABLE(procId, 
+        *(vErrPtr) = GDE_NONE;
+    )
+
+    if (!k_dev_mmioRangeAllowed(procId, pageAlignedPhysMemStart, pageAlignedSizeBytes)) {
+        MEM_ONTABLE(procId, 
+            *(vErrPtr) = GDE_INVALID_PARAMETER;
+        )
+        return nullptr;   
+    }
+    if (!k_mem_bufferIsInUsableUmaRange(pageAlignedPhysMemStart, pageAlignedSizeBytes)) {
+        MEM_ONTABLE(procId, 
+            *(vErrPtr) = GDE_INVALID_PARAMETER;
+        )
+        return nullptr;   
+    }
+
+    #warning TODO try to map desired memory region
+
+    if (failure) {
+        MEM_ONTABLE(procId, 
+            *(vErrPtr) = GDE_UNKNOWN;
+        )
+        return nullptr;
+    }
+    
     #warning TODO
+    return ME_UNKNOWN;
+*/
+
     return ME_UNKNOWN;
 }
 

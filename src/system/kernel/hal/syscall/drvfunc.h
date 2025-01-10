@@ -37,6 +37,6 @@ enum gnwDeviceError k_scr_emit(const struct gnwDeviceEvent * const event);
     Code - 0x03
     Function - MMIO_PLZ
 */
-ptr_t k_scr_mmioPlz(const size_t sizeBytes, const addr_t physMemStart, enum gnwDeviceError * const vErrPtr);
+enum gnwMemoryError k_scr_mmioPlz(const size_t pageCount, const addr_t vAddr, const addr_t pAddr);
 
 #endif // DRVFUNC_H

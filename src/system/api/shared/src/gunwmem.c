@@ -6,13 +6,13 @@
 //
 
 #include "../include/gunwmem.h"
+#include "../_include/_gunwmem.h"
 #include <defs.h>
 #include "../include/gunwfug.h"
 #include "../_include/scl_user.h"
 
 #ifndef _GUNWAPI_KERNEL
 
-#define PAGE_SIZE KiB(4)
 #define PAGE_OF_ADDR(ADDR)      ((ADDR) / (PAGE_SIZE))
 #define ADDR_OF_PAGE(PAGE)      ((PAGE) * (PAGE_SIZE))
 #define LAST_BYTE_ADDR(ENTRY)   (ENTRY + sizeof(struct heapMetadataEntry) + ENTRY->dataSizeBytes - 1)
@@ -21,6 +21,10 @@ static struct heapMetadataEntry {
     size_t dataSizeBytes;
     struct heapMetadataEntry * next;
 } *heapMetadataStartEntry;
+
+bool isHeapUsed() {
+    return heapMetadataStartEntry != nullptr;
+}
 
 addr_t _heapStart;
 
