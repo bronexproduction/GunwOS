@@ -65,6 +65,14 @@ enum k_mem_error k_mem_gimme(const procId_t procId,
                              const size_t sizeBytes);
 
 /*
+    Maps exact physical memory range for given process pointed at by vPtr
+*/
+enum k_mem_error k_mem_mapme(const procId_t procId,
+                             const ptr_t vPtr,
+                             const addr_t physPtr,
+                             const size_t sizeBytes);
+
+/*
     Releases memory page from given process
 */
 enum k_mem_error k_mem_thanksPage(const procId_t procId,
