@@ -410,7 +410,8 @@ void k_paging_init(const struct k_krn_memMapEntry *memMap) {
 }
 
 enum k_mem_error k_paging_assign(const procId_t procId,
-                                 const size_t startPage,
+                                 const size_t startVPage,
+                                 const size_t startPPage,
                                  const size_t pageCount) {
     if (!k_proc_idIsUser(procId)) {
         return ME_INVALID_ARGUMENT;
@@ -418,15 +419,16 @@ enum k_mem_error k_paging_assign(const procId_t procId,
     if (!pageCount) {
         return ME_INVALID_ARGUMENT;
     }
-    if (startPage >= MEM_MAX_VIRTUAL_PAGE_COUNT ||
+    if (startVPage >= MEM_MAX_VIRTUAL_PAGE_COUNT ||
         pageCount >= MEM_MAX_VIRTUAL_PAGE_COUNT ||
-        (startPage + pageCount) >= MEM_MAX_VIRTUAL_PAGE_COUNT) {
+        (startVPage + pageCount) >= MEM_MAX_VIRTUAL_PAGE_COUNT) {
         return ME_INVALID_ARGUMENT;
     }
 
     bool newPages = false;
     bool overlap = false;
-    for (size_t page = startPage; page < startPage + pageCount; ++page) {
+    size_t physicalPage = startPPage;
+    for (size_t page = startVPage; page < startVPage + pageCount; ++page) {
         size_t dirIndex = MEM_DIR_INDEX_OF_PAGE(page);
         if (dirIndex >= MEM_VIRTUAL_USER_MAX_PAGE_TABLE_COUNT) {
             return ME_UNAVAILABLE;
@@ -469,13 +471,17 @@ enum k_mem_error k_paging_assign(const procId_t procId,
         }
 
         size_t physicalPageIndex;
-        const enum k_mem_error err = getFreePhysicalPageIndex(&physicalPageIndex);
-        if (err != ME_NONE) {
-            if (err == ME_OUT_OF_MEMORY) {
-                return ME_OUT_OF_MEMORY;
-            }
+        if (physicalPage) {
+            physicalPageIndex = physicalPage++;    
+        } else {
+            const enum k_mem_error err = getFreePhysicalPageIndex(&physicalPageIndex);
+            if (err != ME_NONE) {
+                if (err == ME_OUT_OF_MEMORY) {
+                    return ME_OUT_OF_MEMORY;
+                }
 
-            return ME_UNKNOWN;
+                return ME_UNKNOWN;
+            }
         }
 
         assignVirtualPage(pageEntry, physicalPageIndex, true);

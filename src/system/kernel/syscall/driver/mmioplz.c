@@ -13,17 +13,9 @@ enum gnwMemoryError k_scr_drv_mmioPlz(const procId_t procId,
                                       const size_t pageCount,
                                       const addr_t vAddr,
                                       const addr_t pAddr) {
-    
-    if (vAddr % MEM_PAGE_SIZE_BYTES) {
-        return GME_ADDRESS_ALIGNMENT;
-    }
-    if (pAddr % MEM_PAGE_SIZE_BYTES) {
-        return GME_ADDRESS_ALIGNMENT;
-    }
-
     #warning TODO verify error codes
 
-    const enum k_mem_error error = k_mem_mapme(procId, (ptr_t)vAddr, (ptr_t)pAddr, pageCount * MEM_PAGE_SIZE_BYTES);
+    const enum k_mem_error error = k_mem_gimme(procId, (ptr_t)vAddr, (ptr_t)pAddr, pageCount * MEM_PAGE_SIZE_BYTES);
     if (error == ME_ALREADY_ASSIGNED ||
         error == ME_PART_ALREADY_ASSIGNED ||
         error == ME_NONE) {

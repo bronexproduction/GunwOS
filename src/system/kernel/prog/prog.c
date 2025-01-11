@@ -166,6 +166,7 @@ static enum gnwCtrlError loadElf(const data_t fileData,
 
         enum k_mem_error err = k_mem_gimme(procId,
                                            (ptr_t)sectionHeaderEntry->virtualAddr,
+                                           nullptr,
                                            sectionHeaderEntry->fileSizeBytes);
         if (err != ME_NONE &&
             err != ME_ALREADY_ASSIGNED &&
@@ -247,6 +248,7 @@ static enum gnwCtrlError spawn(const data_t fileData,
     const size_t stackSize = KiB(256);
     enum k_mem_error error = k_mem_gimme(*spawnedProcId,
                                          (ptr_t)(0 - MEM_VIRTUAL_RESERVED_KERNEL_MEM - stackSize),
+                                         nullptr,
                                          stackSize);
     if (error != ME_NONE) {
         k_proc_cleanup(*spawnedProcId);

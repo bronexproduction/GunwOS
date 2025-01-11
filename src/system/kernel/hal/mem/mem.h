@@ -62,13 +62,6 @@ bool k_mem_bufferZoneValidForProc(const procId_t procId,
 */
 enum k_mem_error k_mem_gimme(const procId_t procId,
                              const ptr_t vPtr,
-                             const size_t sizeBytes);
-
-/*
-    Maps exact physical memory range for given process pointed at by vPtr
-*/
-enum k_mem_error k_mem_mapme(const procId_t procId,
-                             const ptr_t vPtr,
                              const ptr_t pPtr,
                              const size_t sizeBytes);
 

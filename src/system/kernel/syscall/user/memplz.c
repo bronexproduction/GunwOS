@@ -16,7 +16,7 @@ enum gnwMemoryError k_scr_usr_memPlz(const procId_t procId,
         return GME_ADDRESS_ALIGNMENT;
     }
 
-    const enum k_mem_error error = k_mem_gimme(procId, (ptr_t)vAddr, pageCount * MEM_PAGE_SIZE_BYTES);
+    const enum k_mem_error error = k_mem_gimme(procId, (ptr_t)vAddr, nullptr, pageCount * MEM_PAGE_SIZE_BYTES);
     if (error == ME_ALREADY_ASSIGNED ||
         error == ME_PART_ALREADY_ASSIGNED ||
         error == ME_NONE) {
