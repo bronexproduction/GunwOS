@@ -24,7 +24,7 @@ ptr_t mmioPlz(const addr_t physMemStart, const size_t sizeBytes, enum gnwMemoryE
     }
 
     const addr_t vAddr = aligned(_heapStart, PAGE_SIZE);
-    const addr_t pAddr = physMemStart / PAGE_SIZE;
+    const addr_t pAddr = alignedr(physMemStart, PAGE_SIZE, false);
     const size_t pageCount = aligned(physMemStart + sizeBytes - pAddr, PAGE_SIZE) / PAGE_SIZE;
 
     SYSCALL_DRIVER_CALL(MMIO_PLZ, pageCount, vAddr, pAddr);
