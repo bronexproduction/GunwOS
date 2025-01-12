@@ -100,7 +100,8 @@ static void unsafe_assignVirtualPage(struct virtual_page_specifier_t * const pag
 
 static void assignVirtualPage(struct virtual_page_specifier_t * const pageEntryPtr,
                               const size_t physicalPageIndex,
-                              const bool user) {
+                              const bool user,
+                              const bool mmio) {
     if (!pageEntryPtr) {
         OOPS("Nullptr",);
     }
@@ -119,7 +120,7 @@ static void assignVirtualPage(struct virtual_page_specifier_t * const pageEntryP
     if (!physicalPageSpecifier->available) {
         OOPS("Physical page unavailable",);
     }
-    if (physicalPageSpecifier->reserved) {
+    if (physicalPageSpecifier->reserved && user && !mmio) {
         OOPS("Physical page reserved",);
     }
     if (physicalPageSpecifier->assignCount) {
@@ -502,7 +503,7 @@ enum k_mem_error k_paging_assign(const procId_t procId,
             }
         }
 
-        assignVirtualPage(pageEntry, physicalPageIndex, true);
+        assignVirtualPage(pageEntry, physicalPageIndex, true, startPPage);
         newPages = true;
     }
 
