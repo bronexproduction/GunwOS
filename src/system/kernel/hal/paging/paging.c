@@ -221,7 +221,7 @@ static void assignDirEntry(struct virtual_page_specifier_t * const dirEntryPtr,
 }
 
 static void initializePhysicalMemoryMap(const struct k_krn_memMapEntry *memMap) {
-    
+
     /*
         Prepare usable memory map
     */
@@ -283,6 +283,24 @@ static void initializePhysicalMemoryMap(const struct k_krn_memMapEntry *memMap) 
             entry->available = usable;
             entry->reserved = reserved;
             entry->assignCount = reserved;
+            entry->mmio = false;
+        }
+    }
+
+    /*
+        Initialize usable UMA range (only non-present pages)
+    */
+    
+    const size_t umaStartPage = MEM_PAGE_OF_ADDR(MEM_UMA_START);
+    const size_t umaEndPage = MEM_PAGE_OF_ADDR(MEM_UMA_RESERVED_START);
+    for (size_t page = umaStartPage; page < umaEndPage && page < MEM_PHYSICAL_PAGE_COUNT; ++page) {
+        struct physical_page_specifier_t * entry = &physicalPages[page];
+        if (!entry->present) {
+            entry->present = true;
+            entry->available = true;
+            entry->reserved = true;
+            entry->assignCount = 0;
+            entry->mmio = true;
         }
     }
 

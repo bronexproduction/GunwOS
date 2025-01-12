@@ -73,6 +73,7 @@ typedef struct __attribute__((packed)) physical_page_specifier_t {
     bool present    :1; // Installed physical RAM
     bool available  :1; // Available (non-reserved) physical RAM
     bool reserved   :1; // Reserved for kernel-use only
+    bool mmio       :1; // Available for memory-mapped devices
     size_t assignCount; // Number of processes already having the page assigned
 } physical_page_table_t[MEM_PHYSICAL_PAGE_COUNT];
 
