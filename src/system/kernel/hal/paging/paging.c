@@ -120,7 +120,7 @@ static void assignVirtualPage(struct virtual_page_specifier_t * const pageEntryP
     if (!physicalPageSpecifier->available) {
         OOPS("Physical page unavailable",);
     }
-    if (physicalPageSpecifier->reserved && user && !mmio) {
+    if (physicalPageSpecifier->reserved && !mmio) {
         OOPS("Physical page reserved",);
     }
     if (physicalPageSpecifier->assignCount) {
