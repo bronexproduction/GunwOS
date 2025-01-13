@@ -88,3 +88,31 @@ void k_scr_mmioPlz(const procId_t procId, const ptr_t refEsp) {
     extern enum gnwMemoryError k_scr_drv_mmioPlz(const procId_t, const size_t, const addr_t, const addr_t);
     SAFE_STACK_RESULT_ARCH_VAL = k_scr_drv_mmioPlz(procId, *pageCount, *vAddr, *pAddr);
 }
+
+/*
+    Code - 0x04
+    Function - REPORT_INIT
+
+    Params (process stack offset):
+        * PARAMETER_1_STACK_OFFSET - driver initialization report status
+*/
+void k_scr_reportInit(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(const bool, success, PARAMETER_1_STACK_OFFSET);
+
+    extern void k_scr_drv_reportInit(const procId_t, const bool);
+    k_scr_drv_reportInit(procId, *success);
+}
+
+/*
+    Code - 0x05
+    Function - REPORT_START
+
+    Params (process stack offset):
+        * PARAMETER_1_STACK_OFFSET - driver startup report status
+*/
+void k_scr_reportStart(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(const bool, success, PARAMETER_1_STACK_OFFSET);
+
+    extern void k_scr_drv_reportStart(const procId_t, const bool);
+    k_scr_drv_reportStart(procId, *success);
+}

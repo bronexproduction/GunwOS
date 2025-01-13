@@ -25,7 +25,7 @@ void k_scr_usr_devStart(const procId_t procId,
 
     enum gnwDriverError error = k_dev_start_async(operatorProcId, procId, vErrorPtr);
 
-    if (error == GDRE_IGNORED) {
+    if (error == GDRE_NOT_FOUND) {
         MEM_ONTABLE(procId, 
             *(vErrorPtr) = GDRE_NONE;
         )

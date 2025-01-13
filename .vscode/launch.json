@@ -24,6 +24,8 @@
             "cwd": "${workspaceRoot}",
             "debugger_args": ["--init-eval-command", "add-symbol-file build/kernel/kernel_paged.elf",
                               "--init-eval-command", "add-symbol-file build/kernel/kernel.elf",
+                              "--init-eval-command", "add-symbol-file build/driver/gnwvga.gdv",
+                              "--init-eval-command", "add-symbol-file build/app/gnwstart.elf",
                               "--init-eval-command", "add-symbol-file build/app/gnwdispm.elf",
                               "--init-eval-command", "add-symbol-file build/app/gnwkbdm.elf",
                               "--init-eval-command", "add-symbol-file build/app/gnwterm.elf",

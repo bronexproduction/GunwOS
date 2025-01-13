@@ -11,16 +11,21 @@
 #include "../_include/scl_user.h"
 #include "../include/gunwfug.h"
 #include <string.h>
+#include <proc.h>
 
-procId_t start(const char * const path) {
+enum gnwCtrlError start(const char * const path, procId_t * const procIdResultPtr) {
     CHECKPTR(path);
 
     procId_t procId;
-    struct gnwCtrlStartDescriptor desc = { { (byte_t *)path, strlen(path) }, GET_PROGRAM, &procId }; 
+    struct gnwCtrlStartDescriptor desc = { { (byte_t *)path, strlen(path) }, GET_PROGRAM, &procId };
 
-    SYSCALL_USER_CALL(START, &desc, 0, 0);
+    SYSCALL_USER_CALL(START, &desc, 0, 0); 
 
-    return procId;
+    if (procIdResultPtr) {
+        *(procIdResultPtr) = (procId < 0) ? NONE_PROC_ID : procId;
+    }
+
+    return (procId < 0) ? procId : GCE_NONE;
 }
 
 void bye(const int_32 status) {

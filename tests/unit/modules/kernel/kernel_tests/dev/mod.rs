@@ -453,7 +453,7 @@ fn k_dev_start_checkIncorrect_deviceStartFailed() {
         devices[device_id as usize].desc.driver.descriptor.start = Some(start);
     }
 
-    k_dev_start_expect(device_id, gnwDriverError::GDRE_START_FAILED, false);
+    k_dev_start_expect(device_id, gnwDriverError::GDRE_OPERATION_FAILED, false);
     
     log("k_dev_start_checkIncorrect_deviceStartFailed end\n\0");
 }

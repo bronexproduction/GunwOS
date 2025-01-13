@@ -8,11 +8,12 @@
 #include "../cmdutil.h"
 #include "../cliio.h"
 #include <gunwctrl.h>
+#include <defs.h>
 
 void cmd_start(const char * const params) {
     CMD_PARAM_STRING(0, name, "Program name")
 
-    enum gnwCtrlError err = start(name);
+    enum gnwCtrlError err = start(name, nullptr);
     switch (err) {
     case GCE_NONE:
         break;

@@ -9,15 +9,30 @@
 #include <gunwctrl.h>
 #include <gunwdev.h>
 #include <gunwfug.h>
+#include <defs.h>
+#include <string.h>
 
-#define START(PATH) if (err == GCE_NONE) {  \
-    log(PATH);                              \
-    err = start(PATH);                      \
+#define START(PATH) if (err == GCE_NONE) {          \
+    log(PATH);                                      \
+    procId_t procId;                                \
+    err = start(PATH, &procId);                     \
+    char procIdString[15];                          \
+    int2str(procId, procIdString);                  \
+    if (err == GCE_NONE) {                          \
+        log("Loading successful. Process ID: ");    \
+        log(procIdString);                          \
+    }                                               \
 }
 
 #define INSTALL(PATH) if (installErr == GDRE_NONE && ctrlErr == GCE_NONE) { \
     log(PATH);                                                              \
     devInstall(PATH, &ctrlErr, &installErr);                                \
+    if (ctrlErr == GCE_NONE) {                                              \
+        log("Loading successful");                                          \
+        if (installErr != GDRE_NONE) {                                      \
+            log("Setup failed");                                            \
+        }                                                                   \
+    }                                                                       \
 }
 
 static void installCoreDrivers() {

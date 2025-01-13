@@ -13,7 +13,6 @@ enum gnwMemoryError k_scr_drv_mmioPlz(const procId_t procId,
                                       const size_t pageCount,
                                       const addr_t vAddr,
                                       const addr_t pAddr) {
-    #warning TODO verify error codes
 
     const enum k_mem_error error = k_mem_gimme(procId, (ptr_t)vAddr, (ptr_t)pAddr, pageCount * MEM_PAGE_SIZE_BYTES);
     if (error == ME_ALREADY_ASSIGNED ||

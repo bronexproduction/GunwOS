@@ -390,7 +390,7 @@ pub struct gnwDeviceParamDescriptor {
 pub enum gnwDriverError {
     GDRE_NONE               = 0,
     GDRE_UNINITIALIZED      = 1,
-    GDRE_START_FAILED       = 2,
+    GDRE_OPERATION_FAILED   = 2,
     GDRE_IRQ_CONFLICT       = 3,
     GDRE_IRQ_INVALID        = 4,
     GDRE_LIMIT_REACHED      = 5,

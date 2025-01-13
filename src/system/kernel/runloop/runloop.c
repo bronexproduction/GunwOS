@@ -109,9 +109,6 @@ static void release(struct dispatchItem * const item) {
     memzero(item, sizeof(struct dispatchItem));
 }
 
-#include <log/log.h>
-#include <string.h>
-
 enum gnwRunLoopError k_runloop_dispatch(const procId_t procId,
                                         const size_t token,
                                         const struct gnwRunLoopDispatchItem item,

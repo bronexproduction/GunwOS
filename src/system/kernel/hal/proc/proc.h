@@ -14,7 +14,7 @@
 #include <hal/gdt/gdt.h>
 #include <_gunwrlp.h>
 
-#define MAX_PROC 5
+#define MAX_PROC 6
 #define KERNEL_PROC_ID -1
 
 struct k_proc_descriptor {
@@ -82,6 +82,11 @@ procId_t k_proc_getCurrentId();
     Returns whether the process identifier belongs to an user process
 */
 bool k_proc_idIsUser(const procId_t procId);
+
+/*
+    Returns whether the process with given ID is alive
+*/
+bool k_proc_isAlive(const procId_t procId);
 
 /*
     Returns information about the process with given procId

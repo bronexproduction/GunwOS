@@ -39,4 +39,16 @@ enum gnwDeviceError k_scr_emit(const struct gnwDeviceEvent * const event);
 */
 enum gnwMemoryError k_scr_mmioPlz(const size_t pageCount, const addr_t vAddr, const addr_t pAddr);
 
+/*
+    Code - 0x04
+    Function - REPORT_INIT
+*/
+void k_scr_reportInit(const bool success);
+
+/*
+    Code - 0x05
+    Function - REPORT_START
+*/
+void k_scr_reportStart(const bool success);
+
 #endif // DRVFUNC_H

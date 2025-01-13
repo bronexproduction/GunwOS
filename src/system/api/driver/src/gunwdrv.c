@@ -8,13 +8,14 @@
 #ifndef _GUNWAPI_KERNEL
 
 #include <types.h>
+#include <scl_driver.h>
 
 void drvInitReport(bool success) {
-    #warning TODO not implemented yet
+    SYSCALL_DRIVER_CALL(REPORT_INIT, success, 0, 0);
 }
 
 void drvStartReport(bool success) {
-    #warning TODO not implemented yet
+    SYSCALL_DRIVER_CALL(REPORT_START, success, 0, 0);
 }
 
 #else

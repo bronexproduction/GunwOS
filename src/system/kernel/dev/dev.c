@@ -12,6 +12,7 @@
 #include <hal/hal.h>
 #include <hal/int/irq.h>
 #include <hal/proc/proc.h>
+#include <hal/paging/paging.h>
 #include <hal/mem/mem.h>
 #include <error/panic.h>
 #include <hal/criticalsec/criticalsec.h>
@@ -111,30 +112,45 @@ PRIVATE bool validateInstalledId(size_t id) {
     return id < MAX_DEVICES && id < devicesCount;
 }
 
-PRIVATE enum gnwDeviceError validateStartedDevice(const procId_t processId, const size_t deviceId) {
+PRIVATE enum gnwDeviceError validateStartedDevice(const size_t deviceId) {
     if (!validateInstalledId(deviceId)) {
         return GDE_UNKNOWN;
     }
+    
+    struct device *devPtr = &devices[deviceId];
+    
+    if (devPtr->status != STARTED) {
+        return GDE_INVALID_DEVICE_STATE;
+    }
+    if (k_proc_idIsUser(devPtr->operator)) {
+        if (k_proc_getInfo(devPtr->operator).type != PT_DRIVER) {
+            return GDE_INVALID_DEVICE_STATE;
+        }
+        if (!k_proc_isAlive(devPtr->operator)) {
+            return GDE_INVALID_DEVICE_STATE;
+        }
+    }
 
+    return GDE_NONE;
+}
+
+PRIVATE enum gnwDeviceError validateStartedDeviceOwnership(const procId_t processId, const size_t deviceId) {
     if (!k_proc_idIsUser(processId)) {
         OOPS("Invalid process identifier", GDE_UNKNOWN);
     }
-
     if (k_proc_getInfo(processId).state != PS_RUNNING) {
         OOPS("Invalid process state", GDE_UNKNOWN);
     }
 
-    struct device *dev = &devices[deviceId];
-    if (dev->holder != processId) {
+    const enum gnwDeviceError error = validateStartedDevice(deviceId);
+    if (error != GDE_NONE) {
+        return error;
+    }
+
+    if (devices[deviceId].holder != processId) {
         return GDE_HANDLE_INVALID;
     }
-    if (!k_proc_idIsUser(dev->operator) || k_proc_getInfo(dev->operator).type != PT_DRIVER) {
-        return GDE_INVALID_DEVICE_STATE;
-    }
-    if (dev->status != STARTED) {
-        return GDE_INVALID_DEVICE_STATE;
-    }
-    
+
     return GDE_NONE;
 }
 
@@ -299,29 +315,13 @@ enum gnwDriverError k_dev_install_async(const struct gnwDeviceDescriptor * const
     return GDRE_NONE;
 }
 
-static enum gnwDriverError deviceInvokeAsync(const procId_t operatorProcId,
-                                             const procId_t requesterProcId,
-                                             enum gnwDriverError * const vErrPtr,
-                                             const enum deviceStatus expectedStatus,
-                                             const enum deviceStatus resultStatus,
-                                             addr_t vOperationPtrDeviceOffset) {
-
-
-
-                                                        /*
-                                                        
-                                                        
-                                                        
-                                                        
-                                                        
-                                                            RETURN GDRE_IGNORED ON NULL 
-                                                        
-                                                        
-                                                        
-                                                        
-                                                        
-                                                        */
-
+static enum gnwDriverError deviceFlowInvokeAsyncIfNeeded(const procId_t operatorProcId,
+                                                         const procId_t requesterProcId,
+                                                         enum gnwDriverError * const vErrPtr,
+                                                         const enum deviceStatus expectedStatus,
+                                                         const enum deviceStatus intermediateStatus,
+                                                         const enum deviceStatus resultStatus,
+                                                         addr_t vOperationPtrDeviceOffset) {
 
     if (!vErrPtr) {
         return GDE_INVALID_PARAMETER;
@@ -348,6 +348,11 @@ static enum gnwDriverError deviceInvokeAsync(const procId_t operatorProcId,
     }
 
     const addr_t deviceFuncVAddr = *(addr_t *)((addr_t)dev + vOperationPtrDeviceOffset);
+    if (!deviceFuncVAddr) {
+        dev->status = resultStatus;
+        return GDRE_NOT_FOUND;
+    }
+
     const enum k_proc_error error = k_proc_callback_invoke_void(operatorProcId,
                                                                 (void (*)(void))deviceFuncVAddr);
     if (error != PE_NONE) {
@@ -356,19 +361,20 @@ static enum gnwDriverError deviceInvokeAsync(const procId_t operatorProcId,
     
     dev->pendingRequestInfo.procId = requesterProcId;
     dev->pendingRequestInfo.vErrPtr = vErrPtr;
-    dev->status = resultStatus;
+    dev->status = intermediateStatus;
     return GDRE_NONE;
 }
 
 enum gnwDriverError k_dev_init_async(const procId_t operatorProcId,
                                      const procId_t requesterProcId,
                                      enum gnwDriverError * const vErrPtr) {
-    return deviceInvokeAsync(operatorProcId,
-                             requesterProcId,
-                             vErrPtr,
-                             NEW,
-                             INITIALIZING,
-                             OFFSETOF(struct device, desc.driver.descriptor.init));
+    return deviceFlowInvokeAsyncIfNeeded(operatorProcId,
+                                         requesterProcId,
+                                         vErrPtr,
+                                         NEW,
+                                         INITIALIZING,
+                                         INITIALIZED,
+                                         OFFSETOF(struct device, desc.driver.descriptor.init));
 }
 
 static bool validateReporter(const procId_t operatorProcId, const size_t deviceId) {
@@ -379,25 +385,61 @@ static bool validateReporter(const procId_t operatorProcId, const size_t deviceI
     if (devicePtr->operator != operatorProcId) {
         OOPS("Unexpected operator", false);
     }
-
-    #warning TODO handle errors and process identifiers
-
+    
+    if (k_proc_idIsUser(devicePtr->pendingRequestInfo.procId) && !devicePtr->pendingRequestInfo.vErrPtr) {
+        OOPS("Invalid pending request info", false);
+    }
+    
     return true;
 }
 
-void k_dev_init_report(const procId_t operatorProcId, const size_t deviceId, const bool success) {
+static void unsafe_pendingRequestInfoSetErrorIfNeeded(const size_t deviceId, const enum gnwDriverError error) {
+    struct deviceRequestInfo * const infoPtr = &(devices[deviceId].pendingRequestInfo);
+    if (k_proc_idIsUser(infoPtr->procId)) {
+        MEM_ONTABLE(infoPtr->procId, 
+            *(infoPtr->vErrPtr) = error;
+        )
+
+        const procId_t procId = infoPtr->procId;
+        infoPtr->procId = NONE_PROC_ID;
+        infoPtr->vErrPtr = nullptr;
+        k_proc_unlock(procId, PLT_SYNC);
+    }
+}
+
+static void unsafe_reportStatusOperationFailed(const procId_t operatorProcId, const size_t deviceId, const char * const reason) {
+    if (operatorProcId == KERNEL_PROC_ID) {
+        OOPS(reason,);
+    } else {
+        LOG(reason);
+        #warning TODO k_scr_usr_bye should not be called directly
+        extern void k_scr_usr_bye(const procId_t, const int_32);
+        k_scr_usr_bye(operatorProcId, -68);
+        unsafe_pendingRequestInfoSetErrorIfNeeded(deviceId, GDRE_OPERATION_FAILED);
+    }
+}
+
+static void reportStatus(const procId_t operatorProcId,
+                         const size_t deviceId,
+                         const bool success,
+                         const enum deviceStatus expectedStatus,
+                         const enum deviceStatus updatedStatus) {
+
     if (!validateReporter(operatorProcId, deviceId)) {
-        OOPS("Reporter validation failed",);
-        #warning TODO terminate operator process or crash if kernel
+        unsafe_reportStatusOperationFailed(operatorProcId, deviceId, "Reporter validation failed");
+        return;   
     }
-    if (devices[deviceId].status != INITIALIZING) {
-        OOPS("Unexpected device status",);
-        #warning TODO terminate operator process or crash if kernel
+    if (devices[deviceId].status != expectedStatus) {
+        unsafe_reportStatusOperationFailed(operatorProcId, deviceId, "Unexpected device status");
+        return;
     }
 
-    #warning TODO handle errors and process identifiers
+    devices[deviceId].status = updatedStatus;
+    unsafe_pendingRequestInfoSetErrorIfNeeded(deviceId, GDRE_NONE);
+}
 
-    devices[deviceId].status = INITIALIZED;
+void k_dev_init_report(const procId_t operatorProcId, const size_t deviceId, const bool success) {
+    reportStatus(operatorProcId, deviceId, success, INITIALIZING, INITIALIZED);
 }
 
 enum gnwDriverError k_dev_start(const size_t id) {
@@ -427,7 +469,7 @@ enum gnwDriverError k_dev_start(const size_t id) {
     if (dev->status != STARTED) {
         LOG("Error: Driver startup failed");
         dev->status = FAILED;
-        return GDRE_START_FAILED;
+        return GDRE_OPERATION_FAILED;
     }
 
     return GDRE_NONE;
@@ -436,27 +478,17 @@ enum gnwDriverError k_dev_start(const size_t id) {
 enum gnwDriverError k_dev_start_async(const procId_t operatorProcId,
                                       const procId_t requesterProcId,
                                       enum gnwDriverError * const vErrPtr) {
-    return deviceInvokeAsync(operatorProcId,
-                             requesterProcId,
-                             vErrPtr,
-                             INITIALIZED,
-                             STARTING,
-                             OFFSETOF(struct device, desc.driver.descriptor.start));
+    return deviceFlowInvokeAsyncIfNeeded(operatorProcId,
+                                         requesterProcId,
+                                         vErrPtr,
+                                         INITIALIZED,
+                                         STARTING,
+                                         STARTED,
+                                         OFFSETOF(struct device, desc.driver.descriptor.start));
 }
 
 void k_dev_start_report(const procId_t operatorProcId, const size_t deviceId, const bool success) {
-    if (!validateReporter(operatorProcId, deviceId)) {
-        OOPS("Reporter validation failed",);
-        #warning TODO terminate operator process or crash if kernel
-    }
-    if (devices[deviceId].status != STARTING) {
-        OOPS("Unexpected device status",);
-        #warning TODO terminate operator process or crash if kernel
-    }
-
-    #warning TODO handle errors and process identifiers
-
-    devices[deviceId].status = STARTED;
+    reportStatus(operatorProcId, deviceId, success, STARTING, STARTED);
 }
 
 enum gnwDeviceError k_dev_getById(const size_t id, struct gnwDeviceUHADesc * const desc) {
@@ -470,6 +502,24 @@ enum gnwDeviceError k_dev_getById(const size_t id, struct gnwDeviceUHADesc * con
     
     *desc = uhaGetDesc(id, devices[id].desc.type, devices[id].desc.api);
     return GDE_NONE;
+}
+
+enum gnwDeviceError k_dev_getByOperator(const procId_t operator, struct gnwDeviceUHADesc * const desc) {
+    if (!k_proc_idIsUser(operator)) {
+        OOPS("Operator identifier invalid", GDE_UNKNOWN);
+    }
+    
+    if (!desc) {
+        OOPS("Device descriptor nullptr", GDE_UNKNOWN);
+    }
+
+    for (size_t index = 0; index < MAX_DEVICES; ++index) {
+        if (devices[index].operator == operator) {
+            return k_dev_getById(index, desc);
+        }
+    }
+
+    return GDE_NOT_FOUND;
 }
 
 enum gnwDeviceError k_dev_getByType(const enum gnwDeviceType type, struct gnwDeviceUHADesc * const desc) {
@@ -521,8 +571,9 @@ bool k_dev_mmioRangeAllowed(const procId_t procId, const addr_t physMemStart, co
 }
 
 enum gnwDeviceError k_dev_acquireHold(const procId_t processId, const size_t deviceId) {
-    if (!validateInstalledId(deviceId)) {
-        OOPS("Device identifier invalid", GDE_UNKNOWN);
+    const enum gnwDeviceError validationError = validateStartedDevice(deviceId);
+    if (validationError != GDE_NONE) {
+        OOPS("Device identifier invalid", validationError);
     }
 
     if (!k_proc_idIsUser(processId)) {
@@ -562,7 +613,7 @@ enum gnwDeviceError k_dev_writeMem(const procId_t processId,
         OOPS("Buffer cannot be nullptr", GDE_UNKNOWN);
     }
 
-    const enum gnwDeviceError e = validateStartedDevice(processId, deviceId);
+    const enum gnwDeviceError e = validateStartedDeviceOwnership(processId, deviceId);
     if (e) {
         return e;
     }
@@ -597,7 +648,7 @@ enum gnwDeviceError k_dev_writeChar(const procId_t processId,
                                     const size_t deviceId,
                                     const char character) {
 
-    const enum gnwDeviceError e = validateStartedDevice(processId, deviceId);
+    const enum gnwDeviceError e = validateStartedDeviceOwnership(processId, deviceId);
     if (e) {
         return e;
     }
@@ -630,7 +681,7 @@ enum gnwDeviceError k_dev_listen(const procId_t processId,
         return GDE_DECODER_INVALID;
     }
 
-    enum gnwDeviceError err = validateStartedDevice(processId, deviceId);
+    enum gnwDeviceError err = validateStartedDeviceOwnership(processId, deviceId);
     if (err) {
         return err;
     }
@@ -673,7 +724,7 @@ enum gnwDeviceError k_dev_setParam(const procId_t procId,
                                    const size_t deviceId,
                                    const struct gnwDeviceParamDescriptor paramDescriptor,
                                    const size_t value) {
-    const enum gnwDeviceError err = validateStartedDevice(procId, deviceId);
+    const enum gnwDeviceError err = validateStartedDeviceOwnership(procId, deviceId);
     if (err != GDE_NONE) {
         return err;
     }

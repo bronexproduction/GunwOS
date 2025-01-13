@@ -78,6 +78,16 @@ bool k_proc_idIsUser(const procId_t procId) {
     return IN_RANGE(0, procId, MAX_PROC - 1);
 }
 
+bool k_proc_isAlive(const procId_t procId) {
+    if (!k_proc_idIsUser(procId)) {
+        OOPS("Process ID out of range", false);
+    }
+    
+    return pTab[procId].info.state == PS_READY ||
+           pTab[procId].info.state == PS_RUNNING ||
+           pTab[procId].info.state == PS_BLOCKED;
+}
+
 struct k_proc_process k_proc_getInfo(const procId_t procId) {
     if (procId < KERNEL_PROC_ID || procId >= MAX_PROC) {
         struct k_proc_process info;
@@ -193,17 +203,11 @@ void k_proc_unlock(const procId_t procId, enum k_proc_lockType lockType) {
     k_proc_schedule_processStateDidChange();
 }
 
-static bool isProcessAlive(const procId_t procId) {
-    return pTab[procId].info.state == PS_READY ||
-           pTab[procId].info.state == PS_RUNNING ||
-           pTab[procId].info.state == PS_BLOCKED;
-}
-
 void k_proc_cleanup(const procId_t procId) {
     if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
         OOPS("Process id out of range",);
     }
-    if (isProcessAlive(procId)) {
+    if (k_proc_isAlive(procId)) {
         OOPS("Unexpected process state during cleanup",);
     }
 
@@ -215,7 +219,7 @@ void k_proc_stop(const procId_t procId) {
     if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
         OOPS("Process id out of range",);
     }
-    if (!isProcessAlive(procId)) {
+    if (!k_proc_isAlive(procId)) {
         OOPS("Unexpected process state during stop",);
     }
     
@@ -447,7 +451,7 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
     if (pTab[procId].info.state == PS_FINISHED) {
         return PE_IGNORED;
     }
-    if (!isProcessAlive(procId)) {
+    if (!k_proc_isAlive(procId)) {
         OOPS("Attempted callback invocation in dead process", PE_UNKNOWN);
     }
     

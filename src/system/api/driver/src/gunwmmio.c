@@ -13,7 +13,7 @@
 #include <gunwfug.h>
 #include <scl_driver.h>
 
-extern const addr_t _heapStart;
+extern addr_t _heapStart;
 
 ptr_t mmioPlz(const addr_t physMemStart, const size_t sizeBytes, enum gnwMemoryError * const errorPtr) {
     CHECKPTR(errorPtr);
@@ -34,10 +34,8 @@ ptr_t mmioPlz(const addr_t physMemStart, const size_t sizeBytes, enum gnwMemoryE
         return nullptr;
     }
 
-    #warning SUCCESS! DETS OSOM DUMOR
-    #warning TODO UPDATE _HEAPSTART
-    
-    return nullptr;
+    _heapStart = (vAddr + (pageCount * PAGE_SIZE));
+    return (ptr_t)(vAddr + (physMemStart - pAddr));
 }
 
 #endif // _GUNWAPI_KERNEL

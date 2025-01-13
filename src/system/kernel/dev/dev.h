@@ -27,6 +27,7 @@ enum gnwDriverError k_dev_start_async(const procId_t operatorProcId, const procI
 void k_dev_start_report(const procId_t operatorProcId, const size_t deviceId, const bool success);
 
 enum gnwDeviceError k_dev_getById(const size_t id, struct gnwDeviceUHADesc * const desc);
+enum gnwDeviceError k_dev_getByOperator(const procId_t operator, struct gnwDeviceUHADesc * const desc);
 enum gnwDeviceError k_dev_getByType(const enum gnwDeviceType type, struct gnwDeviceUHADesc * const desc);
 
 enum gnwDeviceError k_dev_getUHAForId(const size_t id, struct gnwDeviceUHA * const uha);

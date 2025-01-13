@@ -18,12 +18,12 @@
 
     Params:
     * path - path to the executable
+    * procIdResultPtr - optional pointer where started process identifier will be stored
     
     Returns:
-    * value less than 0 - start error (gnwCtrlError)
-    * value greater or equal 0 - started process ID
+    * start error (gnwCtrlError) if any, otherwise GCE_NONE
 */
-extern procId_t start(const char * const path);
+extern enum gnwCtrlError start(const char * const path, procId_t * const procIdResultPtr);
 
 /*
     Ends process execution
