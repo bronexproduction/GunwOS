@@ -278,8 +278,8 @@ void k_scr_devGetParam(const procId_t procId, const ptr_t refEsp) {
     SAFE_STACK_VAL_PTR(const struct gnwDeviceParamDescriptor * const, paramDesc, PARAMETER_2_STACK_OFFSET);
     SAFE_STACK_VAL_PTR(size_t * const, resultPtr, PARAMETER_3_STACK_OFFSET);
 
-    extern enum gnwDeviceError k_scr_usr_devGetParam(const procId_t, const size_t, const struct gnwDeviceParamDescriptor * const, size_t * const);
-    SAFE_STACK_RESULT_ARCH_VAL = k_scr_usr_devGetParam(procId, *devId, *paramDesc, *resultPtr);
+    extern void k_scr_usr_devGetParam(const procId_t, const size_t, const struct gnwDeviceParamDescriptor * const, size_t * const, enum gnwDeviceError * const);
+    k_scr_usr_devGetParam(procId, *devId, *paramDesc, *resultPtr, SAFE_STACK_RESULT_PTR);
 }
 
 /*

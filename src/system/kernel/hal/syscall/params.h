@@ -34,8 +34,10 @@
 
 #define SAFE_STACK_VAL_PTR(TYPE, NAME, OFFSET) \
     TYPE * const NAME = userStackSafeValuePointer(procId, refEsp, OFFSET, sizeof(TYPE));
+#define SAFE_STACK_RESULT_PTR \
+    (userStackSafeValuePointer(procId, refEsp, RESULT_STACK_OFFSET, sizeof(addr_t)))
 #define SAFE_STACK_RESULT_ARCH_VAL \
-    *(addr_t *)userStackSafeValuePointer(procId, refEsp, RESULT_STACK_OFFSET, sizeof(addr_t))
+    (*(addr_t *)SAFE_STACK_RESULT_PTR)
 
 void * userStackSafeValuePointer(const procId_t procId, 
                                  const ptr_t refEsp,

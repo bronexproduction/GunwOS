@@ -50,9 +50,11 @@ enum gnwDeviceError k_dev_listen(const procId_t processId,
                                  const gnwDeviceEventListener listener,
                                  const gnwDeviceEventDecoder decoder);
 
-enum gnwDeviceError k_dev_getParam(const size_t deviceId,
-                                   const struct gnwDeviceParamDescriptor paramDescriptor,
-                                   size_t * const resultPtr);
+void k_dev_getParam(const procId_t procId,
+                    const size_t deviceId,
+                    const struct gnwDeviceParamDescriptor paramDescriptor,
+                    size_t * const vResultPtr,
+                    enum gnwDeviceError * const vErrorPtr);
 enum gnwDeviceError k_dev_setParam(const procId_t procId,
                                    const size_t deviceId,
                                    const struct gnwDeviceParamDescriptor paramDescriptor,

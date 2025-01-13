@@ -695,29 +695,69 @@ enum gnwDeviceError k_dev_listen(const procId_t processId,
     return GDE_NONE;
 }
 
-enum gnwDeviceError k_dev_getParam(const size_t deviceId,
-                                   const struct gnwDeviceParamDescriptor paramDescriptor,
-                                   size_t * const resultPtr) {
-    if (!resultPtr) {
-        OOPS("Nullptr", GDE_UNKNOWN);
+void k_dev_getParam(const procId_t procId,
+                    const size_t deviceId,
+                    const struct gnwDeviceParamDescriptor paramDescriptor,
+                    size_t * const vResultPtr,
+                    enum gnwDeviceError * const vErrorPtr) {
+
+    if (!k_proc_idIsUser(procId)) {
+        OOPS("Invalid process ID",);
+        return;
+    }
+    if (!k_proc_isAlive(procId)) {
+        OOPS("Incorrect process ID",);
+        return;
+    }
+    if (!vErrorPtr) {
+        OOPS("Nullptr",);
+        return;
+    }
+    if (!vResultPtr) {
+        OOPS("Nullptr",);
+        MEM_ONTABLE(procId, 
+            *(vErrorPtr) = GDE_INVALID_PARAMETER;
+        )
+        return;
+    }
+    if (validateStartedDevice(deviceId) != GDE_NONE) {
+        MEM_ONTABLE(procId, 
+            *(vErrorPtr) = GDE_ID_INVALID;
+        )
+        return;
     }
 
-    if (!validateInstalledId(deviceId)) {
-        return GDE_ID_INVALID;
+    const struct gnwDeviceUHA_system_routine routine = devices[deviceId].desc.api.system.routine; 
+
+    if (!routine.getParam) {
+        MEM_ONTABLE(procId, 
+            *(vErrorPtr) = GDE_INVALID_OPERATION;
+        )
+        return;
     }
 
-    if (!devices[deviceId].desc.api.system.routine.getParam) {
-        return GDE_INVALID_OPERATION;
-    }
+    if (k_proc_idIsUser(devices[deviceId].operator)) {
+        OOPS("Not implemented yet",);
 
-    if (!devices[deviceId].desc.api.system.routine.getParam(paramDescriptor.param,
-                                                            paramDescriptor.subParam,
-                                                            paramDescriptor.paramIndex,
-                                                            resultPtr)) {
-        return GDE_OPERATION_FAILED;
-    }
+        #warning TODO
 
-    return GDE_NONE;
+        k_proc_lock(procId, PLT_SYNC);
+    } else {
+        #warning ALSO TODO
+        if (!routine.getParam(paramDescriptor.param,
+                              paramDescriptor.subParam,
+                              paramDescriptor.paramIndex,
+                              vResultPtr)) {
+            MEM_ONTABLE(procId, 
+                *(vErrorPtr) = GDE_OPERATION_FAILED;
+            )
+            return;
+        }
+
+        MEM_ONTABLE(procId, 
+            *(vErrorPtr) = GDE_NONE;
+        )
+    }
 }
 
 enum gnwDeviceError k_dev_setParam(const procId_t procId,
