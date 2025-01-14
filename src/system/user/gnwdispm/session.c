@@ -109,13 +109,8 @@ enum gnwDeviceError sessionEnable(const sessionPtr_t sessionPtr) {
     /*
         Set display adapter format
     */
-    enum gnwDeviceError e = setDisplayFormat(sessionPtr->displayDescriptor.identifier, 
-                                             sessionPtr->displayDescriptor.format);
-    if (e) {
-        return e;
-    }
-
-    return GDE_NONE;
+    return setDisplayFormat(sessionPtr->displayDescriptor.identifier, 
+                            sessionPtr->displayDescriptor.format);
 }
 
 void sessionClear(const sessionPtr_t sessionPtr) {
