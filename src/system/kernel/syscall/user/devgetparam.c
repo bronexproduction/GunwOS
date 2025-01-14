@@ -12,8 +12,8 @@
 
 void k_scr_usr_devGetParam(const procId_t procId,
                            const size_t devId, 
-                           const struct gnwDeviceParamDescriptor * const vParamDescriptorPtr,
-                           size_t * const vResultPtr,
+                           const struct gnwDeviceGetParamQuery * const vParamQueryPtr,
+                           size_t * const vReplyPtr,
                            enum gnwDeviceError * const vErrorPtr) {
     
     if (!vErrorPtr) {
@@ -24,28 +24,28 @@ void k_scr_usr_devGetParam(const procId_t procId,
         OOPS("Reserved zone access violation",);
         return;
     }
-    if (!vParamDescriptorPtr) {
+    if (!vParamQueryPtr) {
         OOPS("Unexpected null pointer",);
         MEM_ONTABLE(procId, 
             *(vErrorPtr) = GDE_UNKNOWN;
         )
         return;
     }
-    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)vParamDescriptorPtr, sizeof(struct gnwDeviceParamDescriptor))) {
+    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)vParamQueryPtr, sizeof(struct gnwDeviceGetParamQuery))) {
         OOPS("Reserved zone access violation",);
         MEM_ONTABLE(procId, 
             *(vErrorPtr) = GDE_UNKNOWN;
         )
         return;
     }
-    if (!vResultPtr) {
+    if (!vReplyPtr) {
         OOPS("Unexpected null pointer",);
         MEM_ONTABLE(procId, 
             *(vErrorPtr) = GDE_UNKNOWN;
         )
         return;
     }
-    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)vResultPtr, sizeof(size_t))) {
+    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)vReplyPtr, sizeof(size_t))) {
         OOPS("Reserved zone access violation",);
         MEM_ONTABLE(procId, 
             *(vErrorPtr) = GDE_UNKNOWN;
@@ -53,10 +53,10 @@ void k_scr_usr_devGetParam(const procId_t procId,
         return;
     }
     
-    struct gnwDeviceParamDescriptor paramDescriptor;
+    struct gnwDeviceGetParamQuery paramDescriptor;
     MEM_ONTABLE(procId, 
-        paramDescriptor = *(vParamDescriptorPtr);
+        paramDescriptor = *(vParamQueryPtr);
     )
 
-    k_dev_getParam(procId, devId, paramDescriptor, vResultPtr, vErrorPtr);
+    k_dev_getParam(procId, devId, paramDescriptor, vReplyPtr, vErrorPtr);
 }

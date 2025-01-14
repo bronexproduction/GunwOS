@@ -43,14 +43,43 @@ enum gnwDeviceError {
     GDE_PRECONDITION_NOT_SATISFIED,
     GDE_OPERATION_FAILED,
     GDE_OPERATION_PENDING,
+    GDE_NOT_RESPONDING,
     GDE_UNKNOWN = -1
 };
 _Static_assert(sizeof(enum gnwDeviceError) == sizeof(int_32), "Unexpected enum gnwDeviceError size");
 
-struct gnwDeviceParamDescriptor {
+struct gnwDeviceEvent {
+    /*
+        Event type (device specific)
+    */
+    int_32 type;
+
+    /*
+        Event data pointer
+    */
+    ptr_t data;
+
+    /*
+        Event data size in bytes
+    */
+    size_t dataSizeBytes;
+};
+
+struct gnwDeviceGetParamQuery {
     size_t param;
     size_t subParam;
     size_t paramIndex;
 };
+
+struct gnwDeviceSetParamQuery {
+    size_t param;
+    size_t subParam;
+    size_t paramIndex;
+    size_t value;
+};
+
+typedef __attribute__((cdecl)) void (*gnwDeviceEventListener)(const struct gnwDeviceEvent * const);
+
+typedef void (*gnwDeviceEventDecoder)(const ptr_t, struct gnwDeviceEvent * const);
 
 #endif // GUNWOS_GUNWDEVTYPES_H

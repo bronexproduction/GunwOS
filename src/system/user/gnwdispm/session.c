@@ -31,11 +31,7 @@ bool sessionIsOnTop(const sessionPtr_t sessionPtr) {
 }
 
 static enum gnwDeviceError setDisplayFormat(const size_t deviceId, const enum gnwDeviceUHA_display_format format) {
-    struct gnwDeviceParamDescriptor paramDesc;
-
-    paramDesc.param = GDU_DISPLAY_PARAM_FORMAT;
-
-    return devSetParam(deviceId, &paramDesc, format);
+    return devSetParam(deviceId, GDU_DISPLAY_PARAM_FORMAT, 0, 0, format);
 }
 
 enum gnwDeviceError sessionCreate(const procId_t procId, 

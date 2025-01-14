@@ -11,14 +11,14 @@
 
 enum gnwDeviceError k_scr_usr_devSetParam(const procId_t procId,
                                           const size_t devId, 
-                                          const struct gnwDeviceParamDescriptor * const paramDescriptorPtr,
+                                          const struct gnwDeviceSetParamQuery * const vParamQueryPtr,
                                           const size_t value) {
-    if (!paramDescriptorPtr) {
+    if (!vParamQueryPtr) {
         OOPS("Unexpected null pointer", GDE_UNKNOWN);
     }
-    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)paramDescriptorPtr, sizeof(struct gnwDeviceParamDescriptor))) {
+    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)vParamQueryPtr, sizeof(struct gnwDeviceSetParamQuery))) {
         OOPS("Reserved zone access violation", GDE_UNKNOWN);
     }
     
-    return k_dev_setParam(procId, devId, *paramDescriptorPtr, value);
+    return k_dev_setParam(procId, devId, *vParamQueryPtr, value);
 }

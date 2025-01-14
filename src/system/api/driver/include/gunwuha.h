@@ -40,6 +40,16 @@ struct gnwDeviceUHA {
     struct gnwDeviceUHA_event event;        // event emitting devices
 };
 
+/*
+    Report getParam result
+*/
+extern void getParamReply(bool success, size_t result);
+
+/*
+    Report setParam result
+*/
+extern void setParamReply(bool success);
+
 #ifdef _GUNWAPI_KERNEL
 
 /*

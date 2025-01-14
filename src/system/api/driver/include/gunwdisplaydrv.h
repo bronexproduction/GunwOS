@@ -12,10 +12,7 @@
 
 #include <types.h>
 
-extern bool uhaGetParam_display(const size_t paramVal,
-                                const size_t subParamVal,
-                                const size_t paramIndex,
-                                size_t * const result);
+extern void uhaGetParam_display(const struct gnwDeviceGetParamQuery * const query);
 extern bool uhaSetParam_display(const size_t paramVal,
                                 const size_t subParamVal,
                                 const size_t paramIndex,

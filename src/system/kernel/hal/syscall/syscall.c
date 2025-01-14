@@ -17,7 +17,7 @@
 #include "drvfunc.h"
 #include "usrfunc.h"
 
-#define DRIVER_SYSCALL_COUNT 6
+#define DRIVER_SYSCALL_COUNT 8
 #define USER_SYSCALL_COUNT 25
 
 typedef void (*k_scl_function_handler_t)(const procId_t procId, const ptr_t refEsp);
@@ -33,7 +33,9 @@ static k_scl_function_handler_t syscallReg_DRIVER[DRIVER_SYSCALL_COUNT] = {
     /* 0x02 */ (void *)k_scr_emit,
     /* 0x03 */ (void *)k_scr_mmioPlz,
     /* 0x04 */ (void *)k_scr_reportInit,
-    /* 0x05 */ (void *)k_scr_reportStart
+    /* 0x05 */ (void *)k_scr_reportStart,
+    /* 0x06 */ (void *)k_scr_replyGetParam,
+    /* 0x07 */ (void *)k_scr_replySetParam
 };
 
 /*

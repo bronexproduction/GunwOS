@@ -9,6 +9,7 @@
 
 #include <types.h>
 #include <scl_driver.h>
+#include <gunwdevtypes.h>
 
 void drvInitReport(bool success) {
     SYSCALL_DRIVER_CALL(REPORT_INIT, success, 0, 0);
@@ -18,11 +19,27 @@ void drvStartReport(bool success) {
     SYSCALL_DRIVER_CALL(REPORT_START, success, 0, 0);
 }
 
+void gnwDeviceGetParamQuery_decode(const ptr_t dataPtr, struct gnwDeviceGetParamQuery * const descPtr) {
+    *(descPtr) = *((struct gnwDeviceGetParamQuery *)dataPtr);
+}
+
+void gnwDeviceSetParamQuery_decode(const ptr_t dataPtr, struct gnwDeviceSetParamQuery * const descPtr) {
+    *(descPtr) = *((struct gnwDeviceSetParamQuery *)dataPtr);
+}
+
 #else
 
 #include "../_include/_gunwdrv.h"
+#include <defs.h>
 
 static bool validateDeviceUHA_system(const struct gnwDeviceUHA * const uha) {
+    if (XOR(uha->system.routine.getParam, uha->system.routine.getParamDecoder)) {
+        return false;
+    }
+    if (XOR(uha->system.routine.setParam, uha->system.routine.setParamDecoder)) {
+        return false;
+    }
+
     return true;
 }
 
@@ -172,6 +189,14 @@ bool validateDeviceDescriptor(const struct gnwDeviceDescriptor * const descripto
     VALIDATE_UHA(FDC, fdc);
 
     return typeDefined;
+}
+
+void gnwDeviceGetParamQuery_encode(const struct gnwDeviceGetParamQuery * const descPtr, ptr_t dataPtr) {
+    *((struct gnwDeviceGetParamQuery *)dataPtr) = *(descPtr);
+}
+
+void gnwDeviceSetParamQuery_encode(const struct gnwDeviceSetParamQuery * const descPtr, ptr_t dataPtr) {
+    *((struct gnwDeviceSetParamQuery *)dataPtr) = *(descPtr);
 }
 
 #endif // _GUNWAPI_KERNEL

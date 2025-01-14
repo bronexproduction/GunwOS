@@ -494,12 +494,12 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
 }
 
 enum k_proc_error k_proc_callback_invoke_void(const procId_t procId,
-                                              void (* const funPtr)(void)) {
+                                              const fPtr funPtr) {
     return callbackInvoke(procId, GEF_VOID, (ptr_t)funPtr, nullptr, 0, 0, nullptr, nullptr);
 }
 
 enum k_proc_error k_proc_callback_invoke_ptr(const procId_t procId,
-                                             void (* const funPtr)(ptr_t),
+                                             const fPtr_ptr funPtr,
                                              const ptr_t p,
                                              const size_t pSizeBytes,
                                              const size_t pEncodedSizeBytes,

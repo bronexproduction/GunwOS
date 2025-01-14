@@ -10,6 +10,7 @@
 #define GUNWOS_GUNWUHA_SYSTEM_H
 
 #include <uha/gunwuha_system_desc.h>
+#include <gunwdevtypes.h>
 
 #ifndef _GUNWAPI_KERNEL
 
@@ -18,35 +19,36 @@
 
 #endif // _GUNWAPI_KERNEL
 
+typedef void (*gnwDeviceGetParamQueryDecoder)(const ptr_t, struct gnwDeviceGetParamQuery * const);
+typedef void (*gnwDeviceSetParamQueryDecoder)(const ptr_t, struct gnwDeviceSetParamQuery * const);
+
 struct gnwDeviceUHA_system_routine {
     /*
         Retrieves the value of the parameter with given description
 
         Params:
-            * param - device-specific parameter code
-            * subParam - additional parameter
-            * paramIndex - index of the value
-            * result - pointer to result storage location
+            * queryPtr - pointer to struct gnwDeviceGetParamQuery
 
-        Return value: true on success, false otherwise
+        It's expected for the driver to call getParamReply on finish
 
         The driver can implement custom API using that function.
         Some drivers are required to implement it.
         Check UHA for particular device for more details.
     */
-    bool (*getParam)(const size_t param,
-                     const size_t subParam,
-                     const size_t paramIndex,
-                     size_t * const result);
+    void (*getParam)(const struct gnwDeviceGetParamQuery * const queryPtr);
+    
+    /*
+        Decoder for gnwDeviceGetParamQuery objects
+
+        Required if getParam defined
+    */
+    gnwDeviceGetParamQueryDecoder getParamDecoder;
     
     /*
         Sets the value of the parameter with given description
 
         Params:
-            * param - device-specific parameter code
-            * subParam - additional parameter
-            * paramIndex - index of the value
-            * value - value to be set
+            * queryPtr - pointer to struct gnwDeviceSetParamQuery
 
         Return value: true on success, false otherwise
 
@@ -58,6 +60,13 @@ struct gnwDeviceUHA_system_routine {
                      const size_t subParam,
                      const size_t paramIndex,
                      const size_t value);
+    
+    /*
+        Decoder for gnwDeviceSetParamQuery objects
+
+        Required if setParam defined
+    */
+    gnwDeviceSetParamQueryDecoder setParamDecoder;
 };
 
 struct gnwDeviceUHA_system {

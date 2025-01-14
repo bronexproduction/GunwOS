@@ -34,22 +34,38 @@ enum gnwDeviceError devGetByType(const enum gnwDeviceType type,
 }
 
 enum gnwDeviceError devGetParam(const size_t deviceId,
-                                const struct gnwDeviceParamDescriptor * const paramDescriptor,
+                                const size_t param,
+                                const size_t subParam,
+                                const size_t paramIndex,
                                 size_t * const result) {
-    CHECKPTR(paramDescriptor);
+
     CHECKPTR(result);
 
-    SYSCALL_USER_CALL(DEV_GET_PARAM, deviceId, paramDescriptor, result);
+    const struct gnwDeviceGetParamQuery desc = {
+        param,
+        subParam,
+        paramIndex
+    };
+
+    SYSCALL_USER_CALL(DEV_GET_PARAM, deviceId, &desc, result);
 
     return SYSCALL_RESULT;
 }
 
 enum gnwDeviceError devSetParam(const size_t deviceId,
-                                const struct gnwDeviceParamDescriptor * const paramDescriptor,
+                                const size_t param,
+                                const size_t subParam,
+                                const size_t paramIndex,
                                 const size_t value) {
-    CHECKPTR(paramDescriptor);
 
-    SYSCALL_USER_CALL(DEV_SET_PARAM, deviceId, paramDescriptor, value);
+    const struct gnwDeviceSetParamQuery desc = {
+        param,
+        subParam,
+        paramIndex,
+        value
+    };
+
+    SYSCALL_USER_CALL(DEV_SET_PARAM, deviceId, &desc, 0);
 
     return SYSCALL_RESULT;
 }

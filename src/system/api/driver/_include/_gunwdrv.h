@@ -5,14 +5,21 @@
 //  Created by Artur Danielewski on 12.04.2023.
 //
 
-#ifdef _GUNWAPI_KERNEL
-
 #ifndef GUNWOS__GUNWDRV_H
 #define GUNWOS__GUNWDRV_H
 
+#ifdef _GUNWAPI_KERNEL
+
 #include "../include/gunwdrv.h"
+#include <_gunwdev.h>
+
+#define GNW_DEVICEGETPARAMQUERY_ENCODEDSIZE (sizeof(struct gnwDeviceGetParamQuery))
+#define GNW_DEVICESETPARAMQUERY_ENCODEDSIZE (sizeof(struct gnwDeviceSetParamQuery))
 
 bool validateDeviceDescriptor(const struct gnwDeviceDescriptor * const);
+
+void gnwDeviceGetParamQuery_encode(const struct gnwDeviceGetParamQuery * const, ptr_t);
+void gnwDeviceSetParamQuery_encode(const struct gnwDeviceSetParamQuery * const, ptr_t);
 
 #endif // GUNWOS__GUNWDRV_H
 

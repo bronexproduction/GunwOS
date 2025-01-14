@@ -123,15 +123,15 @@ enum gnwDeviceError k_scr_devListen(const size_t identifier,
     Function - DEV_GET_PARAM
 */
 enum gnwDeviceError k_scr_devGetParam(const size_t deviceId,
-                                      const struct gnwDeviceParamDescriptor * const paramDescriptor,
-                                      size_t * const result);
+                                      const struct gnwDeviceGetParamQuery * const vParamQueryPtr,
+                                      size_t * const vResultPtr);
 
 /*
     Code - 0x10
     Function - DEV_SET_PARAM
 */
 enum gnwDeviceError k_scr_devSetParam(const size_t deviceId,
-                                      const struct gnwDeviceParamDescriptor * const paramDescriptor,
+                                      const struct gnwDeviceSetParamQuery * const vParamQueryPtr,
                                       const size_t value);
 
 /*

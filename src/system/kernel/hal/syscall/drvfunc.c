@@ -116,3 +116,37 @@ void k_scr_reportStart(const procId_t procId, const ptr_t refEsp) {
     extern void k_scr_drv_reportStart(const procId_t, const bool);
     k_scr_drv_reportStart(procId, *success);
 }
+
+/*
+    Code - 0x06
+    Function - REPLY_GETPARAM
+
+    Params (process stack offset):
+        * PARAMETER_1_STACK_OFFSET - operation success status
+        * PARAMETER_2_STACK_OFFSET - operation result
+    
+    In case 'success' value is 'false'
+    'result' value is undefined
+*/
+void k_scr_replyGetParam(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(const bool, success, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const size_t, result, PARAMETER_2_STACK_OFFSET);
+
+    extern void k_scr_drv_replyGetParam(const procId_t, const bool, const size_t);
+    k_scr_drv_replyGetParam(procId, *success, *result);
+}
+
+/*
+    Code - 0x07
+    Function - REPLY_SETPARAM
+    
+    Params (process stack offset):
+        * PARAMETER_1_STACK_OFFSET - operation success status
+*/
+void k_scr_replySetParam(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(const bool, success, PARAMETER_1_STACK_OFFSET);
+
+    extern void k_scr_drv_replySetParam(const procId_t, const bool);
+    k_scr_drv_replySetParam(procId, *success);
+    
+}

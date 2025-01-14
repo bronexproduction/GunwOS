@@ -5,7 +5,19 @@
 //  Created by Artur Danielewski on 11.05.2023.
 //
 
-#ifdef _GUNWAPI_KERNEL
+#ifndef _GUNWAPI_KERNEL
+
+#include <scl_driver.h>
+
+void getParamReply(bool success, size_t result) {
+    SYSCALL_DRIVER_CALL(REPLY_GETPARAM, success, result, 0);
+}
+
+void setParamReply(bool success) {
+    SYSCALL_DRIVER_CALL(REPLY_SETPARAM, success, 0, 0);
+}
+
+#else
 
 #include "../include/gunwuha.h"
 

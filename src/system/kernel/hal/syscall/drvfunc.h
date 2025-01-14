@@ -51,4 +51,16 @@ void k_scr_reportInit(const bool success);
 */
 void k_scr_reportStart(const bool success);
 
+/*
+    Code - 0x06
+    Function - REPLY_GETPARAM
+*/
+void k_scr_replyGetParam(const bool success, const size_t result);
+
+/*
+    Code - 0x07
+    Function - REPLY_SETPARAM
+*/
+void k_scr_replySetParam(const bool success);
+
 #endif // DRVFUNC_H

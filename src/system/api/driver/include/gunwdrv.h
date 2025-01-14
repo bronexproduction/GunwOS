@@ -112,4 +112,19 @@ extern void drvInitReport(bool success);
 */
 extern void drvStartReport(bool success);
 
+/*
+    struct gnwDeviceGetParamQuery decoder
+
+    To be used as getParamDecoder parameter value in system UHA
+*/
+void gnwDeviceGetParamQuery_decode(const ptr_t, struct gnwDeviceGetParamQuery * const);
+
+/*
+    struct gnwDeviceSetParamQuery decoder
+
+    To be used as setParamDecoder parameter value in system UHA
+*/
+void gnwDeviceSetParamQuery_decode(const ptr_t, struct gnwDeviceSetParamQuery * const);
+
+
 #endif // GUNWOS_GUNWDRV_H

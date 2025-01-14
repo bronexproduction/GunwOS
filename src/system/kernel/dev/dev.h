@@ -19,11 +19,11 @@ enum gnwDriverError k_dev_install(const struct gnwDeviceDescriptor * const descr
 enum gnwDriverError k_dev_install_async(const struct gnwDeviceDescriptor * const descriptorPtr,
                                         const procId_t operatorProcId);
 
-enum gnwDriverError k_dev_init_async(const procId_t operatorProcId, const procId_t requesterProcId, enum gnwDriverError * const vErrPtr);
+enum gnwDriverError k_dev_init_async(const procId_t operatorProcId, const procId_t requesterProcId, enum gnwDriverError * const vErrorPtr);
 void k_dev_init_report(const procId_t operatorProcId, const size_t deviceId, const bool success);
 
 enum gnwDriverError k_dev_start(const size_t id);
-enum gnwDriverError k_dev_start_async(const procId_t operatorProcId, const procId_t requesterProcId, enum gnwDriverError * const vErrPtr);
+enum gnwDriverError k_dev_start_async(const procId_t operatorProcId, const procId_t requesterProcId, enum gnwDriverError * const vErrorPtr);
 void k_dev_start_report(const procId_t operatorProcId, const size_t deviceId, const bool success);
 
 enum gnwDeviceError k_dev_getById(const size_t id, struct gnwDeviceUHADesc * const desc);
@@ -52,13 +52,20 @@ enum gnwDeviceError k_dev_listen(const procId_t processId,
 
 void k_dev_getParam(const procId_t procId,
                     const size_t deviceId,
-                    const struct gnwDeviceParamDescriptor paramDescriptor,
-                    size_t * const vResultPtr,
+                    const struct gnwDeviceGetParamQuery paramDescriptor,
+                    size_t * const vReplyPtr,
                     enum gnwDeviceError * const vErrorPtr);
+void k_dev_getParam_reply(const procId_t operatorProcId,
+                          const size_t deviceId,
+                          const bool success,
+                          const size_t result);
 enum gnwDeviceError k_dev_setParam(const procId_t procId,
                                    const size_t deviceId,
-                                   const struct gnwDeviceParamDescriptor paramDescriptor,
+                                   const struct gnwDeviceSetParamQuery paramDescriptor,
                                    const size_t value);
+void k_dev_setParam_reply(const procId_t operatorProcId,
+                                         const size_t deviceId,
+                                         const bool success);
 
 enum gnwDeviceError k_dev_emit(const procId_t procId, const struct gnwDeviceEvent * const eventPtr);
 

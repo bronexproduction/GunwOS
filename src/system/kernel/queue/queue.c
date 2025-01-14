@@ -17,7 +17,7 @@
 #define _NOPAR _PAR((addr_t)NULL)
 
 union dispatchFuncPtr {
-    fPtr_void f;
+    fPtr f;
     fPtr_arch f_arch;
     fPtr_arch2 f_arch2;
     fPtr_arch3 f_arch3;
@@ -82,7 +82,7 @@ static void dispatch(const ptr_t funcPtr,
     queue[i].func.type = type;
     switch (type) {
     case DFE_VOID:
-        queue[i].func.ptr.f = (fPtr_void)funcPtr;
+        queue[i].func.ptr.f = (fPtr)funcPtr;
         break;
     case DFE_ARCH:
         queue[i].func.ptr.f_arch = (fPtr_arch)funcPtr;
@@ -116,7 +116,7 @@ static void dispatch(const ptr_t funcPtr,
     }
 }
 
-void k_que_dispatch(const fPtr_void func) {
+void k_que_dispatch(const fPtr func) {
     dispatch((ptr_t)func, DFE_VOID, _NOPAR, _NOPAR, _NOPAR);
 }
 

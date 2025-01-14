@@ -12,27 +12,7 @@
 #include "gunwevent.h"
 #include "gunwctrltypes.h"
 #include "gunwdrvtypes.h"
-
-struct gnwDeviceEvent {
-    /*
-        Event type (device specific)
-    */
-    int_32 type;
-
-    /*
-        Event data pointer
-    */
-    ptr_t data;
-
-    /*
-        Event data size in bytes
-    */
-    size_t dataSizeBytes;
-};
-
-typedef __attribute__((cdecl)) void (*gnwDeviceEventListener)(const struct gnwDeviceEvent * const);
-
-typedef void (*gnwDeviceEventDecoder)(const ptr_t, struct gnwDeviceEvent * const);
+#include "gunwdevtypes.h"
 
 #ifndef _GUNWAPI_KERNEL
 
@@ -67,13 +47,17 @@ extern enum gnwDeviceError devGetByType(const enum gnwDeviceType type,
 
     Params:
         * id - id of the device
-        * paramDescriptor - device-specific parameter info (see UHA for a specific device)
+        * param - parameter value
+        * subParam - parameter configuration subset value
+        * paramIndex - index of parameter (useful for handling value lists)
         * result - pointer to the result buffer
     
     Return value: Device error code or GDE_NONE (see enum gnwDeviceError)
 */
 extern enum gnwDeviceError devGetParam(const size_t deviceId, 
-                                       const struct gnwDeviceParamDescriptor * const paramDescriptor,
+                                       const size_t param,
+                                       const size_t subParam,
+                                       const size_t paramIndex,
                                        size_t * const result);
 
 /*
@@ -81,7 +65,9 @@ extern enum gnwDeviceError devGetParam(const size_t deviceId,
 
     Params:
         * id - id of the device
-        * paramDescriptor - device-specific parameter info (see UHA for a specific device)
+        * param - parameter value
+        * subParam - parameter configuration subset value
+        * paramIndex - index of parameter (useful for handling value lists)
         * value - value to be set for parameter
     
     Return value: Device error code or GDE_NONE (see enum gnwDeviceError)
@@ -90,7 +76,9 @@ extern enum gnwDeviceError devGetParam(const size_t deviceId,
           the process has to be exclusive holder of it
 */
 extern enum gnwDeviceError devSetParam(const size_t deviceId,
-                                       const struct gnwDeviceParamDescriptor * const paramDescriptor,
+                                       const size_t param,
+                                       const size_t subParam,
+                                       const size_t paramIndex,
                                        const size_t value);
 
 /*

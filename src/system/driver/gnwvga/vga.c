@@ -111,7 +111,9 @@ const struct gnwDeviceDescriptor _gnw_device_descriptor = {
             /* desc */ { 0 },
             /* routine */ {
                 /* getParam */ uhaGetParam_display,
-                /* setParam */ uhaSetParam_display
+                /* getParamDecoder */ gnwDeviceGetParamQuery_decode,
+                /* setParam */ uhaSetParam_display,
+                /* setParamDecoder */ gnwDeviceSetParamQuery_decode,
             }
         },
         /* mem */ { 
