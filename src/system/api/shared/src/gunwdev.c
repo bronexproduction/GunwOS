@@ -41,13 +41,13 @@ enum gnwDeviceError devGetParam(const size_t deviceId,
 
     CHECKPTR(result);
 
-    const struct gnwDeviceGetParamQuery desc = {
+    const struct gnwDeviceGetParamQuery query = {
         param,
         subParam,
         paramIndex
     };
 
-    SYSCALL_USER_CALL(DEV_GET_PARAM, deviceId, &desc, result);
+    SYSCALL_USER_CALL(DEV_GET_PARAM, deviceId, &query, result);
 
     return SYSCALL_RESULT;
 }
@@ -58,14 +58,14 @@ enum gnwDeviceError devSetParam(const size_t deviceId,
                                 const size_t paramIndex,
                                 const size_t value) {
 
-    const struct gnwDeviceSetParamQuery desc = {
+    const struct gnwDeviceSetParamQuery query = {
         param,
         subParam,
         paramIndex,
         value
     };
 
-    SYSCALL_USER_CALL(DEV_SET_PARAM, deviceId, &desc, 0);
+    SYSCALL_USER_CALL(DEV_SET_PARAM, deviceId, &query, 0);
 
     return SYSCALL_RESULT;
 }

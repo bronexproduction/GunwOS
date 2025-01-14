@@ -52,17 +52,17 @@ enum gnwDeviceError k_dev_listen(const procId_t processId,
 
 void k_dev_getParam(const procId_t procId,
                     const size_t deviceId,
-                    const struct gnwDeviceGetParamQuery paramDescriptor,
+                    const struct gnwDeviceGetParamQuery query,
                     size_t * const vReplyPtr,
                     enum gnwDeviceError * const vErrorPtr);
 void k_dev_getParam_reply(const procId_t operatorProcId,
                           const size_t deviceId,
                           const bool success,
                           const size_t result);
-enum gnwDeviceError k_dev_setParam(const procId_t procId,
-                                   const size_t deviceId,
-                                   const struct gnwDeviceSetParamQuery paramDescriptor,
-                                   const size_t value);
+void k_dev_setParam(const procId_t procId,
+                    const size_t deviceId,
+                    const struct gnwDeviceSetParamQuery query,
+                    enum gnwDeviceError * const vErrorPtr);
 void k_dev_setParam_reply(const procId_t operatorProcId,
                                          const size_t deviceId,
                                          const bool success);

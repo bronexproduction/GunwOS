@@ -42,21 +42,19 @@ void uhaGetParam_display(const struct gnwDeviceGetParamQuery * const query) {
     getParamReply(true, result);
 }
 
-bool uhaSetParam_display(const size_t paramVal,
-                         const size_t subParamVal,
-                         const size_t paramIndex,
-                         const size_t value) {
+void uhaSetParam_display(const struct gnwDeviceSetParamQuery * const query) {
+    CHECKPTR(query);
 
-    const enum gnwDeviceUHA_display_param param = paramVal;
+    const enum gnwDeviceUHA_display_param param = query->param;
 
     switch (param) {
     case GDU_DISPLAY_PARAM_FORMAT: {
-        const enum gnwDeviceUHA_display_format format = value;
+        const enum gnwDeviceUHA_display_format format = query->value;
         extern bool setFormat(const enum gnwDeviceUHA_display_format);
-        return setFormat(format);
+        setParamReply(setFormat(format));
     } break;
     default:
-        return false;
+        setParamReply(true);
     }
 }
 

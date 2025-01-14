@@ -50,16 +50,13 @@ struct gnwDeviceUHA_system_routine {
         Params:
             * queryPtr - pointer to struct gnwDeviceSetParamQuery
 
-        Return value: true on success, false otherwise
+        It's expected for the driver to call setParamReply on finish
 
         The driver can implement custom API using that function.
         Some drivers are required to implement it.
         Check UHA for particular device for more details.
     */
-    bool (*setParam)(const size_t param,
-                     const size_t subParam,
-                     const size_t paramIndex,
-                     const size_t value);
+    void (*setParam)(const struct gnwDeviceSetParamQuery * const queryPtr);
     
     /*
         Decoder for gnwDeviceSetParamQuery objects

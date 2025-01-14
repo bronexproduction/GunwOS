@@ -289,7 +289,6 @@ void k_scr_devGetParam(const procId_t procId, const ptr_t refEsp) {
     Params (process stack offset):
         * PARAMETER_1_STACK_OFFSET - device identifier
         * PARAMETER_2_STACK_OFFSET - device parameter query pointer (relative to process memory)
-        * PARAMETER_3_STACK_OFFSET - parameter value
     
     Return (process stack offset):
         * RESULT_STACK_OFFSET - error code (enum gnwDeviceError)
@@ -297,10 +296,9 @@ void k_scr_devGetParam(const procId_t procId, const ptr_t refEsp) {
 void k_scr_devSetParam(const procId_t procId, const ptr_t refEsp) {
     SAFE_STACK_VAL_PTR(const size_t, devId, PARAMETER_1_STACK_OFFSET);
     SAFE_STACK_VAL_PTR(const struct gnwDeviceSetParamQuery * const, vParamQueryPtr, PARAMETER_2_STACK_OFFSET);
-    SAFE_STACK_VAL_PTR(const size_t, paramVal, PARAMETER_3_STACK_OFFSET);
 
-    extern enum gnwDeviceError k_scr_usr_devSetParam(const procId_t, const size_t, const struct gnwDeviceSetParamQuery * const, const size_t);
-    SAFE_STACK_RESULT_ARCH_VAL = k_scr_usr_devSetParam(procId, *devId, *vParamQueryPtr, *paramVal);
+    extern void k_scr_usr_devSetParam(const procId_t, const size_t, const struct gnwDeviceSetParamQuery * const, enum gnwDeviceError * const);
+    k_scr_usr_devSetParam(procId, *devId, *vParamQueryPtr, SAFE_STACK_RESULT_PTR);
 }
 
 /*

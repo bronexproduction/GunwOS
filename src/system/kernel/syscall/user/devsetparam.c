@@ -7,18 +7,38 @@
 
 #include <dev/dev.h>
 #include <hal/mem/mem.h>
+#include <hal/paging/paging.h>
 #include <error/panic.h>
 
-enum gnwDeviceError k_scr_usr_devSetParam(const procId_t procId,
-                                          const size_t devId, 
-                                          const struct gnwDeviceSetParamQuery * const vParamQueryPtr,
-                                          const size_t value) {
-    if (!vParamQueryPtr) {
-        OOPS("Unexpected null pointer", GDE_UNKNOWN);
+void k_scr_usr_devSetParam(const procId_t procId,
+                           const size_t devId, 
+                           const struct gnwDeviceSetParamQuery * const vQueryPtr,
+                           enum gnwDeviceError * const vErrorPtr) {
+    if (!vErrorPtr) {
+        OOPS("Unexpected null pointer",);
     }
-    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)vParamQueryPtr, sizeof(struct gnwDeviceSetParamQuery))) {
-        OOPS("Reserved zone access violation", GDE_UNKNOWN);
+    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)vErrorPtr, sizeof(enum gnwDeviceError))) {
+        OOPS("Reserved zone access violation",);
+    }
+    if (!vQueryPtr) {
+        OOPS("Unexpected null pointer",);
+        MEM_ONTABLE(procId, 
+            *(vErrorPtr) = GDE_UNKNOWN;
+        )
+        return;
+    }
+    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)vQueryPtr, sizeof(struct gnwDeviceSetParamQuery))) {
+        OOPS("Reserved zone access violation",);
+        MEM_ONTABLE(procId, 
+            *(vErrorPtr) = GDE_UNKNOWN;
+        )
+        return;
     }
     
-    return k_dev_setParam(procId, devId, *vParamQueryPtr, value);
+    struct gnwDeviceSetParamQuery query;
+    MEM_ONTABLE(procId, 
+        query = *(vQueryPtr);
+    )
+    
+    k_dev_setParam(procId, devId, query, vErrorPtr);
 }

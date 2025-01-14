@@ -13,10 +13,7 @@
 #include <types.h>
 
 extern void uhaGetParam_display(const struct gnwDeviceGetParamQuery * const query);
-extern bool uhaSetParam_display(const size_t paramVal,
-                                const size_t subParamVal,
-                                const size_t paramIndex,
-                                const size_t value);
+extern void uhaSetParam_display(const struct gnwDeviceSetParamQuery * const query);
 
 #endif // _GUNWAPI_KERNEL             
 
