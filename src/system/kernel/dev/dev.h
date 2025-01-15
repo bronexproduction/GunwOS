@@ -41,6 +41,9 @@ void k_dev_writeMem(const procId_t procId,
                     const size_t deviceId,
                     const struct gnwDeviceMemWriteQuery query,
                     enum gnwDeviceError * const vErrorPtr);
+void k_dev_writeMem_reply(const procId_t operatorProcId,
+                          const size_t deviceId,
+                          const bool success);
 enum gnwDeviceError k_dev_writeChar(const procId_t processId, 
                                     const size_t deviceId,
                                     const char character);

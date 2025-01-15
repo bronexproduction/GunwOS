@@ -17,6 +17,10 @@ void setParamReply(bool success) {
     SYSCALL_DRIVER_CALL(REPLY_SETPARAM, success, 0, 0);
 }
 
+void memWriteReply(bool success) {
+    SYSCALL_DRIVER_CALL(REPLY_MEMWRITE, success, 0, 0);
+}
+
 #else
 
 #include "../include/gunwuha.h"

@@ -50,6 +50,11 @@ extern void getParamReply(bool success, size_t result);
 */
 extern void setParamReply(bool success);
 
+/*
+    Report memWrite result
+*/
+extern void memWriteReply(bool success);
+
 #ifdef _GUNWAPI_KERNEL
 
 /*

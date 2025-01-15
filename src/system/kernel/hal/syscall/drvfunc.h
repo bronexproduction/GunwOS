@@ -63,4 +63,10 @@ void k_scr_replyGetParam(const bool success, const size_t result);
 */
 void k_scr_replySetParam(const bool success);
 
+/*
+    Code - 0x08
+    Function - REPLY_MEMWRITE
+*/
+void k_scr_replyMemWrite(const bool success);
+
 #endif // DRVFUNC_H

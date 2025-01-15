@@ -27,6 +27,8 @@ struct gnwDeviceUHA_mem_routine {
     
         Params:
             * queryPtr - pointer to struct gnwDeviceMemWriteQuery
+
+        It's expected for the driver to call memWriteReply on finish
     */
     void (*write)(const struct gnwDeviceMemWriteQuery * const);
     

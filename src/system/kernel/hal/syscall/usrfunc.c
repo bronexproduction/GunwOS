@@ -223,7 +223,7 @@ void k_scr_devMemWrite(const procId_t procId, const ptr_t refEsp) {
     SAFE_STACK_VAL_PTR(const struct gnwDeviceMemWriteQuery * const, query, PARAMETER_2_STACK_OFFSET);
 
     extern void k_scr_usr_devMemWrite(const procId_t, const size_t devId, const struct gnwDeviceMemWriteQuery * const, enum gnwDeviceError * const);
-    k_scr_usr_devMemWrite(procId, *devId, *query, (enum gnwDeviceError *)SAFE_STACK_RESULT_ARCH_VAL);
+    k_scr_usr_devMemWrite(procId, *devId, *query, (enum gnwDeviceError *)SAFE_STACK_RESULT_PTR);
 }
 
 /*

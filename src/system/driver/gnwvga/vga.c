@@ -76,10 +76,12 @@ bool setFormat(const enum gnwDeviceUHA_display_format format) {
 
 static void update(const struct gnwDeviceMemWriteQuery * const queryPtr) {
     if (!queryPtr) {
+        memWriteReply(false);
         fug(FUG_NULLPTR);
         return;
     }
     if (!queryPtr->buffer) {
+        memWriteReply(false);
         fug(FUG_NULLPTR);
         return;
     }
@@ -90,6 +92,8 @@ static void update(const struct gnwDeviceMemWriteQuery * const queryPtr) {
         *MEM_CHAR(index) = charBuffer[index].character;
         *MEM_COLOR(index) = (charBuffer[index].charColor | charBuffer[index].bgColor << 4);
     }
+
+    memWriteReply(true);
 }
 
 static void init() {

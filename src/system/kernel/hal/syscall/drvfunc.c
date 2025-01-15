@@ -148,5 +148,18 @@ void k_scr_replySetParam(const procId_t procId, const ptr_t refEsp) {
 
     extern void k_scr_drv_replySetParam(const procId_t, const bool);
     k_scr_drv_replySetParam(procId, *success);
+}
+
+/*
+    Code - 0x08
+    Function - REPLY_MEMWRITE
     
+    Params (process stack offset):
+        * PARAMETER_1_STACK_OFFSET - operation success status
+*/
+void k_scr_replyMemWrite(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(const bool, success, PARAMETER_1_STACK_OFFSET);
+
+    extern void k_scr_drv_replyMemWrite(const procId_t, const bool);
+    k_scr_drv_replyMemWrite(procId, *success);
 }

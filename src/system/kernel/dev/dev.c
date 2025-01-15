@@ -760,6 +760,23 @@ void k_dev_writeMem(const procId_t procId,
     }
 }
 
+void k_dev_writeMem_reply(const procId_t operatorProcId,
+                          const size_t deviceId,
+                          const bool success) {
+                            
+    if (!validateReporter(operatorProcId, deviceId)) {
+        unsafe_reportStatusOperationFailed(operatorProcId, deviceId, "Reporter validation failed", GDE_INVALID_OPERATION);
+        return;
+    }
+    struct device * const devicePtr = &(devices[deviceId]);
+    if (devicePtr->status != STARTED) {
+        unsafe_reportStatusOperationFailed(operatorProcId, deviceId, "Unexpected device status", GDE_INVALID_DEVICE_STATE);
+        return;
+    }
+
+    unsafe_pendingRequestInfoSetErrorIfNeeded(deviceId, success ? GDRE_NONE : GDRE_OPERATION_FAILED);
+}
+
 enum gnwDeviceError k_dev_writeChar(const procId_t processId, 
                                     const size_t deviceId,
                                     const char character) {
