@@ -126,5 +126,11 @@ void gnwDeviceGetParamQuery_decode(const ptr_t, struct gnwDeviceGetParamQuery * 
 */
 void gnwDeviceSetParamQuery_decode(const ptr_t, struct gnwDeviceSetParamQuery * const);
 
+/*
+    struct gnwDeviceMemWriteQuery decoder
+
+    To be used as writeDecoder parameter value in system UHA
+*/
+void gnwDeviceMemWriteQuery_decode(const ptr_t, struct gnwDeviceMemWriteQuery * const);
 
 #endif // GUNWOS_GUNWDRV_H

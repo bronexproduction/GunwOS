@@ -20,6 +20,7 @@
 #include <_gunwdev.h>
 
 #define MAX_DEVICES 8
+#define MAX_MEM_BUFFER_SIZE_BYTES KiB(8)
 
 enum deviceStatus {
     NONE            =  0,
@@ -46,6 +47,11 @@ struct deviceRequestInfo {
         Request reply pointer
     */
     size_t * vReplyPtr;
+
+    /*
+        Request reply pointer
+    */
+    byte_t buffer[MAX_MEM_BUFFER_SIZE_BYTES];
 };
 
 PRIVATE struct device {
@@ -207,7 +213,8 @@ PRIVATE enum gnwDriverError devInstallPrepare(const struct gnwDeviceDescriptor *
         /* pendingRequestInfo */ {
             /* procId */ NONE_PROC_ID,
             /* vErrorPtr */ nullptr,
-            /* vResultPtr */ nullptr
+            /* vResultPtr */ nullptr,
+            /* buffer */ { 0 }
         }
     };
 
@@ -406,6 +413,7 @@ static void unsafe_clearPendingRequestInfo(struct deviceRequestInfo * const info
     infoPtr->procId = NONE_PROC_ID;
     infoPtr->vErrorPtr = nullptr;
     infoPtr->vReplyPtr = nullptr;
+    memzero(infoPtr->buffer, MAX_MEM_BUFFER_SIZE_BYTES);
 }
 
 static void unsafe_pendingRequestInfoSetErrorIfNeeded(const size_t deviceId, const size_t error) {
@@ -623,43 +631,133 @@ void k_dev_releaseHold(const procId_t processId, const size_t deviceId) {
     }
 }
 
-enum gnwDeviceError k_dev_writeMem(const procId_t processId, 
-                                   const size_t deviceId,
-                                   const ptr_t bufferPtr,
-                                   const range_addr_t devMemRange) {
-    if (!bufferPtr) {
-        OOPS("Buffer cannot be nullptr", GDE_UNKNOWN);
+enum gnwDeviceError devApiOperationValidatePreconditions(const procId_t procId,
+                                                         const size_t deviceId,
+                                                         const bool needsOwnership) {
+    
+    if (!k_proc_idIsUser(procId)) {
+        OOPS("Invalid process ID", GDE_UNKNOWN);
+    }
+    if (!k_proc_isAlive(procId)) {
+        OOPS("Incorrect process ID", GDE_UNKNOWN);
+    }
+    if ((needsOwnership ? validateStartedDeviceOwnership(procId, deviceId) : validateStartedDevice(deviceId)) != GDE_NONE) {
+        return GDE_ID_INVALID;
     }
 
-    const enum gnwDeviceError e = validateStartedDeviceOwnership(processId, deviceId);
-    if (e) {
-        return e;
-    }
+    struct device * const devicePtr = &(devices[deviceId]);
 
-    const size_t maxInputSizeBytes = devices[deviceId].desc.api.mem.desc.maxInputSizeBytes;
-    if (!maxInputSizeBytes) {
-        return GDE_INVALID_OPERATION;
+    if (deviceHasPendingOperation(devicePtr)) {
+        return GDE_OPERATION_PENDING;
     }
-
-    if (!devMemRange.sizeBytes) {
-        return GDE_INVALID_PARAMETER;
-    }
-    if (devMemRange.offset >= maxInputSizeBytes) {
-        return GDE_INVALID_PARAMETER;
-    }
-    const size_t devBytesLeft = maxInputSizeBytes - devMemRange.offset;
-    if (devMemRange.sizeBytes > devBytesLeft) {
-        return GDE_INVALID_PARAMETER;
-    }
-
-    const struct gnwDeviceUHA_mem_routine * const routine = &devices[deviceId].desc.api.mem.routine;
-    if (!routine->write) {
-        return GDE_INVALID_OPERATION;
-    }
-    #warning it is more than dangerous to allow the driver to access the buffer directly, moreover it could be even impossible when driver processes are implemented
-    routine->write(bufferPtr, devMemRange);
 
     return GDE_NONE;
+}
+
+void k_dev_writeMem(const procId_t procId, 
+                    const size_t deviceId,
+                    const struct gnwDeviceMemWriteQuery query,
+                    enum gnwDeviceError * const vErrorPtr) {
+    if (!vErrorPtr) {
+        OOPS("Error pointer cannot be nullptr",);
+        return;
+    }
+
+    const enum gnwDeviceError e = devApiOperationValidatePreconditions(procId, deviceId, true);
+    if (e) {
+        MEM_ONTABLE(procId, 
+            *(vErrorPtr) = e;
+        )
+        return;
+    }
+
+    if (!query.buffer) {
+        OOPS("Buffer cannot be nullptr",);
+        MEM_ONTABLE(procId, 
+            *(vErrorPtr) = GDE_UNKNOWN;
+        )
+        return;
+    }
+
+    struct device * const devicePtr = &(devices[deviceId]);
+    const struct gnwDeviceUHA_mem * const api = &(devicePtr->desc.api.mem); 
+    const size_t maxInputSizeBytes = api->desc.maxInputSizeBytes;
+    if (!maxInputSizeBytes) {
+        MEM_ONTABLE(procId, 
+            *(vErrorPtr) = GDE_INVALID_OPERATION;
+        )
+        return;
+    }
+
+    if (!query.inputBufferRange.sizeBytes) {
+        MEM_ONTABLE(procId, 
+            *(vErrorPtr) = GDE_INVALID_PARAMETER;
+        )
+        return;
+    }
+    if (query.inputBufferRange.offset >= maxInputSizeBytes) {
+        MEM_ONTABLE(procId, 
+            *(vErrorPtr) = GDE_INVALID_PARAMETER;
+        )
+        return;
+    }
+
+    const size_t devBytesLeft = maxInputSizeBytes - query.inputBufferRange.offset;
+    if (query.inputBufferRange.sizeBytes > devBytesLeft) {
+        MEM_ONTABLE(procId, 
+            *(vErrorPtr) = GDE_INVALID_PARAMETER;
+        )
+        return;
+    }
+
+    if (!api->routine.write || !api->routine.writeDecoder) {
+        MEM_ONTABLE(procId, 
+            *(vErrorPtr) = GDE_INVALID_OPERATION;
+        )
+        return;
+    }
+    
+    if (query.inputBufferRange.sizeBytes > MAX_MEM_BUFFER_SIZE_BYTES) {
+        MEM_ONTABLE(procId, 
+            *(vErrorPtr) = GDE_INVALID_PARAMETER;
+        )
+        return;
+    }
+
+    devicePtr->pendingRequestInfo.procId = procId;
+    devicePtr->pendingRequestInfo.vErrorPtr = (size_t *)vErrorPtr;
+    MEM_ONTABLE(procId, 
+        memcopy(query.buffer, devicePtr->pendingRequestInfo.buffer, query.inputBufferRange.sizeBytes);
+    )
+
+    const struct gnwDeviceMemWriteQuery updatedQuery = {
+        /* buffer */ devicePtr->pendingRequestInfo.buffer,
+        /* inputBufferRange */ query.inputBufferRange
+    };
+
+    if (k_proc_idIsUser(devicePtr->operator)) {
+        const enum k_proc_error callbackError = k_proc_callback_invoke_ptr(devicePtr->operator, 
+                                                                           (fPtr_ptr)api->routine.write,
+                                                                           (ptr_t)&(updatedQuery),
+                                                                           sizeof(struct gnwDeviceMemWriteQuery),
+                                                                           GNW_DEVICEMEMWRITEQUERY_ENCODEDSIZE(updatedQuery),
+                                                                           (gnwRunLoopDataEncodingRoutine)gnwDeviceMemWriteQuery_encode,
+                                                                           (gnwRunLoopDataEncodingRoutine)api->routine.writeDecoder);
+        if (callbackError != PE_NONE) {   
+            MEM_ONTABLE(procId, 
+                *(vErrorPtr) = GDE_UNKNOWN;
+            )
+            unsafe_clearPendingRequestInfo(&(devicePtr->pendingRequestInfo));
+            return;
+        }
+
+        k_proc_lock(procId, PLT_SYNC);
+    } else {
+        api->routine.write(&updatedQuery);
+        MEM_ONTABLE(procId, 
+            *(vErrorPtr) = GDE_NONE;
+        )
+    }
 }
 
 enum gnwDeviceError k_dev_writeChar(const procId_t processId, 
@@ -713,28 +811,6 @@ enum gnwDeviceError k_dev_listen(const procId_t processId,
     return GDE_NONE;
 }
 
-enum gnwDeviceError devParamOperationValidatePreconditions(const procId_t procId,
-                                                           const size_t deviceId) {
-    
-    if (!k_proc_idIsUser(procId)) {
-        OOPS("Invalid process ID", GDE_UNKNOWN);
-    }
-    if (!k_proc_isAlive(procId)) {
-        OOPS("Incorrect process ID", GDE_UNKNOWN);
-    }
-    if (validateStartedDevice(deviceId) != GDE_NONE) {
-        return GDE_ID_INVALID;
-    }
-
-    struct device * const devicePtr = &(devices[deviceId]);
-
-    if (deviceHasPendingOperation(devicePtr)) {
-        return GDE_OPERATION_PENDING;
-    }
-
-    return GDE_NONE;
-}
-
 void k_dev_getParam(const procId_t procId,
                     const size_t deviceId,
                     const struct gnwDeviceGetParamQuery query,
@@ -752,7 +828,7 @@ void k_dev_getParam(const procId_t procId,
         return;
     }
 
-    const enum gnwDeviceError prevalidationError = devParamOperationValidatePreconditions(procId, deviceId);
+    const enum gnwDeviceError prevalidationError = devApiOperationValidatePreconditions(procId, deviceId, false);
     if (prevalidationError != GDE_NONE) {
         MEM_ONTABLE(procId, 
             *(vErrorPtr) = GDE_INVALID_OPERATION;
@@ -786,6 +862,7 @@ void k_dev_getParam(const procId_t procId,
             MEM_ONTABLE(procId, 
                 *(vErrorPtr) = GDE_UNKNOWN;
             )
+            unsafe_clearPendingRequestInfo(&(devicePtr->pendingRequestInfo));
             return;
         }
 
@@ -832,7 +909,7 @@ void k_dev_setParam(const procId_t procId,
         OOPS("Nullptr",);
     }
 
-    const enum gnwDeviceError prevalidationError = devParamOperationValidatePreconditions(procId, deviceId);
+    const enum gnwDeviceError prevalidationError = devApiOperationValidatePreconditions(procId, deviceId, true);
     if (prevalidationError != GDE_NONE) {
         MEM_ONTABLE(procId, 
             *(vErrorPtr) = GDE_INVALID_OPERATION;
@@ -865,6 +942,7 @@ void k_dev_setParam(const procId_t procId,
             MEM_ONTABLE(procId, 
                 *(vErrorPtr) = GDE_UNKNOWN;
             )
+            unsafe_clearPendingRequestInfo(&(devicePtr->pendingRequestInfo));
             return;
         }
 

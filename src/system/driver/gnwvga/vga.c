@@ -74,13 +74,17 @@ bool setFormat(const enum gnwDeviceUHA_display_format format) {
     return true;
 }
 
-static void update(const ptr_t buffer, const range_addr_t inputBufferRange) {
-    if (!buffer) {
+static void update(const struct gnwDeviceMemWriteQuery * const queryPtr) {
+    if (!queryPtr) {
+        fug(FUG_NULLPTR);
+        return;
+    }
+    if (!queryPtr->buffer) {
         fug(FUG_NULLPTR);
         return;
     }
 
-    const struct gnwDeviceUHA_display_character * const charBuffer = (struct gnwDeviceUHA_display_character *)buffer;
+    const struct gnwDeviceUHA_display_character * const charBuffer = (struct gnwDeviceUHA_display_character *)(queryPtr->buffer);
 
     for (int index = 0; index < dimensions.x * dimensions.y; ++index) {
         *MEM_CHAR(index) = charBuffer[index].character;
@@ -125,7 +129,8 @@ const struct gnwDeviceDescriptor _gnw_device_descriptor = {
                 /* maxInputSizeBytes */ 320 * 200 * sizeof(struct gnwDeviceUHA_display_pixel)
                 },
             /* routine */ {
-                /* write */ update
+                /* write */ update,
+                /* writeDecoder */ gnwDeviceMemWriteQuery_decode
             }
         },
         GNW_UHA_NO_KEYBOARD,

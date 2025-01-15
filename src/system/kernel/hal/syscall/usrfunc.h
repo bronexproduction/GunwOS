@@ -101,8 +101,7 @@ void k_scr_devRelease(const uint_32);
     Function - DEV_MEM_WRITE
 */
 enum gnwDeviceError k_scr_devMemWrite(const size_t,
-                                      const ptr_t,
-                                      const range_addr_t * const);
+                                      const struct gnwDeviceMemWriteQuery * const);
 
 /*
     Code - 0x0d

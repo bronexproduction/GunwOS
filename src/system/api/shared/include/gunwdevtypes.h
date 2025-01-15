@@ -78,6 +78,15 @@ struct gnwDeviceSetParamQuery {
     size_t value;
 };
 
+struct gnwDeviceMemWriteQuery {
+    ptr_t buffer;
+    range_addr_t inputBufferRange;
+};
+/*
+            * Buffer pointer (see struct gnwDeviceUHA_mem_desc for parameters)
+            * Range of the buffer, relative to (0 - desc.maxInputSizeBytes)
+*/
+
 typedef __attribute__((cdecl)) void (*gnwDeviceEventListener)(const struct gnwDeviceEvent * const);
 
 typedef void (*gnwDeviceEventDecoder)(const ptr_t, struct gnwDeviceEvent * const);

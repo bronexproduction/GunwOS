@@ -6,32 +6,73 @@
 //
 
 #include <hal/mem/mem.h>
+#include <hal/paging/paging.h>
 #include <dev/dev.h>
 #include <error/panic.h>
 
-enum gnwDeviceError k_scr_usr_devMemWrite(const procId_t procId, const size_t devId, const ptr_t bufferPtr, const range_addr_t * const devInputRange) {
+void k_scr_usr_devMemWrite(const procId_t procId,
+                           const size_t devId,
+                           const struct gnwDeviceMemWriteQuery * const vQueryPtr,
+                           enum gnwDeviceError * const vErrorPtr) {
 
-    if (!bufferPtr) {
-        OOPS("Unexpected null pointer", GDE_UNKNOWN);
+    if (!vErrorPtr) {
+        OOPS("Unexpected null pointer",);
+        return;
     }
-    if (!devInputRange) {
-        OOPS("Unexpected null pointer", GDE_UNKNOWN);
+    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)vErrorPtr, sizeof(enum gnwDeviceError))) {
+        OOPS("Reserved zone access violation",);
+        return;
     }
-    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)devInputRange, sizeof(range_addr_t))) {
-        OOPS("Reserved zone access violation", GDE_UNKNOWN);
+    if (!vQueryPtr) {
+        OOPS("Unexpected null pointer",);
+        MEM_ONTABLE(procId, 
+            *(vErrorPtr) = GDE_UNKNOWN;
+        )
+        return;
     }
-    if (!devInputRange->sizeBytes) {
-        OOPS("Unexpected buffer size", GDE_UNKNOWN);
+    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)vQueryPtr, sizeof(struct gnwDeviceMemWriteQuery))) {
+        OOPS("Reserved zone access violation",);
+        MEM_ONTABLE(procId, 
+            *(vErrorPtr) = GDE_UNKNOWN;
+        )
+        return;
     }
-    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)bufferPtr, devInputRange->sizeBytes)) {
-        OOPS("Reserved zone access violation", GDE_UNKNOWN);
+
+    struct gnwDeviceMemWriteQuery query;
+    MEM_ONTABLE(procId,
+        query = *(vQueryPtr);
+    )
+
+    if (!query.buffer) {
+        OOPS("Unexpected null pointer",);
+        MEM_ONTABLE(procId, 
+            *(vErrorPtr) = GDE_UNKNOWN;
+        )
+        return;
+    }
+    if (!query.inputBufferRange.sizeBytes) {
+        OOPS("Unexpected buffer size",);
+        MEM_ONTABLE(procId, 
+            *(vErrorPtr) = GDE_UNKNOWN;
+        )
+        return;
+    }
+    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)query.buffer, query.inputBufferRange.sizeBytes)) {
+        OOPS("Reserved zone access violation",);
+        MEM_ONTABLE(procId, 
+            *(vErrorPtr) = GDE_UNKNOWN;
+        )
+        return;
     }
 
     struct gnwDeviceUHADesc desc;
     const enum gnwDeviceError err = k_dev_getById(devId, &desc);
     if (err != GDE_NONE) {
-        return err;
+        MEM_ONTABLE(procId, 
+            *(vErrorPtr) = err;
+        )
+        return;
     }
     
-    return k_dev_writeMem(procId, devId, (ptr_t)bufferPtr, *devInputRange);
+    k_dev_writeMem(procId, devId, query, vErrorPtr);
 }

@@ -89,10 +89,15 @@ enum gnwDeviceError devCharWrite(const uint_32 deviceId,
 
 enum gnwDeviceError devMemWrite(const size_t identifier,
                                 const ptr_t buffer,
-                                const range_addr_t * const devInputBufferRange) {
+                                const range_addr_t devInputBufferRange) {
     CHECKPTR(buffer);
 
-    SYSCALL_USER_CALL(DEV_MEM_WRITE, identifier, buffer, devInputBufferRange);
+    const struct gnwDeviceMemWriteQuery query = {
+        /* buffer */ buffer,
+        /* inputBufferRange */ devInputBufferRange
+    };
+
+    SYSCALL_USER_CALL(DEV_MEM_WRITE, identifier, &query, 0);
 
     return SYSCALL_RESULT;
 }

@@ -37,10 +37,10 @@ bool k_dev_mmioRangeAllowed(const procId_t procId, const addr_t physMemStart, co
 enum gnwDeviceError k_dev_acquireHold(const procId_t processId, const size_t deviceId);
 void k_dev_releaseHold(const procId_t processId, const size_t deviceId);
 
-enum gnwDeviceError k_dev_writeMem(const procId_t processId, 
-                                   const size_t deviceId,
-                                   const ptr_t bufferPtr,
-                                   const range_addr_t devMemRange);
+void k_dev_writeMem(const procId_t procId, 
+                    const size_t deviceId,
+                    const struct gnwDeviceMemWriteQuery query,
+                    enum gnwDeviceError * const vErrorPtr);
 enum gnwDeviceError k_dev_writeChar(const procId_t processId, 
                                     const size_t deviceId,
                                     const char character);

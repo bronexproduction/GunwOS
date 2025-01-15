@@ -35,7 +35,7 @@ struct gnwDeviceUHA_system_routine {
         Some drivers are required to implement it.
         Check UHA for particular device for more details.
     */
-    void (*getParam)(const struct gnwDeviceGetParamQuery * const queryPtr);
+    void (*getParam)(const struct gnwDeviceGetParamQuery * const);
     
     /*
         Decoder for gnwDeviceGetParamQuery objects
@@ -56,7 +56,7 @@ struct gnwDeviceUHA_system_routine {
         Some drivers are required to implement it.
         Check UHA for particular device for more details.
     */
-    void (*setParam)(const struct gnwDeviceSetParamQuery * const queryPtr);
+    void (*setParam)(const struct gnwDeviceSetParamQuery * const);
     
     /*
         Decoder for gnwDeviceSetParamQuery objects

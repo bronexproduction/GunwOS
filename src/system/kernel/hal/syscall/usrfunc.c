@@ -213,19 +213,17 @@ void k_scr_devRelease(const procId_t procId, const ptr_t refEsp) {
 
     Params (process stack offset):
         * PARAMETER_1_STACK_OFFSET - device identifier
-        * PARAMETER_2_STACK_OFFSET - data buffer relative to caller process memory 
-        * PARAMETER_3_STACK_OFFSET - memory range (pointer) relative to device memory 
+        * PARAMETER_2_STACK_OFFSET - struct gnwDeviceMemWriteQuery pointer relative to caller process memory 
 
     Return (process stack offset):
         * RESULT_STACK_OFFSET - error code (enum gnwDeviceError)
 */
 void k_scr_devMemWrite(const procId_t procId, const ptr_t refEsp) {
     SAFE_STACK_VAL_PTR(const size_t, devId, PARAMETER_1_STACK_OFFSET);
-    SAFE_STACK_VAL_PTR(const ptr_t, buf, PARAMETER_2_STACK_OFFSET);
-    SAFE_STACK_VAL_PTR(const range_addr_t * const, rangePtr, PARAMETER_3_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const struct gnwDeviceMemWriteQuery * const, query, PARAMETER_2_STACK_OFFSET);
 
-    extern enum gnwDeviceError k_scr_usr_devMemWrite(const procId_t, const size_t devId, const ptr_t buf, const range_addr_t * const);
-    SAFE_STACK_RESULT_ARCH_VAL = k_scr_usr_devMemWrite(procId, *devId, *buf, *rangePtr);
+    extern void k_scr_usr_devMemWrite(const procId_t, const size_t devId, const struct gnwDeviceMemWriteQuery * const, enum gnwDeviceError * const);
+    k_scr_usr_devMemWrite(procId, *devId, *query, (enum gnwDeviceError *)SAFE_STACK_RESULT_ARCH_VAL);
 }
 
 /*

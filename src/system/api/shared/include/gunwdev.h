@@ -125,7 +125,7 @@ extern enum gnwDeviceError devCharWrite(const uint_32 deviceId,
 */
 extern enum gnwDeviceError devMemWrite(const size_t identifier,
                                        const ptr_t buffer,
-                                       const range_addr_t * const devInputBufferRange);
+                                       const range_addr_t devInputBufferRange);
 
 /*
     Register a listener to device events

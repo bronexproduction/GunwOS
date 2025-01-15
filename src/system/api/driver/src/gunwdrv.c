@@ -19,18 +19,24 @@ void drvStartReport(bool success) {
     SYSCALL_DRIVER_CALL(REPORT_START, success, 0, 0);
 }
 
-void gnwDeviceGetParamQuery_decode(const ptr_t dataPtr, struct gnwDeviceGetParamQuery * const descPtr) {
-    *(descPtr) = *((struct gnwDeviceGetParamQuery *)dataPtr);
+void gnwDeviceGetParamQuery_decode(const ptr_t dataPtr, struct gnwDeviceGetParamQuery * const queryPtr) {
+    *(queryPtr) = *((struct gnwDeviceGetParamQuery *)dataPtr);
 }
 
-void gnwDeviceSetParamQuery_decode(const ptr_t dataPtr, struct gnwDeviceSetParamQuery * const descPtr) {
-    *(descPtr) = *((struct gnwDeviceSetParamQuery *)dataPtr);
+void gnwDeviceSetParamQuery_decode(const ptr_t dataPtr, struct gnwDeviceSetParamQuery * const queryPtr) {
+    *(queryPtr) = *((struct gnwDeviceSetParamQuery *)dataPtr);
+}
+
+void gnwDeviceMemWriteQuery_decode(const ptr_t dataPtr, struct gnwDeviceMemWriteQuery * const queryPtr) {
+    *(queryPtr) = *((struct gnwDeviceMemWriteQuery *)dataPtr);
+    queryPtr->buffer = dataPtr + sizeof(struct gnwDeviceMemWriteQuery);
 }
 
 #else
 
 #include "../_include/_gunwdrv.h"
 #include <defs.h>
+#include <mem.h>
 
 static bool validateDeviceUHA_system(const struct gnwDeviceUHA * const uha) {
     if (XOR(uha->system.routine.getParam, uha->system.routine.getParamDecoder)) {
@@ -61,6 +67,9 @@ static bool validateDeviceUHA_mem(const struct gnwDeviceUHA * const uha) {
     */
 
     if (!uha->mem.routine.write) {
+        return false;
+    }
+    if (!uha->mem.routine.writeDecoder) {
         return false;
     }
     
@@ -191,12 +200,17 @@ bool validateDeviceDescriptor(const struct gnwDeviceDescriptor * const descripto
     return typeDefined;
 }
 
-void gnwDeviceGetParamQuery_encode(const struct gnwDeviceGetParamQuery * const descPtr, ptr_t dataPtr) {
-    *((struct gnwDeviceGetParamQuery *)dataPtr) = *(descPtr);
+void gnwDeviceGetParamQuery_encode(const struct gnwDeviceGetParamQuery * const queryPtr, ptr_t dataPtr) {
+    *((struct gnwDeviceGetParamQuery *)dataPtr) = *(queryPtr);
 }
 
-void gnwDeviceSetParamQuery_encode(const struct gnwDeviceSetParamQuery * const descPtr, ptr_t dataPtr) {
-    *((struct gnwDeviceSetParamQuery *)dataPtr) = *(descPtr);
+void gnwDeviceSetParamQuery_encode(const struct gnwDeviceSetParamQuery * const queryPtr, ptr_t dataPtr) {
+    *((struct gnwDeviceSetParamQuery *)dataPtr) = *(queryPtr);
+}
+
+void gnwDeviceMemWriteQuery_encode(const struct gnwDeviceMemWriteQuery * const queryPtr, ptr_t dataPtr) {
+    *((struct gnwDeviceMemWriteQuery *)dataPtr) = *(queryPtr);
+    memcopy(queryPtr->buffer, dataPtr + sizeof(struct gnwDeviceMemWriteQuery), queryPtr->inputBufferRange.sizeBytes);
 }
 
 #endif // _GUNWAPI_KERNEL
