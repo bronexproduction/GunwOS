@@ -9,7 +9,6 @@
 #include <gunwctrl.h>
 #include <gunwdev.h>
 #include <gunwfug.h>
-#include <defs.h>
 #include <string.h>
 
 #define START(PATH) if (err == GCE_NONE) {          \
