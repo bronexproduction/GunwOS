@@ -433,7 +433,7 @@ pub struct k_proc_process {
 #[derive(Debug)]
 pub enum k_proc_lockType {
     PLT_ASYNC   = 1 << 0,
-    PLT_SYNC     = 1 << 1,
+    PLT_SYNC    = 1 << 1,
 }
 
 #[repr(C)]
