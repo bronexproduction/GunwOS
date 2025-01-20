@@ -213,6 +213,10 @@ void k_proc_cleanup(const procId_t procId) {
 
     memzero(&pTab[procId], sizeof(struct process_user));
     k_mem_procCleanup(procId);
+
+    k_que_dispatch_arch((fPtr_arch)k_dev_procCleanup, procId);
+    k_que_dispatch_arch((fPtr_arch)k_ipc_procCleanup, procId);
+    k_que_dispatch_arch((fPtr_arch)k_runloop_procCleanup, procId);
 }
 
 void k_proc_stop(const procId_t procId) {
