@@ -437,9 +437,7 @@ static void unsafe_reportStatusOperationFailed(const procId_t operatorProcId,
         OOPS(reason,);
     } else {
         LOG(reason);
-        #warning TODO k_scr_usr_bye should not be called directly
-        extern void k_scr_usr_bye(const procId_t, const int_32);
-        k_scr_usr_bye(operatorProcId, -68);
+        k_proc_stop(operatorProcId);
         unsafe_pendingRequestInfoSetErrorIfNeeded(deviceId, errorCode);
     }
 }

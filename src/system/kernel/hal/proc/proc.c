@@ -20,6 +20,7 @@
 #include <error/panic.h>
 #include <queue/queue.h>
 #include <runloop/runloop.h>
+#include <dev/dev.h>
 
 #define STACK_VAL(REFESP, SIZE, OFFSET) (*(uint_ ## SIZE *)(REFESP + OFFSET))
 
