@@ -48,7 +48,8 @@ struct gnwDriverConfig {
     meaning that the device triggered an event  */
     void (*isr)();
     
-/*  IRQ request number  */
+/*
+    IRQ request number */
     uint_8 irq;
 };
 
@@ -111,26 +112,5 @@ extern void drvInitReport(bool success);
     Report driver startup status
 */
 extern void drvStartReport(bool success);
-
-/*
-    struct gnwDeviceGetParamQuery decoder
-
-    To be used as getParamDecoder parameter value in system UHA
-*/
-void gnwDeviceGetParamQuery_decode(const ptr_t, struct gnwDeviceGetParamQuery * const);
-
-/*
-    struct gnwDeviceSetParamQuery decoder
-
-    To be used as setParamDecoder parameter value in system UHA
-*/
-void gnwDeviceSetParamQuery_decode(const ptr_t, struct gnwDeviceSetParamQuery * const);
-
-/*
-    struct gnwDeviceMemWriteQuery decoder
-
-    To be used as writeDecoder parameter value in system UHA
-*/
-void gnwDeviceMemWriteQuery_decode(const ptr_t, struct gnwDeviceMemWriteQuery * const);
 
 #endif // GUNWOS_GUNWDRV_H

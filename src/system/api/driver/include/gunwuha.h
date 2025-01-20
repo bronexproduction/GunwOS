@@ -55,15 +55,25 @@ extern void setParamReply(bool success);
 */
 extern void memWriteReply(bool success);
 
-#ifdef _GUNWAPI_KERNEL
+/*
+    struct gnwDeviceGetParamQuery decoder
+
+    To be used as getParamDecoder parameter value in system UHA
+*/
+void gnwDeviceGetParamQuery_decode(const ptr_t, struct gnwDeviceGetParamQuery * const);
 
 /*
-    Extracts UHA descriptor from UHA structure
-*/
-extern struct gnwDeviceUHADesc uhaGetDesc(const size_t identifier,
-                                          const enum gnwDeviceType type,
-                                          const struct gnwDeviceUHA api);
+    struct gnwDeviceSetParamQuery decoder
 
-#endif // _GUNWAPI_KERNEL
+    To be used as setParamDecoder parameter value in system UHA
+*/
+void gnwDeviceSetParamQuery_decode(const ptr_t, struct gnwDeviceSetParamQuery * const);
+
+/*
+    struct gnwDeviceMemWriteQuery decoder
+
+    To be used as writeDecoder parameter value in system UHA
+*/
+void gnwDeviceMemWriteQuery_decode(const ptr_t, struct gnwDeviceMemWriteQuery * const);
 
 #endif // GUNWOS_GUNWUHA_H

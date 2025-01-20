@@ -18,6 +18,7 @@
 #include <hal/criticalsec/criticalsec.h>
 #include <log/log.h>
 #include <_gunwdev.h>
+#include <_gunwuha.h>
 
 #define MAX_DEVICES 8
 #define MAX_MEM_BUFFER_SIZE_BYTES KiB(8)
