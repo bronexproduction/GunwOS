@@ -27,6 +27,6 @@ void gnwDeviceGetParamQuery_encode(const struct gnwDeviceGetParamQuery * const, 
 void gnwDeviceSetParamQuery_encode(const struct gnwDeviceSetParamQuery * const, ptr_t);
 void gnwDeviceMemWriteQuery_encode(const struct gnwDeviceMemWriteQuery * const, ptr_t);
 
-#endif // GUNWOS__GUNWUHA_H
-
 #endif // _GUNWAPI_KERNEL
+
+#endif // GUNWOS__GUNWUHA_H
