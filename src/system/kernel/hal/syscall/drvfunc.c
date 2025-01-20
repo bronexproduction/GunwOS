@@ -28,9 +28,8 @@
 void k_scr_rdb(const procId_t procId, const ptr_t refEsp) {
     SAFE_STACK_VAL_PTR(const uint_16, port, PARAMETER_1_STACK_OFFSET);
 
-    #warning look at usr syscalls
-
-    SAFE_STACK_RESULT_ARCH_VAL = k_bus_inb(*port);
+    extern uint_8 k_scr_drv_rdb(const procId_t, const uint_16);
+    SAFE_STACK_RESULT_ARCH_VAL = k_scr_drv_rdb(procId, *port);
 }
 
 /*
@@ -46,9 +45,8 @@ void k_scr_wrb(const procId_t procId, const ptr_t refEsp) {
     SAFE_STACK_VAL_PTR(const uint_16, port, PARAMETER_1_STACK_OFFSET);
     SAFE_STACK_VAL_PTR(const uint_8, value, PARAMETER_2_STACK_OFFSET);
 
-    #warning look at usr syscalls
-
-    k_bus_outb(*port, *value);
+    extern void k_scr_drv_wrb(const procId_t, const uint_16, const uint_8);
+    k_scr_drv_wrb(procId, *port, *value);
 }
 
 /*
@@ -65,7 +63,8 @@ void k_scr_wrb(const procId_t procId, const ptr_t refEsp) {
 void k_scr_emit(const procId_t procId, const ptr_t refEsp) {
     SAFE_STACK_VAL_PTR(const struct gnwDeviceEvent * const, eventPtr, PARAMETER_1_STACK_OFFSET);
 
-    SAFE_STACK_RESULT_ARCH_VAL = k_dev_emit(procId, *eventPtr);
+    extern enum gnwDeviceError k_scr_drv_emit(const procId_t, const struct gnwDeviceEvent * const);
+    SAFE_STACK_RESULT_ARCH_VAL = k_scr_drv_emit(procId, *eventPtr);
 }
 
 /*
