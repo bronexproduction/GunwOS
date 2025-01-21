@@ -1066,14 +1066,31 @@ enum gnwDeviceError k_dev_emit(const procId_t procId, const struct gnwDeviceEven
 
 void k_dev_procCleanup(const procId_t procId) {
     for (size_t devId = 0; devId < MAX_DEVICES; ++devId) {
-        if (devices[devId].holder == procId) {
+        struct device * const devicePtr = &(devices[devId]);
+
+        if (devicePtr->holder == procId) {
             CRITICAL_SECTION(
                 k_dev_releaseHold(procId, devId);
             )
         }
+        if (devicePtr->pendingRequestInfo.procId == procId) {
+            unsafe_clearPendingRequestInfo(&(devicePtr->pendingRequestInfo));
+            #warning TODO does it mean that setting the response needs to be wrapped in critical section?
+        }
+        if (devicePtr->operator == procId) {
+            if (k_proc_idIsUser(devicePtr->pendingRequestInfo.procId)) {
+                if (!devicePtr->pendingRequestInfo.vReplyPtr) {
+                    OOPS("Unexpected nullptr vErrPtr",);
+                    return;
+                }
 
-        #warning TODO remove pendingRequestInfo from all the devices containing given requester procId
-        #warning TODO remove operator and device too
+                MEM_ONTABLE(procId,
+                    *(devicePtr->pendingRequestInfo.vReplyPtr) = GDE_HANDLE_INVALID;
+                )
+            }
 
+            #warning TODO remove device
+            OOPS("Removing device not supported yet",);
+        }
     }
 }

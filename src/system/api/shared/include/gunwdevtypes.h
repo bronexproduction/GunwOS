@@ -34,7 +34,6 @@ enum gnwDeviceError {
     GDE_CANNOT_BE_HELD,
     GDE_ALREADY_HELD,
     GDE_ALREADY_SET,
-    GDE_HANDLE_INVALID,
     GDE_LISTENER_INVALID,
     GDE_DECODER_INVALID,
     GDE_INVALID_DEVICE_STATE,
@@ -44,6 +43,7 @@ enum gnwDeviceError {
     GDE_OPERATION_FAILED,
     GDE_OPERATION_PENDING,
     GDE_NOT_RESPONDING,
+    GDE_HANDLE_INVALID,
     GDE_UNKNOWN = -1
 };
 _Static_assert(sizeof(enum gnwDeviceError) == sizeof(int_32), "Unexpected enum gnwDeviceError size");
