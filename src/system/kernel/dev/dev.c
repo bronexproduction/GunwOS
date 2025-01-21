@@ -111,12 +111,16 @@ PRIVATE bool validateId(size_t id) {
     return id < MAX_DEVICES;
 }
 
+static void unsafe_clearDevice(const size_t deviceId) {
+    memzero(&(devices[deviceId]), sizeof(struct device));
+    devices[deviceId].holder = NONE_PROC_ID;
+    devices[deviceId].operator = NONE_PROC_ID;
+    devices[deviceId].pendingRequestInfo.procId = NONE_PROC_ID;
+}
+
 void k_dev_init() {
-    memzero(devices, sizeof(struct device) * MAX_DEVICES);
     for (size_t i = 0; i < MAX_DEVICES; ++i) {
-        devices[i].holder = NONE_PROC_ID;
-        devices[i].operator = NONE_PROC_ID;
-        devices[i].pendingRequestInfo.procId = NONE_PROC_ID;
+        unsafe_clearDevice(i);
     }
 }
 
@@ -269,7 +273,7 @@ enum gnwDriverError k_dev_install(const struct gnwDeviceDescriptor * const descr
 
     if (devicePtr->status != INITIALIZED) {
         LOG("Driver init failed");
-        devicePtr->status = FAILED;
+        unsafe_clearDevice(*deviceIdPtr);
         return GDRE_UNINITIALIZED;
     }
     
@@ -281,11 +285,9 @@ enum gnwDriverError k_dev_install(const struct gnwDeviceDescriptor * const descr
 
     if (e != GDRE_NONE) {
         LOG("Error: Driver installation failed");
-        devicePtr->status = FAILED;
+        unsafe_clearDevice(*deviceIdPtr);
         return e;
     }
-
-    #warning TODO cleanup failed devices
 
     return GDRE_NONE;
 }
