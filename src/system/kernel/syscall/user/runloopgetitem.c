@@ -11,12 +11,10 @@
 
 enum gnwRunLoopError k_scr_usr_runLoopGetItem(const procId_t procId, struct gnwRunLoopDispatchItem * const itemPtr) {
 
-    if (!itemPtr) {
-        OOPS("Unexpected null pointer", GRLE_UNKNOWN);
-    }
-    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)itemPtr, sizeof(struct gnwRunLoopDispatchItem))) {
-        OOPS("Reserved zone access violation", GRLE_UNKNOWN);
-    }
+    MEM_VALIDATE_VPTR(procId, itemPtr, struct gnwRunLoopDispatchItem,
+        { OOPS("Unexpected null pointer", GRLE_UNKNOWN); },
+        { OOPS("Reserved zone access violation", GRLE_UNKNOWN); }
+    )
     
     return k_runloop_getPendingItem(procId, itemPtr);
 }

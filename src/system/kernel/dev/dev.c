@@ -1020,21 +1020,17 @@ PRIVATE enum gnwDeviceError validateListenerInvocation(const size_t deviceId) {
 }
 
 enum gnwDeviceError k_dev_emit(const procId_t procId, const struct gnwDeviceEvent * const eventPtr) {
-    if (!eventPtr) {
-        OOPS("Nullptr", GDE_UNKNOWN);
-    }
-    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)eventPtr, sizeof(struct gnwDeviceEvent))) {
-        OOPS("Reserved zone access violation", GDE_UNKNOWN);
-    }
-    if (!eventPtr->data) {
-        OOPS("Nullptr", GDE_UNKNOWN);
-    }
+    MEM_VALIDATE_VPTR(procId, eventPtr, struct gnwDeviceEvent,
+        { OOPS("Nullptr", GDE_UNKNOWN); },
+        { OOPS("Reserved zone access violation", GDE_UNKNOWN); }
+    )
     if (!eventPtr->dataSizeBytes) {
         OOPS("Unexpected event data size", GDE_UNKNOWN);
     }
-    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)eventPtr->data, eventPtr->dataSizeBytes)) {
-        OOPS("Reserved zone access violation", GDE_UNKNOWN);
-    }
+    MEM_VALIDATE_VPTR_BUFFER(procId, eventPtr->data, eventPtr->dataSizeBytes,
+        { OOPS("Nullptr", GDE_UNKNOWN); },
+        { OOPS("Reserved zone access violation", GDE_UNKNOWN); }
+    )
     enum gnwDeviceError err = validateEmitter(k_hal_servicedDevIdPtr);
     if (err) {
         return err;

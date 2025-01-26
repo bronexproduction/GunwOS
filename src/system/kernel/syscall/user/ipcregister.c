@@ -13,21 +13,17 @@
 
 enum gnwIpcError k_scr_usr_ipcRegister(const procId_t procId, const struct gnwIpcHandlerDescriptor * descPtr) {
 
-    if (!descPtr) {
-        OOPS("Unexpected null pointer", GIPCE_UNKNOWN);
-    }
-    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)descPtr, sizeof(struct gnwIpcHandlerDescriptor))) {
-        OOPS("Reserved zone access violation", GIPCE_UNKNOWN);
-    }
-    if (!descPtr->pathData.ptr) {
-        OOPS("Unexpected null pointer", GIPCE_UNKNOWN);
-    }
+    MEM_VALIDATE_VPTR(procId, descPtr, struct gnwIpcHandlerDescriptor,
+        { OOPS("Unexpected null pointer", GIPCE_UNKNOWN); },
+        { OOPS("Reserved zone access violation", GIPCE_UNKNOWN); }
+    )
     if (!descPtr->pathData.bytes) {
         OOPS("Unexpected path length", GIPCE_UNKNOWN);
     }
-    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)descPtr->pathData.ptr, descPtr->pathData.bytes)) {
-        OOPS("Reserved zone access violation", GIPCE_UNKNOWN);
-    }
+    MEM_VALIDATE_VPTR_BUFFER(procId, descPtr->pathData.ptr, descPtr->pathData.bytes,
+        { OOPS("Unexpected null pointer", GIPCE_UNKNOWN); },
+        { OOPS("Reserved zone access violation", GIPCE_UNKNOWN); }
+    )
     if (!descPtr->handlerRoutine) {
         OOPS("Unexpected null pointer", GIPCE_UNKNOWN);
     }

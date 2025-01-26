@@ -22,6 +22,13 @@
 #define MEM_UMA_USABLE_SIZE                             (MEM_UMA_RESERVED_START - MEM_UMA_START)
 #define MEM_XMS_START                                   MiB(1)
 
+#define MEM_VALIDATE_VPTR_BUFFER(PROC_ID, VPTR, SIZE_BYTES, ON_NULLPTR, ON_RESTRICTED) {    \
+    if (!VPTR) { ON_NULLPTR; }                                                              \
+    if (!k_mem_bufferZoneValidForProc(PROC_ID, (ptr_t)VPTR, SIZE_BYTES)) { ON_RESTRICTED; } \
+}
+#define MEM_VALIDATE_VPTR(PROC_ID, VPTR, TYPE, ON_NULLPTR, ON_RESTRICTED) \
+    MEM_VALIDATE_VPTR_BUFFER(PROC_ID, VPTR, sizeof(TYPE), ON_NULLPTR, ON_RESTRICTED)
+
 enum k_mem_error {
     ME_NONE = 0,
     ME_PART_ALREADY_ASSIGNED,

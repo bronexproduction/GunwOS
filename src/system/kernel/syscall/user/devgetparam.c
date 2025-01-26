@@ -15,41 +15,33 @@ void k_scr_usr_devGetParam(const procId_t procId,
                            const struct gnwDeviceGetParamQuery * const vQueryPtr,
                            size_t * const vReplyPtr,
                            enum gnwDeviceError * const vErrorPtr) {
-    
-    if (!vErrorPtr) {
-        OOPS("Unexpected null pointer",);
-    }
-    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)vErrorPtr, sizeof(enum gnwDeviceError))) {
-        OOPS("Reserved zone access violation",);
-    }
-    if (!vQueryPtr) {
-        OOPS("Unexpected null pointer",);
+
+    MEM_VALIDATE_VPTR(procId, vErrorPtr, enum gnwDeviceError,
+        { OOPS("Unexpected null pointer",); },
+        { OOPS("Reserved zone access violation",); }
+    )
+    MEM_VALIDATE_VPTR(procId, vQueryPtr, struct gnwDeviceGetParamQuery, {
+        OOPS("Unexpected null pointer",); 
         MEM_ONTABLE(procId, 
             *(vErrorPtr) = GDE_UNKNOWN;
         )
-        return;
-    }
-    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)vQueryPtr, sizeof(struct gnwDeviceGetParamQuery))) {
+    }, {
         OOPS("Reserved zone access violation",);
         MEM_ONTABLE(procId, 
             *(vErrorPtr) = GDE_UNKNOWN;
         )
-        return;
-    }
-    if (!vReplyPtr) {
-        OOPS("Unexpected null pointer",);
+    })
+    MEM_VALIDATE_VPTR(procId, vReplyPtr, size_t, {
+        OOPS("Unexpected null pointer",); 
         MEM_ONTABLE(procId, 
             *(vErrorPtr) = GDE_UNKNOWN;
         )
-        return;
-    }
-    if (!k_mem_bufferZoneValidForProc(procId, (ptr_t)vReplyPtr, sizeof(size_t))) {
+    }, {
         OOPS("Reserved zone access violation",);
         MEM_ONTABLE(procId, 
             *(vErrorPtr) = GDE_UNKNOWN;
         )
-        return;
-    }
+    })
     
     struct gnwDeviceGetParamQuery query;
     MEM_ONTABLE(procId, 
