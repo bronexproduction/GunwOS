@@ -57,8 +57,6 @@ static void loadFileSystem(struct gnwFileSystemDescriptor (*descProvider)(),
 }
 
 void k_drv_loadMinimal() {
-    
-    size_t dummyDeviceId;
 
     /*
         PIT driver for 8253/8254 chip
@@ -71,7 +69,8 @@ void k_drv_loadMinimal() {
         Keyboard controller driver for 8042 PS/2 chip
     */
     extern struct gnwDeviceDescriptor k_drv_keyboard_descriptor();
-    loadDevice(k_drv_keyboard_descriptor, &dummyDeviceId, MSGS_FAIL(Keyboard));
+    extern size_t k_drv_keyboard_deviceId;
+    loadDevice(k_drv_keyboard_descriptor, &k_drv_keyboard_deviceId, MSGS_FAIL(Keyboard));
 
     /*
         82077AA Floppy disk controller

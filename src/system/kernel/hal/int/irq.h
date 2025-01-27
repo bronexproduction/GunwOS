@@ -8,7 +8,7 @@
 #ifndef IRQ_H
 #define IRQ_H
 
-#define DEV_IRQ_LIMIT 8
+#define DEV_IRQ_LIMIT 16
 
 enum k_dev_irq {
                         // PIC      80368   Description
@@ -24,7 +24,7 @@ enum k_dev_irq {
     CVR           = 9,  // 9/1	    71h	    CGA vertical retrace (and other IRQ 2 devices)
     RESERVED_10   = 10, // 10/2	    72h	    Reserved
     RESERVED_11   = 11, // 11/3	    73h	    Reserved
-    RESERVED_12   = 12, // 12/4	    74h	    Reserved in AT, auxiliary device on PS/2 systems
+    MOUSE         = 12, // 12/4	    74h	    Reserved in AT, auxiliary device on PS/2 systems
     FPU           = 13, // 13/5	    75h	    FPU interrupt
     HDD           = 14, // 14/6	    76h	    Hard disk controller
     RESERVED_15   = 15  // 15/7	    77h	    Reserved

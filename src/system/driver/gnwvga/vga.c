@@ -111,6 +111,10 @@ static void init() {
     drvInitReport(true);
 }
 
+static void start() {
+    drvStartReport(true);
+}
+
 static void uhaGetParam_display(const struct gnwDeviceGetParamQuery * const query) {
     CHECKPTR(query);
 
@@ -203,7 +207,7 @@ const struct gnwDeviceDescriptor _gnw_device_descriptor = {
         },
         /* descriptor */ {
             /* init */ init,
-            /* start */ nullptr,
+            /* start */ start,
             /* isr */ nullptr,
             /* IRQ */ NULL
         }

@@ -513,6 +513,20 @@ enum k_proc_error k_proc_callback_invoke_ptr(const procId_t procId,
     return callbackInvoke(procId, GEF_PTR, (ptr_t)funPtr, p, pSizeBytes, pEncodedSizeBytes, encoder, decoder);
 }
 
+enum k_proc_error k_proc_setPriority(const procId_t procId, const bool priority) {
+    if (!k_proc_isAlive(procId)) {
+        return PE_INVALID_STATE;
+    }
+
+    pTab[procId].info.priority = priority;
+
+    if (!pTab[procCurrent].info.priority) {
+        k_proc_schedule_processStateDidChange();
+    }
+
+    return PE_NONE;
+}
+
 static void k_proc_prepareKernelProc() {
     memset(&kernelProc, 0, sizeof(struct process_kernel));
     kernelProc.info.state = PS_RUNNING;

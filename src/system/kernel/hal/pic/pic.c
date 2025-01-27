@@ -51,7 +51,7 @@ static uint_8 init() {
 
 static void disableIRQs() {
     
-    k_bus_outb(BUS_PIC_MASTER_DATA, 0xFF);
+    k_bus_outb(BUS_PIC_MASTER_DATA, 0xFF & ~(1 << SLAVE));
     k_bus_outb(BUS_PIC_SLAVE_DATA, 0xFF);
 }
 
@@ -63,13 +63,24 @@ void k_pic_configure() {
 
 void k_pic_enableIRQ(const enum k_dev_irq num) {
 
-    if (num > 15) OOPS("Attempt to enable IRQ above supported range",);
-    if (num > 7) OOPS("IRQ range not implemented yet",);
+    if (num > PIC_MAX_IRQ) {
+        OOPS("Attempt to enable IRQ above supported range",);
+    }
+    if (num == SLAVE) {
+        OOPS("Attempt to enable restricted IRQ",);
+    }
 
-    #warning IRQ > 7 not supported
-    uint_16 port = BUS_PIC_MASTER_DATA;
+    uint_16 port;
+    enum k_dev_irq line;
+    if (PIC_IRQ_IS_SLAVE(num)) {
+        port = BUS_PIC_SLAVE_DATA;
+        line = PIC_IRQ_SLAVE_LINE(num);
+    } else {
+        port = BUS_PIC_MASTER_DATA;
+        line = num;
+    }
 
     uint_8 mask = k_bus_inb(port);
-    mask = ~(1 << num) & mask;
+    mask = ~(1 << line) & mask;
     k_bus_outb(port, mask);
 }

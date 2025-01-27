@@ -8,6 +8,7 @@
 #include "hal.h"
 
 #include <defs.h>
+#include "proc/proc.h"
 #include "cpu/cpu.h"
 #include "gdt/gdt.h"
 #include "paging/paging.h"
@@ -25,6 +26,7 @@ extern void k_mem_init();
 
 PRIVATE struct isrEntry {
     size_t devId;
+    procId_t operator;
     void (*routine)();
 } isrReg[DEV_IRQ_LIMIT];
 
@@ -41,6 +43,17 @@ __attribute__((naked)) void k_paging_start_end() {
     __builtin_unreachable();
 }
 
+static void cleanISR(const size_t irq) {
+    if (irq >= DEV_IRQ_LIMIT) {
+        OOPS("IRQ out of range",);
+        return;
+    }
+
+    isrReg[irq].devId = 0;
+    isrReg[irq].operator = NONE_PROC_ID;
+    isrReg[irq].routine = nullptr;
+}
+
 void k_hal_init(const struct k_krn_memMapEntry *memMap) {
     k_paging_init(memMap);
     k_idt_loadDefault();
@@ -53,7 +66,22 @@ void k_hal_init(const struct k_krn_memMapEntry *memMap) {
     k_proc_init();
     k_mem_init();
 
+    for (size_t irq = 0; irq < DEV_IRQ_LIMIT; ++irq) {
+        cleanISR(irq);
+    }
+
     CPU_INTERRUPTS_ENABLE;
+}
+
+bool k_hal_isIRQAllowed(uint_8 num) {
+    if (num >= DEV_IRQ_LIMIT) {
+        return false;
+    }
+    if (num == SLAVE) {
+        return false;
+    }
+
+    return true;
 }
 
 bool k_hal_isIRQRegistered(uint_8 num) {
@@ -67,15 +95,24 @@ bool k_hal_isIRQRegistered(uint_8 num) {
     return true;
 }
 
-enum gnwDriverError k_hal_install(const size_t devId, const struct gnwDriverConfig driver) {
+enum gnwDriverError k_hal_install(const size_t devId, const procId_t operator, const struct gnwDriverConfig driver) {
     if (!driver.isr) {
         return GDRE_ISR_MISSING;
+    }
+    if (!k_hal_isIRQAllowed(driver.irq)) {
+        return GDRE_IRQ_INVALID;
     }
     if (k_hal_isIRQRegistered(driver.irq)) {
         return GDRE_IRQ_CONFLICT;
     }
+    if (operator != KERNEL_PROC_ID) {
+        if (!k_proc_isAlive(operator)) {
+            return GDRE_INVALID_ARGUMENT;
+        }
+    }
 
     isrReg[driver.irq].devId = devId;
+    isrReg[driver.irq].operator = operator;
     isrReg[driver.irq].routine = driver.isr;
         
     extern void k_pic_enableIRQ(const enum k_dev_irq);
@@ -112,11 +149,29 @@ void k_hal_irqHandle(const uint_8 irq) {
     */
     if (irq >= DEV_IRQ_LIMIT) {
         fail(FAIL_REASON_IRQ_ABOVE_LIMIT);
-    } else if (!isrReg[irq].routine) {
+        return;
+    }
+    if (!isrReg[irq].routine) {
         fail(FAIL_REASON_IRQ_NOT_FOUND);
-    } else {
-        k_hal_servicedDevIdPtr = &isrReg[irq].devId;
+        return;
+    }
+    if (isrReg[irq].operator <= NONE_PROC_ID) {
+        OOPS("Device operator inconsistency",);
+    }
+    
+    k_hal_servicedDevIdPtr = &isrReg[irq].devId;
+    
+    if (isrReg[irq].operator == KERNEL_PROC_ID) {
         isrReg[irq].routine();
+    } else {
+        enum k_proc_error error = k_proc_callback_invoke_void(isrReg[irq].operator, isrReg[irq].routine);
+        if (error != PE_NONE) {
+            OOPS("Error invoking IRQ handler",);
+        }
+        error = k_proc_setPriority(isrReg[irq].operator, true);
+        if (error != PE_NONE) {
+            OOPS("Error invoking IRQ handler",);
+        }
     }
 
     /*
@@ -135,7 +190,7 @@ void k_hal_irqHandle(const uint_8 irq) {
     /*
         Send EOI command to PIC
     */
-    if (irq > 7) {
+    if (PIC_IRQ_IS_SLAVE(irq)) {
         k_bus_outb(BUS_PIC_SLAVE_COMMAND, PIC_EOI);
     }
     k_bus_outb(BUS_PIC_MASTER_COMMAND, PIC_EOI);

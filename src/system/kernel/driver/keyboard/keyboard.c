@@ -18,6 +18,7 @@
 #include <error/panic.h>
 #include <hal/io/bus.h>
 #include <hal/proc/proc.h>
+#include <log/log.h>
 
 /*
     Keyboard controller data register
@@ -89,6 +90,8 @@
 #define KBD_STAT_TIM        0x40    /* Timeout bit (TIM) */
 #define KBD_STAT_PARERR     0x80    /* Parity error bit (PARE) */
 
+size_t k_drv_keyboard_deviceId;
+
 static void emitEvent(const int_32 type, const char data) {
     enum gnwDeviceError err;
     struct gnwDeviceEvent event;
@@ -97,15 +100,36 @@ static void emitEvent(const int_32 type, const char data) {
     event.dataSizeBytes = sizeof(char);
 
     err = k_dev_emit(KERNEL_PROC_ID, &event);
-    if (err != GDE_NONE) {
+    if (err == GDE_NOT_FOUND) {
+        LOG("Keyboard event ignored - no listener");
+    } else if (err != GDE_NONE) {
         OOPS("Error emitting keyboard event",);
     }
 }
 
+static void init() {
+    k_dev_init_report(KERNEL_PROC_ID, k_drv_keyboard_deviceId, true);
+}
+
+static void start() {
+    k_dev_start_report(KERNEL_PROC_ID, k_drv_keyboard_deviceId, true);
+}
+
 static void isr() {
     /* Checking output buffer status */
-    if (!k_bus_inb(KBD_BUS_STATUS) & KBD_STAT_OUTB) {
-        OOPS_NBR("Keyboard output buffer empty on keyboard interrupt");
+    const uint_8 status = k_bus_inb(KBD_BUS_STATUS);
+    if (!(status & KBD_STAT_OUTB)) {
+        /*
+            No data
+        */
+        LOG("Keyboard output buffer empty on keyboard interrupt");
+        return;
+    }
+    if ((status & KBD_STAT_AUXBF)) {
+        /*
+            Mouse input
+        */
+        LOG("Mouse data available on keyboard interrupt");
         return;
     }
 
@@ -126,9 +150,11 @@ static void isr() {
 }
 
 static struct gnwDriverConfig desc() {
+    const addr_t initAddr = (addr_t)init;
+    const addr_t startAddr = (addr_t)start;
     const addr_t isrAddr = (addr_t)isr;
 
-    return (struct gnwDriverConfig){ 0, 0, (void (*)())isrAddr, 1 };
+    return (struct gnwDriverConfig){ (void (*)())initAddr, (void (*)())startAddr, (void (*)())isrAddr, 1 };
 }
 
 static struct gnwDeviceUHA uha() {
@@ -143,10 +169,12 @@ struct gnwDeviceDescriptor k_drv_keyboard_descriptor() {
         /* api */ uha(),
         /* driver */ (struct gnwDeviceDriver) {
             /* io */ (struct gnwDeviceIO) {
-                /* busBase */ 0x60
+                /* busBase */ KBD_BUS_DATA
             },
             /* descriptor */ desc()
         },
         /* name */ "8042 PS/2 Controller"
     };
 }
+
+#warning TODO https://wiki.osdev.org/%228042%22_PS/2_Controller
