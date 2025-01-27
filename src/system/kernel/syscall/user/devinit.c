@@ -16,10 +16,7 @@ void k_scr_usr_devInit(const procId_t procId,
                        const procId_t operatorProcId,
                        enum gnwDriverError * vErrorPtr) {
 
-    MEM_VALIDATE_VPTR(procId, vErrorPtr, enum gnwDriverError,
-        { OOPS("Unexpected null pointer",); },
-        { OOPS("Reserved zone access violation",); }
-    )
+    MEM_VALIDATE_VPTR(procId, vErrorPtr, enum gnwDriverError,,);
 
     enum gnwDriverError error = k_dev_init_async(operatorProcId, procId, vErrorPtr);
 

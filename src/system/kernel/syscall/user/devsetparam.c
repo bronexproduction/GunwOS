@@ -15,17 +15,8 @@ void k_scr_usr_devSetParam(const procId_t procId,
                            const struct gnwDeviceSetParamQuery * const vQueryPtr,
                            enum gnwDeviceError * const vErrorPtr) {
 
-    MEM_VALIDATE_VPTR(procId, vErrorPtr, enum gnwDeviceError,
-        { OOPS("Unexpected null pointer",); },
-        { OOPS("Reserved zone access violation",); }
-    )
-    MEM_VALIDATE_VPTR(procId, vQueryPtr, struct gnwDeviceSetParamQuery, {
-        OOPS("Unexpected null pointer",); 
-        MEM_ONTABLE(procId, 
-            *(vErrorPtr) = GDE_UNKNOWN;
-        )
-    }, {
-        OOPS("Reserved zone access violation",);
+    MEM_VALIDATE_VPTR(procId, vErrorPtr, enum gnwDeviceError,,);
+    MEM_VALIDATE_VPTR(procId, vQueryPtr, struct gnwDeviceSetParamQuery,, {
         MEM_ONTABLE(procId, 
             *(vErrorPtr) = GDE_UNKNOWN;
         )

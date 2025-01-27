@@ -16,30 +16,20 @@
 void k_scr_usr_start(const procId_t procId,
                      struct gnwCtrlStartDescriptor * const descPtr) {
     
-    MEM_VALIDATE_VPTR(procId, descPtr, struct gnwCtrlStartDescriptor,
-        { OOPS("Unexpected null pointer",); },
-        { OOPS("Reserved zone access violation",); }
-    )
+    MEM_VALIDATE_VPTR(procId, descPtr, struct gnwCtrlStartDescriptor,,);
 
     byte_t pathBuffer[PATH_LENGTH_LIMIT] = { 0 };
     data_t pathData;
     enum gnwCtrlExecType type;
     MEM_ONTABLE(procId,
-        MEM_VALIDATE_VPTR(procId, descPtr->procIdOrErrorPtr, procId_t,
-            { OOPS("Unexpected null pointer",); },
-            { OOPS("Reserved zone access violation",); }
-        )
-        if (!descPtr->pathData.bytes || descPtr->pathData.bytes > PATH_LENGTH_LIMIT) {
+        MEM_VALIDATE_VPTR(procId, descPtr->procIdOrErrorPtr, procId_t,,);
+        if (descPtr->pathData.bytes > PATH_LENGTH_LIMIT) {
             *(descPtr->procIdOrErrorPtr) = GCE_INVALID_ARGUMENT;
             OOPS("Unexpected length",);
         }
-        MEM_VALIDATE_VPTR_BUFFER(procId, descPtr->pathData.ptr, descPtr->pathData.bytes, {
+        MEM_VALIDATE_VPTR_BUFFER(procId, descPtr->pathData.ptr, descPtr->pathData.bytes,, {
             *(descPtr->procIdOrErrorPtr) = GCE_INVALID_ARGUMENT;
-            OOPS("Unexpected null pointer",);
-        }, {
-            *(descPtr->procIdOrErrorPtr) = GCE_INVALID_ARGUMENT;
-            OOPS("Reserved zone access violation",);
-        })
+        });
 
         memcopy(descPtr->pathData.ptr, pathBuffer, descPtr->pathData.bytes);
         pathData.ptr = pathBuffer;

@@ -10,14 +10,8 @@
 #include <error/panic.h>
 
 void k_scr_usr_log(const procId_t procId, const char * const msgPtr, const size_t msgBytes) {
-    
-    if (!msgBytes) {
-        OOPS("Unexpected message size",);
-    }
-    MEM_VALIDATE_VPTR_BUFFER(procId, msgPtr, msgBytes,
-        { OOPS("Unexpected null pointer",); },
-        { OOPS("Reserved zone access violation",); }
-    )
+
+    MEM_VALIDATE_VPTR_BUFFER(procId, msgPtr, msgBytes,,);
 
     data_t logData;
     logData.ptr = (ptr_t)msgPtr;

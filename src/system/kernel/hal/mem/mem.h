@@ -22,12 +22,13 @@
 #define MEM_UMA_USABLE_SIZE                             (MEM_UMA_RESERVED_START - MEM_UMA_START)
 #define MEM_XMS_START                                   MiB(1)
 
-#define MEM_VALIDATE_VPTR_BUFFER(PROC_ID, VPTR, SIZE_BYTES, ON_NULLPTR, ON_RESTRICTED) {    \
-    if (!VPTR) { ON_NULLPTR; }                                                              \
-    if (!k_mem_bufferZoneValidForProc(PROC_ID, (ptr_t)VPTR, SIZE_BYTES)) { ON_RESTRICTED; } \
+#define MEM_VALIDATE_VPTR_BUFFER(PROC_ID, VPTR, SIZE_BYTES, RETVAL, ON_ERROR) {                                                             \
+    if (!SIZE_BYTES) { { ON_ERROR; } OOPS("Unexpected buffer size", RETVAL); }                                                              \
+    if (!VPTR) { { ON_ERROR; } OOPS("Unexpected null pointer", RETVAL); }                                                                   \
+    if (!k_mem_bufferZoneValidForProc(PROC_ID, (ptr_t)VPTR, SIZE_BYTES)) { { ON_ERROR; } OOPS("Reserved zone access violation", RETVAL); }  \
 }
-#define MEM_VALIDATE_VPTR(PROC_ID, VPTR, TYPE, ON_NULLPTR, ON_RESTRICTED) \
-    MEM_VALIDATE_VPTR_BUFFER(PROC_ID, VPTR, sizeof(TYPE), ON_NULLPTR, ON_RESTRICTED)
+#define MEM_VALIDATE_VPTR(PROC_ID, VPTR, TYPE, RETVAL, ON_ERROR) \
+    MEM_VALIDATE_VPTR_BUFFER(PROC_ID, VPTR, sizeof(TYPE), RETVAL, ON_ERROR)
 
 enum k_mem_error {
     ME_NONE = 0,

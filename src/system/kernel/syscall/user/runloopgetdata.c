@@ -18,10 +18,7 @@ enum gnwRunLoopError k_scr_usr_runLoopGetData(const procId_t procId, ptr_t dataB
         return err;
     }
 
-    MEM_VALIDATE_VPTR_BUFFER(procId, dataBufferPtr, dataSizeBytes,
-        { OOPS("Unexpected null pointer", GRLE_UNKNOWN); },
-        { OOPS("Reserved zone access violation", GRLE_UNKNOWN); }
-    )
+    MEM_VALIDATE_VPTR_BUFFER(procId, dataBufferPtr, dataSizeBytes, GRLE_UNKNOWN,);
     
     return k_runloop_getPendingItemData(procId, dataBufferPtr);
 }
