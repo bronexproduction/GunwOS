@@ -22,13 +22,25 @@
 #define MEM_UMA_USABLE_SIZE                             (MEM_UMA_RESERVED_START - MEM_UMA_START)
 #define MEM_XMS_START                                   MiB(1)
 
-#define MEM_VALIDATE_VPTR_BUFFER(PROC_ID, VPTR, SIZE_BYTES, RETVAL, ON_ERROR) {                                                             \
-    if (!SIZE_BYTES) { { ON_ERROR; } OOPS("Unexpected buffer size", RETVAL); }                                                              \
-    if (!VPTR) { { ON_ERROR; } OOPS("Unexpected null pointer", RETVAL); }                                                                   \
-    if (!k_mem_bufferZoneValidForProc(PROC_ID, (ptr_t)VPTR, SIZE_BYTES)) { { ON_ERROR; } OOPS("Reserved zone access violation", RETVAL); }  \
+#define _MEM_VALIDATE_VPTR_BUFFER(PROC_ID, VPTR, SIZE_BYTES, RETVAL, ON_ERROR, NULLABLE) {                                                      \
+    if (!NULLABLE || VPTR || SIZE_BYTES) {                                                                                                      \
+        if (!SIZE_BYTES) { { ON_ERROR; } OOPS("Unexpected buffer size", RETVAL); }                                                              \
+        if (!VPTR) { { ON_ERROR; } OOPS("Unexpected null pointer", RETVAL); }                                                                   \
+        if (!k_mem_bufferZoneValidForProc(PROC_ID, (ptr_t)VPTR, SIZE_BYTES)) { { ON_ERROR; } OOPS("Reserved zone access violation", RETVAL); }  \
+    }                                                                                                                                           \
 }
-#define MEM_VALIDATE_VPTR(PROC_ID, VPTR, TYPE, RETVAL, ON_ERROR) \
+#define MEM_VALIDATE_VPTR_BUFFER(PROC_ID, VPTR, SIZE_BYTES, RETVAL, ON_ERROR) \
+    _MEM_VALIDATE_VPTR_BUFFER(PROC_ID, VPTR, SIZE_BYTES, RETVAL, ON_ERROR, false)
+#define MEM_VALIDATE_VPTR_BUFFER_NULLABLE(PROC_ID, VPTR, SIZE_BYTES, RETVAL, ON_ERROR) \
+    _MEM_VALIDATE_VPTR_BUFFER(PROC_ID, VPTR, SIZE_BYTES, RETVAL, ON_ERROR, true)
+#define MEM_VALIDATE_VPTR_RE(PROC_ID, VPTR, TYPE, RETVAL, ON_ERROR) \
     MEM_VALIDATE_VPTR_BUFFER(PROC_ID, VPTR, sizeof(TYPE), RETVAL, ON_ERROR)
+#define MEM_VALIDATE_VPTR_R(PROC_ID, VPTR, TYPE, RETVAL) \
+    MEM_VALIDATE_VPTR_RE(PROC_ID, VPTR, TYPE, RETVAL,)
+#define MEM_VALIDATE_VPTR_E(PROC_ID, VPTR, TYPE, ON_ERROR) \
+    MEM_VALIDATE_VPTR_RE(PROC_ID, VPTR, TYPE,, ON_ERROR)
+#define MEM_VALIDATE_VPTR(PROC_ID, VPTR, TYPE) \
+    MEM_VALIDATE_VPTR_RE(PROC_ID, VPTR, TYPE,,)
 
 enum k_mem_error {
     ME_NONE = 0,

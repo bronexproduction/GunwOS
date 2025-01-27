@@ -10,7 +10,7 @@
 #include <error/panic.h>
 
 enum gnwDeviceError k_scr_usr_devGetByType(const procId_t procId, const enum gnwDeviceType deviceType, struct gnwDeviceUHADesc * const descriptorPtr) {
-    MEM_VALIDATE_VPTR(procId, descriptorPtr, struct gnwDeviceUHADesc, GDE_UNKNOWN,);
+    MEM_VALIDATE_VPTR_R(procId, descriptorPtr, struct gnwDeviceUHADesc, GDE_UNKNOWN);
 
     return k_dev_getByType(deviceType, descriptorPtr);
 }

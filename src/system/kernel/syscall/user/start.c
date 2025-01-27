@@ -16,13 +16,13 @@
 void k_scr_usr_start(const procId_t procId,
                      struct gnwCtrlStartDescriptor * const descPtr) {
     
-    MEM_VALIDATE_VPTR(procId, descPtr, struct gnwCtrlStartDescriptor,,);
+    MEM_VALIDATE_VPTR(procId, descPtr, struct gnwCtrlStartDescriptor);
 
     byte_t pathBuffer[PATH_LENGTH_LIMIT] = { 0 };
     data_t pathData;
     enum gnwCtrlExecType type;
     MEM_ONTABLE(procId,
-        MEM_VALIDATE_VPTR(procId, descPtr->procIdOrErrorPtr, procId_t,,);
+        MEM_VALIDATE_VPTR(procId, descPtr->procIdOrErrorPtr, procId_t);
         if (descPtr->pathData.bytes > PATH_LENGTH_LIMIT) {
             *(descPtr->procIdOrErrorPtr) = GCE_INVALID_ARGUMENT;
             OOPS("Unexpected length",);
