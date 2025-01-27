@@ -14,7 +14,7 @@
 #include <hal/gdt/gdt.h>
 #include <_gunwrlp.h>
 
-#define MAX_PROC 6
+#define MAX_PROC 7
 #define KERNEL_PROC_ID -1
 
 struct k_proc_descriptor {

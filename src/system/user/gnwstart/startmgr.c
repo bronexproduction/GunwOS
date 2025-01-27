@@ -41,6 +41,7 @@ static void installCoreDrivers() {
     enum gnwCtrlError ctrlErr = GCE_NONE;
 
     INSTALL("0:GNWVGA.GDV");    /* Display driver - process ID: 1 */
+    INSTALL("0:GNWMOUSE.GDV");  /* Mouse driver - process ID: 2 */
 
     if (installErr != GDRE_NONE || ctrlErr != GCE_NONE) {
         log("Unable to install core drivers");
@@ -53,10 +54,10 @@ static void startCoreModules() {
 
     enum gnwCtrlError err = GCE_NONE;
 
-    START("0:GNWDISPM.ELF");    /* Display manager    - process ID: 2 */
-    START("0:GNWKBDM.ELF");     /* Keyboard manager   - process ID: 3 */
-    START("0:GNWTERM.ELF");     /* Terminal           - process ID: 4 */
-    START("0:GNWSH.ELF");       /* Command line       - process ID: 5 */
+    START("0:GNWDISPM.ELF");    /* Display manager    - process ID: 3 */
+    START("0:GNWKBDM.ELF");     /* Keyboard manager   - process ID: 4 */
+    START("0:GNWTERM.ELF");     /* Terminal           - process ID: 5 */
+    START("0:GNWSH.ELF");       /* Command line       - process ID: 6 */
 
     if (err != GCE_NONE) {
         log("Unable to start core modules");
