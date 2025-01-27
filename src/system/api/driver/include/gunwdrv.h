@@ -113,4 +113,9 @@ extern void drvInitReport(bool success);
 */
 extern void drvStartReport(bool success);
 
+/*
+    Return from interrupt handler
+*/
+extern void drvInterruptReturn();
+
 #endif // GUNWOS_GUNWDRV_H

@@ -13,4 +13,4 @@ $(TARGET_O).o: build
 	$(AR) $(ARFLAGS) lib$(TARGET_O).a $(TARGET_O).o
 
 build:
-	$(C_DIR_LISTING) -print0 | xargs -0I{} $(C) $(CFLAGS) -o {}.o {}
+	$(C_SRC_DIR_LISTING) -print0 | xargs -0I{} $(C) $(CFLAGS) -o {}.o {}

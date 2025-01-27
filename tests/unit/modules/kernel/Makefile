@@ -1,6 +1,5 @@
 LFLAGS=-m$(L_OUTFORMAT) -z noexecstack --fatal-warnings -T linker.ld --no-warn-rwx-segments
 O_DIR_LISTING=find . -name '*.o' -type f
-C_DIR_LISTING=find . -name '*.c' -type f
 
 TEST_INCLUDE=-I $(KERNEL_SRC_DIR) \
 		     -I $(STDGUNW_INCLUDE_DIR)

@@ -9,7 +9,7 @@ O_DIR_LISTING=find . -name '*.o' -type f
 .PHONY: all clean run
 
 CXX_FRAMEWORK_INPUT=$(shell $(CXX_FRAMEWORK_LISTING))
-CXX_INPUT=$(shell $(CXX_DIR_LISTING))
+CXX_INPUT=$(shell $(CXX_SRC_DIR_LISTING))
 CXX_INPUT+=$(shell $(CXX_SHARED_DIR_LISTING))
 
 FRAMEWORK=$(BUILD_DIR)/gunwtest.a

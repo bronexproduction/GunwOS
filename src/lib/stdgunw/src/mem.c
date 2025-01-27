@@ -5,7 +5,7 @@
 //  Created by Artur Danielewski on 08.03.2020.
 //
 
-#include "include/mem.h"
+#include "../include/mem.h"
 
 void memset(void *ptr, const uint_8 val, size_t bytes) {
     byte_t *p = (byte_t *)ptr;

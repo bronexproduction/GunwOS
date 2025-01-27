@@ -41,9 +41,9 @@ SRC_DIR="$(CUR_DIR)/src"
 export LIB_SRC_DIR="$(SRC_DIR)/lib"
 SYSTEM_SRC_DIR="$(SRC_DIR)/system"
 export API_DIR="$(SYSTEM_SRC_DIR)/api"
-export SHARED_API_SRC_DIR="$(API_DIR)/shared"
-export APP_API_SRC_DIR="$(API_DIR)/app"
-export DRIVER_API_SRC_DIR="$(API_DIR)/driver"
+export SHARED_API_DIR="$(API_DIR)/shared"
+export APP_API_DIR="$(API_DIR)/app"
+export DRIVER_API_DIR="$(API_DIR)/driver"
 export KERNEL_SRC_DIR="$(SYSTEM_SRC_DIR)/kernel"
 BOOTLOADER_DIR="$(SRC_DIR)/bootloader"
 DRIVERS_SRC_DIR="$(SYSTEM_SRC_DIR)/driver"
@@ -61,10 +61,11 @@ export TEST_BLACKBOX_SHARED_DIR="$(TESTS_BLACKBOX_DIR)/shared"
 
 export BOOTLOADER_INCLUDE_DIR="$(BOOTLOADER_DIR)/preloader/kernel"
 export STDGUNW_INCLUDE_DIR="$(LIB_SRC_DIR)/stdgunw/include"
-export APP_API_PRV_INCLUDE_DIR="$(APP_API_SRC_DIR)/_include"
-export APP_API_INCLUDE_DIR="$(APP_API_SRC_DIR)/include"
-export DRIVER_API_PRV_INCLUDE_DIR="$(DRIVER_API_SRC_DIR)/_include"
-export DRIVER_API_INCLUDE_DIR="$(DRIVER_API_SRC_DIR)/include"
+export APP_API_PRV_INCLUDE_DIR="$(APP_API_DIR)/_include"
+export APP_API_INCLUDE_DIR="$(APP_API_DIR)/include"
+export DRIVER_API_PRV_INCLUDE_DIR="$(DRIVER_API_DIR)/_include"
+export DRIVER_API_INCLUDE_DIR="$(DRIVER_API_DIR)/include"
+export DRIVER_API_MODULES_DIR="$(DRIVER_API_DIR)/modules"
 export SHARED_API_PRV_INCLUDE_DIR="$(API_DIR)/shared/_include"
 export SHARED_API_INCLUDE_DIR="$(API_DIR)/shared/include"
 export API_SYS_DIR="$(API_DIR)/sys"
@@ -99,8 +100,11 @@ export ARFLAGS=rvs
 # Base listing commands
 
 export C_DIR_LISTING=find . -name '*.c' -type f
+export C_SRC_DIR_LISTING=find src/ -name '*.c' -type f
 export CXX_DIR_LISTING=find . -name '*.cpp' -type f
+export CXX_SRC_DIR_LISTING=find src/ -name '*.cpp' -type f
 export RS_DIR_LISTING=find . -name '*.rs' -type f
+export RS_SRC_DIR_LISTING=find src/ -name '*.rs' -type f
 
 .PHONY: all libs pre_build img clean test_blackbox
 

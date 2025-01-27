@@ -29,9 +29,9 @@ $(TARGET_O)_app_kernel: build_kernel_o
 	$(L) $(LFLAGS) -o $@.o $(shell $(O_KERNEL_DIR_LISTING))
 
 build_app_o:
-	$(C_DIR_LISTING) -print0 | xargs -0I{} $(C) $(CFLAGS_APP) -o {}_app.o {}
-	$(CXX_DIR_LISTING) -print0 | xargs -0I{} $(CXX) $(CXXFLAGS_APP) -o {}_app.o {}
+	$(C_SRC_DIR_LISTING) -print0 | xargs -0I{} $(C) $(CFLAGS_APP) -o {}_app.o {}
+	$(CXX_SRC_DIR_LISTING) -print0 | xargs -0I{} $(CXX) $(CXXFLAGS_APP) -o {}_app.o {}
 
 build_kernel_o:
-	$(C_DIR_LISTING) -print0 | xargs -0I{} $(C) $(CFLAGS_KERNEL) -o {}_app_kernel.o {}
-	$(CXX_DIR_LISTING) -print0 | xargs -0I{} $(CXX) $(CXXFLAGS_KERNEL) -o {}_app_kernel.o {}
+	$(C_SRC_DIR_LISTING) -print0 | xargs -0I{} $(C) $(CFLAGS_KERNEL) -o {}_app_kernel.o {}
+	$(CXX_SRC_DIR_LISTING) -print0 | xargs -0I{} $(CXX) $(CXXFLAGS_KERNEL) -o {}_app_kernel.o {}

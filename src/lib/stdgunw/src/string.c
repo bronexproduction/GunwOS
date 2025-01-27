@@ -5,11 +5,11 @@
 //  Created by Artur Danielewski on 27.01.2018.
 //
 
-#include "include/string.h"
+#include "../include/string.h"
 
-#include "include/char.h"
-#include "include/math.h"
-#include "include/mem.h"
+#include "../include/char.h"
+#include "../include/math.h"
+#include "../include/mem.h"
 
 size_t strlen(const char * const c) {
     size_t s = 0;

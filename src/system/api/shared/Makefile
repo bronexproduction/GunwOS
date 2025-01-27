@@ -29,9 +29,9 @@ $(TARGET_O)_shared_kernel: build_kernel_o
 	$(L) $(LFLAGS) -o $@.o $(shell $(O_KERNEL_DIR_LISTING))
 
 build_shared_o:
-	$(C_DIR_LISTING) -print0 | xargs -0I{} $(C) $(CFLAGS_SHARED) -o {}_shared.o {}
-	$(CXX_DIR_LISTING) -print0 | xargs -0I{} $(CXX) $(CXXFLAGS_SHARED) -o {}_shared.o {}
+	$(C_SRC_DIR_LISTING) -print0 | xargs -0I{} $(C) $(CFLAGS_SHARED) -o {}_shared.o {}
+	$(CXX_SRC_DIR_LISTING) -print0 | xargs -0I{} $(CXX) $(CXXFLAGS_SHARED) -o {}_shared.o {}
 
 build_kernel_o:
-	$(C_DIR_LISTING) -print0 | xargs -0I{} $(C) $(CFLAGS_KERNEL) -o {}_shared_kernel.o {}
-	$(CXX_DIR_LISTING) -print0 | xargs -0I{} $(CXX) $(CXXFLAGS_KERNEL) -o {}_shared_kernel.o {}
+	$(C_SRC_DIR_LISTING) -print0 | xargs -0I{} $(C) $(CFLAGS_KERNEL) -o {}_shared_kernel.o {}
+	$(CXX_SRC_DIR_LISTING) -print0 | xargs -0I{} $(CXX) $(CXXFLAGS_KERNEL) -o {}_shared_kernel.o {}

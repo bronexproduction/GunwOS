@@ -18,10 +18,8 @@ KERNEL_INCLUDE=-include kernel.pch \
 			   -I $(DRIVER_API_INCLUDE_DIR) \
 			   -I $(SHARED_API_PRV_INCLUDE_DIR) \
 			   -I $(SHARED_API_INCLUDE_DIR) \
-			   -I $(APP_API_SRC_DIR) \
-			   -I $(DRIVER_API_SRC_DIR) \
 			   -I . \
-			   -I "$(LIB_SRC_DIR)/gunwelf"
+			   -I "$(LIB_SRC_DIR)/gunwelf/include"
 
 KERNEL_LIBS=$(LIB_BUILD_DIR)/stdgunw.o \
 			$(LIB_BUILD_DIR)/gunwelf.o \

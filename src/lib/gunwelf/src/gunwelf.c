@@ -5,7 +5,7 @@
 //  Created by Artur Danielewski on 11.03.2023.
 //
 
-#include "gunwelf.h"
+#include "../include/gunwelf.h"
 #include <string.h>
 #include <defs.h>
 

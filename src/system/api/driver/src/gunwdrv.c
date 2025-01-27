@@ -19,6 +19,10 @@ void drvStartReport(bool success) {
     SYSCALL_DRIVER_CALL(REPORT_START, success, 0, 0);
 }
 
+void drvInterruptReturn() {
+    SYSCALL_DRIVER_CALL(INTERRUPT_RETURN, 0, 0, 0);
+}
+
 #else
 
 #include "../_include/_gunwdrv.h"

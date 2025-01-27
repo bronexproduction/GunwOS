@@ -5,7 +5,7 @@
 //  Created by Artur Danielewski on 02.03.2023.
 //
 
-#include "include/utils.h"
+#include "../include/utils.h"
 
 size_t aligned(const size_t value, const size_t alignment) {
     return alignedr(value, alignment, true);

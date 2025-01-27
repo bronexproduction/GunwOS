@@ -5,7 +5,7 @@
 //  Created by Artur Danielewski on 27.02.2020.
 //
 
-#include "include/math.h"
+#include "../include/math.h"
 
 int pow(int base, int exp) {
     if (exp == 0) {

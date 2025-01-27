@@ -5,15 +5,15 @@ export DRIVER_LFLAGS=-m$(L_OUTFORMAT) --fatal-warnings -z noexecstack
 export DRIVER_RSFLAGS=$(RSFLAGS_OBJECT)
 
 DRIVER_DIR_LISTING=find . -mindepth 1 -maxdepth 1 -type d
-APPS=$(shell $(DRIVER_DIR_LISTING))
+DRIVERS=$(shell $(DRIVER_DIR_LISTING))
 
-.PHONY: all $(APPS)
+.PHONY: all $(DRIVERS)
 
-all: $(APPS)
+all: $(DRIVERS)
 	mv *.gdv $(DRIVER_BUILD_DIR)/
 	mv *.lst $(DRIVER_BUILD_DIR)/
 
-$(APPS):
+$(DRIVERS):
 	make -C $@
 	mv $@/$@.gdv $@.gdv
 	objdump -D $@.gdv > $@.lst
