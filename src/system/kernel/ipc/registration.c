@@ -8,7 +8,7 @@
 #include "ipc.h"
 #include "data.h"
 #include "utility.h"
-#include <src/_gunwipc.h>
+#include <_gunwipc.h>
 #include <defs.h>
 #include <mem.h>
 #include <hal/proc/proc.h>

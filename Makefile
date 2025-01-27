@@ -40,11 +40,13 @@ SPEC_DIR="$(CUR_DIR)/spec"
 SRC_DIR="$(CUR_DIR)/src"
 export LIB_SRC_DIR="$(SRC_DIR)/lib"
 SYSTEM_SRC_DIR="$(SRC_DIR)/system"
-API_DIR="$(SYSTEM_SRC_DIR)/api"
+export API_DIR="$(SYSTEM_SRC_DIR)/api"
+export SHARED_API_SRC_DIR="$(API_DIR)/shared"
 export APP_API_SRC_DIR="$(API_DIR)/app"
 export DRIVER_API_SRC_DIR="$(API_DIR)/driver"
 export KERNEL_SRC_DIR="$(SYSTEM_SRC_DIR)/kernel"
 BOOTLOADER_DIR="$(SRC_DIR)/bootloader"
+DRIVERS_SRC_DIR="$(SYSTEM_SRC_DIR)/driver"
 APPS_SRC_DIR="$(SYSTEM_SRC_DIR)/user"
 TESTS_SRC_DIR="$(CUR_DIR)/tests"
 TESTS_BLACKBOX_DIR="$(TESTS_SRC_DIR)/blackbox"
@@ -59,9 +61,12 @@ export TEST_BLACKBOX_SHARED_DIR="$(TESTS_BLACKBOX_DIR)/shared"
 
 export BOOTLOADER_INCLUDE_DIR="$(BOOTLOADER_DIR)/preloader/kernel"
 export STDGUNW_INCLUDE_DIR="$(LIB_SRC_DIR)/stdgunw/include"
+export APP_API_PRV_INCLUDE_DIR="$(APP_API_SRC_DIR)/_include"
 export APP_API_INCLUDE_DIR="$(APP_API_SRC_DIR)/include"
+export DRIVER_API_PRV_INCLUDE_DIR="$(DRIVER_API_SRC_DIR)/_include"
 export DRIVER_API_INCLUDE_DIR="$(DRIVER_API_SRC_DIR)/include"
-export API_SHARED_INCLUDE_DIR="$(API_DIR)/shared"
+export SHARED_API_PRV_INCLUDE_DIR="$(API_DIR)/shared/_include"
+export SHARED_API_INCLUDE_DIR="$(API_DIR)/shared/include"
 export API_SYS_DIR="$(API_DIR)/sys"
 
 # Build directories
@@ -69,6 +74,7 @@ export API_SYS_DIR="$(API_DIR)/sys"
 export BUILD_DIR="$(CUR_DIR)/build"
 export LIB_BUILD_DIR="$(BUILD_DIR)/lib"
 export KERNEL_BUILD_DIR="$(BUILD_DIR)/kernel"
+export DRIVER_BUILD_DIR="$(BUILD_DIR)/driver"
 export APP_BUILD_DIR="$(BUILD_DIR)/app"
 
 # Base library paths
@@ -98,10 +104,10 @@ export RS_DIR_LISTING=find . -name '*.rs' -type f
 
 .PHONY: all libs pre_build img clean test_blackbox
 
-all: boot.bin boot.gfb kernel.gfb app_pack
+all: boot.bin boot.gfb kernel.gfb driver_pack app_pack
 
 pre_build:
-	mkdir -p $(BUILD_DIR) $(KERNEL_BUILD_DIR) $(LIB_BUILD_DIR) $(APP_BUILD_DIR)
+	mkdir -p $(BUILD_DIR) $(KERNEL_BUILD_DIR) $(LIB_BUILD_DIR) $(DRIVER_BUILD_DIR) $(APP_BUILD_DIR)
 
 boot.bin: pre_build
 	make -C $(BOOTLOADER_DIR)/boot
@@ -124,19 +130,23 @@ libs: pre_build
 api: libs
 	make -C $(API_DIR)
 
+driver_pack: libs api
+	make -C $(DRIVERS_SRC_DIR)
+
 app_pack: libs api
 	make -C $(APPS_SRC_DIR)
 
 img: $(BUILD_DIR)/gunwos.img
 
 $(BUILD_DIR)/gunwos.img:
-	bash $(SCRIPTS_DIR)/build_image_fat12.sh $@ $(KERNEL_BUILD_DIR)/boot.bin $(KERNEL_BUILD_DIR)/boot.gfb $(KERNEL_BUILD_DIR)/kernel.gfb $(APP_BUILD_DIR)/*.elf
+	bash $(SCRIPTS_DIR)/build_image_fat12.sh $@ $(KERNEL_BUILD_DIR)/boot.bin $(KERNEL_BUILD_DIR)/boot.gfb $(KERNEL_BUILD_DIR)/kernel.gfb $(DRIVER_BUILD_DIR)/*.gdv $(APP_BUILD_DIR)/*.elf
 
 clean:
 	rm -rf $(BUILD_DIR)
 	find $(SRC_DIR)/ -type f -name '*.o' -delete
 	find $(SRC_DIR)/ -type f -name '*.a' -delete
 	find $(SRC_DIR)/ -type f -name '*.elf' -delete
+	find $(SRC_DIR)/ -type f -name '*.gdv' -delete
 	find $(TESTS_SRC_DIR)/ -type f -name '*.o' -delete
 
 test_blackbox:

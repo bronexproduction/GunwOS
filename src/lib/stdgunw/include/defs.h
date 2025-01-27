@@ -11,8 +11,14 @@
 #define NULL 0
 #define nullptr 0
 
-#define KiB(C) (C * 1024)
+#define XOR(A, B) (!(A) != !(B))
+
+#define KiB(C) ((C) * 1024)
 #define MiB(C) (KiB(C) * 1024)
 #define GiB(C) (MiB(C) * 1024)
+
+#define PATH_LENGTH_LIMIT 255
+
+#define OFFSETOF(TYPE, ELEMENT) ((size_t)&(((TYPE *)0)->ELEMENT))
 
 #endif // STDGUNW_DEFS_H

@@ -10,6 +10,7 @@
 #include <hal/proc/proc.h>
 #include <hal/paging/paging.h>
 #include <error/panic.h>
+#include <dev/dev.h>
 
 void k_mem_init() {
 }
@@ -19,6 +20,23 @@ ptr_t k_mem_physicalToLinear(const ptr_t physAddr) {
         OOPS("Kernel address out of range", nullptr);
     }
     return (ptr_t)(MEM_CONV_PTL(physAddr));
+}
+
+bool k_mem_bufferIsInUsableUmaRange(const addr_t address, const size_t size) {
+    if (!size) {
+        return false;   
+    }
+    if (size > MEM_UMA_USABLE_SIZE) {
+        return false;
+    }
+    if (address < MEM_UMA_START || address >= MEM_UMA_RESERVED_START) {
+        return false;
+    }
+    if ((address + size) > MEM_UMA_RESERVED_START) {
+        return false;
+    }
+
+    return true;
 }
 
 size_t k_mem_getFreeBytes() {
@@ -54,6 +72,7 @@ bool k_mem_bufferZoneValidForProc(const procId_t procId,
 
 enum k_mem_error k_mem_gimme(const procId_t procId,
                              const ptr_t vPtr,
+                             const ptr_t pPtr,
                              const size_t sizeBytes) {
     if (!k_proc_idIsUser(procId)) {
         return ME_INVALID_ARGUMENT;
@@ -67,10 +86,37 @@ enum k_mem_error k_mem_gimme(const procId_t procId,
         return ME_INVALID_ARGUMENT;
     }
 
-    size_t startPage = MEM_PAGE_OF_ADDR((addr_t)vPtr);
-    size_t pageCount = MEM_PAGE_OF_ADDR((addr_t)aligned((addr_t)vEnd, MEM_PAGE_SIZE_BYTES)) - startPage;
+    if (pPtr) {        
+        if ((addr_t)vPtr % MEM_PAGE_SIZE_BYTES) {
+            return ME_INVALID_ARGUMENT;
+        }
+        if ((addr_t)pPtr % MEM_PAGE_SIZE_BYTES) {
+            return ME_INVALID_ARGUMENT;
+        }
+        if (sizeBytes % MEM_PAGE_SIZE_BYTES) {
+            return ME_INVALID_ARGUMENT;
+        }
+        if (!sizeBytes) {
+            return ME_INVALID_ARGUMENT;
+        }
+        ptr_t pEnd = pPtr + sizeBytes;
+        if (pEnd <= pPtr) {
+            return ME_INVALID_ARGUMENT;
+        }
 
-    return k_paging_assign(procId, startPage, pageCount);
+        if (!k_dev_mmioRangeAllowed(procId, (addr_t)pPtr, sizeBytes)) {
+            return ME_INVALID_ARGUMENT;
+        }
+        if (!k_mem_bufferIsInUsableUmaRange((addr_t)pPtr, sizeBytes)) {
+            return ME_INVALID_ARGUMENT;
+        }
+    }
+
+    size_t startVPage = MEM_PAGE_OF_ADDR((addr_t)vPtr);
+    size_t startPPage = MEM_PAGE_OF_ADDR((addr_t)pPtr);
+    size_t pageCount = MEM_PAGE_OF_ADDR((addr_t)aligned((addr_t)vEnd, MEM_PAGE_SIZE_BYTES)) - startVPage;
+
+    return k_paging_assign(procId, startVPage, startPPage, pageCount);
 }
 
 enum k_mem_error k_mem_thanksPage(const procId_t procId,

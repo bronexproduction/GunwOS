@@ -36,7 +36,7 @@ enum gnwDeviceError display_pushFrame(const procId_t procId,
         or the content from the last process may stay presented
     */
 
-    const enum gnwDeviceError e = devMemWrite(displayId, buffer, &inputRange);
+    const enum gnwDeviceError e = devMemWrite(displayId, buffer, inputRange);
     if (e != GDE_NONE) {
         sessionDestroy(displaySession);
     }

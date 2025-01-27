@@ -11,22 +11,13 @@
 #include <types.h>
 #include <defs.h>
 #include <gunwdev.h>
-#include "../include/gunwuha.h"
+#include "gunwuha.h"
 
-/*
-    Device driver error codes
-*/
-enum gnwDriverError {
-    GDRE_NONE               = 0,
-    GDRE_UNINITIALIZED      = 1,        // Driver initialization failed or driver expected to be initialized before requested operation
-    GDRE_START_FAILED       = 2,        // Driver start failed
-    GDRE_IRQ_CONFLICT       = 3,        // Driver caused IRQ conflict with another driver previously installed
-    GDRE_IRQ_INVALID        = 4,
-    GDRE_LIMIT_REACHED      = 5,
-    GDRE_ISR_MISSING        = 6,
-    GDRE_INVALID_DESCRIPTOR = 7,
-    GDRE_UNKNOWN            = -1
-};
+#ifndef _GUNWAPI_KERNEL
+
+#define GNW_UHA_EMPTY(TYPE) { GNW_UHA_ ## TYPE ## _DESC_EMPTY, GNW_UHA_ ## TYPE ## _ROUTINE_EMPTY }
+
+#endif // _GUNWAPI_KERNEL
 
 /*  Device driver configuration
 
@@ -38,18 +29,18 @@ struct gnwDriverConfig {
 
     Called when device is being registered
 
-    Returns 1 on success, 0 otherwise
+    Expected to call drvInitReport on finish
     
     NOTE: In this phase the interrupts are DISABLED */
-    bool (*init)();
+    void (*init)();
 
 /*
     Pointer to device start routine
 
-    Returns 1 on success, 0 otherwise
+    Expected to call drvStartReport on finish
 
     Called after device is being initialized */
-    bool (*start)();
+    void (*start)();
 
 /*  Pointer to device interrupt service routine
 
@@ -57,7 +48,8 @@ struct gnwDriverConfig {
     meaning that the device triggered an event  */
     void (*isr)();
     
-/*  IRQ request number  */
+/*
+    IRQ request number */
     uint_8 irq;
 };
 
@@ -110,5 +102,15 @@ struct gnwDeviceDescriptor {
     */
     char *name;
 };
+
+/*
+    Report driver initialization status
+*/
+extern void drvInitReport(bool success);
+
+/*
+    Report driver startup status
+*/
+extern void drvStartReport(bool success);
 
 #endif // GUNWOS_GUNWDRV_H

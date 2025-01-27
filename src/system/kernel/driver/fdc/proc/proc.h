@@ -8,8 +8,8 @@
 //  Intel 82077AA Datasheet 
 //
 
-#ifndef PROC_H
-#define PROC_H
+#ifndef FDC_PROC_H
+#define FDC_PROC_H
 
 #include "../common/fdctypes.h"
 
@@ -50,4 +50,4 @@ enum fdc_opStatus proc_stopMotor(const uint_16 base, const uint_8 drive);
 */
 enum fdc_opStatus proc_senseInterruptStatus(const uint_16 base, uint_8 * const sr0, uint_8 * const pcn);
 
-#endif // PROC_H
+#endif // FDC_PROC_H

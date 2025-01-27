@@ -136,7 +136,7 @@ void k_idt_loadDefault() {
     // 66
     // 67
     // 68
-    k_idt_default[69] = k_idt_gateInterrupt(k_isr_syscallDRIVER, DPL_0);
+    k_idt_default[69] = k_idt_gateInterrupt(k_isr_syscallDRIVER, DPL_3);
     // 70
     // 71
     // 72

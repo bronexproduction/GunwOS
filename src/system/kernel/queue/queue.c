@@ -17,9 +17,10 @@
 #define _NOPAR _PAR((addr_t)NULL)
 
 union dispatchFuncPtr {
-    fPtr_void f;
+    fPtr f;
     fPtr_arch f_arch;
-    fPtr_arch_arch f_arch_arch;
+    fPtr_arch2 f_arch2;
+    fPtr_arch3 f_arch3;
 };
 
 union dispatchFuncParam {
@@ -33,13 +34,14 @@ enum dispatchFuncType {
     DFE_NONE = 0,
     DFE_VOID,
     DFE_ARCH,
-    DFE_ARCH_ARCH,
+    DFE_ARCH2,
+    DFE_ARCH3,
 };
 
 struct dispatchFunc {
     enum dispatchFuncType type;
     union dispatchFuncPtr ptr;
-    union dispatchFuncParam params[2];
+    union dispatchFuncParam params[3];
 };
 
 struct dispatchEntry {
@@ -55,7 +57,8 @@ PRIVATE bool queueRunning = 0;
 static void dispatch(const ptr_t funcPtr,
                      const enum dispatchFuncType type, 
                      const union dispatchFuncParam p0, 
-                     const union dispatchFuncParam p1) {
+                     const union dispatchFuncParam p1, 
+                     const union dispatchFuncParam p2) {
     
     #warning how to avoid duplicates?
 
@@ -79,16 +82,22 @@ static void dispatch(const ptr_t funcPtr,
     queue[i].func.type = type;
     switch (type) {
     case DFE_VOID:
-        queue[i].func.ptr.f = (fPtr_void)funcPtr;
+        queue[i].func.ptr.f = (fPtr)funcPtr;
         break;
     case DFE_ARCH:
         queue[i].func.ptr.f_arch = (fPtr_arch)funcPtr;
         queue[i].func.params[0].pArch = p0.pArch;
         break;
-    case DFE_ARCH_ARCH:
-        queue[i].func.ptr.f_arch_arch = (fPtr_arch_arch)funcPtr;
+    case DFE_ARCH2:
+        queue[i].func.ptr.f_arch2 = (fPtr_arch2)funcPtr;
         queue[i].func.params[0].pArch = p0.pArch;
         queue[i].func.params[1].pArch = p1.pArch;
+        break;
+    case DFE_ARCH3:
+        queue[i].func.ptr.f_arch3 = (fPtr_arch3)funcPtr;
+        queue[i].func.params[0].pArch = p0.pArch;
+        queue[i].func.params[1].pArch = p1.pArch;
+        queue[i].func.params[2].pArch = p2.pArch;
         break;
     default:
         OOPS("Unexpected dispatched function type",);
@@ -107,16 +116,20 @@ static void dispatch(const ptr_t funcPtr,
     }
 }
 
-void k_que_dispatch(const fPtr_void func) {
-    dispatch((ptr_t)func, DFE_VOID, _NOPAR, _NOPAR);
+void k_que_dispatch(const fPtr func) {
+    dispatch((ptr_t)func, DFE_VOID, _NOPAR, _NOPAR, _NOPAR);
 }
 
 void k_que_dispatch_arch(const fPtr_arch func, const addr_t p0) {
-    dispatch((ptr_t)func, DFE_ARCH, _PAR(p0), _NOPAR);
+    dispatch((ptr_t)func, DFE_ARCH, _PAR(p0), _NOPAR, _NOPAR);
 }
 
-void k_que_dispatch_arch_arch(const fPtr_arch_arch func, const addr_t p0, const addr_t p1) {
-    dispatch((ptr_t)func, DFE_ARCH_ARCH, _PAR(p0), _PAR(p1));
+void k_que_dispatch_arch2(const fPtr_arch2 func, const addr_t p0, const addr_t p1) {
+    dispatch((ptr_t)func, DFE_ARCH2, _PAR(p0), _PAR(p1), _NOPAR);
+}
+
+void k_que_dispatch_arch3(const fPtr_arch3 func, const addr_t p0, const addr_t p1, const addr_t p2) {
+    dispatch((ptr_t)func, DFE_ARCH3, _PAR(p0), _PAR(p1), _PAR(p2));
 }
 
 void k_que_start() {
@@ -147,9 +160,14 @@ void k_que_start() {
         case DFE_ARCH:
             enqueued->func.ptr.f_arch(enqueued->func.params[0].pArch);
             break;
-        case DFE_ARCH_ARCH:
-            enqueued->func.ptr.f_arch_arch(enqueued->func.params[0].pArch,
-                                           enqueued->func.params[1].pArch);
+        case DFE_ARCH2:
+            enqueued->func.ptr.f_arch2(enqueued->func.params[0].pArch,
+                                       enqueued->func.params[1].pArch);
+            break;
+        case DFE_ARCH3:
+            enqueued->func.ptr.f_arch3(enqueued->func.params[0].pArch,
+                                       enqueued->func.params[1].pArch,
+                                       enqueued->func.params[2].pArch);
             break;
         default:
             OOPS("Unexpected queued function type",);

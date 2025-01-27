@@ -1,5 +1,5 @@
-CFLAGS=-std=c11 -c -fpic -ffreestanding -mno-red-zone -ggdb -I $(STDGUNW_INCLUDE_DIR) -I $(APP_API_INCLUDE_DIR) -I $(API_SHARED_INCLUDE_DIR) $(CFLAGS_GLOBAL)
-CXXFLAGS=-std=c++11 -c -fpic -ffreestanding -mno-red-zone -ggdb $(CXXFLAGS_GLOBAL)
+CFLAGS=-std=c17 -c -fpic -ffreestanding -mno-red-zone -ggdb -I $(STDGUNW_INCLUDE_DIR) -I $(SHARED_API_PRV_INCLUDE_DIR) -I $(SHARED_API_INCLUDE_DIR) $(CFLAGS_GLOBAL)
+CXXFLAGS=-std=c++17 -c -fpic -ffreestanding -mno-red-zone -ggdb $(CXXFLAGS_GLOBAL)
 
 CFLAGS_DRIVER=$(CFLAGS)
 CXXFLAGS_DRIVER=$(CXXFLAGS)
@@ -16,7 +16,7 @@ TARGET_O=gunwapi
 
 .PHONY: all driver kernel
 
-all: driver kernel clean
+all: driver kernel
 
 driver: $(TARGET_O)_driver
 kernel: $(TARGET_O)_driver_kernel
@@ -35,7 +35,3 @@ build_driver_o:
 build_kernel_o:
 	$(C_DIR_LISTING) -print0 | xargs -0I{} $(C) $(CFLAGS_KERNEL) -o {}_driver_kernel.o {}
 	$(CXX_DIR_LISTING) -print0 | xargs -0I{} $(CXX) $(CXXFLAGS_KERNEL) -o {}_driver_kernel.o {}
-
-clean_o:
-	find . -type f -name '*.o' ! -name '$(TARGET_O)_driver.o' -delete ! -name '$(TARGET_O)_driver_kernel.o' -delete
-	find . -type f -name '*.a' -delete

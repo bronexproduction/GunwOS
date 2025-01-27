@@ -13,15 +13,9 @@
 #include <gunwfug.h>
 
 static enum gnwDeviceUHA_display_format getSupportedFormat(const size_t deviceId, const size_t index) {
-    struct gnwDeviceParamDescriptor paramDesc;
-
-    paramDesc.param = GDU_DISPLAY_PARAM_FORMAT;
-    paramDesc.subParam = 0;
-    paramDesc.paramIndex = index;
-
     enum gnwDeviceUHA_display_format format;
 
-    const enum gnwDeviceError err = devGetParam(deviceId, &paramDesc, (size_t *)&format);
+    const enum gnwDeviceError err = devGetParam(deviceId, GDU_DISPLAY_PARAM_FORMAT, 0, index, (size_t *)&format);
     if (err != GDE_NONE) {
         return 0;
     }
@@ -51,24 +45,17 @@ static enum gnwDeviceUHA_display_format getSupportedDisplayFormat(const enum gnw
 }
 
 static point_t getDisplayDimensions(const size_t deviceId, const enum gnwDeviceUHA_display_format format) {
-    struct gnwDeviceParamDescriptor paramDesc;
     point_t dimensions;
+    enum gnwDeviceError error;
 
-    paramDesc.param = GDU_DISPLAY_PARAM_DIMENSIONS;
-    paramDesc.subParam = format;
-    
-    paramDesc.paramIndex = 0; {
-        const enum gnwDeviceError err = devGetParam(deviceId, &paramDesc, (size_t *)&dimensions.x);
-        if (err != GDE_NONE) {
-            return (point_t) { -1, -1 };
-        }
+    error = devGetParam(deviceId, GDU_DISPLAY_PARAM_DIMENSIONS, format, 0, (size_t *)&dimensions.x);
+    if (error != GDE_NONE) {
+        return (point_t) { -1, -1 };
     }
 
-    paramDesc.paramIndex = 1; {
-        const enum gnwDeviceError err = devGetParam(deviceId, &paramDesc, (size_t *)&dimensions.y);
-        if (err != GDE_NONE) {
-            return (point_t) { -1, -1 };
-        }
+    error = devGetParam(deviceId, GDU_DISPLAY_PARAM_DIMENSIONS, format, 1, (size_t *)&dimensions.y);
+    if (error != GDE_NONE) {
+        return (point_t) { -1, -1 };
     }
 
     return dimensions;

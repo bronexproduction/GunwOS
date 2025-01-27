@@ -7,7 +7,7 @@
 
 #ifndef _GUNWAPI_KERNEL
 
-#include "_gunwdisplay.h"
+#include "../_include/_gunwdisplay.h"
 #include <mem.h>
 #include "../include/gunwfug.h"
 #include "../include/gunwipc.h"
@@ -32,10 +32,6 @@ enum gnwDeviceError getDisplay(const enum gnwDisplayType type,
     }
     
     memcopy(&result.displayDescriptor, displayDescriptor, sizeof(struct gnwDisplayDescriptor));
-    displayDescriptor->dimensions.x = 80;
-    displayDescriptor->dimensions.y = 25;
-    displayDescriptor->format = TEXT_H80V25C16;
-    displayDescriptor->identifier = 0;
     return GDE_NONE;
 }
 

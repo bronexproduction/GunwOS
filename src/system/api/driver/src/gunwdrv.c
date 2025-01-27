@@ -5,11 +5,34 @@
 //  Created by Artur Danielewski on 12.04.2023.
 //
 
-#ifdef _GUNWAPI_KERNEL
+#ifndef _GUNWAPI_KERNEL
 
-#include "_gunwdrv.h"
+#include <types.h>
+#include <scl_driver.h>
+#include <gunwdevtypes.h>
+
+void drvInitReport(bool success) {
+    SYSCALL_DRIVER_CALL(REPORT_INIT, success, 0, 0);
+}
+
+void drvStartReport(bool success) {
+    SYSCALL_DRIVER_CALL(REPORT_START, success, 0, 0);
+}
+
+#else
+
+#include "../_include/_gunwdrv.h"
+#include <defs.h>
+#include <mem.h>
 
 static bool validateDeviceUHA_system(const struct gnwDeviceUHA * const uha) {
+    if (XOR(uha->system.routine.getParam, uha->system.routine.getParamDecoder)) {
+        return false;
+    }
+    if (XOR(uha->system.routine.setParam, uha->system.routine.setParamDecoder)) {
+        return false;
+    }
+
     return true;
 }
 
@@ -31,6 +54,9 @@ static bool validateDeviceUHA_mem(const struct gnwDeviceUHA * const uha) {
     */
 
     if (!uha->mem.routine.write) {
+        return false;
+    }
+    if (!uha->mem.routine.writeDecoder) {
         return false;
     }
     

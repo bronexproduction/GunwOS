@@ -10,16 +10,34 @@
 #define GUNWOS_GUNWUHA_MEM_H
 
 #include <uha/gunwuha_mem_desc.h>
+#include <gunwdevtypes.h>
+
+#ifndef _GUNWAPI_KERNEL
+
+#define GNW_UHA_NO_MEM GNW_UHA_EMPTY(MEM)
+#define GNW_UHA_MEM_ROUTINE_EMPTY { 0 }
+
+#endif // _GUNWAPI_KERNEL
+
+typedef void (*gnwDeviceMemWriteQueryDecoder)(const ptr_t, struct gnwDeviceMemWriteQuery * const);
 
 struct gnwDeviceUHA_mem_routine {
     /*
         Update the memory
     
         Params:
-            * Buffer pointer (see struct gnwDeviceUHA_mem_desc for parameters)
-            * Range of the buffer, relative to (0 - desc.maxInputSizeBytes)
+            * queryPtr - pointer to struct gnwDeviceMemWriteQuery
+
+        It's expected for the driver to call memWriteReply on finish
     */
-    void (*write)(const ptr_t buffer, const range_addr_t inputBufferRange);
+    void (*write)(const struct gnwDeviceMemWriteQuery * const);
+    
+    /*
+        Decoder for gnwDeviceMemWriteQuery objects
+
+        Required if write defined
+    */
+    gnwDeviceMemWriteQueryDecoder writeDecoder;
 };
 
 struct gnwDeviceUHA_mem {

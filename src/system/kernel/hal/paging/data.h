@@ -43,6 +43,9 @@
 
 _Static_assert(!(MEM_PHYSICAL_ADDRESSABLE_MEM % MEM_SPACE_PER_DIR_ENTRY), "MEM_PHYSICAL_ADDRESSABLE_MEM not aligned to addressable space unit");
 _Static_assert(!(MEM_VIRTUAL_RESERVED_KERNEL_MEM % MEM_SPACE_PER_DIR_ENTRY), "MEM_VIRTUAL_RESERVED_KERNEL_MEM not aligned to addressable space unit");
+_Static_assert(!(MEM_UMA_START % MEM_PAGE_SIZE_BYTES), "MEM_UMA_START must align to MEM_PAGE_SIZE_BYTES");
+_Static_assert(!(MEM_UMA_RESERVED_START % MEM_PAGE_SIZE_BYTES), "MEM_UMA_RESERVED_START must align to MEM_PAGE_SIZE_BYTES");
+_Static_assert(!(MEM_XMS_START % MEM_PAGE_SIZE_BYTES), "MEM_XMS_START must align to MEM_PAGE_SIZE_BYTES");
 _Static_assert(MEM_PHYSICAL_PAGE_TABLE_COUNT <= MEM_MAX_DIR_ENTRY, "MEM_PHYSICAL_PAGE_TABLE_COUNT exceeds MEM_MAX_DIR_ENTRY");
 _Static_assert(MEM_PAGE_SIZE_BYTES >= 2, "MEM_PAGE_SIZE_BYTES cannot be less than 2");
 _Static_assert(MEM_VIRTUAL_USER_MAX_PAGE_TABLE_COUNT + MEM_VIRTUAL_RESERVED_KERNEL_PAGE_TABLE_COUNT == MEM_MAX_DIR_ENTRY, "User and reserved pages count not equal MEM_MAX_VIRTUAL_PAGE_COUNT");
@@ -70,6 +73,7 @@ typedef struct __attribute__((packed)) physical_page_specifier_t {
     bool present    :1; // Installed physical RAM
     bool available  :1; // Available (non-reserved) physical RAM
     bool reserved   :1; // Reserved for kernel-use only
+    bool mmio       :1; // Available for memory-mapped devices
     size_t assignCount; // Number of processes already having the page assigned
 } physical_page_table_t[MEM_PHYSICAL_PAGE_COUNT];
 

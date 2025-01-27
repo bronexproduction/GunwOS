@@ -12,9 +12,12 @@ KERNEL_INCLUDE=-include kernel.pch \
 			   $(KERNEL_TEST_INCLUDE) \
 			   -I $(BOOTLOADER_INCLUDE_DIR) \
 			   -I $(STDGUNW_INCLUDE_DIR) \
+			   -I $(APP_API_PRV_INCLUDE_DIR) \
 			   -I $(APP_API_INCLUDE_DIR) \
+			   -I $(DRIVER_API_PRV_INCLUDE_DIR) \
 			   -I $(DRIVER_API_INCLUDE_DIR) \
-			   -I $(API_SHARED_INCLUDE_DIR) \
+			   -I $(SHARED_API_PRV_INCLUDE_DIR) \
+			   -I $(SHARED_API_INCLUDE_DIR) \
 			   -I $(APP_API_SRC_DIR) \
 			   -I $(DRIVER_API_SRC_DIR) \
 			   -I . \
@@ -23,10 +26,11 @@ KERNEL_INCLUDE=-include kernel.pch \
 KERNEL_LIBS=$(LIB_BUILD_DIR)/stdgunw.o \
 			$(LIB_BUILD_DIR)/gunwelf.o \
 			$(LIB_BUILD_DIR)/gunwapi_app_kernel.o \
-			$(LIB_BUILD_DIR)/gunwapi_driver_kernel.o
+			$(LIB_BUILD_DIR)/gunwapi_driver_kernel.o \
+			$(LIB_BUILD_DIR)/gunwapi_shared_kernel.o
 
-export KERNEL_BUILD_CFLAGS=-std=c11 -c -fpic -ffreestanding -mno-red-zone -ggdb -D_GUNWAPI_KERNEL $(CFLAGS_GLOBAL)
-CXXFLAGS=-std=c++11 -c -ffreestanding -mno-red-zone -ggdb $(CXXFLAGS_GLOBAL)
+export KERNEL_BUILD_CFLAGS=-std=c17 -c -fpic -ffreestanding -mno-red-zone -ggdb -D_GUNWAPI_KERNEL $(CFLAGS_GLOBAL)
+CXXFLAGS=-std=c++17 -c -ffreestanding -mno-red-zone -ggdb $(CXXFLAGS_GLOBAL)
 
 O_DIR_LISTING=find . -name '*.o' -type f
 

@@ -20,6 +20,7 @@
 #include <error/panic.h>
 #include <queue/queue.h>
 #include <runloop/runloop.h>
+#include <dev/dev.h>
 
 #define STACK_VAL(REFESP, SIZE, OFFSET) (*(uint_ ## SIZE *)(REFESP + OFFSET))
 
@@ -78,6 +79,16 @@ bool k_proc_idIsUser(const procId_t procId) {
     return IN_RANGE(0, procId, MAX_PROC - 1);
 }
 
+bool k_proc_isAlive(const procId_t procId) {
+    if (!k_proc_idIsUser(procId)) {
+        OOPS("Process ID out of range", false);
+    }
+    
+    return pTab[procId].info.state == PS_READY ||
+           pTab[procId].info.state == PS_RUNNING ||
+           pTab[procId].info.state == PS_BLOCKED;
+}
+
 struct k_proc_process k_proc_getInfo(const procId_t procId) {
     if (procId < KERNEL_PROC_ID || procId >= MAX_PROC) {
         struct k_proc_process info;
@@ -88,9 +99,13 @@ struct k_proc_process k_proc_getInfo(const procId_t procId) {
     return (procId == KERNEL_PROC_ID) ? kernelProc.info : pTab[procId].info;
 }
 
-enum k_proc_error k_proc_spawn(procId_t * procId) {
+enum k_proc_error k_proc_spawn(procId_t * procId, const enum k_proc_procType procType) {
     if (!procId) {
         OOPS("Nullptr", PE_UNKNOWN);
+    }
+    if (procType != PT_PROG &&
+        procType != PT_DRIVER) {
+        OOPS("Unexpected proc type", PE_UNKNOWN);
     }
     
     uint_32 pIndex;
@@ -113,6 +128,7 @@ enum k_proc_error k_proc_spawn(procId_t * procId) {
 
     memzero(&pTab[pIndex].cpuState, sizeof pTab[pIndex].cpuState);
 
+    pTab[pIndex].info.type = procType;
     pTab[pIndex].info.dpl = DPL_3;
 
     pTab[pIndex].cpuState.eflags = FLAGS_INTERRUPT;
@@ -188,29 +204,27 @@ void k_proc_unlock(const procId_t procId, enum k_proc_lockType lockType) {
     k_proc_schedule_processStateDidChange();
 }
 
-static bool isProcessAlive(const procId_t procId) {
-    return pTab[procId].info.state == PS_READY ||
-           pTab[procId].info.state == PS_RUNNING ||
-           pTab[procId].info.state == PS_BLOCKED;
-}
-
 void k_proc_cleanup(const procId_t procId) {
     if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
         OOPS("Process id out of range",);
     }
-    if (isProcessAlive(procId)) {
+    if (k_proc_isAlive(procId)) {
         OOPS("Unexpected process state during cleanup",);
     }
 
     memzero(&pTab[procId], sizeof(struct process_user));
     k_mem_procCleanup(procId);
+
+    k_que_dispatch_arch((fPtr_arch)k_dev_procCleanup, procId);
+    k_que_dispatch_arch((fPtr_arch)k_ipc_procCleanup, procId);
+    k_que_dispatch_arch((fPtr_arch)k_runloop_procCleanup, procId);
 }
 
 void k_proc_stop(const procId_t procId) {
     if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
         OOPS("Process id out of range",);
     }
-    if (!isProcessAlive(procId)) {
+    if (!k_proc_isAlive(procId)) {
         OOPS("Unexpected process state during stop",);
     }
     
@@ -442,7 +456,7 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
     if (pTab[procId].info.state == PS_FINISHED) {
         return PE_IGNORED;
     }
-    if (!isProcessAlive(procId)) {
+    if (!k_proc_isAlive(procId)) {
         OOPS("Attempted callback invocation in dead process", PE_UNKNOWN);
     }
     
@@ -478,14 +492,19 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
         return PE_OPERATION_FAILED;
     }
 
-    k_proc_unlock(procId, PLT_EVENT);
+    k_proc_unlock(procId, PLT_ASYNC);
     k_proc_schedule_processStateDidChange();
 
     return PE_NONE;
 }
 
+enum k_proc_error k_proc_callback_invoke_void(const procId_t procId,
+                                              const fPtr funPtr) {
+    return callbackInvoke(procId, GEF_VOID, (ptr_t)funPtr, nullptr, 0, 0, nullptr, nullptr);
+}
+
 enum k_proc_error k_proc_callback_invoke_ptr(const procId_t procId,
-                                             void (* const funPtr)(ptr_t),
+                                             const fPtr_ptr funPtr,
                                              const ptr_t p,
                                              const size_t pSizeBytes,
                                              const size_t pEncodedSizeBytes,

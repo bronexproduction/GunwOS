@@ -10,9 +10,10 @@
 
 #include <gunwdrv.h>
 #include <gunwdev.h>
-#include <src/_gunwipc.h>
-#include <src/_gunwctrl.h>
-#include <src/_gunwrlp.h>
+#include <_gunwipc.h>
+#include <_gunwctrl.h>
+#include <_gunwdev.h>
+#include <_gunwrlp.h>
 #include <gunwfug.h>
 
 /*
@@ -73,13 +74,15 @@ enum gnwIpcError k_scr_ipcRegister(const struct gnwIpcHandlerDescriptor * const 
     Code - 0x08
     Function - DEV_GET_BY_ID
 */
-enum gnwDeviceError k_scr_devGetById(const size_t id, struct gnwDeviceUHADesc * const);
+enum gnwDeviceError k_scr_devGetById(const size_t id,
+                                     struct gnwDeviceUHADesc * const);
 
 /*
     Code - 0x09
     Function - DEV_GET_BY_TYPE
 */
-enum gnwDeviceError k_scr_devGetByType(const enum gnwDeviceType, struct gnwDeviceUHADesc * const);
+enum gnwDeviceError k_scr_devGetByType(const enum gnwDeviceType,
+                                       struct gnwDeviceUHADesc * const);
 
 /*
     Code - 0x0a
@@ -98,8 +101,7 @@ void k_scr_devRelease(const uint_32);
     Function - DEV_MEM_WRITE
 */
 enum gnwDeviceError k_scr_devMemWrite(const size_t,
-                                      const ptr_t,
-                                      const range_addr_t * const);
+                                      const struct gnwDeviceMemWriteQuery * const);
 
 /*
     Code - 0x0d
@@ -120,15 +122,15 @@ enum gnwDeviceError k_scr_devListen(const size_t identifier,
     Function - DEV_GET_PARAM
 */
 enum gnwDeviceError k_scr_devGetParam(const size_t deviceId,
-                                      const struct gnwDeviceParamDescriptor * const paramDescriptor,
-                                      size_t * const result);
+                                      const struct gnwDeviceGetParamQuery * const vParamQueryPtr,
+                                      size_t * const vResultPtr);
 
 /*
     Code - 0x10
     Function - DEV_SET_PARAM
 */
 enum gnwDeviceError k_scr_devSetParam(const size_t deviceId,
-                                      const struct gnwDeviceParamDescriptor * const paramDescriptor,
+                                      const struct gnwDeviceSetParamQuery * const vParamQueryPtr,
                                       const size_t value);
 
 /*
@@ -147,7 +149,9 @@ enum gnwRunLoopError k_scr_runLoopGetData(ptr_t dataBufferPtr);
     Code - 0x13
     Function - IPC_REPLY
 */
-enum gnwIpcError k_scr_ipcReply(const ptr_t replyBufferPtr, const size_t replySizeBytes, const struct gnwIpcReplyInfo * infoPtr);
+enum gnwIpcError k_scr_ipcReply(const ptr_t replyBufferPtr,
+                                const size_t replySizeBytes,
+                                const struct gnwIpcReplyInfo * infoPtr);
 
 /*
     Code - 0x14
@@ -166,5 +170,17 @@ enum gnwMemoryError k_scr_memPlz(const size_t pageCount, const addr_t vStart);
     Function - MEM_THX
 */
 enum gnwMemoryError k_scr_memThx(const addr_t vStart);
+
+/*
+    Code - 0x17
+    Function - DEV_INIT
+*/
+void k_scr_devInit(const procId_t operatorProcId, enum gnwDriverError * vErrorPtr);
+
+/*
+    Code - 0x18
+    Function - DEV_START
+*/
+void k_scr_devStart(const procId_t operatorProcId, enum gnwDriverError * vErrorPtr);
 
 #endif // USRFUNC_H

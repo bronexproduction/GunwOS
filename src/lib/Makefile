@@ -1,5 +1,5 @@
-export LIB_CFLAGS=-std=c11 -c -fpic -ffreestanding -Wall -Wextra -ggdb $(CFLAGS_GLOBAL)
-export LIB_CXXFLAGS=-std=c++11 -c -fpic -ffreestanding -Wall -Wextra -ggdb $(CXXFLAGS_GLOBAL)
+export LIB_CFLAGS=-std=c17 -c -fpic -ffreestanding -Wall -Wextra -ggdb $(CFLAGS_GLOBAL)
+export LIB_CXXFLAGS=-std=c++17 -c -fpic -ffreestanding -Wall -Wextra -ggdb $(CXXFLAGS_GLOBAL)
 export LIB_LFLAGS=-m$(L_OUTFORMAT) -i
 
 O_DIR_LISTING=find . -maxdepth 1 -name '*.o' -type f

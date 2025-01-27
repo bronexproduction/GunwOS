@@ -5,57 +5,56 @@
 //  Created by Artur Danielewski on 19.04.2023.
 //
 
-#warning swapped until drivers running in separate processes
-// #ifndef _GUNWAPI_KERNEL
-#ifdef _GUNWAPI_KERNEL
+#ifndef _GUNWAPI_KERNEL
 
-#include <uha/gunwuha_display_desc.h>
+#include "../include/uha/gunwuha_display_desc.h"
+#include "../include/gunwuha.h"
+#include <gunwfug.h>
 
-bool uhaGetParam_display(const size_t paramVal,
-                         const size_t subParamVal,
-                         const size_t paramIndex,
-                         size_t * const result) {
+void uhaGetParam_display(const struct gnwDeviceGetParamQuery * const query) {
+    CHECKPTR(query);
 
-    const enum gnwDeviceUHA_display_param param = paramVal;
+    const enum gnwDeviceUHA_display_param param = query->param;
+    size_t result;
 
     switch (param) {
     case GDU_DISPLAY_PARAM_FORMAT: {
         extern enum gnwDeviceUHA_display_format uhaSupportedFormat(const size_t index);
-        *result = uhaSupportedFormat(paramIndex);
+        result = uhaSupportedFormat(query->paramIndex);
     } break;
     case GDU_DISPLAY_PARAM_DIMENSIONS: {
-        if (paramIndex > 1) {
-            return false;
+        if (query->paramIndex > 1) {
+            getParamReply(false, 0);
+            return;
         }
 
         extern point_t uhaDimensionsForFormat(const enum gnwDeviceUHA_display_format format);
-        const enum gnwDeviceUHA_display_format format = subParamVal;
+        const enum gnwDeviceUHA_display_format format = query->subParam;
         const point_t dimensions = uhaDimensionsForFormat(format);
         
-        *result = paramIndex ? dimensions.y : dimensions.x;
+        result = query->paramIndex ? dimensions.y : dimensions.x;
     } break;
     default:
-        return false;
+        getParamReply(false, 0);
+        return;
     }
-    
-    return true;
+
+    getParamReply(true, result);
 }
 
-bool uhaSetParam_display(const size_t paramVal,
-                         const size_t subParamVal,
-                         const size_t paramIndex,
-                         const size_t value) {
+void uhaSetParam_display(const struct gnwDeviceSetParamQuery * const query) {
+    CHECKPTR(query);
 
-    const enum gnwDeviceUHA_display_param param = paramVal;
+    const enum gnwDeviceUHA_display_param param = query->param;
 
     switch (param) {
     case GDU_DISPLAY_PARAM_FORMAT: {
-        const enum gnwDeviceUHA_display_format format = value;
+        const enum gnwDeviceUHA_display_format format = query->value;
         extern bool setFormat(const enum gnwDeviceUHA_display_format);
-        return setFormat(format);
+        setParamReply(setFormat(format));
     } break;
     default:
-        return false;
+        setParamReply(true);
     }
 }
 

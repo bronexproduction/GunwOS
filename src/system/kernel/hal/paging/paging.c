@@ -100,7 +100,8 @@ static void unsafe_assignVirtualPage(struct virtual_page_specifier_t * const pag
 
 static void assignVirtualPage(struct virtual_page_specifier_t * const pageEntryPtr,
                               const size_t physicalPageIndex,
-                              const bool user) {
+                              const bool user,
+                              const bool mmio) {
     if (!pageEntryPtr) {
         OOPS("Nullptr",);
     }
@@ -119,7 +120,7 @@ static void assignVirtualPage(struct virtual_page_specifier_t * const pageEntryP
     if (!physicalPageSpecifier->available) {
         OOPS("Physical page unavailable",);
     }
-    if (physicalPageSpecifier->reserved) {
+    if (physicalPageSpecifier->reserved && !mmio) {
         OOPS("Physical page reserved",);
     }
     if (physicalPageSpecifier->assignCount) {
@@ -221,7 +222,7 @@ static void assignDirEntry(struct virtual_page_specifier_t * const dirEntryPtr,
 }
 
 static void initializePhysicalMemoryMap(const struct k_krn_memMapEntry *memMap) {
-    
+
     /*
         Prepare usable memory map
     */
@@ -283,6 +284,24 @@ static void initializePhysicalMemoryMap(const struct k_krn_memMapEntry *memMap) 
             entry->available = usable;
             entry->reserved = reserved;
             entry->assignCount = reserved;
+            entry->mmio = false;
+        }
+    }
+
+    /*
+        Initialize usable UMA range (only non-present pages)
+    */
+    
+    const size_t umaStartPage = MEM_PAGE_OF_ADDR(MEM_UMA_START);
+    const size_t umaEndPage = MEM_PAGE_OF_ADDR(MEM_UMA_RESERVED_START);
+    for (size_t page = umaStartPage; page < umaEndPage && page < MEM_PHYSICAL_PAGE_COUNT; ++page) {
+        struct physical_page_specifier_t * entry = &physicalPages[page];
+        if (!entry->present) {
+            entry->present = true;
+            entry->available = true;
+            entry->reserved = true;
+            entry->assignCount = 0;
+            entry->mmio = true;
         }
     }
 
@@ -315,7 +334,7 @@ static void initializePhysicalMemoryMap(const struct k_krn_memMapEntry *memMap) 
 
 static void unsafe_initializePagingInfo(struct process_paging_info_t * const pagingInfo) {
     /*
-        Clear kernel paging info
+        Clear paging info
     */
     memzero(pagingInfo, sizeof(struct process_paging_info_t));
 
@@ -353,18 +372,11 @@ void k_paging_prepare() {
     for (size_t procId = 0; procId < MAX_PROC; ++procId) {
         unsafe_initializePagingInfo(&processPageTables[procId]);
     }
-
-    /*
-        Mark all kernel pages as kernel only
-    */
-    for (size_t table = 0; table < MEM_VIRTUAL_USER_PAGE_TABLE_COUNT; ++table) {
-        for (size_t page = 0; page < MEM_MAX_PAGE_ENTRY; ++page) {
-            kernelPagingInfo.pageTables[table][page].user = false;
-        }
-    }
     
     /*
         Initialize kernel page tables to map the lower physical memory
+
+        Note: Omits lower HMA area
 
         TODO: Initialize as many pages as needed after startup (definetely less than 4MiB)
     */
@@ -417,7 +429,8 @@ void k_paging_init(const struct k_krn_memMapEntry *memMap) {
 }
 
 enum k_mem_error k_paging_assign(const procId_t procId,
-                                 const size_t startPage,
+                                 const size_t startVPage,
+                                 const size_t startPPage,
                                  const size_t pageCount) {
     if (!k_proc_idIsUser(procId)) {
         return ME_INVALID_ARGUMENT;
@@ -425,15 +438,16 @@ enum k_mem_error k_paging_assign(const procId_t procId,
     if (!pageCount) {
         return ME_INVALID_ARGUMENT;
     }
-    if (startPage >= MEM_MAX_VIRTUAL_PAGE_COUNT ||
+    if (startVPage >= MEM_MAX_VIRTUAL_PAGE_COUNT ||
         pageCount >= MEM_MAX_VIRTUAL_PAGE_COUNT ||
-        (startPage + pageCount) >= MEM_MAX_VIRTUAL_PAGE_COUNT) {
+        (startVPage + pageCount) >= MEM_MAX_VIRTUAL_PAGE_COUNT) {
         return ME_INVALID_ARGUMENT;
     }
 
     bool newPages = false;
     bool overlap = false;
-    for (size_t page = startPage; page < startPage + pageCount; ++page) {
+    size_t physicalPage = startPPage;
+    for (size_t page = startVPage; page < startVPage + pageCount; ++page) {
         size_t dirIndex = MEM_DIR_INDEX_OF_PAGE(page);
         if (dirIndex >= MEM_VIRTUAL_USER_MAX_PAGE_TABLE_COUNT) {
             return ME_UNAVAILABLE;
@@ -476,16 +490,20 @@ enum k_mem_error k_paging_assign(const procId_t procId,
         }
 
         size_t physicalPageIndex;
-        const enum k_mem_error err = getFreePhysicalPageIndex(&physicalPageIndex);
-        if (err != ME_NONE) {
-            if (err == ME_OUT_OF_MEMORY) {
-                return ME_OUT_OF_MEMORY;
-            }
+        if (physicalPage) {
+            physicalPageIndex = physicalPage++;    
+        } else {
+            const enum k_mem_error err = getFreePhysicalPageIndex(&physicalPageIndex);
+            if (err != ME_NONE) {
+                if (err == ME_OUT_OF_MEMORY) {
+                    return ME_OUT_OF_MEMORY;
+                }
 
-            return ME_UNKNOWN;
+                return ME_UNKNOWN;
+            }
         }
 
-        assignVirtualPage(pageEntry, physicalPageIndex, true);
+        assignVirtualPage(pageEntry, physicalPageIndex, true, startPPage);
         newPages = true;
     }
 

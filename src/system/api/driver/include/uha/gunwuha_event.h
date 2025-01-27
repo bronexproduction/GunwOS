@@ -12,6 +12,13 @@
 #include <uha/gunwuha_event_desc.h>
 #include <gunwevent.h>
 
+#ifndef _GUNWAPI_KERNEL
+
+#define GNW_UHA_NO_EVENT GNW_UHA_EMPTY(EVENT)
+#define GNW_UHA_EVENT_ROUTINE_EMPTY { 0 }
+
+#endif // _GUNWAPI_KERNEL
+
 /*
     Event emitting device routines
 */

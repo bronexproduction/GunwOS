@@ -29,8 +29,44 @@ void k_scr_wrb(const uint_16 port, const uint_8 value);
 
 /*
     Code - 0x02
-    Function - EMIT_VOID
+    Function - EMIT
 */
 enum gnwDeviceError k_scr_emit(const struct gnwDeviceEvent * const event);
+
+/*
+    Code - 0x03
+    Function - MMIO_PLZ
+*/
+enum gnwMemoryError k_scr_mmioPlz(const size_t pageCount, const addr_t vAddr, const addr_t pAddr);
+
+/*
+    Code - 0x04
+    Function - REPORT_INIT
+*/
+void k_scr_reportInit(const bool success);
+
+/*
+    Code - 0x05
+    Function - REPORT_START
+*/
+void k_scr_reportStart(const bool success);
+
+/*
+    Code - 0x06
+    Function - REPLY_GETPARAM
+*/
+void k_scr_replyGetParam(const bool success, const size_t result);
+
+/*
+    Code - 0x07
+    Function - REPLY_SETPARAM
+*/
+void k_scr_replySetParam(const bool success);
+
+/*
+    Code - 0x08
+    Function - REPLY_MEMWRITE
+*/
+void k_scr_replyMemWrite(const bool success);
 
 #endif // DRVFUNC_H

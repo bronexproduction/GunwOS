@@ -40,6 +40,12 @@ _Static_assert(sizeof(addr_t) == sizeof(ptr_t), "sizeof(addr_t) != sizeof(ptr_t)
 _Static_assert(sizeof(ptr_t) == sizeof(size_t), "sizeof(ptr_t) != sizeof(size_t)");
 _Static_assert(sizeof(size_t) == sizeof(uint_32), "sizeof(size_t) != sizeof(uint_32)");
 
+typedef void (*fPtr)(void);
+typedef void (*fPtr_ptr)(ptr_t);
+typedef void (*fPtr_arch)(addr_t);
+typedef void (*fPtr_arch2)(addr_t, addr_t);
+typedef void (*fPtr_arch3)(addr_t, addr_t, addr_t);
+
 typedef struct {
     int x, y;
 } point_t;

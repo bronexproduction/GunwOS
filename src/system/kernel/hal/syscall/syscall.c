@@ -17,8 +17,8 @@
 #include "drvfunc.h"
 #include "usrfunc.h"
 
-#define DRIVER_SYSCALL_COUNT 3
-#define USER_SYSCALL_COUNT 23
+#define DRIVER_SYSCALL_COUNT 9
+#define USER_SYSCALL_COUNT 25
 
 typedef void (*k_scl_function_handler_t)(const procId_t procId, const ptr_t refEsp);
 
@@ -30,7 +30,13 @@ typedef void (*k_scl_function_handler_t)(const procId_t procId, const ptr_t refE
 static k_scl_function_handler_t syscallReg_DRIVER[DRIVER_SYSCALL_COUNT] = {
     /* 0x00 */ (void *)k_scr_rdb,
     /* 0x01 */ (void *)k_scr_wrb,
-    /* 0x02 */ (void *)k_scr_emit
+    /* 0x02 */ (void *)k_scr_emit,
+    /* 0x03 */ (void *)k_scr_mmioPlz,
+    /* 0x04 */ (void *)k_scr_reportInit,
+    /* 0x05 */ (void *)k_scr_reportStart,
+    /* 0x06 */ (void *)k_scr_replyGetParam,
+    /* 0x07 */ (void *)k_scr_replySetParam,
+    /* 0x08 */ (void *)k_scr_replyMemWrite
 };
 
 /*
@@ -61,7 +67,9 @@ static k_scl_function_handler_t syscallReg_USER[USER_SYSCALL_COUNT] = {
     /* 0x13 */ (void *)k_scr_ipcReply,
     /* 0x14 */ (void *)k_scr_yield,
     /* 0x15 */ (void *)k_scr_memPlz,
-    /* 0x16 */ (void *)k_scr_memThx
+    /* 0x16 */ (void *)k_scr_memThx,
+    /* 0x17 */ (void *)k_scr_devInit,
+    /* 0x18 */ (void *)k_scr_devStart,
 };
 
 /*
@@ -71,6 +79,9 @@ static k_scl_function_handler_t syscallReg_USER[USER_SYSCALL_COUNT] = {
 */
 void k_scl_syscall_DRIVER(const ptr_t refEsp) {
     const procId_t procId = k_proc_getCurrentId();
+    if (k_proc_getInfo(procId).type != PT_DRIVER) {
+        OOPS_NBR("Unauthorized driver syscall access");
+    }
     const size_t functionCode = *(size_t *)userStackSafeValuePointer(procId, refEsp, FUNC_CODE_STACK_OFFSET, sizeof(size_t));
     
     if (functionCode >= DRIVER_SYSCALL_COUNT) {

@@ -32,7 +32,8 @@ size_t k_paging_getFreePages();
     Requests memory pages to be assigned to the process
 */
 enum k_mem_error k_paging_assign(const procId_t procId,
-                                 const size_t startPage,
+                                 const size_t startVPage,
+                                 const size_t startPPage,
                                  const size_t pageCount);
 
 /*

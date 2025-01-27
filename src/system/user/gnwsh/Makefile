@@ -1,6 +1,6 @@
-CFLAGS=$(APP_CFLAGS) -I $(shell pwd)
+CFLAGS=$(APP_CFLAGS)
 RSFLAGS=$(APP_RSFLAGS)
-LFLAGS=$(APP_LFLAGS) -Ttext 0x40000000
+LFLAGS=$(APP_LFLAGS) -Ttext 0x14000000
 
 O_DIR_LISTING=find . -name '*.o' -type f
 

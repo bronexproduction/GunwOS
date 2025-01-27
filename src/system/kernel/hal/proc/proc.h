@@ -12,9 +12,9 @@
 #include <proc.h>
 #include <hal/cpu/cpu.h>
 #include <hal/gdt/gdt.h>
-#include <src/_gunwrlp.h>
+#include <_gunwrlp.h>
 
-#define MAX_PROC 5
+#define MAX_PROC 6
 #define KERNEL_PROC_ID -1
 
 struct k_proc_descriptor {
@@ -42,12 +42,24 @@ enum k_proc_state {
     PS_FINISHED
 };
 
+enum k_proc_procType {
+    PT_NONE = 0,
+    PT_PROG,
+    PT_DRIVER
+};
+
 enum k_proc_lockType {
-    PLT_EVENT   = 1 << 0,
-    PLT_IPC     = 1 << 1
+    PLT_ASYNC           = 1 << 0,
+    PLT_SYNC            = 1 << 1
 };
 
 struct k_proc_process {
+    
+    /*
+        Process type
+    */
+    enum k_proc_procType type;
+
     /*
         Process state
     */
@@ -72,6 +84,11 @@ procId_t k_proc_getCurrentId();
 bool k_proc_idIsUser(const procId_t procId);
 
 /*
+    Returns whether the process with given ID is alive
+*/
+bool k_proc_isAlive(const procId_t procId);
+
+/*
     Returns information about the process with given procId
 */
 struct k_proc_process k_proc_getInfo(const procId_t procId);
@@ -81,8 +98,9 @@ struct k_proc_process k_proc_getInfo(const procId_t procId);
 
     Params:
     * procId - Memory pointer where spawned process ID will be set (out param)
+    * procType - Type of process to be spawned
 */
-enum k_proc_error k_proc_spawn(procId_t * procId);
+enum k_proc_error k_proc_spawn(procId_t * procId, const enum k_proc_procType procType);
 
 /*
     Hatching previously spawned userland processes
@@ -162,6 +180,8 @@ void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const procId_t currentP
     
     Return value: enum k_proc_error - PE_NONE on success
 */
+enum k_proc_error k_proc_callback_invoke_void(const procId_t procId,
+                                              void (* const funPtr)(void));
 enum k_proc_error k_proc_callback_invoke_ptr(const procId_t procId,
                                              void (* const funPtr)(ptr_t),
                                              const ptr_t p,

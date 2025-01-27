@@ -9,6 +9,7 @@
 #include <log/log.h>
 #include <string.h>
 #include <error/panic.h>
+#include <hal/proc/proc.h>
 
 void k_err_fug(const procId_t procId, enum gnwFugCode code) {
     char log[37] = "Process       crashed with code     ";
@@ -18,6 +19,5 @@ void k_err_fug(const procId_t procId, enum gnwFugCode code) {
     
     LOG(log);
     
-    extern void k_scr_usr_bye(procId_t, int_32);
-    k_scr_usr_bye(procId, code);
+    k_proc_stop(procId);
 }

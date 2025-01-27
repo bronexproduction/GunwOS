@@ -15,6 +15,7 @@
 #define ELF_HEADER_SIZE_32 (size_t)0x34
 #define ELF_PROGRAM_ENTRY_SIZE_32 (size_t)0x20
 #define ELF_SECTION_ENTRY_SIZE_32 (size_t)0x28
+#define ELF_SYMTAB_SECTION_ENTRY_SIZE_32 (size_t)0x10
 
 enum elfClass {
     ECLASS_32 = 1,
@@ -154,6 +155,24 @@ struct __attribute__((packed)) elfSectionHeaderEntry32 {
 };
 _Static_assert(sizeof(struct elfSectionHeaderEntry32) == ELF_SECTION_ENTRY_SIZE_32, "Unexpected struct elfProgramHeader32 size");
 
+struct __attribute__((packed)) elfSymtabSectionEntry32 {
+    const uint_32 name;                 /* An index into the object file's symbol string table, which holds the character representations of the symbol names.
+                                           If the value is nonzero, the value represents a string table index that gives the symbol name.
+                                           Otherwise, the symbol table entry has no name. */
+    const uint_32 value;                /* The value of the associated symbol.
+                                           The value can be an absolute value or an address, depending on the context. */
+    const uint_32 size;                 /* Many symbols have associated sizes. For example, a data object's size is the number of bytes that are contained in the object.
+                                           This member holds the value zero if the symbol has no size or an unknown size. */
+    const uint_8 info;                  /* The symbol's type and binding attributes. The following code shows how to manipulate the values. (To be explained further) */
+    const uint_8 other;                 /* A symbol's visibility. The following code shows how to manipulate the values for both 32–bit objects and 64–bit objects.
+                                           Other bits are set to zero, and have no defined meaning. (To be explained further) */
+    const uint_16 sectionHeaderIndex;   /* Every symbol table entry is defined in relation to some section.
+                                           This member holds the relevant section header table index. Some section indexes indicate special meanings.
+                                           If this member contains SHN_XINDEX, then the actual section header index is too large to fit in this field.
+                                           The actual value is contained in the associated section of type SHT_SYMTAB_SHNDX. */
+};
+_Static_assert(sizeof(struct elfSymtabSectionEntry32) == ELF_SYMTAB_SECTION_ENTRY_SIZE_32, "Unexpected struct elfSymtabSectionEntry32 size");
+
 struct elfExpectation {
     enum elfClass class;
     enum elfEndianess endianess;
@@ -161,8 +180,7 @@ struct elfExpectation {
     uint_16 architecture;
 };
 
-bool elfValidate(const ptr_t filePtr, 
-                 const size_t fileSizeBytes, 
+bool elfValidate(const data_t fileData, 
                  const struct elfExpectation * const expectation);
 
 /*
@@ -173,11 +191,19 @@ size_t elfGetSectionHeaderEntryCount(const ptr_t filePtr);
 /*
     Returns the section header entry at given index
 */
-struct elfSectionHeaderEntry32 * elfGetSectionHeaderEntry(const ptr_t filePtr, const size_t index, const size_t fileSizeBytes);
+struct elfSectionHeaderEntry32 * elfGetSectionHeaderEntryAtIndex(const data_t fileData,
+                                                                 const size_t index);
 
 /*
     Returns the entry point address
 */
-addr_t elfGetEntry(const ptr_t filePtr, const size_t fileSizeBytes);
+addr_t elfGetEntry(const data_t fileData);
+
+/*
+    Returns the address of given symbol inside the file
+*/
+addr_t elfGetSymbolFileAddr(const data_t fileData,
+                            const char * const symbolName,
+                            size_t * const symbolSizeBytes);
 
 #endif // GUNWELF_H

@@ -40,15 +40,40 @@ struct gnwDeviceUHA {
     struct gnwDeviceUHA_event event;        // event emitting devices
 };
 
-#ifdef _GUNWAPI_KERNEL
+/*
+    Report getParam result
+*/
+extern void getParamReply(bool success, size_t result);
 
 /*
-    Extracts UHA descriptor from UHA structure
+    Report setParam result
 */
-extern struct gnwDeviceUHADesc uhaGetDesc(const size_t identifier,
-                                          const enum gnwDeviceType type,
-                                          const struct gnwDeviceUHA api);
+extern void setParamReply(bool success);
 
-#endif // _GUNWAPI_KERNEL
+/*
+    Report memWrite result
+*/
+extern void memWriteReply(bool success);
+
+/*
+    struct gnwDeviceGetParamQuery decoder
+
+    To be used as getParamDecoder parameter value in system UHA
+*/
+void gnwDeviceGetParamQuery_decode(const ptr_t, struct gnwDeviceGetParamQuery * const);
+
+/*
+    struct gnwDeviceSetParamQuery decoder
+
+    To be used as setParamDecoder parameter value in system UHA
+*/
+void gnwDeviceSetParamQuery_decode(const ptr_t, struct gnwDeviceSetParamQuery * const);
+
+/*
+    struct gnwDeviceMemWriteQuery decoder
+
+    To be used as writeDecoder parameter value in system UHA
+*/
+void gnwDeviceMemWriteQuery_decode(const ptr_t, struct gnwDeviceMemWriteQuery * const);
 
 #endif // GUNWOS_GUNWUHA_H

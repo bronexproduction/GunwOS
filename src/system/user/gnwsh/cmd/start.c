@@ -5,15 +5,15 @@
 //  Created by Artur Danielewski on 23.03.2023.
 //
 
-#include <cmdutil.h>
-#include <cliio.h>
+#include "../cmdutil.h"
+#include "../cliio.h"
 #include <gunwctrl.h>
+#include <defs.h>
 
 void cmd_start(const char * const params) {
     CMD_PARAM_STRING(0, name, "Program name")
 
-    enum gnwCtrlError err;
-    start(name, &err);
+    enum gnwCtrlError err = start(name, nullptr);
     switch (err) {
     case GCE_NONE:
         break;
