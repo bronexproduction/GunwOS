@@ -168,6 +168,13 @@ bool validateDeviceDescriptor(const struct gnwDeviceDescriptor * const descripto
         return false;
     }
 
+    if (!descriptor->driver.descriptor.init) {
+        return false;
+    }
+    if (!descriptor->driver.descriptor.start) {
+        return false;
+    }
+
     bool typeDefined = false;
 
     #define VALIDATE_UHA(TYPE, NAME) \

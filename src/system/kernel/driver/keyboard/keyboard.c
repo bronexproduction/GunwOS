@@ -89,6 +89,8 @@
 #define KBD_STAT_TIM        0x40    /* Timeout bit (TIM) */
 #define KBD_STAT_PARERR     0x80    /* Parity error bit (PARE) */
 
+size_t k_drv_keyboard_deviceId;
+
 static void emitEvent(const int_32 type, const char data) {
     enum gnwDeviceError err;
     struct gnwDeviceEvent event;
@@ -100,6 +102,14 @@ static void emitEvent(const int_32 type, const char data) {
     if (err != GDE_NONE) {
         OOPS("Error emitting keyboard event",);
     }
+}
+
+static void init() {
+    k_dev_init_report(KERNEL_PROC_ID, k_drv_keyboard_deviceId, true);
+}
+
+static void start() {
+    k_dev_start_report(KERNEL_PROC_ID, k_drv_keyboard_deviceId, true);
 }
 
 static void isr() {
@@ -126,9 +136,11 @@ static void isr() {
 }
 
 static struct gnwDriverConfig desc() {
+    const addr_t initAddr = (addr_t)init;
+    const addr_t startAddr = (addr_t)start;
     const addr_t isrAddr = (addr_t)isr;
 
-    return (struct gnwDriverConfig){ 0, 0, (void (*)())isrAddr, 1 };
+    return (struct gnwDriverConfig){ (void (*)())initAddr, (void (*)())startAddr, (void (*)())isrAddr, 1 };
 }
 
 static struct gnwDeviceUHA uha() {

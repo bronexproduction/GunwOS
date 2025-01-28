@@ -107,15 +107,25 @@ static void init() {
     k_dev_init_report(KERNEL_PROC_ID, k_drv_pit_deviceId, true);
 }
 
+static void start() {
+    k_dev_start_report(KERNEL_PROC_ID, k_drv_pit_deviceId, true);
+}
+
 static void isr() {
     k_pit_routine();
 }
 
 static struct gnwDriverConfig desc() {
     const addr_t initAddr = (addr_t)init;
+    const addr_t startAddr = (addr_t)start;
     const addr_t isrAddr = (addr_t)isr;
 
-    return (struct gnwDriverConfig){ (void (*)())initAddr, 0, (void (*)())isrAddr, 0 };
+    return (struct gnwDriverConfig) {
+        (void (*)())initAddr,
+        (void (*)())startAddr,
+        (void (*)())isrAddr,
+        0
+    };
 }
 
 static struct gnwDeviceUHA uha() {

@@ -266,27 +266,16 @@ enum gnwDriverError k_dev_install(const struct gnwDeviceDescriptor * const descr
     devicePtr->status = INITIALIZING;
 
     if (!driverDescPtr->init) {
-        devicePtr->status = INITIALIZED;
-    } else {
-        driverDescPtr->init();
+        unsafe_clearDevice(*deviceIdPtr);
+        OOPS("Driver init routine unavailable", GDRE_UNINITIALIZED);
     }
+    
+    driverDescPtr->init();
 
     if (devicePtr->status != INITIALIZED) {
         LOG("Driver init failed");
         unsafe_clearDevice(*deviceIdPtr);
         return GDRE_UNINITIALIZED;
-    }
-    
-    enum gnwDriverError e = GDRE_NONE;
-
-    if (driverDescPtr->isr) {
-        e = k_hal_install(*deviceIdPtr, descriptorPtr->driver.descriptor);   
-    }
-
-    if (e != GDRE_NONE) {
-        LOG("Error: Driver installation failed");
-        unsafe_clearDevice(*deviceIdPtr);
-        return e;
     }
 
     return GDRE_NONE;
@@ -400,6 +389,7 @@ static bool validateReporter(const procId_t operatorProcId, const size_t deviceI
     if (!validateId(deviceId)) {
         OOPS("Unexpected device ID", false);
     }
+
     struct device * const devicePtr = &(devices[deviceId]);
     if (devicePtr->operator != operatorProcId) {
         OOPS("Unexpected operator", false);
@@ -436,6 +426,11 @@ static void unsafe_reportStatusOperationFailed(const procId_t operatorProcId,
                                                const size_t deviceId,
                                                const char * const reason,
                                                const size_t errorCode) {
+
+    if (validateInstalledId(deviceId)) {
+        devices[deviceId].status = FAILED;
+    }
+
     if (operatorProcId == KERNEL_PROC_ID) {
         OOPS(reason,);
     } else {
@@ -445,28 +440,28 @@ static void unsafe_reportStatusOperationFailed(const procId_t operatorProcId,
     }
 }
 
-static void reportStatus(const procId_t operatorProcId,
-                         const size_t deviceId,
-                         const bool success,
-                         const enum deviceStatus expectedStatus,
-                         const enum deviceStatus updatedStatus,
-                         const size_t errorCode) {
-
+void k_dev_init_report(const procId_t operatorProcId, const size_t deviceId, const bool success) {
     if (!validateReporter(operatorProcId, deviceId)) {
-        unsafe_reportStatusOperationFailed(operatorProcId, deviceId, "Reporter validation failed", errorCode);
-        return;   
+        unsafe_reportStatusOperationFailed(operatorProcId, deviceId, "Reporter validation failed", GDRE_OPERATION_FAILED);
+        return;
     }
-    if (devices[deviceId].status != expectedStatus) {
-        unsafe_reportStatusOperationFailed(operatorProcId, deviceId, "Unexpected device status", errorCode);
+    if (devices[deviceId].status != INITIALIZING) {
+        unsafe_reportStatusOperationFailed(operatorProcId, deviceId, "Unexpected device status", GDRE_OPERATION_FAILED);
         return;
     }
 
-    devices[deviceId].status = updatedStatus;
-    unsafe_pendingRequestInfoSetErrorIfNeeded(deviceId, GDRE_NONE);
-}
+    const struct gnwDriverConfig * driverDescPtr = &(devices[deviceId].desc.driver.descriptor);
+    if (driverDescPtr->isr) {
+        const enum gnwDriverError e = k_hal_install(deviceId, *driverDescPtr);   
 
-void k_dev_init_report(const procId_t operatorProcId, const size_t deviceId, const bool success) {
-    reportStatus(operatorProcId, deviceId, success, INITIALIZING, INITIALIZED, GDRE_OPERATION_FAILED);
+        if (e != GDRE_NONE) {
+            unsafe_reportStatusOperationFailed(operatorProcId, deviceId, "IRQ registration failed", GDRE_OPERATION_FAILED);
+            return;
+        }
+    }
+
+    devices[deviceId].status = INITIALIZED;
+    unsafe_pendingRequestInfoSetErrorIfNeeded(deviceId, GDRE_NONE);
 }
 
 enum gnwDriverError k_dev_start(const size_t id) {
@@ -488,10 +483,11 @@ enum gnwDriverError k_dev_start(const size_t id) {
     
     void (*start)(void) = dev->desc.driver.descriptor.start;
     if (!start) {
-        dev->status = STARTED;
-    } else {
-        start();
+        dev->status = FAILED;
+        OOPS("Driver startup routine unavailable", GDRE_OPERATION_FAILED);
     }
+    
+    start();
 
     if (dev->status != STARTED) {
         LOG("Error: Driver startup failed");
@@ -515,7 +511,17 @@ enum gnwDriverError k_dev_start_async(const procId_t operatorProcId,
 }
 
 void k_dev_start_report(const procId_t operatorProcId, const size_t deviceId, const bool success) {
-    reportStatus(operatorProcId, deviceId, success, STARTING, STARTED, GDRE_OPERATION_FAILED);
+    if (!validateReporter(operatorProcId, deviceId)) {
+        unsafe_reportStatusOperationFailed(operatorProcId, deviceId, "Reporter validation failed", GDRE_OPERATION_FAILED);
+        return;   
+    }
+    if (devices[deviceId].status != STARTING) {
+        unsafe_reportStatusOperationFailed(operatorProcId, deviceId, "Unexpected device status", GDRE_OPERATION_FAILED);
+        return;
+    }
+
+    devices[deviceId].status = STARTED;
+    unsafe_pendingRequestInfoSetErrorIfNeeded(deviceId, GDRE_NONE);
 }
 
 enum gnwDeviceError k_dev_getById(const size_t id, struct gnwDeviceUHADesc * const desc) {

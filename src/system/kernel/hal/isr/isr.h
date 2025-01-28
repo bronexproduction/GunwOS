@@ -50,7 +50,7 @@ __attribute__((naked)) void k_isr_picIRQ6();    // 38   - IRQ 6 PIC input (remap
 // 41
 // 42
 // 43
-// 44
+__attribute__((naked)) void k_isr_picIRQ12();    // 44   - IRQ 12 PIC input (remapped)
 // 45
 // 46
 // 47

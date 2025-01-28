@@ -22,7 +22,7 @@ void k_scr_usr_devStart(const procId_t procId,
 
     if (error == GDRE_NOT_FOUND) {
         MEM_ONTABLE(procId, 
-            *(vErrorPtr) = GDRE_NONE;
+            *(vErrorPtr) = GDRE_NOT_SUPPORTED;
         )
         return;
     } else if (error != GDRE_NONE) {

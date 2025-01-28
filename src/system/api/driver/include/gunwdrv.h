@@ -25,7 +25,8 @@
 */
 struct gnwDriverConfig {
    
-/*  Pointer to device initialization routine
+/*  
+    Mandatory pointer to device initialization routine
 
     Called when device is being registered
 
@@ -35,7 +36,7 @@ struct gnwDriverConfig {
     void (*init)();
 
 /*
-    Pointer to device start routine
+    Mandatory pointer to device start routine
 
     Expected to call drvStartReport on finish
 
