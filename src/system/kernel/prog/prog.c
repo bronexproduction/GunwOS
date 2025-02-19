@@ -326,19 +326,35 @@ procId_t k_prog_spawnDriver(const procId_t procId,
     }
 
     /*
-        Get driver descriptor
+        Get driver descriptor list
     */
 
-    size_t deviceDescriptorSizeBytes;
-    const struct gnwDeviceDescriptor * const deviceDescriptorPtr = (struct gnwDeviceDescriptor *)elfGetSymbolFileAddr(fileData,
-                                                                                                                      "_gnw_device_descriptor",
-                                                                                                                      &deviceDescriptorSizeBytes);
-    if (!deviceDescriptorPtr || !deviceDescriptorSizeBytes) {
+    size_t deviceDescriptorListSizeBytes;
+    size_t deviceDescriptorCountSizeBytes;
+    const struct gnwDeviceDescriptor * const deviceDescriptorListPtr = (struct gnwDeviceDescriptor *)elfGetSymbolFileAddr(fileData,
+                                                                                                                          "_gnw_device_descriptor_list",
+                                                                                                                          &deviceDescriptorListSizeBytes);                                                                                  
+    const size_t * const deviceDescriptorCountPtr = (size_t *)elfGetSymbolFileAddr(fileData,
+                                                                                   "_gnw_device_descriptor_count",
+                                                                                   &deviceDescriptorCountSizeBytes);
+    if (!deviceDescriptorListPtr || !deviceDescriptorListSizeBytes || !deviceDescriptorCountPtr || !deviceDescriptorCountSizeBytes) {
         LOG_CODE("Device descriptor not found in driver file", 0);
         return GCE_HEADER_INVALID;
     }
-    if (deviceDescriptorSizeBytes != sizeof(struct gnwDeviceDescriptor)) {
-        LOG_CODE("Device descriptor size invalid", 0);
+    if (deviceDescriptorCountSizeBytes != sizeof(size_t)) {
+        LOG_CODE("Device descriptor count size invalid", 0);
+        return GCE_HEADER_INVALID;
+    }
+    if (!(*deviceDescriptorCountPtr)) {
+        LOG_CODE("Device descriptor count invalid", 0);
+        return GCE_HEADER_INVALID;
+    }
+    if ((*deviceDescriptorCountPtr) > (((size_t)-1) / sizeof(struct gnwDeviceDescriptor))) {
+        LOG_CODE("Device descriptor count invalid", 0);
+        return GCE_HEADER_INVALID;
+    }
+    if (deviceDescriptorListSizeBytes != (sizeof(struct gnwDeviceDescriptor) * (*deviceDescriptorCountPtr))) {
+        LOG_CODE("Device descriptor list size invalid", 0);
         return GCE_HEADER_INVALID;
     }
 
@@ -357,8 +373,12 @@ procId_t k_prog_spawnDriver(const procId_t procId,
     /*
         Create device stub
     */
+    
+    if ((*deviceDescriptorCountPtr) > 1) {
+        OOPS("Not implemented yet", GCE_UNKNOWN);
+    }
 
-    const enum gnwDriverError installError = k_dev_install_async(deviceDescriptorPtr, spawnedProcId);
+    const enum gnwDriverError installError = k_dev_install_async(deviceDescriptorListPtr, spawnedProcId);
     if (installError != GDRE_NONE) {
         k_proc_stop(spawnedProcId);
         
