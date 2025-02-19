@@ -41,7 +41,7 @@ static void installCoreDrivers() {
     enum gnwCtrlError ctrlErr = GCE_NONE;
 
     INSTALL("0:GNWVGA.GDV");    /* Display driver - process ID: 1 */
-    INSTALL("0:GNWMOUSE.GDV");  /* Mouse driver - process ID: 2 */
+    INSTALL("0:GNWINPUT.GDV");  /* Keyboard and mouse driver - process ID: 2 */
 
     if (installErr != GDRE_NONE || ctrlErr != GCE_NONE) {
         log("Unable to install core drivers");
