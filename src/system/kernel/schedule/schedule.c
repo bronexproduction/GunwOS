@@ -31,18 +31,19 @@ static procId_t procSelect() {
     /*
         Simple round robin algorithm
     */
-    size_t nextProc = KERNEL_PROC_ID;
+    procId_t nextProc = KERNEL_PROC_ID;
 
-    for (size_t i = 0; i < MAX_PROC; ++i) {
-        const size_t procId = (lastProcId + i + 1) % MAX_PROC;
+    for (procId_t i = 0; i < MAX_PROC; ++i) {
+        const procId_t procId = (lastProcId + i + 1) % MAX_PROC;
         const struct k_proc_process procInfo = k_proc_getInfo(procId);
 
         if (!canSchedule(procInfo)) {
             continue;
         }
         
-        nextProc = procId;
-                    
+        if (nextProc == KERNEL_PROC_ID || procInfo.priority) {
+            nextProc = procId;
+        }
         if (procInfo.priority) {
             break;
         }

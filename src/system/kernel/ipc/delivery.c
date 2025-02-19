@@ -116,7 +116,7 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
         listenerIndex = k_ipc_utl_nextListenerIndexForPath(query.pathData, &listenerIndex);
     }
     if (listenerIndex >= MAX_IPC_LISTENER) {
-        return GIPCE_NONE;
+        return GIPCE_NOT_FOUND;
     }
 
     if (!listenerPtr->bindingRequired && (type == GILT_DIRECT)) {
