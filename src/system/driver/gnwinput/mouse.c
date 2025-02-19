@@ -100,5 +100,5 @@ const struct gnwDeviceDescriptor _gnw_device_descriptor = {
             /* IRQ */ 12
         }
     },
-    /* name */ "Default PS/2 mouse"
+    /* name */ "Mouse driver for 8042 PS/2 controller"
 };
