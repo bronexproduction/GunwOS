@@ -111,7 +111,7 @@ void k_idt_loadDefault() {
     // 41
     // 42
     // 43
-    // 44
+    k_idt_default[44] = k_idt_gateInterrupt(k_isr_picIRQ12, DPL_0);
     // 45
     // 46
     // 47

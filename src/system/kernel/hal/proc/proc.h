@@ -14,7 +14,7 @@
 #include <hal/gdt/gdt.h>
 #include <_gunwrlp.h>
 
-#define MAX_PROC 6
+#define MAX_PROC 7
 #define KERNEL_PROC_ID -1
 
 struct k_proc_descriptor {
@@ -69,6 +69,11 @@ struct k_proc_process {
         Process privilege level
     */
     enum k_gdt_dpl dpl;
+
+    /*
+        Priority flag
+    */
+    bool priority;
 };
 
 /*
@@ -189,5 +194,14 @@ enum k_proc_error k_proc_callback_invoke_ptr(const procId_t procId,
                                              const size_t pEncodedSizeBytes,
                                              const gnwRunLoopDataEncodingRoutine encoder,
                                              const gnwRunLoopDataEncodingRoutine decoder);
+
+/*
+    Managing process priority
+
+    Params:
+    * procId - identifier of the process
+    * priority - flag if the priority has to be given to the process
+*/
+enum k_proc_error k_proc_setPriority(const procId_t procId, const bool priority);
 
 #endif // PROC_H

@@ -23,8 +23,7 @@ PRIVATE size_t executionTimeCounter = GRANULARITY_MS;
 static procId_t lastProcId = KERNEL_PROC_ID;
 static procId_t nextProcId = KERNEL_PROC_ID;
 
-static bool canSchedule(const procId_t procId) {
-    const struct k_proc_process procInfo = k_proc_getInfo(procId);
+static bool canSchedule(const struct k_proc_process procInfo) {
     return procInfo.state == PS_READY;
 }
 
@@ -32,14 +31,25 @@ static procId_t procSelect() {
     /*
         Simple round robin algorithm
     */
-    for (size_t i = 0; i < MAX_PROC; ++i) {
-        size_t procId = (lastProcId + i + 1) % MAX_PROC;
-        if (canSchedule(procId)) {
-            return procId;
+    procId_t nextProc = KERNEL_PROC_ID;
+
+    for (procId_t i = 0; i < MAX_PROC; ++i) {
+        const procId_t procId = (lastProcId + i + 1) % MAX_PROC;
+        const struct k_proc_process procInfo = k_proc_getInfo(procId);
+
+        if (!canSchedule(procInfo)) {
+            continue;
+        }
+        
+        if (nextProc == KERNEL_PROC_ID || procInfo.priority) {
+            nextProc = procId;
+        }
+        if (procInfo.priority) {
+            break;
         }
     }
     
-    return KERNEL_PROC_ID;
+    return nextProc;
 }
 
 static void schedEvaluate() {

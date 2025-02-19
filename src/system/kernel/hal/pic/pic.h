@@ -108,4 +108,9 @@
 
 #define PIC_EOI             0x20    // End of interrupt
 
+#define PIC_MAX_IRQ         15
+
+#define PIC_IRQ_IS_SLAVE(IRQ)   (IRQ > 7)
+#define PIC_IRQ_SLAVE_LINE(IRQ) (IRQ - 8)
+
 #endif // PIC_H
