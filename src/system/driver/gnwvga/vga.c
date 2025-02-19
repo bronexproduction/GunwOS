@@ -162,7 +162,7 @@ static void uhaSetParam_display(const struct gnwDeviceSetParamQuery * const quer
     }
 }
 
-const struct gnwDeviceDescriptor _gnw_device_descriptor = {
+static const struct gnwDeviceDescriptor device_descriptor = {
     /* type */ DEV_TYPE_DISPLAY | DEV_TYPE_MEM,
     /* api */ { 
         /* system */ {
@@ -214,3 +214,6 @@ const struct gnwDeviceDescriptor _gnw_device_descriptor = {
     },
     /* name */ "Default VGA display"
 };
+
+const struct gnwDeviceDescriptor * const _gnw_device_descriptor_list = &device_descriptor;
+const size_t _gnw_device_descriptor_count = 1;

@@ -11,8 +11,8 @@
 #include <gunwbus.h>
 #include <gunwlog.h>
 
-#define CAN_READ (rdb(MOUSE_BUS_STATUS) & MOUSE_STAT_OUTB)
-#define CAN_WRITE (!(rdb(MOUSE_BUS_STATUS) & MOUSE_STAT_INPB))
+#define CAN_READ (rdb(BA_STATUS) & CSR_OUTPUT_BUFFER_FULL)
+#define CAN_WRITE (!(rdb(BA_STATUS) & CSR_INPUT_BUFFER_FULL))
 
 static bool readData(uint_8 * const bytePtr) {
     if (!bytePtr) {
@@ -27,7 +27,7 @@ static bool readData(uint_8 * const bytePtr) {
         return false;
     }
 
-    *(bytePtr) = rdb(MOUSE_BUS_DATA);
+    *(bytePtr) = rdb(BA_DATA);
     return true;
 }
 
@@ -46,11 +46,11 @@ static bool write(const uint_16 port, const uint_8 byte) {
 }
 
 static bool performMouseCommand(const enum mouseCommand command) {
-    if (!write(MOUSE_BUS_STATUS, PLZ_LEMME_WRITE)) {
+    if (!write(BA_STATUS, KC_PLZ_LEMME_WRITE)) {
         return false;
     }
 
-    if (!write(MOUSE_BUS_DATA, command)) {
+    if (!write(BA_DATA, command)) {
         return false;
     }
     
@@ -58,7 +58,7 @@ static bool performMouseCommand(const enum mouseCommand command) {
     if (!readData(&result)) {
         return false;
     }
-    if (result != MOUSE_DATA_ACK) {
+    if (result != MCR_ACK) {
         return false;
     }
 
@@ -66,18 +66,18 @@ static bool performMouseCommand(const enum mouseCommand command) {
 }
 
 static bool performKeyboardCommand(const enum keyboardCommand command) {
-    return write(MOUSE_BUS_STATUS, command);
+    return write(BA_STATUS, command);
 }
 
 bool inputEnable() {
     // Set Compaq Status/Enable IRQ12
     // On some systems, the PS2 aux port is disabled at boot. Data coming from the aux port will not generate any interrupts. To know that data has arrived, you need to enable the aux port to generate IRQ12. There is only one way to do that, which involves getting/modifying the "compaq status" byte. You need to send the command byte 0x20 ("Get Compaq Status Byte") to the PS2 controller on port 0x64. If you look at RBIL, it says that this command is Compaq specific, but this is no longer true. This command does not generate a 0xFA ACK byte. The very next byte returned should be the Status byte. (Note: on some versions of Bochs, you will get a second byte, with a value of 0xD8, after sending this command, for some reason.) After you get the Status byte, you need to set bit number 1 (value=2, Enable IRQ12), and clear bit number 5 (value=0x20, Disable Mouse Clock). Then send command byte 0x60 ("Set Compaq Status") to port 0x64, followed by the modified Status byte to port 0x60. This might generate a 0xFA ACK byte from the keyboard.
 
-    return performKeyboardCommand(ENABLE_AUXILIARY_DEVICE);
+    return performKeyboardCommand(KC_ENABLE_AUXILIARY_DEVICE);
 }
 
 bool reset() {
-    if (!performMouseCommand(RESET)) {
+    if (!performMouseCommand(MC_RESET)) {
         return false;
     }
 
@@ -85,13 +85,13 @@ bool reset() {
     if (!readData(&result)) {
         return false;
     }
-    if (result != MOUSE_DATA_BAT_SUCCESSFUL) {
+    if (result != MCR_BAT_SUCCESSFUL) {
         return false;
     }
     if (!readData(&result)) {
         return false;
     }
-    if (result != MOUSE_DATA_RESET_COMPLETE) {
+    if (result != MCR_RESET_COMPLETE) {
         return false;
     }
 
@@ -99,15 +99,15 @@ bool reset() {
 }
 
 bool setDefaults() {
-    return performMouseCommand(SET_DEFAULTS);
+    return performMouseCommand(MC_SET_DEFAULTS);
 }
 
 bool enablePacketStreaming() {
-    return performMouseCommand(ENABLE_PACKET_STREAMING);
+    return performMouseCommand(MC_ENABLE_PACKET_STREAMING);
 }
 
 bool enableInterrupt() {
-    if (!performKeyboardCommand(READ_COMMAND_BYTE)) {
+    if (!performKeyboardCommand(KC_READ_COMMAND_BYTE)) {
         return false;
     }
 
@@ -118,14 +118,14 @@ bool enableInterrupt() {
     //     return false;
     // }
 
-    commandByte &= ~DISABLE_AUXILIARY_DEVICE;
-    commandByte |= ENABLE_AUXILIARY_INTERRUPT;
+    commandByte &= ~CCB_DISABLE_AUXILIARY_DEVICE;
+    commandByte |= CCB_ENABLE_AUXILIARY_INTERRUPT;
 
-    if (!performKeyboardCommand(WRITE_COMMAND_BYTE)) {
+    if (!performKeyboardCommand(KC_WRITE_COMMAND_BYTE)) {
         return false;
     }
 
-    if (!write(MOUSE_BUS_DATA, commandByte)) {
+    if (!write(BA_DATA, commandByte)) {
         return false;
     }
 
