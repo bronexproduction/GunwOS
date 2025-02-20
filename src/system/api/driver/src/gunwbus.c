@@ -13,8 +13,8 @@
 /*
     Read byte from system bus
 */
-uint_8 rdb(uint_16 const port) {
-    SYSCALL_DRIVER_CALL(RDB, port, 0, 0);
+uint_8 rdb(const size_t deviceId, const uint_16 port) {
+    SYSCALL_DRIVER_CALL(RDB, deviceId, port, 0, 0);
     
     return SYSCALL_RESULT;
 }
@@ -22,8 +22,8 @@ uint_8 rdb(uint_16 const port) {
 /*
     Write byte to system bus
 */
-void wrb(uint_16 const port, uint_8 const value) {
-    SYSCALL_DRIVER_CALL(WRB, port, value, 0);
+void wrb(const size_t deviceId, const uint_16 port, const uint_8 value) {
+    SYSCALL_DRIVER_CALL(WRB, deviceId, port, value, 0);
 }
 
 #endif // _GUNWAPI_KERNEL

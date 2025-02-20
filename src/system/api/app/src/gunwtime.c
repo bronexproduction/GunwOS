@@ -11,7 +11,7 @@
 #include "scl_user.h"
 
 time_t timeMs() {
-    SYSCALL_USER_CALL(TIME_MS, 0, 0, 0);
+    SYSCALL_USER_CALL(TIME_MS, 0, 0, 0, 0);
     
     return SYSCALL_RESULT;
 }

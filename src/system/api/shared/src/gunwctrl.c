@@ -19,7 +19,7 @@ enum gnwCtrlError start(const char * const path, procId_t * const procIdResultPt
     procId_t procId;
     struct gnwCtrlStartDescriptor desc = { { (byte_t *)path, strlen(path) }, GET_PROGRAM, &procId };
 
-    SYSCALL_USER_CALL(START, &desc, 0, 0); 
+    SYSCALL_USER_CALL(START, &desc, 0, 0, 0); 
 
     if (procIdResultPtr) {
         *(procIdResultPtr) = (procId < 0) ? NONE_PROC_ID : procId;
@@ -29,15 +29,15 @@ enum gnwCtrlError start(const char * const path, procId_t * const procIdResultPt
 }
 
 void bye(const int_32 status) {
-    SYSCALL_USER_CALL(BYE, status, 0, 0);
+    SYSCALL_USER_CALL(BYE, status, 0, 0, 0);
 }
 
 void waitForEvent() {
-    SYSCALL_USER_CALL(WAIT_FOR_EVENT, 0, 0, 0);
+    SYSCALL_USER_CALL(WAIT_FOR_EVENT, 0, 0, 0, 0);
 }
 
 void yield() {
-    SYSCALL_USER_CALL(YIELD, 0, 0, 0);
+    SYSCALL_USER_CALL(YIELD, 0, 0, 0, 0);
 }
 
 #endif // _GUNWAPI_KERNEL

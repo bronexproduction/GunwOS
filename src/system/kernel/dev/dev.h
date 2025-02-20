@@ -17,22 +17,26 @@ void k_dev_init();
 enum gnwDriverError k_dev_install(const struct gnwDeviceDescriptor * const descriptorPtr,
                                   size_t * const deviceIdPtr);
 enum gnwDriverError k_dev_install_async(const struct gnwDeviceDescriptor * const descriptorPtr,
-                                        const procId_t operatorProcId);
+                                        const procId_t operatorProcId,
+                                        size_t * const deviceIdPtr);
 
-enum gnwDriverError k_dev_init_async(const procId_t operatorProcId, const procId_t requesterProcId, enum gnwDriverError * const vErrorPtr);
+enum gnwDriverError k_dev_init_async(const procId_t requesterProcId, const size_t deviceId, enum gnwDriverError * const vErrorPtr);
 void k_dev_init_report(const procId_t operatorProcId, const size_t deviceId, const bool success);
 
 enum gnwDriverError k_dev_start(const size_t id);
-enum gnwDriverError k_dev_start_async(const procId_t operatorProcId, const procId_t requesterProcId, enum gnwDriverError * const vErrorPtr);
+enum gnwDriverError k_dev_start_async(const procId_t requesterProcId, const size_t deviceId, enum gnwDriverError * const vErrorPtr);
 void k_dev_start_report(const procId_t operatorProcId, const size_t deviceId, const bool success);
 
+procId_t k_dev_operatorOf(const size_t deviceId);
+size_t k_dev_countForOperator(const procId_t operatorProcId);
+void k_dev_identifiersForOperator(const procId_t operatorProcId, size_t * const deviceIdentifiersBuffer, const size_t count);
+
 enum gnwDeviceError k_dev_getById(const size_t id, struct gnwDeviceUHADesc * const desc);
-enum gnwDeviceError k_dev_getByOperator(const procId_t operator, struct gnwDeviceUHADesc * const desc);
 enum gnwDeviceError k_dev_getByType(const enum gnwDeviceType type, struct gnwDeviceUHADesc * const desc);
 
 enum gnwDeviceError k_dev_getUHAForId(const size_t id, struct gnwDeviceUHA * const uha);
 
-bool k_dev_mmioRangeAllowed(const procId_t procId, const addr_t physMemStart, const size_t sizeBytes);
+bool k_dev_mmioRangeAllowed(const size_t deviceId, const addr_t physMemStart, const size_t sizeBytes);
 
 enum gnwDeviceError k_dev_acquireHold(const procId_t processId, const size_t deviceId);
 void k_dev_releaseHold(const procId_t processId, const size_t deviceId);

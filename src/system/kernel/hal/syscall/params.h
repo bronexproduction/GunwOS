@@ -12,6 +12,7 @@
 
 #define _STACK_REFERENCE_OFFSET 0x28
 
+#warning yusur?
 #define _USER_STACK_ADDR (*(addr_t *)(refEsp + _STACK_REFERENCE_OFFSET + 12))
 
 /*
@@ -31,6 +32,7 @@
 #define PARAMETER_1_STACK_OFFSET    4
 #define PARAMETER_2_STACK_OFFSET    8
 #define PARAMETER_3_STACK_OFFSET    12
+#define PARAMETER_4_STACK_OFFSET    16
 
 #define SAFE_STACK_VAL_PTR(TYPE, NAME, OFFSET) \
     TYPE * const NAME = userStackSafeValuePointer(procId, refEsp, OFFSET, sizeof(TYPE));

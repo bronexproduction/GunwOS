@@ -20,7 +20,7 @@
 static enum gnwRunLoopError runLoopGetItem(struct gnwRunLoopDispatchItem * const itemPtr) {
     CHECKPTR(itemPtr);
 
-    SYSCALL_USER_CALL(RUNLOOP_GET_ITEM, itemPtr, 0, 0);
+    SYSCALL_USER_CALL(RUNLOOP_GET_ITEM, itemPtr, 0, 0, 0);
 
     return SYSCALL_RESULT;
 }
@@ -31,7 +31,7 @@ static enum gnwRunLoopError runLoopGetItem(struct gnwRunLoopDispatchItem * const
 static enum gnwRunLoopError runLoopGetData(ptr_t dataBufferPtr) {
     CHECKPTR(dataBufferPtr);
 
-    SYSCALL_USER_CALL(RUNLOOP_GET_DATA, dataBufferPtr, 0, 0);
+    SYSCALL_USER_CALL(RUNLOOP_GET_DATA, dataBufferPtr, 0, 0, 0);
 
     return SYSCALL_RESULT;
 }

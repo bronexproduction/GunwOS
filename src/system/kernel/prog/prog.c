@@ -166,7 +166,6 @@ static enum gnwCtrlError loadElf(const data_t fileData,
 
         enum k_mem_error err = k_mem_gimme(procId,
                                            (ptr_t)sectionHeaderEntry->virtualAddr,
-                                           nullptr,
                                            sectionHeaderEntry->fileSizeBytes);
         if (err != ME_NONE &&
             err != ME_ALREADY_ASSIGNED &&
@@ -248,7 +247,6 @@ static enum gnwCtrlError spawn(const data_t fileData,
     const size_t stackSize = KiB(256);
     enum k_mem_error error = k_mem_gimme(*spawnedProcId,
                                          (ptr_t)(0 - MEM_VIRTUAL_RESERVED_KERNEL_MEM - stackSize),
-                                         nullptr,
                                          stackSize);
     if (error != ME_NONE) {
         k_proc_cleanup(*spawnedProcId);
@@ -330,14 +328,33 @@ procId_t k_prog_spawnDriver(const procId_t procId,
     */
 
     size_t deviceDescriptorListSizeBytes;
+    size_t deviceIdentifierListSizeBytes;
     size_t deviceDescriptorCountSizeBytes;
-    const struct gnwDeviceDescriptor * const deviceDescriptorListPtr = (struct gnwDeviceDescriptor *)elfGetSymbolFileAddr(fileData,
-                                                                                                                          "_gnw_device_descriptor_list",
-                                                                                                                          &deviceDescriptorListSizeBytes);                                                                                  
-    const size_t * const deviceDescriptorCountPtr = (size_t *)elfGetSymbolFileAddr(fileData,
-                                                                                   "_gnw_device_descriptor_count",
-                                                                                   &deviceDescriptorCountSizeBytes);
-    if (!deviceDescriptorListPtr || !deviceDescriptorListSizeBytes || !deviceDescriptorCountPtr || !deviceDescriptorCountSizeBytes) {
+    struct gnwDeviceDescriptor * const deviceDescriptorListPtr; {
+        elfGetSymbolAddr(fileData,
+                        "_gnw_device_descriptor_list",
+                        (addr_t *)&deviceDescriptorListPtr,
+                        nullptr,
+                        &deviceDescriptorListSizeBytes);
+    }
+    size_t * const vDeviceIdentifierListPtr; {
+        elfGetSymbolAddr(fileData,
+                         "_gnw_device_identifier_list",
+                         nullptr,
+                         (addr_t *)&vDeviceIdentifierListPtr,
+                         &deviceIdentifierListSizeBytes);
+    }
+    size_t * const deviceDescriptorCountPtr; {
+        elfGetSymbolAddr(fileData,
+                         "_gnw_device_descriptor_count",
+                         (addr_t *)&deviceDescriptorCountPtr,
+                         nullptr,
+                         &deviceDescriptorCountSizeBytes);
+    }
+
+    if (!deviceDescriptorListPtr || !deviceDescriptorListSizeBytes ||
+        !vDeviceIdentifierListPtr || !deviceIdentifierListSizeBytes ||
+        !deviceDescriptorCountPtr || !deviceDescriptorCountSizeBytes) {
         LOG_CODE("Device descriptor not found in driver file", 0);
         return GCE_HEADER_INVALID;
     }
@@ -357,6 +374,14 @@ procId_t k_prog_spawnDriver(const procId_t procId,
         LOG_CODE("Device descriptor list size invalid", 0);
         return GCE_HEADER_INVALID;
     }
+    if (deviceIdentifierListSizeBytes % sizeof(size_t)) {
+        LOG_CODE("Device identifier list size invalid", 0);
+        return GCE_HEADER_INVALID;
+    }
+    if (deviceIdentifierListSizeBytes / sizeof(size_t) != (*deviceDescriptorCountPtr)) {
+        LOG_CODE("Device identifier list size invalid", 0);
+        return GCE_HEADER_INVALID;
+    }
 
     /*
         Spawn operator process
@@ -373,18 +398,21 @@ procId_t k_prog_spawnDriver(const procId_t procId,
     /*
         Create device stub
     */
-    
-    if ((*deviceDescriptorCountPtr) > 1) {
-        OOPS("Not implemented yet", GCE_UNKNOWN);
-    }
 
-    const enum gnwDriverError installError = k_dev_install_async(deviceDescriptorListPtr, spawnedProcId);
-    if (installError != GDRE_NONE) {
-        k_proc_stop(spawnedProcId);
+    for (size_t index = 0; index < (*deviceDescriptorCountPtr); ++index) {
+        size_t deviceId;
+        const enum gnwDriverError installError = k_dev_install_async(deviceDescriptorListPtr, spawnedProcId, &deviceId);
+        if (installError != GDRE_NONE) {
+            k_proc_stop(spawnedProcId);
         
-        #warning TODO find a way to return install error to the caller process
+            #warning TODO find a way to return install error to the caller process
 
-        return GCE_UNKNOWN;
+            return GCE_UNKNOWN;
+        }
+
+        MEM_ONTABLE(spawnedProcId, 
+            vDeviceIdentifierListPtr[index] = deviceId;
+        )
     }
 
     return spawnedProcId;

@@ -72,7 +72,6 @@ bool k_mem_bufferZoneValidForProc(const procId_t procId,
 
 enum k_mem_error k_mem_gimme(const procId_t procId,
                              const ptr_t vPtr,
-                             const ptr_t pPtr,
                              const size_t sizeBytes) {
     if (!k_proc_idIsUser(procId)) {
         return ME_INVALID_ARGUMENT;
@@ -86,30 +85,56 @@ enum k_mem_error k_mem_gimme(const procId_t procId,
         return ME_INVALID_ARGUMENT;
     }
 
-    if (pPtr) {        
-        if ((addr_t)vPtr % MEM_PAGE_SIZE_BYTES) {
-            return ME_INVALID_ARGUMENT;
-        }
-        if ((addr_t)pPtr % MEM_PAGE_SIZE_BYTES) {
-            return ME_INVALID_ARGUMENT;
-        }
-        if (sizeBytes % MEM_PAGE_SIZE_BYTES) {
-            return ME_INVALID_ARGUMENT;
-        }
-        if (!sizeBytes) {
-            return ME_INVALID_ARGUMENT;
-        }
-        ptr_t pEnd = pPtr + sizeBytes;
-        if (pEnd <= pPtr) {
-            return ME_INVALID_ARGUMENT;
-        }
+    size_t startVPage = MEM_PAGE_OF_ADDR((addr_t)vPtr);
+    size_t pageCount = MEM_PAGE_OF_ADDR((addr_t)aligned((addr_t)vEnd, MEM_PAGE_SIZE_BYTES)) - startVPage;
 
-        if (!k_dev_mmioRangeAllowed(procId, (addr_t)pPtr, sizeBytes)) {
-            return ME_INVALID_ARGUMENT;
-        }
-        if (!k_mem_bufferIsInUsableUmaRange((addr_t)pPtr, sizeBytes)) {
-            return ME_INVALID_ARGUMENT;
-        }
+    return k_paging_assign(procId, startVPage, 0, pageCount);
+}
+
+enum k_mem_error k_mem_mapme(const procId_t procId,
+                             const size_t deviceId,
+                             const ptr_t vPtr,
+                             const ptr_t pPtr,
+                             const size_t sizeBytes) {
+    if (!k_proc_idIsUser(procId)) {
+        return ME_INVALID_ARGUMENT;
+    }
+
+    ptr_t vEnd = vPtr + sizeBytes;
+    if (vEnd <= vPtr) {
+        return ME_INVALID_ARGUMENT;
+    }
+    if ((addr_t)vEnd > ((addr_t)0 - MEM_VIRTUAL_RESERVED_KERNEL_MEM)) {
+        return ME_INVALID_ARGUMENT;
+    }
+    if (!pPtr) {
+        return ME_INVALID_ARGUMENT;
+    }
+    if ((addr_t)vPtr % MEM_PAGE_SIZE_BYTES) {
+        return ME_INVALID_ARGUMENT;
+    }
+    if ((addr_t)pPtr % MEM_PAGE_SIZE_BYTES) {
+        return ME_INVALID_ARGUMENT;
+    }
+    if (sizeBytes % MEM_PAGE_SIZE_BYTES) {
+        return ME_INVALID_ARGUMENT;
+    }
+    if (!sizeBytes) {
+        return ME_INVALID_ARGUMENT;
+    }
+    ptr_t pEnd = pPtr + sizeBytes;
+    if (pEnd <= pPtr) {
+        return ME_INVALID_ARGUMENT;
+    }
+
+    if (k_dev_operatorOf(deviceId) != procId) {
+        return ME_INVALID_ARGUMENT;
+    }
+    if (!k_dev_mmioRangeAllowed(deviceId, (addr_t)pPtr, sizeBytes)) {
+        return ME_INVALID_ARGUMENT;
+    }
+    if (!k_mem_bufferIsInUsableUmaRange((addr_t)pPtr, sizeBytes)) {
+        return ME_INVALID_ARGUMENT;
     }
 
     size_t startVPage = MEM_PAGE_OF_ADDR((addr_t)vPtr);

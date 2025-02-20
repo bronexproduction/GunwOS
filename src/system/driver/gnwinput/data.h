@@ -13,6 +13,14 @@
 
 #include <types.h>
 
+#define IRQ_KEYBOARD 1
+#define IRQ_MOUSE 12
+
+#define KEYBOARD_DEVICE_ID (_gnw_device_identifier_list[0])
+#define MOUSE_DEVICE_ID (_gnw_device_identifier_list[1])
+
+extern const size_t _gnw_device_identifier_list[];
+
 enum busAddress {
     /*
         Controller status register bus address

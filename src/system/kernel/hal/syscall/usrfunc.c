@@ -405,15 +405,15 @@ void k_scr_memThx(const procId_t procId, const ptr_t refEsp) {
     Function - DEV_INIT
 
     Params (process stack offset):
-        * PARAMETER_1_STACK_OFFSET - device operator process ID
+        * PARAMETER_1_STACK_OFFSET - device identifier
         * PARAMETER_2_STACK_OFFSET - error pointer (address in caller process space)
 */
 void k_scr_devInit(const procId_t procId, const ptr_t refEsp) {
-    SAFE_STACK_VAL_PTR(const procId_t, operatorProcId, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const size_t, deviceId, PARAMETER_1_STACK_OFFSET);
     SAFE_STACK_VAL_PTR(enum gnwDriverError *, vErrorPtr, PARAMETER_2_STACK_OFFSET);
 
-    extern void k_scr_usr_devInit(const procId_t procId, const procId_t operatorProcId, enum gnwDriverError * vErrorPtr);
-    k_que_dispatch_arch3((fPtr_arch3)(ptr_t)k_scr_usr_devInit, procId, *operatorProcId, (addr_t)*vErrorPtr);
+    extern void k_scr_usr_devInit(const procId_t procId, const size_t deviceId, enum gnwDriverError * vErrorPtr);
+    k_que_dispatch_arch3((fPtr_arch3)(ptr_t)k_scr_usr_devInit, procId, *deviceId, (addr_t)*vErrorPtr);
 }
 
 /*
@@ -421,13 +421,47 @@ void k_scr_devInit(const procId_t procId, const ptr_t refEsp) {
     Function - DEV_START
 
     Params (process stack offset):
-        * PARAMETER_1_STACK_OFFSET - device operator process ID
+        * PARAMETER_1_STACK_OFFSET - device identifier
         * PARAMETER_2_STACK_OFFSET - error pointer (address in caller process space)
 */
 void k_scr_devStart(const procId_t procId, const ptr_t refEsp) {
-    SAFE_STACK_VAL_PTR(const procId_t, operatorProcId, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const size_t, deviceId, PARAMETER_1_STACK_OFFSET);
     SAFE_STACK_VAL_PTR(enum gnwDriverError *, vErrorPtr, PARAMETER_2_STACK_OFFSET);
 
-    extern void k_scr_usr_devStart(const procId_t procId, const procId_t operatorProcId, enum gnwDriverError * vErrorPtr);
-    k_que_dispatch_arch3((fPtr_arch3)(ptr_t)k_scr_usr_devStart, procId, *operatorProcId, (addr_t)*vErrorPtr);
+    extern void k_scr_usr_devStart(const procId_t procId, const size_t deviceId, enum gnwDriverError * vErrorPtr);
+    k_que_dispatch_arch3((fPtr_arch3)(ptr_t)k_scr_usr_devStart, procId, *deviceId, (addr_t)*vErrorPtr);
+}
+
+/*
+    Code - 0x19
+    Function - DEV_GET_COUNT_FOR_OPERATOR
+
+    Params (process stack offset):
+        * PARAMETER_1_STACK_OFFSET - operator process identifier
+
+    Return: number of devices operated by given process
+*/
+void k_scr_devGetCountForOperator(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(const procId_t, operatorProcId, PARAMETER_1_STACK_OFFSET);
+
+    extern size_t k_scr_usr_devGetCountForOperator(const procId_t, const procId_t);
+    SAFE_STACK_RESULT_ARCH_VAL = k_scr_usr_devGetCountForOperator(procId, *operatorProcId);
+}
+
+/*
+    Code - 0x1a
+    Function - DEV_GET_IDS_FOR_OPERATOR
+
+    Params (process stack offset):
+        * PARAMETER_1_STACK_OFFSET - operator process identifier
+        * PARAMETER_2_STACK_OFFSET - linear pointer to first item of device id list result buffer
+        * PARAMETER_3_STACK_OFFSET - linear pointer to result error (enum gnwDeviceError)
+*/
+void k_scr_devGetIdsForOperator(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(const procId_t, operatorProcId, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(size_t * const, vDeviceIdListStartPtr, PARAMETER_2_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(enum gnwDeviceError * const, vErrorPtr, PARAMETER_3_STACK_OFFSET);
+    
+    extern void k_scr_usr_devGetIdsForOperator(const procId_t, const procId_t, size_t * const, enum gnwDeviceError * const);
+    k_scr_usr_devGetIdsForOperator(procId, *operatorProcId, *vDeviceIdListStartPtr, *vErrorPtr);
 }

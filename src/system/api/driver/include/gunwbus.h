@@ -18,7 +18,7 @@
     Note:
         * Not allowed from user-level
 */
-extern uint_8 rdb(uint_16 const port);
+extern uint_8 rdb(const size_t deviceId, const uint_16 port);
 
 /*
     Write byte to system bus
@@ -26,7 +26,7 @@ extern uint_8 rdb(uint_16 const port);
     Note:
         * Not allowed from user-level
 */
-extern void wrb(uint_16 const port, uint_8 const val);
+extern void wrb(const size_t deviceId, const uint_16 port, uint_8 val);
 
 #endif // _GUNWAPI_KERNEL
 

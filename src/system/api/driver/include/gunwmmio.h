@@ -15,12 +15,13 @@
     Returns new virtual memory pointer mapped to requested physical memory address
 
     Params:
+        * deviceId - device identifier
         * physMemStart - physical address of the begginning of the buffer
         * sizeBytes - size of the requested memory space
         * errorPtr - enum gnwMemoryError pointer
 
     Return: Pointer to the newly allocated memory or nullptr if anything went wrong
 */
-extern ptr_t mmioPlz(const addr_t physMemStart, const size_t sizeBytes, enum gnwMemoryError * const errorPtr);
+ptr_t mmioPlz(const size_t deviceId, const addr_t physMemStart, const size_t sizeBytes, enum gnwMemoryError * const errorPtr);
 
 #endif // GUNWOS_GUNWMMIO_H

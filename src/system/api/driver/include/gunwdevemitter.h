@@ -21,7 +21,7 @@
     Note:
         * Not allowed from user-level
 */
-extern enum gnwDeviceError emit(const struct gnwDeviceEvent * const event);
+enum gnwDeviceError emit(const size_t deviceId, const struct gnwDeviceEvent * const event);
 
 #endif // _GUNWAPI_KERNEL
 

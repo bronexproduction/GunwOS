@@ -5,12 +5,14 @@
 //  Created by Artur Danielewski on 24.03.2023.
 //
 
-#include "vga_bus.h"
 #include <gunwbus.h>
 #include <gunwfug.h>
 
+#include "data.h"
+#include "vga_bus.h"
+
 static void vga_wrb(uint_16 const port, uint_8 const val) {
-    wrb(port, val);
+    wrb(DEVICE_ID, port, val);
     extern void vga_sleepms();
     vga_sleepms();
 }
@@ -19,7 +21,7 @@ static uint_8 busReadLSI(const uint_16 addrAddr,
                          const uint_16 dataAddr,
                          const uint_8 index) {
     vga_wrb(addrAddr, index);
-    return rdb(dataAddr);
+    return rdb(DEVICE_ID, dataAddr);
 }
 
 static void busWriteLSI(const uint_16 addrAddr, 
@@ -38,7 +40,7 @@ uint_8 busReadExternal(const enum bus_reg_external reg) {
         return 0;
     }
 
-    return rdb(reg);
+    return rdb(DEVICE_ID, reg);
 }
 
 uint_8 busReadCRT(const enum bus_reg_crt_index index) {
@@ -87,7 +89,7 @@ void busWriteAttribute(const enum bus_reg_attr_index index, const uint_8 data) {
     /*
         Reading port 0x3DA will reset the attribute register flip-flop to address mode
     */
-    (void)rdb(BRE_FEATURE_CTRL);
+    (void)rdb(DEVICE_ID, BRE_FEATURE_CTRL);
     busWriteLSI(BRA_ADDRESS, BRA_DATA, index, data);
 }
 
@@ -95,6 +97,6 @@ void busWriteAttributeAddr(const uint_8 data) {
     /*
         Reading port 0x3DA will reset the attribute register flip-flop to address mode
     */
-    (void)rdb(BRE_FEATURE_CTRL);
+    (void)rdb(DEVICE_ID, BRE_FEATURE_CTRL);
     vga_wrb(BRA_ADDRESS, data);
 }

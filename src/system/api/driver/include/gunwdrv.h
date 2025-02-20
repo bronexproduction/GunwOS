@@ -107,11 +107,11 @@ struct gnwDeviceDescriptor {
 /*
     Report driver initialization status
 */
-extern void drvInitReport(bool success);
+void drvInitReport(const size_t deviceId, const bool success);
 
 /*
     Report driver startup status
 */
-extern void drvStartReport(bool success);
+void drvStartReport(const size_t deviceId, const bool success);
 
 #endif // GUNWOS_GUNWDRV_H

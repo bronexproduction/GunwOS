@@ -14,11 +14,6 @@
 #include "data.h"
 #include "ops.h"
 
-#define IRQ_KEYBOARD 1
-#define IRQ_MOUSE 12
-
-#define DESCRIPTOR_COUNT 2
-
 #warning TODO https://wiki.osdev.org/%228042%22_PS/2_Controller
 
 static void emitKeyboardEvent(const int_32 type, const char data) {
@@ -28,7 +23,7 @@ static void emitKeyboardEvent(const int_32 type, const char data) {
     event.data = (ptr_t)&data;
     event.dataSizeBytes = sizeof(char);
 
-    err = emit(&event);
+    err = emit(KEYBOARD_DEVICE_ID, &event);
     if (err == GDE_NOT_FOUND) {
         log("Keyboard event ignored - no listener");
     } else if (err != GDE_NONE) {
@@ -38,16 +33,16 @@ static void emitKeyboardEvent(const int_32 type, const char data) {
 }
 
 static void init_keyboard() {
-    drvInitReport(true);
+    drvInitReport(KEYBOARD_DEVICE_ID, true);
 }
 
 static void start_keyboard() {
-    drvStartReport(true);
+    drvStartReport(KEYBOARD_DEVICE_ID, true);
 }
 
 static void isr_keyboard () {
     /* Checking output buffer status */
-    const uint_8 status = rdb(BA_STATUS);
+    const uint_8 status = rdb(KEYBOARD_DEVICE_ID, BA_STATUS);
     if (!(status & CSR_OUTPUT_BUFFER_FULL)) {
         /*
             No data
@@ -64,7 +59,7 @@ static void isr_keyboard () {
     }
 
     /* Reading keycode */
-    uint_8 c = rdb(BA_DATA);
+    uint_8 c = rdb(KEYBOARD_DEVICE_ID, BA_DATA);
     
     /*
         Extracting exact keycode
@@ -81,7 +76,7 @@ static void isr_keyboard () {
 
 static void isr_mouse() {
     /* Checking output buffer status */
-    const uint_8 status = rdb(BA_STATUS);
+    const uint_8 status = rdb(MOUSE_DEVICE_ID, BA_STATUS);
     if (!(status & CSR_OUTPUT_BUFFER_FULL)) {
         /*
             No data
@@ -120,6 +115,9 @@ static void isr_mouse() {
 extern void init_mouse();
 extern void start_mouse();
 
+#define DESCRIPTOR_COUNT 2
+
+const size_t _gnw_device_descriptor_count = DESCRIPTOR_COUNT;
 const struct gnwDeviceDescriptor _gnw_device_descriptor_list[DESCRIPTOR_COUNT] = {
     /* keyboard */ {
         /* type */ DEV_TYPE_KEYBOARD,
@@ -190,4 +188,4 @@ const struct gnwDeviceDescriptor _gnw_device_descriptor_list[DESCRIPTOR_COUNT] =
         /* name */ "Mouse driver for 8042 PS/2 controller"
     }
 };
-const size_t _gnw_device_descriptor_count = DESCRIPTOR_COUNT;
+const size_t _gnw_device_identifier_list[DESCRIPTOR_COUNT];

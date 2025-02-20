@@ -11,12 +11,12 @@
 #include <scl_driver.h>
 #include <gunwdevtypes.h>
 
-void drvInitReport(bool success) {
-    SYSCALL_DRIVER_CALL(REPORT_INIT, success, 0, 0);
+void drvInitReport(const size_t deviceId, const bool success) {
+    SYSCALL_DRIVER_CALL(REPORT_INIT, deviceId, success, 0, 0);
 }
 
-void drvStartReport(bool success) {
-    SYSCALL_DRIVER_CALL(REPORT_START, success, 0, 0);
+void drvStartReport(const size_t deviceId, const bool success) {
+    SYSCALL_DRIVER_CALL(REPORT_START, deviceId, success, 0, 0);
 }
 
 #else

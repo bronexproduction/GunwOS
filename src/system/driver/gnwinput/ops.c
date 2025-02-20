@@ -11,8 +11,10 @@
 #include <gunwbus.h>
 #include <gunwlog.h>
 
-#define CAN_READ (rdb(BA_STATUS) & CSR_OUTPUT_BUFFER_FULL)
-#define CAN_WRITE (!(rdb(BA_STATUS) & CSR_INPUT_BUFFER_FULL))
+#define CAN_READ (rdb(MOUSE_DEVICE_ID, BA_STATUS) & CSR_OUTPUT_BUFFER_FULL)
+#define CAN_WRITE (!(rdb(MOUSE_DEVICE_ID, BA_STATUS) & CSR_INPUT_BUFFER_FULL))
+
+extern const size_t MOUSE_DEVICE_ID;
 
 static bool readData(uint_8 * const bytePtr) {
     if (!bytePtr) {
@@ -27,7 +29,7 @@ static bool readData(uint_8 * const bytePtr) {
         return false;
     }
 
-    *(bytePtr) = rdb(BA_DATA);
+    *(bytePtr) = rdb(MOUSE_DEVICE_ID, BA_DATA);
     return true;
 }
 
@@ -40,7 +42,7 @@ static bool write(const uint_16 port, const uint_8 byte) {
         return false;
     }
 
-    wrb(port, byte);
+    wrb(MOUSE_DEVICE_ID, port, byte);
 
     return true;
 }

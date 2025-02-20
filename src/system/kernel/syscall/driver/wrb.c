@@ -13,12 +13,10 @@
 #include <log/log.h>
 #include <string.h>
 
-void k_scr_drv_wrb(const procId_t procId, const uint_16 port, const uint_8 value) {
+void k_scr_drv_wrb(const procId_t procId, const size_t deviceId, const uint_16 port, const uint_8 value) {
 
-    struct gnwDeviceUHADesc desc;
-    const enum gnwDeviceError error = k_dev_getByOperator(procId, &desc);
-    if (error != GDE_NONE) {
-        OOPS("Unexpected device operator identifier",);
+    if (k_dev_operatorOf(deviceId) != procId) {
+        OOPS("Invalid device operator identifier",);
         k_proc_stop(procId);
         return;
     }

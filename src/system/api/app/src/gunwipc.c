@@ -36,7 +36,7 @@ enum gnwIpcError ipcRegister(const gnwIpcPath path,
     desc.bindingRequired = bindingRequired;
     desc.permissionMask = permissionMask;
 
-    SYSCALL_USER_CALL(IPC_REGISTER, &desc, 0, 0);
+    SYSCALL_USER_CALL(IPC_REGISTER, &desc, 0, 0, 0);
 
     return SYSCALL_RESULT;
 }
@@ -70,7 +70,7 @@ enum gnwIpcError ipcSendDirect(const procId_t procId,
     query.replyData = replyData;
     query.bindData = bindData;
 
-    SYSCALL_USER_CALL(IPC_SEND, &query, 0, 0);
+    SYSCALL_USER_CALL(IPC_SEND, &query, 0, 0, 0);
 
     enum gnwIpcError error = SYSCALL_RESULT;
     return (replyErr == GIPCE_NONE) ? (enum gnwIpcError)error : replyErr;
@@ -87,7 +87,7 @@ enum gnwIpcError ipcReply(const data_t replyData,
     info.token = token;
     info.bindData = bindData;
 
-    SYSCALL_USER_CALL(IPC_REPLY, &info, 0, 0);
+    SYSCALL_USER_CALL(IPC_REPLY, &info, 0, 0, 0);
 
     return SYSCALL_RESULT;
 }

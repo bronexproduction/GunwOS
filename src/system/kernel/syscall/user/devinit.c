@@ -13,12 +13,12 @@
 #include <dev/dev.h>
 
 void k_scr_usr_devInit(const procId_t procId,
-                       const procId_t operatorProcId,
+                       const size_t deviceId,
                        enum gnwDriverError * vErrorPtr) {
 
     MEM_VALIDATE_VPTR(procId, vErrorPtr, enum gnwDriverError);
 
-    enum gnwDriverError error = k_dev_init_async(operatorProcId, procId, vErrorPtr);
+    enum gnwDriverError error = k_dev_init_async(procId, deviceId, vErrorPtr);
 
     if (error == GDRE_NOT_FOUND) {
         MEM_ONTABLE(procId, 

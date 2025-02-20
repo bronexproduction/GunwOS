@@ -200,10 +200,12 @@ struct elfSectionHeaderEntry32 * elfGetSectionHeaderEntryAtIndex(const data_t fi
 addr_t elfGetEntry(const data_t fileData);
 
 /*
-    Returns the address of given symbol inside the file
+    Extracts the address of given symbol
 */
-addr_t elfGetSymbolFileAddr(const data_t fileData,
-                            const char * const symbolName,
-                            size_t * const symbolSizeBytes);
+void elfGetSymbolAddr(const data_t fileData,
+                      const char * const symbolName,
+                      addr_t * const fileAddr,
+                      addr_t * const linearAddr,
+                      size_t * const symbolSizeBytes);
 
 #endif // GUNWELF_H

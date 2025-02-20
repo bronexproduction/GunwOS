@@ -23,10 +23,10 @@
 #define MEM_XMS_START                                   MiB(1)
 
 #define _MEM_VALIDATE_VPTR_BUFFER(PROC_ID, VPTR, SIZE_BYTES, RETVAL, ON_ERROR, NULLABLE) {                                                      \
-    if (!NULLABLE || VPTR || SIZE_BYTES) {                                                                                                      \
-        if (!SIZE_BYTES) { { ON_ERROR; } OOPS("Unexpected buffer size", RETVAL); }                                                              \
-        if (!VPTR) { { ON_ERROR; } OOPS("Unexpected null pointer", RETVAL); }                                                                   \
-        if (!k_mem_bufferZoneValidForProc(PROC_ID, (ptr_t)VPTR, SIZE_BYTES)) { { ON_ERROR; } OOPS("Reserved zone access violation", RETVAL); }  \
+    if (!(NULLABLE) || ((VPTR) != nullptr) || ((SIZE_BYTES) != 0)) {                                                                                                      \
+        if ((SIZE_BYTES) == 0) { { ON_ERROR; } OOPS("Unexpected buffer size", RETVAL); }                                                              \
+        if ((VPTR) == nullptr) { { ON_ERROR; } OOPS("Unexpected null pointer", RETVAL); }                                                                   \
+        if (!k_mem_bufferZoneValidForProc(PROC_ID, (ptr_t)(VPTR), (SIZE_BYTES))) { { ON_ERROR; } OOPS("Reserved zone access violation", RETVAL); }  \
     }                                                                                                                                           \
 }
 #define MEM_VALIDATE_VPTR_BUFFER(PROC_ID, VPTR, SIZE_BYTES, RETVAL, ON_ERROR) \
@@ -81,6 +81,14 @@ bool k_mem_bufferZoneValidForProc(const procId_t procId,
     Reserves memory for given process pointed at by vPtr
 */
 enum k_mem_error k_mem_gimme(const procId_t procId,
+                             const ptr_t vPtr,
+                             const size_t sizeBytes);
+                             
+/*
+    Maps specified physical memory area for given process (device operator)
+*/
+enum k_mem_error k_mem_mapme(const procId_t procId,
+                             const size_t deviceId,
                              const ptr_t vPtr,
                              const ptr_t pPtr,
                              const size_t sizeBytes);
