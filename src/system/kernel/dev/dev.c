@@ -172,15 +172,10 @@ PRIVATE enum gnwDeviceError validateStartedDeviceOwnership(const procId_t proces
 
 PRIVATE enum gnwDriverError devInstallPrepare(const struct gnwDeviceDescriptor * const descriptorPtr,
                                               const procId_t validOperatorProcId,
-                                              size_t * const deviceIdPtr,
                                               const struct gnwDriverConfig * * driverDescPtr,
                                               struct device * dev) {
     if (!driverDescPtr) {
         LOG("Driver desc nullptr not allowed");
-        return GDRE_UNKNOWN;
-    }
-    if (!deviceIdPtr) {
-        LOG("ID nullptr not allowed");
         return GDRE_UNKNOWN;
     }
     if (!dev) {
@@ -226,26 +221,12 @@ PRIVATE enum gnwDriverError devInstallPrepare(const struct gnwDeviceDescriptor *
     return GDRE_NONE;
 }
 
-// PRIVATE struct device * deviceForOperator(const procId_t operatorProcId) {
-//     if (!k_proc_idIsUser(operatorProcId)) {
-//         OOPS("Unexpected operator process ID", nullptr);
-//     }
-//     for (size_t id = 0; id < MAX_DEVICES; ++id) {
-//         if (devices[id].operator == operatorProcId) {
-//             return &(devices[id]);
-//         }
-//     }
-
-//     return nullptr;
-// }
-
 enum gnwDriverError k_dev_install(const struct gnwDeviceDescriptor * const descriptorPtr,
                                   size_t * const deviceIdPtr) {
     const struct gnwDriverConfig * driverDescPtr = nullptr;
     struct device dev = { 0 };
     enum gnwDriverError error = devInstallPrepare(descriptorPtr,
                                                   KERNEL_PROC_ID,
-                                                  deviceIdPtr,
                                                   &driverDescPtr,
                                                   &dev);
     if (error != GDRE_NONE) {
@@ -301,7 +282,6 @@ enum gnwDriverError k_dev_install_async(const struct gnwDeviceDescriptor * const
     struct device dev = { 0 };
     enum gnwDriverError error = devInstallPrepare(descriptorPtr,
                                                   operatorProcId,
-                                                  deviceIdPtr,
                                                   &driverDescPtr,
                                                   &dev);
     if (error != GDRE_NONE) {
@@ -312,8 +292,7 @@ enum gnwDriverError k_dev_install_async(const struct gnwDeviceDescriptor * const
         return GDRE_UNKNOWN;
     }
 
-    #warning it can be nice to return device identifier somehow
-
+    *deviceIdPtr = devicesCount;
     devices[devicesCount++] = dev;
 
     return GDRE_NONE;
@@ -389,7 +368,7 @@ enum gnwDriverError k_dev_init_async(const procId_t requesterProcId,
 }
 
 static bool validateReporter(const procId_t operatorProcId, const size_t deviceId) {
-    if (!validateId(deviceId)) {
+    if (!validateInstalledId(deviceId)) {
         OOPS("Unexpected device ID", false);
     }
 
@@ -459,7 +438,7 @@ void k_dev_init_report(const procId_t operatorProcId, const size_t deviceId, con
 
     const struct gnwDriverConfig * driverDescPtr = &(devices[deviceId].desc.driver.descriptor);
     if (driverDescPtr->isr) {
-        const enum gnwDriverError e = k_hal_install(deviceId, operatorProcId, *driverDescPtr);   
+        const enum gnwDriverError e = k_hal_install(operatorProcId, *driverDescPtr);   
 
         if (e != GDRE_NONE) {
             unsafe_reportStatusOperationFailed(operatorProcId, deviceId, "IRQ registration failed", GDRE_OPERATION_FAILED);
@@ -1026,14 +1005,11 @@ void k_dev_setParam_reply(const procId_t operatorProcId,
     unsafe_pendingRequestInfoSetErrorIfNeeded(deviceId, success ? GDRE_NONE : GDRE_OPERATION_FAILED);
 }
 
-PRIVATE enum gnwDeviceError validateEmitter(const size_t * const devIdPtr) {
-    if (!devIdPtr) {
-        OOPS("Unexpected null device ID pointer", GDE_UNKNOWN);
-    }
-    if (!validateInstalledId(*devIdPtr)) {
+PRIVATE enum gnwDeviceError validateEmitter(const size_t deviceId) {
+    if (!validateInstalledId(deviceId)) {
         OOPS("Unexpected serviced device ID", GDE_UNKNOWN);
     }
-    if (devices[*devIdPtr].status != STARTED) {
+    if (devices[deviceId].status != STARTED) {
         return GDE_INVALID_DEVICE_STATE;
     }
 
@@ -1055,19 +1031,19 @@ PRIVATE enum gnwDeviceError validateListenerInvocation(const size_t deviceId) {
     return GDE_NONE;
 }
 
-enum gnwDeviceError k_dev_emit(const procId_t procId, const struct gnwDeviceEvent * const eventPtr) {
+enum gnwDeviceError k_dev_emit(const procId_t procId, const size_t deviceId, const struct gnwDeviceEvent * const eventPtr) {
     MEM_VALIDATE_VPTR_R(procId, eventPtr, struct gnwDeviceEvent, GDE_UNKNOWN);
     MEM_VALIDATE_VPTR_BUFFER(procId, eventPtr->data, eventPtr->dataSizeBytes, GDE_UNKNOWN, {});
-    enum gnwDeviceError err = validateEmitter(k_hal_servicedDevIdPtr);
+    enum gnwDeviceError err = validateEmitter(deviceId);
     if (err) {
         return err;
     }
-    err = validateListenerInvocation(*k_hal_servicedDevIdPtr);
+    err = validateListenerInvocation(deviceId);
     if (err != GDE_NONE) {
         return err;
     }
 
-    struct device *dev = &devices[*k_hal_servicedDevIdPtr];
+    struct device *dev = &devices[deviceId];
     const enum k_proc_error callbackErr = k_proc_callback_invoke_ptr(dev->holder, 
                                                                      (gnwEventListener_ptr)dev->listener,
                                                                      (ptr_t)eventPtr,

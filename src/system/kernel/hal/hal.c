@@ -25,12 +25,9 @@ extern void k_proc_init();
 extern void k_mem_init();
 
 PRIVATE struct isrEntry {
-    size_t devId;
     procId_t operator;
     void (*routine)();
 } isrReg[DEV_IRQ_LIMIT];
-
-const size_t *k_hal_servicedDevIdPtr;
 
 __attribute__((naked)) void k_hal_prepare() {
     k_paging_prepare();
@@ -49,7 +46,6 @@ static void cleanISR(const size_t irq) {
         return;
     }
 
-    isrReg[irq].devId = 0;
     isrReg[irq].operator = NONE_PROC_ID;
     isrReg[irq].routine = nullptr;
 }
@@ -95,7 +91,7 @@ bool k_hal_isIRQRegistered(uint_8 num) {
     return true;
 }
 
-enum gnwDriverError k_hal_install(const size_t devId, const procId_t operator, const struct gnwDriverConfig driver) {
+enum gnwDriverError k_hal_install(const procId_t operator, const struct gnwDriverConfig driver) {
     if (!driver.isr) {
         return GDRE_ISR_MISSING;
     }
@@ -111,7 +107,6 @@ enum gnwDriverError k_hal_install(const size_t devId, const procId_t operator, c
         }
     }
 
-    isrReg[driver.irq].devId = devId;
     isrReg[driver.irq].operator = operator;
     isrReg[driver.irq].routine = driver.isr;
         
@@ -159,8 +154,6 @@ void k_hal_irqHandle(const uint_8 irq) {
         OOPS("Device operator inconsistency",);
     }
     
-    k_hal_servicedDevIdPtr = &isrReg[irq].devId;
-    
     if (isrReg[irq].operator == KERNEL_PROC_ID) {
         isrReg[irq].routine();
     } else {
@@ -181,11 +174,6 @@ void k_hal_irqHandle(const uint_8 irq) {
 
         NOTE: service routines MUST end with ret
     */
-
-    /*
-        Clearing currently serviced device identifier
-    */
-    k_hal_servicedDevIdPtr = nullptr;
 
     /*
         Send EOI command to PIC

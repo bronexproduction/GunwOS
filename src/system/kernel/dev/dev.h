@@ -71,10 +71,12 @@ void k_dev_setParam(const procId_t procId,
                     const struct gnwDeviceSetParamQuery query,
                     enum gnwDeviceError * const vErrorPtr);
 void k_dev_setParam_reply(const procId_t operatorProcId,
-                                         const size_t deviceId,
-                                         const bool success);
+                          const size_t deviceId,
+                          const bool success);
 
-enum gnwDeviceError k_dev_emit(const procId_t procId, const struct gnwDeviceEvent * const eventPtr);
+enum gnwDeviceError k_dev_emit(const procId_t procId,
+                               const size_t deviceId,
+                               const struct gnwDeviceEvent * const eventPtr);
 
 void k_dev_procCleanup(const procId_t procId);
 

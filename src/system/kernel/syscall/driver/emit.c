@@ -20,5 +20,5 @@ enum gnwDeviceError k_scr_drv_emit(const procId_t procId,
 
     #warning TODO - checks, move to "dev"
 
-    return k_dev_emit(procId, vEventPtr);
+    return k_dev_emit(procId, deviceId, vEventPtr);
 }

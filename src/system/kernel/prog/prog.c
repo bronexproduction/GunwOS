@@ -401,7 +401,7 @@ procId_t k_prog_spawnDriver(const procId_t procId,
 
     for (size_t index = 0; index < (*deviceDescriptorCountPtr); ++index) {
         size_t deviceId;
-        const enum gnwDriverError installError = k_dev_install_async(deviceDescriptorListPtr, spawnedProcId, &deviceId);
+        const enum gnwDriverError installError = k_dev_install_async(&deviceDescriptorListPtr[index], spawnedProcId, &deviceId);
         if (installError != GDRE_NONE) {
             k_proc_stop(spawnedProcId);
         
