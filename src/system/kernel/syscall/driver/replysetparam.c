@@ -18,14 +18,6 @@ void k_scr_drv_replySetParam(const procId_t procId,
         k_proc_stop(procId);
         return;
     }
-    
-    struct gnwDeviceUHADesc desc;
-    const enum gnwDeviceError error = k_dev_getById(procId, &desc);
-    if (error != GDE_NONE) {
-        OOPS("Unexpected device operator identifier",);
-        k_proc_stop(procId);
-        return;
-    }
 
-    k_dev_setParam_reply(procId, desc.identifier, success);
+    k_dev_setParam_reply(procId, deviceId, success);
 }
