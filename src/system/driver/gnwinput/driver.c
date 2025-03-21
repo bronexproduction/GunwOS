@@ -40,7 +40,7 @@ static void start_keyboard() {
     drvStartReport(KEYBOARD_DEVICE_ID, true);
 }
 
-static void isr_keyboard () {
+static void isr_keyboard() {
     /* Checking output buffer status */
     const uint_8 status = rdb(KEYBOARD_DEVICE_ID, BA_STATUS);
     if (!(status & CSR_OUTPUT_BUFFER_FULL)) {
