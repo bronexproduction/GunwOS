@@ -86,7 +86,7 @@ static void isr_mouse() {
     }
     if (!(status & CSR_AUXILIARY_OUTPUT_BUFFER_FULL)) {
         /*
-            Mouse input
+            Keyboard input
         */
         log("Keyboard data available on keyboard interrupt");
         return;
