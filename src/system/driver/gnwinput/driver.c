@@ -99,16 +99,12 @@ static void isr_mouse() {
         return;
     }
 
-    // /*
-    //     Extracting exact keycode
-
-    //     MSB contains information whether key was pressed or released
-    // */
-    // if (c & 0b10000000) {
-    //     emitEvent(GKEC_KEY_UP, c & 0b01111111);
-    // }
-    // else {
-    //     emitEvent(GKEC_KEY_DOWN, c);
+    // if () {
+    //     emitMouseEvent(GMEC_KEY_UP, 1);
+    // } else if () {
+    //     emitMouseEvent(GMEC_KEY_DOWN, 1);
+    // } else {
+    //     emitMouseEvent(GMEC_MOVEMENT, 1);
     // }
 }
 
