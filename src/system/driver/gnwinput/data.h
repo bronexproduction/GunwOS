@@ -340,7 +340,7 @@ enum mouseCommandResponse {
 /*
     Movement data packet
 */
-__attribute__((packed)) struct movementDataPacket {
+__attribute__((packed)) struct eventDataPacket {
     struct {
         bool overflowY    :1;
         bool overflowX    :1;

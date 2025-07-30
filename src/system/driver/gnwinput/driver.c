@@ -55,18 +55,18 @@ static void isr_mouse() {
         /*
             Keyboard input
         */
-        log("Keyboard data available on keyboard interrupt");
+        log("Keyboard data available on mouse interrupt");
         return;
     }
 
-    struct movementDataPacket data;
-    if (!readMovementData(&data)) {
-        log("Unable to get movement data");
+    struct eventDataPacket data;
+    if (!readEventData(&data)) {
+        log("Unable to get event data");
         fug(FUG_INCONSISTENT);
         return;
     }
 
-    emitMouseEvent(data);
+    emitMouseEvents(data);
 }
 
 #define DESCRIPTOR_COUNT 2

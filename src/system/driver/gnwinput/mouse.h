@@ -12,6 +12,6 @@
 
 void init_mouse();
 void start_mouse();
-void emitMouseEvent(const struct movementDataPacket);
+void emitMouseEvents(const struct eventDataPacket);
 
 #endif // MOUSE_H

@@ -134,7 +134,7 @@ bool enableInterrupt() {
     return true;
 }
 
-bool readMovementData(struct movementDataPacket * const data) {
+bool readEventData(struct eventDataPacket * const data) {
     if (!data) {
         return false;
     }

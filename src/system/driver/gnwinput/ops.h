@@ -16,6 +16,6 @@ bool setDefaults();
 bool enablePacketStreaming();
 bool enableInterrupt();
 
-bool readMovementData(struct movementDataPacket * const data);
+bool readEventData(struct eventDataPacket * const data);
 
 #endif // OPS_H

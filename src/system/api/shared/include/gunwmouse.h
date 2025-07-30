@@ -28,14 +28,6 @@ enum gnwMouseKey {
     GMK_RIGHT
 };
 
-/*
-    Mouse movement data
-*/
-struct gnwMouseMovement {
-    int_8 horizontal;
-    int_8 vertical;
-};
-
 #ifndef _GUNWAPI_KERNEL
 
 /*
@@ -44,11 +36,19 @@ struct gnwMouseMovement {
 #define GNW_MOUSE_EVENT_LISTENER(NAME) void NAME (const struct gnwMouseEvent * const event)
 
 /*
+    Mouse event data
+*/
+union gnwMouseEventData {
+    enum gnwMouseKey key;
+    point_t coordinates;
+};
+
+/*
     Listener callback data definition
 */
-struct gnwKeyboardEvent {
-    enum gnwKeyboardEventCode code;
-    char key;
+struct gnwMouseEvent {
+    enum gnwMouseEventCode code;
+    union gnwMouseEventData data;
 };
 
 /*
@@ -65,7 +65,7 @@ typedef __attribute__((cdecl)) void (*gnwMouseEventListener)(const struct gnwMou
     Result:
         * Error value indicating what went wrong while attaching
 
-    Note: Only the process attached to the mouse can receive key status updates
+    Note: Mouse updates are exclusive to the attached process
 */
 enum gnwDeviceError attachToMouse(const gnwMouseEventListener listener);
 
