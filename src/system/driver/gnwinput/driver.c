@@ -6,39 +6,15 @@
 //
 
 #include <gunwdrv.h>
-#include <gunwkeyboard.h>
 #include <gunwfug.h>
-#include <gunwdevemitter.h>
 #include <gunwlog.h>
 #include <gunwbus.h>
 #include "data.h"
 #include "ops.h"
+#include "keyboard.h"
+#include "mouse.h"
 
 #warning TODO https://wiki.osdev.org/%228042%22_PS/2_Controller
-
-static void emitKeyboardEvent(const int_32 type, const char data) {
-    enum gnwDeviceError err;
-    struct gnwDeviceEvent event;
-    event.type = type;
-    event.data = (ptr_t)&data;
-    event.dataSizeBytes = sizeof(char);
-
-    err = emit(KEYBOARD_DEVICE_ID, &event);
-    if (err == GDE_NOT_FOUND) {
-        log("Keyboard event ignored - no listener");
-    } else if (err != GDE_NONE) {
-        log("Error emitting keyboard event");
-        fug(FUG_UNDEFINED);
-    }
-}
-
-static void init_keyboard() {
-    drvInitReport(KEYBOARD_DEVICE_ID, true);
-}
-
-static void start_keyboard() {
-    drvStartReport(KEYBOARD_DEVICE_ID, true);
-}
 
 static void isr_keyboard() {
     /* Checking output buffer status */
@@ -61,20 +37,11 @@ static void isr_keyboard() {
     /* Reading keycode */
     uint_8 c = rdb(KEYBOARD_DEVICE_ID, BA_DATA);
     
-    /*
-        Extracting exact keycode
-
-        MSB contains information whether key was pressed or released
-    */
-    if (c & 0b10000000) {
-        emitKeyboardEvent(GKEC_KEY_UP, c & 0b01111111);
-    }
-    else {
-        emitKeyboardEvent(GKEC_KEY_DOWN, c);
-    }
+    emitKeyboardEvent(c);
 }
 
 static void isr_mouse() {
+    log("Mouse interrupt");
     /* Checking output buffer status */
     const uint_8 status = rdb(MOUSE_DEVICE_ID, BA_STATUS);
     if (!(status & CSR_OUTPUT_BUFFER_FULL)) {
@@ -99,17 +66,8 @@ static void isr_mouse() {
         return;
     }
 
-    // if () {
-    //     emitMouseEvent(GMEC_KEY_UP, 1);
-    // } else if () {
-    //     emitMouseEvent(GMEC_KEY_DOWN, 1);
-    // } else {
-    //     emitMouseEvent(GMEC_MOVEMENT, 1);
-    // }
+    emitMouseEvent(data);
 }
-
-extern void init_mouse();
-extern void start_mouse();
 
 #define DESCRIPTOR_COUNT 2
 
