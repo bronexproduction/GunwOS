@@ -12,7 +12,7 @@
 #include <gunwipc.h>
 #include <gunwrlp.h>
 #include <gunwdisplay.h>
-#include <gunwkeyboard.h>
+#include <gunwinput.h>
 
 #warning TAKE IT FROM DISPLAY INSTEAD (requires dynamic memory allocation)
 #define DISPLAY_ROWS 25
@@ -56,7 +56,7 @@ static void init() {
     }
 
     ipcSessionDestroyListener = onSessionDestroy;
-    e = attachToKeyboard(onKeyboardEvent);
+    e = attachToInput(onKeyboardEvent, 0);
     if (e) {
         fug(FUG_UNDEFINED);
         // OOPS("Unable to attach display");

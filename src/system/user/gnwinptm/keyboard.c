@@ -13,7 +13,7 @@
 #include <string.h>
 #include <gunwdev.h>
 #include <gunwipc.h>
-#include <gunwkeyboard.h>
+#include <gunwinput.h>
 #include <gunwfug.h>
 #include <gunwlog.h>
 #include <inputmgr.h>
@@ -45,7 +45,7 @@ static void onDeviceEvent(const struct gnwDeviceEvent *const deviceEvent) {
         return;
     }
 
-    const enum gnwIpcError e = ipcSendDirect(session->procId, INPUTMGR_PATH_EVENT,
+    const enum gnwIpcError e = ipcSendDirect(session->procId, INPUTMGR_PATH_KEYBOARD_EVENT,
                                              (data_t){ (ptr_t)&query, sizeof(struct gnwInputManagerKeyboardEventQuery) },
                                              (data_t){ nullptr, 0 },
                                              (struct gnwIpcBindData){ GIBF_NONE, 0 });

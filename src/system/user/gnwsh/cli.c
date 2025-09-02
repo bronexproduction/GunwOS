@@ -13,7 +13,7 @@
 #include <gunwctrl.h>
 #include <gunwdev.h>
 #include <gunwipc.h>
-#include <gunwkeyboard.h>
+#include <gunwinput.h>
 #include <gunwfug.h>
 #include <gunwrlp.h>
 
@@ -142,7 +142,7 @@ static void onSessionDestroy(const struct gnwIpcEndpointQuery * const query) {
 static void cli_init() {
     ipcSessionDestroyListener = onSessionDestroy;
 
-    enum gnwDeviceError e = attachToKeyboard(onKeyboardEvent);
+    enum gnwDeviceError e = attachToInput(onKeyboardEvent, 0);
     if (e != GDE_NONE) {
         fug(FUG_UNDEFINED);
     }

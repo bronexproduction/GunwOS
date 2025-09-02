@@ -10,13 +10,13 @@
 
 #include <defs.h>
 #include <gunwdevtypes.h>
-#include <gunwkeyboard.h>
-#include <gunwmouse.h>
+#include <gunwinput.h>
 
-#define INPUTMGR_PATH_ATTACH    "im/a"
-#define INPUTMGR_PATH_EVENT     ":/im/e"
+#define INPUTMGR_PATH_ATTACH            "in/a"
+#define INPUTMGR_PATH_KEYBOARD_EVENT    ":/in/k"
+#define INPUTMGR_PATH_MOUSE_EVENT       ":/in/m"
 
-struct gnwInputManagerAttachToKeyboardResult {
+struct gnwInputManagerAttachResult {
     enum gnwDeviceError error;
 };
 

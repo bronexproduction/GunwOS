@@ -11,7 +11,7 @@
 #include <gunwlog.h>
 #include <gunwfug.h>
 #include <gunwdevemitter.h>
-#include <gunwmouse.h>
+#include <gunwinput.h>
 
 #define TRY(OP, ON_FAIL) if (!OP()) { ON_FAIL; return; }
 #define INIT_TRY(OP) TRY(OP, drvInitReport(MOUSE_DEVICE_ID, false))

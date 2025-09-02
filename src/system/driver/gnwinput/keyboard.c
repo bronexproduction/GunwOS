@@ -11,7 +11,7 @@
 #include <gunwlog.h>
 #include <gunwfug.h>
 #include <gunwdevemitter.h>
-#include <gunwkeyboard.h>
+#include <gunwinput.h>
 
 extern const size_t KEYBOARD_DEVICE_ID;
 
