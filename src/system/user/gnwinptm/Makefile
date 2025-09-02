@@ -1,4 +1,4 @@
-CFLAGS=$(APP_CFLAGS) -I $(API_SYS_DIR)/kbdmgr/include
+CFLAGS=$(APP_CFLAGS) -I $(API_SYS_DIR)/inputmgr/include
 RSFLAGS=$(APP_RSFLAGS)
 LFLAGS=$(APP_LFLAGS) -Ttext 0x12000000
 

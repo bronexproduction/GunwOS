@@ -16,7 +16,7 @@
 #include <gunwkeyboard.h>
 #include <gunwfug.h>
 #include <gunwlog.h>
-#include <kbdmgr.h>
+#include <inputmgr.h>
 
 extern sessionPtr_t keyboardStack[MAX_SESSION];
 extern struct session sessions[MAX_SESSION];
@@ -30,7 +30,7 @@ static void onDeviceEvent(const struct gnwDeviceEvent *const deviceEvent) {
         return;
     }
 
-    struct gnwKeyboardManagerEventQuery query;
+    struct gnwInputManagerKeyboardEventQuery query;
     query.keyboardEvent.code = deviceEvent->type;
     query.keyboardEvent.key = *(char *)(deviceEvent->data);
 
@@ -45,21 +45,21 @@ static void onDeviceEvent(const struct gnwDeviceEvent *const deviceEvent) {
         return;
     }
 
-    const enum gnwIpcError e = ipcSendDirect(session->procId, KBDMGR_PATH_EVENT,
-                                             (data_t){ (ptr_t)&query, sizeof(struct gnwKeyboardManagerEventQuery) },
+    const enum gnwIpcError e = ipcSendDirect(session->procId, INPUTMGR_PATH_EVENT,
+                                             (data_t){ (ptr_t)&query, sizeof(struct gnwInputManagerKeyboardEventQuery) },
                                              (data_t){ nullptr, 0 },
                                              (struct gnwIpcBindData){ GIBF_NONE, 0 });
     if (e == GIPCE_NONE) {
         return;
     }
 
-    log("gnwkbdm - onKeyboardEvent - ipcSendDirect failed - destroying session");
+    log("gnwinptm - onKeyboardEvent - ipcSendDirect failed - destroying session");
     sessionDestroy(session);
     
     if (e == GIPCE_FORBIDDEN || e == GIPCE_NOT_FOUND) {
         return;
     } else {
-        char logMsg[75] = "gnwkbdm - onKeyboardEvent - ipcSendDirect failure unexpected error        ";
+        char logMsg[75] = "gnwinptm - onKeyboardEvent - ipcSendDirect failure unexpected error        ";
         int2str(e, logMsg + 67);
         log(logMsg);
         fug(FUG_UNDEFINED);

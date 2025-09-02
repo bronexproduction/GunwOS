@@ -55,7 +55,7 @@ static void startCoreModules() {
     enum gnwCtrlError err = GCE_NONE;
 
     START("0:GNWDISPM.ELF");    /* Display manager    - process ID: 3 */
-    START("0:GNWKBDM.ELF");     /* Keyboard manager   - process ID: 4 */
+    START("0:GNWINPTM.ELF");    /* Input manager   - process ID: 4 */
     START("0:GNWTERM.ELF");     /* Terminal           - process ID: 5 */
     START("0:GNWSH.ELF");       /* Command line       - process ID: 6 */
 
