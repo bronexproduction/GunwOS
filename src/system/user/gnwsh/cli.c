@@ -128,6 +128,19 @@ static GNW_KEYBOARD_EVENT_LISTENER(onKeyboardEvent) {
     }
 }
 
+static GNW_MOUSE_EVENT_LISTENER(onMouseEvent) {
+    if (event->code == GMEC_KEY_DOWN) {
+        append('a'+ event->data.key);
+    } else if (event->code == GMEC_KEY_UP) {
+        append('A' + event->data.key);
+    } else if (event->code == GMEC_MOVEMENT) {
+        append('0' + event->data.coordinates.x);
+        append('0' + event->data.coordinates.y);
+    } else {
+        fug(FUG_INCONSISTENT);
+    }
+}
+
 static void prompt() {
     memzero(cmdBuf, CMD_LEN_MAX * sizeof(char) + 1);
     cmdBufIndex = 0;
@@ -142,7 +155,7 @@ static void onSessionDestroy(const struct gnwIpcEndpointQuery * const query) {
 static void cli_init() {
     ipcSessionDestroyListener = onSessionDestroy;
 
-    enum gnwDeviceError e = attachToInput(onKeyboardEvent, 0);
+    enum gnwDeviceError e = attachToInput(onKeyboardEvent, onMouseEvent);
     if (e != GDE_NONE) {
         fug(FUG_UNDEFINED);
     }

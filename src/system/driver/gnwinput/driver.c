@@ -41,14 +41,12 @@ static void isr_keyboard() {
 }
 
 static void isr_mouse() {
-    log("Mouse interrupt");
     /* Checking output buffer status */
     const uint_8 status = rdb(MOUSE_DEVICE_ID, BA_STATUS);
     if (!(status & CSR_OUTPUT_BUFFER_FULL)) {
         /*
             No data
         */
-        log("Mouse output buffer empty on mouse interrupt");
         return;
     }
     if (!(status & CSR_AUXILIARY_OUTPUT_BUFFER_FULL)) {

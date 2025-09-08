@@ -23,15 +23,5 @@ void k_scr_drv_wrb(const procId_t procId, const size_t deviceId, const uint_16 p
 
     #warning TODO - checks, move to "dev"
 
-    {
-        char procIdBuffer[8] = { 0 };
-        char portBuffer[8] = { 0 };
-        char valueBuffer[8] = { 0 };
-        int2str(procId, procIdBuffer);
-        uint2hex(port, portBuffer);
-        uint2hex(value, valueBuffer);
-        LOG6("Proc ", procIdBuffer, " bus (", portBuffer, ") <- ", valueBuffer);
-    }
-
     k_bus_outb(port, value);
 }

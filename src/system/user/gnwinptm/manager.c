@@ -10,7 +10,7 @@
 #include <gunwrlp.h>
 #include <inputmgr.h>
 
-#include "keyboard.h"
+#include "input.h"
 #include "session.h"
 
 static void ipcAttachListener(const struct gnwIpcEndpointQuery * const query) {
@@ -25,7 +25,7 @@ static void ipcAttachListener(const struct gnwIpcEndpointQuery * const query) {
 
     struct gnwInputManagerAttachResult result;
     
-    result.error = keyboard_attach(query->sourceProcId);
+    result.error = input_attach(query->sourceProcId);
     
     enum gnwIpcError error = ipcReply((data_t){ (ptr_t)&result, sizeof(struct gnwInputManagerAttachResult) },
                                       query->token,
@@ -53,7 +53,7 @@ static void onSessionDestroy(const struct gnwIpcEndpointQuery * const query) {
 }
 
 void dupa() {
-    if (!keyboard_init()) {
+    if (!input_init()) {
         fug(FUG_UNDEFINED);
     }
 
