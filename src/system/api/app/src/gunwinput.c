@@ -83,6 +83,9 @@ static enum gnwDeviceError registerMouseListener(const gnwMouseEventListener lis
 
 enum gnwDeviceError attachToInput(const gnwKeyboardEventListener keyboardListener,
                                   const gnwMouseEventListener mouseListener) {
+    if (!keyboardListener && !mouseListener) {
+        return GDE_INVALID_PARAMETER;
+    }
     if (!ipcSessionDestroyListener) {
         return GDE_PRECONDITION_NOT_SATISFIED;
     }
@@ -105,13 +108,22 @@ enum gnwDeviceError attachToInput(const gnwKeyboardEventListener keyboardListene
     }
 
     enum gnwDeviceError regError;
-    regError = registerKeyboardListener(keyboardListener);
-    if (regError != GDE_NONE) {
-        return regError;
+    if (keyboardListener) {
+        regError = registerKeyboardListener(keyboardListener);
+        if (regError != GDE_NONE) {
+            return regError;
+        }
+    } else {
+        keyboardEventListener = nullptr;
     }
-    regError = registerMouseListener(mouseListener);
-    if (regError != GDE_NONE) {
-        return regError;
+
+    if (mouseListener) {
+        regError = registerMouseListener(mouseListener);
+        if (regError != GDE_NONE) {
+            return regError;
+        }
+    } else {
+        mouseEventListener = nullptr;
     }
 
     return GDE_NONE;
