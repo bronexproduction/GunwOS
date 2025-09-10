@@ -342,14 +342,14 @@ enum mouseCommandResponse {
 */
 __attribute__((packed)) struct eventDataPacket {
     struct {
-        bool overflowY    :1;
-        bool overflowX    :1;
-        bool signBitY     :1;
-        bool signBitX     :1;
-        bool _unused      :1;
-        bool buttonMiddle :1;
-        bool buttonRight  :1;
         bool buttonLeft   :1;
+        bool buttonRight  :1;
+        bool buttonMiddle :1;
+        bool _unused      :1;
+        bool signBitX     :1;
+        bool signBitY     :1;
+        bool overflowX    :1;
+        bool overflowY    :1;
     } state;
     byte_t movementX;
     byte_t movementY;
