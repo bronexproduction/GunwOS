@@ -17,9 +17,6 @@
 
     Params:
         * event - event descriptor (see struct gnwDeviceEvent)
-
-    Note:
-        * Not allowed from user-level
 */
 enum gnwDeviceError emit(const size_t deviceId, const struct gnwDeviceEvent * const event);
 
