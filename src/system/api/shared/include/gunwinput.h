@@ -50,7 +50,7 @@ enum gnwMouseKey {
 */
 struct gnwKeyboardEvent {
     enum gnwKeyboardEventCode code;
-    char scancode;
+    uint_8 scancode;
 };
 
 /*
