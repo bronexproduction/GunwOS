@@ -17,7 +17,7 @@ enum gnwKeyboardEventCode {
     GKEC_KEY_DOWN,
     GKEC_KEY_UP
 };
-_Static_assert(sizeof(enum gnwKeyboardEventCode) == sizeof(int_32), "Unexpected enum gnwKeyboardEventCode size");
+_Static_assert(sizeof(enum gnwKeyboardEventCode) == sizeof(int_32), "Expected size of enum gnwKeyboardEventCode is 32 bits");
 
 /*
     Event type code for mouse event listener
