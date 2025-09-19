@@ -32,7 +32,7 @@ static void onKeyboardEvent(const struct gnwDeviceEvent *const deviceEvent) {
 
     struct gnwInputManagerKeyboardEventQuery query;
     query.keyboardEvent.code = deviceEvent->type;
-    query.keyboardEvent.key = *(char *)(deviceEvent->data);
+    query.keyboardEvent.scancode = *(char *)(deviceEvent->data);
 
     if (query.keyboardEvent.code != GKEC_KEY_DOWN &&
         query.keyboardEvent.code != GKEC_KEY_UP) {
