@@ -12,7 +12,7 @@
 
 #define _STACK_REFERENCE_OFFSET 0x28
 
-#warning yusur?
+#warning TODO: check where does this '12' come from
 #define _USER_STACK_ADDR (*(addr_t *)(refEsp + _STACK_REFERENCE_OFFSET + 12))
 
 /*
