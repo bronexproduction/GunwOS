@@ -12,7 +12,7 @@
 #include <string.h>
 
 void log(const char * const msg) {
-    SYSCALL_USER_CALL(LOG, msg, strlen(msg), 0);
+    SYSCALL_USER_CALL(LOG, msg, strlen(msg), 0, 0);
 }
 
 #endif // _GUNWAPI_KERNEL

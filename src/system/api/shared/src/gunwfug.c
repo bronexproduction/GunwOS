@@ -11,7 +11,7 @@
 #include "../_include/scl_user.h"
 
 void fug(enum gnwFugCode code) {
-    SYSCALL_USER_CALL(FUG, code, 0, 0);
+    SYSCALL_USER_CALL(FUG, code, 0, 0, 0);
 }
 
 #endif // _GUNWAPI_KERNEL

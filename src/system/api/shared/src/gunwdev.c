@@ -19,7 +19,7 @@ enum gnwDeviceError devGetById(const size_t deviceId,
                                struct gnwDeviceUHADesc * const desc) {
     CHECKPTR(desc);
 
-    SYSCALL_USER_CALL(DEV_GET_BY_ID, deviceId, desc, 0);
+    SYSCALL_USER_CALL(DEV_GET_BY_ID, deviceId, desc, 0, 0);
 
     return SYSCALL_RESULT;
 }
@@ -28,7 +28,7 @@ enum gnwDeviceError devGetByType(const enum gnwDeviceType type,
                                  struct gnwDeviceUHADesc * const desc) {
     CHECKPTR(desc);
 
-    SYSCALL_USER_CALL(DEV_GET_BY_TYPE, type, desc, 0);
+    SYSCALL_USER_CALL(DEV_GET_BY_TYPE, type, desc, 0, 0);
 
     return SYSCALL_RESULT;
 }
@@ -47,7 +47,7 @@ enum gnwDeviceError devGetParam(const size_t deviceId,
         paramIndex
     };
 
-    SYSCALL_USER_CALL(DEV_GET_PARAM, deviceId, &query, result);
+    SYSCALL_USER_CALL(DEV_GET_PARAM, deviceId, &query, result, 0);
 
     return SYSCALL_RESULT;
 }
@@ -65,24 +65,24 @@ enum gnwDeviceError devSetParam(const size_t deviceId,
         value
     };
 
-    SYSCALL_USER_CALL(DEV_SET_PARAM, deviceId, &query, 0);
+    SYSCALL_USER_CALL(DEV_SET_PARAM, deviceId, &query, 0, 0);
 
     return SYSCALL_RESULT;
 }
 
 enum gnwDeviceError devAcquire(const uint_32 identifier) {
-    SYSCALL_USER_CALL(DEV_ACQUIRE, identifier, 0, 0);
+    SYSCALL_USER_CALL(DEV_ACQUIRE, identifier, 0, 0, 0);
 
     return SYSCALL_RESULT;
 }
 
 void devRelease(const uint_32 identifier) {
-    SYSCALL_USER_CALL(DEV_RELEASE, identifier, 0, 0);
+    SYSCALL_USER_CALL(DEV_RELEASE, identifier, 0, 0, 0);
 }
 
 enum gnwDeviceError devCharWrite(const uint_32 deviceId, 
                                  const char character) {
-    SYSCALL_USER_CALL(DEV_CHAR_WRITE, deviceId, character, 0);
+    SYSCALL_USER_CALL(DEV_CHAR_WRITE, deviceId, character, 0, 0);
     
     return SYSCALL_RESULT;
 }
@@ -97,7 +97,7 @@ enum gnwDeviceError devMemWrite(const size_t identifier,
         /* inputBufferRange */ devInputBufferRange
     };
 
-    SYSCALL_USER_CALL(DEV_MEM_WRITE, identifier, &query, 0);
+    SYSCALL_USER_CALL(DEV_MEM_WRITE, identifier, &query, 0, 0);
 
     return SYSCALL_RESULT;
 }
@@ -106,7 +106,7 @@ enum gnwDeviceError devListen(const size_t identifier,
                               const gnwDeviceEventListener listener) {
     CHECKPTR(listener);
 
-    SYSCALL_USER_CALL(DEV_LISTEN, identifier, listener, gnwDeviceEvent_decode);
+    SYSCALL_USER_CALL(DEV_LISTEN, identifier, listener, gnwDeviceEvent_decode, 0);
 
     return SYSCALL_RESULT;
 }
@@ -129,24 +129,51 @@ void devInstall(const char * const path,
     procId_t deviceOperatorProcId;
     struct gnwCtrlStartDescriptor desc = { { (byte_t *)path, strlen(path) }, GET_DRIVER, &deviceOperatorProcId }; 
 
-    { SYSCALL_USER_CALL(START, &desc, 0, 0); }
+    { SYSCALL_USER_CALL(START, &desc, 0, 0, 0); }
 
     if (deviceOperatorProcId < 0) {
         *(ctrlError) = (enum gnwCtrlError)deviceOperatorProcId;
         return;
     }
-
-    /* Initialize device */
     
-    { SYSCALL_USER_CALL(DEV_INIT, deviceOperatorProcId, installError, 0); }
-
-    if (*(installError) != GDRE_NONE) {
+    size_t deviceCount; {
+        SYSCALL_USER_CALL(DEV_GET_COUNT_FOR_OPERATOR, deviceOperatorProcId, 0, 0, 0);
+        deviceCount = SYSCALL_RESULT;
+    }
+    if (!deviceCount) {
+        *(ctrlError) = (enum gnwCtrlError)GCE_UNKNOWN;
         return;
     }
-    
-    /* Start device */
 
-    { SYSCALL_USER_CALL(DEV_START, deviceOperatorProcId, installError, 0); }
+    size_t deviceIdentifiers[deviceCount]; {
+        enum gnwDeviceError error;
+        SYSCALL_USER_CALL(DEV_GET_IDS_FOR_OPERATOR, deviceOperatorProcId, deviceIdentifiers, &error, 0);
+
+        if (error != GDE_NONE) {
+            *(ctrlError) = (enum gnwCtrlError)GCE_UNKNOWN;
+            return;
+        }
+    }
+
+    /* Initialize devices */
+    
+    for (size_t deviceIdIndex = 0; deviceIdIndex < deviceCount; ++deviceIdIndex) {  
+        { SYSCALL_USER_CALL(DEV_INIT, deviceIdentifiers[deviceIdIndex], installError, 0, 0); }
+
+        if (*(installError) != GDRE_NONE) {
+            return;
+        }
+    }
+    
+    /* Start devices */
+
+    for (size_t deviceIdIndex = 0; deviceIdIndex < deviceCount; ++deviceIdIndex) {  
+        { SYSCALL_USER_CALL(DEV_START, deviceIdentifiers[deviceIdIndex], installError, 0, 0); }
+
+        if (*(installError) != GDRE_NONE) {
+            return;
+        }
+    }
 }
 
 void gnwDeviceEvent_decode(const ptr_t dataPtr, struct gnwDeviceEvent * const eventPtr) {

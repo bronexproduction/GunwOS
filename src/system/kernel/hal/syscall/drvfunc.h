@@ -19,54 +19,54 @@
     Code - 0x00
     Function - RDB
 */
-uint_8 k_scr_rdb(const uint_16 port); 
+uint_8 k_scr_rdb(const size_t deviceId, const uint_16 port); 
 
 /*
     Code - 0x01
     Function - WRB
 */
-void k_scr_wrb(const uint_16 port, const uint_8 value);
+void k_scr_wrb(const size_t deviceId, const uint_16 port, const uint_8 value);
 
 /*
     Code - 0x02
     Function - EMIT
 */
-enum gnwDeviceError k_scr_emit(const struct gnwDeviceEvent * const event);
+enum gnwDeviceError k_scr_emit(const size_t deviceId, const struct gnwDeviceEvent * const event);
 
 /*
     Code - 0x03
     Function - MMIO_PLZ
 */
-enum gnwMemoryError k_scr_mmioPlz(const size_t pageCount, const addr_t vAddr, const addr_t pAddr);
+enum gnwMemoryError k_scr_mmioPlz(const size_t deviceId, const size_t pageCount, const addr_t vAddr, const addr_t pAddr);
 
 /*
     Code - 0x04
     Function - REPORT_INIT
 */
-void k_scr_reportInit(const bool success);
+void k_scr_reportInit(const size_t deviceId, const bool success);
 
 /*
     Code - 0x05
     Function - REPORT_START
 */
-void k_scr_reportStart(const bool success);
+void k_scr_reportStart(const size_t deviceId, const bool success);
 
 /*
     Code - 0x06
     Function - REPLY_GETPARAM
 */
-void k_scr_replyGetParam(const bool success, const size_t result);
+void k_scr_replyGetParam(const size_t deviceId, const bool success, const size_t result);
 
 /*
     Code - 0x07
     Function - REPLY_SETPARAM
 */
-void k_scr_replySetParam(const bool success);
+void k_scr_replySetParam(const size_t deviceId, const bool success);
 
 /*
     Code - 0x08
     Function - REPLY_MEMWRITE
 */
-void k_scr_replyMemWrite(const bool success);
+void k_scr_replyMemWrite(const size_t deviceId, const bool success);
 
 #endif // DRVFUNC_H

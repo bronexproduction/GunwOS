@@ -15,7 +15,7 @@
 
 extern addr_t _heapStart;
 
-ptr_t mmioPlz(const addr_t physMemStart, const size_t sizeBytes, enum gnwMemoryError * const errorPtr) {
+ptr_t mmioPlz(const size_t deviceId, const addr_t physMemStart, const size_t sizeBytes, enum gnwMemoryError * const errorPtr) {
     CHECKPTR(errorPtr);
 
     if (isHeapUsed()) {
@@ -27,7 +27,7 @@ ptr_t mmioPlz(const addr_t physMemStart, const size_t sizeBytes, enum gnwMemoryE
     const addr_t pAddr = alignedr(physMemStart, PAGE_SIZE, false);
     const size_t pageCount = aligned(physMemStart + sizeBytes - pAddr, PAGE_SIZE) / PAGE_SIZE;
 
-    SYSCALL_DRIVER_CALL(MMIO_PLZ, pageCount, vAddr, pAddr);
+    SYSCALL_DRIVER_CALL(MMIO_PLZ, deviceId, pageCount, vAddr, pAddr);
 
     *(errorPtr) = SYSCALL_RESULT;
     if (*(errorPtr) != GME_NONE) {

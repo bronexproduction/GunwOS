@@ -13,7 +13,7 @@
 #include <gunwctrl.h>
 #include <gunwdev.h>
 #include <gunwipc.h>
-#include <gunwkeyboard.h>
+#include <gunwinput.h>
 #include <gunwfug.h>
 #include <gunwrlp.h>
 
@@ -128,6 +128,10 @@ static GNW_KEYBOARD_EVENT_LISTENER(onKeyboardEvent) {
     }
 }
 
+static GNW_MOUSE_EVENT_LISTENER(onMouseEvent) {
+    // No mouse support
+}
+
 static void prompt() {
     memzero(cmdBuf, CMD_LEN_MAX * sizeof(char) + 1);
     cmdBufIndex = 0;
@@ -142,7 +146,7 @@ static void onSessionDestroy(const struct gnwIpcEndpointQuery * const query) {
 static void cli_init() {
     ipcSessionDestroyListener = onSessionDestroy;
 
-    enum gnwDeviceError e = attachToKeyboard(onKeyboardEvent);
+    enum gnwDeviceError e = attachToInput(onKeyboardEvent, onMouseEvent);
     if (e != GDE_NONE) {
         fug(FUG_UNDEFINED);
     }

@@ -8,26 +8,26 @@
 #include <gunwipc.h>
 #include <gunwfug.h>
 #include <gunwrlp.h>
-#include <kbdmgr.h>
+#include <inputmgr.h>
 
-#include "keyboard.h"
+#include "input.h"
 #include "session.h"
 
-static void ipcAttachToKeyboardListener(const struct gnwIpcEndpointQuery * const query) {
+static void ipcAttachListener(const struct gnwIpcEndpointQuery * const query) {
     if (!query) { 
         fug(FUG_NULLPTR); 
         return; 
     }
-    if (query->replySizeBytes != sizeof(struct gnwKeyboardManagerAttachToKeyboardResult)) {
+    if (query->replySizeBytes != sizeof(struct gnwInputManagerAttachResult)) {
         fug(FUG_INCONSISTENT);
         return;
     }
 
-    struct gnwKeyboardManagerAttachToKeyboardResult result;
+    struct gnwInputManagerAttachResult result;
     
-    result.error = keyboard_attach(query->sourceProcId);
+    result.error = input_attach(query->sourceProcId);
     
-    enum gnwIpcError error = ipcReply((data_t){ (ptr_t)&result, sizeof(struct gnwKeyboardManagerAttachToKeyboardResult) },
+    enum gnwIpcError error = ipcReply((data_t){ (ptr_t)&result, sizeof(struct gnwInputManagerAttachResult) },
                                       query->token,
                                       (struct gnwIpcBindData){ (result.error == GDE_NONE) ? GIBF_BIND : GIBF_NONE, 0 });
     if (error == GIPCE_NOT_FOUND) {
@@ -53,13 +53,13 @@ static void onSessionDestroy(const struct gnwIpcEndpointQuery * const query) {
 }
 
 void dupa() {
-    if (!keyboard_init()) {
+    if (!input_init()) {
         fug(FUG_UNDEFINED);
     }
 
     enum gnwIpcError e;
 
-    e = ipcRegister(KBDMGR_PATH_ATTACH, ipcAttachToKeyboardListener, false, 0);
+    e = ipcRegister(INPUTMGR_PATH_ATTACH, ipcAttachListener, false, 0);
     if (e != GIPCE_NONE) {
         fug(FUG_UNDEFINED);
     }

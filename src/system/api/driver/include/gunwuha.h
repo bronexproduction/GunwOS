@@ -43,17 +43,17 @@ struct gnwDeviceUHA {
 /*
     Report getParam result
 */
-extern void getParamReply(bool success, size_t result);
+void getParamReply(const size_t deviceId, const bool success, const size_t result);
 
 /*
     Report setParam result
 */
-extern void setParamReply(bool success);
+void setParamReply(const size_t deviceId, const bool success);
 
 /*
     Report memWrite result
 */
-extern void memWriteReply(bool success);
+void memWriteReply(const size_t deviceId, const bool success);
 
 /*
     struct gnwDeviceGetParamQuery decoder

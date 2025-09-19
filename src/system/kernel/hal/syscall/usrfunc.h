@@ -175,12 +175,24 @@ enum gnwMemoryError k_scr_memThx(const addr_t vStart);
     Code - 0x17
     Function - DEV_INIT
 */
-void k_scr_devInit(const procId_t operatorProcId, enum gnwDriverError * vErrorPtr);
+void k_scr_devInit(const size_t deviceId, enum gnwDriverError * vErrorPtr);
 
 /*
     Code - 0x18
     Function - DEV_START
 */
-void k_scr_devStart(const procId_t operatorProcId, enum gnwDriverError * vErrorPtr);
+void k_scr_devStart(const size_t deviceId, enum gnwDriverError * vErrorPtr);
+
+/*
+    Code - 0x19
+    Function - DEV_GET_COUNT_FOR_OPERATOR
+*/
+size_t k_scr_devGetCountForOperator(const procId_t operatorProcId);
+
+/*
+    Code - 0x1a
+    Function - DEV_GET_IDS_FOR_OPERATOR
+*/
+void k_scr_devGetIdsForOperator(const procId_t operatorProcId, size_t * const vDeviceIdListStartPtr, enum gnwDeviceError * const vErrorPtr);
 
 #endif // USRFUNC_H

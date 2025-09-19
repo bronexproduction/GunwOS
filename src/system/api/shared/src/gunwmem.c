@@ -192,7 +192,7 @@ void memThx(const ptr_t ptr) {
 enum gnwMemoryError memPagePlz(const size_t pageCount, const addr_t start) {
     CHECKPTR(start);
 
-    SYSCALL_USER_CALL(MEM_PLZ, pageCount, start, 0);
+    SYSCALL_USER_CALL(MEM_PLZ, pageCount, start, 0, 0);
 
     return SYSCALL_RESULT;
 }
@@ -200,7 +200,7 @@ enum gnwMemoryError memPagePlz(const size_t pageCount, const addr_t start) {
 enum gnwMemoryError memPageThx(const addr_t start) {
     CHECKPTR(start);
 
-    SYSCALL_USER_CALL(MEM_THX, start, 0, 0);
+    SYSCALL_USER_CALL(MEM_THX, start, 0, 0, 0);
 
     return SYSCALL_RESULT;
 }

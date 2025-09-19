@@ -271,23 +271,36 @@ addr_t elfGetEntry(const data_t fileData) {
     return headerPtr->entry;
 }
 
-addr_t elfGetSymbolFileAddr(const data_t fileData,
-                            const char * const symbolName,
-                            size_t * const symbolSizeBytes) {
+void elfGetSymbolAddr(const data_t fileData,
+                      const char * const symbolName,
+                      addr_t * const fileAddr,
+                      addr_t * const linearAddr,
+                      size_t * const symbolSizeBytes) {
+    if (!fileAddr && !linearAddr) {
+        return;
+    }
+
+    if (fileAddr) {
+        *fileAddr = NULL;
+    }
+    if (linearAddr) {
+        *linearAddr = NULL;
+    }
+
     if (!fileData.ptr) {
-        return NULL;
+        return;
     }
     if (fileData.bytes < sizeof(struct elfHeader32)) {
-        return NULL;
+        return;
     }
     if (!symbolName) {
-        return NULL;
+        return;
     }
     if (fileData.ptr >= fileData.ptr + fileData.bytes) {
-        return NULL;
+        return;
     }
     if (!symbolSizeBytes) {
-        return NULL;
+        return;
     }
 
     *symbolSizeBytes = 0;
@@ -297,12 +310,12 @@ addr_t elfGetSymbolFileAddr(const data_t fileData,
     const struct elfSymtabSectionEntry32 * symbolTable = symtab(fileData, &symbolTableEntryCount);
     const char * strTable = strtab(fileData, &stringTableSizeBytes);
     if (!symbolTable || !symbolTableEntryCount || !strTable || !stringTableSizeBytes) {
-        return NULL;
+        return;
     }
     
     const size_t symbolNameLen = strlen(symbolName);
     if (symbolNameLen >= stringTableSizeBytes) {
-        return NULL;
+        return;
     }
 
     for (size_t index = 0; index < symbolTableEntryCount; ++index) {
@@ -311,7 +324,7 @@ addr_t elfGetSymbolFileAddr(const data_t fileData,
             /*
                 ELF data inconsistency
             */
-            return NULL;
+            return;
         } else if (!symbolTableEntry->name) {
             continue;
         } else if ((symbolNameLen + 1) > (stringTableSizeBytes - symbolTableEntry->name)) {
@@ -326,12 +339,12 @@ addr_t elfGetSymbolFileAddr(const data_t fileData,
             /*
                 Wraparound or zero bytes - unsupported
             */
-            return NULL;
+            return;
         }
         
         const struct elfSectionHeaderEntry32 * symbolSection = elfGetSectionHeaderEntryAtIndex(fileData, symbolTableEntry->sectionHeaderIndex);
         if (!symbolSection) {
-            return NULL;
+            return;
         }
 
         if (symbolTableEntry->value < symbolSection->virtualAddr ||
@@ -339,7 +352,7 @@ addr_t elfGetSymbolFileAddr(const data_t fileData,
                 /*
                     Symbol outside of section virtual memory
                 */
-                return NULL;
+                return;
         }
             
         const addr_t symbolFileAddr = (addr_t)fileData.ptr + symbolSection->offset + (symbolTableEntry->value - symbolSection->virtualAddr);
@@ -349,12 +362,16 @@ addr_t elfGetSymbolFileAddr(const data_t fileData,
             /*
                 Address outside of the file
             */
-            return NULL;
+            return;
         }
 
         *symbolSizeBytes = symbolTableEntry->size;
-        return symbolFileAddr;
+        if (fileAddr) {
+            *fileAddr = symbolFileAddr;
+        }
+        if (linearAddr) {
+            *linearAddr = symbolTableEntry->value;
+        }
+        return;
     }
-
-    return nullptr;
 }

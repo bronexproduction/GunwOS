@@ -9,17 +9,16 @@
 #include <error/panic.h>
 #include <hal/proc/proc.h>
 
-enum gnwDeviceError k_scr_drv_emit(const procId_t procId, const struct gnwDeviceEvent * const vEventPtr) {
+enum gnwDeviceError k_scr_drv_emit(const procId_t procId,
+                                   const size_t deviceId,
+                                   const struct gnwDeviceEvent * const vEventPtr) {
 
-    struct gnwDeviceUHADesc desc;
-    const enum gnwDeviceError error = k_dev_getByOperator(procId, &desc);
-    if (error != GDE_NONE) {
-        OOPS("Unexpected device operator identifier", GDE_UNKNOWN);
+    if (k_dev_operatorOf(deviceId) != procId) {
         k_proc_stop(procId);
-        return GDE_UNKNOWN;
+        OOPS("Invalid device operator identifier", GDE_ID_INVALID);
     }
 
     #warning TODO - checks, move to "dev"
 
-    return k_dev_emit(procId, vEventPtr);
+    return k_dev_emit(procId, deviceId, vEventPtr);
 }

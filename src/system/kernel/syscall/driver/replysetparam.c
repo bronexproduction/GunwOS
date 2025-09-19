@@ -10,15 +10,14 @@
 #include <hal/proc/proc.h>
 
 void k_scr_drv_replySetParam(const procId_t procId,
+                             const size_t deviceId,
                              const bool success) {
 
-    struct gnwDeviceUHADesc desc;
-    const enum gnwDeviceError error = k_dev_getByOperator(procId, &desc);
-    if (error != GDE_NONE) {
-        OOPS("Unexpected device operator identifier",);
+    if (k_dev_operatorOf(deviceId) != procId) {
+        OOPS("Invalid device operator identifier",);
         k_proc_stop(procId);
         return;
     }
 
-    k_dev_setParam_reply(procId, desc.identifier, success);
+    k_dev_setParam_reply(procId, deviceId, success);
 }

@@ -11,11 +11,11 @@
 #include <gunwfug.h>
 #include <scl_driver.h>
 
-enum gnwDeviceError emit(const struct gnwDeviceEvent * const event) {
+enum gnwDeviceError emit(const size_t deviceId, const struct gnwDeviceEvent * const event) {
     CHECKPTR(event);
     CHECKPTR(event->data);
 
-    SYSCALL_DRIVER_CALL(EMIT, event, 0, 0);
+    SYSCALL_DRIVER_CALL(EMIT, deviceId, event, 0, 0);
     
     return SYSCALL_RESULT;
 }

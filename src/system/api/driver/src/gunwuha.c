@@ -10,16 +10,16 @@
 #include <scl_driver.h>
 #include "../_include/_gunwuha.h"
 
-void getParamReply(bool success, size_t result) {
-    SYSCALL_DRIVER_CALL(REPLY_GETPARAM, success, result, 0);
+void getParamReply(const size_t deviceId, const bool success, const size_t result) {
+    SYSCALL_DRIVER_CALL(REPLY_GETPARAM, deviceId, success, result, 0);
 }
 
-void setParamReply(bool success) {
-    SYSCALL_DRIVER_CALL(REPLY_SETPARAM, success, 0, 0);
+void setParamReply(const size_t deviceId, const bool success) {
+    SYSCALL_DRIVER_CALL(REPLY_SETPARAM, deviceId, success, 0, 0);
 }
 
-void memWriteReply(bool success) {
-    SYSCALL_DRIVER_CALL(REPLY_MEMWRITE, success, 0, 0);
+void memWriteReply(const size_t deviceId, const bool success) {
+    SYSCALL_DRIVER_CALL(REPLY_MEMWRITE, deviceId, success, 0, 0);
 }
 
 void gnwDeviceGetParamQuery_decode(const ptr_t dataPtr, struct gnwDeviceGetParamQuery * const queryPtr) {

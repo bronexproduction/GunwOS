@@ -10,11 +10,12 @@
 #include <hal/mem/mem.h>
 
 enum gnwMemoryError k_scr_drv_mmioPlz(const procId_t procId,
+                                      const size_t deviceId,
                                       const size_t pageCount,
                                       const addr_t vAddr,
                                       const addr_t pAddr) {
 
-    const enum k_mem_error error = k_mem_gimme(procId, (ptr_t)vAddr, (ptr_t)pAddr, pageCount * MEM_PAGE_SIZE_BYTES);
+    const enum k_mem_error error = k_mem_mapme(procId, deviceId, (ptr_t)vAddr, (ptr_t)pAddr, pageCount * MEM_PAGE_SIZE_BYTES);
     if (error == ME_ALREADY_ASSIGNED ||
         error == ME_PART_ALREADY_ASSIGNED ||
         error == ME_NONE) {

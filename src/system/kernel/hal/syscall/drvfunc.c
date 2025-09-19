@@ -20,16 +20,18 @@
     Function - RDB
 
     Params (process stack offset):
-        * PARAMETER_1_STACK_OFFSET - port
+        * PARAMETER_1_STACK_OFFSET - deviceId
+        * PARAMETER_2_STACK_OFFSET - port
         
     Return (process stack offset):
         * RESULT_STACK_OFFSET - value read from bus port
 */
 void k_scr_rdb(const procId_t procId, const ptr_t refEsp) {
-    SAFE_STACK_VAL_PTR(const uint_16, port, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const size_t, deviceId, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const uint_16, port, PARAMETER_2_STACK_OFFSET);
 
-    extern uint_8 k_scr_drv_rdb(const procId_t, const uint_16);
-    SAFE_STACK_RESULT_ARCH_VAL = k_scr_drv_rdb(procId, *port);
+    extern uint_8 k_scr_drv_rdb(const procId_t, const size_t, const uint_16);
+    SAFE_STACK_RESULT_ARCH_VAL = k_scr_drv_rdb(procId, *deviceId, *port);
 }
 
 /*
@@ -37,16 +39,18 @@ void k_scr_rdb(const procId_t procId, const ptr_t refEsp) {
     Function - WRB
 
     Params (process stack offset):
-        * PARAMETER_1_STACK_OFFSET - port
-        * PARAMETER_2_STACK_OFFSET - value
+        * PARAMETER_1_STACK_OFFSET - deviceId
+        * PARAMETER_2_STACK_OFFSET - port
+        * PARAMETER_3_STACK_OFFSET - value
 
 */
 void k_scr_wrb(const procId_t procId, const ptr_t refEsp) {
-    SAFE_STACK_VAL_PTR(const uint_16, port, PARAMETER_1_STACK_OFFSET);
-    SAFE_STACK_VAL_PTR(const uint_8, value, PARAMETER_2_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const size_t, deviceId, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const uint_16, port, PARAMETER_2_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const uint_8, value, PARAMETER_3_STACK_OFFSET);
 
-    extern void k_scr_drv_wrb(const procId_t, const uint_16, const uint_8);
-    k_scr_drv_wrb(procId, *port, *value);
+    extern void k_scr_drv_wrb(const procId_t, const size_t, const uint_16, const uint_8);
+    k_scr_drv_wrb(procId, *deviceId, *port, *value);
 }
 
 /*
@@ -54,17 +58,18 @@ void k_scr_wrb(const procId_t procId, const ptr_t refEsp) {
     Function - EMIT
 
     Params (process stack offset):
-        * PARAMETER_1_STACK_OFFSET - struct gnwDeviceEvent pointer relative to caller process memory
-                                     (to be implemented when drivers moved to process space)
+        * PARAMETER_1_STACK_OFFSET - device identifier
+        * PARAMETER_2_STACK_OFFSET - struct gnwDeviceEvent pointer relative to caller process memory
         
     Return (process stack offset):
         * RESULT_STACK_OFFSET - error code if any, otherwise GDE_NONE (see enum gnwDeviceError)
 */
 void k_scr_emit(const procId_t procId, const ptr_t refEsp) {
-    SAFE_STACK_VAL_PTR(const struct gnwDeviceEvent * const, eventPtr, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const size_t, deviceId, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const struct gnwDeviceEvent * const, eventPtr, PARAMETER_2_STACK_OFFSET);
 
-    extern enum gnwDeviceError k_scr_drv_emit(const procId_t, const struct gnwDeviceEvent * const);
-    SAFE_STACK_RESULT_ARCH_VAL = k_scr_drv_emit(procId, *eventPtr);
+    extern enum gnwDeviceError k_scr_drv_emit(const procId_t, const size_t, const struct gnwDeviceEvent * const);
+    SAFE_STACK_RESULT_ARCH_VAL = k_scr_drv_emit(procId, *deviceId, *eventPtr);
 }
 
 /*
@@ -72,20 +77,22 @@ void k_scr_emit(const procId_t procId, const ptr_t refEsp) {
     Function - MMIO_PLZ
 
     Params (process stack offset):
-        * PARAMETER_1_STACK_OFFSET - number of contiguous physical pages to be mapped
-        * PARAMETER_2_STACK_OFFSET - linear (process) memory address to be mapped
-        * PARAMETER_3_STACK_OFFSET - physical memory address to be mapped
+        * PARAMETER_1_STACK_OFFSET - device identifier
+        * PARAMETER_2_STACK_OFFSET - number of contiguous physical pages to be mapped
+        * PARAMETER_3_STACK_OFFSET - linear (process) memory address to be mapped
+        * PARAMETER_4_STACK_OFFSET - physical memory address to be mapped
         
     Return (process stack offset):
         * RESULT_STACK_OFFSET - error (enum gnwMemoryError) if anything goes wrong, otherwise GME_NONE
 */
 void k_scr_mmioPlz(const procId_t procId, const ptr_t refEsp) {
-    SAFE_STACK_VAL_PTR(const addr_t, pageCount, PARAMETER_1_STACK_OFFSET);
-    SAFE_STACK_VAL_PTR(const addr_t, vAddr, PARAMETER_2_STACK_OFFSET);
-    SAFE_STACK_VAL_PTR(const addr_t, pAddr, PARAMETER_3_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const size_t, deviceId, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const addr_t, pageCount, PARAMETER_2_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const addr_t, vAddr, PARAMETER_3_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const addr_t, pAddr, PARAMETER_4_STACK_OFFSET);
 
-    extern enum gnwMemoryError k_scr_drv_mmioPlz(const procId_t, const size_t, const addr_t, const addr_t);
-    SAFE_STACK_RESULT_ARCH_VAL = k_scr_drv_mmioPlz(procId, *pageCount, *vAddr, *pAddr);
+    extern enum gnwMemoryError k_scr_drv_mmioPlz(const procId_t, const size_t, const size_t, const addr_t, const addr_t);
+    SAFE_STACK_RESULT_ARCH_VAL = k_scr_drv_mmioPlz(procId, *deviceId, *pageCount, *vAddr, *pAddr);
 }
 
 /*
@@ -93,13 +100,15 @@ void k_scr_mmioPlz(const procId_t procId, const ptr_t refEsp) {
     Function - REPORT_INIT
 
     Params (process stack offset):
-        * PARAMETER_1_STACK_OFFSET - driver initialization report status
+        * PARAMETER_1_STACK_OFFSET - device identifier
+        * PARAMETER_2_STACK_OFFSET - driver initialization report status
 */
 void k_scr_reportInit(const procId_t procId, const ptr_t refEsp) {
-    SAFE_STACK_VAL_PTR(const bool, success, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const size_t, deviceId, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const bool, success, PARAMETER_2_STACK_OFFSET);
 
-    extern void k_scr_drv_reportInit(const procId_t, const bool);
-    k_scr_drv_reportInit(procId, *success);
+    extern void k_scr_drv_reportInit(const procId_t, const size_t, const bool);
+    k_scr_drv_reportInit(procId, *deviceId, *success);
 }
 
 /*
@@ -107,13 +116,15 @@ void k_scr_reportInit(const procId_t procId, const ptr_t refEsp) {
     Function - REPORT_START
 
     Params (process stack offset):
-        * PARAMETER_1_STACK_OFFSET - driver startup report status
+        * PARAMETER_1_STACK_OFFSET - device identifier
+        * PARAMETER_2_STACK_OFFSET - driver startup report status
 */
 void k_scr_reportStart(const procId_t procId, const ptr_t refEsp) {
-    SAFE_STACK_VAL_PTR(const bool, success, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const size_t, deviceId, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const bool, success, PARAMETER_2_STACK_OFFSET);
 
-    extern void k_scr_drv_reportStart(const procId_t, const bool);
-    k_scr_drv_reportStart(procId, *success);
+    extern void k_scr_drv_reportStart(const procId_t, const size_t, const bool);
+    k_scr_drv_reportStart(procId, *deviceId, *success);
 }
 
 /*
@@ -121,18 +132,20 @@ void k_scr_reportStart(const procId_t procId, const ptr_t refEsp) {
     Function - REPLY_GETPARAM
 
     Params (process stack offset):
-        * PARAMETER_1_STACK_OFFSET - operation success status
-        * PARAMETER_2_STACK_OFFSET - operation result
+        * PARAMETER_1_STACK_OFFSET - device identifier
+        * PARAMETER_2_STACK_OFFSET - operation success status
+        * PARAMETER_3_STACK_OFFSET - operation result
     
     In case 'success' value is 'false'
     'result' value is undefined
 */
 void k_scr_replyGetParam(const procId_t procId, const ptr_t refEsp) {
-    SAFE_STACK_VAL_PTR(const bool, success, PARAMETER_1_STACK_OFFSET);
-    SAFE_STACK_VAL_PTR(const size_t, result, PARAMETER_2_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const size_t, deviceId, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const bool, success, PARAMETER_2_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const size_t, result, PARAMETER_3_STACK_OFFSET);
 
-    extern void k_scr_drv_replyGetParam(const procId_t, const bool, const size_t);
-    k_scr_drv_replyGetParam(procId, *success, *result);
+    extern void k_scr_drv_replyGetParam(const procId_t, const size_t, const bool, const size_t);
+    k_scr_drv_replyGetParam(procId, *deviceId, *success, *result);
 }
 
 /*
@@ -140,13 +153,15 @@ void k_scr_replyGetParam(const procId_t procId, const ptr_t refEsp) {
     Function - REPLY_SETPARAM
     
     Params (process stack offset):
-        * PARAMETER_1_STACK_OFFSET - operation success status
+        * PARAMETER_1_STACK_OFFSET - device identifier
+        * PARAMETER_2_STACK_OFFSET - operation success status
 */
 void k_scr_replySetParam(const procId_t procId, const ptr_t refEsp) {
-    SAFE_STACK_VAL_PTR(const bool, success, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const size_t, deviceId, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const bool, success, PARAMETER_2_STACK_OFFSET);
 
-    extern void k_scr_drv_replySetParam(const procId_t, const bool);
-    k_scr_drv_replySetParam(procId, *success);
+    extern void k_scr_drv_replySetParam(const procId_t, const size_t, const bool);
+    k_scr_drv_replySetParam(procId, *deviceId, *success);
 }
 
 /*
@@ -154,11 +169,13 @@ void k_scr_replySetParam(const procId_t procId, const ptr_t refEsp) {
     Function - REPLY_MEMWRITE
     
     Params (process stack offset):
-        * PARAMETER_1_STACK_OFFSET - operation success status
+        * PARAMETER_1_STACK_OFFSET - device identifier
+        * PARAMETER_2_STACK_OFFSET - operation success status
 */
 void k_scr_replyMemWrite(const procId_t procId, const ptr_t refEsp) {
-    SAFE_STACK_VAL_PTR(const bool, success, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const size_t, deviceId, PARAMETER_1_STACK_OFFSET);
+    SAFE_STACK_VAL_PTR(const bool, success, PARAMETER_2_STACK_OFFSET);
 
-    extern void k_scr_drv_replyMemWrite(const procId_t, const bool);
-    k_scr_drv_replyMemWrite(procId, *success);
+    extern void k_scr_drv_replyMemWrite(const procId_t, const size_t, const bool);
+    k_scr_drv_replyMemWrite(procId, *deviceId, *success);
 }

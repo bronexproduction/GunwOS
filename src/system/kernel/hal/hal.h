@@ -16,8 +16,6 @@ void k_hal_init(const struct k_krn_memMapEntry *memMap);
 
 void k_hal_irqHandle(const uint_8 irq);
 
-enum gnwDriverError k_hal_install(const size_t devId, const procId_t operator, const struct gnwDriverConfig driver);
-
-extern const size_t *k_hal_servicedDevIdPtr;
+enum gnwDriverError k_hal_install(const procId_t operator, const struct gnwDriverConfig driver);
 
 #endif // HAL_H

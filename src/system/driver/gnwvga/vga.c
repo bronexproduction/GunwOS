@@ -10,6 +10,7 @@
 #include <gunwfug.h>
 #include <gunwmmio.h>
 
+#include "data.h"
 #include "opmode.h"
 
 static const addr_t DISPLAY_BUFFER_ADDR_BASIC = 0xb8000;
@@ -75,12 +76,12 @@ bool setFormat(const enum gnwDeviceUHA_display_format format) {
 
 static void update(const struct gnwDeviceMemWriteQuery * const queryPtr) {
     if (!queryPtr) {
-        memWriteReply(false);
+        memWriteReply(DEVICE_ID, false);
         fug(FUG_NULLPTR);
         return;
     }
     if (!queryPtr->buffer) {
-        memWriteReply(false);
+        memWriteReply(DEVICE_ID, false);
         fug(FUG_NULLPTR);
         return;
     }
@@ -92,27 +93,27 @@ static void update(const struct gnwDeviceMemWriteQuery * const queryPtr) {
         *MEM_COLOR(index) = (charBuffer[index].charColor | charBuffer[index].bgColor << 4);
     }
 
-    memWriteReply(true);
+    memWriteReply(DEVICE_ID, true);
 }
 
 static void init() {
     enum gnwMemoryError error;
-    DISPLAY_BUFFER_PTR_BASIC = mmioPlz(DISPLAY_BUFFER_ADDR_BASIC, BYTES_PER_CHAR * 80 * 25, &error);
+    DISPLAY_BUFFER_PTR_BASIC = mmioPlz(DEVICE_ID, DISPLAY_BUFFER_ADDR_BASIC, BYTES_PER_CHAR * 80 * 25, &error);
     if (!DISPLAY_BUFFER_PTR_BASIC || error != GME_NONE) {
-        drvInitReport(false);
+        drvInitReport(DEVICE_ID, false);
         return;
     }
-    DISPLAY_BUFFER_PTR_ENHANCED = mmioPlz(DISPLAY_BUFFER_ADDR_ENHANCED, 64 /* to be determined */, &error);
+    DISPLAY_BUFFER_PTR_ENHANCED = mmioPlz(DEVICE_ID, DISPLAY_BUFFER_ADDR_ENHANCED, 64 /* to be determined */, &error);
     if (!DISPLAY_BUFFER_PTR_ENHANCED || error != GME_NONE) {
-        drvInitReport(false);
+        drvInitReport(DEVICE_ID, false);
         return;
     }
 
-    drvInitReport(true);
+    drvInitReport(DEVICE_ID, true);
 }
 
 static void start() {
-    drvStartReport(true);
+    drvStartReport(DEVICE_ID, true);
 }
 
 static void uhaGetParam_display(const struct gnwDeviceGetParamQuery * const query) {
@@ -128,7 +129,7 @@ static void uhaGetParam_display(const struct gnwDeviceGetParamQuery * const quer
     } break;
     case GDU_DISPLAY_PARAM_DIMENSIONS: {
         if (query->paramIndex > 1) {
-            getParamReply(false, 0);
+            getParamReply(DEVICE_ID, false, 0);
             return;
         }
 
@@ -139,11 +140,11 @@ static void uhaGetParam_display(const struct gnwDeviceGetParamQuery * const quer
         result = query->paramIndex ? dimensions.y : dimensions.x;
     } break;
     default:
-        getParamReply(false, 0);
+        getParamReply(DEVICE_ID, false, 0);
         return;
     }
 
-    getParamReply(true, result);
+    getParamReply(DEVICE_ID, true, result);
 }
 
 static void uhaSetParam_display(const struct gnwDeviceSetParamQuery * const query) {
@@ -155,62 +156,68 @@ static void uhaSetParam_display(const struct gnwDeviceSetParamQuery * const quer
     case GDU_DISPLAY_PARAM_FORMAT: {
         const enum gnwDeviceUHA_display_format format = query->value;
         extern bool setFormat(const enum gnwDeviceUHA_display_format);
-        setParamReply(setFormat(format));
+        setParamReply(DEVICE_ID, setFormat(format));
     } break;
     default:
-        setParamReply(true);
+        setParamReply(DEVICE_ID, true);
     }
 }
 
-const struct gnwDeviceDescriptor _gnw_device_descriptor = {
-    /* type */ DEV_TYPE_DISPLAY | DEV_TYPE_MEM,
-    /* api */ { 
-        /* system */ {
-            /* desc */ { 0 },
-            /* routine */ {
-                /* getParam */ uhaGetParam_display,
-                /* getParamDecoder */ gnwDeviceGetParamQuery_decode,
-                /* setParam */ uhaSetParam_display,
-                /* setParamDecoder */ gnwDeviceSetParamQuery_decode,
-            }
-        },
-        /* mem */ { 
-            /* desc */ {
-                /* bytesRange */ {
-                    /* offset */ (addr_t)DISPLAY_BUFFER_ADDR_ENHANCED,
-                    /* sizeBytes */ KiB(96) /* memory between DISPLAY_BUFFER_ADDR_ENHANCED and DISPLAY_BUFFER_ADDR_BASIC */ + KiB(4) /* text mode buffer */
-                },
-                /* maxInputSizeBytes */ 320 * 200 * sizeof(struct gnwDeviceUHA_display_pixel)
-                },
-            /* routine */ {
-                /* write */ update,
-                /* writeDecoder */ gnwDeviceMemWriteQuery_decode
-            }
-        },
-        GNW_UHA_NO_KEYBOARD,
-        GNW_UHA_NO_MOUSE,
-        GNW_UHA_NO_FDC,
-        GNW_UHA_NO_STORCTRL,
-        GNW_UHA_NO_CHAR_IN,
-        GNW_UHA_NO_CHAR_OUT,
-        /* display */ {
-            /* desc */ {
-                /* supportedFormatCount */ 2
+#define DESCRIPTOR_COUNT 1
+
+const size_t _gnw_device_descriptor_count = DESCRIPTOR_COUNT;
+const struct gnwDeviceDescriptor _gnw_device_descriptor_list[DESCRIPTOR_COUNT] = {
+    {
+        /* type */ DEV_TYPE_DISPLAY | DEV_TYPE_MEM,
+        /* api */ { 
+            /* system */ {
+                /* desc */ { 0 },
+                /* routine */ {
+                    /* getParam */ uhaGetParam_display,
+                    /* getParamDecoder */ gnwDeviceGetParamQuery_decode,
+                    /* setParam */ uhaSetParam_display,
+                    /* setParamDecoder */ gnwDeviceSetParamQuery_decode,
+                }
             },
-            /* routine */ { 0 }
+            /* mem */ { 
+                /* desc */ {
+                    /* bytesRange */ {
+                        /* offset */ (addr_t)DISPLAY_BUFFER_ADDR_ENHANCED,
+                        /* sizeBytes */ KiB(96) /* memory between DISPLAY_BUFFER_ADDR_ENHANCED and DISPLAY_BUFFER_ADDR_BASIC */ + KiB(4) /* text mode buffer */
+                    },
+                    /* maxInputSizeBytes */ 320 * 200 * sizeof(struct gnwDeviceUHA_display_pixel)
+                    },
+                /* routine */ {
+                    /* write */ update,
+                    /* writeDecoder */ gnwDeviceMemWriteQuery_decode
+                }
+            },
+            GNW_UHA_NO_KEYBOARD,
+            GNW_UHA_NO_MOUSE,
+            GNW_UHA_NO_FDC,
+            GNW_UHA_NO_STORCTRL,
+            GNW_UHA_NO_CHAR_IN,
+            GNW_UHA_NO_CHAR_OUT,
+            /* display */ {
+                /* desc */ {
+                    /* supportedFormatCount */ 2
+                },
+                /* routine */ { 0 }
+            },
+            GNW_UHA_NO_EVENT
         },
-        GNW_UHA_NO_EVENT
-    },
-    /* driver */ {
-        /* io */ {
-            /* busBase */ 0x3B2,
+        /* driver */ {
+            /* io */ {
+                /* busBase */ 0x3B2,
+            },
+            /* descriptor */ {
+                /* init */ init,
+                /* start */ start,
+                /* isr */ nullptr,
+                /* IRQ */ NULL
+            }
         },
-        /* descriptor */ {
-            /* init */ init,
-            /* start */ start,
-            /* isr */ nullptr,
-            /* IRQ */ NULL
-        }
-    },
-    /* name */ "Default VGA display"
+        /* name */ "Default VGA display"
+    }
 };
+const size_t _gnw_device_identifier_list[DESCRIPTOR_COUNT];

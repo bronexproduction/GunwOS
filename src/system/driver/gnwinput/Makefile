@@ -1,6 +1,6 @@
-CFLAGS=$(APP_CFLAGS) -I $(API_SYS_DIR)/kbdmgr/include
-RSFLAGS=$(APP_RSFLAGS)
-LFLAGS=$(APP_LFLAGS) -Ttext 0x12000000
+CFLAGS=$(DRIVER_CFLAGS)
+RSFLAGS=$(DRIVER_RSFLAGS)
+LFLAGS=$(DRIVER_LFLAGS) -Ttext 0xA1000000
 
 O_DIR_LISTING=find . -name '*.o' -type f
 
@@ -8,10 +8,10 @@ TARGET_O=$(shell basename $(shell pwd))
 
 .PHONY: all
 
-all: $(TARGET_O).elf clean_o
+all: $(TARGET_O).gdv clean_o
 
-$(TARGET_O).elf: build_o
-	$(L) $(LFLAGS) -o $@ $(APP_LINK_LIBS) $(shell $(O_DIR_LISTING))
+$(TARGET_O).gdv: build_o
+	$(L) $(LFLAGS) -o $@ $(DRIVER_LINK_LIBS) $(shell $(O_DIR_LISTING))
 	
 build_o:
 	$(C_DIR_LISTING) -print0 | xargs -0I{} $(C) $(CFLAGS) -o {}.o {}
