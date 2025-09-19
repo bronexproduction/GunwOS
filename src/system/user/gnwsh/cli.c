@@ -129,16 +129,7 @@ static GNW_KEYBOARD_EVENT_LISTENER(onKeyboardEvent) {
 }
 
 static GNW_MOUSE_EVENT_LISTENER(onMouseEvent) {
-    if (event->code == GMEC_KEY_DOWN) {
-        append('a'+ event->data.key);
-    } else if (event->code == GMEC_KEY_UP) {
-        append('A' + event->data.key);
-    } else if (event->code == GMEC_MOVEMENT) {
-        append('0' + event->data.coordinates.x);
-        append('0' + event->data.coordinates.y);
-    } else {
-        fug(FUG_INCONSISTENT);
-    }
+    // No mouse support
 }
 
 static void prompt() {
