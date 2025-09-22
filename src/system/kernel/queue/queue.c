@@ -141,6 +141,7 @@ void k_que_start() {
             if (!enqueued) {
                 k_proc_schedule_onKernelHandlingFinished();
                 CRITICAL_SECTION_END;
+                // TODO: Check inlining
                 k_cpu_halt();
                 continue;
             }
