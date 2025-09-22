@@ -99,23 +99,23 @@ size_t isrStackHeight = 0;
     /* EAX stored for current process should contain return value (if any) */ \
 })
 
-/* 0 */ __attribute__((naked)) void k_isr_divErr() {        CPU_SEG_RESTORE; OOPS_NBR("Division by zero interrupt triggered"); k_cpu_halt(); }
-/* 1 */ __attribute__((naked)) void k_isr_dbgExc() {        CPU_SEG_RESTORE; OOPS_NBR("Debug exceptions interrupt triggered"); k_cpu_halt(); }
-/* 2 */ __attribute__((naked)) void k_isr_nmi() {           CPU_SEG_RESTORE; OOPS_NBR("Non-maskable interrupt triggered"); k_cpu_halt(); }
-/* 3 */ __attribute__((naked)) void k_isr_brkpt() {         CPU_SEG_RESTORE; OOPS_NBR("Breakpoint interrupt triggered"); k_cpu_halt(); }
-/* 4 */ __attribute__((naked)) void k_isr_ofl() {           CPU_SEG_RESTORE; OOPS_NBR("Overflow interrupt triggered"); k_cpu_halt(); }
-/* 5 */ __attribute__((naked)) void k_isr_bdsChk() {        CPU_SEG_RESTORE; OOPS_NBR("Bounds check interrupt triggered"); k_cpu_halt(); }
-/* 6 */ __attribute__((naked)) void k_isr_invOpc() {        CPU_SEG_RESTORE; OOPS_NBR("Invalid opcode interrupt triggered"); k_cpu_halt(); }
-/* 7 */ __attribute__((naked)) void k_isr_coProcNA() {      CPU_SEG_RESTORE; OOPS_NBR("Coprocessor not available interrupt triggered"); k_cpu_halt(); }
-/* 8 */ __attribute__((naked)) void k_isr_dblFlt() {        CPU_SEG_RESTORE; OOPS_NBR("Double fault interrupt triggered"); k_cpu_halt(); }
+/* 0 */ __attribute__((naked)) void k_isr_divErr() {        CPU_SEG_RESTORE; OOPS_NBR("Division by zero interrupt triggered"); k_cpu_stop(); }
+/* 1 */ __attribute__((naked)) void k_isr_dbgExc() {        CPU_SEG_RESTORE; OOPS_NBR("Debug exceptions interrupt triggered"); k_cpu_stop(); }
+/* 2 */ __attribute__((naked)) void k_isr_nmi() {           CPU_SEG_RESTORE; OOPS_NBR("Non-maskable interrupt triggered"); k_cpu_stop(); }
+/* 3 */ __attribute__((naked)) void k_isr_brkpt() {         CPU_SEG_RESTORE; OOPS_NBR("Breakpoint interrupt triggered"); k_cpu_stop(); }
+/* 4 */ __attribute__((naked)) void k_isr_ofl() {           CPU_SEG_RESTORE; OOPS_NBR("Overflow interrupt triggered"); k_cpu_stop(); }
+/* 5 */ __attribute__((naked)) void k_isr_bdsChk() {        CPU_SEG_RESTORE; OOPS_NBR("Bounds check interrupt triggered"); k_cpu_stop(); }
+/* 6 */ __attribute__((naked)) void k_isr_invOpc() {        CPU_SEG_RESTORE; OOPS_NBR("Invalid opcode interrupt triggered"); k_cpu_stop(); }
+/* 7 */ __attribute__((naked)) void k_isr_coProcNA() {      CPU_SEG_RESTORE; OOPS_NBR("Coprocessor not available interrupt triggered"); k_cpu_stop(); }
+/* 8 */ __attribute__((naked)) void k_isr_dblFlt() {        CPU_SEG_RESTORE; OOPS_NBR("Double fault interrupt triggered"); k_cpu_stop(); }
 // 9 (reserved)
-/* 10 */ __attribute__((naked)) void k_isr_invTSS() {       CPU_SEG_RESTORE; OOPS_NBR("Invalid TSS interrupt triggered"); k_cpu_halt(); }
-/* 11 */ __attribute__((naked)) void k_isr_segNP() {        CPU_SEG_RESTORE; OOPS_NBR("Segment not present interrupt triggered"); k_cpu_halt(); }
-/* 12 */ __attribute__((naked)) void k_isr_stExc() {        CPU_SEG_RESTORE; OOPS_NBR("Stack exception interrupt triggered"); k_cpu_halt(); }
-/* 13 */ __attribute__((naked)) void k_isr_genPrt() {       CPU_SEG_RESTORE; OOPS_WITH_CODE_NBR("General protection interrupt triggered"); k_cpu_halt(); }
-/* 14 */ __attribute__((naked)) void k_isr_pgFlt() {        CPU_SEG_RESTORE; OOPS_NBR("Page fault interrupt triggered"); k_cpu_halt(); }
+/* 10 */ __attribute__((naked)) void k_isr_invTSS() {       CPU_SEG_RESTORE; OOPS_NBR("Invalid TSS interrupt triggered"); k_cpu_stop(); }
+/* 11 */ __attribute__((naked)) void k_isr_segNP() {        CPU_SEG_RESTORE; OOPS_NBR("Segment not present interrupt triggered"); k_cpu_stop(); }
+/* 12 */ __attribute__((naked)) void k_isr_stExc() {        CPU_SEG_RESTORE; OOPS_NBR("Stack exception interrupt triggered"); k_cpu_stop(); }
+/* 13 */ __attribute__((naked)) void k_isr_genPrt() {       CPU_SEG_RESTORE; OOPS_WITH_CODE_NBR("General protection interrupt triggered"); k_cpu_stop(); }
+/* 14 */ __attribute__((naked)) void k_isr_pgFlt() {        CPU_SEG_RESTORE; OOPS_NBR("Page fault interrupt triggered"); k_cpu_stop(); }
 // 15 (reserved)
-/* 16 */ __attribute__((naked)) void k_isr_coProcErr() {    CPU_SEG_RESTORE; OOPS_NBR("Coprocessor error interrupt triggered"); k_cpu_halt(); }
+/* 16 */ __attribute__((naked)) void k_isr_coProcErr() {    CPU_SEG_RESTORE; OOPS_NBR("Coprocessor error interrupt triggered"); k_cpu_stop(); }
 // 17 - 31 (reserved)
 
 /*

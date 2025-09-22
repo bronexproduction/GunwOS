@@ -24,7 +24,11 @@ void k_cpu_loadTaskRegister() {
     __asm__ volatile ("ltr %ax");
 }
 
-void k_cpu_halt() {
+__attribute__((always_inline)) inline void k_cpu_halt() {
+    __asm__ volatile ("hlt");
+}
+
+__attribute__((always_inline)) inline void k_cpu_stop() {
     CPU_INTERRUPTS_DISABLE;
     __asm__ volatile ("hlt");
 }

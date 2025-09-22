@@ -154,9 +154,14 @@ void k_cpu_init();
 void k_cpu_loadTaskRegister();
 
 /*
-    Halts the CPU
+    Halts the CPU execution (temporarily)
 */
 void k_cpu_halt();
+
+/*
+    Stops the CPU execution (permanently)
+*/
+void k_cpu_stop();
 
 /*
     Reads current CR3 register value
