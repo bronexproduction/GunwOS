@@ -29,6 +29,7 @@ static enum k_obj_error unsafe_reserveNextFreeBox(const size_t sizeBytes, size_t
             CRITICAL_SECTION_BEGIN {
                 if (objects[i].sizeBytes) {
                     CRITICAL_SECTION_END;
+                    i = 0;
                     continue;
                 }
 
