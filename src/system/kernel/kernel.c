@@ -8,6 +8,7 @@
 #include "hal/hal.h"
 #include "hal/mem/mem.h"
 #include "timer/timer.h"
+#include "objects/objects.h"
 #include "ipc/ipc.h"
 #include "dev/dev.h"
 #include "log/log.h"
@@ -38,6 +39,7 @@ void __attribute__((fastcall, section(".start"))) __kernel_start(const struct k_
     const struct k_krn_bootData * const bootData = (struct k_krn_bootData *)k_mem_physicalToLinear((ptr_t)physBootData);
     k_hal_init(bootData->memMap);
     k_tmr_init();
+    k_obj_init();
     k_ipc_init();
     k_dev_init();
     k_log_init();
