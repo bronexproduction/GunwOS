@@ -20,7 +20,7 @@ static struct objectBox {
     byte_t data[MAX_OBJECT_DATA_SIZE_BYTES];
 } objects[MAX_OBJECTS];
 
-static enum k_obj_error unsafe_reserveNextFreeBox(const size_t sizeBytes, size_t * const id) {
+static enum k_obj_error unsafe_reserveNextFreeBox(const size_t sizeBytes, k_obj_handle * const handle) {
     for (size_t i = 0; i < MAX_OBJECTS; ++i) {
         if (!objects[i].sizeBytes) {
 
@@ -37,7 +37,7 @@ static enum k_obj_error unsafe_reserveNextFreeBox(const size_t sizeBytes, size_t
                 CRITICAL_SECTION_END;
             }
 
-            (*id)=i;
+            (*handle)=i;
             
             return OE_NONE;
         }
@@ -50,23 +50,23 @@ static bool validateOwner(const procId_t owner) {
     return k_proc_isAlive(owner) || owner == KERNEL_PROC_ID;
 }
 
-static bool validateId(const size_t id) {
-    return id < MAX_OBJECTS;
+static bool validateHandle(const k_obj_handle handle) {
+    return handle < MAX_OBJECTS;
 }
 
-static void unsafe_clearBox(const size_t id) {
-    objects[id].owner = NONE_PROC_ID;
-    memzero(objects[id].data, MAX_OBJECT_DATA_SIZE_BYTES);
-    objects[id].sizeBytes = 0;
+static void unsafe_clearBox(const k_obj_handle handle) {
+    objects[handle].owner = NONE_PROC_ID;
+    memzero(objects[handle].data, MAX_OBJECT_DATA_SIZE_BYTES);
+    objects[handle].sizeBytes = 0;
 }
 
-static void unsafe_fillBox(const size_t id,
+static void unsafe_fillBox(const k_obj_handle handle,
                            const procId_t owner,
                            const size_t sizeBytes,
                            const void * const data) {
-    objects[id].owner = owner;
-    objects[id].sizeBytes = sizeBytes;
-    memcopy(data, objects[id].data, sizeBytes);
+    objects[handle].owner = owner;
+    objects[handle].sizeBytes = sizeBytes;
+    memcopy(data, objects[handle].data, sizeBytes);
 }
 
 void k_obj_init() {
@@ -78,11 +78,11 @@ void k_obj_init() {
 enum k_obj_error k_obj_store(const procId_t owner,
                              const size_t sizeBytes,
                              const void * const data,
-                             size_t * const id) {
+                             k_obj_handle * const handle) {
     if (!data) {
         return OE_INVALID_PARAMETER;        
     }
-    if (!id) {
+    if (!handle) {
         return OE_INVALID_PARAMETER;
     }
     if (!sizeBytes) {
@@ -95,48 +95,59 @@ enum k_obj_error k_obj_store(const procId_t owner,
         return OE_INVALID_PARAMETER;
     }
 
-    enum k_obj_error error = unsafe_reserveNextFreeBox(sizeBytes, id);
+    enum k_obj_error error = unsafe_reserveNextFreeBox(sizeBytes, handle);
     if (error != OE_NONE) {
         return error;
     }
 
-    unsafe_fillBox(*id, owner, sizeBytes, data);
+    unsafe_fillBox(*handle, owner, sizeBytes, data);
 
     return OE_NONE;
 }
 
 enum k_obj_error k_obj_retrieve(const procId_t owner,
-                                const size_t id,
+                                const k_obj_handle handle,
                                 const size_t sizeBytes,
                                 data_t * const data) {
     if (!data) {
         return OE_INVALID_PARAMETER;
     }
-    if (!validateId(id)) {
+    if (!validateHandle(handle)) {
         return OE_INVALID_PARAMETER;
     }
-    if (objects[id].owner != owner) {
+    if (objects[handle].owner != owner) {
         return OE_INVALID_PARAMETER;
     }
-    if (objects[id].sizeBytes != sizeBytes) {
+    if (objects[handle].sizeBytes != sizeBytes) {
         return OE_INVALID_PARAMETER;
     }
 
-    memcopy(objects[id].data, data, sizeBytes);
+    memcopy(objects[handle].data, data, sizeBytes);
 
     return OE_NONE;
 }
                                 
 enum k_obj_error k_obj_remove(const procId_t owner,
-                              const size_t id) {
-    if (!validateId(id)) {
+                              const k_obj_handle handle) {
+
+    // TODO: what if the handle is 0? it's a valid index
+    
+    if (!validateHandle(handle)) {
         return OE_INVALID_PARAMETER;
     }
-    if (objects[id].owner != owner) {
+    if (objects[handle].owner != owner) {
         return OE_INVALID_PARAMETER;
     }
 
-    unsafe_clearBox(id);
+    unsafe_clearBox(handle);
 
     return OE_NONE;
+}
+
+void k_obj_procCleanup(const procId_t procId) {
+    for (size_t i = 0; i < MAX_OBJECTS; ++i) {
+        if (objects[i].owner == procId) {
+            unsafe_clearBox(i);
+        }
+    }
 }
