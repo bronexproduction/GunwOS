@@ -50,8 +50,18 @@ static bool validateOwner(const procId_t owner) {
     return k_proc_isAlive(owner) || owner == KERNEL_PROC_ID;
 }
 
-static bool validateHandle(const k_obj_handle handle) {
-    return handle < MAX_OBJECTS;
+static bool validateHandle(const k_obj_handle handle, const procId_t owner) {
+    if (handle >= MAX_OBJECTS) {
+        return false;
+    }
+    if (!objects[handle].sizeBytes) {
+        return false;
+    }
+    if (objects[handle].owner != owner) {
+        return false;
+    }
+
+    return true;
 }
 
 static void unsafe_clearBox(const k_obj_handle handle) {
@@ -110,10 +120,7 @@ enum k_obj_error k_obj_retrieve(const procId_t owner,
     if (!data) {
         return OE_INVALID_PARAMETER;
     }
-    if (!validateHandle(handle)) {
-        return OE_INVALID_PARAMETER;
-    }
-    if (objects[handle].owner != owner) {
+    if (!validateHandle(handle, owner)) {
         return OE_INVALID_PARAMETER;
     }
     if (objects[handle].sizeBytes != sizeBytes) {
@@ -127,13 +134,7 @@ enum k_obj_error k_obj_retrieve(const procId_t owner,
                                 
 enum k_obj_error k_obj_remove(const procId_t owner,
                               const k_obj_handle handle) {
-
-    // TODO: what if the handle is 0? it's a valid index
-    
-    if (!validateHandle(handle)) {
-        return OE_INVALID_PARAMETER;
-    }
-    if (objects[handle].owner != owner) {
+    if (!validateHandle(handle, owner)) {
         return OE_INVALID_PARAMETER;
     }
 
