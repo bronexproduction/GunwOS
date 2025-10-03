@@ -62,11 +62,9 @@ static void unsafe_clearBox(const k_obj_handle handle) {
 
 static void unsafe_fillBox(const k_obj_handle handle,
                            const procId_t owner,
-                           const size_t sizeBytes,
                            const void * const data) {
     objects[handle].owner = owner;
-    objects[handle].sizeBytes = sizeBytes;
-    memcopy(data, objects[handle].data, sizeBytes);
+    memcopy(data, objects[handle].data, objects[handle].sizeBytes);
 }
 
 void k_obj_init() {
@@ -100,7 +98,7 @@ enum k_obj_error k_obj_store(const procId_t owner,
         return error;
     }
 
-    unsafe_fillBox(*handle, owner, sizeBytes, data);
+    unsafe_fillBox(*handle, owner, data);
 
     return OE_NONE;
 }
