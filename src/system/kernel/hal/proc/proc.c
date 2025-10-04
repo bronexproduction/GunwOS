@@ -20,6 +20,7 @@
 #include <error/panic.h>
 #include <queue/queue.h>
 #include <runloop/runloop.h>
+#include <objects/objects.h>
 #include <dev/dev.h>
 
 #define STACK_VAL(REFESP, SIZE, OFFSET) (*(uint_ ## SIZE *)(REFESP + OFFSET))
@@ -218,6 +219,7 @@ void k_proc_cleanup(const procId_t procId) {
     k_que_dispatch_arch((fPtr_arch)k_dev_procCleanup, procId);
     k_que_dispatch_arch((fPtr_arch)k_ipc_procCleanup, procId);
     k_que_dispatch_arch((fPtr_arch)k_runloop_procCleanup, procId);
+    k_que_dispatch_arch((fPtr_arch)k_obj_procCleanup, procId);
 }
 
 void k_proc_stop(const procId_t procId) {

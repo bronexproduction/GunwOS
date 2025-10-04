@@ -7,6 +7,7 @@
 
 #include "runloop.h"
 #include <hal/proc/proc.h>
+#include <objects/objects.h>
 #include <utils.h>
 #include <mem.h>
 #include <defs.h>
@@ -14,7 +15,6 @@
 
 #define DISPATCH_QUEUE_SIZE 10
 #define DISPATCH_MAX_DATA_SIZE_BYTES KiB(7)
-#warning more data may overlap with critical memory region (linker script to be updated?)
 
 #warning critical sections might be useful here instead of in the other layers
 
@@ -23,7 +23,7 @@ struct dispatchItem {
     bool handled;
     bool dataHandled;
     struct gnwRunLoopDispatchItem item;
-    uint_8 data[DISPATCH_MAX_DATA_SIZE_BYTES];
+    k_obj_handle dataHandle;
 };
 
 PRIVATE struct runLoop {
@@ -53,8 +53,14 @@ static bool isItemEmpty(const struct gnwRunLoopDispatchItem * const item) {
 }
 
 static struct dispatchItem * reservedEmptyItemOrNull(const procId_t procId, const size_t token) {
+    // TODO: race condition in multi-core environment?
     struct dispatchItem * const item = &rlp_main[procId].queue[token];
     return (isItemEmpty(&item->item) && item->reserved) ? item : nullptr;
+}
+
+static void release(const procId_t procId, struct dispatchItem * const item) {
+    k_obj_remove(procId, item->dataHandle);
+    memzero(item, sizeof(struct dispatchItem));
 }
 
 static void finishIfNeeded(const procId_t procId, const size_t index) {
@@ -64,7 +70,7 @@ static void finishIfNeeded(const procId_t procId, const size_t index) {
         return;
     }
 
-    memzero(item, sizeof(struct dispatchItem));
+    release(procId, item);
     loop->finishedIndex = index;
 }
 
@@ -105,10 +111,6 @@ enum gnwRunLoopError k_runloop_reserve(const procId_t procId, size_t * const tok
     return GRLE_NONE;
 }
 
-static void release(struct dispatchItem * const item) {
-    memzero(item, sizeof(struct dispatchItem));
-}
-
 enum gnwRunLoopError k_runloop_dispatch(const procId_t procId,
                                         const size_t token,
                                         const struct gnwRunLoopDispatchItem item,
@@ -126,23 +128,23 @@ enum gnwRunLoopError k_runloop_dispatch(const procId_t procId,
     }
     if (item.dataSizeBytes) {
         if (item.dataSizeBytes > DISPATCH_MAX_DATA_SIZE_BYTES) {
-            release(queueItem);
+            release(procId, queueItem);
             OOPS("Payload too large", GRLE_INVALID_PARAMETER);
         }
         if (!GNWEVENT_ACCEPTS_DATA(item.format)) {
-            release(queueItem);
+            release(procId, queueItem);
             OOPS("Invalid dispatch format", GRLE_INVALID_PARAMETER);
         }
         if (!data) {
-            release(queueItem);
+            release(procId, queueItem);
             OOPS("Nullptr", GRLE_INVALID_PARAMETER);
         }
         if (!dataEncoder || !item.decode) {
-            release(queueItem);
+            release(procId, queueItem);
             OOPS("No encode/decode present", GRLE_INVALID_PARAMETER);
         }
     } else if (data) {
-        release(queueItem);
+        release(procId, queueItem);
         OOPS("No data expected", GRLE_INVALID_PARAMETER);
     } else {
         queueItem->dataHandled = true;
@@ -150,7 +152,19 @@ enum gnwRunLoopError k_runloop_dispatch(const procId_t procId,
 
     queueItem->item = item;
     if (data) {
-        dataEncoder(data, queueItem->data);    
+        byte_t buffer[queueItem->item.dataSizeBytes];
+        dataEncoder(data, buffer);
+        const enum k_obj_error objError = k_obj_store(procId, queueItem->item.dataSizeBytes, buffer, &(queueItem->dataHandle));
+        if (objError == OE_SIZE_LIMIT_EXCEEDED) {
+            release(procId, queueItem);
+            OOPS("Payload too large for object storage", GRLE_INVALID_PARAMETER);
+        } else if (objError == OE_FULL) {
+            release(procId, queueItem);
+            OOPS("Object storage full", GRLE_UNKNOWN);
+        } else if (objError != OE_NONE) {
+            release(procId, queueItem);
+            OOPS("Unknown error", GRLE_UNKNOWN);
+        }
     }
     
     return GRLE_NONE;
@@ -214,7 +228,11 @@ enum gnwRunLoopError k_runloop_getPendingItemData(const procId_t procId, ptr_t d
         return GRLE_INVALID_STATE;
     }
 
-    memcopy(item->data, dataBufferPtr, item->item.dataSizeBytes);
+    const enum k_obj_error objErr = k_obj_retrieve(procId, item->dataHandle, item->item.dataSizeBytes, dataBufferPtr);
+    if (objErr != OE_NONE) {
+        return GRLE_INTERNAL_INCONSISTENCY;
+    }
+    
     item->dataHandled = true;
     finishIfNeeded(procId, index);
     return GRLE_NONE;
