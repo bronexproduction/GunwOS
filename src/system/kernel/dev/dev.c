@@ -123,7 +123,7 @@ static bool deviceHasPendingOperation(const struct device * const devicePtr) {
 }
 
 static void unsafe_clearPendingRequestInfo(struct deviceRequestInfo * const infoPtr) {
-    if (isPendingRequestValid(infoPtr) && infoPtr->vReplyPtr) {
+    if (isPendingRequestValid(infoPtr)) {
         k_obj_remove(infoPtr->procId, infoPtr->dataHandle);
     }
     infoPtr->procId = NONE_PROC_ID;
@@ -754,12 +754,26 @@ void k_dev_writeMem(const procId_t procId,
 
     devicePtr->pendingRequestInfo.procId = procId;
     devicePtr->pendingRequestInfo.vErrorPtr = (size_t *)vErrorPtr;
-    MEM_ONTABLE(procId, 
-        memcopy(query.buffer, devicePtr->pendingRequestInfo.buffer, query.inputBufferRange.sizeBytes);
+
+    enum k_obj_error objError;
+    MEM_ONTABLE(procId,
+        k_obj_store(devicePtr->operator, query.inputBufferRange.sizeBytes, query.buffer, devicePtr->pendingRequestInfo.dataHandle);
     )
 
+    if (objError != OE_NONE) {
+        unsafe_clearPendingRequestInfo(&(devicePtr->pendingRequestInfo));
+        MEM_ONTABLE(procId, 
+            if (objError == OE_SIZE_LIMIT_EXCEEDED) {
+                *(vErrorPtr) = GDE_INVALID_PARAMETER;
+            } else {
+                *(vErrorPtr) = GDE_UNKNOWN;
+            }
+        )
+        return;
+    }
+
     const struct gnwDeviceMemWriteQuery updatedQuery = {
-        /* buffer */ devicePtr->pendingRequestInfo.buffer,
+        /* objectHandle */ devicePtr->pendingRequestInfo.dataHandle,
         /* inputBufferRange */ query.inputBufferRange
     };
 
