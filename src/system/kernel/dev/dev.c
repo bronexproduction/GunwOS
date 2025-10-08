@@ -15,13 +15,13 @@
 #include <hal/paging/paging.h>
 #include <hal/mem/mem.h>
 #include <error/panic.h>
+#include <objects/objects.h>
 #include <hal/criticalsec/criticalsec.h>
 #include <log/log.h>
 #include <_gunwdev.h>
 #include <_gunwuha.h>
 
 #define MAX_DEVICES 8
-#define MAX_MEM_BUFFER_SIZE_BYTES KiB(8)
 
 enum deviceStatus {
     NONE            =  0,
@@ -50,9 +50,9 @@ struct deviceRequestInfo {
     size_t * vReplyPtr;
 
     /*
-        Request reply pointer
+        Request reply object handle
     */
-    byte_t buffer[MAX_MEM_BUFFER_SIZE_BYTES];
+    k_obj_handle dataHandle;
 };
 
 PRIVATE struct device {
@@ -99,7 +99,6 @@ PRIVATE struct device {
 
         Used for asynchronous initialization and startup
     */
-   #warning TODO to be moved to kernel objects
     struct deviceRequestInfo pendingRequestInfo;
 } devices[MAX_DEVICES];
 
@@ -111,11 +110,36 @@ PRIVATE bool validateId(size_t id) {
     return id < MAX_DEVICES;
 }
 
+static bool isPendingRequestValid(const struct deviceRequestInfo * const infoPtr) {
+    if (infoPtr->procId == NONE_PROC_ID) {
+        return false;
+    }
+
+    return infoPtr->vErrorPtr || infoPtr->vReplyPtr;
+}
+
+static bool deviceHasPendingOperation(const struct device * const devicePtr) {
+    return isPendingRequestValid(&(devicePtr->pendingRequestInfo));
+}
+
+static void unsafe_clearPendingRequestInfo(struct deviceRequestInfo * const infoPtr) {
+    if (isPendingRequestValid(infoPtr) && infoPtr->vReplyPtr) {
+        k_obj_remove(infoPtr->procId, infoPtr->dataHandle);
+    }
+    infoPtr->procId = NONE_PROC_ID;
+    infoPtr->vErrorPtr = nullptr;
+    infoPtr->vReplyPtr = nullptr;
+}
+
 static void unsafe_clearDevice(const size_t deviceId) {
-    memzero(&(devices[deviceId]), sizeof(struct device));
-    devices[deviceId].holder = NONE_PROC_ID;
-    devices[deviceId].operator = NONE_PROC_ID;
-    devices[deviceId].pendingRequestInfo.procId = NONE_PROC_ID;
+    struct device * const dev = &devices[deviceId];
+
+    unsafe_clearPendingRequestInfo(&(dev->pendingRequestInfo));
+
+    memzero(dev, sizeof(struct device));
+    
+    dev->holder = NONE_PROC_ID;
+    dev->operator = NONE_PROC_ID;
 }
 
 void k_dev_init() {
@@ -214,7 +238,7 @@ PRIVATE enum gnwDriverError devInstallPrepare(const struct gnwDeviceDescriptor *
             /* procId */ NONE_PROC_ID,
             /* vErrorPtr */ nullptr,
             /* vResultPtr */ nullptr,
-            /* buffer */ { 0 }
+            /* dataHandle */ 0
         }
     };
 
@@ -298,12 +322,6 @@ enum gnwDriverError k_dev_install_async(const struct gnwDeviceDescriptor * const
     return GDRE_NONE;
 }
 
-static bool deviceHasPendingOperation(const struct device * devicePtr) {
-    return (devicePtr->pendingRequestInfo.procId != NONE_PROC_ID)   ||
-            devicePtr->pendingRequestInfo.vErrorPtr                 ||
-            devicePtr->pendingRequestInfo.vReplyPtr;
-}
-
 static enum gnwDriverError deviceFlowInvokeAsyncIfNeeded(const procId_t requesterProcId,
                                                          const procId_t deviceId,
                                                          enum gnwDriverError * const vErrorPtr,
@@ -349,6 +367,7 @@ static enum gnwDriverError deviceFlowInvokeAsyncIfNeeded(const procId_t requeste
         return GDRE_UNKNOWN;
     }
     
+    // any possibility of race condition (deviceHasPendingOperations) ?
     devicePtr->pendingRequestInfo.procId = requesterProcId;
     devicePtr->pendingRequestInfo.vErrorPtr = (size_t *)vErrorPtr;
     devicePtr->status = intermediateStatus;
@@ -382,13 +401,6 @@ static bool validateReporter(const procId_t operatorProcId, const size_t deviceI
     }
     
     return true;
-}
-
-static void unsafe_clearPendingRequestInfo(struct deviceRequestInfo * const infoPtr) {
-    infoPtr->procId = NONE_PROC_ID;
-    infoPtr->vErrorPtr = nullptr;
-    infoPtr->vReplyPtr = nullptr;
-    memzero(infoPtr->buffer, MAX_MEM_BUFFER_SIZE_BYTES);
 }
 
 static void unsafe_pendingRequestInfoSetErrorIfNeeded(const size_t deviceId, const size_t error) {
