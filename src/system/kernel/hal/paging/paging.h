@@ -19,6 +19,8 @@
 #define MEM_PAGE_OF_ADDR(ADDR)                          ((ADDR) / (MEM_PAGE_SIZE_BYTES))
 #define MEM_ONTABLE(PROC_ID, CODE)                      { const size_t cr3 = k_paging_switch(PROC_ID); { CODE; } k_cpu_setCR3(cr3); }
 
+// TODO: Ensure MEM_ONTABLE never called when already in non-kernel page table
+
 void k_paging_prepare();
 __attribute__((naked)) void k_paging_start();
 void k_paging_init(const struct k_krn_memMapEntry *memMap);
