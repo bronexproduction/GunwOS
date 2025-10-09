@@ -10,6 +10,35 @@
 #ifndef _GUNWAPI_KERNEL
 
 /*
+    Formatted output handling
+
+    Arguments data types are to be written in curly brackets
+    Optional format information is to be put in square brackets and should follow the curly brackets
+    (escape character required in case curly bracket or square bracket is to be put as a character instead)
+
+    How to declare a parameter in msg:
+
+        Format of expected parameter is: {T(:F)} where:
+
+        * T - data type (see table below)
+        * F - optional formatting instructions (see table below)
+    
+    Supported data types:
+
+        * NONE
+
+    Optional formatting instructions:
+
+        * NONE
+
+    Examples of formatted msg:
+
+        * "Your pizza is {u8} cm in diameter, you will stay hungry"
+        * "My pizza is {u16] cm in diameter, it's much bigger than yours"
+        * "His pizza is {u32} cm in diameter, he must have stolen it"
+*/
+
+/*
     Prints to default terminal
 */
 extern void print(const char * const msg, ...);

@@ -10,7 +10,6 @@
 #include "../include/gunwoutput.h"
 #include "../_include/scl_user.h"
 #include <string.h>
-#include <stdarg.h>
 
 enum outputTarget {
     OT_LOG,
