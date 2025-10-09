@@ -490,7 +490,9 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
     }
     
     err = k_runloop_dispatch(procId, runloopToken, item, p, encoder);
-    if (err != GRLE_NONE) {
+    if (err == GRLE_PAYLOAD_TOO_LARGE) {
+        return PE_PAYLOAD_TOO_LARGE;
+    } else if (err != GRLE_NONE) {
         return PE_OPERATION_FAILED;
     }
 

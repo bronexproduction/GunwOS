@@ -15,7 +15,6 @@
 #include <hal/paging/paging.h>
 #include <hal/mem/mem.h>
 #include <error/panic.h>
-#include <objects/objects.h>
 #include <hal/criticalsec/criticalsec.h>
 #include <log/log.h>
 #include <_gunwdev.h>
@@ -48,11 +47,6 @@ struct deviceRequestInfo {
         Request reply pointer
     */
     size_t * vReplyPtr;
-
-    /*
-        Request reply object handle
-    */
-    k_obj_handle dataHandle;
 };
 
 PRIVATE struct device {
@@ -115,7 +109,7 @@ static bool isPendingRequestValid(const struct deviceRequestInfo * const infoPtr
         return false;
     }
 
-    return infoPtr->vErrorPtr || infoPtr->vReplyPtr;
+    return infoPtr->vErrorPtr != nullptr;
 }
 
 static bool deviceHasPendingOperation(const struct device * const devicePtr) {
@@ -123,9 +117,6 @@ static bool deviceHasPendingOperation(const struct device * const devicePtr) {
 }
 
 static void unsafe_clearPendingRequestInfo(struct deviceRequestInfo * const infoPtr) {
-    if (isPendingRequestValid(infoPtr)) {
-        k_obj_remove(infoPtr->procId, infoPtr->dataHandle);
-    }
     infoPtr->procId = NONE_PROC_ID;
     infoPtr->vErrorPtr = nullptr;
     infoPtr->vReplyPtr = nullptr;
@@ -237,8 +228,7 @@ PRIVATE enum gnwDriverError devInstallPrepare(const struct gnwDeviceDescriptor *
         /* pendingRequestInfo */ {
             /* procId */ NONE_PROC_ID,
             /* vErrorPtr */ nullptr,
-            /* vResultPtr */ nullptr,
-            /* dataHandle */ 0
+            /* vResultPtr */ nullptr
         }
     };
 
@@ -744,50 +734,28 @@ void k_dev_writeMem(const procId_t procId,
         )
         return;
     }
-    
-    if (query.inputBufferRange.sizeBytes > MAX_MEM_BUFFER_SIZE_BYTES) {
-        MEM_ONTABLE(procId, 
-            *(vErrorPtr) = GDE_INVALID_PARAMETER;
-        )
-        return;
-    }
 
     devicePtr->pendingRequestInfo.procId = procId;
     devicePtr->pendingRequestInfo.vErrorPtr = (size_t *)vErrorPtr;
 
-    enum k_obj_error objError;
-    MEM_ONTABLE(procId,
-        k_obj_store(devicePtr->operator, query.inputBufferRange.sizeBytes, query.buffer, devicePtr->pendingRequestInfo.dataHandle);
-    )
-
-    if (objError != OE_NONE) {
-        unsafe_clearPendingRequestInfo(&(devicePtr->pendingRequestInfo));
-        MEM_ONTABLE(procId, 
-            if (objError == OE_SIZE_LIMIT_EXCEEDED) {
-                *(vErrorPtr) = GDE_INVALID_PARAMETER;
-            } else {
-                *(vErrorPtr) = GDE_UNKNOWN;
-            }
-        )
-        return;
-    }
-
-    const struct gnwDeviceMemWriteQuery updatedQuery = {
-        /* objectHandle */ devicePtr->pendingRequestInfo.dataHandle,
-        /* inputBufferRange */ query.inputBufferRange
-    };
-
     if (k_proc_idIsUser(devicePtr->operator)) {
-        const enum k_proc_error callbackError = k_proc_callback_invoke_ptr(devicePtr->operator, 
-                                                                           (fPtr_ptr)api->routine.write,
-                                                                           (ptr_t)&(updatedQuery),
-                                                                           sizeof(struct gnwDeviceMemWriteQuery),
-                                                                           GNW_DEVICEMEMWRITEQUERY_ENCODEDSIZE(updatedQuery),
-                                                                           (gnwRunLoopDataEncodingRoutine)gnwDeviceMemWriteQuery_encode,
-                                                                           (gnwRunLoopDataEncodingRoutine)api->routine.writeDecoder);
-        if (callbackError != PE_NONE) {   
+        enum k_proc_error callbackError;
+        MEM_ONTABLE(procId,
+            callbackError = k_proc_callback_invoke_ptr(devicePtr->operator, 
+                                                       (fPtr_ptr)api->routine.write,
+                                                       (ptr_t)&(query),
+                                                       sizeof(struct gnwDeviceMemWriteQuery),
+                                                       GNW_DEVICEMEMWRITEQUERY_ENCODEDSIZE(query),
+                                                       (gnwRunLoopDataEncodingRoutine)gnwDeviceMemWriteQuery_encode,
+                                                       (gnwRunLoopDataEncodingRoutine)api->routine.writeDecoder);
+        )
+        if (callbackError != PE_NONE) {
             MEM_ONTABLE(procId, 
-                *(vErrorPtr) = GDE_UNKNOWN;
+                if (callbackError == PE_PAYLOAD_TOO_LARGE) {
+                    *(vErrorPtr) = GDE_INVALID_PARAMETER;
+                } else {
+                    *(vErrorPtr) = GDE_UNKNOWN;
+                }
             )
             unsafe_clearPendingRequestInfo(&(devicePtr->pendingRequestInfo));
             return;
@@ -795,8 +763,8 @@ void k_dev_writeMem(const procId_t procId,
 
         k_proc_lock(procId, PLT_SYNC);
     } else {
-        api->routine.write(&updatedQuery);
-        MEM_ONTABLE(procId, 
+        MEM_ONTABLE(procId,
+            api->routine.write(&query);
             *(vErrorPtr) = GDE_NONE;
         )
     }
@@ -838,6 +806,9 @@ enum gnwDeviceError k_dev_writeChar(const procId_t processId,
     if (!routine->write) {
         return GDE_INVALID_OPERATION;
     }
+
+    // TODO: it's limited to kernel drivers
+
     if (!routine->write(character)) {
         return GDE_OPERATION_FAILED;
     }
@@ -1070,6 +1041,9 @@ enum gnwDeviceError k_dev_emit(const procId_t procId, const size_t deviceId, con
     }
 
     struct device *dev = &devices[deviceId];
+
+    // TODO: Looks limited to kernel drivers - eventPtr->data seems to be in userspace
+
     const enum k_proc_error callbackErr = k_proc_callback_invoke_ptr(dev->holder, 
                                                                      (gnwEventListener_ptr)dev->listener,
                                                                      (ptr_t)eventPtr,

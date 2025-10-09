@@ -157,7 +157,7 @@ enum gnwRunLoopError k_runloop_dispatch(const procId_t procId,
         const enum k_obj_error objError = k_obj_store(procId, queueItem->item.dataSizeBytes, buffer, &(queueItem->dataHandle));
         if (objError == OE_SIZE_LIMIT_EXCEEDED) {
             release(procId, queueItem);
-            OOPS("Payload too large for object storage", GRLE_INVALID_PARAMETER);
+            OOPS("Payload too large for object storage", GRLE_PAYLOAD_TOO_LARGE);
         } else if (objError == OE_FULL) {
             release(procId, queueItem);
             OOPS("Object storage full", GRLE_UNKNOWN);
