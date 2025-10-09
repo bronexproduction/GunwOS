@@ -8,7 +8,7 @@
 #include "keyboard.h"
 #include "data.h"
 #include <gunwdrv.h>
-#include <gunwlog.h>
+#include <gunwoutput.h>
 #include <gunwfug.h>
 #include <gunwdevemitter.h>
 #include <gunwinput.h>

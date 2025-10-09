@@ -7,7 +7,7 @@
 
 #include <gunwdrv.h>
 #include <gunwfug.h>
-#include <gunwlog.h>
+#include <gunwoutput.h>
 #include <gunwbus.h>
 #include "data.h"
 #include "ops.h"

@@ -9,7 +9,7 @@
 
 #include "ops.h"
 #include <gunwbus.h>
-#include <gunwlog.h>
+#include <gunwoutput.h>
 
 #define CAN_READ (rdb(MOUSE_DEVICE_ID, BA_STATUS) & CSR_OUTPUT_BUFFER_FULL)
 #define CAN_WRITE (!(rdb(MOUSE_DEVICE_ID, BA_STATUS) & CSR_INPUT_BUFFER_FULL))

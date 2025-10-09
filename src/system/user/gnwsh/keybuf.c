@@ -8,7 +8,7 @@
 #include "keybuf.h"
 #include <string.h>
 #include <gunwfug.h>
-#include <gunwlog.h>
+#include <gunwoutput.h>
 #include "keymap.h"
 
 static char kbuf[SCANCODES_MAX];

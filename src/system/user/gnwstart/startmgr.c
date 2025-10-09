@@ -5,7 +5,7 @@
 //  Created by Artur Danielewski on 26.12.2024.
 //
 
-#include <gunwlog.h>
+#include <gunwoutput.h>
 #include <gunwctrl.h>
 #include <gunwdev.h>
 #include <gunwfug.h>

@@ -15,7 +15,7 @@
 #include <gunwipc.h>
 #include <gunwinput.h>
 #include <gunwfug.h>
-#include <gunwlog.h>
+#include <gunwoutput.h>
 #include <inputmgr.h>
 
 extern sessionPtr_t inputStack[MAX_SESSION];
