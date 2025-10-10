@@ -11,28 +11,103 @@
 #include "../_include/scl_user.h"
 #include <string.h>
 
-enum outputTarget {
-    OT_LOG,
-    OT_TERMINAL
+enum target {
+    T_LOG,
+    T_TERMINAL
 };
 
-static void output_print(enum outputTarget target, const char * const msg, __builtin_va_list args) {
+enum paramType {
+    PT_UNKNOWN
+};
+
+#define IS_ESCAPE(CHARACTER) ((CHARACTER) == '\\')
+#define IS_PARAM_START(CHARACTER) ((CHARACTER) == '{')
+#define IS_PARAM_END(CHARACTER) ((CHARACTER) == '}')
+
+static size_t locateParamEndCharacter(const char * const msg, const size_t msgLength, size_t paramStartIndex) {
+    for (; paramStartIndex < msgLength; ++paramStartIndex) {
+        if (IS_PARAM_END(msg[paramStartIndex])) return paramStartIndex;
+    }
+    
+    return 0;
+}
+
+static enum paramType decodeParamType(const char * const msg,
+                                      const size_t paramStartCharacterIndex,
+                                      const size_t paramEndCharacterIndex) {
+    // TODO
+    return PT_UNKNOWN;
+}
+
+
+static void printSequence(enum target target,
+                          const char * msg,
+                          const size_t msgLength,
+                          const size_t startIndex,
+                          const size_t terminatorIndex) {
+
+    // TODO: VALIDATE PARAMETERS
+    // TODO: something else
+    
     switch (target) {
-        case OT_LOG:
+        case T_LOG:
             // TBD
-            SYSCALL_USER_CALL(LOG, msg, strlen(msg), 0, 0);
+            SYSCALL_USER_CALL(LOG, msg + startIndex, terminatorIndex - startIndex, 0, 0);
             break;
-        case OT_TERMINAL:
+        case T_TERMINAL:
             // TBD
             break;
     }
-    
+}
+
+static void printParameter(enum target target,
+                           enum paramType paramType,
+                           __builtin_va_list * const args) {
+    // TODO
+}
+
+static void unsafe_handleEscapeCharacter(enum target target,
+                                         const char * const msg,
+                                         const size_t msgLength,
+                                         size_t * const sequenceStartIndexPtr,
+                                         size_t * const indexPtr) {
+    printSequence(target, msg, msgLength, *sequenceStartIndexPtr, *indexPtr);
+    (*indexPtr) += 1;
+    (*sequenceStartIndexPtr) = (*indexPtr) + 1;
+    printSequence(target, msg, msgLength, *indexPtr, *sequenceStartIndexPtr);
+}
+
+static void _print(enum target target, const char * const msg, const size_t msgLength, __builtin_va_list args) {
+    size_t sequenceStartIndex = 0;
+    for (size_t index = 0; index < msgLength; ++index) {
+        if (IS_ESCAPE(msg[index])) {
+            unsafe_handleEscapeCharacter(target, msg, msgLength, &sequenceStartIndex, &index);
+        } else if (IS_PARAM_START(msg[index])) {
+            const size_t paramEndCharacterIndex = locateParamEndCharacter(msg, msgLength, index);
+            if (!paramEndCharacterIndex) {
+                continue;
+            }
+
+            const enum paramType paramType = decodeParamType(msg, index, paramEndCharacterIndex);
+            if (paramType == PT_UNKNOWN) {
+                continue;
+            }
+
+            printSequence(target, msg, msgLength, sequenceStartIndex, index);
+            printParameter(target, paramType, &args);
+
+            index = paramEndCharacterIndex;
+            sequenceStartIndex = paramEndCharacterIndex + 1;
+        }
+    }
+
+    printSequence(target, msg, msgLength, sequenceStartIndex, msgLength);
 }
 
 void log(const char * const msg, ...) {
     __builtin_va_list args;
     __builtin_va_start(args, msg);
-    output_print(OT_LOG, msg, args);
+    _print(T_LOG, msg, strlen(msg), args);
     __builtin_va_end(args);
 
 }
@@ -40,7 +115,7 @@ void log(const char * const msg, ...) {
 void print(const char * const msg, ...) {
     __builtin_va_list args;
     __builtin_va_start(args, msg);
-    output_print(OT_TERMINAL, msg, args);
+    _print(T_TERMINAL, msg, strlen(msg), args);
     __builtin_va_end(args);
 }
 

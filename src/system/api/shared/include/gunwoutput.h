@@ -25,7 +25,7 @@
     
     Supported data types:
 
-        * NONE
+        * u - unsigned integer (default platform size)
 
     Optional formatting instructions:
 
@@ -41,12 +41,12 @@
 /*
     Prints to default terminal
 */
-extern void print(const char * const msg, ...);
+extern void print(const char * msg, ...);
 
 /*
     Sends log to the kernel
 */
-extern void log(const char * const msg, ...);
+extern void log(const char * msg, ...);
 
 #endif // _GUNWAPI_KERNEL
 
