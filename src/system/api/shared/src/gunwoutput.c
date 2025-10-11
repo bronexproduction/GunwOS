@@ -17,12 +17,18 @@ enum target {
 };
 
 enum paramType {
+    PT_I_DEFAULT,
+    PT_U_DEFAULT,
     PT_UNKNOWN
 };
 
 #define IS_ESCAPE(CHARACTER) ((CHARACTER) == '\\')
 #define IS_PARAM_START(CHARACTER) ((CHARACTER) == '{')
 #define IS_PARAM_END(CHARACTER) ((CHARACTER) == '}')
+
+#define _IS(STRING, EXPECTED) (!strcmpl(STRING, EXPECTED, strlen(EXPECTED)))
+#define IS_SIGNED(STRING) _IS(STRING, "i")
+#define IS_UNSIGNED(STRING) _IS(STRING, "u")
 
 static size_t locateParamEndCharacter(const char * const msg, const size_t msgLength, size_t paramStartIndex) {
     for (; paramStartIndex < msgLength; ++paramStartIndex) {
@@ -32,10 +38,12 @@ static size_t locateParamEndCharacter(const char * const msg, const size_t msgLe
     return 0;
 }
 
-static enum paramType decodeParamType(const char * const msg,
-                                      const size_t paramStartCharacterIndex,
-                                      const size_t paramEndCharacterIndex) {
-    // TODO
+static enum paramType unsafe_decodeParamType(const char * const msg,
+                                             const size_t paramStartCharacterIndex,
+                                             const size_t paramEndCharacterIndex) {
+    if (IS_SIGNED(msg + paramStartCharacterIndex + 1)) return PT_I_DEFAULT;
+    if (IS_UNSIGNED(msg + paramStartCharacterIndex + 1)) return PT_U_DEFAULT;
+    
     return PT_UNKNOWN;
 }
 
@@ -88,7 +96,7 @@ static void _print(enum target target, const char * const msg, const size_t msgL
                 continue;
             }
 
-            const enum paramType paramType = decodeParamType(msg, index, paramEndCharacterIndex);
+            const enum paramType paramType = unsafe_decodeParamType(msg, index, paramEndCharacterIndex);
             if (paramType == PT_UNKNOWN) {
                 continue;
             }

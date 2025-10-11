@@ -11,16 +11,13 @@
 #include <gunwfug.h>
 #include <string.h>
 
-#define START(PATH) if (err == GCE_NONE) {          \
-    log(PATH);                                      \
-    procId_t procId;                                \
-    err = start(PATH, &procId);                     \
-    char procIdString[15];                          \
-    int2str(procId, procIdString);                  \
-    if (err == GCE_NONE) {                          \
-        log("Loading successful. Process ID: ");    \
-        log(procIdString);                          \
-    }                                               \
+#define START(PATH) if (err == GCE_NONE) {                  \
+    log(PATH);                                              \
+    procId_t procId;                                        \
+    err = start(PATH, &procId);                             \
+    if (err == GCE_NONE) {                                  \
+        log("Loading successful. Process ID: {i}", procId); \
+    }                                                       \
 }
 
 #define INSTALL(PATH) if (installErr == GDRE_NONE && ctrlErr == GCE_NONE) { \

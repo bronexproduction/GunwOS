@@ -26,6 +26,7 @@
     Supported data types:
 
         * u - unsigned integer (default platform size)
+        * i - signed integer (default platform size)
 
     Optional formatting instructions:
 
