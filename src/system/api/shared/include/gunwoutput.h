@@ -18,7 +18,7 @@
 
     How to declare a parameter in msg:
 
-        Format of expected parameter is: {T(:F)} where:
+        Format of expected parameter is: {T} or {T:F} where:
 
         * T - data type (see table below)
         * F - optional formatting instructions (see table below)
