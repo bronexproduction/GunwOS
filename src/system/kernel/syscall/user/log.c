@@ -17,7 +17,7 @@ void k_scr_usr_log(const procId_t procId, const char * const msgPtr, const size_
     logData.ptr = (ptr_t)msgPtr;
     logData.bytes = msgBytes;
 
-    LOG_START;
+    // LOG_START;
     k_log_logd(logData);
-    LOG_END;
+    // LOG_END;
 }

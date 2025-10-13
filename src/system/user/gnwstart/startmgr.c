@@ -12,27 +12,27 @@
 #include <string.h>
 
 #define START(PATH) if (err == GCE_NONE) {                  \
-    log(PATH);                                              \
+    logl(PATH);                                              \
     procId_t procId;                                        \
     err = start(PATH, &procId);                             \
     if (err == GCE_NONE) {                                  \
-        log("Loading successful. Process ID: {i}", procId); \
+        logl("Loading successful. Process ID: {i}", procId); \
     }                                                       \
 }
 
 #define INSTALL(PATH) if (installErr == GDRE_NONE && ctrlErr == GCE_NONE) { \
-    log(PATH);                                                              \
+    logl(PATH);                                                              \
     devInstall(PATH, &ctrlErr, &installErr);                                \
     if (ctrlErr == GCE_NONE) {                                              \
-        log("Loading successful");                                          \
+        logl("Loading successful");                                          \
         if (installErr != GDRE_NONE) {                                      \
-            log("Setup failed");                                            \
+            logl("Setup failed");                                            \
         }                                                                   \
     }                                                                       \
 }
 
 static void installCoreDrivers() {
-    log("Installing core device drivers");
+    logl("Installing core device drivers");
     
     enum gnwDriverError installErr = GDRE_NONE;
     enum gnwCtrlError ctrlErr = GCE_NONE;
@@ -41,13 +41,13 @@ static void installCoreDrivers() {
     INSTALL("0:GNWINPUT.GDV");  /* Keyboard and mouse driver - process ID: 2 */
 
     if (installErr != GDRE_NONE || ctrlErr != GCE_NONE) {
-        log("Unable to install core drivers");
+        logl("Unable to install core drivers");
         fug(FUG_OPERATION_FAILED);
     }
 }
 
 static void startCoreModules() {
-    log("Starting core modules");
+    logl("Starting core modules");
 
     enum gnwCtrlError err = GCE_NONE;
 
@@ -57,7 +57,7 @@ static void startCoreModules() {
     START("0:GNWSH.ELF");       /* Command line       - process ID: 6 */
 
     if (err != GCE_NONE) {
-        log("Unable to start core modules");
+        logl("Unable to start core modules");
         fug(FUG_OPERATION_FAILED);
     }
 }

@@ -23,14 +23,14 @@ static void isr_keyboard() {
         /*
             No data
         */
-        log("Keyboard output buffer empty on keyboard interrupt");
+        logl("Keyboard output buffer empty on keyboard interrupt");
         return;
     }
     if ((status & CSR_AUXILIARY_OUTPUT_BUFFER_FULL)) {
         /*
             Mouse input
         */
-        log("Mouse data available on keyboard interrupt");
+        logl("Mouse data available on keyboard interrupt");
         return;
     }
 
@@ -53,13 +53,13 @@ static void isr_mouse() {
         /*
             Keyboard input
         */
-        log("Keyboard data available on mouse interrupt");
+        logl("Keyboard data available on mouse interrupt");
         return;
     }
 
     struct eventDataPacket data;
     if (!readEventData(&data)) {
-        log("Unable to get event data");
+        logl("Unable to get event data");
         fug(FUG_INCONSISTENT);
         return;
     }

@@ -54,8 +54,15 @@ static void printSequence(enum target target,
                           const size_t startIndex,
                           const size_t terminatorIndex) {
 
-    // TODO: VALIDATE PARAMETERS
-    // TODO: something else
+    if (!msg) {
+        return;
+    }
+    if (terminatorIndex > msgLength) {
+        return;
+    }
+    if (startIndex >= terminatorIndex) {
+        return;
+    }
     
     switch (target) {
         case T_LOG:
@@ -71,7 +78,21 @@ static void printSequence(enum target target,
 static void printParameter(enum target target,
                            enum paramType paramType,
                            __builtin_va_list * const args) {
-    // TODO
+    char seqBuf[32] = {0}; // meh!
+    size_t seqLen = 0;
+    
+    switch (paramType) {
+        case PT_I_DEFAULT:
+            seqLen = int2str(__builtin_va_arg(*args, int), seqBuf);
+            break;
+        case PT_U_DEFAULT:
+            seqLen = uint2dec(__builtin_va_arg(*args, size_t), seqBuf);
+            break;
+        default:
+            return;
+    }
+    
+    printSequence(target, seqBuf, seqLen, 0, seqLen);
 }
 
 static void unsafe_handleEscapeCharacter(enum target target,
@@ -87,6 +108,7 @@ static void unsafe_handleEscapeCharacter(enum target target,
 
 static void _print(enum target target, const char * const msg, const size_t msgLength, __builtin_va_list args) {
     size_t sequenceStartIndex = 0;
+
     for (size_t index = 0; index < msgLength; ++index) {
         if (IS_ESCAPE(msg[index])) {
             unsafe_handleEscapeCharacter(target, msg, msgLength, &sequenceStartIndex, &index);
@@ -112,19 +134,34 @@ static void _print(enum target target, const char * const msg, const size_t msgL
     printSequence(target, msg, msgLength, sequenceStartIndex, msgLength);
 }
 
-void log(const char * const msg, ...) {
-    __builtin_va_list args;
-    __builtin_va_start(args, msg);
-    _print(T_LOG, msg, strlen(msg), args);
-    __builtin_va_end(args);
-
-}
-
 void print(const char * const msg, ...) {
     __builtin_va_list args;
     __builtin_va_start(args, msg);
     _print(T_TERMINAL, msg, strlen(msg), args);
     __builtin_va_end(args);
+}
+
+void printl(const char * const msg, ...) {
+    __builtin_va_list args;
+    __builtin_va_start(args, msg);
+    _print(T_TERMINAL, msg, strlen(msg), args);
+    __builtin_va_end(args);
+    _print(T_TERMINAL, "\n", 1, args);
+}
+
+void log(const char * const msg, ...) {
+    __builtin_va_list args;
+    __builtin_va_start(args, msg);
+    _print(T_LOG, msg, strlen(msg), args);
+    __builtin_va_end(args);
+}
+
+void logl(const char * const msg, ...) {
+    __builtin_va_list args;
+    __builtin_va_start(args, msg);
+    _print(T_LOG, msg, strlen(msg), args);
+    __builtin_va_end(args);
+    _print(T_LOG, "\n", 1, args);
 }
 
 #endif // _GUNWAPI_KERNEL

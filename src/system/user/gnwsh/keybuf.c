@@ -27,10 +27,10 @@ void user_cli_kbf_up(const uint_8 k) {
     
     char msg[16] = "cli_kbf_up -   ";
     uint2hex(k, msg + 13);
-    log(msg);
+    logl(msg);
     
     if (k >= SCANCODES_MAX) {
-        log("cli_kbf_up - scancode limit exceeded");
+        logl("cli_kbf_up - scancode limit exceeded");
         fug(FUG_UNDEFINED);
         return;
     }
@@ -47,10 +47,10 @@ void user_cli_kbf_down(const uint_8 k) {
     
     char msg[18] = "cli_kbf_down -   ";
     uint2hex(k, msg + 15);
-    log(msg);
+    logl(msg);
 
     if (k >= SCANCODES_MAX) {
-        log("cli_kbf_down - scancode limit exceeded");
+        logl("cli_kbf_down - scancode limit exceeded");
         fug(FUG_UNDEFINED);
         return;
     }

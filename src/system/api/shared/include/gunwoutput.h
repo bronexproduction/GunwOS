@@ -43,11 +43,13 @@
     Prints to default terminal
 */
 extern void print(const char * msg, ...);
+extern void printl(const char * msg, ...);
 
 /*
     Sends log to the kernel
 */
 extern void log(const char * msg, ...);
+extern void logl(const char * msg, ...);
 
 #endif // _GUNWAPI_KERNEL
 
