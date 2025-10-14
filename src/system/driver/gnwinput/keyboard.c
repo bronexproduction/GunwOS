@@ -45,9 +45,9 @@ void emitKeyboardEvent(const char key) {
 
     err = emit(KEYBOARD_DEVICE_ID, &event);
     if (err == GDE_NOT_FOUND) {
-        logl("Keyboard event ignored - no listener");
+        logn("Keyboard event ignored - no listener");
     } else if (err != GDE_NONE) {
-        logl("Error emitting keyboard event");
+        logn("Error emitting keyboard event");
         fug(FUG_UNDEFINED);
     }
 }

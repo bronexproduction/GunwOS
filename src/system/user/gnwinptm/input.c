@@ -53,13 +53,13 @@ static void onKeyboardEvent(const struct gnwDeviceEvent *const deviceEvent) {
         return;
     }
 
-    logl("gnwinptm - onKeyboardEvent - ipcSendDirect failed - destroying session");
+    logn("gnwinptm - onKeyboardEvent - ipcSendDirect failed - destroying session");
     sessionDestroy(session);
     
     if (e == GIPCE_FORBIDDEN || e == GIPCE_NOT_FOUND) {
         return;
     } else {
-        logl("gnwinptm - onKeyboardEvent - ipcSendDirect failure unexpected error {i}", e);
+        logfn("gnwinptm - onKeyboardEvent - ipcSendDirect failure unexpected error {i}", e);
         fug(FUG_UNDEFINED);
     }
 }
@@ -96,13 +96,13 @@ static void onMouseEvent(const struct gnwDeviceEvent *const deviceEvent) {
         return;
     }
 
-    logl("gnwinptm - onMouseEvent - ipcSendDirect failed - destroying session");
+    logn("gnwinptm - onMouseEvent - ipcSendDirect failed - destroying session");
     sessionDestroy(session);
     
     if (e == GIPCE_FORBIDDEN || e == GIPCE_NOT_FOUND) {
         return;
     } else {
-        logl("gnwinptm - onMouseEvent - ipcSendDirect failure unexpected error {i}", e);
+        logfn("gnwinptm - onMouseEvent - ipcSendDirect failure unexpected error {i}", e);
         fug(FUG_UNDEFINED);
     }
 }

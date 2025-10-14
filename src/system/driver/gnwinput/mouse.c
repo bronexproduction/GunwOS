@@ -46,9 +46,9 @@ void emitMouseEvent(enum gnwMouseEventCode type, union gnwMouseEventData data) {
 
     err = emit(MOUSE_DEVICE_ID, &event);
     if (err == GDE_NOT_FOUND) {
-        logl("Mouse event ignored - no listener");
+        logn("Mouse event ignored - no listener");
     } else if (err != GDE_NONE) {
-        logl("Error emitting mouse event");
+        logn("Error emitting mouse event");
         fug(FUG_UNDEFINED);
     }
 }

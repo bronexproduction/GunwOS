@@ -9,6 +9,8 @@
 
 #ifndef _GUNWAPI_KERNEL
 
+#include <types.h>
+
 /*
     Formatted output handling
 
@@ -26,6 +28,7 @@
     Supported data types:
 
         * u - unsigned integer (default platform size)
+        * h - unsigned integer (default platform size) as hexadecimal
         * i - signed integer (default platform size)
 
     Optional formatting instructions:
@@ -42,14 +45,28 @@
 /*
     Prints to default terminal
 */
-extern void print(const char * msg, ...);
-extern void printl(const char * msg, ...);
+extern size_t printc(const char c);
+extern size_t print(const char * msg);
+extern size_t printn(const char * msg);
+extern size_t printl(const char * msg, const size_t l);
+extern size_t println(const char * msg, const size_t l);
+extern size_t printf(const char * msg, ...);
+extern size_t printfn(const char * msg, ...);
+extern size_t printfl(const char * msg, const size_t l, ...);
+extern size_t printfln(const char * msg, const size_t l, ...);
 
 /*
     Sends log to the kernel
 */
-extern void log(const char * msg, ...);
-extern void logl(const char * msg, ...);
+extern size_t logc(const char c);
+extern size_t log(const char * msg);
+extern size_t logn(const char * msg);
+extern size_t logl(const char * msg, const size_t l);
+extern size_t logln(const char * msg, const size_t l);
+extern size_t logf(const char * msg, ...);
+extern size_t logfn(const char * msg, ...);
+extern size_t logfl(const char * msg, const size_t l, ...);
+extern size_t logfln(const char * msg, const size_t l, ...);
 
 #endif // _GUNWAPI_KERNEL
 

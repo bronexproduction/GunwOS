@@ -25,7 +25,7 @@ static bool readData(uint_8 * const bytePtr) {
         /*
             Output buffer not ready
         */
-        logl("Output buffer not ready");
+        logn("Output buffer not ready");
         return false;
     }
 
@@ -38,7 +38,7 @@ static bool write(const uint_16 port, const uint_8 byte) {
         /*
             Input buffer not ready
         */
-        logl("Input buffer not ready");
+        logn("Input buffer not ready");
         return false;
     }
 

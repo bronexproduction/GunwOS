@@ -17,6 +17,37 @@ size_t strlen(const char * const c) {
     return s;
 }
 
+size_t uintlen(uint_32 n, const size_t base) {
+    size_t l = 0;
+
+    while (n) {
+        n /= base;
+        ++l;
+    }
+
+    return l ? l : 1;
+}
+
+size_t intlen(const int_32 n) {
+    return (n < 0) ? uintlen((uint_32)-n, 10) + 1 : uintlen((uint_32)n, 10);
+}
+
+size_t declen(const uint_32 n) {
+    return uintlen(n, 10);
+}
+
+size_t hexlen(const uint_32 n) {
+    return uintlen(n, 16);
+}
+
+size_t octlen(const uint_32 n) {
+    return uintlen(n, 8);
+}
+
+size_t binlen(const uint_32 n) {
+    return uintlen(n, 2);
+}
+
 int_32 strcmp(const char * const l, const char * const r) {
     size_t ll = strlen(l);
     size_t rl = strlen(r);
@@ -153,6 +184,7 @@ int_32 str2intl(const char * const s, const size_t sLen, bool * const err) {
 }
 
 size_t uint2str(const uint_32 i, char * const s, const uint_8 base) {
+    // TODO: i to be changed to 64-bit
     if (!s) return 0;
 
     uint_32 length = 0;
@@ -186,14 +218,18 @@ size_t int2str(const int_32 i, char * const s) {
     }
 }
 
-size_t uint2dec(const uint_32 i, char * const s) {
+size_t dec2str(const uint_32 i, char * const s) {
     return uint2str(i, s, 10);
 }
 
-size_t uint2hex(const uint_32 i, char * const s) {
+size_t hex2str(const uint_32 i, char * const s) {
     return uint2str(i, s, 16);
 }
 
-size_t uint2bin(const uint_32 i, char * const s) {
+size_t oct2str(const uint_32 i, char * const s) {
+    return uint2str(i, s, 8);
+}
+
+size_t bin2str(const uint_32 i, char * const s) {
     return uint2str(i, s, 2);
 }
