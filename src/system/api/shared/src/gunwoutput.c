@@ -81,23 +81,23 @@ static size_t printSequence(enum target target,
             break;
         case T_TERMINAL:
         for (size_t index = startIndex; index < terminatorIndex; ++index) {
-                enum gnwIpcError e = ipcSend(OUTPUT_PATH_TERMINAL0,
-                                             (data_t){ (ptr_t)&msg[index], sizeof(char) },
-                                             (data_t){ nullptr, 0 },
-                                             (struct gnwIpcBindData){ GIBF_NONE, 0 });
-                if (e == GIPCE_FULL) {
-                    yield();
-                    continue;
-                } else if (e == GIPCE_NOT_FOUND) {
-                    yield();
-                    continue;
-                } else if (e != GIPCE_NONE) {
-                    break;
-                } else {
-                    ++written;
-                }
+            enum gnwIpcError e = ipcSend(OUTPUT_PATH_TERMINAL0,
+                                         (data_t){ (ptr_t)&msg[index], sizeof(char) },
+                                         (data_t){ nullptr, 0 },
+                                         (struct gnwIpcBindData){ GIBF_NONE, 0 });
+            if (e == GIPCE_FULL) {
+                yield();
+                continue;
+            } else if (e == GIPCE_NOT_FOUND) {
+                yield();
+                continue;
+            } else if (e != GIPCE_NONE) {
+                break;
+            } else {
+                ++written;
             }
-            break;
+        }
+        break;
     }
 
     return written;
