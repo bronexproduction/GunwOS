@@ -7,8 +7,6 @@
 #ifndef GUNWOS_GUNWOUTPUT_H
 #define GUNWOS_GUNWOUTPUT_H
 
-#ifndef _GUNWAPI_KERNEL
-
 #include <types.h>
 
 /*
@@ -67,7 +65,5 @@ extern size_t logf(const char * msg, ...);
 extern size_t logfn(const char * msg, ...);
 extern size_t logfl(const char * msg, const size_t l, ...);
 extern size_t logfln(const char * msg, const size_t l, ...);
-
-#endif // _GUNWAPI_KERNEL
 
 #endif // GUNWOS_GUNWOUTPUT_H

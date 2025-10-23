@@ -6,7 +6,6 @@
 //
 
 #include <gunwctrltypes.h>
-#include <log/log.h>
 #include <storage/file.h>
 #include <string.h>
 #include <gunwelf.h>

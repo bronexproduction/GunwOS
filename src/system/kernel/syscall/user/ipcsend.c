@@ -12,7 +12,6 @@
 
 #include <string.h>
 #include <mem.h>
-#include <log/log.h>
 
 enum gnwIpcError k_scr_usr_ipcSend(const procId_t procId, const struct gnwIpcSenderQuery * const queryPtr) {
 

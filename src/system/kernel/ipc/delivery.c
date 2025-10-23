@@ -12,8 +12,8 @@
 #include <defs.h>
 #include <hal/proc/proc.h>
 #include <error/panic.h>
-#include <log/log.h>
 #include <queue/queue.h>
+#include <gunwoutput.h>
 
 static size_t freeReplyIndex() {
     for (size_t index = 0; index < MAX_IPC_TOKEN; ++index) {
@@ -202,7 +202,7 @@ enum gnwIpcError k_ipc_notify(const struct gnwIpcSenderQuery query,
         return e;
     }
 
-    LOG2("ipc_notify: path - ", (gnwIpcPath)query.pathData.ptr);
+    logfn("ipc_notify: path - {s}", (gnwIpcPath)query.pathData.ptr);
 
     size_t listenerIndex = k_ipc_utl_nextListenerIndexForPath(query.pathData, nullptr);
     while (listenerIndex < MAX_IPC_LISTENER) {

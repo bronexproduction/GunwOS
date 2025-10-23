@@ -5,7 +5,6 @@
 //  Created by Artur Danielewski on 20.12.2023.
 //
 
-#include "log.h"
 #include <string.h>
 #include <error/panic.h>
 #include <hal/io/bus.h>
@@ -45,18 +44,6 @@ void k_log_init() {
    // If serial is not faulty set it in normal operation mode
    // (not-loopback with IRQs enabled and OUT#1 and OUT#2 bits enabled)
    k_bus_outb(PORT + 4, 0x0F);
-}
-
-void k_log_log(const char * const msgPtr) {
-    if (!msgPtr) {
-      OOPS("log_log: access violation",);
-    }
-
-    data_t data;
-    data.ptr = (ptr_t)msgPtr;
-    data.bytes = strlen(msgPtr);
-
-    k_log_logd(data);
 }
 
 void k_log_logd(const data_t msgData) {

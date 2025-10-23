@@ -10,12 +10,12 @@
 
 #include <hal/proc/proc.h>
 #include <error/panic.h>
-#include <log/log.h>
 
 #include <defs.h>
 #include <mem.h>
 #include <string.h>
 #include <gunwfug.h>
+#include <gunwoutput.h>
 
 struct binding {
     procId_t sender;
@@ -102,11 +102,7 @@ static void bindingDestroyNotify(const struct binding * const bindingPtr, const 
 
     const enum gnwIpcError e = k_ipc_notify(query, bindingPtr->receiver == requester ? bindingPtr->sender : bindingPtr->receiver);
     if (e != GIPCE_NONE) {
-        {
-            char logMsg[55] = "Unexpected kernel event broadcast error -             ";
-            int2str(e, logMsg + 42);
-            LOG(logMsg);
-        }
+        logfn("Unexpected kernel event broadcast error - {i}", e);
         OOPS("Unexpected kernel event broadcast error",);
     }
 }

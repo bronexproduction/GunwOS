@@ -6,20 +6,20 @@
 //
 
 #include "startup.h"
-#include <string.h>
 #include <_gunwctrl.h>
-#include <log/log.h>
 #include <error/panic.h>
 #include <prog/prog.h>
 #include <hal/proc/proc.h>
+#include <gunwoutput.h>
+#include <string.h>
 
 #define START(PATH) if (err == GCE_NONE) {                                                  \
-    LOG(PATH);                                                                              \
+    logn(PATH);                                                                             \
     err = k_prog_spawnProgram(KERNEL_PROC_ID, (data_t){ (byte_t *)PATH, strlen(PATH) });    \
 }
 
 static void launchStartupManager() {
-    LOG("Launching startup manager");
+    logn("Launching startup manager");
 
     enum gnwCtrlError err = GCE_NONE;
 

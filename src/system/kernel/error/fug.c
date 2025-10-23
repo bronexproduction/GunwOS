@@ -6,18 +6,12 @@
 //
 
 #include "fug.h"
-#include <log/log.h>
 #include <string.h>
 #include <error/panic.h>
 #include <hal/proc/proc.h>
+#include <gunwoutput.h>
 
 void k_err_fug(const procId_t procId, enum gnwFugCode code) {
-    char log[37] = "Process       crashed with code     ";
-    
-    hex2str(procId, log + 8);
-    hex2str(code, log + 32);
-    
-    LOG(log);
-    
+    logfn("Process {i} crashed with code {h}", procId, code);
     k_proc_stop(procId);
 }

@@ -10,7 +10,6 @@
 #include <hal/proc/proc.h>
 #include <hal/io/bus.h>
 
-#include <log/log.h>
 #include <string.h>
 
 void k_scr_drv_wrb(const procId_t procId, const size_t deviceId, const uint_16 port, const uint_8 value) {

@@ -11,11 +11,11 @@
 #include "objects/objects.h"
 #include "ipc/ipc.h"
 #include "dev/dev.h"
-#include "log/log.h"
 #include "driver/defaults.h"
 #include "storage/storage.h"
 #include "startup.h"
 #include "queue/queue.h"
+#include "log/log.h"
 
 static void bss_clear() {
     extern int _BSS_START_, _BSS_END_;

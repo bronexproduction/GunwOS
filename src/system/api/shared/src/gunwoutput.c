@@ -5,8 +5,6 @@
 //  Created by Artur Danielewski on 21.12.2023.
 //
 
-#ifndef _GUNWAPI_KERNEL
-
 #include "../include/gunwoutput.h"
 #include "../include/gunwipc.h"
 #include "../include/gunwctrl.h"
@@ -76,10 +74,22 @@ static size_t printSequence(enum target target,
 
     switch (target) {
         case T_LOG:
+#ifndef _GUNWAPI_KERNEL
             SYSCALL_USER_CALL(LOG, msg + startIndex, length, 0, 0);
             written = length;
+#else
+        {
+            extern size_t k_log_logd(const data_t);
+            const data_t data = { 
+                /* ptr */ (byte_t *)msg + startIndex,
+                /* bytes */ length
+            };
+            return k_log_logd(data);
+        }
+#endif // _GUNWAPI_KERNEL
             break;
         case T_TERMINAL:
+#ifndef _GUNWAPI_KERNEL
         for (size_t index = startIndex; index < terminatorIndex; ++index) {
             enum gnwIpcError e = ipcSend(OUTPUT_PATH_TERMINAL0,
                                          (data_t){ (ptr_t)&msg[index], sizeof(char) },
@@ -97,6 +107,9 @@ static size_t printSequence(enum target target,
                 ++written;
             }
         }
+#else
+        // TODO: Not implemented yet
+#endif // _GUNWAPI_KERNEL
         break;
     }
 
@@ -293,5 +306,3 @@ size_t logfln(const char * const msg, const size_t l, ...) {
         total += _PRINT_NEWLINE(T_LOG);
     , l)
 }
-
-#endif // _GUNWAPI_KERNEL
