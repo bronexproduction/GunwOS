@@ -40,6 +40,8 @@
         * "His pizza is {u32} cm in diameter, he must have stolen it"
 */
 
+#ifndef _GUNWAPI_KERNEL
+
 /*
     Prints to default terminal
 */
@@ -52,6 +54,8 @@ extern size_t printf(const char * msg, ...);
 extern size_t printfn(const char * msg, ...);
 extern size_t printfl(const char * msg, const size_t l, ...);
 extern size_t printfln(const char * msg, const size_t l, ...);
+
+#endif // _GUNWAPI_KERNEL
 
 /*
     Sends log to the kernel

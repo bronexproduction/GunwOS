@@ -96,19 +96,20 @@ static size_t printSequence(enum target target,
                                          (data_t){ nullptr, 0 },
                                          (struct gnwIpcBindData){ GIBF_NONE, 0 });
             if (e == GIPCE_FULL) {
+                // Retry
                 yield();
+                --index;
                 continue;
             } else if (e == GIPCE_NOT_FOUND) {
-                yield();
-                continue;
+                // Terminate
+                break;
             } else if (e != GIPCE_NONE) {
+                // Terminate
                 break;
             } else {
                 ++written;
             }
         }
-#else
-        // TODO: Not implemented yet
 #endif // _GUNWAPI_KERNEL
         break;
     }
@@ -195,6 +196,10 @@ static size_t _print(enum target target, const char * const msg, const size_t ms
 }
 #define _PRINT_NEWLINE(TARGET) _print(TARGET, "\n", 1, nullptr)
 
+#ifndef _GUNWAPI_KERNEL
+
+// Print functions are not available in kernel code
+
 size_t printc(const char c) {
     return _print(T_TERMINAL, &c, 1, nullptr);
 }
@@ -250,6 +255,8 @@ size_t printfln(const char * const msg, const size_t l, ...) {
         total += _PRINT_NEWLINE(T_TERMINAL);
     , l)
 }
+
+#endif // _GUNWAPI_KERNEL
 
 size_t logc(const char c) {
     return _print(T_LOG, &c, 1, nullptr);
