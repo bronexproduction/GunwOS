@@ -10,7 +10,7 @@
 
 #ifndef _GUNWAPI_KERNEL
 
-#include "scl_user.h"
+#include "../_include/scl_user.h"
 #include "../include/gunwfug.h"
 #include <defs.h>
 #include <string.h>

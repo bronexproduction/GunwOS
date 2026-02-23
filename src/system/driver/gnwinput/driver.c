@@ -7,7 +7,7 @@
 
 #include <gunwdrv.h>
 #include <gunwfug.h>
-#include <gunwlog.h>
+#include <gunwoutput.h>
 #include <gunwbus.h>
 #include "data.h"
 #include "ops.h"
@@ -23,14 +23,14 @@ static void isr_keyboard() {
         /*
             No data
         */
-        log("Keyboard output buffer empty on keyboard interrupt");
+        logn("Keyboard output buffer empty on keyboard interrupt");
         return;
     }
     if ((status & CSR_AUXILIARY_OUTPUT_BUFFER_FULL)) {
         /*
             Mouse input
         */
-        log("Mouse data available on keyboard interrupt");
+        logn("Mouse data available on keyboard interrupt");
         return;
     }
 
@@ -53,13 +53,13 @@ static void isr_mouse() {
         /*
             Keyboard input
         */
-        log("Keyboard data available on mouse interrupt");
+        logn("Keyboard data available on mouse interrupt");
         return;
     }
 
     struct eventDataPacket data;
     if (!readEventData(&data)) {
-        log("Unable to get event data");
+        logn("Unable to get event data");
         fug(FUG_INCONSISTENT);
         return;
     }

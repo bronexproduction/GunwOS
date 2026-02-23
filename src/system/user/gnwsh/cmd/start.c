@@ -6,8 +6,8 @@
 //
 
 #include "../cmdutil.h"
-#include "../cliio.h"
 #include <gunwctrl.h>
+#include <gunwoutput.h>
 #include <defs.h>
 
 void cmd_start(const char * const params) {
@@ -18,13 +18,13 @@ void cmd_start(const char * const params) {
     case GCE_NONE:
         break;
     case GCE_NOT_FOUND:
-        user_cli_puts("Program ");
-        user_cli_puts(name);
-        user_cli_puts(" not found");
+        print("Program ");
+        print(name);
+        print(" not found");
         break;
     default:
-        user_cli_puts("Error starting ");
-        user_cli_puts("name");
+        print("Error starting ");
+        print(name);
         break;
     }
 }

@@ -22,6 +22,13 @@
     therefore buffer length is always 1 byte greater than the result
 */
 size_t strlen(const char * const);
+size_t uintlen(const uint_32, const size_t base);
+size_t intlen(const int_32);
+size_t declen(const uint_32);
+size_t hexlen(const uint_32);
+size_t octlen(const uint_32);
+size_t binlen(const uint_32);
+
 int_32 strcmp(const char * const, const char * const);
 int_32 strcmpl(const char * const, const char * const, const size_t);
 void strprefix(const char * const s, size_t l, char * const out);
@@ -34,8 +41,9 @@ int_32 str2int(const char * const s, bool * const err);
 int_32 str2intl(const char * const s, const size_t sLen, bool * const err);
 size_t uint2str(const uint_32 i, char * const s, const uint_8 base);
 size_t int2str(const int_32 i, char * const s);
-size_t uint2dec(const uint_32 i, char * const s);
-size_t uint2hex(const uint_32 i, char * const s);
-size_t uint2bin(const uint_32 i, char * const s);
+size_t dec2str(const uint_32 i, char * const s);
+size_t hex2str(const uint_32 i, char * const s);
+size_t oct2str(const uint_32 i, char * const s);
+size_t bin2str(const uint_32 i, char * const s);
 
 #endif // STDGUNW_STRING_H

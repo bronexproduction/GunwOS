@@ -9,9 +9,9 @@
 #include <hal/mem/mem.h>
 #include <error/panic.h>
 #include <prog/prog.h>
-#include <log/log.h>
 #include <hal/paging/paging.h>
 #include <mem.h>
+#include <gunwoutput.h>
 
 void k_scr_usr_start(const procId_t procId,
                      struct gnwCtrlStartDescriptor * const descPtr) {
@@ -46,7 +46,7 @@ void k_scr_usr_start(const procId_t procId,
             spawnedProcId = k_prog_spawnDriver(procId, pathData);   
             break;
         default:
-            LOG("Invalid executable type");
+            logn("Invalid executable type");
             spawnedProcId = GCE_INVALID_ARGUMENT;
             break;
     }

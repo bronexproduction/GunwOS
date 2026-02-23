@@ -16,8 +16,8 @@
 #include <gunwinput.h>
 #include <gunwfug.h>
 #include <gunwrlp.h>
+#include <gunwoutput.h>
 
-#include "cliio.h"
 #include "cmdutil.h"
 
 static char cmdBuf[CMD_LEN_MAX + 1];    // Ensure null-termination
@@ -53,13 +53,13 @@ static void exec() {
         cmdBuf[CMD_LEN_MAX] = 0;    // Just in case
 
         if (!s_cli_command(cmdBuf)) {
-            user_cli_puts("Command not recognized: \"");
-            user_cli_puts(cmdBuf);
-            user_cli_puts("\"\n");
+            print("Command not recognized: \"");
+            print(cmdBuf);
+            print("\"\n");
         }
     }
     
-    user_cli_putc('\n');
+    printc('\n');
     prompt();
 }
 
@@ -72,7 +72,7 @@ static void append(const char c) {
         
         // Execute command
         
-        user_cli_putc(c);
+        printc(c);
         exec();
     } else if (c == '\b') { 
         
@@ -83,7 +83,7 @@ static void append(const char c) {
         }
 
         cmdBuf[--cmdBufIndex] = 0;
-        user_cli_putc(c);
+        printc(c);
     } else {                    
         
         // Append new character
@@ -93,15 +93,13 @@ static void append(const char c) {
         }
 
         cmdBuf[cmdBufIndex++] = c;
-        user_cli_putc(c);
+        printc(c);
     }
 }
 
 static void onKeyDown(const uint_8 c) {
     if (!user_cli_kmp_defines(user_cli_kmp_default, c)) {
-        user_cli_puts("[UNKNOWN SCANCODE: ");
-        user_cli_putin(c);
-        user_cli_putc(']');
+        printf("[UNKNOWN SCANCODE: {i}]", c);
         return;
     }
 
@@ -136,7 +134,7 @@ static void prompt() {
     memzero(cmdBuf, CMD_LEN_MAX * sizeof(char) + 1);
     cmdBufIndex = 0;
 
-    user_cli_puts("[GunwSH]: ");
+    print("[GunwSH]: ");
 }
 
 static void onSessionDestroy(const struct gnwIpcEndpointQuery * const query) {
@@ -157,7 +155,7 @@ static void cli_init() {
 
 #warning IO_GENERAL_FAILURE not handled at all
 
-    user_cli_puts("GunwOS 0.0.7_DEV started. (C) Bronex Production 2022-2025\n\n");
+    print("GunwOS 0.0.7_DEV started. (C) Bronex Production 2022-2025\n\n");
 
     prompt();
 }

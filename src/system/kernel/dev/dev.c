@@ -9,6 +9,7 @@
 #include <mem.h>
 #include <gunwdev.h>
 #include <_gunwdrv.h>
+#include <gunwoutput.h>
 #include <hal/hal.h>
 #include <hal/int/irq.h>
 #include <hal/proc/proc.h>
@@ -16,7 +17,6 @@
 #include <hal/mem/mem.h>
 #include <error/panic.h>
 #include <hal/criticalsec/criticalsec.h>
-#include <log/log.h>
 #include <_gunwdev.h>
 #include <_gunwuha.h>
 
@@ -190,19 +190,19 @@ PRIVATE enum gnwDriverError devInstallPrepare(const struct gnwDeviceDescriptor *
                                               const struct gnwDriverConfig * * driverDescPtr,
                                               struct device * dev) {
     if (!driverDescPtr) {
-        LOG("Driver desc nullptr not allowed");
+        logn("Driver desc nullptr not allowed");
         return GDRE_UNKNOWN;
     }
     if (!dev) {
-        LOG("Device nullptr not allowed");
+        logn("Device nullptr not allowed");
         return GDRE_UNKNOWN;
     }
     if (devicesCount >= MAX_DEVICES) {
-        LOG("Device limit reached");
+        logn("Device limit reached");
         return GDRE_LIMIT_REACHED;
     }
     if (!validateDeviceDescriptor(descriptorPtr)) {
-        LOG("Device descriptor invalid");
+        logn("Device descriptor invalid");
         return GDRE_INVALID_DESCRIPTOR;
     }
 
@@ -247,7 +247,7 @@ enum gnwDriverError k_dev_install(const struct gnwDeviceDescriptor * const descr
         return error;
     }
     if (!driverDescPtr) {
-        LOG("Unexpected driver desc nullptr");
+        logn("Unexpected driver desc nullptr");
         return GDRE_UNKNOWN;
     }
 
@@ -268,7 +268,7 @@ enum gnwDriverError k_dev_install(const struct gnwDeviceDescriptor * const descr
     driverDescPtr->init();
 
     if (devicePtr->status != INITIALIZED) {
-        LOG("Driver init failed");
+        logn("Driver init failed");
         unsafe_clearDevice(*deviceIdPtr);
         return GDRE_UNINITIALIZED;
     }
@@ -284,11 +284,11 @@ enum gnwDriverError k_dev_install_async(const struct gnwDeviceDescriptor * const
         OOPS("Nullptr during install", GDRE_INVALID_ARGUMENT);
     }
     if (!k_proc_idIsUser(operatorProcId)) {
-        LOG("Invalid operator process ID");
+        logn("Invalid operator process ID");
         return GDRE_INVALID_ARGUMENT;
     }
     if (k_proc_getInfo(operatorProcId).type != PT_DRIVER) {
-        LOG("Invalid operator process type");
+        logn("Invalid operator process type");
         return GDRE_INVALID_ARGUMENT;
     }
 
@@ -302,7 +302,7 @@ enum gnwDriverError k_dev_install_async(const struct gnwDeviceDescriptor * const
         return error;
     }
     if (!driverDescPtr) {
-        LOG("Unexpected driver desc nullptr");
+        logn("Unexpected driver desc nullptr");
         return GDRE_UNKNOWN;
     }
 
@@ -418,7 +418,7 @@ static void unsafe_reportStatusOperationFailed(const procId_t operatorProcId,
     if (operatorProcId == KERNEL_PROC_ID) {
         OOPS(reason,);
     } else {
-        LOG(reason);
+        logn(reason);
         k_proc_stop(operatorProcId);
         unsafe_pendingRequestInfoSetErrorIfNeeded(deviceId, errorCode);
     }
@@ -454,7 +454,7 @@ void k_dev_init_report(const procId_t operatorProcId, const size_t deviceId, con
 
 enum gnwDriverError k_dev_start(const size_t id) {
     if (!validateId(id)) {
-        LOG("Device identifier invalid");
+        logn("Device identifier invalid");
         return GDRE_UNKNOWN;
     }
 
@@ -478,7 +478,7 @@ enum gnwDriverError k_dev_start(const size_t id) {
     start();
 
     if (dev->status != STARTED) {
-        LOG("Error: Driver startup failed");
+        logn("Error: Driver startup failed");
         dev->status = FAILED;
         return GDRE_OPERATION_FAILED;
     }

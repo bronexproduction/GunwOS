@@ -8,7 +8,7 @@
 #include "keyboard.h"
 #include "data.h"
 #include <gunwdrv.h>
-#include <gunwlog.h>
+#include <gunwoutput.h>
 #include <gunwfug.h>
 #include <gunwdevemitter.h>
 #include <gunwinput.h>
@@ -45,9 +45,9 @@ void emitKeyboardEvent(const char key) {
 
     err = emit(KEYBOARD_DEVICE_ID, &event);
     if (err == GDE_NOT_FOUND) {
-        log("Keyboard event ignored - no listener");
+        logn("Keyboard event ignored - no listener");
     } else if (err != GDE_NONE) {
-        log("Error emitting keyboard event");
+        logn("Error emitting keyboard event");
         fug(FUG_UNDEFINED);
     }
 }

@@ -6,7 +6,6 @@
 //
 
 #include <gunwctrltypes.h>
-#include <log/log.h>
 #include <storage/file.h>
 #include <string.h>
 #include <gunwelf.h>
@@ -17,19 +16,15 @@
 #include <error/panic.h>
 #include <gunwdevtypes.h>
 #include <hal/paging/paging.h>
+#include <gunwoutput.h>
 
-#define LOG_CODE(MSG, CODE) {                                       \
-    LOG_START;                                                      \
-    k_log_logd((data_t){ (ptr_t)pathData.ptr, pathData.bytes });    \
-    LOG_NBR(" - ");                                                 \
-    LOG_NBR(MSG);                                                   \
-    if (CODE) {                                                     \
-        char loc_code_str[10] = { 0 };                              \
-        int2str(CODE, loc_code_str);                                \
-        LOG_NBR(", code ");                                         \
-        k_log_logd((data_t){ (ptr_t)loc_code_str, 10 });            \
-    }                                                               \
-    LOG_END;                                                        \
+#define LOG_CODE(MSG, CODE) {                           \
+    logl((const char *)pathData.ptr, pathData.bytes);   \
+    if (CODE) {                                         \
+        logfn(" - {s}, code {i}", MSG, CODE);           \
+    } else {                                            \
+        logfn(" - {s}", MSG);                           \
+    }                                                   \
 }
 
 static enum gnwCtrlError loadFile(const data_t pathData,
@@ -47,12 +42,8 @@ static enum gnwCtrlError loadFile(const data_t pathData,
         OOPS("Unexpected nullptr", GCE_UNKNOWN);
     }
 
-    {
-        LOG_START;
-        LOG_NBR("Loading file ");
-        k_log_logd((data_t){ (ptr_t)pathData.ptr, pathData.bytes });
-        LOG_END;
-    }
+    log("Loading file ");
+    logln((const char *)pathData.ptr, pathData.bytes);
 
     /*
         Get file info

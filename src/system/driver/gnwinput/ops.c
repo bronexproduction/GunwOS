@@ -9,7 +9,7 @@
 
 #include "ops.h"
 #include <gunwbus.h>
-#include <gunwlog.h>
+#include <gunwoutput.h>
 
 #define CAN_READ (rdb(MOUSE_DEVICE_ID, BA_STATUS) & CSR_OUTPUT_BUFFER_FULL)
 #define CAN_WRITE (!(rdb(MOUSE_DEVICE_ID, BA_STATUS) & CSR_INPUT_BUFFER_FULL))
@@ -25,7 +25,7 @@ static bool readData(uint_8 * const bytePtr) {
         /*
             Output buffer not ready
         */
-        log("Output buffer not ready");
+        logn("Output buffer not ready");
         return false;
     }
 
@@ -38,7 +38,7 @@ static bool write(const uint_16 port, const uint_8 byte) {
         /*
             Input buffer not ready
         */
-        log("Input buffer not ready");
+        logn("Input buffer not ready");
         return false;
     }
 

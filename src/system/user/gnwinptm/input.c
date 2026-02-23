@@ -15,7 +15,7 @@
 #include <gunwipc.h>
 #include <gunwinput.h>
 #include <gunwfug.h>
-#include <gunwlog.h>
+#include <gunwoutput.h>
 #include <inputmgr.h>
 
 extern sessionPtr_t inputStack[MAX_SESSION];
@@ -53,15 +53,13 @@ static void onKeyboardEvent(const struct gnwDeviceEvent *const deviceEvent) {
         return;
     }
 
-    log("gnwinptm - onKeyboardEvent - ipcSendDirect failed - destroying session");
+    logn("gnwinptm - onKeyboardEvent - ipcSendDirect failed - destroying session");
     sessionDestroy(session);
     
     if (e == GIPCE_FORBIDDEN || e == GIPCE_NOT_FOUND) {
         return;
     } else {
-        char logMsg[75] = "gnwinptm - onKeyboardEvent - ipcSendDirect failure unexpected error        ";
-        int2str(e, logMsg + 67);
-        log(logMsg);
+        logfn("gnwinptm - onKeyboardEvent - ipcSendDirect failure unexpected error {i}", e);
         fug(FUG_UNDEFINED);
     }
 }
@@ -98,15 +96,13 @@ static void onMouseEvent(const struct gnwDeviceEvent *const deviceEvent) {
         return;
     }
 
-    log("gnwinptm - onMouseEvent - ipcSendDirect failed - destroying session");
+    logn("gnwinptm - onMouseEvent - ipcSendDirect failed - destroying session");
     sessionDestroy(session);
     
     if (e == GIPCE_FORBIDDEN || e == GIPCE_NOT_FOUND) {
         return;
     } else {
-        char logMsg[72] = "gnwinptm - onMouseEvent - ipcSendDirect failure unexpected error        ";
-        int2str(e, logMsg + 64);
-        log(logMsg);
+        logfn("gnwinptm - onMouseEvent - ipcSendDirect failure unexpected error {i}", e);
         fug(FUG_UNDEFINED);
     }
 }

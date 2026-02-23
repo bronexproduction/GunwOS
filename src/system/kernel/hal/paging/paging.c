@@ -15,9 +15,7 @@
 #include <hal/proc/proc.h>
 #include <error/panic.h>
 #include <hal/criticalsec/criticalsec.h>
-
-#include <string.h>
-#include <log/log.h>
+#include <gunwoutput.h>
 
 static physical_page_table_t physicalPages;
 static process_page_tables_t processPageTables;
@@ -311,25 +309,17 @@ static void initializePhysicalMemoryMap(const struct k_krn_memMapEntry *memMap) 
         Available memory bytes
     */
 
-    char bytesString[11];
     size_t physicalBytes = 0;
     for (size_t page = 0; page < MEM_PHYSICAL_PAGE_COUNT; ++page) {
         physicalBytes += physicalPages[page].present * MEM_PAGE_SIZE_BYTES;
     }
-    memzero(bytesString, 11);
-    uint2str(physicalBytes, bytesString, 10);
-    LOG2("Installed memory (bytes): ", bytesString);
+    logfn("Installed memory (bytes): {u}", physicalBytes);
     size_t availableBytes = 0;
     for (size_t page = 0; page < MEM_PHYSICAL_PAGE_COUNT; ++page) {
         availableBytes += physicalPages[page].available * MEM_PAGE_SIZE_BYTES;
     }
-    memzero(bytesString, 11);
-    uint2str(availableBytes, bytesString, 10);
-    LOG2("Physical memory available (bytes): ", bytesString);
-    size_t freeBytes = k_mem_getFreeBytes();
-    memzero(bytesString, 11);
-    uint2str(freeBytes, bytesString, 10);
-    LOG2("Free memory (bytes): ", bytesString);
+    logfn("Physical memory available (bytes): {u}", availableBytes);
+    logfn("Free memory (bytes): {u}", k_mem_getFreeBytes());
 }
 
 static void unsafe_initializePagingInfo(struct process_paging_info_t * const pagingInfo) {
@@ -562,17 +552,8 @@ void k_paging_procCleanup(const procId_t procId) {
         OOPS("Invalid paging cleanup procId",);
     }
 
-    {
-        char bytesString[11];
-        memzero(bytesString, 11);
-        uint2str(procId, bytesString, 10);
-        LOG3("Process ", bytesString, " cleanup");
-        size_t freeBytes = k_mem_getFreeBytes();
-        memzero(bytesString, 11);
-        uint2str(freeBytes, bytesString, 10);
-        LOG2("  Free memory (bytes) before: ", bytesString);
-    }
-
+    const size_t freeBytesBefore = k_mem_getFreeBytes();
+    
     /*
         Release virtual pages
     */
@@ -606,11 +587,8 @@ void k_paging_procCleanup(const procId_t procId) {
     memzero(processPageTables[procId].pageTableInfo,
      sizeof(processPageTables[procId].pageTableInfo));
 
-    {
-        char bytesString[11];
-        size_t freeBytes = k_mem_getFreeBytes();
-        memzero(bytesString, 11);
-        uint2str(freeBytes, bytesString, 10);
-        LOG2("  Free memory (bytes) after: ", bytesString);
-    }
+    logf(
+        "Process {i} cleanup. Free memory (bytes) before: {u}. Free memory (bytes) after: {u}.",
+        procId, freeBytesBefore, k_mem_getFreeBytes()
+    );
 }
