@@ -55,6 +55,7 @@ struct gnwDeviceUHADesc uhaGetDesc(const size_t identifier,
         api.charIn.desc,
         api.charOut.desc,
         api.display.desc,
+        api.network.desc,
         api.event.desc
     };
 }

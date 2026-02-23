@@ -204,6 +204,7 @@ const struct gnwDeviceDescriptor _gnw_device_descriptor_list[DESCRIPTOR_COUNT] =
                 },
                 /* routine */ { 0 }
             },
+            GNW_UHA_NO_NETWORK,
             GNW_UHA_NO_EVENT
         },
         /* driver */ {

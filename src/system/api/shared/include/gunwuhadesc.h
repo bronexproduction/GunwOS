@@ -18,6 +18,7 @@
 #include "uha/gunwuha_storctrl_desc.h"
 #include "uha/gunwuha_char_desc.h"
 #include "uha/gunwuha_display_desc.h"
+#include "uha/gunwuha_network_desc.h"
 #include "uha/gunwuha_event_desc.h"
 
 /*
@@ -36,6 +37,7 @@ struct gnwDeviceUHADesc {
     struct gnwDeviceUHA_charIn_desc charIn;       // DEV_TYPE_CHAR_IN
     struct gnwDeviceUHA_charOut_desc charOut;     // DEV_TYPE_CHAR_OUT
     struct gnwDeviceUHA_display_desc display;     // DEV_TYPE_DISPLAY
+    struct gnwDeviceUHA_network_desc network;     // DEV_TYPE_NETWORK
     struct gnwDeviceUHA_event_desc event;         // event emitting devices
 };
 

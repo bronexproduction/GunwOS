@@ -90,6 +90,7 @@ const struct gnwDeviceDescriptor _gnw_device_descriptor_list[DESCRIPTOR_COUNT] =
             GNW_UHA_NO_CHAR_IN,
             GNW_UHA_NO_CHAR_OUT,
             GNW_UHA_NO_DISPLAY,
+            GNW_UHA_NO_NETWORK,
             GNW_UHA_NO_EVENT
         },
         /* driver */ {
@@ -124,6 +125,7 @@ const struct gnwDeviceDescriptor _gnw_device_descriptor_list[DESCRIPTOR_COUNT] =
             GNW_UHA_NO_CHAR_IN,
             GNW_UHA_NO_CHAR_OUT,
             GNW_UHA_NO_DISPLAY,
+            GNW_UHA_NO_NETWORK,
             GNW_UHA_NO_EVENT
         },
         /* driver */ {
