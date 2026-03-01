@@ -21,8 +21,9 @@ enum gnwDeviceType {
     DEV_TYPE_DISPLAY    = (1 << 4),
     DEV_TYPE_CHAR_IN    = (1 << 5),
     DEV_TYPE_CHAR_OUT   = (1 << 6),
-    DEV_TYPE_STORAGE    = (1 << 7),
-    DEV_TYPE_FDC        = (1 << 8) | DEV_TYPE_STORAGE,
+    DEV_TYPE_NETWORK    = (1 << 7),
+    DEV_TYPE_STORAGE    = (1 << 8),
+    DEV_TYPE_FDC        = (1 << 9) | DEV_TYPE_STORAGE,
     DEV_TYPE_NONE       = 0
 };
 

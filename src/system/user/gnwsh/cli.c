@@ -151,11 +151,11 @@ static void cli_init() {
 
     user_cli_kbf_register((struct user_cli_kbf_listener){0, onKeyDown});
     
-    yield();
-
 #warning IO_GENERAL_FAILURE not handled at all
 
-    print("GunwOS 0.0.7_DEV started. (C) Bronex Production 2022-2025\n\n");
+    while(!print("GunwOS 0.0.7_DEV started. (C) Bronex Production 2022-2026\n\n")) {
+        yield();
+    }
 
     prompt();
 }

@@ -24,9 +24,6 @@ uint_8 user_cli_kbf_currModMask() {
 }
 
 void user_cli_kbf_up(const uint_8 k) {
-    
-    logfn("cli_kbf_up - {h}", k);
-    
     if (k >= SCANCODES_MAX) {
         logn("cli_kbf_up - scancode limit exceeded");
         fug(FUG_UNDEFINED);
@@ -42,9 +39,6 @@ void user_cli_kbf_up(const uint_8 k) {
 }
 
 void user_cli_kbf_down(const uint_8 k) {
-
-    logfn("cli_kbf_down - {h}", k);
-
     if (k >= SCANCODES_MAX) {
         logn("cli_kbf_down - scancode limit exceeded");
         fug(FUG_UNDEFINED);

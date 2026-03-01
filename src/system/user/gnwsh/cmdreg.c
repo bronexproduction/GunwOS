@@ -30,6 +30,7 @@ void (*s_cli_cmdSelector(const char *const cmd))(const char *const) {
         print("Available commands:");
     }
     CMD_REG(help)
+    CMD_REG(install)
     CMD_REG(start)
     CMD_REG(exit)
 

@@ -125,6 +125,22 @@ static bool validateDeviceUHA_charOut(const struct gnwDeviceUHA * const uha) {
     return true;
 }
 
+static bool validateDeviceUHA_netIfaceCtrl(const struct gnwDeviceUHA * const uha) {
+
+    /*
+        Validate routines
+    */
+    
+    // if (!uha->network.routine.isReadyToWrite) {
+    //     return false;
+    // }
+    // if (!uha->network.routine.write) {
+    //     return false;
+    // }
+
+    return true;
+}
+
 static bool validateDeviceUHA_storCtrl(const struct gnwDeviceUHA * const uha) {
     
     /*
@@ -188,6 +204,7 @@ bool validateDeviceDescriptor(const struct gnwDeviceDescriptor * const descripto
     VALIDATE_UHA(DISPLAY, display);
     VALIDATE_UHA(CHAR_IN, charIn);
     VALIDATE_UHA(CHAR_OUT, charOut);
+    VALIDATE_UHA(NETWORK, netIfaceCtrl);
     VALIDATE_UHA(STORAGE, storCtrl);
     VALIDATE_UHA(FDC, fdc);
 
