@@ -72,7 +72,11 @@ static void unsafe_setProcParams(const procId_t procId, const addr_t heap) {
     pTab[procId].cpuState.esp -= sizeof(addr_t);
 }
 
-static bool unsafe_hasLock(const procId_t procId, const enum k_proc_lockReason reason) {
+static bool hasLock(const procId_t procId, const enum k_proc_lockReason reason) {
+    if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
+        OOPS("Process id out of range", false);
+    }
+
     return pTab[procId].lockCondition.reason == reason;
 }
 
@@ -91,6 +95,7 @@ bool k_proc_isAlive(const procId_t procId) {
     
     return pTab[procId].info.state == PS_READY ||
            pTab[procId].info.state == PS_RUNNING ||
+           pTab[procId].info.state == PS_IDLE ||
            pTab[procId].info.state == PS_BLOCKED;
 }
 
@@ -174,40 +179,72 @@ enum k_proc_error k_proc_hatch(const struct k_proc_descriptor descriptor, const 
     return PE_NONE;
 }
 
-void k_proc_lock(const procId_t procId, const struct k_proc_lockCondition lockCondition) {
+static void deactivate(const procId_t procId, const enum k_proc_state state) {
     if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
         OOPS("Process id out of range",);
     }
 
-    if (pTab[procId].info.state == PS_BLOCKED) {
-        OOPS("Process already blocked",);
+    if (pTab[procId].info.state == state) {
+        OOPS("Process already at expected state",);
     }
     
     if (pTab[procId].info.state != PS_READY &&
         pTab[procId].info.state != PS_RUNNING) {
-        OOPS("Unexpected process state during lock",);
+        OOPS("Unexpected process state during deactivation",);
     }
 
-    pTab[procId].info.state = PS_BLOCKED;
-    pTab[procId].lockCondition = lockCondition;
+    pTab[procId].info.state = state;
     k_proc_schedule_processStateDidChange();
 }
 
-void k_proc_unlockIfNeeded(const procId_t procId, const enum k_proc_lockReason reason) {
+void k_proc_idle(const procId_t procId) {
+    deactivate(procId, PS_IDLE);
+}
+
+void k_proc_lock(const procId_t procId, const struct k_proc_lockCondition lockCondition) {
+    deactivate(procId, PS_BLOCKED);
+    pTab[procId].lockCondition = lockCondition;
+}
+
+void k_proc_wakeIfNeeded(const procId_t procId) {
     if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
         OOPS("Process id out of range",);
     }
 
+    if (pTab[procId].info.state == PS_BLOCKED ||
+        pTab[procId].info.state == PS_READY ||
+        pTab[procId].info.state == PS_RUNNING) {
+        return;
+    }
+
+    if (pTab[procId].info.state != PS_IDLE) {
+        OOPS("Trying to wake process that is not in idle state",);
+    }
+
+    pTab[procId].info.state = PS_READY;
+    k_proc_schedule_processStateDidChange();
+}
+
+void k_proc_unlockIfNeeded(const procId_t procId, const enum k_proc_lockReason reason) {
     if (reason == PLR_NONE) {
         OOPS("Invalid reason",);
     }
 
-    if (!unsafe_hasLock(procId, reason)) {
+    if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
+        OOPS("Process id out of range",);
+    }
+
+    if (!hasLock(procId, reason)) {
+        return;
+    }
+
+    if (pTab[procId].info.state == PS_READY ||
+        pTab[procId].info.state == PS_RUNNING) {
         return;
     }
 
     if (pTab[procId].info.state != PS_BLOCKED) {
-        OOPS("Trying to unlock process that is not blocked",);
+        OOPS("Trying to unlock process that is not in blocked state",);
     }
 
     pTab[procId].info.state = PS_READY;
@@ -359,6 +396,7 @@ void k_proc_switchToKernelIfNeeded(const uint_32 refEsp, const procId_t currentP
     }
     if (pTab[currentProcId].info.state != PS_RUNNING &&
         pTab[currentProcId].info.state != PS_BLOCKED &&
+        pTab[currentProcId].info.state != PS_IDLE &&
         pTab[currentProcId].info.state != PS_FINISHED) {
         OOPS("Invalid current process state during switch",);
     }
@@ -506,7 +544,7 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
         return PE_OPERATION_FAILED;
     }
 
-    k_proc_unlockIfNeeded(procId, PLR_ASYNC_OP);
+    k_proc_wakeIfNeeded(procId);
 
     return PE_NONE;
 }

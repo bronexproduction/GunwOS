@@ -39,6 +39,7 @@ enum k_proc_state {
     PS_NEW,
     PS_READY,
     PS_RUNNING,
+    PS_IDLE,
     PS_BLOCKED,
     PS_FINISHED
 };
@@ -51,8 +52,7 @@ enum k_proc_procType {
 
 enum k_proc_lockReason {
     PLR_NONE = 0,
-    PLR_SYNC_OP,
-    PLR_ASYNC_OP
+    PLR_SYNC_OP
 };
 
 struct k_proc_lockCondition {
@@ -123,14 +123,31 @@ enum k_proc_error k_proc_spawn(procId_t * procId, const enum k_proc_procType pro
 enum k_proc_error k_proc_hatch(const struct k_proc_descriptor descriptor, const procId_t procId);
 
 /*
+    Idling the process
+    e.g. in case the process is ready for event handling
+
+    Params:
+    * procId - Identifier of the process
+*/
+void k_proc_idle(const procId_t procId);
+
+/*
     Blocking the process
-    e.g. in case the process waits for an event
+    e.g. in case the process waits for data
 
     Params:
     * procId - Identifier of the process
     * lockCondition - condition (type/source) of the lock
 */
 void k_proc_lock(const procId_t procId, const struct k_proc_lockCondition lockCondition);
+
+/*
+    Waking the process from idle state
+
+    Params:
+    * procId - identifier of the process to be resumed
+*/
+void k_proc_wake(const procId_t procId);
 
 /*
     Removing a lock from the process and resuming alive process if able (and needed)
