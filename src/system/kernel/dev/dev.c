@@ -402,7 +402,7 @@ static void unsafe_pendingRequestInfoSetErrorIfNeeded(const size_t deviceId, con
 
         const procId_t procId = infoPtr->procId;
         unsafe_clearPendingRequestInfo(infoPtr);
-        k_proc_unlock(procId, PLR_SYNC_OP);
+        k_proc_unlockIfNeeded(procId, PLR_SYNC_OP);
     }
 }
 

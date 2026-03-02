@@ -133,13 +133,13 @@ enum k_proc_error k_proc_hatch(const struct k_proc_descriptor descriptor, const 
 void k_proc_lock(const procId_t procId, const struct k_proc_lockCondition lockCondition);
 
 /*
-    Removing a lock from the process and resuming alive process if able
+    Removing a lock from the process and resuming alive process if able (and needed)
 
     Params:
     * procId - identifier of the process to be resumed
     * lockReason - reason of lock being resolved
 */
-void k_proc_unlock(const procId_t procId, const enum k_proc_lockReason reason);
+void k_proc_unlockIfNeeded(const procId_t procId, const enum k_proc_lockReason reason);
 
 /*
     Cleaning up process corpse

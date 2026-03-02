@@ -72,6 +72,10 @@ static void unsafe_setProcParams(const procId_t procId, const addr_t heap) {
     pTab[procId].cpuState.esp -= sizeof(addr_t);
 }
 
+static bool unsafe_hasLock(const procId_t procId, const enum k_proc_lockReason reason) {
+    return pTab[procId].lockCondition.reason == reason;
+}
+
 procId_t k_proc_getCurrentId() {
     return procCurrent;
 }
@@ -189,7 +193,7 @@ void k_proc_lock(const procId_t procId, const struct k_proc_lockCondition lockCo
     k_proc_schedule_processStateDidChange();
 }
 
-void k_proc_unlock(const procId_t procId, const enum k_proc_lockReason reason) {
+void k_proc_unlockIfNeeded(const procId_t procId, const enum k_proc_lockReason reason) {
     if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
         OOPS("Process id out of range",);
     }
@@ -198,13 +202,12 @@ void k_proc_unlock(const procId_t procId, const enum k_proc_lockReason reason) {
         OOPS("Invalid reason",);
     }
 
-    if (pTab[procId].info.state != PS_BLOCKED ||
-        pTab[procId].lockCondition.reason != PLR_NONE) {
-        OOPS("Trying to unlock process that is not blocked",);
+    if (!unsafe_hasLock(procId, reason)) {
+        return;
     }
-    
-    if (pTab[procId].lockCondition.reason != reason) {
-        OOPS("Unlock reason inconsistency",);
+
+    if (pTab[procId].info.state != PS_BLOCKED) {
+        OOPS("Trying to unlock process that is not blocked",);
     }
 
     pTab[procId].info.state = PS_READY;
@@ -503,8 +506,7 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
         return PE_OPERATION_FAILED;
     }
 
-    k_proc_unlock(procId, PLR_ASYNC_OP);
-    k_proc_schedule_processStateDidChange();
+    k_proc_unlockIfNeeded(procId, PLR_ASYNC_OP);
 
     return PE_NONE;
 }
