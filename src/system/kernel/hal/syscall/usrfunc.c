@@ -465,3 +465,17 @@ void k_scr_devGetIdsForOperator(const procId_t procId, const ptr_t refEsp) {
     extern void k_scr_usr_devGetIdsForOperator(const procId_t, const procId_t, size_t * const, enum gnwDeviceError * const);
     k_scr_usr_devGetIdsForOperator(procId, *operatorProcId, *vDeviceIdListStartPtr, *vErrorPtr);
 }
+
+/*
+    Code - 0x1b
+    Function - WAIT_FOR_PROC
+
+    Params (process stack offset):
+        * PARAMETER_1_STACK_OFFSET - observed process identifier
+*/
+void k_scr_waitForProc(const procId_t procId, const ptr_t refEsp) {
+    SAFE_STACK_VAL_PTR(const procId_t, observedProcId, PARAMETER_1_STACK_OFFSET);
+    
+    extern enum gnwCtrlError k_scr_usr_waitForProc(const procId_t, const addr_t);
+    SAFE_STACK_RESULT_ARCH_VAL = k_scr_usr_waitForProc(procId, *observedProcId);
+}

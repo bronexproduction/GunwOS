@@ -41,6 +41,11 @@ extern void waitForEvent();
 */
 extern void yield();
 
+/*
+    Waits for given process to terminate
+*/
+extern enum gnwCtrlError waitForProc(const procId_t procId);
+
 #endif // _GUNWAPI_KERNEL
 
 #endif // GUNWOS_GUNWCTRL_H

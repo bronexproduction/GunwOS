@@ -40,4 +40,9 @@ void yield() {
     SYSCALL_USER_CALL(YIELD, 0, 0, 0, 0);
 }
 
+enum gnwCtrlError waitForProc(const procId_t procId) {
+    SYSCALL_USER_CALL(WAIT_FOR_PROC, procId, 0, 0, 0);
+    return SYSCALL_RESULT;
+}
+
 #endif // _GUNWAPI_KERNEL

@@ -195,4 +195,10 @@ size_t k_scr_devGetCountForOperator(const procId_t operatorProcId);
 */
 void k_scr_devGetIdsForOperator(const procId_t operatorProcId, size_t * const vDeviceIdListStartPtr, enum gnwDeviceError * const vErrorPtr);
 
+/*
+    Code - 0x1b
+    Function - WAIT_FOR_PROC
+*/
+enum gnwCtrlError k_scr_waitForProc(const procId_t observedProcId);
+
 #endif // USRFUNC_H
