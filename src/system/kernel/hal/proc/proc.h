@@ -49,9 +49,14 @@ enum k_proc_procType {
     PT_DRIVER
 };
 
-enum k_proc_lockType {
-    PLT_ASYNC           = 1 << 0,
-    PLT_SYNC            = 1 << 1
+enum k_proc_lockReason {
+    PLR_NONE = 0,
+    PLR_SYNC_OP,
+    PLR_ASYNC_OP
+};
+
+struct k_proc_lockCondition {
+    enum k_proc_lockReason reason;
 };
 
 struct k_proc_process {
@@ -123,18 +128,18 @@ enum k_proc_error k_proc_hatch(const struct k_proc_descriptor descriptor, const 
 
     Params:
     * procId - Identifier of the process
-    * lockType - type/source of the lock
+    * lockCondition - condition (type/source) of the lock
 */
-void k_proc_lock(const procId_t procId, const enum k_proc_lockType lockType);
+void k_proc_lock(const procId_t procId, const struct k_proc_lockCondition lockCondition);
 
 /*
     Removing a lock from the process and resuming alive process if able
 
     Params:
     * procId - identifier of the process to be resumed
-    * lockType - type of lock to be released
+    * lockReason - reason of lock being resolved
 */
-void k_proc_unlock(const procId_t procId, const enum k_proc_lockType lockType);
+void k_proc_unlock(const procId_t procId, const enum k_proc_lockReason reason);
 
 /*
     Cleaning up process corpse

@@ -402,7 +402,7 @@ static void unsafe_pendingRequestInfoSetErrorIfNeeded(const size_t deviceId, con
 
         const procId_t procId = infoPtr->procId;
         unsafe_clearPendingRequestInfo(infoPtr);
-        k_proc_unlock(procId, PLT_SYNC);
+        k_proc_unlock(procId, PLR_SYNC_OP);
     }
 }
 
@@ -761,7 +761,9 @@ void k_dev_writeMem(const procId_t procId,
             return;
         }
 
-        k_proc_lock(procId, PLT_SYNC);
+        k_proc_lock(procId, (struct k_proc_lockCondition){
+            .reason = PLR_SYNC_OP
+        });
     } else {
         MEM_ONTABLE(procId,
             api->routine.write(&query);
@@ -896,7 +898,9 @@ void k_dev_getParam(const procId_t procId,
             return;
         }
 
-        k_proc_lock(procId, PLT_SYNC);
+        k_proc_lock(procId, (struct k_proc_lockCondition){
+            .reason = PLR_SYNC_OP
+        });
     } else {
         MEM_ONTABLE(procId, 
             *(vErrorPtr) = GDE_NOT_RESPONDING;
@@ -976,7 +980,9 @@ void k_dev_setParam(const procId_t procId,
             return;
         }
 
-        k_proc_lock(procId, PLT_SYNC);
+        k_proc_lock(procId, (struct k_proc_lockCondition){
+            .reason = PLR_SYNC_OP
+        });
     } else {
         MEM_ONTABLE(procId, 
             *(vErrorPtr) = GDE_NOT_RESPONDING;

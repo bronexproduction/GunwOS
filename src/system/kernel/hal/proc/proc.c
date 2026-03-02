@@ -49,9 +49,9 @@ PRIVATE struct process_user {
     struct k_cpu_state cpuState;
 
     /*
-        Lock mask (if BLOCKED)
+        Lock condition (if BLOCKED)
     */
-    enum k_proc_lockType lockMask;
+    struct k_proc_lockCondition lockCondition;
 } pTab[MAX_PROC];
 
 static procId_t procCurrent = KERNEL_PROC_ID;
@@ -170,38 +170,45 @@ enum k_proc_error k_proc_hatch(const struct k_proc_descriptor descriptor, const 
     return PE_NONE;
 }
 
-void k_proc_lock(const procId_t procId, enum k_proc_lockType lockType) {
+void k_proc_lock(const procId_t procId, const struct k_proc_lockCondition lockCondition) {
     if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
         OOPS("Process id out of range",);
     }
 
-    pTab[procId].lockMask |= lockType;
-    
     if (pTab[procId].info.state == PS_BLOCKED) {
-        return;
+        OOPS("Process already blocked",);
     }
+    
     if (pTab[procId].info.state != PS_READY &&
         pTab[procId].info.state != PS_RUNNING) {
         OOPS("Unexpected process state during lock",);
     }
 
     pTab[procId].info.state = PS_BLOCKED;
+    pTab[procId].lockCondition = lockCondition;
     k_proc_schedule_processStateDidChange();
 }
 
-void k_proc_unlock(const procId_t procId, enum k_proc_lockType lockType) {
+void k_proc_unlock(const procId_t procId, const enum k_proc_lockReason reason) {
     if (procId <= KERNEL_PROC_ID || procId >= MAX_PROC) {
         OOPS("Process id out of range",);
     }
 
-    pTab[procId].lockMask &= ~lockType;
+    if (reason == PLR_NONE) {
+        OOPS("Invalid reason",);
+    }
 
     if (pTab[procId].info.state != PS_BLOCKED ||
-        pTab[procId].lockMask) {
-        return;
+        pTab[procId].lockCondition.reason != PLR_NONE) {
+        OOPS("Trying to unlock process that is not blocked",);
     }
     
+    if (pTab[procId].lockCondition.reason != reason) {
+        OOPS("Unlock reason inconsistency",);
+    }
+
     pTab[procId].info.state = PS_READY;
+    memzero(&pTab[procId].lockCondition, sizeof(struct k_proc_lockCondition));
     k_proc_schedule_processStateDidChange();
 }
 
@@ -260,7 +267,7 @@ void k_proc_switch(const procId_t procId) {
     if (pTab[procId].info.state != PS_READY) {
         OOPS("Invalid next process state during switch",);
     }
-    if (pTab[procId].lockMask) {
+    if (pTab[procId].lockCondition.reason != PLR_NONE) {
         OOPS("Attempted switch to locked process",);
     }
     
@@ -496,7 +503,7 @@ static enum k_proc_error callbackInvoke(const procId_t procId,
         return PE_OPERATION_FAILED;
     }
 
-    k_proc_unlock(procId, PLT_ASYNC);
+    k_proc_unlock(procId, PLR_ASYNC_OP);
     k_proc_schedule_processStateDidChange();
 
     return PE_NONE;

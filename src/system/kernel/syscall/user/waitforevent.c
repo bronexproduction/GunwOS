@@ -12,7 +12,9 @@
 void k_scr_usr_waitForEvent(const procId_t procId) {
     CRITICAL_SECTION(
         if (k_runloop_isEmpty(procId)) {
-            k_proc_lock(procId, PLT_ASYNC);
+            k_proc_lock(procId, (struct k_proc_lockCondition){
+                .reason = PLR_ASYNC_OP
+            });
         }
     )
 }

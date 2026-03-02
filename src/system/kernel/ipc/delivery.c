@@ -160,7 +160,9 @@ enum gnwIpcError k_ipc_send(const procId_t procId,
         ipcReplyRegister[endpointQuery.token].replyBufferData.ptr = query.replyData.ptr;
         ipcReplyRegister[endpointQuery.token].replyBufferData.bytes = endpointQuery.replySizeBytes;
         
-        k_proc_lock(procId, PLT_SYNC);
+        k_proc_lock(procId, (struct k_proc_lockCondition){
+            .reason = PLR_SYNC_OP
+        });
     } else {
         endpointQuery.token = MAX_IPC_TOKEN;
     }

@@ -31,6 +31,8 @@ void k_scr_usr_devStart(const procId_t procId,
         )
         return;
     } else {
-        k_proc_lock(procId, PLT_SYNC);
+        k_proc_lock(procId, (struct k_proc_lockCondition){
+            .reason = PLR_SYNC_OP
+        });
     }
 }
