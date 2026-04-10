@@ -52,7 +52,8 @@ enum k_proc_procType {
 
 enum k_proc_lockReason {
     PLR_NONE = 0,
-    PLR_SYNC_OP
+    PLR_SYNC_OP,
+    PLR_PROC_WAIT
 };
 
 struct k_proc_lockCondition {
