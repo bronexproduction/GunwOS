@@ -56,8 +56,15 @@ enum k_proc_lockReason {
     PLR_PROC_WAIT
 };
 
+union k_proc_lockParam {
+    struct {
+        procId_t procId;
+    } procWait;
+};
+
 struct k_proc_lockCondition {
     enum k_proc_lockReason reason;
+    union k_proc_lockParam param;
 };
 
 struct k_proc_process {

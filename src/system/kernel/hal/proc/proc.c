@@ -260,8 +260,6 @@ void k_proc_cleanup(const procId_t procId) {
         OOPS("Unexpected process state during cleanup",);
     }
 
-    #warning TODO unlock process waiting for another process to finish PLR_PROC_WAIT (k_proc_Stop or cleanup to be determined)
-    
     memzero(&pTab[procId], sizeof(struct process_user));
     k_mem_procCleanup(procId);
 
@@ -279,8 +277,14 @@ void k_proc_stop(const procId_t procId) {
         OOPS("Unexpected process state during stop",);
     }
 
-    #warning TODO unlock process waiting for another process to finish PLR_PROC_WAIT (k_proc_Stop or cleanup to be determined)
-    
+    for (procId_t pIndex = 0; pIndex < MAX_PROC; ++pIndex) {
+        if (hasLock(pIndex, PLR_PROC_WAIT)) {
+            if (pTab[pIndex].lockCondition.param.procWait.procId == procId) {
+                k_proc_unlockIfNeeded(pIndex, PLR_PROC_WAIT);
+            }
+        }
+    }
+
     pTab[procId].info.state = PS_FINISHED;
     k_que_dispatch_arch((fPtr_arch)k_proc_cleanup, procId);
     k_proc_schedule_processStateDidChange();

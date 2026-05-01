@@ -8,10 +8,11 @@
 #include <_gunwctrl.h>
 #include <hal/proc/proc.h>
 
-enum gnwCtrlError k_scr_usr_waitForProc(const procId_t procId) {
+enum gnwCtrlError k_scr_usr_waitForProc(const procId_t procId, const procId_t observedProcId) {
     
     struct k_proc_lockCondition condition = {
-        .reason = PLR_PROC_WAIT
+        .reason = PLR_PROC_WAIT,
+        .param.procWait.procId = observedProcId
     };
 
     k_proc_lock(procId, condition);
